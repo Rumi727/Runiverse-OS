@@ -1,0 +1,78 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e92e7b8e6e31bb749bbc2856e9a91c2c, type: 3}
+  m_Name: ko_kr
+  m_EditorClassIdentifier: 
+  _languageKey: ko_kr
+  _languages:
+    serializableKeys:
+    - gui.key
+    - gui.value
+    - gui.field_is_null
+    - gui.path
+    - gui.min
+    - gui.max
+    - gui.year
+    - gui.month
+    - gui.day
+    - gui.hour
+    - gui.minute
+    - gui.second
+    - gui.millisecond
+    - gui.left
+    - gui.right
+    - gui.top
+    - gui.bottom
+    - gui.bottom_left
+    - gui.top_left
+    - gui.top_right
+    - gui.bottom_right
+    - gui.namespace
+    - serializable_dictionary_property_drawer.not_found.key
+    - serializable_dictionary_property_drawer.not_found.value
+    - serializable_nullable.invalid_serialization_type
+    - ui.unclamped_slider.tooltip
+    serializableValues:
+    - "\uD0A4"
+    - "\uAC12"
+    - "null\uC77C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
+    - "\uACBD\uB85C"
+    - "\uCD5C\uC18C"
+    - "\uCD5C\uB300"
+    - "\uB144"
+    - "\uB2EC"
+    - "\uC77C"
+    - "\uC2DC\uAC04"
+    - "\uBD84"
+    - "\uCD08"
+    - "\uBC00\uB9AC\uCD08"
+    - "\uC67C\uCABD"
+    - "\uC624\uB978\uCABD"
+    - "\uC0C1\uB2E8"
+    - "\uD558\uB2E8"
+    - "\uC67C\uCABD \uD558\uB2E8"
+    - "\uC67C\uCABD \uC0C1\uB2E8"
+    - "\uC624\uB978\uCABD \uC0C1\uB2E8"
+    - "\uC624\uB978\uCABD \uD558\uB2E8"
+    - "\uB124\uC784\uC2A4\uD398\uC774\uC2A4"
+    - "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
+      \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
+      \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
+      \"serializableKeys\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableValues\"\uAC00
+      \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
+      \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
+      \"serializableValues\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - "\uC798\uBABB\uB41C \uC9C1\uB82C\uD654 \uD0C0\uC785\uC785\uB2C8\uB2E4"
+    - "\uC2AC\uB77C\uC774\uB354 \uBC94\uC704\uC640 \uAD00\uACC4\uC5C6\uC774 \uC801\uC6A9\uB418\uB294
+      \uAC12 \uC81C\uD55C\uC785\uB2C8\uB2E4. null\uC774\uBA74 \uD574\uB2F9 \uBC29\uD5A5\uC73C\uB85C
+      \uC81C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."

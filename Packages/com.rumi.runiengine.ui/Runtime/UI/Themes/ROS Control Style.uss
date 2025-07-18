@@ -1,0 +1,22 @@
+.runios-progress-bar__viewport {
+    overflow: hidden;
+}
+
+.runios-type-field {
+}
+
+.runios-type-field .unity-base-field__input {
+    flex-direction: row;
+}
+
+.runios-type-field__text {
+    flex-grow: 1;
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    align-self: center;
+}
+
+.runios-type-field__button {
+    align-self: center;
+}

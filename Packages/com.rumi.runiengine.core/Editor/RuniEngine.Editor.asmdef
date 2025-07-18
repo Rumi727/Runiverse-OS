@@ -1,0 +1,22 @@
+{
+    "name": "RuniEngine.Editor",
+    "rootNamespace": "RuniEngine.Editor",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:c6d2ee51b86b95246ae92eebdcffddee",
+        "GUID:e0d7720a211379b4bab82afbf6fc6b14"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "ExtendedNumerics.BigDecimal.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

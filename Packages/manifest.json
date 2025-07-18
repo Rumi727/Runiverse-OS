@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "com.singularitygroup.hotreload": "git+https://gitlab.hotreload.net/root/hot-reload-releases.git#1.13.7",
+    "com.unity.ide.rider": "3.0.36",
+    "com.unity.ide.visualstudio": "2.0.23",
+    "com.unity.memoryprofiler": "1.1.6",
+    "com.unity.vectorgraphics": "2.0.0-preview.25"
+  },
+  "scopedRegistries": [
+    {
+      "name": "package.openupm.com",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.cysharp.unitask",
+        "com.quickeye.ui-toolkit-plus",
+        "com.coffee.csharp-compiler-settings"
+      ]
+    }
+  ]
+}

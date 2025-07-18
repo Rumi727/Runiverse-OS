@@ -1,0 +1,26 @@
+{
+    "name": "RuniEngine.Installer",
+    "rootNamespace": "RuniEngine.Installer",
+    "references": [
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [
+        {
+            "name": "com.unity.textmeshpro",
+            "expression": "3.0.6",
+            "define": "ENABLE_TEXT_MESH_PRO"
+        }
+    ],
+    "noEngineReferences": false
+}

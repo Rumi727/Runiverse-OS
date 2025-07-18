@@ -1,0 +1,13 @@
+# C# 파일
+[*.cs]
+
+#### 명명 스타일 ####
+
+# 명명 규칙
+
+dotnet_naming_rule.const_should_be_all_upper.severity = none
+dotnet_naming_rule.generic_should_be_generic.severity = none
+dotnet_naming_rule.non_public_field_should_be_non_public_field.severity = none
+dotnet_naming_rule.interface_should_be_interface.severity = none
+dotnet_naming_rule.camel_case_should_be_camel_case.severity = none
+dotnet_naming_rule.pascal_case_should_be_pascal_case.severity = none

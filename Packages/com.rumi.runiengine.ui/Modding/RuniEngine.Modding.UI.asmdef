@@ -1,0 +1,21 @@
+{
+    "name": "RuniEngine.Modding.UI",
+    "rootNamespace": "RuniEngine.Modding.UI",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:c77e46b23ddba8e4dae2558b74e85ac5",
+        "GUID:1926334cbf393eb4c80a82210a1144e3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "0Harmony.dll",
+        "ExtendedNumerics.BigDecimal.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

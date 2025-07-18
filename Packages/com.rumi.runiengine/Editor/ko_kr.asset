@@ -1,0 +1,58 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ee49caa2911c94491c08d57280c839, type: 3}
+  m_Name: ko_kr
+  m_EditorClassIdentifier: 
+  texts:
+    serializableKeys:
+    - language.name
+    - language.region
+    - installer.welcome
+    - installer.welcome.text
+    - installer.welcome.text2
+    - installer.package_setting.label
+    - installer.package_setting.file_not_found
+    - installer.package_setting.json_deserialization_fail
+    - installer.package_setting.url_warning
+    - installer.package_setting.setting_info
+    - installer.package_setting.apply
+    - installer.package_setting.no_changes
+    - installer.tmp_setting.label
+    - installer.tmp_setting.warning
+    - installer.tmp_setting.info
+    serializableValues:
+    - "\uD55C\uAD6D\uC5B4"
+    - "\uB300\uD55C\uBBFC\uAD6D"
+    - "\uD658\uC601\uD569\uB2C8\uB2E4!"
+    - "Runi Engine\uC744 \uC0AC\uC6A9\uD574 \uC8FC\uC154\uC11C \uAC10\uC0AC\uD569\uB2C8\uB2E4."
+    - "\uC9C0\uAE08\uBD80\uD130 \uC5D4\uC9C4\uC758 \uCD08\uAE30 \uC124\uC815\uC744
+      \uC2DC\uC791\uD569\uB2C8\uB2E4."
+    - "\uBC94\uC704 \uC9C0\uC815 \uB808\uC9C0\uC2A4\uD2B8\uB9AC \uC124\uC815"
+    - "{path} \uD30C\uC77C\uC744 \uCC3E\uC9C0 \uBABB\uD588\uC2B5\uB2C8\uB2E4!"
+    - "JSON \uC5ED\uC9C1\uB82C\uD654\uC5D0 \uC2E4\uD328\uD588\uC2B5\uB2C8\uB2E4"
+    - "\uB808\uC9C0\uC2A4\uD2B8\uB9AC {name}\uC758 URL\uC774 \uC608\uC0C1\uACFC \uB2E4\uB985\uB2C8\uB2E4.\n\uBCF4\uC548\uC744
+      \uC704\uD574 \uC791\uC5C5\uC744 \uC911\uB2E8\uD588\uC2B5\uB2C8\uB2E4.\nURL\uC744
+      \uB2E4\uC74C\uC73C\uB85C \uBCC0\uACBD\uD574 \uC8FC\uC138\uC694: {url}"
+    - "\uD328\uD0A4\uC9C0\uB97C \uC124\uCE58\uD558\uAE30 \uC804\uC5D0, \uC885\uC18D\uC131\uC744
+      \uC790\uB3D9\uC73C\uB85C \uC124\uCE58\uD560 \uC218 \uC788\uB3C4\uB85D \uBC94\uC704
+      \uC9C0\uC815 \uB808\uC9C0\uC2A4\uD2B8\uB9AC\uB97C \uC124\uC815\uD574\uC57C
+      \uD569\uB2C8\uB2E4.\r\n\uBCC0\uACBD \uB0B4\uC6A9\uC744 \uD655\uC778\uD55C \uB4A4,
+      \uC9C1\uC811 \uC124\uC815\uD558\uAC70\uB098 \u2018\uC801\uC6A9\u2019 \uBC84\uD2BC\uC744
+      \uB20C\uB7EC \uC790\uB3D9\uC73C\uB85C \uC124\uC815\uD560 \uC218 \uC788\uC2B5\uB2C8\uB2E4."
+    - "\uC801\uC6A9"
+    - "\uBCC0\uACBD \uC0AC\uD56D \uC5C6\uC74C"
+    - "TMP \uB9AC\uC18C\uC2A4"
+    - "TextMesh Pro \uD328\uD0A4\uC9C0\uAC00 \uAE54\uB824\uC788\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
+    - "ROS \uD328\uD0A4\uC9C0\uB294 Unity\uC758 TextMesh Pro \uD328\uD0A4\uC9C0\uB97C
+      \uC0AC\uC6A9\uD569\uB2C8\uB2E4.\n\uC6D0\uD65C\uD55C \uC0AC\uC6A9\uC744 \uC704\uD574
+      TextMesh Pro\uC758 \uAE30\uBCF8 \uB9AC\uC18C\uC2A4\uB97C \uC784\uD3EC\uD2B8\uD558\uB294
+      \uAC83\uC744 \uAD8C\uC7A5\uD569\uB2C8\uB2E4."

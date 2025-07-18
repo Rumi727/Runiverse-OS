@@ -1,0 +1,4 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="True">
+    <Style src="project://database/Packages/com.rumi.runiengine.ui/Runtime/UI/Themes/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
+    <RuniEngine.UI.TypeField label="Label" base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
+</ui:UXML>

@@ -1,0 +1,77 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e92e7b8e6e31bb749bbc2856e9a91c2c, type: 3}
+  m_Name: en_us
+  m_EditorClassIdentifier: 
+  _languageKey: en_us
+  _languages:
+    serializableKeys:
+    - gui.key
+    - gui.value
+    - gui.field_is_null
+    - gui.path
+    - gui.min
+    - gui.max
+    - gui.year
+    - gui.month
+    - gui.day
+    - gui.hour
+    - gui.minute
+    - gui.second
+    - gui.millisecond
+    - gui.left
+    - gui.right
+    - gui.top
+    - gui.bottom
+    - gui.bottom_left
+    - gui.top_left
+    - gui.top_right
+    - gui.bottom_right
+    - gui.namespace
+    - serializable_dictionary_property_drawer.not_found.key
+    - serializable_dictionary_property_drawer.not_found.value
+    - serializable_nullable.invalid_serialization_type
+    - ui.unclamped_slider.tooltip
+    serializableValues:
+    - Key
+    - Value
+    - "This field is required.\r"
+    - Path
+    - Min
+    - Max
+    - Year
+    - Month
+    - Day
+    - Hour
+    - Minute
+    - Second
+    - Millisecond
+    - Left
+    - Right
+    - Top
+    - Bottom
+    - Bottom Left
+    - Top Left
+    - Top Right
+    - Bottom Right
+    - Namespace
+    - 'The serializable field "serializableKeys" does not exist.
+
+      To be displayed
+      automatically in the GUI, the field name must be exactly "serializableKeys".'
+    - 'The serializable field "serializableValues" does not exist.
+
+      To be displayed
+      automatically in the GUI, the field name must be exactly "serializableValues".'
+    - Invalid serialization type
+    - Clamps the value independently of the slider's range. null removes the limit
+      in that direction.

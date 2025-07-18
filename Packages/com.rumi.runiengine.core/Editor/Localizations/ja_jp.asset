@@ -1,0 +1,72 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e92e7b8e6e31bb749bbc2856e9a91c2c, type: 3}
+  m_Name: ja_jp
+  m_EditorClassIdentifier: 
+  _languageKey: ja_jp
+  _languages:
+    serializableKeys:
+    - gui.key
+    - gui.value
+    - gui.field_is_null
+    - gui.path
+    - gui.min
+    - gui.max
+    - gui.year
+    - gui.month
+    - gui.day
+    - gui.hour
+    - gui.minute
+    - gui.second
+    - gui.millisecond
+    - gui.left
+    - gui.right
+    - gui.top
+    - gui.bottom
+    - gui.bottom_left
+    - gui.top_left
+    - gui.top_right
+    - gui.bottom_right
+    - gui.namespace
+    - serializable_dictionary_property_drawer.not_found.key
+    - serializable_dictionary_property_drawer.not_found.value
+    - serializable_nullable.invalid_serialization_type
+    - ui.unclamped_slider.tooltip
+    serializableValues:
+    - "\u30AD\u30FC"
+    - "\u5024"
+    - "null \u306B\u3059\u308B\u3053\u3068\u306F\u3067\u304D\u307E\u305B\u3093\u3002"
+    - "\u30D1\u30B9"
+    - "\u6700\u5C0F"
+    - "\u6700\u5927"
+    - "\u5E74"
+    - "\u6708"
+    - "\u65E5"
+    - "\u6642"
+    - "\u5206"
+    - "\u79D2"
+    - "\u30DF\u30EA\u79D2"
+    - "\u5DE6"
+    - "\u53F3"
+    - "\u4E0A"
+    - "\u4E0B"
+    - "\u5DE6\u4E0B"
+    - "\u5DE6\u4E0A"
+    - "\u53F3\u4E0A"
+    - "\u53F3\u4E0B"
+    - "\u540D\u524D\u7A7A\u9593"
+    - "\u30B7\u30EA\u30A2\u30E9\u30A4\u30BA\u53EF\u80FD\u306A\u30D5\u30A3\u30FC\u30EB\u30C9\u300CserializableKeys\u300D\u304C\u5B58\u5728\u3057\u307E\u305B\u3093\u3002\nGUI
+      \u306B\u81EA\u52D5\u7684\u306B\u8868\u793A\u3059\u308B\u306B\u306F\u3001\u30D5\u30A3\u30FC\u30EB\u30C9\u540D\u304C\u6B63\u78BA\u306B\u300CserializableKeys\u300D\u3067\u3042\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002"
+    - "\u30B7\u30EA\u30A2\u30E9\u30A4\u30BA\u53EF\u80FD\u306A\u30D5\u30A3\u30FC\u30EB\u30C9\u300CserializableValues\u300D\u304C\u5B58\u5728\u3057\u307E\u305B\u3093\u3002\nGUI
+      \u306B\u81EA\u52D5\u7684\u306B\u8868\u793A\u3059\u308B\u306B\u306F\u3001\u30D5\u30A3\u30FC\u30EB\u30C9\u540D\u304C\u6B63\u78BA\u306B\u300CserializableValues\u300D\u3067\u3042\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002"
+    - "\u7121\u52B9\u306A\u30B7\u30EA\u30A2\u30EB\u5316\u30BF\u30A4\u30D7\u3067\u3059"
+    - "\u30B9\u30E9\u30A4\u30C0\u30FC\u7BC4\u56F2\u3068\u306F\u7121\u95A2\u4FC2\u306B\u9069\u7528\u3055\u308C\u308B\u5024\u306E\u5236\u9650\u3067\u3059\u3002null\u306E\u5834\u5408\u3001\u305D\u306E\u65B9\u5411\u306E\u5236\u9650\u306F\u89E3\u9664\u3055\u308C\u307E\u3059\u3002"

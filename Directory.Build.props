@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup Condition=" '$(MSBuildProjectName)' != '' And '$(MSBuildProjectName.Substring(0,10))' == 'RuniEngine' ">
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+</Project>

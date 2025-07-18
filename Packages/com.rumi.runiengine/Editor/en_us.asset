@@ -1,0 +1,54 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8ee49caa2911c94491c08d57280c839, type: 3}
+  m_Name: en_us
+  m_EditorClassIdentifier: 
+  texts:
+    serializableKeys:
+    - language.name
+    - language.region
+    - installer.welcome
+    - installer.welcome.text
+    - installer.welcome.text2
+    - installer.package_setting.label
+    - installer.package_setting.file_not_found
+    - installer.package_setting.json_deserialization_fail
+    - installer.package_setting.url_warning
+    - installer.package_setting.setting_info
+    - installer.package_setting.apply
+    - installer.package_setting.no_changes
+    - installer.tmp_setting.label
+    - installer.tmp_setting.warning
+    - installer.tmp_setting.info
+    serializableValues:
+    - English
+    - US
+    - Welcome!
+    - Thank you for using Runi Engine.
+    - From now on, we start the initial setup of the engine.
+    - Setting the scope registry
+    - Could not find file {path}!
+    - JSON deserialization failed
+    - "The URL of the registry \"{name}\" does not match the expected value.\r\nTo
+      protect security, the operation has been stopped.\r\nPlease change the URL
+      to the following: {url}\r"
+    - "To install dependencies automatically, set the scoped registry before installing
+      the package.\r\nYou can review the changes and set it manually or click Apply
+      to do it automatically.\r"
+    - Apply
+    - No changes
+    - TMP Resources
+    - The TextMeshPro package is not installed.
+    - 'The ROS package utilizes Unity''s TextMesh Pro package.
+
+      We recommend
+      importing TextMesh Pro''s essential resources for smooth operation.'
