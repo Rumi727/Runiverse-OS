@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniEngine.Collections.Generic
 {
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary, ISerializableDictionary<TKey, TValue>

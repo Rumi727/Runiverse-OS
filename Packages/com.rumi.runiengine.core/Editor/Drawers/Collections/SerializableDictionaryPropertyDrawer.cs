@@ -1,5 +1,6 @@
 #nullable enable
-using System.Collections.Generic;
+using RuniEngine.Collections;
+using RuniEngine.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
@@ -10,7 +11,7 @@ using static RuniEngine.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 using EditorGUIUtility = UnityEditor.EditorGUIUtility;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniEngine.Editor.Drawers.Collections
 {
     [CustomPropertyDrawer(typeof(ISerializableDictionary<,>), true)]
     public sealed class SerializableDictionaryPropertyDrawer : PropertyDrawer

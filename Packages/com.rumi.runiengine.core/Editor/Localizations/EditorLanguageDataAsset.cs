@@ -1,4 +1,5 @@
 #nullable enable
+using RuniEngine.Collections;
 using UnityEngine;
 
 namespace RuniEngine.Editor.Localizations
