@@ -22,7 +22,8 @@ namespace RuniEngine.Install
 
 
         static GUIStyle? headStyle;
-        
+        public static Rect logoRect;
+
 
 
         public void DrawGUI()
@@ -32,9 +33,13 @@ namespace RuniEngine.Install
             GUILayout.FlexibleSpace();
             GUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            //GUILayout.Space(10);
 
-            EditorGUILayout.GetControlRect(GUILayout.Width(100), GUILayout.Height(100));
+            GUILayout.Space(20);
+
+            Rect rect = EditorGUILayout.GetControlRect(GUILayout.Width(100), GUILayout.Height(100));
+            if (rect.position != Vector2.zero)
+                logoRect = rect;
+
             GUILayout.Space(20);
 
             GUILayout.BeginVertical();
@@ -43,6 +48,7 @@ namespace RuniEngine.Install
             DrawAnimatedLabels(timer);
 
             GUILayout.Space(20);
+
             GUILayout.Label(InstallerWindow.TryGetText("installer.welcome.text"));
             GUILayout.Label(InstallerWindow.TryGetText("installer.welcome.text2"));
 

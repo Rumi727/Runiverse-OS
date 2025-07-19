@@ -370,7 +370,7 @@ namespace RuniEngine.Install
             
             if (ConfigScriptableObject.config.screenIndex == 0)
             {
-                logoPos = Vector2.Lerp(logoPos, new Vector2((Screen.width * 0.5f) - 178, (Screen.height * 0.5f) - 65.5f), 10f * deltaTime);
+                logoPos = Vector2.Lerp(logoPos, WelcomeScreen.logoRect.position, 10f * deltaTime);
                 logoSize = Mathf.Lerp(logoSize, 100, 10f * deltaTime);
                 logoRotation = Mathf.Repeat(logoRotation + (deltaTime * 64), 360);
             }
