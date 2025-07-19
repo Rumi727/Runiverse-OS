@@ -35,20 +35,20 @@ namespace RuniEngine
             }
         }
 
-        public static string[] GetFiles(string path, ExtensionFilter extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly).ToArray();
-        public static string[] GetFiles(string path, ExtensionFilter extensionFilter, SearchOption searchOption) => EnumerateFiles(path, extensionFilter, searchOption).ToArray();
+        public static string[] GetFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly).ToArray();
+        public static string[] GetFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => EnumerateFiles(path, extensionFilter, searchOption).ToArray();
 
-        public static IEnumerable<string> EnumerateFiles(string path, ExtensionFilter extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
-        public static IEnumerable<string> EnumerateFiles(string path, ExtensionFilter extensionFilter, SearchOption searchOption)
+        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
+        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption)
         {
-            if (extensionFilter.extensions.Count == 1)
-                return Directory.EnumerateFiles(path, "*" + extensionFilter.extensions[0], searchOption);
+            if (extensionFilter.patterns.Count == 1)
+                return Directory.EnumerateFiles(path, "*" + extensionFilter.patterns[0], searchOption);
 
             return Directory.EnumerateFiles(path, "*", searchOption).Where(x =>
             {
-                for (int i = 0; i < extensionFilter.extensions.Count; i++)
+                for (int i = 0; i < extensionFilter.patterns.Count; i++)
                 {
-                    if (x.EndsWith(extensionFilter.extensions[i]))
+                    if (x.EndsWith(extensionFilter.patterns[i]))
                         return true;
                 }
 
