@@ -31,5 +31,7 @@ namespace System.Linq
 
             return -1;
         }
+
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) => source.Where(x => x != null)!;
     }
 }
