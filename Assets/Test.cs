@@ -1,4 +1,6 @@
+#nullable enable
 using RuniEngine;
+using RuniEngine.Collections.Generic;
 using RuniEngine.Resource;
 using System.Collections.Generic;
 using UnityEngine;
