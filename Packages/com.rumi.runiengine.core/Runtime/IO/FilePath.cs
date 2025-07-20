@@ -16,7 +16,7 @@ namespace RuniEngine.IO
     /// 모든 경로는 내부적으로 표준 구분자(<see cref="directorySeparatorChar"/>)를 사용하도록 정규화됩니다.
     /// </summary>
     [Serializable]
-    public struct FilePath : IEquatable<FilePath>
+    public struct FilePath : IEquatable<FilePath>, ISerializationCallbackReceiver
     {
         /// <summary>
         /// 표준 디렉터리 구분 문자로, 항상 '/'입니다.<br/>
@@ -867,5 +867,10 @@ namespace RuniEngine.IO
         public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
         #endregion
         #endregion
+
+
+
+        public void OnBeforeSerialize() => value = value;
+        public void OnAfterDeserialize() => value = value;
     }
 }
