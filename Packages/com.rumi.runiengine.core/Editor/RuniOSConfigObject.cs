@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace RuniEngine.Editor
 {
-    public abstract class ConfigObject<T> : ScriptableObject where T : ConfigObject<T>
+    public abstract class RuniOSConfigObject<T> : ScriptableObject where T : RuniOSConfigObject<T>
     {
         public static T instance
         {
