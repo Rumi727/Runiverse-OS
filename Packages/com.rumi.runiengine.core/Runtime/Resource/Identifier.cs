@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using RuniEngine.IO;
 using RuniEngine.Spans;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace RuniEngine.Resource
@@ -55,15 +56,16 @@ namespace RuniEngine.Resource
             _path = path;
         }
 
+        [AllowNull]
         /// <summary>
         /// 식별자의 네임스페이스 구성 요소를 가져오거나 설정합니다.
         /// </summary>
         public string nameSpace
         {
-            readonly get => _nameSpace;
+            readonly get => _nameSpace ?? string.Empty;
             set => _nameSpace = value;
         }
-        [FieldName("gui.namespace"), JsonIgnore, SerializeField] string _nameSpace;
+        [SerializeField, FieldName("gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
 
         /// <summary>
         /// 식별자의 경로 구성 요소를 가져오거나 설정합니다.
@@ -73,7 +75,7 @@ namespace RuniEngine.Resource
             readonly get => _path;
             set => _path = value;
         }
-        [FieldName("gui.path"), JsonIgnore, SerializeField] FilePath _path;
+        [SerializeField, FieldName("gui.path"), JsonIgnore] FilePath _path;
 
 
 
