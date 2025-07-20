@@ -1,5 +1,4 @@
 #nullable enable
-using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
@@ -13,7 +12,7 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(object), true)]
     public sealed class ObjectPropertyDrawer : PropertyDrawer
     {
-        readonly Dictionary<string, AnimBool> animBools = new Dictionary<string, AnimBool>();
+        AnimBool? animBool;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -21,10 +20,8 @@ namespace RuniEngine.Editor.Drawers
             {
                 label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
 
-                AnimBool? animBool = GetAnimBool(property);
-                if (animBool == null)
-                    return;
-
+                animBool ??= new AnimBool(property.isExpanded);
+                
                 float orgHeight;
                 float headHeight = GetYSize(label, EditorStyles.foldout);
                 
@@ -94,7 +91,7 @@ namespace RuniEngine.Editor.Drawers
         {
             if (property.IsChildrenIncluded() && !property.IsInArray())
             {
-                AnimBool animBool = CreateAnimBool(property, property.isExpanded);
+                animBool ??= new AnimBool(property.isExpanded);
                 animBool.target = property.isExpanded;
 
                 bool isExpanded = property.isExpanded;
@@ -108,21 +105,6 @@ namespace RuniEngine.Editor.Drawers
             }
             else
                 return EditorGUI.GetPropertyHeight(property, label, property.IsChildrenIncluded());
-        }
-
-        public AnimBool CreateAnimBool(SerializedProperty property, bool value)
-        {
-            string identifier = property.GetIdentifier();
-            return GetAnimBool(property) ?? (animBools[identifier] = new AnimBool(value));
-        }
-
-        public AnimBool? GetAnimBool(SerializedProperty property)
-        {
-            string identifier = property.GetIdentifier();
-            if (animBools.TryGetValue(identifier, out AnimBool animBool))
-                return animBool;
-
-            return null;
         }
     }
 }
