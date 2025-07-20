@@ -1,12 +1,13 @@
 #nullable enable
 using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace RuniEngine.IO
 {
     [Serializable]
-    public struct FileExtension : IEquatable<FileExtension>
+    public struct FileExtension : IEquatable<FileExtension>, ISerializationCallbackReceiver
     {
         /// <summary>
         /// 표준 확장자 구분 문자로, 항상 '.'입니다.<br/>
@@ -17,24 +18,28 @@ namespace RuniEngine.IO
         public FileExtension(FilePath? path) : this(path?.value) { }
         public FileExtension(string? value)
         {
-            if (value != null)
+            _value = string.Empty;
+            if (!string.IsNullOrEmpty(value))
+                this.value = value;
+        }
+
+        [AllowNull]
+        public string value
+        {
+            readonly get => _value ?? string.Empty;
+            set
             {
+                value ??= string.Empty;
+
                 int index = value.LastIndexOf(extensionSeparatorChar);
                 if (index >= 0)
                 {
                     _value = value.Substring(index);
                     return;
                 }
+
+                _value = string.Empty;
             }
-
-            _value = string.Empty;
-            return;
-        }
-
-        public string value
-        {
-            readonly get => _value ?? string.Empty;
-            set => _value = value;
         }
         [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
@@ -108,5 +113,10 @@ namespace RuniEngine.IO
         /// <param name="extension">변환할 문자열 확장자입니다.</param>
         public static implicit operator FileExtension(string? extension) => new FileExtension(extension);
         #endregion
+
+
+
+        public void OnBeforeSerialize() => value = value;
+        public void OnAfterDeserialize() => value = value;
     }
 }
