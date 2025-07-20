@@ -16,20 +16,19 @@ namespace RuniEngine
     public sealed class VirtualDirectory : IVirtualNode
     {
         /// <summary>
-        /// 새로운 <see cref="VirtualDirectory"/> 인스턴스를 초기화하고, 자신을 루트 디렉토리로 설정합니다.
+        /// 새로운 <see cref="VirtualDirectory"/> 인스턴스를 초기화하고, 자신을 루트 디렉토리로 설정합니다.<br/>
         /// 이 생성자는 가상 파일 시스템의 최상위 루트 디렉토리를 생성할 때 사용됩니다.
         /// </summary>
         public VirtualDirectory() => root = this;
 
         /// <summary>
-        /// 지정된 루트 디렉토리와 부모 디렉토리를 가진 새로운 <see cref="VirtualDirectory"/> 인스턴스를 초기화합니다.
+        /// 지정된 루트 디렉토리와 부모 디렉토리를 가진 새로운 <see cref="VirtualDirectory"/> 인스턴스를 초기화합니다.<br/>
         /// 이 생성자는 하위 디렉토리를 생성할 때 내부적으로 사용됩니다.
         /// </summary>
-        /// <param name="root">이 디렉토리가 속한 가상 파일 시스템의 최상위 루트 디렉토리입니다.</param>
         /// <param name="parent">이 디렉토리의 부모 디렉토리입니다. 루트 디렉토리인 경우 <see langword="null"/>일 수 있습니다.</param>
         VirtualDirectory(VirtualDirectory? parent)
         {
-            this.root = parent?.root ?? this;
+            root = parent?.root ?? this;
             this.parent = parent;
         }
 
@@ -46,7 +45,7 @@ namespace RuniEngine
         public VirtualDirectory? parent { get; } = null;
 
         /// <summary>
-        /// 이 가상 파일 시스템 엔트리(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.
+        /// 이 가상 파일 시스템 엔트리(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
         /// 즉, 이 항목이 다른 가상 파일 시스템 엔트리의 하위가 아닌, 스스로 루트 역할을 하는지 여부를 나타냅니다.
         /// </summary>
         public bool isIndependent => root == this && parent == null;
@@ -69,7 +68,7 @@ namespace RuniEngine
         {
             if (path.IsEmpty())
                 return false;
-            
+
             bool isCreated = false;
             VirtualDirectory childDirectory = this;
             foreach (var directoryNameSpan in path.value.AsSpan().Split(FilePath.directorySeparatorChar))
@@ -146,8 +145,6 @@ namespace RuniEngine
 
             return GetDirectory(parentPath).children.GetValueOrDefault(fileName) as VirtualFile ?? throw new FileNotFoundException();
         }
-
-
 
         /// <summary>
         /// 지정된 경로에 있는 모든 직접적인 하위 디렉토리의 이름을 가져옵니다.
