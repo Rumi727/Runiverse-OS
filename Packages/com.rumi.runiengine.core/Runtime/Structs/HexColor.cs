@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RuniEngine
 {
     [Serializable]
-    public struct HexColor : IEquatable<HexColor>
+    public struct HexColor : IEquatable<HexColor>, ISerializationCallbackReceiver
     {
         public const string clearHex = "#00000000";
         public const string blackHex = "#000000";
@@ -82,7 +82,7 @@ namespace RuniEngine
                 }
             }
         }
-        string? _value;
+        [SerializeField, NotNullField, FieldName("gui.color")] string? _value;
 
 
 
@@ -171,17 +171,7 @@ namespace RuniEngine
         public override readonly bool Equals(object? obj) => obj is HexColor other && Equals(other);
         public readonly bool Equals(HexColor other) => _r == other._r && _g == other._g && _b == other._b && _a == other._a;
 
-        public override readonly int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = -10935280 * _r.GetHashCode();
-                hash *= -967107767 * _g.GetHashCode();
-                hash *= -903759131 * _b.GetHashCode();
-                hash *= -373667234 * _a.GetHashCode();
-                return hash;
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(_r, _g, _b, _a);
 
         public override readonly string ToString() => ToHex(_r, _g, _b, _a);
 
@@ -192,6 +182,11 @@ namespace RuniEngine
 
         public static implicit operator HexColor(Color value) => new HexColor(value);
         public static implicit operator HexColor(Color32 value) => new HexColor(value);
+
+
+
+        public void OnBeforeSerialize() => value = value;
+        public void OnAfterDeserialize() => value = value;
 
 
 

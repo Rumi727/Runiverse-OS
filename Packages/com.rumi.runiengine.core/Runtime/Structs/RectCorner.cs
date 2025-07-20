@@ -74,18 +74,6 @@ namespace RuniEngine
                    bottomRight.Equals(other.bottomRight);
         }
 
-        public override readonly int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 816633021;
-                hash *= 122684447 + bottomLeft.GetHashCode();
-                hash *= 245107901 + topLeft.GetHashCode();
-                hash *= -619998250 + topRight.GetHashCode();
-                hash *= 499623778 + bottomRight.GetHashCode();
-
-                return hash;
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(bottomLeft, topLeft, topRight, bottomRight);
     }
 }

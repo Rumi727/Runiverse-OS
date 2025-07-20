@@ -87,19 +87,7 @@ namespace RuniEngine
         public readonly bool Equals(RectOffset other) => left.Equals(other.left) && right.Equals(other.right) && top.Equals(other.top) && bottom.Equals(other.bottom);
         public override readonly bool Equals(object? obj) => obj is RectOffset result && Equals(result);
 
-        public override readonly int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = -227221066;
-                hash *= -285278722 + left.GetHashCode();
-                hash *= -293580314 + right.GetHashCode();
-                hash *= -952309402 + top.GetHashCode();
-                hash *= -208677248 + bottom.GetHashCode();
-
-                return hash;
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(left, right, top, bottom);
 
         public override readonly string ToString() => $"RectOffset l:{left} r:{right} t:{top} b:{bottom}";
     }

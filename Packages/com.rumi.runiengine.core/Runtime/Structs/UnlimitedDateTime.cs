@@ -126,22 +126,7 @@ namespace RuniEngine
             return Equals((UnlimitedDateTime)obj);
         }
 
-        public override readonly int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 708572895;
-                hash *= 95514639 + year.GetHashCode();
-                hash *= -541921074 + month.GetHashCode();
-                hash *= 533634984 + day.GetHashCode();
-                hash *= -402168980 + hour.GetHashCode();
-                hash *= -182987143 + minute.GetHashCode();
-                hash *= -309051701 + second.GetHashCode();
-                hash *= 909854872 + millisecond.GetHashCode();
-
-                return hash;
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(year, month, day, hour, minute, second, millisecond);
 
         public readonly int CompareTo(object? value)
         {

@@ -194,18 +194,7 @@ namespace RuniEngine
             return false;
         }
 
-        public override readonly int GetHashCode()
-        {
-            unchecked
-            {
-                int hash = 92381513;
-                hash += 582934 + major.GetHashCode();
-                hash += 3829571 + minor.GetHashCode();
-                hash += 41815 + patch.GetHashCode();
-
-                return hash;
-            }
-        }
+        public override readonly int GetHashCode() => HashCode.Combine(major, minor, patch);
 
 
 
