@@ -70,7 +70,7 @@ namespace RuniEngine.IO
             readonly get => _value ?? string.Empty;
             set => _value = NormalizePath(value.AsSpan());
         }
-        [SerializeField, FieldName("gui.path"), NotNullField, JsonIgnore] string? _value;
+        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
         /// <summary>
         /// 경로 문자열의 길이를 반환합니다.<br/>
