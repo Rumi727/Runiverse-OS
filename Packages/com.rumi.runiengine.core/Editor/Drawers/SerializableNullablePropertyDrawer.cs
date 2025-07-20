@@ -26,15 +26,18 @@ namespace RuniEngine.Editor.Drawers
             float toggleWidth = GetXSize(EditorStyles.toggle);
             Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
 
-            if (field == null)
+            if (field == null && toggle != null)
             {
                 EditorGUI.LabelField(position, label, new GUIContent($"{TryGetText("serializable_nullable.invalid_serialization_type")}"));
                 EditorGUI.PropertyField(toggleRect, toggle, GUIContent.none, false);
 
                 return;
             }
-            else if (toggle == null)
+            else if (field == null || toggle == null)
+            {
+                EditorGUI.LabelField(position, label, new GUIContent($"{TryGetText("serializable_nullable.invalid_serialization_type")}"));
                 return;
+            }
 
             if (field.IsTextField())
             {
