@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -59,6 +60,7 @@ namespace RuniEngine.IO
 
 
 
+        [AllowNull]
         /// <summary>
         /// 현재 <see cref="FilePath"/> 인스턴스가 나타내는 정규화된 경로의 문자열 표현을 가져오거나 설정합니다.<br/>
         /// 값을 설정할 때 입력된 문자열은 <see cref="NormalizePath"/> 메서드를 통해 자동으로 정규화됩니다.<br/>
@@ -68,7 +70,7 @@ namespace RuniEngine.IO
         public string value
         {
             readonly get => _value ?? string.Empty;
-            set => _value = NormalizePath(value.AsSpan());
+            set => _value = NormalizePath(value ?? string.Empty);
         }
         [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
@@ -481,6 +483,9 @@ namespace RuniEngine.IO
         /// <returns>정규화된 경로 문자열입니다. 입력이 비어있으면 <see cref="string.Empty"/>를 반환합니다.</returns>
         public static string NormalizePath(ReadOnlySpan<char> path)
         {
+            if (path.IsEmpty)
+                return string.Empty;
+
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
 
             ReadOnlySpan<char> trimPath = path.Trim(directorySeparatorChars);
