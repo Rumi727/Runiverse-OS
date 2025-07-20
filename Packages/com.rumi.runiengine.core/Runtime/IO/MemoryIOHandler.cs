@@ -142,31 +142,27 @@ namespace RuniEngine.IO
         /// </summary>
         /// <returns>가상 파일의 모든 바이트를 포함하는 <see cref="byte"/> 배열입니다.</returns>
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
-        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override UniTask<byte[]> ReadAllBytes() => rootDirectory.GetFile(fullPath).ReadAllBytesAsync();
+        public override UniTask<byte[]> ReadAllBytes() => rootDirectory.GetFile(fullPath)?.ReadAllBytesAsync() ?? throw new FileNotFoundException();
 
         /// <summary>
         /// 이 핸들러가 나타내는 가상 파일의 모든 텍스트를 비동기적으로 읽습니다.
         /// </summary>
         /// <returns>가상 파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
-        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override UniTask<string> ReadAllText() => rootDirectory.GetFile(fullPath).ReadAllTextAsync();
+        public override UniTask<string> ReadAllText() => rootDirectory.GetFile(fullPath)?.ReadAllTextAsync() ?? throw new FileNotFoundException();
 
         /// <summary>
         /// 이 핸들러가 나타내는 가상 파일의 모든 줄을 비동기적으로 읽습니다.
         /// </summary>
         /// <returns>가상 파일의 모든 줄을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
-        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override UniTask<IEnumerable<string>> ReadLines() => rootDirectory.GetFile(fullPath).ReadLines();
+        public override UniTask<IEnumerable<string>> ReadLines() => rootDirectory.GetFile(fullPath)?.ReadLines() ?? throw new FileNotFoundException();
 
         /// <summary>
         /// 이 핸들러가 나타내는 가상 파일을 읽기 모드로 열어 스트림을 비동기적으로 반환합니다.
         /// </summary>
         /// <returns>지정된 가상 파일에 대한 읽기 전용 <see cref="Stream"/>입니다.</returns>
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
-        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(fullPath).OpenRead();
+        public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(fullPath)?.OpenRead() ?? throw new FileNotFoundException();
     }
 }
