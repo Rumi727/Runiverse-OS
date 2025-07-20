@@ -82,7 +82,7 @@ namespace RuniEngine
                 }
             }
         }
-        [SerializeField, NotNullField, FieldName("gui.color")] string? _value;
+        [SerializeField, NotNullField, FieldName("gui.value")] string? _value;
 
 
 
