@@ -3,83 +3,62 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System;
-using System.Collections.Concurrent;
-using System.Text;
 using RuniEngine.Spans;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace RuniEngine.IO
 {
     /// <summary>
-    /// Thread-safe
+    /// 가상 메모리 내의 파일 및 디렉토리 구조를 처리하는 핸들러입니다. 이 클래스는 상속될 수 없습니다.
     /// </summary>
     public sealed class MemoryIOHandler : IOHandler
     {
-        class VirtualDirectory
-        {
-            public readonly ConcurrentDictionary<FilePath, VirtualDirectory> directories = new();
-            public readonly ConcurrentDictionary<FilePath, VirtualFile> files = new();
+        /// <summary>
+        /// 지정된 가상 디렉토리를 사용하여 <see cref="MemoryIOHandler"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="virtualDirectory">이 핸들러의 루트 가상 디렉토리입니다.</param>
+        public MemoryIOHandler(VirtualDirectory virtualDirectory) => rootDirectory = virtualDirectory;
 
-            public VirtualDirectory? GetDirectory(FilePath path)
-            {
-                if (path.IsEmpty())
-                    return this;
-
-                VirtualDirectory directory = this;
-                foreach (var directoryName in path.value.AsSpan().SplitAny(FilePath.directorySeparatorChars))
-                {
-                    if (!directory.directories.TryGetValue(new string(directoryName), out directory))
-                        return null;
-                }
-
-                return directory;
-            }
-
-            public VirtualFile? GetFile(FilePath path)
-            {
-                FilePath parentPath = path.GetParentPath();
-                string fileName = path.GetFileName();
-
-                return GetDirectory(parentPath)?.files.GetValueOrDefault(fileName);
-            }
-        }
-
-        class VirtualFile
-        {
-            readonly IOHandler? ioHandler = empty;
-            readonly byte[] content = new byte[0];
-
-            VirtualFile(IOHandler ioHandler) => this.ioHandler = ioHandler;
-            VirtualFile(byte[] content) => this.content = content;
-
-
-            public UniTask<byte[]> ReadAllBytesAsync() => ioHandler?.ReadAllBytes() ?? UniTask.RunOnThreadPool(() => content);
-
-            public UniTask<string> ReadAllTextAsync() => ioHandler?.ReadAllText() ?? UniTask.RunOnThreadPool(() => Encoding.UTF8.GetString(content));
-
-            public UniTask<IEnumerable<string>> ReadLines() => ioHandler?.ReadLines() ?? UniTask.RunOnThreadPool(() => Encoding.UTF8.GetString(content).ReadLines());
-
-            public UniTask<Stream> OpenRead() => ioHandler?.OpenRead() ?? UniTask.RunOnThreadPool(() => (Stream)new MemoryStream(content, false));
-
-            public static VirtualFile CreateShortcut(IOHandler ioHandler) => new VirtualFile(ioHandler);
-
-            public static VirtualFile Create(byte[] content) => new VirtualFile(content.ToArray());
-            public static VirtualFile Create(string content) => new VirtualFile(Encoding.UTF8.GetBytes(content));
-        }
-
-        public MemoryIOHandler() => rootDirectory = new VirtualDirectory();
+        /// <summary>
+        /// 루트 가상 디렉토리, 부모 핸들러 및 자식 경로를 사용하여 <see cref="MemoryIOHandler"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="rootDirectory">이 핸들러의 루트 가상 디렉토리입니다.</param>
+        /// <param name="parent">이 핸들러의 부모 <see cref="MemoryIOHandler"/>입니다.</param>
+        /// <param name="childPath">이 핸들러의 자식 경로입니다.</param>
         MemoryIOHandler(VirtualDirectory rootDirectory, MemoryIOHandler? parent, string childPath) : base(parent, childPath) => this.rootDirectory = rootDirectory;
 
+        /// <summary>
+        /// 이 핸들러의 최상위 <see cref="MemoryIOHandler"/>를 가져옵니다.
+        /// </summary>
+        public new MemoryIOHandler? root => (MemoryIOHandler?)base.root;
+        /// <summary>
+        /// 이 핸들러의 부모 <see cref="MemoryIOHandler"/>를 가져옵니다.
+        /// </summary>
         public new MemoryIOHandler? parent => (MemoryIOHandler?)base.parent;
 
+        /// <summary>
+        /// 이 핸들러가 독립적인지 여부를 나타내는 값을 가져옵니다. 이 값은 <see cref="rootDirectory"/>의 <see cref="VirtualDirectory.isIndependent"/> 값에 따라 결정됩니다.
+        /// </summary>
+        public override bool isIndependent => rootDirectory.isIndependent;
 
-
+        /// <summary>
+        /// 이 핸들러의 루트 가상 디렉토리를 가져옵니다.
+        /// </summary>
         readonly VirtualDirectory rootDirectory;
 
+        /// <summary>
+        /// 현재 위치를 최상위 경로로 취급하는 새 <see cref="MemoryIOHandler"/> 인스턴스를 생성합니다.
+        /// <br/>
+        /// 주의: <see cref="VirtualDirectory"/>는 복제하지 않습니다.
+        /// </summary>
+        /// <returns>현재 위치를 기반으로 하는 새 <see cref="MemoryIOHandler"/> 인스턴스입니다.</returns>
+        public override IOHandler Recreate() => new MemoryIOHandler(rootDirectory.GetDirectory(fullPath) ?? new VirtualDirectory());
 
-
-        /// <returns><see cref="MemoryIOHandler"/><br/>유니티 qt이 공변 반환 타입 지원 안하네 tllllllllqkf</returns>
+        /// <summary>
+        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="MemoryIOHandler"/>를 생성합니다.
+        /// </summary>
+        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <returns>생성된 <see cref="MemoryIOHandler"/> 인스턴스입니다.</returns>
         public override IOHandler CreateChild(FilePath path)
         {
             MemoryIOHandler handler = this;
@@ -95,117 +74,99 @@ namespace RuniEngine.IO
             return handler;
         }
 
-        public override IOHandler AddExtension(string extension) => new MemoryIOHandler(rootDirectory, parent, childPath + extension);
+        /// <summary>
+        /// 이 핸들러의 경로에 지정된 확장자를 추가하여 새 <see cref="MemoryIOHandler"/>를 생성합니다.
+        /// </summary>
+        /// <param name="extension">추가할 확장자입니다.</param>
+        /// <returns>확장자가 추가된 새 <see cref="MemoryIOHandler"/> 인스턴스입니다.</returns>
+        public override IOHandler AddExtension(FileExtension extension) => new MemoryIOHandler(rootDirectory, parent, name + extension);
 
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉토리가 가상 디렉토리 내에 존재하는지 비동기적으로 확인합니다.
+        /// </summary>
+        /// <returns>디렉토리가 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환하는 <see cref="bool"/>입니다.</returns>
+        public override UniTask<bool> DirectoryExists() => UniTask.FromResult(rootDirectory.GetDirectory(fullPath) != null);
 
+        /// <summary>
+        /// 이 핸들러가 나타내는 파일이 가상 디렉토리 내에 존재하는지 비동기적으로 확인합니다.
+        /// </summary>
+        /// <returns>파일이 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환하는 <see cref="bool"/>입니다.</returns>
+        public override UniTask<bool> FileExists() => UniTask.FromResult(rootDirectory.GetFile(fullPath) != null);
 
-        public override UniTask<bool> DirectoryExists() => UniTask.FromResult(rootDirectory.GetDirectory(childFullPath) != null);
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉토리의 모든 서브디렉토리 이름을 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <returns>디렉토리의 서브디렉토리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<string>> GetDirectories() => UniTask.FromResult(rootDirectory.GetDirectories(fullPath));
 
-        public override UniTask<bool> FileExists() => UniTask.FromResult(rootDirectory.GetFile(childFullPath) != null);
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉토리의 모든 서브디렉토리 경로(재귀적으로)를 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <returns>디렉토리의 모든 서브디렉토리 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<FilePath>> GetAllDirectories() => UniTask.FromResult(rootDirectory.GetAllDirectories(fullPath));
 
-        public override UniTask<IEnumerable<FilePath>> GetDirectories()
-        {
-            VirtualDirectory? directory = rootDirectory.GetDirectory(childFullPath) ?? throw new DirectoryNotFoundException(childFullPath);
-            return UniTask.FromResult(directory.directories.Select(x => x.Key));
-        }
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <returns>디렉토리의 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<string>> GetFiles() => UniTask.FromResult(rootDirectory.GetFiles(fullPath));
 
-        public override UniTask<IEnumerable<FilePath>> GetAllDirectories() => UniTask.FromResult(InternalGetAllDirectories().Select(x => x.Key));
+        /// <summary>
+        /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">파일 이름과 일치시킬 와일드카드 패턴입니다.</param>
+        /// <returns>지정된 패턴과 일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<string>> GetFiles(WildcardPatterns wildcardPatterns) => UniTask.FromResult(rootDirectory.GetFiles(fullPath).Where(x => WildcardUtility.IsMatch(x, wildcardPatterns)));
 
-        IEnumerable<KeyValuePair<FilePath, VirtualDirectory>> InternalGetAllDirectories()
-        {
-            return Recurse(this, rootDirectory.GetDirectory(childFullPath) ?? throw new DirectoryNotFoundException(childFullPath), FilePath.empty);
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <returns>디렉토리의 모든 파일 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<FilePath>> GetAllFiles() => UniTask.FromResult(rootDirectory.GetAllFiles(fullPath));
 
-            static IEnumerable<KeyValuePair<FilePath, VirtualDirectory>> Recurse(MemoryIOHandler handler, VirtualDirectory directory, FilePath parentPath)
-            {
-                foreach (var item in directory.directories)
-                {
-                    FilePath path = parentPath + item.Key;
-                    yield return new(path, item.Value);
+        /// <summary>
+        /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">파일 경로와 일치시킬 와일드카드 패턴입니다.</param>
+        /// <returns>지정된 패턴과 일치하는 파일 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<FilePath>> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTask.FromResult(rootDirectory.GetAllFiles(fullPath).Where(x => WildcardUtility.IsMatch(x, wildcardPatterns)));
 
-                    foreach (var subItem in Recurse(handler, item.Value, path))
-                        yield return subItem;
-                }
-            }
-        }
+        /// <summary>
+        /// 이 핸들러가 나타내는 가상 파일의 모든 바이트를 비동기적으로 읽습니다.
+        /// </summary>
+        /// <returns>가상 파일의 모든 바이트를 포함하는 <see cref="byte"/> 배열입니다.</returns>
+        /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
+        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<byte[]> ReadAllBytes() => rootDirectory.GetFile(fullPath).ReadAllBytesAsync();
 
+        /// <summary>
+        /// 이 핸들러가 나타내는 가상 파일의 모든 텍스트를 비동기적으로 읽습니다.
+        /// </summary>
+        /// <returns>가상 파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
+        /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
+        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<string> ReadAllText() => rootDirectory.GetFile(fullPath).ReadAllTextAsync();
 
-        public override UniTask<IEnumerable<FilePath>> GetFiles()
-        {
-            VirtualDirectory? directory = rootDirectory.GetDirectory(childFullPath) ?? throw new DirectoryNotFoundException(childFullPath);
-            return UniTask.FromResult(directory.files.Select(item => item.Key));
-        }
+        /// <summary>
+        /// 이 핸들러가 나타내는 가상 파일의 모든 줄을 비동기적으로 읽습니다.
+        /// </summary>
+        /// <returns>가상 파일의 모든 줄을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
+        /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
+        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<IEnumerable<string>> ReadLines() => rootDirectory.GetFile(fullPath).ReadLines();
 
-        public override UniTask<IEnumerable<FilePath>> GetFiles(ExtensionFilter extensionFilter)
-        {
-            VirtualDirectory? directory = rootDirectory.GetDirectory(childFullPath) ?? throw new DirectoryNotFoundException(childFullPath);
-            return UniTask.FromResult(FilterFiles(directory.files.Keys, extensionFilter));
-        }
-
-        public override UniTask<IEnumerable<FilePath>> GetAllFiles() => UniTask.FromResult(InternalGetAllFiles());
-
-        IEnumerable<FilePath> InternalGetAllFiles()
-        {
-            var directories = InternalGetAllDirectories();
-            return directories.SelectMany(directoryItem => directoryItem.Value.files.Select(fileItem => directoryItem.Key + fileItem.Key));
-        }
-
-        public override UniTask<IEnumerable<FilePath>> GetAllFiles(ExtensionFilter extensionFilter) => UniTask.FromResult(FilterFiles(InternalGetAllFiles(), extensionFilter));
-
-        static IEnumerable<FilePath> FilterFiles(IEnumerable<FilePath> files, ExtensionFilter extensionFilter)
-        {
-            IEnumerable<string> patterns = extensionFilter.ToString().Split('|').Select(ConvertPatternToRegex);
-
-            // `*` 패턴이 포함되어 있다면 바로 모든 파일 반환
-            if (patterns.Contains(".*"))
-                return files;
-
-            return files.Where(file => patterns.Any(pattern => Regex.IsMatch(file, pattern, RegexOptions.IgnoreCase))).ToList();
-        }
-
-        static string ConvertPatternToRegex(string pattern)
-        {
-            if (pattern == "*" || pattern == "*.*")
-                return ".*"; // 모든 파일을 허용하는 패턴
-
-            string escaped = Regex.Escape(pattern).Replace(@"\*", ".*"); // '*'를 '.*'로 변환
-            return $"^{escaped}$";
-        }
-
-        public override UniTask<byte[]> ReadAllBytes() => rootDirectory.GetFile(childFullPath)?.ReadAllBytesAsync() ?? throw new FileNotFoundException();
-
-        public override UniTask<string> ReadAllText() => rootDirectory.GetFile(childFullPath)?.ReadAllTextAsync() ?? throw new FileNotFoundException();
-
-        public override UniTask<IEnumerable<string>> ReadLines() => rootDirectory.GetFile(childFullPath)?.ReadLines() ?? throw new FileNotFoundException();
-
-        public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(childFullPath)?.OpenRead() ?? throw new FileNotFoundException();
-
-
-
-        /*VirtualDirectory GetNearestDirectory(string path, out string childPath)
-        {
-            MemoryIOHandler? ioHandler = this;
-            VirtualDirectory? directory = this.directory;
-            childPath = string.Empty;
-
-            while (directory == null)
-            {
-                string childPath = ioHandler.childPath;
-                ioHandler = parent;
-
-                if (ioHandler == null)
-                    break;
-
-                directory = ioHandler.directory;
-                childPath = PathUtility.Combine(childPath, childPath);
-            }
-
-            return directory;
-        }
-
-        VirtualDirectory? GetDirectory(string path)
-        {
-            VirtualDirectory? directory = GetNearestDirectory(out string nearPath);
-            return directory?.GetDirectory(PathUtility.Combine(nearPath, path));
-        }*/
+        /// <summary>
+        /// 이 핸들러가 나타내는 가상 파일을 읽기 모드로 열어 스트림을 비동기적으로 반환합니다.
+        /// </summary>
+        /// <returns>지정된 가상 파일에 대한 읽기 전용 <see cref="Stream"/>입니다.</returns>
+        /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
+        /// <exception cref="DirectoryNotFoundException">파일이 위치한 상위 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
+        public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(fullPath).OpenRead();
     }
 }
