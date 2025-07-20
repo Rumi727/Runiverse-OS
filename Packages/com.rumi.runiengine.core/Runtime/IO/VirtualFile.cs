@@ -15,8 +15,7 @@ namespace RuniEngine.IO
     public class VirtualFile : IVirtualNode
     {
         /// <summary>
-        /// 이 파일이 속한 가상 파일 시스템의 최상위 루트 디렉토리를 가져옵니다.<br/>
-        /// 이 속성은 읽기 전용입니다.
+        /// 이 파일이 속한 가상 파일 시스템의 최상위 루트 디렉토리를 가져옵니다.
         /// </summary>
         public VirtualDirectory? root { get; internal set; }
 

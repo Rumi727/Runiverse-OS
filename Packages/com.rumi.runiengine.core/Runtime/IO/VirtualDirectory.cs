@@ -106,7 +106,7 @@ namespace RuniEngine
         FilePath? IVirtualNode.fullPath => fullPath;
 
         /// <summary>
-        /// 이 가상 파일 시스템 엔트리(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
+        /// 이 가상 파일 시스템 노드(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
         /// 즉, 이 항목이 다른 가상 파일 시스템 엔트리의 하위가 아닌, 스스로 루트 역할을 하는지 여부를 나타냅니다.
         /// </summary>
         public bool isIndependent
