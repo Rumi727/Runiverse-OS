@@ -215,11 +215,11 @@ namespace RuniEngine.IO
         public readonly FileExtension GetExtension() => new FileExtension(this);
 
         /// <summary>
-        /// 현재 경로에서 마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 파일 이름 부분만 문자열로 가져옵니다.<br/>
+        /// 현재 경로에서 마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 부분만 문자열로 가져옵니다.<br/>
         /// 예를 들어, "dir/file.txt"의 경우 "file.txt"를 반환합니다.<br/>
         /// 경로에 디렉터리 구분자가 없으면 전체 경로 문자열을 반환합니다.
         /// </summary>
-        /// <returns>파일 이름 부분 또는 경로에 디렉터리가 없는 경우 전체 경로 문자열.</returns>
+        /// <returns>마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 부분 또는 경로에 디렉터리가 없는 경우 전체 경로 문자열.</returns>
         public readonly string GetFileName()
         {
             int index = value.LastIndexOf(directorySeparatorChar);
