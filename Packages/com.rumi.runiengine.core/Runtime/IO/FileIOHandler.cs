@@ -99,9 +99,8 @@ namespace RuniEngine.IO
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
         public override UniTask<IEnumerable<string>> GetDirectories() => UniTask.RunOnThreadPool(() => Directory.EnumerateDirectories(targetPath).Select(x =>
         {
-            FilePath path = x - targetPath;
-            if (path != targetPath)
-                return path.ToString();
+            if (x.ToPath().TryTrimStartPath(targetPath, out FilePath result))
+                return result.ToString();
 
             return null;
         }).WhereNotNull());
@@ -124,9 +123,8 @@ namespace RuniEngine.IO
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
         public override UniTask<IEnumerable<string>> GetFiles() => UniTask.RunOnThreadPool(() => Directory.EnumerateFiles(targetPath).Select(x =>
         {
-            FilePath path = x - targetPath;
-            if (path != targetPath)
-                return path.ToString();
+            if (x.ToPath().TryTrimStartPath(targetPath, out FilePath result))
+                return result.ToString();
 
             return null;
         }).WhereNotNull());
