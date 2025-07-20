@@ -1,6 +1,7 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace RuniEngine
@@ -23,8 +24,10 @@ namespace RuniEngine
             hasValue = value.HasValue;
         }
 
+        [MemberNotNullWhen(true, nameof(Value))]
         public readonly bool HasValue => hasValue;
 
+        [MaybeNull]
         public readonly T Value
         {
             get
@@ -110,7 +113,7 @@ namespace RuniEngine
 
 
         public static implicit operator SerializableNullable<T>(T value) => new SerializableNullable<T>(value);
-        public static explicit operator T(SerializableNullable<T> value) => value!.Value;
+        public static explicit operator T(SerializableNullable<T> value) => value.Value;
 
 
 
