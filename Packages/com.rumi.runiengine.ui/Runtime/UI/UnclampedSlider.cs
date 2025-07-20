@@ -30,7 +30,7 @@ namespace RuniEngine.UI
         float? IUnclampedSlider<float>.logicalMinValue
         {
             get => logicalMinValue;
-            set => logicalMinValue = value as float?;
+            set => logicalMinValue = value;
         }
         object? IUnclampedSlider.logicalMinValue
         {
