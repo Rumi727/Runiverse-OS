@@ -1,10 +1,9 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.IO;
 using System;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniEngine.IO
 {
     [Serializable]
     public struct FileExtension : IEquatable<FileExtension>
@@ -37,7 +36,7 @@ namespace RuniEngine
             readonly get => _value ?? string.Empty;
             set => _value = value;
         }
-        [SerializeField, FieldName("gui.extension"), NotNullField, JsonIgnore] string? _value;
+        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
 
 
