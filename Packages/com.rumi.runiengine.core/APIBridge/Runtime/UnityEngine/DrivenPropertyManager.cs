@@ -18,7 +18,7 @@ namespace RuniEngine.APIBridge.UnityEngine
         static MethodInfo? m_RegisterProperty;
         static readonly object[] mp_RegisterProperty = new object[3];
         static readonly Type[] mpt_RegisterProperty = new Type[] { typeof(UniObject), typeof(UniObject), typeof(string) };
-        [Conditional("UNITY_EDITOR")]
+        [Conditional("UNITY_EDITOR"), Obsolete("If possible, please use the traceable RuniEngine.DrivenPropertyManager method.")]
         public static void RegisterProperty(UniObject driver, UniObject target, string propertyPath)
         {
             m_RegisterProperty ??= type.GetMethod("RegisterProperty", BindingFlags.Public | BindingFlags.Static, null, mpt_RegisterProperty, null);
@@ -33,7 +33,7 @@ namespace RuniEngine.APIBridge.UnityEngine
         static MethodInfo? m_UnregisterProperty;
         static readonly object[] mp_UnregisterProperty = new object[3];
         static readonly Type[] mpt_UnregisterProperty = new Type[] { typeof(UniObject), typeof(UniObject), typeof(string) };
-        [Conditional("UNITY_EDITOR")]
+        [Conditional("UNITY_EDITOR"), Obsolete("If possible, please use the traceable RuniEngine.DrivenPropertyManager method.")]
         public static void UnregisterProperty(UniObject driver, UniObject target, string propertyPath)
         {
             m_UnregisterProperty ??= type.GetMethod("UnregisterProperty", BindingFlags.Public | BindingFlags.Static, null, mpt_UnregisterProperty, null);
