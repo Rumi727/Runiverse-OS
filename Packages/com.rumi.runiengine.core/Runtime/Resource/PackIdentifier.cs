@@ -9,7 +9,6 @@ namespace RuniEngine.Resource
     /// <br/>내부 ID (<see cref="internalID"/>) 또는 로컬 경로 (<see cref="localPath"/>) 중 정확히 하나만 가질 수 있습니다.
     /// <br/>두 필드가 모두 null이거나 모두 null이 아니면 유효하지 않은 상태로 간주됩니다.
     /// </summary>
-    [Serializable]
     public readonly struct PackIdentifier : IEquatable<PackIdentifier>
     {
         /// <summary>
