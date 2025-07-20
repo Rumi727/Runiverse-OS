@@ -1,8 +1,10 @@
 #nullable enable
 using Newtonsoft.Json;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -83,13 +85,12 @@ namespace RuniEngine.IO
         /// 입력된 경로는 <see cref="NormalizePath"/>를 통해 표준 형식으로 변환됩니다.
         /// </summary>
         /// <param name="path">생성할 파일 경로 문자열입니다. null이거나 비어있을 수 있습니다.</param>
-        /// <returns>정규화된 새 <see cref="FilePath"/> 인스턴스입니다. 입력이 null이거나 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
-        public static FilePath Create(string? path) => new FilePath(NormalizePath(path ?? string.Empty));
+        public FilePath(string? path) => _value = NormalizePath(path ?? string.Empty);
 
-        public static FilePath Create(string? path1, string? path2) => new FilePath(NormalizePath(path1 ?? string.Empty)) + new FilePath(NormalizePath(path2 ?? string.Empty));
-        public static FilePath Create(string? path1, string? path2, string? path3) => new FilePath(NormalizePath(path1 ?? string.Empty)) + new FilePath(NormalizePath(path2 ?? string.Empty)) + new FilePath(NormalizePath(path3 ?? string.Empty));
-        public static FilePath Create(string? path1, string? path2, string? path3, string? path4) => new FilePath(NormalizePath(path1 ?? string.Empty)) + new FilePath(NormalizePath(path2 ?? string.Empty)) + new FilePath(NormalizePath(path3 ?? string.Empty)) + new FilePath(NormalizePath(path4 ?? string.Empty));
-        public static FilePath Create(string? path1, string? path2, string? path3, string? path4, string? path5) => new FilePath(NormalizePath(path1 ?? string.Empty)) + new FilePath(NormalizePath(path2 ?? string.Empty)) + new FilePath(NormalizePath(path3 ?? string.Empty)) + new FilePath(NormalizePath(path4 ?? string.Empty)) + new FilePath(NormalizePath(path5 ?? string.Empty));
+        public FilePath(string? path1, string? path2) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty);
+        public FilePath(string? path1, string? path2, string? path3) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty);
+        public FilePath(string? path1, string? path2, string? path3, string? path4) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty) + directorySeparatorChar + NormalizePath(path4 ?? string.Empty);
+        public FilePath(string? path1, string? path2, string? path3, string? path4, string? path5) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty) + directorySeparatorChar + NormalizePath(path4 ?? string.Empty) + directorySeparatorChar + NormalizePath(path5 ?? string.Empty);
 
         /// <summary>
         /// 지정된 문자열 경로로부터 새 <see cref="FilePath"/> 인스턴스를 생성하고 정규화합니다.<br/>
@@ -97,7 +98,7 @@ namespace RuniEngine.IO
         /// </summary>
         /// <param name="paths">생성할 파일 경로 문자열입니다. null이거나 비어있을 수 있습니다.</param>
         /// <returns>정규화된 새 <see cref="FilePath"/> 인스턴스입니다. 입력이 null이거나 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
-        public static FilePath Create(params string[] paths) => new FilePath(NormalizePath(string.Join(directorySeparatorChar, paths)));
+        public FilePath(params string[] paths) => _value = NormalizePath(string.Join(directorySeparatorChar, paths));
 
         /// <summary>
         /// 지정된 <see cref="ReadOnlySpan{T}"/> 경로로부터 새 <see cref="FilePath"/> 인스턴스를 생성하고 정규화합니다.<br/>
@@ -105,9 +106,7 @@ namespace RuniEngine.IO
         /// </summary>
         /// <param name="path">생성할 파일 경로를 나타내는 <see cref="ReadOnlySpan{T}"/>입니다.</param>
         /// <returns>정규화된 새 <see cref="FilePath"/> 인스턴스입니다. 입력이 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
-        public static FilePath Create(ReadOnlySpan<char> path) => new FilePath(NormalizePath(path));
-
-        FilePath(string? path) => _value = path ?? string.Empty;
+        public FilePath(ReadOnlySpan<char> path) => _value = NormalizePath(path);
 
 
 
@@ -208,23 +207,16 @@ namespace RuniEngine.IO
 
 
         /// <summary>
-        /// 현재 경로의 파일 확장자(점 포함)를 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"의 경우 ".txt"를 반환합니다.<br/>
+        /// 현재 경로의 파일 확장자을 문자열로 가져옵니다.<br/>
+        /// 예를 들어, "dir/file.txt"의 경우 "txt"를 반환합니다.<br/>
         /// 경로에 확장자가 없으면 <see cref="string.Empty"/>를 반환합니다.
         /// </summary>
         /// <returns>파일 확장자(점 포함) 또는 확장자가 없는 경우 <see cref="string.Empty"/>.</returns>
-        public readonly string GetExtension()
-        {
-            int index = value.LastIndexOf('.');
-            if (index < 0)
-                return string.Empty;
-
-            return value.Substring(index);
-        }
+        public readonly FileExtension GetExtension() => new FileExtension(this);
 
         /// <summary>
         /// 현재 경로에서 마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 파일 이름 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"의 경우 "file.txt"를 반환합니다.<br/>
+        /// 예를 들어, "dir/file.txt"의 경우 "file.txt"를 반환합니다.<br/>
         /// 경로에 디렉터리 구분자가 없으면 전체 경로 문자열을 반환합니다.
         /// </summary>
         /// <returns>파일 이름 부분 또는 경로에 디렉터리가 없는 경우 전체 경로 문자열.</returns>
@@ -239,7 +231,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 현재 경로의 파일 이름에서 확장자를 제외한 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"의 경우 "file"을 반환합니다.<br/>
+        /// 예를 들어, "dir/file.txt"의 경우 "file"을 반환합니다.<br/>
         /// 파일 이름에 확장자가 없으면 파일 이름 전체를 반환합니다.
         /// </summary>
         /// <returns>확장자를 제외한 파일 이름 부분.</returns>
@@ -256,7 +248,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 현재 경로에서 파일 확장자를 제외한 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"의 경우 "C:/dir/file"을 반환합니다.<br/>
+        /// 예를 들어, "dir/file.txt"의 경우 "dir/file"을 반환합니다.<br/>
         /// 경로에 확장자가 없으면 원래 <see cref="FilePath"/>를 반환합니다.
         /// </summary>
         /// <returns>확장자가 제거된 새 <see cref="FilePath"/> 인스턴스.</returns>
@@ -271,7 +263,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 현재 경로의 상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"의 경우 "C:/dir"을 반환합니다.<br/>
+        /// 예를 들어, "dir/file.txt"의 경우 "dir"을 반환합니다.<br/>
         /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 빈 <see cref="empty"/>를 반환합니다.
         /// </summary>
         /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스 또는 <see cref="empty"/>.</returns>
@@ -290,7 +282,7 @@ namespace RuniEngine.IO
         /// <summary>
         /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는 경우,
         /// 해당 접두사 부분을 제거한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 예를 들어, 현재 경로가 "C:/project/data/file.txt"이고 <paramref name="relativeTo"/>가 "C:/project/data"인 경우,
+        /// 예를 들어, 현재 경로가 "project/data/file.txt"이고 <paramref name="relativeTo"/>가 "project/data"인 경우,
         /// "file.txt"를 반환합니다.
         /// </summary>
         /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
@@ -304,7 +296,7 @@ namespace RuniEngine.IO
         /// <summary>
         /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는 경우,
         /// 해당 접두사 부분을 제거한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 예를 들어, 현재 경로가 "C:/project/data/file.txt"이고 <paramref name="relativeTo"/>가 "C:/project/data"인 경우,
+        /// 예를 들어, 현재 경로가 "project/data/file.txt"이고 <paramref name="relativeTo"/>가 "project/data"인 경우,
         /// "file.txt"를 반환합니다.
         /// </summary>
         /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
@@ -315,17 +307,56 @@ namespace RuniEngine.IO
         /// </returns>
         public readonly FilePath TrimStartPath(FilePath relativeTo)
         {
-            if (relativeTo.value.Length <= 0)
-                return value;
+            if (TryTrimStartPath(relativeTo, out FilePath result))
+                return result;
 
-            if (value.Length <= 0 || relativeTo == this)
-                return string.Empty;
+            return this;
+        }
+
+        /// <summary>
+        /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는지 시도하고,
+        /// 일치하는 경우 해당 접두사를 제거한 새 <see cref="FilePath"/>를 반환합니다.
+        /// </summary>
+        /// <param name="relativeTo">
+        /// 현재 경로의 시작 부분에서 제거할 접두사 경로입니다.
+        /// 이 경로가 비어있는 경우 (null 또는 빈 문자열), 현재 경로 자체가 결과로 반환되며 <see langword="true"/>를 반환합니다.
+        /// </param>
+        /// <param name="result">
+        /// 메서드가 성공적으로 접두사를 제거하면, 제거된 접두사 부분을 제외한 새 <see cref="FilePath"/>가 여기에 할당됩니다.
+        /// <paramref name="relativeTo"/>가 현재 경로와 완전히 일치하면, 빈 <see cref="empty"/>가 반환됩니다.
+        /// <br/>
+        /// <paramref name="relativeTo"/>가 비어있는 경우, 현재 <see cref="FilePath"/>의 값이 할당됩니다.
+        /// <br/>
+        /// 메서드가 실패하거나 현재 경로가 비어있는 경우, <see cref="empty"/>가 할당됩니다.
+        /// </param>
+        /// <returns>
+        /// <paramref name="relativeTo"/>가 비어있거나 현재 경로가 <paramref name="relativeTo"/>로 시작하면 <see langword="true"/>를 반환하고,
+        /// 현재 경로가 비어있거나 (그리고 <paramref name="relativeTo"/>가 비어있지 않은 경우)
+        /// <paramref name="relativeTo"/>로 시작하지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        public readonly bool TryTrimStartPath(FilePath relativeTo, out FilePath result)
+        {
+            if (string.IsNullOrEmpty(relativeTo.value))
+            {
+                result = value;
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(value) || relativeTo == this)
+            {
+                result = empty;
+                return false;
+            }
 
             FilePath path = value;
             if (path.StartsWith(relativeTo))
-                return path.value.Substring(relativeTo.value.Length + 1);
+            {
+                result = path.value.Substring(relativeTo.value.Length + 1);
+                return true;
+            }
 
-            return path;
+            result = empty;
+            return false;
         }
 
 
@@ -340,7 +371,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 현재 경로가 지정된 <paramref name="startPath"/>로 시작하는지 여부를 확인합니다.<br/>
-        /// 예를 들어, "C:/dir/file.txt"가 "C:/dir"로 시작하는지 확인합니다.
+        /// 예를 들어, "dir/file.txt"가 "dir"로 시작하는지 확인합니다.
         /// </summary>
         /// <param name="startPath">현재 경로의 시작 부분과 비교할 경로입니다.</param>
         /// <returns>현재 경로가 <paramref name="startPath"/>로 시작하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
@@ -372,7 +403,7 @@ namespace RuniEngine.IO
         /// </summary>
         /// <param name="ext">추가할 확장자입니다. 점(.)을 포함해야 합니다 (예: ".txt").</param>
         /// <returns>확장자가 덧붙여진 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
-        public readonly FilePath AddExtension(string ext) => new FilePath(value + ext);
+        public readonly FilePath AddExtension(FileExtension ext) => new FilePath(value + ext);
 
 
 
@@ -479,6 +510,28 @@ namespace RuniEngine.IO
 
 
 
+        public static IEnumerable<FilePath> FilterFiles(IEnumerable<FilePath> files, WildcardPatterns extensionFilter)
+        {
+            IEnumerable<string> patterns = extensionFilter.patterns.Select(ConvertPatternToRegex);
+
+            // `*` 패턴이 포함되어 있다면 바로 모든 파일 반환
+            if (patterns.Contains(".*"))
+                return files;
+
+            return files.Where(file => patterns.Any(pattern => Regex.IsMatch(file, pattern, RegexOptions.IgnoreCase))).ToList();
+
+            static string ConvertPatternToRegex(string pattern)
+            {
+                if (pattern == "*" || pattern == "*.*")
+                    return ".*"; // 모든 파일을 허용하는 패턴
+
+                string escaped = Regex.Escape(pattern).Replace(@"\*", ".*"); // '*'를 '.*'로 변환
+                return $"^{escaped}$";
+            }
+        }
+
+
+
         /// <summary>
         /// 현재 <see cref="FilePath"/> 인스턴스의 문자열 표현을 반환합니다.<br/>
         /// 이는 <see cref="value"/> 속성과 동일합니다.
@@ -546,7 +599,7 @@ namespace RuniEngine.IO
         /// 입력된 문자열은 <see cref="Create(string?)"/> 메서드를 통해 정규화됩니다.
         /// </summary>
         /// <param name="path">변환할 문자열 경로입니다.</param>
-        public static implicit operator FilePath(string? path) => Create(path);
+        public static implicit operator FilePath(string? path) => new FilePath(path);
 
 
 
@@ -562,7 +615,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// <see cref="FilePath"/>와 nullable <see cref="FilePath"/>를 하나의 경로로 결합합니다.<br/>
-        /// <see cref="Combine(FilePath?, FilePath?)"/> 메서드를 사용하여 null을 <see cref="empty"/>로 처리합니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 첫 번째 경로입니다.</param>
         /// <param name="right">결합할 두 번째 nullable 경로입니다.</param>
@@ -571,7 +625,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// nullable <see cref="FilePath"/>와 <see cref="FilePath"/>를 하나의 경로로 결합합니다.<br/>
-        /// <see cref="Combine(FilePath?, FilePath?)"/> 메서드를 사용하여 null을 <see cref="empty"/>로 처리합니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 첫 번째 nullable 경로입니다.</param>
         /// <param name="right">결합할 두 번째 경로입니다.</param>
@@ -580,7 +635,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 두 nullable <see cref="FilePath"/> 객체를 하나의 경로로 결합합니다.<br/>
-        /// <see cref="Combine(FilePath?, FilePath?)"/> 메서드를 사용하여 null을 <see cref="empty"/>로 처리합니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 첫 번째 nullable 경로입니다.</param>
         /// <param name="right">결합할 두 번째 nullable 경로입니다.</param>
@@ -589,7 +645,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// <see cref="FilePath"/>와 문자열 경로 세그먼트를 하나의 경로로 결합합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 결합됩니다.
+        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 결합됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 <see cref="FilePath"/>입니다.</param>
         /// <param name="right">결합할 문자열 경로 세그먼트입니다.</param>
@@ -598,7 +655,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// nullable <see cref="FilePath"/>와 문자열 경로 세그먼트를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 nullable <see cref="FilePath"/>입니다.</param>
         /// <param name="right">결합할 문자열 경로 세그먼트입니다.</param>
@@ -607,7 +665,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 문자열 경로와 <see cref="FilePath"/>를 하나의 경로로 결합합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 결합됩니다.
+        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 결합됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 문자열 경로입니다.</param>
         /// <param name="right">결합할 <see cref="FilePath"/>입니다.</param>
@@ -616,7 +675,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 문자열 경로와 nullable <see cref="FilePath"/>를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// <see cref="Combine(FilePath, FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">결합할 문자열 경로입니다.</param>
         /// <param name="right">결합할 nullable <see cref="FilePath"/>입니다.</param>
@@ -639,7 +699,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// <see cref="FilePath"/>와 nullable <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// <paramref name="right"/>가 null이면 <see cref="empty"/>로 처리됩니다.
+        /// <paramref name="right"/>가 null이면 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 경로입니다.</param>
         /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
@@ -648,7 +709,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// nullable <see cref="FilePath"/>와 <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// <paramref name="left"/>가 null이면 <see cref="empty"/>로 처리됩니다.
+        /// <paramref name="left"/>가 null이면 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable 경로입니다.</param>
         /// <param name="right">제거할 접두사 경로입니다.</param>
@@ -657,7 +719,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 두 nullable <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// null 값은 <see cref="empty"/>로 처리됩니다.
+        /// null 값은 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable 경로입니다.</param>
         /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
@@ -666,7 +729,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// <see cref="FilePath"/>와 문자열 접두사 간의 상대 경로를 구합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.
+        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 <see cref="FilePath"/>입니다.</param>
         /// <param name="right">제거할 문자열 접두사입니다.</param>
@@ -675,7 +739,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// nullable <see cref="FilePath"/>와 문자열 접두사 간의 상대 경로를 구합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable <see cref="FilePath"/>입니다.</param>
         /// <param name="right">제거할 문자열 접두사입니다.</param>
@@ -684,7 +749,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 문자열 경로와 <see cref="FilePath"/> 접두사 간의 상대 경로를 구합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.
+        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 문자열 경로입니다.</param>
         /// <param name="right">제거할 <see cref="FilePath"/> 접두사입니다.</param>
@@ -693,7 +759,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 문자열 경로와 nullable <see cref="FilePath"/> 접두사 간의 상대 경로를 구합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.
+        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 문자열 경로입니다.</param>
         /// <param name="right">제거할 nullable <see cref="FilePath"/> 접두사입니다.</param>
@@ -714,7 +781,8 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// nullable <see cref="FilePath"/>의 상위 디렉터리 경로를 구합니다.<br/>
-        /// <paramref name="path"/>가 null이면 <see cref="empty"/>를 반환합니다.
+        /// <paramref name="path"/>가 null이면 <see cref="empty"/>를 반환합니다.<br/>
+        /// 이는 <see cref="GetParentPath()"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="path">상위 디렉터리를 구할 nullable 경로입니다.</param>
         /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스 또는 <see cref="empty"/>.</returns>
