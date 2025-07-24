@@ -21,9 +21,9 @@ namespace RuniEngine
         public int? minor;
         public int? patch;
 
-        [SerializeField, NullableField("*")] SerializableNullable<int> _major;
-        [SerializeField, NullableField("*")] SerializableNullable<int> _minor;
-        [SerializeField, NullableField("*")] SerializableNullable<int> _patch;
+        [SerializeField, FieldName("gui.major"), NullableField("*")] SerializableNullable<int> _major;
+        [SerializeField, FieldName("gui.minor"), NullableField("*")] SerializableNullable<int> _minor;
+        [SerializeField, FieldName("gui.patch"), NullableField("*")] SerializableNullable<int> _patch;
 
 
 
