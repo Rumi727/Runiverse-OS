@@ -45,6 +45,8 @@ MonoBehaviour:
     - gui.patch
     - serializable_dictionary_property_drawer.not_found.key
     - serializable_dictionary_property_drawer.not_found.value
+    - serializable_key_value_pair_property_drawer.not_found.key
+    - serializable_key_value_pair_property_drawer.not_found.value
     - serializable_nullable.invalid_serialization_type
     - ui.unclamped_slider.tooltip
     - internal.auto_setter.property.info
@@ -86,6 +88,12 @@ MonoBehaviour:
       \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
       \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
       \"serializableValues\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"key\"\uAC00 \uC874\uC7AC\uD558\uC9C0
+      \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74
+      \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"key\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"value\"\uAC00 \uC874\uC7AC\uD558\uC9C0
+      \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74
+      \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"value\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
     - "\uC798\uBABB\uB41C \uC9C1\uB82C\uD654 \uD0C0\uC785\uC785\uB2C8\uB2E4"
     - "\uC2AC\uB77C\uC774\uB354 \uBC94\uC704\uC640 \uAD00\uACC4\uC5C6\uC774 \uC801\uC6A9\uB418\uB294
       \uAC12 \uC81C\uD55C\uC785\uB2C8\uB2E4. null\uC774\uBA74 \uD574\uB2F9 \uBC29\uD5A5\uC73C\uB85C

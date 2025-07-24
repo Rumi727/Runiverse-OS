@@ -45,6 +45,8 @@ MonoBehaviour:
     - gui.patch
     - serializable_dictionary_property_drawer.not_found.key
     - serializable_dictionary_property_drawer.not_found.value
+    - serializable_key_value_pair_property_drawer.not_found.key
+    - serializable_key_value_pair_property_drawer.not_found.value
     - serializable_nullable.invalid_serialization_type
     - ui.unclamped_slider.tooltip
     - internal.auto_setter.property.info
@@ -86,6 +88,14 @@ MonoBehaviour:
 
       To be displayed
       automatically in the GUI, the field name must be exactly "serializableValues".'
+    - 'The serializable field "key" does not exist.
+
+      To be displayed automatically
+      in the GUI, the field name must be exactly "key".'
+    - 'The serializable field "value" does not exist.
+
+      To be displayed automatically
+      in the GUI, the field name must be exactly "value".'
     - Invalid serialization type
     - Clamps the value independently of the slider's range. null removes the limit
       in that direction.
