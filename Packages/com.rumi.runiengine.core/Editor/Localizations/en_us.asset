@@ -37,10 +37,18 @@ MonoBehaviour:
     - gui.top_right
     - gui.bottom_right
     - gui.namespace
+    - gui.extension
+    - gui.color
+    - gui.invalid_type
+    - gui.major
+    - gui.minor
+    - gui.patch
     - serializable_dictionary_property_drawer.not_found.key
     - serializable_dictionary_property_drawer.not_found.value
     - serializable_nullable.invalid_serialization_type
     - ui.unclamped_slider.tooltip
+    - internal.auto_setter.property.info
+    - internal.auto_setter.property.value_info
     serializableValues:
     - Key
     - Value
@@ -64,6 +72,12 @@ MonoBehaviour:
     - Top Right
     - Bottom Right
     - Namespace
+    - Extension
+    - Color
+    - Invalid type
+    - Major
+    - Minor
+    - Patch
     - 'The serializable field "serializableKeys" does not exist.
 
       To be displayed
@@ -75,3 +89,5 @@ MonoBehaviour:
     - Invalid serialization type
     - Clamps the value independently of the slider's range. null removes the limit
       in that direction.
+    - Changed the {name} property value to allow RuniOS to work properly
+    - Changed the {name} property value to {value} to allow RuniOS to work correctly
