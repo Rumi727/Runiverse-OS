@@ -3837,8 +3837,24 @@ namespace RuniEngine
         public static decimal Repeat(this decimal t, decimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
         public static BigInteger Repeat(this BigInteger t, BigInteger length) => (t - ((BigInteger)((BigDecimal)t / (BigDecimal)length).Floor() * length)).Clamp(0, length);
         public static BigDecimal Repeat(this BigDecimal t, BigDecimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
+
         public static nint Repeat(this nint t, nint length) => (t - ((nint)((float)t / length) * length)).Clamp(0, length);
         public static nuint Repeat(this nuint t, nuint length) => (t - ((nuint)((float)t / length) * length)).Clamp(0, length);
+        public static sbyte Repeat(this sbyte t, sbyte start, sbyte end) => (sbyte)((t - start).Repeat(start.Distance(end)) + end);
+        public static byte Repeat(this byte t, byte start, byte end) => (byte)((t - start).Repeat(start.Distance(end)) + end);
+        public static short Repeat(this short t, short start, short end) => (short)((t - start).Repeat(start.Distance(end)) + end);
+        public static ushort Repeat(this ushort t, ushort start, ushort end) => (ushort)((t - start).Repeat(start.Distance(end)) + end);
+        public static int Repeat(this int t, int start, int end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static uint Repeat(this uint t, uint start, uint end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static long Repeat(this long t, long start, long end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static ulong Repeat(this ulong t, ulong start, ulong end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static float Repeat(this float t, float start, float end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static double Repeat(this double t, double start, double end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static decimal Repeat(this decimal t, decimal start, decimal end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static BigInteger Repeat(this BigInteger t, BigInteger start, BigInteger end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static BigDecimal Repeat(this BigDecimal t, BigDecimal start, BigDecimal end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static nint Repeat(this nint t, nint start, nint end) => (t - start).Repeat(start.Distance(end)) + end;
+        public static nuint Repeat(this nuint t, nuint start, nuint end) => (t - start).Repeat(start.Distance(end)) + end;
         #endregion
 
         #region Repeat While
