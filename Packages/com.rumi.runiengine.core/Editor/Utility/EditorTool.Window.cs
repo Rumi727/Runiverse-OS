@@ -1,5 +1,10 @@
 #nullable enable
-using RuniEngine.Editor.APIBridge.UnityEditor;
+
+using UnityEditor;
+using UnityEditor.UIElements;
+using UnityEngine.UIElements;
+using GUIView = RuniEngine.Editor.APIBridge.UnityEditor.GUIView;
+using HostView = RuniEngine.Editor.APIBridge.UnityEditor.HostView;
 
 namespace RuniEngine.Editor
 {
@@ -8,7 +13,20 @@ namespace RuniEngine.Editor
         public static void RepaintCurrentWindow()
         {
             if (GUIView.current?.instance != null)
-                GUIView.current.Repaint();
+            {
+                if (HostView.type.IsAssignableFrom(GUIView.current.instance.GetType()))
+                {
+                    HostView hostView = HostView.GetInstance(GUIView.current.instance);
+                    EditorWindow? actualView = hostView.actualView;
+                    if (actualView != null)
+                    {
+                        actualView.Repaint();
+                        RuniEngine.APIBridge.UnityEngine.UIElements.VisualElement.GetInstance(actualView.rootVisualElement).IncrementVersion(VersionChangeType.Size);
+                    }
+                }
+                else
+                    GUIView.current.Repaint();
+            }
         }
     }
 }
