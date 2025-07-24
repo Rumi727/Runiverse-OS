@@ -5,7 +5,7 @@ namespace RuniEngine.Editor
 {
     public partial class EditorTool
     {
-        public static string TryGetText(string key, string lauguage = "")
+        public static string GetTextOrKey(string key, string lauguage = "")
         {
             string? result = GetText(key, lauguage);
             if (result == null)
