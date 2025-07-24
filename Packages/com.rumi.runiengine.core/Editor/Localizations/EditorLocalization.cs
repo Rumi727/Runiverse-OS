@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
 namespace RuniEngine.Editor.Localizations
 {
@@ -33,6 +34,12 @@ namespace RuniEngine.Editor.Localizations
         {
             if (string.IsNullOrEmpty(languageKey))
                 languageKey = currentLanguage;
+
+            if (registeredDataAssets.Count <= 0)
+            {
+                foreach (var item in ReflectionUtility.types.Where(static x => typeof(ScriptableObject).IsAssignableFrom(x) && typeof(IEditorLocalizationRegister).IsAssignableFrom(x)))
+                    ScriptableObject.CreateInstance(item);
+            }
 
             if (registeredDataAssets.TryGetValue(languageKey, out var datas))
                 return datas.Select(x => x._languages);

@@ -1,15 +1,11 @@
 #nullable enable
-using RuniEngine.Editor.Localizations;
 using UnityEditor;
 using UnityEngine;
 
 namespace RuniEngine.Editor.Localizations
 {
-    sealed class EditorLocalizationRegister : UnityEditor.Editor
+    sealed class EditorLocalizationRegister : ScriptableObject, IEditorLocalizationRegister
     {
-        [InitializeOnLoadMethod]
-        static void Init() => CreateInstance<EditorLocalizationRegister>();
-
         [SerializeField] EditorLanguageDataAsset? en_us;
         [SerializeField] EditorLanguageDataAsset? ko_kr;
         [SerializeField] EditorLanguageDataAsset? ja_jp;
