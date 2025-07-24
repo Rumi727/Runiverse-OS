@@ -78,16 +78,16 @@ namespace RuniEngine.Editor
         public static void BeginLabelWidth(string[] label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
         public static void BeginLabelWidth(GUIContent[] label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
 
-        static readonly Stack<float> labelWidthQueue = new Stack<float>();
+        static readonly Stack<float> labelWidthStack = new Stack<float>();
         public static void BeginLabelWidth(float width)
         {
-            labelWidthQueue.Push(APIBridge.UnityEditor.EditorGUIUtility.s_LabelWidth);
+            labelWidthStack.Push(APIBridge.UnityEditor.EditorGUIUtility.s_LabelWidth);
             EditorGUIUtility.labelWidth = width;
         }
 
         public static void EndLabelWidth()
         {
-            if (labelWidthQueue.TryPop(out float result))
+            if (labelWidthStack.TryPop(out float result))
                 EditorGUIUtility.labelWidth = result;
             else
                 EditorGUIUtility.labelWidth = 0;
@@ -147,28 +147,28 @@ namespace RuniEngine.Editor
 
 
 
-        static readonly Dictionary<GUIStyle, Stack<TextAnchor>> alignmentQueue = new Dictionary<GUIStyle, Stack<TextAnchor>>();
+        static readonly Dictionary<GUIStyle, Stack<TextAnchor>> alignmentStacks = new Dictionary<GUIStyle, Stack<TextAnchor>>();
         public static void BeginAlignment(TextAnchor alignment, GUIStyle style)
         {
-            if (!alignmentQueue.ContainsKey(style))
-                alignmentQueue.Add(style, new Stack<TextAnchor>());
+            if (!alignmentStacks.ContainsKey(style))
+                alignmentStacks.Add(style, new Stack<TextAnchor>());
 
-            alignmentQueue[style].Push(style.alignment);
+            alignmentStacks[style].Push(style.alignment);
             style.alignment = alignment;
         }
 
         public static void EndAlignment(GUIStyle style)
         {
-            if (alignmentQueue.ContainsKey(style))
+            if (alignmentStacks.ContainsKey(style))
             {
-                Stack<TextAnchor> stack = alignmentQueue[style];
+                Stack<TextAnchor> stack = alignmentStacks[style];
                 if (stack.TryPop(out TextAnchor result))
                     style.alignment = result;
                 else
                     style.alignment = 0;
 
                 if (stack.Count <= 0)
-                    alignmentQueue.Remove(style);
+                    alignmentStacks.Remove(style);
 
                 return;
             }
@@ -181,28 +181,28 @@ namespace RuniEngine.Editor
         public static void BeginFontSize(int size) => BeginFontSize(size, labelStyle);
         public static void EndFontSize() => EndFontSize(labelStyle);
 
-        static readonly Dictionary<GUIStyle, Stack<int>> fontSizeQueue = new Dictionary<GUIStyle, Stack<int>>();
+        static readonly Dictionary<GUIStyle, Stack<int>> fontSizeStacks = new Dictionary<GUIStyle, Stack<int>>();
         public static void BeginFontSize(int size, GUIStyle style)
         {
-            if (!fontSizeQueue.ContainsKey(style))
-                fontSizeQueue.Add(style, new Stack<int>());
+            if (!fontSizeStacks.ContainsKey(style))
+                fontSizeStacks.Add(style, new Stack<int>());
 
-            fontSizeQueue[style].Push(style.fontSize);
+            fontSizeStacks[style].Push(style.fontSize);
             style.fontSize = size;
         }
 
         public static void EndFontSize(GUIStyle style)
         {
-            if (fontSizeQueue.ContainsKey(style))
+            if (fontSizeStacks.ContainsKey(style))
             {
-                Stack<int> stack = fontSizeQueue[style];
+                Stack<int> stack = fontSizeStacks[style];
                 if (stack.TryPop(out int result))
                     style.fontSize = result;
                 else
                     style.fontSize = 0;
 
                 if (stack.Count <= 0)
-                    fontSizeQueue.Remove(style);
+                    fontSizeStacks.Remove(style);
 
                 return;
             }
@@ -212,19 +212,42 @@ namespace RuniEngine.Editor
 
 
 
-        static readonly Stack<bool> wideModeQueue = new Stack<bool>();
+        static readonly Stack<bool> wideModeStack = new Stack<bool>();
         public static void BeginWideMode(bool width)
         {
-            wideModeQueue.Push(EditorGUIUtility.wideMode);
+            wideModeStack.Push(EditorGUIUtility.wideMode);
             EditorGUIUtility.wideMode = width;
         }
 
         public static void EndWideMode()
         {
-            if (wideModeQueue.TryPop(out bool result))
+            if (wideModeStack.TryPop(out bool result))
                 EditorGUIUtility.wideMode = result;
             else
                 EditorGUIUtility.wideMode = false;
+        }
+
+
+
+        public static void BeginIndentLevel()
+        {
+            //++ 연산자는 바꾸기 전 값을 반환함
+            indentLevelStack.Push(EditorGUI.indentLevel++);
+        }
+
+        static readonly Stack<int> indentLevelStack = new Stack<int>();
+        public static void BeginIndentLevel(int indentLevel)
+        {
+            indentLevelStack.Push(EditorGUI.indentLevel);
+            EditorGUI.indentLevel = indentLevel;
+        }
+
+        public static void EndIndentLevel()
+        {
+            if (indentLevelStack.TryPop(out int result))
+                EditorGUI.indentLevel = result;
+            else
+                EditorGUI.indentLevel = 0;
         }
 
 
