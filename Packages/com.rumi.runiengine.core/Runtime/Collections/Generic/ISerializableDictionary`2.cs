@@ -4,46 +4,51 @@ using UnityEngine;
 
 namespace RuniEngine.Collections.Generic
 {
+    /// <summary>
+    /// 인스펙터상에 표시되려면 이름의 가진 직렬화 가능 필드가 있어야합니다!
+    /// </summary>
+    /// <typeparam name="TKey"></typeparam>
+    /// <typeparam name="TValue"></typeparam>
     public interface ISerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
     {
         IList<TKey?> serializableKeys { get; }
         IList<TValue?> serializableValues { get; }
 
-        public static void Serialize(ISerializableDictionary<TKey, TValue> dict)
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
-            dict.serializableKeys.Clear();
-            dict.serializableValues.Clear();
+            serializableKeys.Clear();
+            serializableValues.Clear();
 
-            foreach (var item in dict)
+            foreach (var item in this)
             {
-                dict.serializableKeys.Add(item.Key);
-                dict.serializableValues.Add(item.Value);
+                serializableKeys.Add(item.Key);
+                serializableValues.Add(item.Value);
             }
         }
 
-        public static void Deserialize(ISerializableDictionary<TKey, TValue> dict)
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
-            dict.Clear();
-            for (int i = 0; i != dict.serializableKeys.Count.Max(dict.serializableValues.Count); i++)
+            Clear();
+            for (int i = 0; i != serializableKeys.Count.Max(serializableValues.Count); i++)
             {
                 TKey? key;
-                if (i < dict.serializableKeys.Count)
-                    key = dict.serializableKeys[i];
+                if (i < serializableKeys.Count)
+                    key = serializableKeys[i];
                 else
                     key = default;
 
                 key ??= (TKey)typeof(TKey).GetDefaultValueNotNull();
 
                 TValue? value;
-                if (i < dict.serializableValues.Count)
-                    value = dict.serializableValues[i];
+                if (i < serializableValues.Count)
+                    value = serializableValues[i];
                 else
                     value = default;
 
                 value ??= (TValue)typeof(TValue).GetDefaultValueNotNull();
 
-                if (!dict.ContainsKey(key))
-                    dict.Add(key, value);
+                if (!ContainsKey(key))
+                    Add(key, value);
             }
         }
     }

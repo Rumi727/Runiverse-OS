@@ -32,8 +32,5 @@ namespace RuniEngine.Collections.Generic
 
         public Type keyType => typeof(TKey);
         public Type valueType => typeof(TValue);
-
-        void ISerializationCallbackReceiver.OnBeforeSerialize() => ISerializableDictionary<TKey, TValue>.Serialize(this);
-        void ISerializationCallbackReceiver.OnAfterDeserialize() => ISerializableDictionary<TKey, TValue>.Deserialize(this);
     }
 }
