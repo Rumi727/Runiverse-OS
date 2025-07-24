@@ -8,7 +8,7 @@ using EditorGUIUtility = UnityEditor.EditorGUIUtility;
 
 namespace RuniEngine.Editor.Drawers
 {
-    //[CustomPropertyDrawer(typeof(object), true)]
+    [CustomPropertyDrawer(typeof(object), true)]
     public sealed class ObjectPropertyDrawer : PropertyDrawer
     {
         AnimBool? animBool;
