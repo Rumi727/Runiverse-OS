@@ -1,4 +1,6 @@
 #nullable enable
+using System.ComponentModel;
+
 namespace RuniEngine.IO
 {
     /// <summary>
@@ -42,6 +44,7 @@ namespace RuniEngine.IO
         /// </summary>
         public bool isDeleted { get; }
 
+        [EditorBrowsable(EditorBrowsableState.Never)]
         /// <summary>
         /// 이 <see cref="VirtualDirectory"/> 인스턴스를 상위 디렉토리에서 제거되어 유효하지 않은 상태로 설정합니다
         /// </summary>
