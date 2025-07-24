@@ -10,7 +10,7 @@ namespace RuniEngine.Editor
         {
             if (!APIBridge.UnityEditor.EditorSettings.inspectorUseIMGUIDefaultInspector)
             {
-                Debug.Log(EditorTool.TryGetText("internal.auto_setter.property.value_info").Replace("{name}", $"{nameof(APIBridge.UnityEditor.EditorSettings)}.{nameof(APIBridge.UnityEditor.EditorSettings.inspectorUseIMGUIDefaultInspector)}").Replace("{value}", "true"));
+                Debug.Log(EditorTool.GetTextOrKey("internal.auto_setter.property.value_info").Replace("{name}", $"{nameof(APIBridge.UnityEditor.EditorSettings)}.{nameof(APIBridge.UnityEditor.EditorSettings.inspectorUseIMGUIDefaultInspector)}").Replace("{value}", "true"));
                 APIBridge.UnityEditor.EditorSettings.inspectorUseIMGUIDefaultInspector = true;
             }
         }
