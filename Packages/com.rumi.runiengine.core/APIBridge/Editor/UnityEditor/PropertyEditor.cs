@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Reflection;
 
 namespace RuniEngine.Editor.APIBridge.UnityEditor
 {
@@ -12,6 +13,15 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
         protected PropertyEditor(global::UnityEditor.EditorWindow? instance) => this.instance = instance;
 
         public global::UnityEditor.EditorWindow? instance { get; }
+
+
+
+        static MethodInfo? m_RebuildContentsContainers;
+        public void RebuildContentsContainers()
+        {
+            m_RebuildContentsContainers ??= type.GetMethod("RebuildContentsContainers", BindingFlags.NonPublic | BindingFlags.Static);
+            m_RebuildContentsContainers.Invoke(instance, null);
+        }
 
 
 
