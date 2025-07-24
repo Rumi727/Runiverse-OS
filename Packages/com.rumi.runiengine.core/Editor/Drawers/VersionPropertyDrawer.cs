@@ -11,26 +11,55 @@ namespace RuniEngine.Editor.Drawers
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            property.Next(true);
-
+            EditorGUI.BeginProperty(position, label, property.Copy());
+            
             int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
             position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
             position.height = 18f;
-
-            float fieldWidth = position.width / 3f;
-            float toggleWidth = GetXSize(EditorStyles.toggle);
             
-            for (int i = 0; i < 3; i++)
+            property.Next(true);
+
+            BeginIndentLevel(0);
+            float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
+
+            for (int i = 0; i < 5; i++)
             {
+                if (i % 2 == 0)
                 {
-                    position.width = fieldWidth;
+                    if (i == 2)
+                        position.width = fieldWidth.Floor();
+                    else if (i == 4)
+                        position.width = fieldWidth.Ceil();
+                    else
+                        position.width = fieldWidth;
+
                     EditorGUI.PropertyField(position, property, new GUIContent(), false);
                     position.x += position.width;
-                }
 
-                property.Next(false);
-                position.x += 2;
+                    property.Next(false);
+                    position.x += 4;
+                }
+                else
+                {
+                    position.width = 8;
+                    position.x -= 4;
+                    GUI.Label(position, ".");
+
+                    position.x += position.width;
+                    position.width += 4;
+                }
             }
+            EndIndentLevel();
+
+            EditorGUI.EndProperty();
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (EditorGUIUtility.wideMode)
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return EditorGUIUtility.singleLineHeight * 2;
         }
     }
 }
