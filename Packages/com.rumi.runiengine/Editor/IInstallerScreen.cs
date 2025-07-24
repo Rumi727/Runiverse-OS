@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine.Install
+namespace RuniEngine.Installer
 {
     interface IInstallerScreen
     {

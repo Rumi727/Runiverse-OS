@@ -3,7 +3,7 @@ using UnityEditor;
 using TMPro;
 using UnityEngine;
 
-namespace RuniEngine.Install
+namespace RuniEngine.Installer
 {
     sealed class TMPSettingScreen : IInstallerScreen
     {

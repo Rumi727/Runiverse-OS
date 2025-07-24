@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniEngine.Install
+namespace RuniEngine.Installer
 {
     //[CreateAssetMenu(fileName = "LanguageScriptableObject", menuName = "Scriptable Objects/LanguageScriptableObject")]
     class LanguageScriptableObject : ScriptableObject

@@ -8,7 +8,7 @@ using UnityEditor;
 using UnityEditor.PackageManager;
 using UnityEngine;
 
-namespace RuniEngine.Install
+namespace RuniEngine.Installer
 {
     sealed class PackageSettingScreen : IInstallerScreen
     {

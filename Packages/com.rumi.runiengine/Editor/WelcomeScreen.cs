@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniEngine.Install
+namespace RuniEngine.Installer
 {
     sealed class WelcomeScreen : IInstallerScreen
     {
