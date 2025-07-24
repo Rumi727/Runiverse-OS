@@ -22,7 +22,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                 position.width *= 0.5f;
                 position.width += 2;
 
-                EditorGUI.HelpBox(position, TryGetText("gui.field_is_null"), MessageType.Error);
+                EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
             }
             else
                 EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());

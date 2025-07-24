@@ -14,7 +14,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
             FieldNameAttribute attribute = (FieldNameAttribute)this.attribute;
             if (attribute.force || L10n.Tr(property.displayName) == label.text)
             {
-                label.text = TryGetText(attribute.name);
+                label.text = GetTextOrKey(attribute.name);
                 EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
             }
             else

@@ -10,7 +10,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             TooltipAttribute attribute = (TooltipAttribute)this.attribute;
-            label.tooltip = EditorTool.TryGetText(attribute.text);
+            label.tooltip = EditorTool.GetTextOrKey(attribute.text);
 
             EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
         }
