@@ -1,5 +1,6 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
+// Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Nullable.cs
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
@@ -7,7 +8,7 @@ using UnityEngine;
 namespace RuniEngine
 {
     [Serializable]
-    public struct SerializableNullable<T> : IEquatable<T>, IEquatable<T?>, IEquatable<SerializableNullable<T>>, ISerializationCallbackReceiver where T : struct
+    public struct SerializableNullable<T> : ISerializableNullable<T>, IEquatable<T>, IEquatable<T?>, IEquatable<SerializableNullable<T>>, ISerializationCallbackReceiver where T : struct
     {
         [SerializeField] T value;
         [SerializeField] bool hasValue;
