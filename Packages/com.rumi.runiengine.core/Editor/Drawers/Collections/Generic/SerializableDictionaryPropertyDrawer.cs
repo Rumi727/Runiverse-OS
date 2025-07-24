@@ -11,7 +11,7 @@ using static RuniEngine.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 using EditorGUIUtility = UnityEditor.EditorGUIUtility;
 
-namespace RuniEngine.Editor.Drawers.Collections
+namespace RuniEngine.Editor.Drawers.Collections.Generic
 {
     [CustomPropertyDrawer(typeof(ISerializableDictionary<,>), true)]
     public sealed class SerializableDictionaryPropertyDrawer : PropertyDrawer
@@ -27,12 +27,12 @@ namespace RuniEngine.Editor.Drawers.Collections
             InitListProperty(property);
             if (key == null)
             {
-                GUI.Label(position, TryGetText("serializable_dictionary_property_drawer.not_found.key"));
+                GUI.Label(position, GetTextOrKey("serializable_dictionary_property_drawer.not_found.key"));
                 return;
             }
             else if (value == null)
             {
-                GUI.Label(position, TryGetText("serializable_dictionary_property_drawer.not_found.value"));
+                GUI.Label(position, GetTextOrKey("serializable_dictionary_property_drawer.not_found.value"));
                 return;
             }
 
@@ -125,8 +125,8 @@ namespace RuniEngine.Editor.Drawers.Collections
                     if (key == null || value == null)
                         return;
 
-                    string keyLabel = TryGetText("gui.key");
-                    string valueLabel = TryGetText("gui.value");
+                    string keyLabel = GetTextOrKey("gui.key");
+                    string valueLabel = GetTextOrKey("gui.value");
 
                     rect.width /= 2;
                     rect.width -= 10;
