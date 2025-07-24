@@ -19,8 +19,5 @@ namespace RuniEngine.Editor.Localizations
 
         IList ISerializableDictionary.serializableKeys => serializableKeys;
         IList ISerializableDictionary.serializableValues => serializableValues;
-
-        public void OnAfterDeserialize() => ISerializableDictionary<string, string>.Deserialize(this);
-        public void OnBeforeSerialize() => ISerializableDictionary<string, string>.Serialize(this);
     }
 }
