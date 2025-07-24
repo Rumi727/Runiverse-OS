@@ -9,12 +9,10 @@ using EditorGUI = UnityEditor.EditorGUI;
 
 namespace RuniEngine.Editor.Drawers
 {
-    [CustomPropertyDrawer(typeof(object), true)]
-    public sealed class ObjectPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(AnimFolderAttribute))]
+    public sealed class AnimFolderPropertyDrawer : PropertyDrawer
     {
         AnimBool? animBool;
-
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PropertyField(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
