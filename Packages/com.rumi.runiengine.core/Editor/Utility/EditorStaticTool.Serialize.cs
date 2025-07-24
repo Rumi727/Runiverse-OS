@@ -7,7 +7,7 @@ namespace RuniEngine.Editor
     public static partial class EditorStaticTool
     {
         public static bool IsChildrenIncluded(this SerializedProperty prop) => prop.propertyType == SerializedPropertyType.Generic;
-        public static bool IsTextField(this SerializedProperty prop) => prop.propertyType == SerializedPropertyType.Integer || prop.propertyType == SerializedPropertyType.Float || prop.propertyType == SerializedPropertyType.String;
+        public static bool IsTextField(this SerializedProperty prop) => prop.propertyType == SerializedPropertyType.Integer || prop.propertyType == SerializedPropertyType.Float || prop.propertyType == SerializedPropertyType.Character || prop.propertyType == SerializedPropertyType.String;
 
         public static void SetDefaultValue(this SerializedProperty serializedProperty)
         {
