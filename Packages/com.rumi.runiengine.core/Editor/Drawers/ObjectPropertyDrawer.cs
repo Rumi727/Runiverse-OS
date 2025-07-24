@@ -2,14 +2,13 @@
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
-
 using static RuniEngine.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 using EditorGUIUtility = UnityEditor.EditorGUIUtility;
 
 namespace RuniEngine.Editor.Drawers
 {
-    [CustomPropertyDrawer(typeof(object), true)]
+    //[CustomPropertyDrawer(typeof(object), true)]
     public sealed class ObjectPropertyDrawer : PropertyDrawer
     {
         AnimBool? animBool;
@@ -31,7 +30,7 @@ namespace RuniEngine.Editor.Drawers
                     property.isExpanded = true;
 
                     SerializedProperty childProperty = property.Copy();
-
+                    
                     orgHeight = EditorGUI.GetPropertyHeight(childProperty, label); //여기에서 값 바뀜
                     property.isExpanded = isExpanded;
                 }
@@ -51,10 +50,7 @@ namespace RuniEngine.Editor.Drawers
                 {
                     float childHeight = orgHeight - headHeight;
 
-                    position.x += 30;
-                    position.width -= 30;
-
-                    position.y += headHeight + 2;
+                    position.y += headHeight + 3;
 
                     if (animBool.isAnimating)
                         GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + 0f.Lerp(childHeight, animBool.faded)));
@@ -62,18 +58,21 @@ namespace RuniEngine.Editor.Drawers
                     if (property.Next(true))
                     {
                         int depth = property.depth;
+                        EditorGUI.indentLevel++;
 
                         do
                         {
                             position.height = EditorGUI.GetPropertyHeight(property);
 
-                            BeginLabelWidth(EditorGUIUtility.labelWidth - 15);
+                            BeginLabelWidth(EditorGUIUtility.labelWidth);
                             EditorGUI.PropertyField(position, property, false);
                             EndLabelWidth();
 
                             position.y += position.height + 2;
                         }
                         while (property.Next(false) && property.depth == depth);
+
+                        EditorGUI.indentLevel--;
                     }
 
                     if (animBool.isAnimating)
