@@ -16,8 +16,8 @@ namespace RuniEngine.Installer
         public LanguageScriptableObject? en_us;
         public LanguageScriptableObject? ja_jp;
 
-        public static System.Diagnostics.Stopwatch stopwatch = new();
-        public static System.Diagnostics.Stopwatch deltaTimeStopwatch = new();
+        public static readonly System.Diagnostics.Stopwatch stopwatch = new();
+        public static readonly System.Diagnostics.Stopwatch deltaTimeStopwatch = new();
 
         static readonly List<IInstallerScreen> installerScreens = new();
 
@@ -81,8 +81,6 @@ namespace RuniEngine.Installer
 
                 if (stack.Count <= 0)
                     alignmentQueue.Remove(style);
-
-                return;
             }
             else
                 style.alignment = 0;
@@ -111,7 +109,7 @@ namespace RuniEngine.Installer
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding - 2));
             r.height = thickness;
-            r.y += (padding / 2) - 2;
+            r.y += (padding / 2f) - 2;
             r.x -= 18;
             r.width += 22;
             EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
@@ -120,7 +118,7 @@ namespace RuniEngine.Installer
         public static void DrawLine(Rect position, int thickness = 2, int padding = 10)
         {
             Rect r = new Rect(position.x, position.y, position.width, thickness);
-            r.y += (padding / 2) - 2;
+            r.y += (padding / 2f) - 2;
             r.x -= 18;
             r.width += 22;
             EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
@@ -129,7 +127,7 @@ namespace RuniEngine.Installer
         public static void DrawLineV(Rect position, int thickness = 2, int padding = 10)
         {
             Rect r = new Rect(position.x, position.y, thickness, position.height);
-            r.x += (padding / 2) - 2;
+            r.x += (padding / 2f) - 2;
             r.y -= 18;
             r.height += 22;
             EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
@@ -232,7 +230,7 @@ namespace RuniEngine.Installer
                     continue;
 
                 var screen = installerScreens[i];
-                Vector2 size = screen.windowSize ?? new Vector2(584, 298);
+                //Vector2 size = screen.windowSize ?? new Vector2(584, 298);
 
                 float x = (Screen.width + 2) * i;
                 float offsetX = (Screen.width + 2) * indexAnim.value;
@@ -397,7 +395,7 @@ namespace RuniEngine.Installer
 
             GUI.EndGroup();
 
-            if (instance != null && prevRotation != logoRotation)
+            if (instance != null && !Mathf.Approximately(prevRotation, logoRotation))
                 instance.Repaint();
         }
     }

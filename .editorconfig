@@ -51,6 +51,11 @@ dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:warning
 dotnet_style_parentheses_in_other_operators = never_if_unnecessary:none
 dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:warning
 
+# ReSharper properties
+resharper_parentheses_redundancy_style = remove_if_not_clarifies_precedence
+resharper_parentheses_same_type_operations = true
+resharper_arrange_redundant_parentheses_highlighting = none
+
 # 한정자 기본 설정
 dotnet_style_require_accessibility_modifiers = omit_if_default
 
@@ -224,7 +229,7 @@ dotnet_naming_rule.interface_should_be_interface.severity = suggestion
 dotnet_naming_rule.interface_should_be_interface.symbols = interface
 dotnet_naming_rule.interface_should_be_interface.style = interface
 
-dotnet_naming_rule.camel_case_should_be_camel_case.severity = suggestion
+dotnet_naming_rule.camel_case_should_be_camel_case.severity = none
 dotnet_naming_rule.camel_case_should_be_camel_case.symbols = camel_case
 dotnet_naming_rule.camel_case_should_be_camel_case.style = camel_case
 

@@ -1,13 +1,12 @@
 #nullable enable
 using HarmonyLib;
 using RuniEngine.Booting;
-using System.Diagnostics;
 
 namespace RuniEngine.Modding.UI
 {
     public static partial class Patches
     {
-        public static Harmony harmony = new Harmony("rumi.runios.ui");
+        public static readonly Harmony harmony = new Harmony("rumi.runios.ui");
 
         [Awaken]
 #if UNITY_EDITOR

@@ -19,6 +19,7 @@ namespace RuniEngine
         /// 데이터 크기를(바이트) 적절하게 바꿔줍니다 (B, KB, MB, GB, TB, PB, EB, ZB, YB)
         /// </summary>
         /// <param name="byteSize">계산할 용량</param>
+        /// <param name="space"></param>
         public static double ByteTo(long byteSize, out string space)
         {
             int loopCount = 0;

@@ -32,6 +32,7 @@ namespace RuniEngine
         public static bool IsEditorPanel(this VisualElement visualElement) => visualElement.panel is not IRuntimePanel || !Kernel.isPlaying;
 #else
 #pragma warning disable IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
+        // ReSharper disable UnusedParameter.Global
         /// <summary>
         /// 지정된 <see cref="VisualElement"/>가 런타임 패널에 속하는지 여부를 반환합니다.
         /// 빌드된 애플리케이션에서는 항상 true를 반환합니다.
@@ -47,6 +48,7 @@ namespace RuniEngine
         /// <param name="visualElement">확인할 <see cref="VisualElement"/>입니다.</param>
         /// <returns>항상 false를 반환합니다.</returns>
         public static bool IsEditorPanel(this VisualElement visualElement) => false;
+        // ReSharper restore UnusedParameter.Global
 #pragma warning restore IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
 #endif
     }

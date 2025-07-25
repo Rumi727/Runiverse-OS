@@ -1,10 +1,9 @@
 #nullable enable
 using System;
-using Unity.Android.Gradle;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UI
+namespace RuniEngine.UI.Bindings
 {
     [UxmlObject]
     public partial class HalfTheSizeBinding : CustomBinding

@@ -1,3 +1,4 @@
+#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 
@@ -57,6 +58,7 @@ namespace RuniEngine.Spans
             }
 
 #pragma warning disable IDE1006 // 명명 스타일
+            // ReSharper disable once InconsistentNaming
             public readonly SpanSplitValue<T> Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]

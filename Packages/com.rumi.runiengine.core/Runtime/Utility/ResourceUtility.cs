@@ -1,6 +1,4 @@
 #nullable enable
-using RuniEngine.Booting;
-using RuniEngine.Resource;
 using UnityEngine;
 
 namespace RuniEngine
@@ -69,15 +67,19 @@ namespace RuniEngine
                         hideFlags = HideFlags.HideAndDontSave
                     };
 
-                    _coloredMaterial.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    _coloredMaterial.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    _coloredMaterial.SetInt("_Cull", (int)UnityEngine.Rendering.CullMode.Off);
-                    _coloredMaterial.SetInt("_ZWrite", 0);
+                    _coloredMaterial.SetInt(srcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    _coloredMaterial.SetInt(dstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    _coloredMaterial.SetInt(cull, (int)UnityEngine.Rendering.CullMode.Off);
+                    _coloredMaterial.SetInt(zWrite, 0);
                 }
 
                 return _coloredMaterial;
             }
         }
         static Material? _coloredMaterial;
+        static readonly int srcBlend = Shader.PropertyToID("_SrcBlend");
+        static readonly int dstBlend = Shader.PropertyToID("_DstBlend");
+        static readonly int cull = Shader.PropertyToID("_Cull");
+        static readonly int zWrite = Shader.PropertyToID("_ZWrite");
     }
 }

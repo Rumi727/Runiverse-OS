@@ -4,6 +4,7 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 
+// ReSharper disable once CheckNamespace
 public static class Debug
 {
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -73,14 +74,14 @@ public static class Debug
         {
             StackFrame stackFrame = stackTrace.GetFrame(skipFrames);
             MethodBase methodBase = stackFrame.GetMethod();
-            Type type = methodBase.DeclaringType;
+            Type type = methodBase.DeclaringType ?? typeof(Debug);
 
             if (type.IsCompilerGenerated())
             {
-                string name = type.FullName;
+                string name = type.FullName ?? string.Empty;
                 int startIndex = name.LastIndexOf('.') + 1;
 
-                return type.FullName.Substring(startIndex, name.LastIndexOf('+') - startIndex);
+                return name.Substring(startIndex, name.LastIndexOf('+') - startIndex);
             }
 
             return type.Name;
@@ -92,7 +93,7 @@ public static class Debug
     public static StackFrame GetMethodCallerStackFrame()
     {
         StackFrame stackFrame;
-        Type declaringType;
+        Type? declaringType;
         int skipFrames = 2;
         do
         {

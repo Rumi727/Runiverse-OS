@@ -19,11 +19,9 @@ namespace RuniEngine
         public HexColor(Color color) : this((Color32)color) { }
         public HexColor(Color32 color) : this(color.r, color.g, color.b, color.a) { }
 
-        public HexColor(float r, float g, float b) : this(r, g, b, 1f) { }
-        public HexColor(float r, float g, float b, float a) : this(new Color(r, g, b, a)) { }
+        public HexColor(float r, float g, float b, float a = 1f) : this(new Color(r, g, b, a)) { }
 
-        public HexColor(byte r, byte g, byte b) : this(r, g, b, byte.MaxValue) { }
-        public HexColor(byte r, byte g, byte b, byte a)
+        public HexColor(byte r, byte g, byte b, byte a = byte.MaxValue)
         {
             _r = r;
             _g = g;

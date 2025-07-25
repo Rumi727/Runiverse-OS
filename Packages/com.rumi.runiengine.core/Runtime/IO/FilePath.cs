@@ -60,13 +60,13 @@ namespace RuniEngine.IO
 
 
 
-        [AllowNull]
         /// <summary>
         /// 현재 <see cref="FilePath"/> 인스턴스가 나타내는 정규화된 경로의 문자열 표현을 가져오거나 설정합니다.<br/>
         /// 값을 설정할 때 입력된 문자열은 <see cref="NormalizePath"/> 메서드를 통해 자동으로 정규화됩니다.<br/>
         /// 이 과정에서 Windows 스타일의 역슬래시('\')는 슬래시('/')로 변경되고, 불필요한 시작/끝 구분자는 제거됩니다.<br/>
         /// 경로가 null이거나 비어있을 경우 <see cref="string.Empty"/>를 반환합니다.
         /// </summary>
+        [AllowNull]
         public string value
         {
             readonly get => _value ?? string.Empty;
@@ -114,7 +114,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// 현재 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="System.IO.Path.GetInvalidPathChars"/>)를 모두 제거한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 예를 들어, Windows에서 경로에 사용할 수 없는 '<', '>', '|' 등의 문자를 제거합니다.
+        /// 예를 들어, Windows에서 경로에 사용할 수 없는 '&lt;', '&gt;', '|' 등의 문자를 제거합니다.
         /// </summary>
         /// <returns>잘못된 문자가 제거된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
         public readonly FilePath CleanPath()
@@ -377,7 +377,7 @@ namespace RuniEngine.IO
         /// </summary>
         /// <param name="startPath">현재 경로의 시작 부분과 비교할 경로입니다.</param>
         /// <returns>현재 경로가 <paramref name="startPath"/>로 시작하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public readonly bool StartsWith(FilePath startPath) => value.StartsWith(startPath.value);
+        public readonly bool StartsWith(FilePath startPath) => value.StartsWith(startPath.value, StringComparison.Ordinal);
 
 
 
@@ -395,7 +395,7 @@ namespace RuniEngine.IO
         /// 이 메서드는 <see cref="empty"/>와 동일한 상태를 확인하는 데 사용됩니다.
         /// </summary>
         /// <returns>경로가 비어있으면 <c>true</c>이고, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public readonly bool IsEmpty() => _value == null || _value == string.Empty;
+        public readonly bool IsEmpty() => string.IsNullOrEmpty(_value);
 
 
 
@@ -601,7 +601,7 @@ namespace RuniEngine.IO
 
         /// <summary>
         /// <see cref="string"/>을 <see cref="FilePath"/>로 암시적으로 변환합니다.<br/>
-        /// 입력된 문자열은 <see cref="Create(string?)"/> 메서드를 통해 정규화됩니다.
+        /// 입력된 문자열은 <see cref="NormalizePath"/> 메서드를 통해 정규화됩니다.
         /// </summary>
         /// <param name="path">변환할 문자열 경로입니다.</param>
         public static implicit operator FilePath(string? path) => new FilePath(path);

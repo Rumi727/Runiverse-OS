@@ -196,21 +196,21 @@ namespace RuniEngine
         #endregion
 
         #region Arithmetic Sequence Sum
-        public static sbyte ArithmeticSequenceSum(this sbyte start, sbyte end) => (sbyte)((start.Distance(end) + 1) * (start + end) / 2);
-        public static byte ArithmeticSequenceSum(this byte start, byte end) => (byte)((start.Distance(end) + 1) * (start + end) / 2);
-        public static short ArithmeticSequenceSum(this short start, short end) => (short)((start.Distance(end) + 1) * (start + end) / 2);
-        public static ushort ArithmeticSequenceSum(this ushort start, ushort end) => (ushort)((start.Distance(end) + 1) * (start + end) / 2);
-        public static int ArithmeticSequenceSum(this int start, int end) => (start.Distance(end) + 1) * (start + end) / 2;
-        public static uint ArithmeticSequenceSum(this uint start, uint end) => (start.Distance(end) + 1) * (start + end) / 2;
-        public static long ArithmeticSequenceSum(this long start, long end) => (start.Distance(end) + 1) * (start + end) / 2;
-        public static ulong ArithmeticSequenceSum(this ulong start, ulong end) => (start.Distance(end) + 1) * (start + end) / 2;
+        public static sbyte ArithmeticSequenceSum(this sbyte start, sbyte end) => (sbyte)(((start.Distance(end) + 1) * (start + end)) / 2);
+        public static byte ArithmeticSequenceSum(this byte start, byte end) => (byte)(((start.Distance(end) + 1) * (start + end)) / 2);
+        public static short ArithmeticSequenceSum(this short start, short end) => (short)(((start.Distance(end) + 1) * (start + end)) / 2);
+        public static ushort ArithmeticSequenceSum(this ushort start, ushort end) => (ushort)(((start.Distance(end) + 1) * (start + end)) / 2);
+        public static int ArithmeticSequenceSum(this int start, int end) => ((start.Distance(end) + 1) * (start + end)) / 2;
+        public static uint ArithmeticSequenceSum(this uint start, uint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
+        public static long ArithmeticSequenceSum(this long start, long end) => ((start.Distance(end) + 1) * (start + end)) / 2;
+        public static ulong ArithmeticSequenceSum(this ulong start, ulong end) => ((start.Distance(end) + 1) * (start + end)) / 2;
         public static float ArithmeticSequenceSum(this float start, float end) => (start.Distance(end) + 1) * (start + end) * 0.5f;
         public static double ArithmeticSequenceSum(this double start, double end) => (start.Distance(end) + 1) * (start + end) * 0.5;
         public static decimal ArithmeticSequenceSum(this decimal start, decimal end) => (start.Distance(end) + 1) * (start + end) * 0.5m;
-        public static BigInteger ArithmeticSequenceSum(this BigInteger start, BigInteger end) => (start.Distance(end) + 1) * (start + end) / 2;
+        public static BigInteger ArithmeticSequenceSum(this BigInteger start, BigInteger end) => ((start.Distance(end) + 1) * (start + end)) / 2;
         public static BigDecimal ArithmeticSequenceSum(this BigDecimal start, BigDecimal end) => (start.Distance(end) + 1) * (start + end) * 0.5;
-        public static nint ArithmeticSequenceSum(this nint start, nint end) => (start.Distance(end) + 1) * (start + end) / 2;
-        public static nuint ArithmeticSequenceSum(this nuint start, nuint end) => (start.Distance(end) + 1) * (start + end) / 2;
+        public static nint ArithmeticSequenceSum(this nint start, nint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
+        public static nuint ArithmeticSequenceSum(this nuint start, nuint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
         #endregion
 
         public static float Angle(this Vector2 current, Vector2 target)
@@ -998,7 +998,7 @@ namespace RuniEngine
                     return temp;
             }
 
-            float result = temp / absMax.Pow(gamma) * absMax;
+            float result = (temp / absMax.Pow(gamma)) * absMax;
             if (flag)
                 return -result;
             else
@@ -1018,7 +1018,7 @@ namespace RuniEngine
                     return temp;
             }
 
-            double result = temp / absMax.Pow(gamma) * absMax;
+            double result = (temp / absMax.Pow(gamma)) * absMax;
             if (flag)
                 return -result;
             else
@@ -1100,7 +1100,7 @@ namespace RuniEngine
 
         public static float InverseLerp(this float a, float b, float t)
         {
-            if (a != b)
+            if (!Approximately(a, b))
                 return ((t - a) / (b - a)).Clamp01();
 
             return 0;
@@ -1108,7 +1108,7 @@ namespace RuniEngine
 
         public static double InverseLerp(this double a, double b, double t)
         {
-            if (a != b)
+            if (!Approximately(a, b))
                 return ((t - a) / (b - a)).Clamp01();
 
             return 0;
@@ -2601,7 +2601,7 @@ namespace RuniEngine
                 return target;
 
             float num4 = (float)Math.Sqrt(num3);
-            return new Vector2(current.x + (num / num4 * maxDistanceDelta), current.y + (num2 / num4 * maxDistanceDelta));
+            return new Vector2(current.x + ((num / num4) * maxDistanceDelta), current.y + ((num2 / num4) * maxDistanceDelta));
         }
         public static Vector3 MoveTowards(this Vector3 current, Vector3 target, float maxDistanceDelta)
         {
@@ -2613,7 +2613,7 @@ namespace RuniEngine
                 return target;
 
             float num5 = (float)Math.Sqrt(num4);
-            return new Vector3(current.x + (num / num5 * maxDistanceDelta), current.y + (num2 / num5 * maxDistanceDelta), current.z + (num3 / num5 * maxDistanceDelta));
+            return new Vector3(current.x + ((num / num5) * maxDistanceDelta), current.y + ((num2 / num5) * maxDistanceDelta), current.z + ((num3 / num5) * maxDistanceDelta));
         }
         public static Vector4 MoveTowards(this Vector4 current, Vector4 target, float maxDistanceDelta)
         {
@@ -2626,7 +2626,7 @@ namespace RuniEngine
                 return target;
 
             float num6 = (float)Math.Sqrt(num5);
-            return new Vector4(current.x + (num / num6 * maxDistanceDelta), current.y + (num2 / num6 * maxDistanceDelta), current.z + (num3 / num6 * maxDistanceDelta), current.w + (num4 / num6 * maxDistanceDelta));
+            return new Vector4(current.x + ((num / num6) * maxDistanceDelta), current.y + ((num2 / num6) * maxDistanceDelta), current.z + ((num3 / num6) * maxDistanceDelta), current.w + ((num4 / num6) * maxDistanceDelta));
         }
         public static Rect MoveTowards(this Rect current, Rect target, float maxDistanceDelta)
         {
@@ -2639,7 +2639,7 @@ namespace RuniEngine
                 return target;
 
             float num6 = (float)Math.Sqrt(num5);
-            return new Rect(current.x + (num / num6 * maxDistanceDelta), current.y + (num2 / num6 * maxDistanceDelta), current.width + (num3 / num6 * maxDistanceDelta), current.height + (num4 / num6 * maxDistanceDelta));
+            return new Rect(current.x + ((num / num6) * maxDistanceDelta), current.y + ((num2 / num6) * maxDistanceDelta), current.width + ((num3 / num6) * maxDistanceDelta), current.height + ((num4 / num6) * maxDistanceDelta));
         }
         public static Color MoveTowards(this Color current, Color target, float maxDistanceDelta)
         {
@@ -2652,7 +2652,7 @@ namespace RuniEngine
                 return target;
 
             float num6 = (float)Math.Sqrt(num5);
-            return new Color(current.r + (num / num6 * maxDistanceDelta), current.g + (num2 / num6 * maxDistanceDelta), current.b + (num3 / num6 * maxDistanceDelta), current.a + (num4 / num6 * maxDistanceDelta));
+            return new Color(current.r + ((num / num6) * maxDistanceDelta), current.g + ((num2 / num6) * maxDistanceDelta), current.b + ((num3 / num6) * maxDistanceDelta), current.a + ((num4 / num6) * maxDistanceDelta));
         }
         #endregion
 
@@ -2835,20 +2835,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return (byte)(tempValue * power);
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return (byte)tempValue;
-            }
+            return (byte)tempValue;
         }
 
         public static short NextPowerOf(this short value, int power)
@@ -2897,20 +2887,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return (ushort)(tempValue * power);
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return (ushort)tempValue;
-            }
+            return (ushort)tempValue;
         }
 
         public static int NextPowerOf(this int value, int power)
@@ -2959,20 +2939,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             uint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return tempValue * power;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue;
-            }
+            return tempValue;
         }
 
         public static long NextPowerOf(this long value, long power)
@@ -3022,20 +2992,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             ulong tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return tempValue * power;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue;
-            }
+            return tempValue;
         }
 
         public static float NextPowerOf(this float value, int power)
@@ -3342,20 +3302,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return (byte)tempValue;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return (byte)(tempValue / power);
-            }
+            return (byte)(tempValue / power);
         }
 
         public static short PrePowerOf(this short value, int power)
@@ -3404,20 +3354,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return (ushort)tempValue;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return (ushort)(tempValue / power);
-            }
+            return (ushort)(tempValue / power);
         }
 
         public static int PrePowerOf(this int value, int power)
@@ -3466,20 +3406,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             uint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return tempValue;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue / power;
-            }
+            return tempValue / power;
         }
 
         public static long PrePowerOf(this long value, long power)
@@ -3529,20 +3459,10 @@ namespace RuniEngine
             power = power.Clamp(1);
 
             ulong tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
+            while (tempValue < value)
+                tempValue *= power;
 
-                return tempValue;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue / power;
-            }
+            return tempValue / power;
         }
 
         public static float PrePowerOf(this float value, int power)
@@ -3835,7 +3755,7 @@ namespace RuniEngine
         public static float Repeat(this float t, float length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
         public static double Repeat(this double t, double length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
         public static decimal Repeat(this decimal t, decimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
-        public static BigInteger Repeat(this BigInteger t, BigInteger length) => (t - ((BigInteger)((BigDecimal)t / (BigDecimal)length).Floor() * length)).Clamp(0, length);
+        public static BigInteger Repeat(this BigInteger t, BigInteger length) => (t - ((BigInteger)((BigDecimal)t / length).Floor() * length)).Clamp(0, length);
         public static BigDecimal Repeat(this BigDecimal t, BigDecimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
 
         public static nint Repeat(this nint t, nint length) => (t - ((nint)((float)t / length) * length)).Clamp(0, length);

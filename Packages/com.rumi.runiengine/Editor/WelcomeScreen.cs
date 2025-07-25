@@ -58,26 +58,26 @@ namespace RuniEngine.Installer
             GUILayout.FlexibleSpace();
         }
 
-        void DrawAnimatedLabels(float timer)
+        static void DrawAnimatedLabels(float timer)
         {
             Rect rect = EditorGUILayout.GetControlRect(false, 40);
             Color baseColor = GUI.color;
 
-            int interval = 45;
-            int count = 3;
+            const int interval = 45;
+            const int count = 3;
 
             DrawFloatingLabel("en_us", 0);
             DrawFloatingLabel("ko_kr", 1);
             DrawFloatingLabel("ja_jp", 2);
 
             GUI.color = baseColor;
+            return;
 
             void DrawFloatingLabel(string language, int index)
             {
                 float animYOffset = -interval + Mathf.Repeat((timer * 20) + (index * interval), interval * count);
                 Rect animRect = new Rect(new Vector2(rect.x, rect.y + animYOffset), rect.size);
-                float distance = animYOffset;
-                float alpha = distance < 0 ? (1 - (Mathf.Abs(distance) / interval)) * 2 : 1 - (Mathf.Abs(distance) / (interval * 0.5f));
+                float alpha = animYOffset < 0 ? (1 - (Mathf.Abs(animYOffset) / interval)) * 2 : 1 - (Mathf.Abs(animYOffset) / (interval * 0.5f));
                 alpha = Mathf.Clamp01(alpha);
 
                 GUI.color = new Color(baseColor.r, baseColor.g, baseColor.b, alpha);

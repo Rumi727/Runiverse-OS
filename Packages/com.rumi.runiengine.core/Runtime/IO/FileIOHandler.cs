@@ -17,7 +17,7 @@ namespace RuniEngine.IO
         /// 지정된 대상 경로를 사용하여 <see cref="FileIOHandler"/> 클래스의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="targetPath">이 핸들러가 나타내는 파일 또는 디렉토리의 실제 경로입니다.</param>
-        public FileIOHandler(FilePath targetPath) : base() => this.targetPath = targetPath;
+        public FileIOHandler(FilePath targetPath) => this.targetPath = targetPath;
 
         /// <summary>
         /// 부모 핸들러와 자식 경로를 사용하여 <see cref="FileIOHandler"/> 클래스의 새 인스턴스를 초기화합니다.

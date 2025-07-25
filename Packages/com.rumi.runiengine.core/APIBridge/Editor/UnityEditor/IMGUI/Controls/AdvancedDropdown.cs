@@ -22,12 +22,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.IMGUI.Controls
             get
             {
                 f_m_State ??= type.GetField("m_State", BindingFlags.NonPublic | BindingFlags.Instance);
-                return (AdvancedDropdownState)f_m_State.GetValue(instance);
+                return (AdvancedDropdownState)f_m_State!.GetValue(instance);
             }
             set
             {
                 f_m_State ??= type.GetField("m_State", BindingFlags.NonPublic | BindingFlags.Instance);
-                f_m_State.SetValue(instance, value);
+                f_m_State!.SetValue(instance, value);
             }
         }
         static FieldInfo? f_m_State;
@@ -37,12 +37,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.IMGUI.Controls
             get
             {
                 f_maximumSize ??= type.GetProperty("maximumSize", BindingFlags.NonPublic | BindingFlags.Instance);
-                return (Vector2)f_maximumSize.GetValue(instance);
+                return (Vector2)f_maximumSize!.GetValue(instance);
             }
             set
             {
                 f_maximumSize ??= type.GetProperty("maximumSize", BindingFlags.NonPublic | BindingFlags.Instance);
-                f_maximumSize.SetValue(instance, value);
+                f_maximumSize!.SetValue(instance, value);
             }
         }
         static PropertyInfo? f_maximumSize;

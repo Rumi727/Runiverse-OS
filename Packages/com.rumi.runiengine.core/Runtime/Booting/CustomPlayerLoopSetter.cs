@@ -29,7 +29,7 @@ namespace RuniEngine.Booting
         [Awaken]
         static void Awaken()
         {
-            Kernel.quitting += () =>
+            Kernel.quitting += static () =>
             {
                 PlayerLoopSystem loopSystems = PlayerLoop.GetDefaultPlayerLoop();
                 PlayerLoopHelper.Initialize(ref loopSystems);

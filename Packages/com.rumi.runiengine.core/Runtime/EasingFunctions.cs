@@ -1,4 +1,6 @@
 #nullable enable
+// ReSharper disable All
+// ReSharper disable InvalidXmlDocComment
 /*
  * Created by C.J. Kimberlin
  * 

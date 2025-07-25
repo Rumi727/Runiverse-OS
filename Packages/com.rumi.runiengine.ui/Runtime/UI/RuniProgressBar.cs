@@ -29,7 +29,7 @@ namespace RuniEngine.UI
             get => _lowValue;
             set
             {
-                if (_lowValue == value)
+                if (_lowValue.Approximately(value))
                     return;
 
                 _lowValue = value;
@@ -47,7 +47,7 @@ namespace RuniEngine.UI
             get => _highValue;
             set
             {
-                if (_highValue == value)
+                if (_highValue.Approximately(value))
                     return;
 
                 _highValue = value;
@@ -65,7 +65,7 @@ namespace RuniEngine.UI
             get => _value;
             set
             {
-                if (_value == value)
+                if (_value.Approximately(value))
                     return;
 
                 if (panel != null)

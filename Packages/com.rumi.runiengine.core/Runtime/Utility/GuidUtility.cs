@@ -31,7 +31,7 @@ namespace RuniEngine
                 return maxGuidToBytes;
 
             for (int i = 0; i < array.Length; i++)
-                tempArray[tempArray.Length - array.Length + i] = array[i];
+                tempArray[(tempArray.Length - array.Length) + i] = array[i];
 
             return tempArray;
         }

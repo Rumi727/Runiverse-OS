@@ -1,5 +1,7 @@
 #nullable enable
+// ReSharper disable InconsistentNaming
 #pragma warning disable IDE1006 // 명명 스타일
+// ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
 {
     /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>

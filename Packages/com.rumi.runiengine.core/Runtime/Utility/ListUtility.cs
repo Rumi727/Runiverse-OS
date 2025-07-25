@@ -42,7 +42,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -59,7 +59,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target) < (y - target) ? x : y);
 
             return 0;
@@ -76,7 +76,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -93,7 +93,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target) < (y - target) ? x : y);
 
             return 0;
@@ -110,7 +110,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -127,7 +127,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target) < (y - target) ? x : y);
 
             return 0;
@@ -144,7 +144,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -161,7 +161,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target) < (y - target) ? x : y);
 
             return 0;
@@ -178,7 +178,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -195,7 +195,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -212,7 +212,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -229,7 +229,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -246,7 +246,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -263,7 +263,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
 
             return 0;
@@ -280,7 +280,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
                 return list.Aggregate((x, y) => (x - target) < (y - target) ? x : y);
 
             return 0;
@@ -300,7 +300,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -330,7 +330,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -360,7 +360,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -390,7 +390,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -420,7 +420,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -450,7 +450,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -480,7 +480,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -510,7 +510,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -540,7 +540,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -570,7 +570,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -600,7 +600,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -630,7 +630,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -660,7 +660,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -690,7 +690,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -720,7 +720,7 @@ namespace RuniEngine
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
                 enumerator.MoveNext();
@@ -746,13 +746,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static sbyte CloseValue<T>(this IEnumerable<T> list, sbyte target, Func<T, sbyte> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -792,13 +793,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static byte CloseValue<T>(this IEnumerable<T> list, byte target, Func<T, byte> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -838,13 +840,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static short CloseValue<T>(this IEnumerable<T> list, short target, Func<T, short> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -884,13 +887,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static ushort CloseValue<T>(this IEnumerable<T> list, ushort target, Func<T, ushort> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -930,13 +934,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static int CloseValue<T>(this IEnumerable<T> list, int target, Func<T, int> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -976,13 +981,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static uint CloseValue<T>(this IEnumerable<T> list, uint target, Func<T, uint> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1022,13 +1028,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static long CloseValue<T>(this IEnumerable<T> list, long target, Func<T, long> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1068,13 +1075,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static ulong CloseValue<T>(this IEnumerable<T> list, ulong target, Func<T, ulong> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1114,13 +1122,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static float CloseValue<T>(this IEnumerable<T> list, float target, Func<T, float> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1160,13 +1169,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static double CloseValue<T>(this IEnumerable<T> list, double target, Func<T, double> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1206,13 +1216,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static decimal CloseValue<T>(this IEnumerable<T> list, decimal target, Func<T, decimal> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1252,13 +1263,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static BigInteger CloseValue<T>(this IEnumerable<T> list, BigInteger target, Func<T, BigInteger> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1298,13 +1310,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static BigDecimal CloseValue<T>(this IEnumerable<T> list, BigDecimal target, Func<T, BigDecimal> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1344,13 +1357,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static nint CloseValue<T>(this IEnumerable<T> list, nint target, Func<T, nint> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -1390,13 +1404,14 @@ namespace RuniEngine
         /// <param name="list">리스트</param>
         /// <param name="target">기준</param>
         /// <param name="getNumberFunc">리스트에서 숫자를 가져올 함수</param>
+        /// <param name="predicate">조건</param>
         /// <returns></returns>
         public static nuint CloseValue<T>(this IEnumerable<T> list, nuint target, Func<T, nuint> getNumberFunc, Predicate<T> predicate)
         {
             if (list == null)
                 throw new ArgumentNullException(nameof(list));
 
-            if (list.Count() > 0)
+            if (list.Any())
             {
                 using IEnumerator<T> enumerator = list.GetEnumerator();
 
@@ -2137,11 +2152,11 @@ namespace RuniEngine
 
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> source, Func<T, string> selector)
         {
-            int max = source.SelectMany(i => Regex.Matches(selector(i), @"\d+").Cast<Match>().Select(m => (int?)m.Value.Length)).Max() ?? 0;
+            int max = source.SelectMany(i => Regex.Matches(selector(i), @"\d+").Select(static m => (int?)m.Value.Length)).Max() ?? 0;
             return source.OrderBy(i => Regex.Replace(selector(i), @"\d+", m => m.Value.PadLeft(max, '0')));
         }
 
-        public static void RenameKey(this IDictionary dic, object fromKey, object? toKey)
+        public static void RenameKey(this IDictionary dic, object fromKey, object toKey)
         {
             object value = dic[fromKey];
 
@@ -2168,7 +2183,7 @@ namespace RuniEngine
         public static T[] Add<T>(this T[] array, T item)
         {
             Array.Resize(ref array, array.Length + 1);
-            array[array.Length - 1] = item;
+            array[^1] = item;
 
             return array;
         }
@@ -2216,7 +2231,7 @@ namespace RuniEngine
         {
             if (array.Length != newSize)
             {
-                Array newArray = Array.CreateInstance(array.GetType().GetElementType(), newSize);
+                Array newArray = Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), newSize);
                 Array.Copy(array, 0, newArray, 0, (array.Length > newSize) ? newSize : array.Length);
 
                 return newArray;
@@ -2227,7 +2242,7 @@ namespace RuniEngine
 
         public static Array Copy(this Array array)
         {
-            Array result = Array.CreateInstance(array.GetType().GetElementType(), array.Length);
+            Array result = Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), array.Length);
             Array.Copy(array, result, array.Length);
 
             return result;

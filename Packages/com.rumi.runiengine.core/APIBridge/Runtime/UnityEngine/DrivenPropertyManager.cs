@@ -27,7 +27,7 @@ namespace RuniEngine.APIBridge.UnityEngine
             mp_RegisterProperty[1] = target;
             mp_RegisterProperty[2] = propertyPath;
 
-            m_RegisterProperty.Invoke(null, mp_RegisterProperty);
+            m_RegisterProperty!.Invoke(null, mp_RegisterProperty);
         }
 
         static MethodInfo? m_UnregisterProperty;
@@ -42,7 +42,7 @@ namespace RuniEngine.APIBridge.UnityEngine
             mp_UnregisterProperty[1] = target;
             mp_UnregisterProperty[2] = propertyPath;
 
-            m_UnregisterProperty.Invoke(null, mp_UnregisterProperty);
+            m_UnregisterProperty!.Invoke(null, mp_UnregisterProperty);
         }
     }
 }

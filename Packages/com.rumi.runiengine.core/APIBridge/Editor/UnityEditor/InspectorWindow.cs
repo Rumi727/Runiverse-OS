@@ -20,7 +20,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
         public static void RepaintAllInspectors()
         {
             m_RepaintAllInspectors ??= type.GetMethod("RepaintAllInspectors", BindingFlags.NonPublic | BindingFlags.Static);
-            m_RepaintAllInspectors.Invoke(null, null);
+            m_RepaintAllInspectors!.Invoke(null, null);
         }
 
 

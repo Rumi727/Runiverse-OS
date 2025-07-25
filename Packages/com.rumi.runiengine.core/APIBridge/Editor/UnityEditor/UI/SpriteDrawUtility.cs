@@ -22,7 +22,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.UI
             mp_DrawSprite[1] = drawArea;
             mp_DrawSprite[2] = color;
 
-            m_DrawSprite.Invoke(null, mp_DrawSprite);
+            m_DrawSprite!.Invoke(null, mp_DrawSprite);
         }
 
         static MethodInfo? m2_DrawSprite;
@@ -38,7 +38,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.UI
             m2p_DrawSprite[3] = uv;
             m2p_DrawSprite[4] = color;
 
-            m2_DrawSprite.Invoke(null, m2p_DrawSprite);
+            m2_DrawSprite!.Invoke(null, m2p_DrawSprite);
         }
 
         static MethodInfo? m3_DrawSprite;
@@ -57,7 +57,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.UI
             m3p_DrawSprite[6] = color;
             m3p_DrawSprite[7] = mat;
 
-            m3_DrawSprite.Invoke(null, m3p_DrawSprite);
+            m3_DrawSprite!.Invoke(null, m3p_DrawSprite);
         }
     }
 }

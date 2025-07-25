@@ -28,6 +28,7 @@ namespace RuniEngine
         [MemberNotNullWhen(true, nameof(Value))]
         public readonly bool HasValue => hasValue;
 
+        // ReSharper disable once RedundantNullableFlowAttribute
         [MaybeNull]
         public readonly T Value
         {

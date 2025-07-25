@@ -18,7 +18,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             m_HasAudioCallback ??= type.GetMethod("HasAudioCallback", BindingFlags.Public | BindingFlags.Static);
 
             mp_HasAudioCallback[0] = monoBehaviour;
-            return (bool)m_HasAudioCallback.Invoke(null, mp_HasAudioCallback);
+            return (bool)m_HasAudioCallback!.Invoke(null, mp_HasAudioCallback);
         }
 
         static MethodInfo? m_GetCustomFilterChannelCount;
@@ -28,7 +28,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             m_GetCustomFilterChannelCount ??= type.GetMethod("GetCustomFilterChannelCount", BindingFlags.Public | BindingFlags.Static);
 
             mp_GetCustomFilterChannelCount[0] = monoBehaviour;
-            return (int)m_GetCustomFilterChannelCount.Invoke(null, mp_GetCustomFilterChannelCount);
+            return (int)m_GetCustomFilterChannelCount!.Invoke(null, mp_GetCustomFilterChannelCount);
         }
     }
 }

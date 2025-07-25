@@ -21,13 +21,13 @@ namespace RuniEngine
         public const long timeSpanTicksPerWeek = TimeSpan.TicksPerDay * dayPerWeek;
 
         public static int GetYears(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / timeSpanTicksPerYear);
-        public static double GetTotalYears(this TimeSpan timeSpan) => timeSpan.Ticks / timeSpanTicksPerYear;
+        public static double GetTotalYears(this TimeSpan timeSpan) => timeSpan.Ticks / (double)timeSpanTicksPerYear;
 
         public static int GetMonths(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / timeSpanTicksPerMonth);
-        public static double GetTotalMonths(this TimeSpan timeSpan) => timeSpan.Ticks / timeSpanTicksPerMonth;
+        public static double GetTotalMonths(this TimeSpan timeSpan) => timeSpan.Ticks / (double)timeSpanTicksPerMonth;
 
         public static int GetWeeks(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / timeSpanTicksPerWeek);
-        public static double GetTotalWeeks(this TimeSpan timeSpan) => timeSpan.Ticks / timeSpanTicksPerWeek;
+        public static double GetTotalWeeks(this TimeSpan timeSpan) => timeSpan.Ticks / (double)timeSpanTicksPerWeek;
 
 
 
@@ -35,14 +35,11 @@ namespace RuniEngine
         /// <summary>
         /// (second = 70) = "1:10"
         /// </summary>
-        /// <returns></returns>
-        public static string ToTimeString(this int second, AlwayShowTimeUnit alwayShowTimeUnit = AlwayShowTimeUnit.minute, int decimalPlaces = 2) => ToTimeString(second, alwayShowTimeUnit, decimalPlaces);
+        public static string ToTimeString(this int second, AlwayShowTimeUnit alwayShowTimeUnit = AlwayShowTimeUnit.minute, int decimalPlaces = 2) => ToTimeString((float)second, alwayShowTimeUnit, decimalPlaces);
 
         /// <summary>
         /// (second = 70.1f) = "1:10.1"
         /// </summary>
-        /// <param name="second">초</param>
-        /// <returns></returns>
         public static string ToTimeString(this float second, AlwayShowTimeUnit alwayShowTimeUnit = AlwayShowTimeUnit.minute, int decimalPlaces = 2)
         {
             if (!float.IsNormal(second))
@@ -55,9 +52,6 @@ namespace RuniEngine
         /// <summary>
         /// (second = 70.1) = "1:10.1"
         /// </summary>
-        /// <param name="second">초</param>
-        /// <returns></returns>
-
         public static string ToTimeString(this double second, AlwayShowTimeUnit alwayShowTimeUnit = AlwayShowTimeUnit.minute, string decimalFormat = "00")
         {
             if (!double.IsFinite(second))

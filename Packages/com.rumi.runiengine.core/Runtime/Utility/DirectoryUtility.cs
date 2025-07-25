@@ -1,5 +1,6 @@
 #nullable enable
 using RuniEngine.IO;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -44,16 +45,8 @@ namespace RuniEngine
             if (extensionFilter.patterns.Count == 1)
                 return Directory.EnumerateFiles(path, "*" + extensionFilter.patterns[0], searchOption);
 
-            return Directory.EnumerateFiles(path, "*", searchOption).Where(x =>
-            {
-                for (int i = 0; i < extensionFilter.patterns.Count; i++)
-                {
-                    if (x.EndsWith(extensionFilter.patterns[i]))
-                        return true;
-                }
-
-                return false;
-            });
+            return Directory.EnumerateFiles(path, "*", searchOption)
+                .Where(x => extensionFilter.patterns.Any(t => x.EndsWith(t, StringComparison.Ordinal)));
         }
     }
 }

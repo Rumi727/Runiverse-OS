@@ -9,7 +9,7 @@ namespace RuniEngine.Editor.Localizations
     {
         public static string currentLanguage => EditorLanguageConfigAsset.currentLanguage;
 
-        public static Dictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets = new();
+        public static readonly Dictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets = new();
 
         public static void RegisterLanguage(params EditorLanguageDataAsset?[] dataAssets)
         {
@@ -19,10 +19,7 @@ namespace RuniEngine.Editor.Localizations
                 if (dataAsset == null)
                     continue;
 
-                List<EditorLanguageDataAsset> dataList;
-                if (registeredDataAssets.ContainsKey(dataAsset.languageKey))
-                    dataList = registeredDataAssets[dataAsset.languageKey];
-                else
+                if (!registeredDataAssets.TryGetValue(dataAsset.languageKey, out List<EditorLanguageDataAsset> dataList))
                     registeredDataAssets.Add(dataAsset.languageKey, dataList = new List<EditorLanguageDataAsset>());
 
                 if (!dataList.Contains(dataAsset))
@@ -42,7 +39,7 @@ namespace RuniEngine.Editor.Localizations
             }
 
             if (registeredDataAssets.TryGetValue(languageKey, out var datas))
-                return datas.Select(x => x._languages);
+                return datas.Select(static x => x._languages);
 
             return Enumerable.Empty<Dictionary<string, string>>();
         }

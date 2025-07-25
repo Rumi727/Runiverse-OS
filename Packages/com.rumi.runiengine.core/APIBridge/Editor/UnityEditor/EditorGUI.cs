@@ -18,7 +18,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             get
             {
                 f_s_FoldoutHash ??= type.GetField("s_FoldoutHash", BindingFlags.NonPublic | BindingFlags.Static);
-                return (int)f_s_FoldoutHash.GetValue(null);
+                return (int)f_s_FoldoutHash!.GetValue(null);
             }
         }
         static FieldInfo? f_s_FoldoutHash;
@@ -33,7 +33,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             m_HasKeyboardFocus ??= type.GetMethod("HasKeyboardFocus", BindingFlags.NonPublic | BindingFlags.Static, null, mpt_HasKeyboardFocus, null);
             mp_HasKeyboardFocus[0] = id;
 
-            return (bool)m_HasKeyboardFocus.Invoke(null, mp_HasKeyboardFocus);
+            return (bool)m_HasKeyboardFocus!.Invoke(null, mp_HasKeyboardFocus);
         }
 
         static MethodInfo? m_MultiFieldPrefixLabel;
@@ -48,7 +48,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             mp_MultiFieldPrefixLabel[2] = label;
             mp_MultiFieldPrefixLabel[3] = columns;
 
-            return (Rect)m_MultiFieldPrefixLabel.Invoke(null, mp_MultiFieldPrefixLabel);
+            return (Rect)m_MultiFieldPrefixLabel!.Invoke(null, mp_MultiFieldPrefixLabel);
         }
 
 
@@ -84,12 +84,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
                     get
                     {
                         f_lastValue ??= type.GetField("lastValue", BindingFlags.Public | BindingFlags.Instance);
-                        return (float)f_lastValue.GetValue(instance);
+                        return (float)f_lastValue!.GetValue(instance);
                     }
                     set
                     {
                         f_lastValue ??= type.GetField("lastValue", BindingFlags.Public | BindingFlags.Instance);
-                        f_lastValue.SetValue(instance, value);
+                        f_lastValue!.SetValue(instance, value);
                     }
                 }
                 FieldInfo? f_lastValue;
@@ -99,12 +99,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
                     get
                     {
                         f_peakValue ??= type.GetField("peakValue", BindingFlags.Public | BindingFlags.Instance);
-                        return (float)f_peakValue.GetValue(instance);
+                        return (float)f_peakValue!.GetValue(instance);
                     }
                     set
                     {
                         f_peakValue ??= type.GetField("peakValue", BindingFlags.Public | BindingFlags.Instance);
-                        f_peakValue.SetValue(instance, value);
+                        f_peakValue!.SetValue(instance, value);
                     }
                 }
                 FieldInfo? f_peakValue;
@@ -114,12 +114,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
                     get
                     {
                         f_peakValueTime ??= type.GetField("peakValueTime", BindingFlags.Public | BindingFlags.Instance);
-                        return (float)f_peakValueTime.GetValue(instance);
+                        return (float)f_peakValueTime!.GetValue(instance);
                     }
                     set
                     {
                         f_peakValueTime ??= type.GetField("peakValueTime", BindingFlags.Public | BindingFlags.Instance);
-                        f_peakValueTime.SetValue(instance, value);
+                        f_peakValueTime!.SetValue(instance, value);
                     }
                 }
                 FieldInfo? f_peakValueTime;

@@ -25,7 +25,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditorInternal
             m_GetPropertyIdentifier ??= type.GetMethod("GetPropertyIdentifier", BindingFlags.Public | BindingFlags.Static);
 
             mp_GetPropertyIdentifier[0] = serializedProperty;
-            return (string)m_GetPropertyIdentifier.Invoke(null, mp_GetPropertyIdentifier);
+            return (string)m_GetPropertyIdentifier!.Invoke(null, mp_GetPropertyIdentifier);
         }
 
 

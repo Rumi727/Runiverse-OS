@@ -25,7 +25,7 @@ namespace RuniEngine.APIBridge.UnityEngine.UIElements
             m_IncrementVersion ??= type.GetMethod("IncrementVersion", BindingFlags.NonPublic | BindingFlags.Instance, null, mpt_IncrementVersion, null);
 
             mp_IncrementVersion[0] = changeType;
-            m_IncrementVersion.Invoke(instance, mp_IncrementVersion);
+            m_IncrementVersion!.Invoke(instance, mp_IncrementVersion);
         }
     }
 }

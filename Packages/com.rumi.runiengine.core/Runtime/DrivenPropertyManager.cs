@@ -51,12 +51,12 @@ namespace RuniEngine
             _drivenProperties.Remove(new DrivenPropertyData(driver, target, propertyPath));
         }
 
-        public struct DrivenPropertyData : IEquatable<DrivenPropertyData>
+        public readonly struct DrivenPropertyData : IEquatable<DrivenPropertyData>
         {
-            public Object driver;
-            public Object target;
+            public readonly Object driver;
+            public readonly Object target;
 
-            public string propertyPath;
+            public readonly string propertyPath;
 
             public DrivenPropertyData(Object driver, Object target, string propertyPath)
             {
@@ -66,10 +66,10 @@ namespace RuniEngine
                 this.propertyPath = propertyPath;
             }
 
-            public readonly bool Equals(DrivenPropertyData other) => driver == other.driver && target == other.target && propertyPath == other.propertyPath;
+            public bool Equals(DrivenPropertyData other) => driver == other.driver && target == other.target && propertyPath == other.propertyPath;
 
-            public override readonly bool Equals(object? obj) => obj is DrivenPropertyData data && Equals(data);
-            public override readonly int GetHashCode() => HashCode.Combine(driver, target, propertyPath);
+            public override bool Equals(object? obj) => obj is DrivenPropertyData data && Equals(data);
+            public override int GetHashCode() => HashCode.Combine(driver, target, propertyPath);
 
             public static bool operator ==(DrivenPropertyData left, DrivenPropertyData right) => left.Equals(right);
             public static bool operator !=(DrivenPropertyData left, DrivenPropertyData right) => !(left == right);

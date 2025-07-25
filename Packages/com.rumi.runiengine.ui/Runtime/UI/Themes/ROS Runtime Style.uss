@@ -77,10 +77,7 @@
     border-right-color: var(--border-color);
     border-bottom-color: var(--border-color);
     border-top-color: var(--border-color);
-    border-top-left-radius: 5px;
-    border-top-right-radius: 5px;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-radius: 5px;
     padding-top: 3px;
     padding-bottom: 3px;
     min-height: 10px;
@@ -100,10 +97,7 @@
     border-right-width: 1px;
     border-bottom-width: 1px;
     border-left-width: 1px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 5px;
-    border-bottom-left-radius: 5px;
+    border-radius: 0 0 5px 5px;
 }
 
 .unity-list-view__footer > .unity-button {
@@ -124,14 +118,8 @@
 }
 
 .unity-label {
-    padding-top: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-    padding-left: 0;
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    padding: 0;
+    margin: 0;
     align-self: flex-start;
     overflow: hidden;
 }
@@ -141,19 +129,10 @@
 }
 
 .unity-button {
-    padding-top: 1px;
-    padding-bottom: 1px;
-    padding-left: 6px;
-    padding-right: 6px;
-    margin-right: 5px;
-    margin-left: 5px;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    border-top-left-radius: 20px;
+    padding: 1px 6px;
+    margin: 10px 5px;
     height: 40px;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
-    border-bottom-left-radius: 20px;
+    border-radius: 20px;
     background-color: var(--system-color);
     border-top-color: var(--system-color);
     border-right-color: var(--system-color);
@@ -249,10 +228,7 @@
 }
 
 .unity-button-group__button--mid {
-    border-top-left-radius: 3px;
-    border-top-right-radius: 3px;
-    border-bottom-right-radius: 3px;
-    border-bottom-left-radius: 3px;
+    border-radius: 3px;
     margin-right: 2px;
     margin-left: 2px;
 }
@@ -265,24 +241,15 @@
 
 .unity-base-field {
     white-space: nowrap;
-    margin-top: 3px;
-    margin-right: 0;
-    margin-bottom: 3px;
-    margin-left: 0;
+    margin: 3px 0;
     padding-left: 0;
     flex-wrap: nowrap;
 }
 
 .unity-base-field__label {
     white-space: nowrap;
-    margin-top: 0;
-    margin-right: 2px;
-    margin-bottom: 0;
-    margin-left: 0;
-    padding-top: 1px;
-    padding-right: 0;
-    padding-bottom: 0;
-    padding-left: 0;
+    margin: 0 2px 0 0;
+    padding: 1px 0 0;
     min-width: var(--label-width);
     max-width: var(--label-width);
     text-overflow: ellipsis;
@@ -293,14 +260,8 @@
 }
 
 .unity-base-field__input {
-    padding-top: 0;
-    padding-bottom: 0;
-    padding-right: 2px;
-    padding-left: 0;
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    padding: 0 2px 0 0;
+    margin: 0;
     flex-basis: 0;
 }
 
@@ -330,10 +291,7 @@
     border-bottom-width: 3px;
     border-left-width: 3px;
     background-color: rgba(0, 0, 0, 0);
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-radius: 9px;
     transition-property: background-color, scale, border-color;
     transition-duration: var(--transition-duration), 1s, var(--transition-duration);
     transition-timing-function: ease, ease-out-elastic, ease;
@@ -443,26 +401,18 @@
 .unity-foldout__toggle > .unity-toggle__input > .unity-toggle__checkmark {
     width: 13px;
     height: 13px;
-    margin-top: 0;
-    margin-right: 3px;
-    margin-bottom: 0;
-    margin-left: 0;
+    margin: 0 3px 0 0;
     background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-size: 200% 200%;
     -unity-background-image-tint-color: var(--scroll-color);
     transition-property: opacity, scale, rotate;
-    transition-duration: var(--transition-duration);
-    transition-timing-function: ease-out-back;
     transition-duration: var(--transition-duration), 1s, var(--transition-duration);
     transition-timing-function: ease, ease-out-elastic, ease;
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
+    border-radius: 0;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -531,10 +481,7 @@
 }
 
 .unity-foldout__toggle .unity-text-element {
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    margin: 0;
     padding-top: 1px;
 }
 
@@ -552,10 +499,7 @@
     background-color: var(--background-depth-color);
     position: relative;
     align-self: stretch;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-radius: 4px;
     transition-property: padding-left, padding-right, padding-top, padding-bottom;
     transition-duration: var(--transition-duration), var(--transition-duration), var(--transition-duration), var(--transition-duration);
     transition-timing-function: ease-out-circ, ease-out-circ, ease-out-circ, ease-out-circ;
@@ -566,10 +510,7 @@
 }
 
 .unity-base-slider .unity-base-slider__fill {
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-radius: 4px;
     background-color: var(--system-color);
     transition-property: background-color;
     transition-duration: var(--transition-duration);
@@ -587,19 +528,13 @@
 }
 
 .unity-base-slider .unity-base-slider__dragger {
-    margin-top: 0;
     left: auto;
     right: auto;
     top: auto;
     bottom: auto;
     position: absolute;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-    border-bottom-right-radius: 8px;
-    border-bottom-left-radius: 8px;
+    margin: 0;
+    border-radius: 8px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -649,10 +584,7 @@
 }
 
 .unity-base-slider--horizontal .unity-base-slider__tracker {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 0;
-    margin-right: 0;
+    margin: 0;
     top: auto;
     height: 8px;
     bottom: auto;
@@ -698,10 +630,7 @@
 }
 
 .unity-base-slider--vertical .unity-base-slider__tracker {
-    margin-top: 0;
-    margin-bottom: 0;
-    margin-left: 0;
-    margin-right: 0;
+    margin: 0;
     top: auto;
     width: 8px;
     bottom: auto;
@@ -929,22 +858,16 @@
 }
 
 .unity-base-text-field__input {
-    padding-top: 1px;
-    padding-left: 0;
     flex-basis: auto;
     align-self: flex-start;
     min-width: var(--input-width);
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
-    padding-bottom: 1px;
+    border-radius: 9px;
     background-color: var(--field-color);
     border-left-color: var(--field-color);
     border-right-color: var(--field-color);
     border-top-color: var(--field-color);
     border-bottom-color: var(--field-color);
-    padding-right: 0;
+    padding: 1px 0;
     height: var(--text-field-height);
     transition-property: border-color;
     transition-duration: var(--transition-duration);
@@ -999,10 +922,7 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-radius: 4px;
     background-color: var(--background-depth-color);
     position: absolute;
     top: auto;
@@ -1020,10 +940,7 @@
 
 .unity-min-max-slider__dragger {
     background-color: var(--system-color);
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
+    border-radius: 0;
     height: 16px;
     position: absolute;
     top: auto;
@@ -1034,10 +951,7 @@
     align-items: center;
     border-top-width: 0;
     border-bottom-width: 0;
-    margin-left: 2px;
-    margin-right: 2px;
-    margin-bottom: 0;
-    margin-top: 0;
+    margin: 0 2px;
     border-left-width: 0;
     border-right-width: 0;
     min-width: 0;
@@ -1074,8 +988,6 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    border-top-left-radius: 8px;
-    border-bottom-left-radius: 8px;
     background-color: var(--system-color);
     position: absolute;
     border-left-color: rgba(0, 0, 0, 0);
@@ -1083,12 +995,8 @@
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
     min-width: auto;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    border-radius: 8px 0 0 8px;
+    margin: 0;
     transition-property: background-color;
     transition-duration: var(--transition-duration);
 }
@@ -1113,10 +1021,7 @@
     left: auto;
     right: auto;
     bottom: auto;
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    margin: 0;
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
@@ -1148,10 +1053,7 @@
 
 .unity-progress-bar {
     height: 8px;
-    margin-top: 3px;
-    margin-right: 0;
-    margin-bottom: 3px;
-    margin-left: 0;
+    margin: 3px 0;
 }
 
 .unity-progress-bar__container {
@@ -1169,30 +1071,18 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-left-radius: 4px;
+    border-radius: 4px;
     background-color: var(--background-color);
 }
 
 .unity-progress-bar__progress {
-    border-top-left-radius: 2px;
-    border-top-right-radius: 2px;
-    border-bottom-right-radius: 2px;
-    border-bottom-left-radius: 2px;
+    border-radius: 2px;
     background-color: var(--background-depth-color);
-    margin-top: 2px;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    margin-left: 2px;
+    margin: 2px;
 }
 
 .unity-progress-bar__title {
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border-bottom-right-radius: 6px;
-    border-bottom-left-radius: 6px;
+    border-radius: 6px;
     align-self: stretch;
     flex-grow: 1;
 }
@@ -1206,24 +1096,15 @@
 }
 
 .unity-base-popup-field__label {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 3px;
+    margin: 0;
+    padding: 0 0 3px;
     max-width: none;
     min-width: auto;
     width: 100%;
 }
 
 .unity-base-popup-field__input {
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-radius: 9px;
     border-top-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
@@ -1282,10 +1163,7 @@
 }
 
 .unity-base-popup-field__text {
-    margin-top: 5px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    margin-left: 5px;
+    margin: 5px;
 }
 
 .unity-enum-field {
@@ -1297,24 +1175,15 @@
 }
 
 .unity-enum-field__label {
-    margin-left: 0;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
-    padding-left: 0;
-    padding-right: 0;
-    padding-top: 0;
-    padding-bottom: 3px;
+    margin: 0;
+    padding: 0 0 3px;
     max-width: none;
     min-width: auto;
     width: 100%;
 }
 
 .unity-enum-field__input {
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-radius: 9px;
     border-top-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
@@ -1373,10 +1242,7 @@
 }
 
 .unity-enum-field__text {
-    margin-top: 5px;
-    margin-right: 5px;
-    margin-bottom: 5px;
-    margin-left: 5px;
+    margin: 5px;
 }
 
 .unity-base-dropdown__container-outer {
@@ -1387,27 +1253,18 @@
 }
 
 .unity-base-dropdown__container-inner {
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-radius: 9px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
     background-color: var(--field-color);
-    padding-top: 3px;
-    padding-right: 4px;
-    padding-bottom: 3px;
-    padding-left: 4px;
+    padding: 3px 4px;
 }
 
 .unity-base-dropdown__item {
     height: 18px;
-    border-top-left-radius: 9px;
-    border-top-right-radius: 9px;
-    border-bottom-right-radius: 9px;
-    border-bottom-left-radius: 9px;
+    border-radius: 9px;
     background-color: var(--field-color);
     margin-top: 1px;
     margin-bottom: 1px;
@@ -1421,10 +1278,7 @@
 }
 
 .unity-base-dropdown__checkmark {
-    margin-left: 3px;
-    margin-right: 5px;
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0 5px 0 3px;
     width: 16px;
     height: 16px;
 }
@@ -1453,10 +1307,7 @@
 .unity-radio-button__checkmark-background {
     width: 12px;
     height: 12px;
-    padding-top: 0;
-    padding-right: 0;
-    padding-bottom: 0;
-    padding-left: 0;
+    padding: 0;
     justify-content: center;
     margin-right: 2px;
     align-content: flex-start;
@@ -1531,10 +1382,7 @@
 
 .unity-composite-field__field {
     flex-grow: 1;
-    margin-top: 0;
-    margin-right: 4px;
-    margin-bottom: 0;
-    margin-left: 0;
+    margin: 0 4px 0 0;
     min-width: 0;
     flex-basis: 0;
     flex-wrap: nowrap;
@@ -1605,28 +1453,16 @@
 }
 
 .runios-progress-bar__viewport {
-    margin-top: 2px;
-    margin-right: 2px;
-    margin-bottom: 2px;
-    margin-left: 2px;
+    margin: 2px;
 }
 
 .runios-progress-bar__progress {
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: 0;
+    margin: 0;
     min-width: 4px;
 }
 
 .runios-type-field__button {
-    margin-left: 5px;
-    margin-right: 0;
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0 0 0 5px;
     height: 20px;
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    border-bottom-left-radius: 10px;
+    border-radius: 10px;
 }

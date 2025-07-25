@@ -22,7 +22,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             get
             {
                 f_isValid ??= type.GetProperty("isValid", BindingFlags.NonPublic | BindingFlags.Instance);
-                return (bool)f_isValid.GetValue(instance);
+                return (bool)f_isValid!.GetValue(instance);
             }
         }
         static PropertyInfo? f_isValid;

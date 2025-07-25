@@ -11,7 +11,7 @@ namespace RuniEngine
             this.force = force;
         }
 
-        public string name { get; } = "";
+        public string name { get; } = string.Empty;
         public bool force { get; } = false;
     }
 }

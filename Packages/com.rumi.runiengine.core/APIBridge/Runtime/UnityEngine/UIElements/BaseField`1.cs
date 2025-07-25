@@ -37,14 +37,15 @@ namespace RuniEngine.APIBridge.UnityEngine.UIElements
             get
             {
                 f_visualInput ??= type.GetProperty("visualInput", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                return (global::UnityEngine.UIElements.VisualElement)f_visualInput.GetValue(instance);
+                return (global::UnityEngine.UIElements.VisualElement)f_visualInput!.GetValue(instance);
             }
             set
             {
                 f_visualInput ??= type.GetProperty("visualInput", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                f_visualInput.SetValue(instance, value);
+                f_visualInput!.SetValue(instance, value);
             }
         }
+        // ReSharper disable once StaticMemberInGenericType
         static PropertyInfo? f_visualInput;
 
         public Action editingStarted

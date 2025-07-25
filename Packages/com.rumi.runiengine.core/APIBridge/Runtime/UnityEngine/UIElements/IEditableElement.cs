@@ -30,12 +30,12 @@ namespace RuniEngine.APIBridge.UnityEngine.UIElements
                 get
                 {
                     f_editingStarted ??= type.GetProperty("editingStarted", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    return (Action)f_editingStarted.GetValue(instance);
+                    return (Action)f_editingStarted!.GetValue(instance);
                 }
                 set
                 {
                     f_editingStarted ??= type.GetProperty("editingStarted", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    f_editingStarted.SetValue(instance, value);
+                    f_editingStarted!.SetValue(instance, value);
                 }
             }
             static PropertyInfo? f_editingStarted;
@@ -45,12 +45,12 @@ namespace RuniEngine.APIBridge.UnityEngine.UIElements
                 get
                 {
                     f_editingEnded ??= type.GetProperty("editingEnded", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    return (Action)f_editingEnded.GetValue(instance);
+                    return (Action)f_editingEnded!.GetValue(instance);
                 }
                 set
                 {
                     f_editingEnded ??= type.GetProperty("editingEnded", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                    f_editingEnded.SetValue(instance, value);
+                    f_editingEnded!.SetValue(instance, value);
                 }
             }
             static PropertyInfo? f_editingEnded;

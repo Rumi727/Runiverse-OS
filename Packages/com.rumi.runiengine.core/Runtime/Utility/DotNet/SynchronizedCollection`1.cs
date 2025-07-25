@@ -1,5 +1,7 @@
 #nullable enable
-//Source: https://referencesource.microsoft.com/#System.ServiceModel/System/ServiceModel/SynchronizedCollection.cs
+// Source: https://referencesource.microsoft.com/#System.ServiceModel/System/ServiceModel/SynchronizedCollection.cs
+// ReSharper disable InconsistentNaming
+// ReSharper disable once CheckNamespace
 namespace System.Collections.Generic
 {
     [Runtime.InteropServices.ComVisible(false)]
@@ -13,7 +15,7 @@ namespace System.Collections.Generic
         public SynchronizedCollection(IEnumerable<T> list)
         {
             if (list == null)
-                throw new ArgumentNullException("list");
+                throw new ArgumentNullException(nameof(list));
 
             internalList = new List<T>(list);
         }
@@ -21,7 +23,7 @@ namespace System.Collections.Generic
         public SynchronizedCollection(params T[] list)
         {
             if (list == null)
-                throw new ArgumentNullException("list");
+                throw new ArgumentNullException(nameof(list));
 
             internalList = new List<T>(list);
         }
@@ -171,7 +173,7 @@ namespace System.Collections.Generic
 
         object ICollection.SyncRoot => internalSync;
 
-        void ICollection.CopyTo(Array? array, int index)
+        void ICollection.CopyTo(Array array, int index)
         {
             lock (internalSync)
             {

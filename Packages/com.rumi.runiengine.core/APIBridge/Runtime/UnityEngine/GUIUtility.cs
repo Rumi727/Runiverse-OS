@@ -17,12 +17,12 @@ namespace RuniEngine.APIBridge.UnityEngine
             get
             {
                 f_s_ControlCount ??= type.GetField("s_ControlCount", BindingFlags.NonPublic | BindingFlags.Static);
-                return (int)f_s_ControlCount.GetValue(null);
+                return (int)f_s_ControlCount!.GetValue(null);
             }
             set
             {
                 f_s_ControlCount ??= type.GetField("s_ControlCount", BindingFlags.NonPublic | BindingFlags.Static);
-                f_s_ControlCount.SetValue(null, value);
+                f_s_ControlCount!.SetValue(null, value);
             }
         }
         static FieldInfo? f_s_ControlCount;

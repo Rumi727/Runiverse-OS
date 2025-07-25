@@ -118,7 +118,7 @@ namespace RuniEngine
                 }
 
                 stringBuilder.Append(item);
-            };
+            }
 
             yield return StringBuilderCache.Release(stringBuilder);
         }

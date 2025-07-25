@@ -20,7 +20,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
         public void RebuildContentsContainers()
         {
             m_RebuildContentsContainers ??= type.GetMethod("RebuildContentsContainers", BindingFlags.NonPublic | BindingFlags.Static);
-            m_RebuildContentsContainers.Invoke(instance, null);
+            m_RebuildContentsContainers!.Invoke(instance, null);
         }
 
 

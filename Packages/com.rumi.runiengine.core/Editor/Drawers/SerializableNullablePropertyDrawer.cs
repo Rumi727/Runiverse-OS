@@ -68,26 +68,41 @@ namespace RuniEngine.Editor.Drawers
                         {
                             char charValue = (char)(ushort)field.boxedValue;
                             string stringValue;
-                            if (charValue == '\n')
-                                stringValue = "\\n";
-                            else if (charValue == '\r')
-                                stringValue = "\\r";
-                            else if (charValue == '\t')
-                                stringValue = "\\t";
-                            else if (charValue == '\v')
-                                stringValue = "\\v";
-                            else if (charValue == '\0')
-                                stringValue = "\\0";
-                            else if (charValue == '\a')
-                                stringValue = "\\a";
-                            else if (charValue == '\b')
-                                stringValue = "\\b";
-                            else if (charValue == '\f')
-                                stringValue = "\\f";
-                            else if (char.IsControl(charValue))
-                                stringValue = $"\\u{(int)charValue:X4}";
-                            else
-                                stringValue = charValue.ToString();
+                            switch (charValue)
+                            {
+                                case '\n':
+                                    stringValue = "\\n";
+                                    break;
+                                case '\r':
+                                    stringValue = "\\r";
+                                    break;
+                                case '\t':
+                                    stringValue = "\\t";
+                                    break;
+                                case '\v':
+                                    stringValue = "\\v";
+                                    break;
+                                case '\0':
+                                    stringValue = "\\0";
+                                    break;
+                                case '\a':
+                                    stringValue = "\\a";
+                                    break;
+                                case '\b':
+                                    stringValue = "\\b";
+                                    break;
+                                case '\f':
+                                    stringValue = "\\f";
+                                    break;
+                                default:
+                                {
+                                    if (char.IsControl(charValue))
+                                        stringValue = $"\\u{(int)charValue:X4}";
+                                    else
+                                        stringValue = charValue.ToString();
+                                    break;
+                                }
+                            }
 
                             GUI.Box(fieldRect, stringValue, EditorStyles.textField);
                         }
@@ -103,32 +118,45 @@ namespace RuniEngine.Editor.Drawers
 
                     object? value = null;
 
-                    if (field.propertyType == SerializedPropertyType.Integer)
+                    // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault
+                    switch (field.propertyType)
                     {
-                        value = EditorGUI.LongField(fieldRect, label, 0);
+                        case SerializedPropertyType.Integer:
+                        {
+                            value = EditorGUI.LongField(fieldRect, label, 0);
 
-                        if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
-                            GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
-                        else
-                            GUI.Box(Rect.zero, GUIContent.none);
-                    }
-                    else if (field.propertyType == SerializedPropertyType.Float)
-                    {
-                        value = EditorGUI.DoubleField(fieldRect, label, 0);
+                            if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+                                GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
+                            else
+                                GUI.Box(Rect.zero, GUIContent.none);
+                            
+                            break;
+                        }
+                        case SerializedPropertyType.Float:
+                        {
+                            value = EditorGUI.DoubleField(fieldRect, label, 0);
 
-                        if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
-                            GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
-                        else
-                            GUI.Box(Rect.zero, GUIContent.none);
+                            if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+                                GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
+                            else
+                                GUI.Box(Rect.zero, GUIContent.none);
+                            
+                            break;
+                        }
+                        case SerializedPropertyType.Character:
+                        {
+                            string stringValue = EditorGUI.TextField(fieldRect, label, nullText);
+                            if (char.TryParse(stringValue, out char result))
+                                value = result;
+                            
+                            break;
+                        }
+                        case SerializedPropertyType.String:
+                        {
+                            value = EditorGUI.TextField(fieldRect, label, nullText);
+                            break;
+                        }
                     }
-                    else if (field.propertyType == SerializedPropertyType.Character)
-                    {
-                        string stringValue = EditorGUI.TextField(fieldRect, label, nullText);
-                        if (char.TryParse(stringValue, out char result))
-                            value = result;
-                    }
-                    else if (field.propertyType == SerializedPropertyType.String)
-                        value = EditorGUI.TextField(fieldRect, label, nullText);
 
                     if (EditorGUI.EndChangeCheck())
                     {

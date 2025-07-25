@@ -1,5 +1,4 @@
 #nullable enable
-using RuniEngine.IO;
 using RuniEngine.Spans;
 using System;
 using System.Collections.Generic;
@@ -7,7 +6,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace RuniEngine
+namespace RuniEngine.IO
 {
     /// <summary>
     /// 가상 파일 시스템 내의 디렉토리를 나타내는 클래스입니다.<br/>
@@ -440,7 +439,7 @@ namespace RuniEngine
             if (directory == null)
                 ThrowDirectoryNotFoundException(path);
 
-            return directory.children.Where(x => x.Value is VirtualDirectory).Select(x => x.Key);
+            return directory.children.Where(static x => x.Value is VirtualDirectory).Select(static x => x.Key);
         }
 
         /// <summary>
@@ -455,7 +454,7 @@ namespace RuniEngine
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
-        public IEnumerable<FilePath> GetAllDirectories(FilePath path) => InternalGetAllDirectories(path, false).Select(x => x.Key);
+        public IEnumerable<FilePath> GetAllDirectories(FilePath path) => InternalGetAllDirectories(path, false).Select(static x => x.Key);
 
         /// <summary>
         /// 재귀적으로 모든 하위 디렉토리를 탐색하여 경로와 <see cref="VirtualDirectory"/> 쌍을 반환합니다.<br/>
@@ -522,7 +521,7 @@ namespace RuniEngine
             if (directory == null)
                 ThrowDirectoryNotFoundException(path);
 
-            return directory.children.Where(x => x.Value is VirtualFile).Select(x => x.Key);
+            return directory.children.Where(static x => x.Value is VirtualFile).Select(static x => x.Key);
         }
 
         /// <summary>
@@ -541,9 +540,9 @@ namespace RuniEngine
             ThrowIfDeletedException();
 
             var directories = InternalGetAllDirectories(path, true);
-            return directories.SelectMany(directoryItem =>
+            return directories.SelectMany(static directoryItem =>
                 directoryItem.Value.children
-                    .Where(x => x.Value is VirtualFile)
+                    .Where(static x => x.Value is VirtualFile)
                     .Select(fileItem => directoryItem.Key + fileItem.Key));
         }
 

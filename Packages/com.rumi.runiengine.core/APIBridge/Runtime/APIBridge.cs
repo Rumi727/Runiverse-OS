@@ -35,12 +35,12 @@ namespace RuniEngine.APIBridge
             get
             {
                 f_fieldName ??= type.GetField("fieldName", BindingFlags.NonPublic | BindingFlags.Instance);
-                return f_fieldName.GetValue(instance);
+                return f_fieldName!.GetValue(instance);
             }
             set
             {
                 f_fieldName ??= type.GetField("fieldName", BindingFlags.NonPublic | BindingFlags.Instance);
-                f_fieldName.SetValue(instance, value);
+                f_fieldName!.SetValue(instance, value);
             }
         }
         static FieldInfo? f_fieldName;
@@ -55,7 +55,7 @@ namespace RuniEngine.APIBridge
             m_MethodName ??= type.GetMethod("MethodName", BindingFlags.NonPublic | BindingFlags.Instance, null, mpt_MethodName, null);
 
             mp_MethodName[0] = p;
-            m_MethodName.Invoke(instance, mp_MethodName);
+            m_MethodName!.Invoke(instance, mp_MethodName);
         }
 
 

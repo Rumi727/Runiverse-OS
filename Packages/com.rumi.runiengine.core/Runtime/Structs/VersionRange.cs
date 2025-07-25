@@ -22,7 +22,7 @@ namespace RuniEngine
             else
             {
                 min = new Version(versions[0]);
-                max = new Version(versions[versions.Length - 1]);
+                max = new Version(versions[^1]);
             }
         }
 
@@ -62,14 +62,14 @@ namespace RuniEngine
         public readonly bool Equals(Version other) => min == other && max == other;
         public readonly bool Equals(VersionRange other) => this == other;
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
-            if (obj is VersionRange range)
-                return Equals(range);
-            else if (obj is Version version)
-                return Equals(version);
-
-            return false;
+            return obj switch
+            {
+                VersionRange range => Equals(range),
+                Version version => Equals(version),
+                _ => false
+            };
         }
 
         public override readonly int GetHashCode() => HashCode.Combine(min, max);

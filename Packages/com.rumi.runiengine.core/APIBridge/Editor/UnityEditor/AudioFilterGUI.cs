@@ -24,7 +24,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             {
                 f_dataOut ??= type.GetField("dataOut", BindingFlags.NonPublic | BindingFlags.Instance);
 
-                Array array = (Array)f_dataOut.GetValue(instance);
+                Array array = (Array)f_dataOut!.GetValue(instance);
                 if (_dataOut == null || _dataOut.Length != array.Length)
                     _dataOut = new EditorGUI.VUMeter.SmoothingData[array.Length];
 
@@ -34,7 +34,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             set
             {
                 f_dataOut ??= type.GetField("dataOut", BindingFlags.Public | BindingFlags.Instance);
-                f_dataOut.SetValue(instance, value);
+                f_dataOut!.SetValue(instance, value);
             }
         }
         static EditorGUI.VUMeter.SmoothingData[]? _dataOut;
@@ -55,11 +55,11 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
              */
             try
             {
-                m_DrawAudioFilterGUI.Invoke(instance, mp_DrawAudioFilterGUI);
+                m_DrawAudioFilterGUI!.Invoke(instance, mp_DrawAudioFilterGUI);
             }
             catch (TargetInvocationException e)
             {
-                if (e.InnerException.GetType() != typeof(NullReferenceException))
+                if (e.InnerException!.GetType() != typeof(NullReferenceException))
                     throw;
             }
         }

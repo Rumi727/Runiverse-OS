@@ -82,12 +82,14 @@ namespace RuniEngine
         /// </exception>
         public static bool IsAssignableToGenericDefinition(this Type givenType, Type genericTypeDefinition, [MaybeNullWhen(false)] out Type resolvedType)
         {
+            // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (givenType == null)
                 throw new ArgumentNullException(nameof(givenType), "The given type cannot be null.");
             else if (genericTypeDefinition == null)
                 throw new ArgumentNullException(nameof(genericTypeDefinition), "The generic type definition cannot be null.");
             else if (!genericTypeDefinition.IsGenericTypeDefinition)
                 throw new ArgumentException("The provided genericTypeDefinition must be a valid generic type definition (e.g., typeof(List<>) or typeof(IDictionary<,>)).", nameof(genericTypeDefinition));
+            // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
             // 인터페이스 확인
             var interfaceTypes = givenType.GetInterfaces();
@@ -108,7 +110,7 @@ namespace RuniEngine
             }
 
             // 기반 클래스 확인 (재귀 호출)
-            Type baseType = givenType.BaseType;
+            Type? baseType = givenType.BaseType;
             if (baseType == null)
             {
                 resolvedType = null;
@@ -177,10 +179,12 @@ namespace RuniEngine
         /// </exception>
         public static bool IsAssignableToAny(this Type givenType, Type targetType, [MaybeNullWhen(false)] out Type resolvedType)
         {
+            // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (givenType == null)
                 throw new ArgumentNullException(nameof(givenType), "The given type cannot be null.");
             else if (targetType == null)
                 throw new ArgumentNullException(nameof(targetType), "The target type cannot be null.");
+            // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
             if (targetType.IsGenericTypeDefinition)
                 return givenType.IsAssignableToGenericDefinition(targetType, out resolvedType);
@@ -194,7 +198,7 @@ namespace RuniEngine
             return false;
         }
 
-        public static IEnumerable<Type> GetHierarchy(this Type type)
+        public static IEnumerable<Type> GetHierarchy(this Type? type)
         {
             if (type == typeof(object))
                 yield break;

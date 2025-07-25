@@ -8,7 +8,7 @@ namespace RuniEngine
         public static Type? GetUnderlyingType(Type nullableType)
         {
             {
-                Type resultType = Nullable.GetUnderlyingType(nullableType);
+                Type? resultType = Nullable.GetUnderlyingType(nullableType);
                 if (resultType != null)
                     return resultType;
             }

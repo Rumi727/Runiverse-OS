@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Reflection;
-using UnityEngine;
 
 namespace RuniEngine.Editor.APIBridge.UnityEditor
 {
@@ -22,12 +21,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             get
             {
                 f_actualView ??= type.GetProperty("actualView", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                return (global::UnityEditor.EditorWindow?)f_actualView.GetValue(instance);
+                return (global::UnityEditor.EditorWindow?)f_actualView!.GetValue(instance);
             }
             set
             {
                 f_actualView ??= type.GetProperty("actualView", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
-                f_actualView.SetValue(instance, value);
+                f_actualView!.SetValue(instance, value);
             }
         }
         static PropertyInfo? f_actualView;

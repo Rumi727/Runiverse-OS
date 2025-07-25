@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using Unity.Properties;
-using UnityEngine;
 using UnityEngine.Search;
 using UnityEngine.UIElements;
 
@@ -47,7 +46,8 @@ namespace RuniEngine.UI
             set => nullableValueAsType = value;
         }
         Type? cachedType = null;
-
+        
+        // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
         [CreateProperty]
         [UxmlAttribute("value")]
         Type nullableValueAsType
@@ -66,6 +66,7 @@ namespace RuniEngine.UI
             }
         }
         static readonly BindingId valueProperty = nameof(nullableValueAsType);
+        // ReSharper restore ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
 
 
 
@@ -121,7 +122,7 @@ namespace RuniEngine.UI
 
 
 
-        public TypeField() : this(string.Empty, null) { }
+        public TypeField() : this(string.Empty) { }
         public TypeField(string label, Type? baseType = null) : base(label, null)
         {
             apiBridge = APIBridge.UnityEngine.UIElements.BaseField<string>.GetInstance(this);

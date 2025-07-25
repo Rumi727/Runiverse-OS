@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 
+// ReSharper disable once CheckNamespace
 namespace System.Linq
 {
     public static class LinqExtras
@@ -32,6 +33,6 @@ namespace System.Linq
             return -1;
         }
 
-        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) => source.Where(x => x != null)!;
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) => source.Where(static x => x != null)!;
     }
 }

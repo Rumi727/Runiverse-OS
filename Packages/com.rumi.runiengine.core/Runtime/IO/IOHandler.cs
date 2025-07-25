@@ -99,35 +99,45 @@ namespace RuniEngine.IO
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <param name="path1">자식 핸들러의 경로입니다.</param>
+        /// /// <param name="path2">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(FilePath path1, FilePath path2) => CreateChild(path1).CreateChild(path2);
 
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <param name="path1">자식 핸들러의 경로입니다.</param>
+        /// <param name="path2">자식 핸들러의 경로입니다.</param>
+        /// <param name="path3">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3) => CreateChild(path1).CreateChild(path2).CreateChild(path3);
 
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <param name="path1">자식 핸들러의 경로입니다.</param>
+        /// <param name="path2">자식 핸들러의 경로입니다.</param>
+        /// <param name="path3">자식 핸들러의 경로입니다.</param>
+        /// <param name="path4">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3, FilePath path4) => CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4);
 
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <param name="path1">자식 핸들러의 경로입니다.</param>
+        /// <param name="path2">자식 핸들러의 경로입니다.</param>
+        /// <param name="path3">자식 핸들러의 경로입니다.</param>
+        /// <param name="path4">자식 핸들러의 경로입니다.</param>
+        /// <param name="path5">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3, FilePath path4, FilePath path5) => CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4).CreateChild(path5);
 
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
+        /// <param name="paths">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(params FilePath[] paths)
         {

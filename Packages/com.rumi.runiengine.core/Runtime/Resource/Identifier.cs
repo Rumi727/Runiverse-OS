@@ -56,10 +56,10 @@ namespace RuniEngine.Resource
             _path = path;
         }
 
-        [AllowNull]
         /// <summary>
         /// 식별자의 네임스페이스 구성 요소를 가져오거나 설정합니다.
         /// </summary>
+        [AllowNull]
         public string nameSpace
         {
             readonly get => _nameSpace ?? string.Empty;
@@ -91,7 +91,7 @@ namespace RuniEngine.Resource
         /// </summary>
         /// <param name="obj">현재 인스턴스와 비교할 <see cref="object"/>입니다.</param>
         /// <returns>지정된 <see cref="object"/>가 <see cref="Identifier"/>이고 현재 인스턴스와 같은 값을 가지면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (obj is Identifier otherIdentifier)
                 return Equals(otherIdentifier);

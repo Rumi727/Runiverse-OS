@@ -37,7 +37,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.UIElements
                 mp_FromString[0] = value;
                 mp_FromString[1] = cc;
 
-                return m_FromString.Invoke(instance, mp_FromString);
+                return m_FromString!.Invoke(instance, mp_FromString);
             }
 
             static MethodInfo? m_ToString;
@@ -50,7 +50,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor.UIElements
                 mp_ToString[0] = value;
                 mp_ToString[1] = visualTreeAsset;
 
-                return (string)m_ToString.Invoke(instance, mp_ToString);
+                return (string)m_ToString!.Invoke(instance, mp_ToString);
             }
 
 

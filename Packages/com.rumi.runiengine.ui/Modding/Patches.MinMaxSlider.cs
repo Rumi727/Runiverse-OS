@@ -33,7 +33,7 @@ namespace RuniEngine.Modding.UI
                     float rightOffset = dragElement.resolvedStyle.borderRightWidth + dragElement.resolvedStyle.marginRight + maxThumbOffset;
                     float offsetWidth = rightOffset + leftOffset;
 
-                    float inputWidth = visualInput.layout.width - offsetWidth - maxThumbWidth + minThumbOffset;
+                    float inputWidth = (visualInput.layout.width - offsetWidth - maxThumbWidth) + minThumbOffset;
 
                     float position = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.minValue));
                     float width = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.maxValue));

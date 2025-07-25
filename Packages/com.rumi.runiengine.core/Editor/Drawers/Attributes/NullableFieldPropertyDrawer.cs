@@ -2,8 +2,6 @@
 using UnityEditor;
 using UnityEngine;
 
-using static RuniEngine.Editor.EditorTool;
-
 namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(NullableFieldAttribute))]

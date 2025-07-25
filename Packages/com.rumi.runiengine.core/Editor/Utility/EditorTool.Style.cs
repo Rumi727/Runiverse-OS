@@ -65,8 +65,8 @@ namespace RuniEngine.Editor
 
 
 
-        public static void BeginMinLabelWidth(float min = 120, float offset = 0) => BeginLabelWidth(Mathf.Max((APIBridge.UnityEditor.EditorGUIUtility.contextWidth * 0.45f) - 40f, min) + offset);
-        public static void BeginMinLabelWidth(float min = 120, float contextWidth = 0, float offset = 0) => BeginLabelWidth(Mathf.Max((contextWidth * 0.45f) - 40f, min) + offset);
+        public static void BeginMinLabelWidth(float min = 120, float offset = 0) => BeginMinLabelWidth(min, APIBridge.UnityEditor.EditorGUIUtility.contextWidth, offset);
+        public static void BeginMinLabelWidth(float min, float contextWidth, float offset) => BeginLabelWidth(Mathf.Max((contextWidth * 0.45f) - 40f, min) + offset);
 
         public static void BeginLabelWidth(string label) => BeginLabelWidth(new GUIContent(label));
         public static void BeginLabelWidth(GUIContent label) => BeginLabelWidth(label, editorLabelStyle);

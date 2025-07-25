@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.IO;
 
 namespace RuniEngine.Editor
@@ -12,9 +13,9 @@ namespace RuniEngine.Editor
             path = path.Replace("\\", "/");
             string projectPath = Directory.GetCurrentDirectory();
 
-            if (path.StartsWith(Path.Combine(projectPath, "Assets").Replace("\\", "/")))
+            if (path.StartsWith(Path.Combine(projectPath, "Assets").Replace("\\", "/"), StringComparison.Ordinal))
                 return true;
-            else if (path.StartsWith(Path.Combine(projectPath, "Packages").Replace("\\", "/")))
+            else if (path.StartsWith(Path.Combine(projectPath, "Packages").Replace("\\", "/"), StringComparison.Ordinal))
                 return true;
 
             return false;

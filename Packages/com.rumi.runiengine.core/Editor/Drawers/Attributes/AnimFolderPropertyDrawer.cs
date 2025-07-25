@@ -1,13 +1,11 @@
 #nullable enable
 using UnityEditor;
 using UnityEditor.AnimatedValues;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static RuniEngine.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(AnimFolderAttribute))]
     public sealed class AnimFolderPropertyDrawer : PropertyDrawer

@@ -4,8 +4,8 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEditor;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 namespace RuniEngine.Installer
@@ -56,7 +56,7 @@ namespace RuniEngine.Installer
                     return;
                 }
 
-                if (!manifestObject.TryGetValue("scopedRegistries", out JToken? scopedRegistries) || scopedRegistries == null)
+                if (!manifestObject.TryGetValue("scopedRegistries", out JToken? scopedRegistries))
                 {
                     scopedRegistries = new JArray();
                     manifestObject.Add("scopedRegistries", scopedRegistries);
@@ -68,49 +68,46 @@ namespace RuniEngine.Installer
                 if (scopedRegistries.Type == JTokenType.Array)
                 {
                     JArray array = (JArray)scopedRegistries;
-
                     if (CheckNameAndUrl(openupmName, "https://package.openupm.com"))
                         return;
-
                     //true면 return
                     bool CheckNameAndUrl(string name, string url)
                     {
                         bool exists = false;
-                        for (int i = 0; i < array.Count; i++)
+                        foreach (var itemToken in array)
                         {
-                            JToken itemToken = array[i];
                             if (itemToken.Type != JTokenType.Object)
                                 continue;
 
                             JObject itemObject = (JObject)itemToken;
-                            if (itemObject.TryGetValue("name", out JToken? nameValue) && itemObject.TryGetValue("url", out JToken? urlValue))
+                            if (!itemObject.TryGetValue("name", out JToken? nameValue) || !itemObject.TryGetValue("url", out JToken? urlValue))
+                                continue;
+                            
+                            if (nameValue.Type != JTokenType.String || nameValue.ToObject<string>() != name)
+                                continue;
+                            
+                            if (urlValue.Type != JTokenType.String || urlValue.ToObject<string>() != url)
                             {
-                                if (nameValue.Type == JTokenType.String && nameValue.ToObject<string>() == name)
-                                {
-                                    if (urlValue.Type != JTokenType.String || urlValue.ToObject<string>() != url)
-                                    {
-                                        Error(InstallerWindow.TryGetText("installer.package_setting.url_warning").Replace("{name}", name).Replace("{url}", url));
-                                        return true;
-                                    }
-
-                                    parsedScopes[name] = itemObject;
-                                    exists = true;
-                                }
+                                Error(InstallerWindow.TryGetText("installer.package_setting.url_warning").Replace("{name}", name).Replace("{url}", url));
+                                return true;
                             }
+
+                            parsedScopes[name] = itemObject;
+                            exists = true;
                         }
 
-                        if (!exists)
+                        if (exists)
+                            return false;
+                        
+                        JObject jObject = JObject.FromObject(new Dictionary<string, object>()
                         {
-                            JObject jObject = JObject.FromObject(new Dictionary<string, object>()
-                            {
-                                { "name", name },
-                                { "url", url },
-                                { "scopes", new string[0] }
-                            });
+                            { "name", name },
+                            { "url", url },
+                            { "scopes", Array.Empty<string>() }
+                        });
 
-                            parsedScopes[name] = jObject;
-                            array.Add(jObject);
-                        }
+                        parsedScopes[name] = jObject;
+                        array.Add(jObject);
 
                         return false;
                     }
@@ -136,23 +133,17 @@ namespace RuniEngine.Installer
                         for (int i = 0; i < scopes.Length; i++)
                         {
                             bool exists = false;
-                            for (int j = 0; j < array.Count; j++)
+                            if (array.Any(item => item.Type == JTokenType.String && item.ToObject<string>() == scopes[i]))
                             {
-                                JToken item = array[j];
-                                if (item.Type == JTokenType.String && item.ToObject<string>() == scopes[i])
-                                {
-                                    scopes[i] = null;
-                                    exists = true;
-
-                                    break;
-                                }
+                                scopes[i] = null;
+                                exists = true;
                             }
 
-                            if (!exists)
-                            {
-                                GUILayout.Label($"+ {scopes[i]}");
-                                noChanges = false;
-                            }
+                            if (exists)
+                                continue;
+                            
+                            GUILayout.Label($"+ {scopes[i]}");
+                            noChanges = false;
                         }
 
                         if (noChanges)
@@ -161,9 +152,8 @@ namespace RuniEngine.Installer
                         {
                             if (GUILayout.Button(InstallerWindow.TryGetText("installer.package_setting.apply"), GUILayout.ExpandWidth(false)))
                             {
-                                for (int i = 0; i < scopes.Length; i++)
+                                foreach (var scope in scopes)
                                 {
-                                    string? scope = scopes[i];
                                     if (scope != null)
                                         array?.Add(JToken.FromObject(scope));
                                 }

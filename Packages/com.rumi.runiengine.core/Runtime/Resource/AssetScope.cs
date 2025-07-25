@@ -13,6 +13,6 @@ namespace RuniEngine.Resource
 
         public void Dispose() => handle.ReturnScope(this);
 
-        ~AssetScope() { handle.ReturnScope(this); }
+        ~AssetScope() => handle.ReturnScope(this);
     }
 }

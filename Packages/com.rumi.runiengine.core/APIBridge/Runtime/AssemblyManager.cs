@@ -10,7 +10,7 @@ namespace RuniEngine.APIBridge
         public static Assembly[] assemblys => _assemblys ??= AppDomain.CurrentDomain.GetAssemblies();
         static Assembly[]? _assemblys;
 
-        public static Assembly UnityEngine_CoreModule => _UnityEngine_CoreModule ??= assemblys.First(x => x.GetName().Name == "UnityEngine.CoreModule");
+        public static Assembly UnityEngine_CoreModule => _UnityEngine_CoreModule ??= assemblys.First(static x => x.GetName().Name == "UnityEngine.CoreModule");
         static Assembly? _UnityEngine_CoreModule;
     }
 }

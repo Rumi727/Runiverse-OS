@@ -20,12 +20,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             get
             {
                 f_current ??= type.GetProperty("current", BindingFlags.Public | BindingFlags.Static);
-                return GetInstance((UnityEngine.ScriptableObject?)f_current.GetValue(null));
+                return GetInstance((UnityEngine.ScriptableObject?)f_current!.GetValue(null));
             }
             set
             {
                 f_current ??= type.GetProperty("current", BindingFlags.Public | BindingFlags.Static);
-                f_current.SetValue(null, value);
+                f_current!.SetValue(null, value);
             }
         }
         static PropertyInfo? f_current;
@@ -36,7 +36,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
         public void Repaint()
         {
             m_Repaint ??= type.GetMethod("Repaint", BindingFlags.Public | BindingFlags.Instance);
-            m_Repaint.Invoke(instance, null);
+            m_Repaint!.Invoke(instance, null);
         }
 
 

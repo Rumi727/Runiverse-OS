@@ -8,8 +8,6 @@ namespace RuniEngine
         /// <summary>
         /// (keyCode = KeyCode.RightArrow) = "→"
         /// </summary>
-        /// <param name="keyCode"></param>
-        /// <returns></returns>
         public static string KeyCodeToString(this KeyCode keyCode, bool simply = false)
         {
             string text = keyCode switch

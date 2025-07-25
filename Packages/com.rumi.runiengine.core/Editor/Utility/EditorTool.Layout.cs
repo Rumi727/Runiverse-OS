@@ -6,7 +6,7 @@ namespace RuniEngine.Editor
 {
     public partial class EditorTool
     {
-        public static Rect GetPrefixLabelRect(Rect totalPosition, GUIContent label, out Rect? labelPosition)
+        public static Rect GetPrefixLabelRect(Rect totalPosition, GUIContent? label, out Rect? labelPosition)
         {
             if (label != null && label.text == string.Empty && label.image == null)
             {

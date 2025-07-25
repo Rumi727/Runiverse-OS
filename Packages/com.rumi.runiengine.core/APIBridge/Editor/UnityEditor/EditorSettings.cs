@@ -13,12 +13,12 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
             get
             {
                 f_inspectorUseIMGUIDefaultInspector ??= type.GetProperty("inspectorUseIMGUIDefaultInspector", BindingFlags.NonPublic | BindingFlags.Static);
-                return (bool)f_inspectorUseIMGUIDefaultInspector.GetValue(null);
+                return (bool)f_inspectorUseIMGUIDefaultInspector!.GetValue(null);
             }
             set
             {
                 f_inspectorUseIMGUIDefaultInspector ??= type.GetProperty("inspectorUseIMGUIDefaultInspector", BindingFlags.NonPublic | BindingFlags.Static);
-                f_inspectorUseIMGUIDefaultInspector.SetValue(null, value);
+                f_inspectorUseIMGUIDefaultInspector!.SetValue(null, value);
             }
         }
         static PropertyInfo? f_inspectorUseIMGUIDefaultInspector;

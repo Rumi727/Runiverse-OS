@@ -118,12 +118,12 @@ namespace RuniEngine
 
         public readonly bool Equals(UnlimitedDateTime other) => this == other;
 
-        public override readonly bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
-            if (obj is not UnlimitedDateTime)
+            if (obj is not UnlimitedDateTime value)
                 return false;
 
-            return Equals((UnlimitedDateTime)obj);
+            return Equals(value);
         }
 
         public override readonly int GetHashCode() => HashCode.Combine(year, month, day, hour, minute, second, millisecond);

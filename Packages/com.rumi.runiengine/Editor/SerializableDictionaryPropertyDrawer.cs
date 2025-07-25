@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using UnityEditor;
-using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
 
@@ -23,13 +22,12 @@ namespace RuniEngine.Editor.Drawers
             {
 #pragma warning disable IDE0079 // 불필요한 비표시 오류(Suppression) 제거
 #pragma warning disable UNT0027 // Do not call PropertyDrawer.OnGUI()
+                // ReSharper disable once Unity.PropertyDrawerOnGUIBase
                 base.OnGUI(position, property, label);
 #pragma warning restore UNT0027 // Do not call PropertyDrawer.OnGUI()
 #pragma warning restore IDE0079 // 불필요한 비표시 오류(Suppression) 제거
                 return;
             }
-
-            bool isInArray = IsInArray(property);
 
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
@@ -338,10 +336,7 @@ namespace RuniEngine.Editor.Drawers
             }
 
             if (serializedProperty.boxedValue != null)
-            {
                 serializedProperty.boxedValue = GetDefaultValue(serializedProperty.boxedValue.GetType());
-                return;
-            }
         }
 
         public static float GetXSize(GUIContent content, GUIStyle style) => style.CalcSize(content).x;

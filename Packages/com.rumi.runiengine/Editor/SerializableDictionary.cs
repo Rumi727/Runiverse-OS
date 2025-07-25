@@ -10,7 +10,7 @@ namespace RuniEngine.Installer
     [Serializable]
     class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue?>, ISerializableDictionary
     {
-        public SerializableDictionary() : base() { }
+        public SerializableDictionary() { }
         public SerializableDictionary(int capacity) : base(capacity) { }
         public SerializableDictionary(ICollection<KeyValuePair<TKey, TValue?>> collection) : base(collection) { }
         public SerializableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }

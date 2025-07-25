@@ -7,17 +7,17 @@ namespace RuniEngine
     {
         public static float fps { get; private set; } = 60;
 
-        public static float deltaTime { get; private set; } = fps60second;
+        public static float deltaTime { get; private set; } = fps60Second;
 
-        public static double deltaTimeDouble { get; private set; } = fps60second;
+        public static double deltaTimeDouble { get; private set; } = fps60Second;
 
-        public static float smoothDeltaTime { get; private set; } = fps60second;
+        public static float smoothDeltaTime { get; private set; } = fps60Second;
 
-        public static float unscaledDeltaTime { get; private set; } = fps60second;
+        public static float unscaledDeltaTime { get; private set; } = fps60Second;
 
-        public static double unscaledDeltaTimeDouble { get; private set; } = fps60second;
+        public static double unscaledDeltaTimeDouble { get; private set; } = fps60Second;
 
-        public static float unscaledSmoothDeltaTime { get; private set; } = fps60second;
+        public static float unscaledSmoothDeltaTime { get; private set; } = fps60Second;
 
         public static float fixedDeltaTime
         {
@@ -25,7 +25,7 @@ namespace RuniEngine
             set => Time.fixedDeltaTime = value;
         }
 
-        public const float fps60second = 1f / 60f;
+        public const float fps60Second = 1f / 60f;
 
         /// <summary>
         /// 게임의 전체 속도를 결정 합니다

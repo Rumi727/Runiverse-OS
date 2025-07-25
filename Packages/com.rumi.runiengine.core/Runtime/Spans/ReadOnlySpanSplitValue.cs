@@ -1,3 +1,5 @@
+#nullable enable
+// ReSharper disable InconsistentNaming
 using System;
 
 namespace RuniEngine.Spans

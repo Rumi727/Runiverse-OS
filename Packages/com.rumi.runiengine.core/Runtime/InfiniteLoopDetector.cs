@@ -7,7 +7,7 @@ namespace RuniEngine
 {
     public static class InfiniteLoopDetector
     {
-        [ThreadStatic] static int detectionCount = 0;
+        [ThreadStatic] static int detectionCount;
         public const int detectionThreshold = 1000000;
 
         [Conditional("UNITY_EDITOR")]
