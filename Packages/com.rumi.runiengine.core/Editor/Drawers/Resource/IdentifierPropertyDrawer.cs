@@ -49,7 +49,7 @@ namespace RuniEngine.Editor.Drawers.Resource
             if (EditorGUIUtility.wideMode)
                 return EditorGUIUtility.singleLineHeight;
             else
-                return EditorGUIUtility.singleLineHeight * 2;
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
         }
         
         public static (SerializedProperty nameSpace, SerializedProperty path) GetChildProperty(SerializedProperty property)

@@ -865,8 +865,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: pair.value.hasValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: test2.test3.hasValue
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: identifier._nameSpace
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: stringList.Array.size
@@ -881,12 +889,24 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: identifier._path._value
+      value: fdsafd
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: 'stringList.Array.data[0]'
       value: asdff
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: 'stringList.Array.data[1]'
       value: adsfa
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: nIdentifier.value._nameSpace
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: nullableNullableFloat.hasValue
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: stringList2.Array.data[0].test
@@ -903,6 +923,18 @@ PrefabInstance:
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.data[1].hexColor._value
       value: '#00000000'
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: packIdentifier._localPath.hasValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: packIdentifier._internalID.hasValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: nullableNullableFloat.value.hasValue
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: serializableDictionary3.pairs.Array.size

@@ -68,11 +68,17 @@ namespace RuniEngine.Editor.Drawers
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
+            float height;
             (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null || value == null)
-                return base.GetPropertyHeight(property, label);
+                height = base.GetPropertyHeight(property, label);
+            else
+                height = EditorGUI.GetPropertyHeight(key).Max(EditorGUI.GetPropertyHeight(value));
 
-            return EditorGUI.GetPropertyHeight(key).Max(EditorGUI.GetPropertyHeight(value));
+            if (EditorGUIUtility.wideMode)
+                return height;
+            else
+                return height + EditorGUIUtility.singleLineHeight + 4;
         }
 
         public static (SerializedProperty? key, SerializedProperty? value) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableKeyValuePair.nameofKey), property.FindPropertyRelative(SerializableKeyValuePair.nameofValue));

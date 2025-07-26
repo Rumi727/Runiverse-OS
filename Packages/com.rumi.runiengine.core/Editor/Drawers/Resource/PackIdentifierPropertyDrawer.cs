@@ -28,6 +28,9 @@ namespace RuniEngine.Editor.Drawers.Resource
                     IdentifierPropertyDrawer.Draw(position, internalIDField, label);
                 else
                     FilePathPropertyDrawer.Draw(position, localPathField, label);
+                
+                if (!EditorGUIUtility.wideMode)
+                    position.y += EditorGUIUtility.singleLineHeight + 2;
 
                 position.x += position.width + 4;
                 position.width = 50;
@@ -53,7 +56,15 @@ namespace RuniEngine.Editor.Drawers.Resource
                 }
             }
         }
-        
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (EditorGUIUtility.wideMode)
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        }
+
         public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
         {
             property = property.Copy();
