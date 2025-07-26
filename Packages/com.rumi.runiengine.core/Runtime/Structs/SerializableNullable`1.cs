@@ -10,7 +10,7 @@ namespace RuniEngine
     [Serializable]
     public struct SerializableNullable<T> : ISerializableNullable<T>, IEquatable<T>, IEquatable<T?>, IEquatable<SerializableNullable<T>>, ISerializationCallbackReceiver where T : struct
     {
-        [SerializeField] T value;
+        [SerializeField, AnimFolder] T value;
         [SerializeField] bool hasValue;
 
         public SerializableNullable(T value)
