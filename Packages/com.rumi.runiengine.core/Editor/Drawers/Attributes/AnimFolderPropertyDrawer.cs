@@ -8,13 +8,13 @@ using EditorGUI = UnityEditor.EditorGUI;
 namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(AnimFolderAttribute))]
-    public sealed class AnimFolderPropertyDrawer : PropertyDrawer
+    public class AnimFolderPropertyDrawer : PropertyDrawer
     {
         AnimBool? animBool;
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.IsChildrenIncluded() && !property.IsInArray())
+            if (property.IsChildrenIncluded() && !property.IsInArray() && (property.boxedValue == null || !property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>))))
             {
                 label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
                 animBool ??= new AnimBool(property.isExpanded);
