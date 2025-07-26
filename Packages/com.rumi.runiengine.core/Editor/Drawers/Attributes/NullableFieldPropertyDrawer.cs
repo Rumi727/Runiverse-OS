@@ -12,7 +12,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic && !fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
+            if (property.propertyType == SerializedPropertyType.Generic && fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
             {
                 EditorGUI.BeginProperty(position, label, property);
                 
