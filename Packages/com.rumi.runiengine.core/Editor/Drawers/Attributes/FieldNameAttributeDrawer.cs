@@ -7,7 +7,7 @@ using static RuniEngine.Editor.EditorTool;
 namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(FieldNameAttribute))]
-    public sealed class FieldNameAttributeDrawer : PropertyDrawer
+    public class FieldNameAttributeDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

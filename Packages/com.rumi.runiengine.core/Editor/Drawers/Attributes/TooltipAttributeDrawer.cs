@@ -5,7 +5,7 @@ using UnityEngine;
 namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(TooltipAttribute))]
-    public sealed class TooltipAttributeAttributeDrawer : PropertyDrawer
+    public class TooltipAttributeAttributeDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace RuniEngine.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(ReadOnlyFieldAttribute))]
-    public sealed class ReadOnlyFieldAttributeDrawer : PropertyDrawer
+    public class ReadOnlyFieldAttributeDrawer : PropertyDrawer
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
