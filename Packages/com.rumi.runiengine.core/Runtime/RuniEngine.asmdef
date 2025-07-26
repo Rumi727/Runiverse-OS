@@ -2,6 +2,7 @@
     "name": "RuniEngine",
     "rootNamespace": "RuniEngine",
     "references": [
+        "GUID:c6d2ee51b86b95246ae92eebdcffddee",
         "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
