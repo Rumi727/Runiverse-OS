@@ -14,11 +14,8 @@ namespace RuniEngine.Editor.Drawers.Attributes
         {
             if (property.propertyType == SerializedPropertyType.Generic && property.boxedValue != null && property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>)))
             {
-                field ??= property.FindPropertyRelative("value");
-                toggle ??= property.FindPropertyRelative("hasValue");
-
                 string? nullText = ((NullableFieldAttribute)attribute).customNullText;
-                SerializableNullablePropertyDrawer.Draw(position, field, toggle, label, nullText);
+                SerializableNullablePropertyDrawer.Draw(position, property, label, nullText);
             }
             else
                 EditorGUI.PropertyField(position, property, label);
@@ -28,8 +25,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
         {
             if (property.propertyType == SerializedPropertyType.Generic)
             {
-                field ??= property.FindPropertyRelative("value");
-                toggle ??= property.FindPropertyRelative("hasValue");
+                (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
 
                 if (field != null && toggle != null && toggle.boolValue)
                     return EditorGUI.GetPropertyHeight(field, label);

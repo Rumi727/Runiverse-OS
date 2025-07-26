@@ -9,12 +9,9 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyDrawer : PropertyDrawer
     {
-        SerializedProperty? key;
-        SerializedProperty? value;
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            InitProperty(property);
+            (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null)
             {
                 GUI.Label(position, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.key"));
@@ -34,25 +31,32 @@ namespace RuniEngine.Editor.Drawers
             BeginIndentLevel(0);
             float fieldWidth = (position.width - 15) / 2f;
 
-            {
-                position.width = fieldWidth;
+            position.y += 1;
 
+            {
                 string keyLabel = GetTextOrKey("gui.key");
+                GUIContent keyLabelContent = new GUIContent(keyLabel);
+                
+                position.width = fieldWidth;
+                position.height = EditorGUI.GetPropertyHeight(key, keyLabelContent);
+
 
                 BeginLabelWidth(keyLabel);
-                EditorGUI.PropertyField(position, key, new GUIContent(keyLabel));
+                EditorGUI.PropertyField(position, key, keyLabelContent);
                 EndLabelWidth();
 
                 position.x += position.width + 15;
             }
 
             {
-                position.width = fieldWidth.Ceil();
-
                 string valueLabel = GetTextOrKey("gui.value");
+                GUIContent valueLabelContent = new GUIContent(valueLabel);
+                
+                position.width = fieldWidth.Ceil();
+                position.height = EditorGUI.GetPropertyHeight(key, valueLabelContent);
 
                 BeginLabelWidth(valueLabel);
-                EditorGUI.PropertyField(position, value, new GUIContent(valueLabel));
+                EditorGUI.PropertyField(position, value, valueLabelContent);
                 EndLabelWidth();
             }
 
@@ -63,17 +67,13 @@ namespace RuniEngine.Editor.Drawers
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            InitProperty(property);
+            (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null || value == null)
                 return base.GetPropertyHeight(property, label);
 
             return EditorGUI.GetPropertyHeight(key).Max(EditorGUI.GetPropertyHeight(value));
         }
 
-        public void InitProperty(SerializedProperty property)
-        {
-            key ??= property.FindPropertyRelative(SerializableKeyValuePair.nameofKey);
-            value ??= property.FindPropertyRelative(SerializableKeyValuePair.nameofValue);
-        }
+        public static (SerializedProperty? key, SerializedProperty? value) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableKeyValuePair.nameofKey), property.FindPropertyRelative(SerializableKeyValuePair.nameofValue));
     }
 }

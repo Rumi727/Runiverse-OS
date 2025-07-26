@@ -9,21 +9,13 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(ISerializableNullable<>), true)]
     public class SerializableNullablePropertyDrawer : PropertyDrawer
     {
-        SerializedProperty? field;
-        SerializedProperty? toggle;
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
 
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label, string? customNullText = null)
         {
-            field ??= property.FindPropertyRelative("value");
-            toggle ??= property.FindPropertyRelative("hasValue");
-
             EditorGUI.BeginProperty(position, label, property);
-            Draw(position, field, toggle, label);
-            EditorGUI.EndProperty();
-        }
-
-        public static void Draw(Rect position, SerializedProperty? field, SerializedProperty? toggle, GUIContent label, string? customNullText = null)
-        {
+            (SerializedProperty? field, SerializedProperty? toggle) = GetChildProperty(property);
+            
             float fieldWidth = position.width;
             float toggleWidth = GetXSize(EditorStyles.toggle);
             Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
@@ -187,17 +179,19 @@ namespace RuniEngine.Editor.Drawers
                 else
                     EditorGUI.LabelField(position, label, new GUIContent($"null ({field.type})"));
             }
+            
+            EditorGUI.EndProperty();
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            field ??= property.FindPropertyRelative("value");
-            toggle ??= property.FindPropertyRelative("hasValue");
-
+            (SerializedProperty? field, SerializedProperty? toggle) = GetChildProperty(property);
             if (field != null && toggle != null && toggle.boolValue)
                 return EditorGUI.GetPropertyHeight(field, label);
             else
                 return EditorGUIUtility.singleLineHeight;
         }
+
+        public static (SerializedProperty? field, SerializedProperty? toggle) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableNullable.nameofValue), property.FindPropertyRelative(SerializableNullable.nameofHasValue));
     }
 }

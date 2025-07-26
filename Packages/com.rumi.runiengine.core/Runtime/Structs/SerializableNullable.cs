@@ -5,6 +5,9 @@ namespace RuniEngine
 {
     public static class SerializableNullable
     {
+        public const string nameofValue = "value";
+        public const string nameofHasValue = "hasValue";
+        
         public static Type? GetUnderlyingType(Type nullableType)
         {
             {
