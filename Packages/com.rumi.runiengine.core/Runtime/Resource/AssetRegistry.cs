@@ -10,6 +10,6 @@ namespace RuniEngine.Resource
 
         public Dictionary<Identifier, AssetHandle> assetHandles { get; } = new();
 
-        public abstract UniTask Reload(IEnumerable<ResourcePackRef> resourcePacks);
+        public abstract UniTask Reload(IEnumerable<ResourcePackReference> resourcePacks);
     }
 }

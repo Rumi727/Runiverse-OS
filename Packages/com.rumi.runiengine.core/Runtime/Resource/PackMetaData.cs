@@ -1,9 +1,9 @@
 #nullable enable
 namespace RuniEngine.Resource
 {
-    public readonly struct ResourcePackInfo
+    public readonly struct PackMetaData
     {
-        public ResourcePackInfo(string name)
+        public PackMetaData(string name)
         {
             this.name = name;
             version = Version.all;
@@ -12,7 +12,7 @@ namespace RuniEngine.Resource
             targetRuniOSVersion = Version.all;
         }
 
-        public ResourcePackInfo(string name, Version version)
+        public PackMetaData(string name, Version version)
         {
             this.name = name;
             this.version = version;
@@ -21,7 +21,7 @@ namespace RuniEngine.Resource
             targetRuniOSVersion = Version.all;
         }
 
-        public ResourcePackInfo(string name, Version version, VersionRange targetVersion, VersionRange targetRuniOSVersion)
+        public PackMetaData(string name, Version version, VersionRange targetVersion, VersionRange targetRuniOSVersion)
         {
             this.name = name;
             this.version = version;

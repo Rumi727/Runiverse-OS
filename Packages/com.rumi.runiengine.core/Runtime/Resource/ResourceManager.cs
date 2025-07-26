@@ -8,8 +8,20 @@ namespace RuniEngine.Resource
 {
     public static class ResourceManager
     {
+        static readonly Dictionary<PackIdentifier, ResourcePackReference> _resourcePacks = new();
+        public static IReadOnlyDictionary<PackIdentifier, ResourcePackReference> resourcePacks { get; } = _resourcePacks.AsReadOnly();
+        
         static readonly Dictionary<Type, AssetRegistry> _assetRegistries = new();
         public static IReadOnlyDictionary<Type, AssetRegistry> assetRegistries { get; } = _assetRegistries.AsReadOnly();
+
+
+
+        public static async UniTask Reload()
+        {
+            
+        }
+        
+        
 
         public static void RegisterAssetRegistry<T>() where T : AssetRegistry, new() => RegisterAssetRegistry(typeof(T));
         public static void RegisterAssetRegistry(Type type)
@@ -31,7 +43,7 @@ namespace RuniEngine.Resource
         public static void UnregisterAssetRegistry(Type type) => _assetRegistries.Remove(type);
 
 
-
+        
         public static AssetHandle? GetAssetHandle<TRegistry>(Identifier identifier) where TRegistry : AssetRegistry => GetAssetHandle(typeof(TRegistry), identifier);
 
         public static AssetHandle? GetAssetHandle(Type registryType, Identifier identifier)
