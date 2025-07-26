@@ -1,4 +1,5 @@
 #nullable enable
+using RuniEngine.Editor.Drawers.IO;
 using RuniEngine.Resource;
 using UnityEditor;
 using UnityEngine;
@@ -13,42 +14,34 @@ namespace RuniEngine.Editor.Drawers.Resource
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property.Copy());
-
-            /*property.Next(true);
-            SerializedProperty nameSpace = property.Copy();
-            
-            property.Next(false);
-            SerializedProperty path = property.Copy();*/
-
-            property.boxedValue = IdentifierField(position, label, (Identifier)property.boxedValue);
-
+            Draw(position, property, label);
             EditorGUI.EndProperty();
+        }
 
-            /*BeginIndentLevel(0);
-            float fieldWidth = (position.width - (2 * 2) - 4) / 2f;
-            for (int i = 0; i < 3; i++)
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            (SerializedProperty nameSpace, SerializedProperty path) = GetChildProperty(property);
+            path = FilePathPropertyDrawer.GetChildProperty(path);
+
+            Identifier value = Identifier.empty;
+            EditorGUI.BeginChangeCheck();
+            
+            try
             {
-                if (i % 2 == 0)
-                {
-                    position.width = fieldWidth;
-                    EditorGUI.PropertyField(position, property, new GUIContent(), false);
-                    position.x += position.width;
-
-                    property.Next(false);
-                    position.x += 4;
-                }
-                else
-                {
-                    position.width = 8;
-                    position.x -= 4;
-
-                    GUI.Label(position, Identifier.separator.ToString());
-
-                    position.x += position.width;
-                    position.width += 4;
-                }
+                value = new Identifier(nameSpace.stringValue, path.stringValue);
             }
-            EndIndentLevel();*/
+            catch (InvalidIdentifierException e)
+            {
+                Debug.LogException(e);
+            }
+            
+            value = IdentifierField(position, label, value);
+            
+            if (EditorGUI.EndChangeCheck())
+            {
+                nameSpace.stringValue = value.nameSpace;
+                path.stringValue = value.path;
+            }
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
@@ -57,6 +50,19 @@ namespace RuniEngine.Editor.Drawers.Resource
                 return EditorGUIUtility.singleLineHeight;
             else
                 return EditorGUIUtility.singleLineHeight * 2;
+        }
+        
+        public static (SerializedProperty nameSpace, SerializedProperty path) GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            
+            property.Next(true);
+            SerializedProperty nameSpace = property.Copy();
+
+            property.Next(false);
+            SerializedProperty path = property;
+
+            return (nameSpace, path);
         }
     }
 }

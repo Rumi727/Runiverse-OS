@@ -11,19 +11,24 @@ namespace RuniEngine.Editor.Drawers
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
+            EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label);
+            EditorGUI.EndProperty();
+        }
+
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
             (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null)
             {
-                GUI.Label(position, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.key"));
+                EditorGUI.LabelField(position, label, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.key"));
                 return;
             }
             else if (value == null)
             {
-                GUI.Label(position, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.value"));
+                EditorGUI.LabelField(position, label, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.value"));
                 return;
             }
-
-            EditorGUI.BeginProperty(position, label, property);
 
             int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
             position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
@@ -59,8 +64,6 @@ namespace RuniEngine.Editor.Drawers
             }
 
             EndIndentLevel();
-            
-            EditorGUI.EndProperty();
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

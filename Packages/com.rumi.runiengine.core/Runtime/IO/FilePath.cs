@@ -487,7 +487,6 @@ namespace RuniEngine.IO
                 return string.Empty;
 
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
-
             ReadOnlySpan<char> trimPath = path.Trim(directorySeparatorChars);
             bool lastCharWasSeparator = false; // 연속된 구분자 처리용 플래그
             foreach (char item in trimPath)

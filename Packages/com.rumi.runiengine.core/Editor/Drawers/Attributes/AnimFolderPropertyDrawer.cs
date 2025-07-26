@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
@@ -14,31 +15,39 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.IsGeneric() && !property.IsInArray() && (property.boxedValue == null || !property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>))))
+            try
             {
-                label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
-                animBool ??= new AnimBool(property.isExpanded);
-                
+                if (property.IsGeneric() && !property.IsInArray() && !fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
                 {
-                    if (animBool.isAnimating)
+                    label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
+                    animBool ??= new AnimBool(property.isExpanded);
+                
                     {
-                        float headHeight = GetYSize(label, EditorStyles.foldout);
-                        float childHeight = EditorGUI.GetPropertyHeight(property, label) - headHeight; //여기에서 값 바뀜
+                        if (animBool.isAnimating)
+                        {
+                            float headHeight = GetYSize(label, EditorStyles.foldout);
+                            float childHeight = EditorGUI.GetPropertyHeight(property, label) - headHeight; //여기에서 값 바뀜
 
-                        GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + headHeight + 3 + 0f.Lerp(childHeight, animBool.faded)));
+                            GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + headHeight + 3 + 0f.Lerp(childHeight, animBool.faded)));
+                        }
+
+                        EditorGUI.PropertyField(position, property, label, property.IsGeneric());
+
+                        if (animBool.isAnimating)
+                            GUI.EndClip();
                     }
 
-                    EditorGUI.PropertyField(position, property, label, property.IsGeneric());
-
                     if (animBool.isAnimating)
-                        GUI.EndClip();
+                        RepaintCurrentWindow();
                 }
-
-                if (animBool.isAnimating)
-                    RepaintCurrentWindow();
+                else
+                    EditorGUI.PropertyField(position, property, label, property.IsGeneric());
             }
-            else
-                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
+            catch (Exception e)
+            {
+                Debug.Log(property.propertyPath);
+                Debug.LogException(e);
+            }
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

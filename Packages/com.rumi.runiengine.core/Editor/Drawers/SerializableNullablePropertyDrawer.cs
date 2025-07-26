@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using UnityEditor;
 using UnityEngine;
 
@@ -9,11 +10,15 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(ISerializableNullable<>), true)]
     public class SerializableNullablePropertyDrawer : PropertyDrawer
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
-
-        public static void Draw(Rect position, SerializedProperty property, GUIContent label, string? customNullText = null)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label, fieldInfo.FieldType);
+            EditorGUI.EndProperty();
+        }
+
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label, Type fieldType, string? customNullText = null)
+        {
             (SerializedProperty? field, SerializedProperty? toggle) = GetChildProperty(property);
             
             float fieldWidth = position.width;
@@ -167,7 +172,7 @@ namespace RuniEngine.Editor.Drawers
             }
             else
             {
-                if (!field.IsGeneric() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect)
+                if (fieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)) || (!field.IsGeneric() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect))
                     position.width -= toggleWidth + 4;
 
                 BeginIndentLevel(0);
@@ -179,8 +184,6 @@ namespace RuniEngine.Editor.Drawers
                 else
                     EditorGUI.LabelField(position, label, new GUIContent($"null ({field.type})"));
             }
-            
-            EditorGUI.EndProperty();
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

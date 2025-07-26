@@ -13,16 +13,26 @@ namespace RuniEngine.Editor.Drawers.IO
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
-
-            SerializedProperty valueProperty = property.Copy();
-            valueProperty.Next(true);
-
-            EditorGUI.BeginChangeCheck();
-            FileExtension value = FileExtensionField(position, label, valueProperty.stringValue); //boxedValue 쓰면 크래시남..
-            if (EditorGUI.EndChangeCheck())
-                valueProperty.stringValue = value;
-
+            Draw(position, property, label);
             EditorGUI.EndProperty();
+        }
+
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            property = GetChildProperty(property);
+            
+            EditorGUI.BeginChangeCheck();
+            FileExtension value = FileExtensionField(position, label, property.stringValue); //boxedValue 쓰면 크래시남..
+            if (EditorGUI.EndChangeCheck())
+                property.stringValue = value;
+        }
+        
+        public static SerializedProperty GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            property.Next(true);
+
+            return property;
         }
     }
 }

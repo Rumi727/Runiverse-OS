@@ -9,9 +9,14 @@ namespace RuniEngine.Editor.Drawers
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            property.Next(true);
-            
             EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label);
+            EditorGUI.EndProperty();
+        }
+
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            property = GetChildProperty(property);
             EditorGUI.BeginChangeCheck();
 
             HexColor.TryParse(property.stringValue, out Color color);
@@ -19,8 +24,14 @@ namespace RuniEngine.Editor.Drawers
 
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = HexColor.ToHex(color);
+        }
+        
+        public static SerializedProperty GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            property.Next(true);
 
-            EditorGUI.EndProperty();
+            return property;
         }
     }
 }

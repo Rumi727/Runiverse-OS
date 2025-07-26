@@ -9,7 +9,9 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(Version))]
     public class VersionPropertyDrawer : PropertyDrawer
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
+        
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property.Copy());
             

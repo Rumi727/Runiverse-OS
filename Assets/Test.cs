@@ -53,6 +53,9 @@ public sealed class Test : MonoBehaviour
     public RuniEngine.RectOffset rectOffset;
     public UnlimitedDateTime unlimitedDateTime;
     public SerializableKeyValuePair<string, SerializableNullable<double>> pair;
+    public PackIdentifier packIdentifier;
+    public TextAlignment textAlignment;
+    public SerializableNullable<SerializableNullable<float>> nullableNullableFloat;
 
     void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
 

@@ -12,8 +12,10 @@ namespace RuniEngine.Editor.Drawers
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property.Copy());
-            property.uintValue = CharField(position, label, (char)property.uintValue);
+            Draw(position, property, label);
             EditorGUI.EndProperty();
         }
+
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label) => property.uintValue = CharField(position, label, (char)property.uintValue);
     }
 }

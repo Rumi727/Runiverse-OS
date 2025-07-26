@@ -12,10 +12,14 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic && property.boxedValue != null && property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>)))
+            if (property.propertyType == SerializedPropertyType.Generic && !fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
             {
+                EditorGUI.BeginProperty(position, label, property);
+                
                 string? nullText = ((NullableFieldAttribute)attribute).customNullText;
-                SerializableNullablePropertyDrawer.Draw(position, property, label, nullText);
+                SerializableNullablePropertyDrawer.Draw(position, property, label, fieldInfo.FieldType, nullText);
+                
+                EditorGUI.EndProperty();
             }
             else
                 EditorGUI.PropertyField(position, property, label);

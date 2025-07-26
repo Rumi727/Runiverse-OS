@@ -257,7 +257,20 @@ namespace RuniEngine.Editor
 
             {
                 position.width = fieldWidth;
-                value.nameSpace = EditorGUI.TextField(position, value.nameSpace);
+                string nameSpace = EditorGUI.TextField(position, value.nameSpace);
+                if (Identifier.IsNamespaceValid(nameSpace))
+                    value.nameSpace = nameSpace;
+                else
+                {
+                    try
+                    {
+                        Identifier.ThrowInvalidNamespace(nameSpace);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
                 position.x += position.width + 4;
             }
 
@@ -272,7 +285,21 @@ namespace RuniEngine.Editor
             
             {
                 position.width = (fieldWidth * 2) + 8;
-                value.path = EditorGUI.TextField(position, value.path);
+                
+                string path = EditorGUI.TextField(position, value.path);
+                if (Identifier.IsPathValid(path))
+                    value.path = path;
+                else
+                {
+                    try
+                    {
+                        Identifier.ThrowInvalidPath(path);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
             }
 
             EndIndentLevel();
@@ -590,6 +617,30 @@ namespace RuniEngine.Editor
 
             EndIndentLevel();
             return KeyValuePair.Create(valueKey, valueValue);
+        }
+        
+        
+        
+        public static Type TypeFieldLayout(Type value) => TypeField(EditorGUILayout.GetControlRect(), value);
+        public static Type TypeFieldLayout(string label, Type value) => TypeField(EditorGUILayout.GetControlRect(), label, value);
+        public static Type TypeFieldLayout(GUIContent label, Type value) => TypeField(EditorGUILayout.GetControlRect(), label, value);
+
+        public static Type TypeField(Rect position, Type value) => DoTypeField(position, value);
+        public static Type TypeField(Rect position, string label, Type value) => TypeField(position, new GUIContent(label), value);
+        public static Type TypeField(Rect position, GUIContent label, Type value) => DoTypeField(EditorGUI.PrefixLabel(position, label), value);
+
+        static Type DoTypeField(Rect position, Type value)
+        {
+            float buttonWidth = GetXSize("Select Type...", GUI.skin.button);
+            position.width -= buttonWidth + 3;
+            
+            EditorGUI.LabelField(position, value.GetTypeDisplayName());
+            
+            position.x += position.width + 3;
+            position.width = buttonWidth;
+
+            GUI.Button(position, "Select Type...");
+            return value;
         }
     }
 }

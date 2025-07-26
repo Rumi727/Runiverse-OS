@@ -47,13 +47,17 @@ namespace RuniEngine
 
 
 
-        public void OnBeforeSerialize()
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             if (!hasValue)
                 value = default;
         }
 
-        public readonly void OnAfterDeserialize() { }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            if (!hasValue)
+                value = default;
+        }
 
 
 
