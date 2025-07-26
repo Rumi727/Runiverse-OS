@@ -172,8 +172,7 @@ namespace RuniEngine.Editor.Drawers
             }
             else
             {
-                if (fieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)) || (!field.IsGeneric() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect))
-                    position.width -= toggleWidth + 4;
+                position.width -= toggleWidth + 4;
 
                 BeginIndentLevel(0);
                 toggle.boolValue = EditorGUI.Toggle(toggleRect, toggle.boolValue);
