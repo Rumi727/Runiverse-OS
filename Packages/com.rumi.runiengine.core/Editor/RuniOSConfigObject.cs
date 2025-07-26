@@ -17,7 +17,7 @@ namespace RuniEngine.Editor
                 FilePath assetFolderPath = "Assets/Runiverse OS";
                 string assetPath = (assetFolderPath + typeof(T).Name).AddExtension(".asset");
 
-                T? scriptableObject = AssetDatabase.LoadAssetAtPath<T>(assetPath) ?? CreateInstance<T>();
+                T? scriptableObject = AssetDatabase.LoadAssetAtPath<T>(assetPath) ? AssetDatabase.LoadAssetAtPath<T>(assetPath) : CreateInstance<T>();
 
                 if (!AssetDatabase.AssetPathExists(assetFolderPath))
                     AssetDatabase.CreateFolder("Assets", "Runiverse OS");
