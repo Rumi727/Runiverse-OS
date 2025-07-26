@@ -31,8 +31,6 @@ namespace RuniEngine.Editor.Drawers
             BeginIndentLevel(0);
             float fieldWidth = (position.width - 15) / 2f;
 
-            position.y += 1;
-
             {
                 string keyLabel = GetTextOrKey("gui.key");
                 GUIContent keyLabelContent = new GUIContent(keyLabel);
@@ -53,7 +51,7 @@ namespace RuniEngine.Editor.Drawers
                 GUIContent valueLabelContent = new GUIContent(valueLabel);
                 
                 position.width = fieldWidth.Ceil();
-                position.height = EditorGUI.GetPropertyHeight(key, valueLabelContent);
+                position.height = EditorGUI.GetPropertyHeight(value, valueLabelContent);
 
                 BeginLabelWidth(valueLabel);
                 EditorGUI.PropertyField(position, value, valueLabelContent);
