@@ -12,7 +12,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic && property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>)))
+            if (property.propertyType == SerializedPropertyType.Generic && property.boxedValue != null && property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>)))
             {
                 field ??= property.FindPropertyRelative("value");
                 toggle ??= property.FindPropertyRelative("hasValue");
