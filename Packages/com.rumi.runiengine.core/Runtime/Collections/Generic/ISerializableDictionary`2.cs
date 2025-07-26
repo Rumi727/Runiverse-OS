@@ -7,48 +7,39 @@ namespace RuniEngine.Collections.Generic
     /// <summary>
     /// 인스펙터상에 표시되려면 이름의 가진 직렬화 가능 필드가 있어야합니다!
     /// </summary>
-    /// <typeparam name="TKey"></typeparam>
-    /// <typeparam name="TValue"></typeparam>
-    public interface ISerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver
+    public interface ISerializableDictionary<TKey, TValue, TPair> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver where TPair : ISerializableKeyValuePair<TKey?, TValue?>, new()
     {
-        IList<TKey?> serializableKeys { get; }
-        IList<TValue?> serializableValues { get; }
+        IList<TPair> pairs { get; }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
-            serializableKeys.Clear();
-            serializableValues.Clear();
-
+            pairs.Clear();
+            
             foreach (var item in this)
             {
-                serializableKeys.Add(item.Key);
-                serializableValues.Add(item.Value);
+                TPair pair = new TPair
+                {
+                    Key = item.Key,
+                    Value = item.Value
+                };
+
+                pairs.Add(pair);
             }
         }
 
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             Clear();
-            for (int i = 0; i != serializableKeys.Count.Max(serializableValues.Count); i++)
+
+            for (int i = 0; i < pairs.Count; i++)
             {
-                TKey? key;
-                if (i < serializableKeys.Count)
-                    key = serializableKeys[i];
-                else
-                    key = default;
-
-                key ??= (TKey)typeof(TKey).GetDefaultValueNotNull();
-
-                TValue? value;
-                if (i < serializableValues.Count)
-                    value = serializableValues[i];
-                else
-                    value = default;
-
-                value ??= (TValue)typeof(TValue).GetDefaultValueNotNull();
-
-                if (!ContainsKey(key))
-                    Add(key, value);
+                TPair pair = pairs[i];
+                    
+                pair.Key ??= (TKey)typeof(TKey).GetDefaultValueNotNull();
+                pair.Value ??= (TValue)typeof(TValue).GetDefaultValueNotNull();
+                    
+                if (!ContainsKey(pair.Key))
+                    Add(pair.Key, pair.Value);
             }
         }
     }

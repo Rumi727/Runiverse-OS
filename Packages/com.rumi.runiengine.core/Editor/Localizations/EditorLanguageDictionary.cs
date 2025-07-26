@@ -9,15 +9,11 @@ using UnityEngine;
 namespace RuniEngine.Editor.Localizations
 {
     [Serializable]
-    class EditorLanguageDictionary : Dictionary<string, string>, ISerializableDictionary<string, string>, ISerializableDictionary
+    class EditorLanguageDictionary : Dictionary<string, string>, ISerializableDictionary<string, string, EditorLanguageSerializableKeyValuePair>, ISerializableDictionary
     {
-        [SerializeField] List<string?> serializableKeys = new List<string?>();
-        [SerializeField, TextArea(0, 100)] List<string?> serializableValues = new List<string?>();
+        [SerializeField] List<EditorLanguageSerializableKeyValuePair> pairs = new();
 
-        IList<string?> ISerializableDictionary<string, string>.serializableKeys => serializableKeys;
-        IList<string?> ISerializableDictionary<string, string>.serializableValues => serializableValues;
-
-        IList ISerializableDictionary.serializableKeys => serializableKeys;
-        IList ISerializableDictionary.serializableValues => serializableValues;
+        IList<EditorLanguageSerializableKeyValuePair> ISerializableDictionary<string, string, EditorLanguageSerializableKeyValuePair>.pairs => pairs;
+        IList ISerializableDictionary.pairs => pairs;
     }
 }

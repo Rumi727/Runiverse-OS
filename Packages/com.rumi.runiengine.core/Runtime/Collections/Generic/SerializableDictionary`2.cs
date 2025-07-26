@@ -8,9 +8,9 @@ using UnityEngine;
 namespace RuniEngine.Collections.Generic
 {
     [Serializable]
-    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary, ISerializableDictionary<TKey, TValue>
+    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>, ISerializableDictionary
     {
-        public SerializableDictionary() : base() { }
+        public SerializableDictionary() { }
         public SerializableDictionary(int capacity) : base(capacity) { }
         public SerializableDictionary(ICollection<KeyValuePair<TKey, TValue>> collection) : base(collection) { }
         public SerializableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }
@@ -21,14 +21,10 @@ namespace RuniEngine.Collections.Generic
         public SerializableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) : base(dictionary, comparer) { }
 
 
-        [SerializeField] List<TKey?> serializableKeys = new List<TKey?>();
-        [SerializeField] List<TValue?> serializableValues = new List<TValue?>();
+        [SerializeField] List<SerializableKeyValuePair<TKey?, TValue?>> pairs = new();
 
-        IList<TKey?> ISerializableDictionary<TKey, TValue>.serializableKeys => serializableKeys;
-        IList<TValue?> ISerializableDictionary<TKey, TValue>.serializableValues => serializableValues;
-
-        IList ISerializableDictionary.serializableKeys => serializableKeys;
-        IList ISerializableDictionary.serializableValues => serializableValues;
+        IList<SerializableKeyValuePair<TKey?, TValue?>> ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>.pairs => pairs;
+        IList ISerializableDictionary.pairs => pairs;
 
         public Type keyType => typeof(TKey);
         public Type valueType => typeof(TValue);

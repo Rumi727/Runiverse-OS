@@ -14,6 +14,93 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _languageKey: en_us
   _languages:
+    pairs:
+    - key: gui.key
+      value: Key
+    - key: gui.value
+      value: Value
+    - key: gui.field_is_null
+      value: "This field is required.\r"
+    - key: gui.path
+      value: Path
+    - key: gui.min
+      value: Min
+    - key: gui.max
+      value: Max
+    - key: gui.year
+      value: Year
+    - key: gui.month
+      value: Month
+    - key: gui.day
+      value: Day
+    - key: gui.hour
+      value: Hour
+    - key: gui.minute
+      value: Minute
+    - key: gui.second
+      value: Second
+    - key: gui.millisecond
+      value: Millisecond
+    - key: gui.left
+      value: Left
+    - key: gui.right
+      value: Right
+    - key: gui.top
+      value: Top
+    - key: gui.bottom
+      value: Bottom
+    - key: gui.bottom_left
+      value: Bottom Left
+    - key: gui.top_left
+      value: Top Left
+    - key: gui.top_right
+      value: Top Right
+    - key: gui.bottom_right
+      value: Bottom Right
+    - key: gui.namespace
+      value: Namespace
+    - key: gui.extension
+      value: Extension
+    - key: gui.color
+      value: Color
+    - key: gui.invalid_type
+      value: Invalid type
+    - key: gui.major
+      value: Major
+    - key: gui.minor
+      value: Minor
+    - key: gui.patch
+      value: Patch
+    - key: serializable_dictionary_property_drawer.not_found.key
+      value: 'The serializable field "serializableKeys" does not exist.
+
+        To
+        be displayed automatically in the GUI, the field name must be exactly "serializableKeys".'
+    - key: serializable_dictionary_property_drawer.not_found.value
+      value: 'The serializable field "serializableValues" does not exist.
+
+        To
+        be displayed automatically in the GUI, the field name must be exactly "serializableValues".'
+    - key: serializable_key_value_pair_property_drawer.not_found.key
+      value: 'The serializable field "key" does not exist.
+
+        To be displayed
+        automatically in the GUI, the field name must be exactly "key".'
+    - key: serializable_key_value_pair_property_drawer.not_found.value
+      value: 'The serializable field "value" does not exist.
+
+        To be displayed
+        automatically in the GUI, the field name must be exactly "value".'
+    - key: serializable_nullable.invalid_serialization_type
+      value: Invalid serialization type
+    - key: ui.unclamped_slider.tooltip
+      value: Clamps the value independently of the slider's range. null removes the
+        limit in that direction.
+    - key: internal.auto_setter.property.info
+      value: Changed the {name} property value to allow RuniOS to work properly
+    - key: internal.auto_setter.property.value_info
+      value: Changed the {name} property value to {value} to allow RuniOS to work
+        correctly
     serializableKeys:
     - gui.key
     - gui.value

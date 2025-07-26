@@ -6,57 +6,57 @@ namespace RuniEngine.Editor
 {
     public static partial class EditorStaticTool
     {
-        public static bool IsGeneric(this SerializedProperty prop) => prop.propertyType == SerializedPropertyType.Generic;
-        public static bool IsTextField(this SerializedProperty prop) => prop.propertyType == SerializedPropertyType.Integer || prop.propertyType == SerializedPropertyType.Float || prop.propertyType == SerializedPropertyType.Character || prop.propertyType == SerializedPropertyType.String;
+        public static bool IsGeneric(this SerializedProperty property) => property.propertyType == SerializedPropertyType.Generic;
+        public static bool IsTextField(this SerializedProperty property) => property.propertyType == SerializedPropertyType.Integer || property.propertyType == SerializedPropertyType.Float || property.propertyType == SerializedPropertyType.Character || property.propertyType == SerializedPropertyType.String;
 
-        public static void SetDefaultValue(this SerializedProperty serializedProperty)
+        public static void SetDefaultValue(this SerializedProperty property)
         {
-            if (serializedProperty.isArray)
+            if (property.isArray)
             {
-                serializedProperty.ClearArray();
+                property.ClearArray();
                 return;
             }
 
-            if (serializedProperty.propertyType == SerializedPropertyType.String)
+            if (property.propertyType == SerializedPropertyType.String)
             {
-                serializedProperty.stringValue = string.Empty;
+                property.stringValue = string.Empty;
                 return;
             }
 
-            if (serializedProperty.boxedValue != null)
+            if (property.boxedValue != null)
             {
-                serializedProperty.boxedValue = serializedProperty.boxedValue.GetType().GetDefaultValue();
+                property.boxedValue = property.boxedValue.GetType().GetDefaultValue();
                 return;
             }
         }
 
-        public static bool IsNullable(this SerializedProperty serializedProperty) => serializedProperty.propertyType == SerializedPropertyType.ManagedReference || serializedProperty.propertyType == SerializedPropertyType.ObjectReference || serializedProperty.propertyType == SerializedPropertyType.ExposedReference || serializedProperty.propertyType == SerializedPropertyType.String;
+        public static bool IsNullable(this SerializedProperty property) => property.propertyType == SerializedPropertyType.ManagedReference || property.propertyType == SerializedPropertyType.ObjectReference || property.propertyType == SerializedPropertyType.ExposedReference || property.propertyType == SerializedPropertyType.String;
 
-        public static SerializedProperty? GetParent(this SerializedProperty serializedProperty)
+        public static SerializedProperty? GetParent(this SerializedProperty property)
         {
-            string path = serializedProperty.propertyPath;
+            string path = property.propertyPath;
             if (path.Contains('.'))
             {
                 int index = path.LastIndexOf('.');
                 path = path.Substring(0, index);
 
-                return serializedProperty.serializedObject.FindProperty(path);
+                return property.serializedObject.FindProperty(path);
             }
 
             return null;
         }
 
-        public static bool IsInArray(this SerializedProperty? serializedProperty)
+        public static bool IsInArray(this SerializedProperty? property)
         {
-            while ((serializedProperty = serializedProperty?.GetParent()) != null)
+            while ((property = property?.GetParent()) != null)
             {
-                if (serializedProperty.isArray)
+                if (property.isArray)
                     return true;
             }
 
             return false;
         }
 
-        public static string GetIdentifier(this SerializedProperty serializedProperty) => ReorderableListWrapper.GetPropertyIdentifier(serializedProperty);
+        public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapper.GetPropertyIdentifier(property);
     }
 }

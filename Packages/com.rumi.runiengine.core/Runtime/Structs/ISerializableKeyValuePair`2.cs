@@ -1,4 +1,5 @@
 #nullable enable
+// ReSharper disable InconsistentNaming
 #pragma warning disable IDE1006 // 명명 스타일
 namespace RuniEngine
 {
@@ -7,8 +8,8 @@ namespace RuniEngine
     /// </summary>
     public interface ISerializableKeyValuePair<TKey, TValue>
     {
-        TKey Key { get; }
-        TValue Value { get; }
+        TKey Key { get; set; }
+        TValue Value { get; set; }
     }
 }
 #pragma warning restore IDE1006 // 명명 스타일

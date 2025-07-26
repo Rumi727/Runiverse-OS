@@ -14,6 +14,94 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _languageKey: ko_kr
   _languages:
+    pairs:
+    - key: gui.key
+      value: "\uD0A4"
+    - key: gui.value
+      value: "\uAC12"
+    - key: gui.field_is_null
+      value: "null\uC77C \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
+    - key: gui.path
+      value: "\uACBD\uB85C"
+    - key: gui.min
+      value: "\uCD5C\uC18C"
+    - key: gui.max
+      value: "\uCD5C\uB300"
+    - key: gui.year
+      value: "\uB144"
+    - key: gui.month
+      value: "\uB2EC"
+    - key: gui.day
+      value: "\uC77C"
+    - key: gui.hour
+      value: "\uC2DC\uAC04"
+    - key: gui.minute
+      value: "\uBD84"
+    - key: gui.second
+      value: "\uCD08"
+    - key: gui.millisecond
+      value: "\uBC00\uB9AC\uCD08"
+    - key: gui.left
+      value: "\uC67C\uCABD"
+    - key: gui.right
+      value: "\uC624\uB978\uCABD"
+    - key: gui.top
+      value: "\uC0C1\uB2E8"
+    - key: gui.bottom
+      value: "\uD558\uB2E8"
+    - key: gui.bottom_left
+      value: "\uC67C\uCABD \uD558\uB2E8"
+    - key: gui.top_left
+      value: "\uC67C\uCABD \uC0C1\uB2E8"
+    - key: gui.top_right
+      value: "\uC624\uB978\uCABD \uC0C1\uB2E8"
+    - key: gui.bottom_right
+      value: "\uC624\uB978\uCABD \uD558\uB2E8"
+    - key: gui.namespace
+      value: "\uB124\uC784\uC2A4\uD398\uC774\uC2A4"
+    - key: gui.extension
+      value: "\uD655\uC7A5\uC790"
+    - key: gui.color
+      value: "\uC0C9\uC0C1"
+    - key: gui.invalid_type
+      value: "\uC798\uBABB\uB41C \uD0C0\uC785"
+    - key: gui.major
+      value: "\uBA54\uC774\uC800"
+    - key: gui.minor
+      value: "\uB9C8\uC774\uB108"
+    - key: gui.patch
+      value: "\uD328\uCE58"
+    - key: serializable_dictionary_property_drawer.not_found.key
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
+        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
+        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
+        \"serializableKeys\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - key: serializable_dictionary_property_drawer.not_found.value
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableValues\"\uAC00
+        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
+        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
+        \"serializableValues\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - key: serializable_key_value_pair_property_drawer.not_found.key
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"key\"\uAC00 \uC874\uC7AC\uD558\uC9C0
+        \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74
+        \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"key\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - key: serializable_key_value_pair_property_drawer.not_found.value
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"value\"\uAC00
+        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
+        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
+        \"value\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+    - key: serializable_nullable.invalid_serialization_type
+      value: "\uC798\uBABB\uB41C \uC9C1\uB82C\uD654 \uD0C0\uC785\uC785\uB2C8\uB2E4"
+    - key: ui.unclamped_slider.tooltip
+      value: "\uC2AC\uB77C\uC774\uB354 \uBC94\uC704\uC640 \uAD00\uACC4\uC5C6\uC774
+        \uC801\uC6A9\uB418\uB294 \uAC12 \uC81C\uD55C\uC785\uB2C8\uB2E4. null\uC774\uBA74
+        \uD574\uB2F9 \uBC29\uD5A5\uC73C\uB85C \uC81C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
+    - key: internal.auto_setter.property.info
+      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D
+        {name} \uC18D\uC131 \uAC12\uC744 \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
+    - key: internal.auto_setter.property.value_info
+      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D
+        {name} \uC18D\uC131 \uAC12\uC744 {value}\uC73C(\uB85C) \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
     serializableKeys:
     - gui.key
     - gui.value
