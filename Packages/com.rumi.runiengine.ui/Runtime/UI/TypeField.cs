@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using Unity.Properties;
-using UnityEngine.Search;
 using UnityEngine.UIElements;
 
 namespace RuniEngine.UI
@@ -153,7 +152,7 @@ namespace RuniEngine.UI
                     queryBuilderEnabled = true,
                     hideTabs = true,
                     selectHandler = Select,
-                    flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle)
+                    flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
                 };
                 UnityEditor.Search.SearchService.ShowPicker(viewState);
 

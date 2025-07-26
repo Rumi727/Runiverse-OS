@@ -621,26 +621,49 @@ namespace RuniEngine.Editor
         
         
         
-        public static Type TypeFieldLayout(Type value) => TypeField(EditorGUILayout.GetControlRect(), value);
-        public static Type TypeFieldLayout(string label, Type value) => TypeField(EditorGUILayout.GetControlRect(), label, value);
-        public static Type TypeFieldLayout(GUIContent label, Type value) => TypeField(EditorGUILayout.GetControlRect(), label, value);
+        public static void TypeFieldLayout(Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), value, result, baseType);
+        public static void TypeFieldLayout(string label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, result, baseType);
+        public static void TypeFieldLayout(GUIContent label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, result, baseType);
 
-        public static Type TypeField(Rect position, Type value) => DoTypeField(position, value);
-        public static Type TypeField(Rect position, string label, Type value) => TypeField(position, new GUIContent(label), value);
-        public static Type TypeField(Rect position, GUIContent label, Type value) => DoTypeField(EditorGUI.PrefixLabel(position, label), value);
+        public static void TypeField(Rect position, Type? value, Action<Type?>? result, Type? baseType = null) => DoTypeField(position, value, result, baseType);
+        public static void TypeField(Rect position, string label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(position, new GUIContent(label), value, result, baseType);
+        public static void TypeField(Rect position, GUIContent label, Type? value, Action<Type?>? result, Type? baseType = null) => DoTypeField(EditorGUI.PrefixLabel(position, label), value, result, baseType);
 
-        static Type DoTypeField(Rect position, Type value)
+        static void DoTypeField(Rect position, Type? value, Action<Type?>? result, Type? baseType)
         {
-            float buttonWidth = GetXSize("Select Type...", GUI.skin.button);
+            string buttonText = GetTextOrKey("gui.type_field.select_type");
+            float buttonWidth = GetXSize(buttonText, GUI.skin.button);
+            
             position.width -= buttonWidth + 3;
             
-            EditorGUI.LabelField(position, value.GetTypeDisplayName());
+            EditorGUI.LabelField(position, value?.SerializeToString() ?? GetTextOrKey("gui.none"));
             
             position.x += position.width + 3;
             position.width = buttonWidth;
 
-            GUI.Button(position, "Select Type...");
-            return value;
+            if (GUI.Button(position, buttonText))
+            {
+                var provider = APIBridge.UnityEditor.UIElements.TypeSearchProvider.CreateInstance(baseType ?? typeof(object));
+                var context = UnityEditor.Search.SearchService.CreateContext(provider.instance, "type:");
+                var viewState = new UnityEditor.Search.SearchViewState(context)
+                {
+                    title = "Type",
+                    queryBuilderEnabled = true,
+                    hideTabs = true,
+                    selectHandler = (UnityEditor.Search.SearchItem item, bool cancelled) =>
+                    {
+                        if (cancelled)
+                            return;
+                        
+                        if (item.data is Type type)
+                            result?.Invoke(type);
+                        else
+                            result?.Invoke(null);
+                    },
+                    flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
+                };
+                UnityEditor.Search.SearchService.ShowPicker(viewState);
+            }
         }
     }
 }

@@ -71,6 +71,10 @@ MonoBehaviour:
       value: Minor
     - key: gui.patch
       value: Patch
+    - key: gui.none
+      value: None
+    - key: gui.type_field.select_type
+      value: Select Type...
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -101,90 +105,3 @@ MonoBehaviour:
     - key: internal.auto_setter.property.value_info
       value: Changed the {name} property value to {value} to allow RuniOS to work
         correctly
-    serializableKeys:
-    - gui.key
-    - gui.value
-    - gui.field_is_null
-    - gui.path
-    - gui.min
-    - gui.max
-    - gui.year
-    - gui.month
-    - gui.day
-    - gui.hour
-    - gui.minute
-    - gui.second
-    - gui.millisecond
-    - gui.left
-    - gui.right
-    - gui.top
-    - gui.bottom
-    - gui.bottom_left
-    - gui.top_left
-    - gui.top_right
-    - gui.bottom_right
-    - gui.namespace
-    - gui.extension
-    - gui.color
-    - gui.invalid_type
-    - gui.major
-    - gui.minor
-    - gui.patch
-    - serializable_dictionary_property_drawer.not_found.key
-    - serializable_dictionary_property_drawer.not_found.value
-    - serializable_key_value_pair_property_drawer.not_found.key
-    - serializable_key_value_pair_property_drawer.not_found.value
-    - serializable_nullable.invalid_serialization_type
-    - ui.unclamped_slider.tooltip
-    - internal.auto_setter.property.info
-    - internal.auto_setter.property.value_info
-    serializableValues:
-    - Key
-    - Value
-    - "This field is required.\r"
-    - Path
-    - Min
-    - Max
-    - Year
-    - Month
-    - Day
-    - Hour
-    - Minute
-    - Second
-    - Millisecond
-    - Left
-    - Right
-    - Top
-    - Bottom
-    - Bottom Left
-    - Top Left
-    - Top Right
-    - Bottom Right
-    - Namespace
-    - Extension
-    - Color
-    - Invalid type
-    - Major
-    - Minor
-    - Patch
-    - 'The serializable field "serializableKeys" does not exist.
-
-      To be displayed
-      automatically in the GUI, the field name must be exactly "serializableKeys".'
-    - 'The serializable field "serializableValues" does not exist.
-
-      To be displayed
-      automatically in the GUI, the field name must be exactly "serializableValues".'
-    - 'The serializable field "key" does not exist.
-
-      To be displayed automatically
-      in the GUI, the field name must be exactly "key".'
-    - 'The serializable field "value" does not exist.
-
-      To be displayed automatically
-      in the GUI, the field name must be exactly "value".'
-    - Invalid serialization type
-    - Clamps the value independently of the slider's range. null removes the limit
-      in that direction.
-    - Changed the {name} property value to allow RuniOS to work properly
-    - Changed the {name} property value to {value} to allow RuniOS to work correctly
