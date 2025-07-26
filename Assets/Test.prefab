@@ -1,0 +1,792 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &420919353065644578
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3326928128437109631}
+  - component: {fileID: 3920671259197382881}
+  - component: {fileID: 2859357255860281847}
+  m_Layer: 0
+  m_Name: Test
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3326928128437109631
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420919353065644578}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.4630636, y: -0.092207536, z: -0.4633924, w: 0.7498916}
+  m_LocalPosition: {x: 0, y: 0, z: -4.44}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 37.52, y: -45.68, z: -79.71}
+--- !u!114 &3920671259197382881
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420919353065644578}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 538b91b5762f6c849a6527da3b470f5a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  document: {fileID: 2859357255860281847}
+  _a: 
+  list: []
+  stringList: []
+  stringList2: []
+  stringList3: []
+  serializableDictionary:
+    pairs:
+    - key: fdsfafsf
+      value: {fileID: 0}
+    - key: fdsaf
+      value: {fileID: 0}
+  serializableDictionary2:
+    pairs:
+    - key: sadfsadf
+      value: 0
+    - key: asdfas
+      value: 0
+  serializableDictionary3:
+    pairs:
+    - key: fadsfsad
+      value:
+        pairs:
+        - key: asf
+          value:
+            test3:
+              value:
+                asdf2: 0
+              hasValue: 0
+            asdf: 0
+            vector4: {x: 0, y: 0, z: 0, w: 0}
+            version:
+              _major:
+                value: 0
+                hasValue: 0
+              _minor:
+                value: 0
+                hasValue: 0
+              _patch:
+                value: 0
+                hasValue: 0
+            versionRange:
+              min:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+              max:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+            identifier:
+              _nameSpace: 
+              _path:
+                _value: 
+            nInt:
+              value: 0
+              hasValue: 0
+            nUInt:
+              value: 0
+              hasValue: 0
+            nLong:
+              value: 0
+              hasValue: 0
+            nFloat:
+              value: 0
+              hasValue: 0
+            nDouble:
+              value: 0
+              hasValue: 0
+            nDecimal:
+              hasValue: 0
+            nDecimal2:
+              hasValue: 0
+            nIdentifier:
+              value:
+                _nameSpace: 
+                _path:
+                  _value: 
+              hasValue: 0
+            nVector4:
+              value: {x: 0, y: 0, z: 0, w: 0}
+              hasValue: 0
+            nRect:
+              value:
+                serializedVersion: 2
+                x: 0
+                y: 0
+                width: 0
+                height: 0
+              hasValue: 0
+            nColor:
+              value: {r: 0, g: 0, b: 0, a: 0}
+              hasValue: 0
+            nEnum:
+              value: 0
+              hasValue: 0
+            nChar:
+              value: 0
+              hasValue: 0
+            char: 0
+            slider: 0
+            filePath:
+              _value: 
+            fileExtension:
+              _value: 
+            hexColor:
+              _value: '#00000000'
+            rectCorner:
+              bottomLeft: {x: 0, y: 0}
+              topLeft: {x: 0, y: 0}
+              topRight: {x: 0, y: 0}
+              bottomRight: {x: 0, y: 0}
+            rectOffset:
+              left: 0
+              right: 0
+              top: 0
+              bottom: 0
+            unlimitedDateTime:
+              year: 0
+              month: 0
+              day: 0
+              hour: 0
+              minute: 0
+              second: 0
+              millisecond: 0
+        - key: fdsaf
+          value:
+            test3:
+              value:
+                asdf2: 0
+              hasValue: 0
+            asdf: 0
+            vector4: {x: 0, y: 0, z: 0, w: 0}
+            version:
+              _major:
+                value: 0
+                hasValue: 0
+              _minor:
+                value: 0
+                hasValue: 0
+              _patch:
+                value: 0
+                hasValue: 0
+            versionRange:
+              min:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+              max:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+            identifier:
+              _nameSpace: 
+              _path:
+                _value: 
+            nInt:
+              value: 0
+              hasValue: 0
+            nUInt:
+              value: 0
+              hasValue: 0
+            nLong:
+              value: 0
+              hasValue: 0
+            nFloat:
+              value: 0
+              hasValue: 0
+            nDouble:
+              value: 0
+              hasValue: 0
+            nDecimal:
+              hasValue: 0
+            nDecimal2:
+              hasValue: 0
+            nIdentifier:
+              value:
+                _nameSpace: 
+                _path:
+                  _value: 
+              hasValue: 0
+            nVector4:
+              value: {x: 0, y: 0, z: 0, w: 0}
+              hasValue: 0
+            nRect:
+              value:
+                serializedVersion: 2
+                x: 0
+                y: 0
+                width: 0
+                height: 0
+              hasValue: 0
+            nColor:
+              value: {r: 0, g: 0, b: 0, a: 0}
+              hasValue: 0
+            nEnum:
+              value: 0
+              hasValue: 0
+            nChar:
+              value: 0
+              hasValue: 0
+            char: 0
+            slider: 0
+            filePath:
+              _value: 
+            fileExtension:
+              _value: 
+            hexColor:
+              _value: '#00000000'
+            rectCorner:
+              bottomLeft: {x: 0, y: 0}
+              topLeft: {x: 0, y: 0}
+              topRight: {x: 0, y: 0}
+              bottomRight: {x: 0, y: 0}
+            rectOffset:
+              left: 0
+              right: 0
+              top: 0
+              bottom: 0
+            unlimitedDateTime:
+              year: 0
+              month: 0
+              day: 0
+              hour: 0
+              minute: 0
+              second: 0
+              millisecond: 0
+    - key: fdasfsaf
+      value:
+        pairs: []
+    - key: sdfgfgf
+      value:
+        pairs:
+        - key: fdsafs
+          value:
+            test3:
+              value:
+                asdf2: 0
+              hasValue: 0
+            asdf: 0
+            vector4: {x: 0, y: 0, z: 0, w: 0}
+            version:
+              _major:
+                value: 0
+                hasValue: 0
+              _minor:
+                value: 0
+                hasValue: 0
+              _patch:
+                value: 0
+                hasValue: 0
+            versionRange:
+              min:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+              max:
+                _major:
+                  value: 0
+                  hasValue: 0
+                _minor:
+                  value: 0
+                  hasValue: 0
+                _patch:
+                  value: 0
+                  hasValue: 0
+            identifier:
+              _nameSpace: 
+              _path:
+                _value: 
+            nInt:
+              value: 0
+              hasValue: 0
+            nUInt:
+              value: 0
+              hasValue: 0
+            nLong:
+              value: 0
+              hasValue: 0
+            nFloat:
+              value: 0
+              hasValue: 0
+            nDouble:
+              value: 0
+              hasValue: 0
+            nDecimal:
+              hasValue: 0
+            nDecimal2:
+              hasValue: 0
+            nIdentifier:
+              value:
+                _nameSpace: 
+                _path:
+                  _value: 
+              hasValue: 0
+            nVector4:
+              value: {x: 0, y: 0, z: 0, w: 0}
+              hasValue: 0
+            nRect:
+              value:
+                serializedVersion: 2
+                x: 0
+                y: 0
+                width: 0
+                height: 0
+              hasValue: 0
+            nColor:
+              value: {r: 0, g: 0, b: 0, a: 0}
+              hasValue: 0
+            nEnum:
+              value: 0
+              hasValue: 0
+            nChar:
+              value: 0
+              hasValue: 0
+            char: 0
+            slider: 0
+            filePath:
+              _value: 
+            fileExtension:
+              _value: 
+            hexColor:
+              _value: '#00000000'
+            rectCorner:
+              bottomLeft: {x: 0, y: 0}
+              topLeft: {x: 0, y: 0}
+              topRight: {x: 0, y: 0}
+              bottomRight: {x: 0, y: 0}
+            rectOffset:
+              left: 0
+              right: 0
+              top: 0
+              bottom: 0
+            unlimitedDateTime:
+              year: 0
+              month: 0
+              day: 0
+              hour: 0
+              minute: 0
+              second: 0
+              millisecond: 0
+  test2:
+    test3:
+      value:
+        asdf2: 0
+      hasValue: 1
+    asdf: 0
+    vector4: {x: 0, y: 0, z: 0, w: 0}
+    version:
+      _major:
+        value: 0
+        hasValue: 0
+      _minor:
+        value: 0
+        hasValue: 0
+      _patch:
+        value: 0
+        hasValue: 0
+    versionRange:
+      min:
+        _major:
+          value: 0
+          hasValue: 0
+        _minor:
+          value: 0
+          hasValue: 0
+        _patch:
+          value: 0
+          hasValue: 0
+      max:
+        _major:
+          value: 0
+          hasValue: 0
+        _minor:
+          value: 0
+          hasValue: 0
+        _patch:
+          value: 0
+          hasValue: 0
+    identifier:
+      _nameSpace: fdsfdasfdf
+      _path:
+        _value: fdssassdffsf
+    nInt:
+      value: 0
+      hasValue: 0
+    nUInt:
+      value: 0
+      hasValue: 0
+    nLong:
+      value: 0
+      hasValue: 0
+    nFloat:
+      value: 0
+      hasValue: 0
+    nDouble:
+      value: 0
+      hasValue: 0
+    nDecimal:
+      hasValue: 0
+    nDecimal2:
+      hasValue: 0
+    nIdentifier:
+      value:
+        _nameSpace: 
+        _path:
+          _value: 
+      hasValue: 0
+    nVector4:
+      value: {x: 0, y: 0, z: 0, w: 0}
+      hasValue: 0
+    nRect:
+      value:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 0
+        height: 0
+      hasValue: 0
+    nColor:
+      value: {r: 0, g: 0, b: 0, a: 0}
+      hasValue: 0
+    nEnum:
+      value: 0
+      hasValue: 0
+    nChar:
+      value: 97
+      hasValue: 1
+    char: 97
+    slider: 0
+    filePath:
+      _value: 
+    fileExtension:
+      _value: 
+    hexColor:
+      _value: '#FF0000'
+    rectCorner:
+      bottomLeft: {x: 0, y: 0}
+      topLeft: {x: 0, y: 0}
+      topRight: {x: 0, y: 0}
+      bottomRight: {x: 0, y: 0}
+    rectOffset:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+    unlimitedDateTime:
+      year: 0
+      month: 0
+      day: 0
+      hour: 0
+      minute: 0
+      second: 0
+      millisecond: 0
+  test3Ref:
+    rid: 3096582668136218625
+  vector4: {x: -2.5, y: 0, z: 0, w: 0}
+  version:
+    _major:
+      value: 0
+      hasValue: 0
+    _minor:
+      value: 0
+      hasValue: 0
+    _patch:
+      value: 0
+      hasValue: 1
+  versionRange:
+    min:
+      _major:
+        value: 0
+        hasValue: 0
+      _minor:
+        value: 0
+        hasValue: 0
+      _patch:
+        value: 0
+        hasValue: 0
+    max:
+      _major:
+        value: 0
+        hasValue: 0
+      _minor:
+        value: 0
+        hasValue: 0
+      _patch:
+        value: 0
+        hasValue: 0
+  identifier:
+    _nameSpace: asdf
+    _path:
+      _value: fdsa
+  nInt:
+    value: 67
+    hasValue: 1
+  nUInt:
+    value: 0
+    hasValue: 0
+  nLong:
+    value: 0
+    hasValue: 0
+  nFloat:
+    value: 1.12
+    hasValue: 1
+  nDouble:
+    value: 1.3
+    hasValue: 1
+  nDecimal:
+    hasValue: 1
+  nDecimal2:
+    hasValue: 0
+  nIdentifier:
+    value:
+      _nameSpace: runios
+      _path:
+        _value: asdf
+    hasValue: 1
+  nVector2:
+    value: {x: 0, y: 0}
+    hasValue: 0
+  nVector3:
+    value: {x: 0, y: 0, z: 0}
+    hasValue: 0
+  nVector4:
+    value: {x: 0, y: 0, z: 1.7, w: 0}
+    hasValue: 1
+  nRect:
+    value:
+      serializedVersion: 2
+      x: 0
+      y: 2.34
+      width: 0
+      height: 0
+    hasValue: 1
+  nColor:
+    value: {r: 1, g: 0, b: 0, a: 1}
+    hasValue: 1
+  nEnum:
+    value: 2
+    hasValue: 1
+  nChar:
+    value: 0
+    hasValue: 1
+  char: 102
+  slider: 16.94
+  filePath:
+    _value: asdfsa/asdf
+  fileExtension:
+    _value: .asdf
+  hexColor:
+    _value: '#00000000'
+  rectCorner:
+    bottomLeft: {x: 0, y: 0}
+    topLeft: {x: 0, y: 0}
+    topRight: {x: 0, y: 0}
+    bottomRight: {x: 0, y: 0}
+  rectOffset:
+    left: 0
+    right: 0
+    top: 0
+    bottom: 0
+  unlimitedDateTime:
+    year: 0
+    month: 0
+    day: 0
+    hour: 0
+    minute: 0
+    second: 0
+    millisecond: 0
+  pair:
+    key: asdfdsaf
+    value:
+      value: 0
+      hasValue: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 3096582668136218625
+      type: {class: Test/Test2, ns: , asm: Assembly-CSharp}
+      data:
+        test3:
+          value:
+            asdf2: 0
+          hasValue: 0
+        asdf: 0
+        vector4: {x: 0, y: 0, z: 0, w: 0}
+        version:
+          _major:
+            value: 0
+            hasValue: 0
+          _minor:
+            value: 0
+            hasValue: 0
+          _patch:
+            value: 0
+            hasValue: 0
+        versionRange:
+          min:
+            _major:
+              value: 0
+              hasValue: 0
+            _minor:
+              value: 0
+              hasValue: 0
+            _patch:
+              value: 0
+              hasValue: 0
+          max:
+            _major:
+              value: 0
+              hasValue: 0
+            _minor:
+              value: 0
+              hasValue: 0
+            _patch:
+              value: 0
+              hasValue: 0
+        identifier:
+          _nameSpace: 
+          _path:
+            _value: 
+        nInt:
+          value: 0
+          hasValue: 0
+        nUInt:
+          value: 0
+          hasValue: 0
+        nLong:
+          value: 0
+          hasValue: 0
+        nFloat:
+          value: 0
+          hasValue: 0
+        nDouble:
+          value: 0
+          hasValue: 0
+        nDecimal:
+          hasValue: 0
+        nDecimal2:
+          hasValue: 0
+        nIdentifier:
+          value:
+            _nameSpace: 
+            _path:
+              _value: 
+          hasValue: 0
+        nVector4:
+          value: {x: 0, y: 0, z: 0, w: 0}
+          hasValue: 0
+        nRect:
+          value:
+            serializedVersion: 2
+            x: 0
+            y: 0
+            width: 0
+            height: 0
+          hasValue: 0
+        nColor:
+          value: {r: 0, g: 0, b: 0, a: 0}
+          hasValue: 0
+        nEnum:
+          value: 0
+          hasValue: 0
+        nChar:
+          value: 97
+          hasValue: 1
+        char: 97
+        slider: 0
+        filePath:
+          _value: 
+        fileExtension:
+          _value: 
+        hexColor:
+          _value: '#00000000'
+        rectCorner:
+          bottomLeft: {x: 0, y: 0}
+          topLeft: {x: 0, y: 0}
+          topRight: {x: 0, y: 0}
+          bottomRight: {x: 0, y: 0}
+        rectOffset:
+          left: 0
+          right: 0
+          top: 0
+          bottom: 0
+        unlimitedDateTime:
+          year: 0
+          month: 0
+          day: 0
+          hour: 0
+          minute: 0
+          second: 0
+          millisecond: 0
+--- !u!114 &2859357255860281847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 420919353065644578}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_PanelSettings: {fileID: 11400000, guid: c1a65cc2bc2b2064888a750ebfe24408, type: 2}
+  m_ParentUI: {fileID: 0}
+  sourceAsset: {fileID: 9197481963319205126, guid: 9cdd7e61695d9cd43b19a08bf7512e85, type: 3}
+  m_SortingOrder: 0
+  m_Position: 0
+  m_WorldSpaceSizeMode: 0
+  m_WorldSpaceWidth: 310
+  m_WorldSpaceHeight: 1013.8
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}
