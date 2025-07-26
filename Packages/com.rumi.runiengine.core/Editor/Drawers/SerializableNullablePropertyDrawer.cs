@@ -175,13 +175,13 @@ namespace RuniEngine.Editor.Drawers
             }
             else
             {
-                if (!field.IsChildrenIncluded() && field.propertyType != SerializedPropertyType.Rect)
+                if (!field.IsChildrenIncluded() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect)
                     position.width -= toggleWidth + 4;
 
                 BeginIndentLevel(0);
                 toggle.boolValue = EditorGUI.Toggle(toggleRect, toggle.boolValue);
                 EndIndentLevel();
-
+                
                 if (toggle.boolValue)
                     EditorGUI.PropertyField(position, field, label, field.IsChildrenIncluded());
                 else
