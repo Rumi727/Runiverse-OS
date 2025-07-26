@@ -12,7 +12,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
             TooltipAttribute attribute = (TooltipAttribute)this.attribute;
             label.tooltip = EditorTool.GetTextOrKey(attribute.text);
 
-            EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+            EditorGUI.PropertyField(position, property, label, property.IsGeneric());
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);

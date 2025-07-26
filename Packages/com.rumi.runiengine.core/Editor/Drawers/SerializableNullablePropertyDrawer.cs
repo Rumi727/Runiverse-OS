@@ -165,7 +165,7 @@ namespace RuniEngine.Editor.Drawers
                     }
                 }
                 else
-                    EditorGUI.PropertyField(fieldRect, field, label, field.IsChildrenIncluded());
+                    EditorGUI.PropertyField(fieldRect, field, label, field.IsGeneric());
 
                 {
                     BeginIndentLevel(0);
@@ -175,7 +175,7 @@ namespace RuniEngine.Editor.Drawers
             }
             else
             {
-                if (!field.IsChildrenIncluded() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect)
+                if (!field.IsGeneric() && field.propertyType != SerializedPropertyType.Vector2 && field.propertyType != SerializedPropertyType.Rect)
                     position.width -= toggleWidth + 4;
 
                 BeginIndentLevel(0);
@@ -183,7 +183,7 @@ namespace RuniEngine.Editor.Drawers
                 EndIndentLevel();
                 
                 if (toggle.boolValue)
-                    EditorGUI.PropertyField(position, field, label, field.IsChildrenIncluded());
+                    EditorGUI.PropertyField(position, field, label, field.IsGeneric());
                 else
                     EditorGUI.LabelField(position, label, new GUIContent($"null ({field.type})"));
             }

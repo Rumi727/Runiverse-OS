@@ -14,7 +14,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.IsChildrenIncluded() && !property.IsInArray() && (property.boxedValue == null || !property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>))))
+            if (property.IsGeneric() && !property.IsInArray() && (property.boxedValue == null || !property.boxedValue.GetType().IsAssignableToGenericDefinition(typeof(SerializableNullable<>))))
             {
                 label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
                 animBool ??= new AnimBool(property.isExpanded);
@@ -28,7 +28,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                         GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + headHeight + 3 + 0f.Lerp(childHeight, animBool.faded)));
                     }
 
-                    EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+                    EditorGUI.PropertyField(position, property, label, property.IsGeneric());
 
                     if (animBool.isAnimating)
                         GUI.EndClip();
@@ -38,12 +38,12 @@ namespace RuniEngine.Editor.Drawers.Attributes
                     RepaintCurrentWindow();
             }
             else
-                EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (property.IsChildrenIncluded() && !property.IsInArray())
+            if (property.IsGeneric() && !property.IsInArray())
             {
                 animBool ??= new AnimBool(property.isExpanded);
                 animBool.target = property.isExpanded;
@@ -58,7 +58,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                 return headHeight.Lerp(childHeight, animBool.faded);
             }
             else
-                return EditorGUI.GetPropertyHeight(property, label, property.IsChildrenIncluded());
+                return EditorGUI.GetPropertyHeight(property, label, property.IsGeneric());
         }
     }
 }

@@ -25,7 +25,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                 EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
             }
             else
-                EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);

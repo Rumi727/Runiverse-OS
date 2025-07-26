@@ -15,10 +15,10 @@ namespace RuniEngine.Editor.Drawers.Attributes
             if (attribute.force || L10n.Tr(property.displayName) == label.text)
             {
                 label.text = GetTextOrKey(attribute.name);
-                EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
             }
             else
-                EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
+                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
