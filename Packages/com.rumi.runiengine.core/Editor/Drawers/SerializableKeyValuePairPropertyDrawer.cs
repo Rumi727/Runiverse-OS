@@ -72,8 +72,8 @@ namespace RuniEngine.Editor.Drawers
 
         public void InitProperty(SerializedProperty property)
         {
-            key ??= property.FindPropertyRelative("key");
-            value ??= property.FindPropertyRelative("value");
+            key ??= property.FindPropertyRelative(SerializableKeyValuePair.nameofKey);
+            value ??= property.FindPropertyRelative(SerializableKeyValuePair.nameofValue);
         }
     }
 }
