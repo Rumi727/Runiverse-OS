@@ -16,18 +16,19 @@ namespace RuniEngine.Editor.Drawers.Attributes
         {
             if (property.IsChildrenIncluded() && !property.IsInArray())
             {
+                label = new GUIContent(label); //라벨 복제 안해주면 값 바뀜
                 animBool ??= new AnimBool(property.isExpanded);
                 
                 {
                     if (animBool.isAnimating)
                     {
                         float headHeight = GetYSize(label, EditorStyles.foldout);
-                        float childHeight = EditorGUI.GetPropertyHeight(property, label) - headHeight;
+                        float childHeight = EditorGUI.GetPropertyHeight(property, label) - headHeight; //여기에서 값 바뀜
 
                         GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + headHeight + 3 + 0f.Lerp(childHeight, animBool.faded)));
                     }
 
-                    EditorGUI.PropertyField(position, property, property.IsChildrenIncluded());
+                    EditorGUI.PropertyField(position, property, label, property.IsChildrenIncluded());
 
                     if (animBool.isAnimating)
                         GUI.EndClip();
