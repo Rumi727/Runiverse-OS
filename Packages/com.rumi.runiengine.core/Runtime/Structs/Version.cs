@@ -278,16 +278,15 @@ namespace RuniEngine
         public static bool operator !=(Version lhs, VersionRange rhs) => !(lhs == rhs);
 
         /// <summary>
-        /// <see cref="Version"/>이 <see cref="VersionRange"/>의 최소 및 최대 버전보다 모두 큰지 여부를 결정합니다.
+        /// <see cref="Version"/>이 <see cref="VersionRange"/>의 최소 및 최대 버전보다 모두 작은지 여부를 결정합니다.
         /// <br/>
-        /// 이 연산자는 <paramref name="lhs"/>가 <paramref name="rhs"/>의 <see cref="VersionRange.min"/>보다 크고
-        /// 동시에 <paramref name="lhs"/>가 <paramref name="rhs"/>의 <see cref="VersionRange.max"/>보다 클 때 <see langword="true"/>를 반환합니다.
-        /// (일반적인 버전 범위의 포함 여부와는 다른 로직일 수 있습니다.)
+        /// 이 연산자는 <paramref name="lhs"/>가 <paramref name="rhs"/>의 <see cref="VersionRange.min"/>보다 작고
+        /// 동시에 <paramref name="lhs"/>가 <paramref name="rhs"/>의 <see cref="VersionRange.max"/>보다 작을 때 <see langword="true"/>를 반환합니다.
         /// </summary>
         /// <param name="lhs">왼쪽 <see cref="Version"/> 인스턴스입니다.</param>
         /// <param name="rhs">오른쪽 <see cref="VersionRange"/> 인스턴스입니다.</param>
-        /// <returns><paramref name="lhs"/>가 <paramref name="rhs"/>의 최소 및 최대 버전보다 모두 크면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-        public static bool operator <(Version lhs, VersionRange rhs) => lhs < rhs.min && lhs < rhs.max; // NOTE: The actual implementation is `lhs > rhs.min && lhs > rhs.max`, which seems contradictory to a '<' operator. The XML doc reflects the code's behavior.
+        /// <returns><paramref name="lhs"/>가 <paramref name="rhs"/>의 최소 및 최대 버전보다 모두 작으면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
+        public static bool operator <(Version lhs, VersionRange rhs) => lhs < rhs.min && lhs < rhs.max;
         
         /// <summary>
         /// <see cref="Version"/>이 <see cref="VersionRange"/>의 최소 및 최대 버전보다 모두 큰지 여부를 결정합니다.
