@@ -36,7 +36,7 @@ namespace RuniEngine
         }
 
         /// <summary>
-        /// 표준 nullable 타입 (<see cref="T?"/>) 값을 사용하여 <see cref="SerializableNullable{T}"/> 구조체의 새 인스턴스를 초기화합니다.
+        /// 표준 nullable 타입 (<see cref="Nullable{T}"/>) 값을 사용하여 <see cref="SerializableNullable{T}"/> 구조체의 새 인스턴스를 초기화합니다.
         /// <br/>
         /// <see cref="HasValue"/>는 입력 값의 <see cref="Nullable{T}.HasValue"/>에 따라 설정됩니다.
         /// </summary>

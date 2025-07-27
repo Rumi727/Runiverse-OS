@@ -22,7 +22,7 @@ namespace RuniEngine
         /// </summary>
         /// <param name="nullableType">기본 타입을 가져올 nullable 타입입니다 (예: <c>int?</c> 또는 <c>SerializableNullable&lt;int&gt;</c>).</param>
         /// <returns>
-        /// <paramref name="nullableType"/>이 <see cref="Nullable{T}"/> 또는 <see cref="ISerializableNullable{T}"/>의 인스턴스이면 해당 <typeparamref name="T"/> 타입이고,
+        /// <paramref name="nullableType"/>이 <see cref="Nullable{T}"/> 또는 <see cref="ISerializableNullable{T}"/>의 인스턴스이면 해당 T 타입이고,
         /// 그렇지 않으면 <see langword="null"/>입니다.
         /// </returns>
         public static Type? GetUnderlyingType(Type nullableType)
