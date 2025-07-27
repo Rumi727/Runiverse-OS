@@ -7,9 +7,6 @@ namespace RuniEngine.Editor.Drawers.Attributes
     [CustomPropertyDrawer(typeof(NullableFieldAttribute))]
     public class NullableFieldPropertyDrawer : PropertyDrawer
     {
-        SerializedProperty? field;
-        SerializedProperty? toggle;
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             if (property.propertyType == SerializedPropertyType.Generic && fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
@@ -27,7 +24,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic)
+            if (property.propertyType == SerializedPropertyType.Generic && fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
             {
                 (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
 
@@ -37,7 +34,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                     return EditorGUIUtility.singleLineHeight;
             }
             else
-                return EditorGUI.GetPropertyHeight(field, label);
+                return EditorGUI.GetPropertyHeight(property, label);
         }
     }
 }
