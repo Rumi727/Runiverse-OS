@@ -2,6 +2,7 @@
 using RuniEngine.Spans;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -21,7 +22,7 @@ namespace RuniEngine.IO
         public VirtualDirectory()
         {
             _root = this;
-            rootDirectoryCache = new();
+            rootDirectoryCache = new Dictionary<FilePath, VirtualDirectory?>();
         }
 
         /// <summary>
@@ -38,7 +39,7 @@ namespace RuniEngine.IO
             _name = name;
             _fullPath = parent?.fullPath + name;
 
-            rootDirectoryCache = null;
+            rootDirectoryCache = _root.rootDirectoryCache;
         }
 
         /// <summary>
@@ -105,14 +106,14 @@ namespace RuniEngine.IO
         FilePath? IVirtualNode.fullPath => fullPath;
 
         /// <summary>
-        /// 이 가상 파일 시스템 노드(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
+        /// 이 가상 디렉토리가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
         /// 즉, 이 항목이 다른 가상 파일 시스템 엔트리의 하위가 아닌, 스스로 루트 역할을 하는지 여부를 나타냅니다.
         /// </summary>
         public bool isIndependent
         {
             get
             {
-                // isDeleted 상태에서도 isIndependent를 확인해야 할 수 있으므로 ThrowDeletedException()을 호출하지 않음
+                // isDeleted 상태에서도 isIndependent를 확인해야 할 수 있으므로 ThrowIfDeletedException()을 호출하지 않음
                 // 하지만 isDeleted 상태라면 독립적이지 않다고 간주하는 것이 일반적
                 if (isDeleted)
                     return false;
@@ -131,14 +132,15 @@ namespace RuniEngine.IO
         /// 이 디렉토리의 직접적인 하위 항목(디렉토리 및 파일)을 저장하는 컬렉션입니다.<br/>
         /// 키는 항목의 이름(파일명 또는 디렉토리명)이며, 값은 해당 <see cref="IVirtualNode"/> 인스턴스입니다.
         /// </summary>
-        readonly Dictionary<string, IVirtualNode> children = new();
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal readonly Dictionary<string, IVirtualNode> children = new();
 
         /// <summary>
         /// 지정된 경로에 해당하는 <see cref="VirtualDirectory"/> 인스턴스를 캐싱하여 가져옵니다.<br/>
         /// 이 캐시는 가상 파일 시스템의 구조가 변경될 때 무효화되어야 합니다.<br/>
         /// 루트 디렉토리가 아닐 경우, 항상 <see langword="null"/> 입니다.
         /// </summary>
-        readonly Dictionary<FilePath, VirtualDirectory?>? rootDirectoryCache = null;
+        readonly Dictionary<FilePath, VirtualDirectory?> rootDirectoryCache;
 
         /// <summary>
         /// 지정된 경로에 새로운 디렉토리를 생성합니다.<br/>
@@ -234,12 +236,8 @@ namespace RuniEngine.IO
                 // 이는 디렉토리를 기대했지만 대상 경로에 파일이 있을 때 발생하는 예외입니다.
                 ThrowPathIsFileException(path, directoryName);
             }
-
-            InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
-
-            parentDirectory.children.Remove(path.GetFileName());
-            existingNode.SetDeleted(); // 디렉토리의 isDeleted 상태를 true로 설정 (하위 항목 포함)
-
+            
+            existingNode.Delete();
             return true;
         }
 
@@ -259,23 +257,17 @@ namespace RuniEngine.IO
         {
             ThrowIfDeletedException();
 
-            if (rootDirectoryCache != null)
+            // 캐시에서 먼저 시도
+            if (rootDirectoryCache.TryGetValue(fullPath + path, out VirtualDirectory? cachedDirectory))
             {
-                // 캐시에서 먼저 시도
-                if (rootDirectoryCache.TryGetValue(fullPath + path, out VirtualDirectory? cachedDirectory))
-                {
-                    // 캐시된 값이 null이라면 해당 경로에 디렉토리가 없음을 의미
-                    if (cachedDirectory == null)
-                        return null;
+                // 캐시된 값이 null이라면 해당 경로에 디렉토리가 없음을 의미
+                return cachedDirectory;
+            }
 
-                    return cachedDirectory;
-                }
-
-                if (path.IsEmpty())
-                {
-                    rootDirectoryCache[fullPath + path] = this; // 이 인스턴스의 디렉토리 캐싱
-                    return this;
-                }
+            if (path.IsEmpty())
+            {
+                rootDirectoryCache[fullPath + path] = this; // 이 인스턴스의 디렉토리 캐싱
+                return this;
             }
 
             VirtualDirectory childDirectory = this;
@@ -288,15 +280,11 @@ namespace RuniEngine.IO
                 }
 
                 // 찾지 못한 경우 캐시에 null을 저장하고 null 반환
-                if (rootDirectoryCache != null)
-                    rootDirectoryCache[fullPath + path] = null;
-
+                rootDirectoryCache[fullPath + path] = null;
                 return null;
             }
 
-            if (rootDirectoryCache != null)
-                rootDirectoryCache[fullPath + path] = childDirectory; // 찾은 디렉토리 캐싱
-
+            rootDirectoryCache[fullPath + path] = childDirectory; // 찾은 디렉토리 캐싱
             return childDirectory;
         }
 
@@ -324,7 +312,7 @@ namespace RuniEngine.IO
         {
             ThrowIfDeletedException();
 
-            if (virtualFile.isIndependent)
+            if (!virtualFile.isIndependent)
                 throw new InvalidOperationException("The virtual file is already associated with another directory and cannot be written to a new location without being explicitly moved or copied.");
 
             VirtualDirectory? directory = GetDirectory(path.GetParentPath());
@@ -390,12 +378,8 @@ namespace RuniEngine.IO
                 // 이는 파일을 기대했지만 대상 경로에 디렉토리가 있을 때 발생하는 예외입니다.
                 ThrowPathIsDirectoryException(path, fileName);
             }
-
-            InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
-
-            parentDirectory.children.Remove(path.GetFileName());
-            existingNode.SetDeleted(); // 파일의 isDeleted 상태를 true로 설정
-
+            
+            existingNode.Delete();
             return true;
         }
 
@@ -478,7 +462,7 @@ namespace RuniEngine.IO
                 ThrowDirectoryNotFoundException(path);
 
             if (includeSelf)
-                yield return new(path, initialDirectory);
+                yield return new KeyValuePair<FilePath, VirtualDirectory>(path, initialDirectory);
 
             // DFS(깊이 우선 탐색)를 위해 Stack 사용
             Stack<(FilePath currentPath, VirtualDirectory dir)> stack = new Stack<(FilePath currentPath, VirtualDirectory dir)>();
@@ -494,7 +478,7 @@ namespace RuniEngine.IO
                     if (item.Value is VirtualDirectory childDirectory)
                     {
                         FilePath newPath = currentPath + item.Key;
-                        yield return new(newPath, childDirectory); // 자식 디렉토리와 조합된 경로 반환
+                        yield return new KeyValuePair<FilePath, VirtualDirectory>(newPath, childDirectory); // 자식 디렉토리와 조합된 경로 반환
 
                         stack.Push((newPath, childDirectory)); // 자식 디렉토리와 새로운 경로를 스택에 추가하여 나중에 탐색
                     }
@@ -549,24 +533,28 @@ namespace RuniEngine.IO
 
 
         /// <summary>
-        /// 루트 디렉토리 인스턴스에 대한 캐시를 무효화합니다.<br/>
-        /// 디렉토리 구조가 변경될 때마다 이 메서드를 호출하여 캐시 일관성을 유지해야 합니다.
+        /// 루트 디렉토리 인스턴스에 대한 캐시를 무효화합니다.
         /// </summary>
-        void InvalidateCache() => root.rootDirectoryCache?.Clear();
+        public void InvalidateCache() => rootDirectoryCache.Clear();
 
 
 
         /// <summary>
-        /// 이 디렉토리의 인스턴스를 상위 디렉토리에서 제거되어 유효하지 않은 상태로 설정합니다
-        /// 이 디렉토리의 모든 하위 항목(디렉토리 및 파일)의 상태도 재귀적으로 <see langword="true"/>로 설정됩니다.
+        /// 이 디렉토리의 인스턴스를 상위 디렉토리에서 제거합니다
+        /// 이 디렉토리의 모든 하위 항목(디렉토리 및 파일)도 재귀적으로 제거합니다.
         /// </summary>
-        void SetDeleted()
+        public void Delete()
         {
+            ThrowIfDeletedException();
+            
+            InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
+            parent?.children.Remove(name);
+            
+            foreach (var item in children.ToList())
+                item.Value.Delete();
+            
             isDeleted = true; // 현재 디렉토리의 상태 업데이트
-            foreach (var item in children)
-                item.Value.SetDeleted();
         }
-        void IVirtualNode.SetDeleted() => SetDeleted();
 
 
 

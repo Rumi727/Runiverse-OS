@@ -17,31 +17,94 @@ namespace RuniEngine.IO
         /// <summary>
         /// 이 파일이 속한 가상 파일 시스템의 최상위 루트 디렉토리를 가져옵니다.
         /// </summary>
-        public VirtualDirectory? root { get; internal set; }
+        public VirtualDirectory? root
+        {
+            get
+            {
+                ThrowIfDeletedException();
+                return _root;
+            }
+            protected internal set
+            {
+                ThrowIfDeletedException();
+                _root = value;
+            }
+        }
+        VirtualDirectory? _root;
 
         /// <summary>
         /// 이 파일의 부모 디렉토리를 가져옵니다.<br/>
         /// 부모 디렉토리가 없을 경우 <see langword="null"/>입니다.
         /// </summary>
-        public VirtualDirectory? parent { get; internal set; }
+        public VirtualDirectory? parent
+        {
+            get
+            {
+                ThrowIfDeletedException();
+                return _parent;
+            }
+            protected internal set
+            {
+                ThrowIfDeletedException();
+                _parent = value;
+            }
+        }
+        VirtualDirectory? _parent;
 
         /// <summary>
         /// 이 파일의 이름입니다.
         /// 부모 디렉토리가 없을 경우 <see langword="null"/>입니다.
         /// </summary>
-        public string? name { get; internal set; }
+        public string? name
+        {
+            get
+            {
+                ThrowIfDeletedException();
+                return _name;
+            }
+            protected internal set
+            {
+                ThrowIfDeletedException();
+                _name = value;
+            }
+        }
+        string? _name;
 
         /// <summary>
         /// 이 파일의 전체 경로입니다.
         /// 부모 디렉토리가 없을 경우 <see langword="null"/>입니다.
         /// </summary>
-        public FilePath? fullPath { get; internal set; }
+        public FilePath? fullPath
+        {
+            get
+            {
+                ThrowIfDeletedException();
+                return _fullPath;
+            }
+            protected internal set
+            {
+                ThrowIfDeletedException();
+                _fullPath = value;
+            }
+        }
+        FilePath? _fullPath;
 
         /// <summary>
-        /// 이 가상 파일 시스템 엔트리(디렉토리 또는 파일)가 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
+        /// 이 가상 파일이 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
         /// 즉, 이 항목이 다른 가상 파일 시스템 엔트리의 하위가 아닌, 스스로 루트 역할을 하는지 여부를 나타냅니다.
         /// </summary>
-        public bool isIndependent => root == null && parent == null;
+        public bool isIndependent
+        {
+            get
+            {
+                // isDeleted 상태에서도 isIndependent를 확인해야 할 수 있으므로 ThrowIfDeletedException()을 호출하지 않음
+                // 하지만 isDeleted 상태라면 독립적이지 않다고 간주하는 것이 일반적
+                if (isDeleted)
+                    return false;
+
+                return root == null && parent == null;
+            }
+        }
 
         /// <summary>
         /// 이 <see cref="VirtualFile"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 상태인지 나타내는 값입니다.
@@ -87,7 +150,7 @@ namespace RuniEngine.IO
         /// </exception>
         public UniTask<byte[]> ReadAllBytesAsync()
         {
-            ThrowIfDeletedException(); // isDeleted 상태 확인 추가
+            ThrowIfDeletedException();
             return ioHandler?.ReadAllBytes() ?? UniTask.FromResult(content); // UniTask.FromResult 사용
         }
 
@@ -101,7 +164,7 @@ namespace RuniEngine.IO
         /// </exception>
         public UniTask<string> ReadAllTextAsync()
         {
-            ThrowIfDeletedException(); // isDeleted 상태 확인 추가
+            ThrowIfDeletedException();
             return ioHandler?.ReadAllText() ?? UniTask.FromResult(Encoding.UTF8.GetString(content));
         }
 
@@ -115,7 +178,7 @@ namespace RuniEngine.IO
         /// </exception>
         public UniTask<IEnumerable<string>> ReadLines()
         {
-            ThrowIfDeletedException(); // isDeleted 상태 확인 추가
+            ThrowIfDeletedException();
             return ioHandler?.ReadLines() ?? UniTask.FromResult(Encoding.UTF8.GetString(content).ReadLines());
         }
 
@@ -129,16 +192,26 @@ namespace RuniEngine.IO
         /// </exception>
         public UniTask<Stream> OpenRead()
         {
-            ThrowIfDeletedException(); // isDeleted 상태 확인 추가
+            ThrowIfDeletedException();
             return ioHandler?.OpenRead() ?? UniTask.FromResult((Stream)new MemoryStream(content, false));
         }
 
 
         /// <summary>
-        /// 이 파일의 인스턴스를 상위 디렉토리에서 제거되어 유효하지 않은 상태로 설정합니다
+        /// 이 파일의 인스턴스를 상위 디렉토리에서 제거합니다
         /// </summary>
-        void SetDeleted() => isDeleted = true;
-        void IVirtualNode.SetDeleted() => SetDeleted();
+        public void Delete()
+        {
+            ThrowIfDeletedException();
+            
+            if (parent != null && name != null)
+            {
+                parent.InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
+                parent.children.Remove(name);
+            }
+
+            isDeleted = true;
+        }
 
 
 
