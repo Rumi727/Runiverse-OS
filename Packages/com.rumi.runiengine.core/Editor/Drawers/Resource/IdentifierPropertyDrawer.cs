@@ -25,15 +25,12 @@ namespace RuniEngine.Editor.Drawers.Resource
 
             Identifier value = Identifier.empty;
             EditorGUI.BeginChangeCheck();
+
+            string nameSpaceValue = nameSpace.stringValue;
+            string pathValue = path.stringValue;
             
-            try
-            {
+            if (Identifier.IsNamespaceValid(nameSpaceValue) && Identifier.IsPathValid(pathValue))
                 value = new Identifier(nameSpace.stringValue, path.stringValue);
-            }
-            catch (InvalidIdentifierException e)
-            {
-                Debug.LogException(e);
-            }
             
             value = IdentifierField(position, label, value);
             
