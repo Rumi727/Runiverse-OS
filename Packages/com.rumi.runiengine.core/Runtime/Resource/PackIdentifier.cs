@@ -1,4 +1,5 @@
 #nullable enable
+using Newtonsoft.Json;
 using RuniEngine.IO;
 using System;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace RuniEngine.Resource
 {
     /// <summary>
     /// 팩 식별자를 나타내는 구조체입니다.
-    /// <br/>내부 ID (<see cref="internalID"/>) 또는 로컬 경로 (<see cref="localPath"/>) 중 정확히 하나만 가질 수 있습니다.
+    /// <br/>내부 ID (<see cref="identifier"/>) 또는 로컬 경로 (<see cref="path"/>) 중 정확히 하나만 가질 수 있습니다.
     /// <br/>두 필드가 모두 null이거나 모두 null이 아니면 유효하지 않은 상태로 간주됩니다.
     /// </summary>
     [Serializable]
@@ -18,36 +19,36 @@ namespace RuniEngine.Resource
         /// <summary>
         /// 팩의 내부 식별자입니다. 로컬 경로가 없을 때 사용됩니다.
         /// </summary>
-        public Identifier? internalID
+        public Identifier? identifier
         {
-            readonly get => _internalID;
+            readonly get => _identifier;
             set
             {
-                _internalID = value;
-                _localPath = null;
+                _identifier = value;
+                _path = null;
             }
         }
-        [SerializeField] SerializableNullable<Identifier> _internalID;
+        [SerializeField, JsonIgnore] SerializableNullable<Identifier> _identifier;
 
         /// <summary>
         /// 팩의 로컬 파일 시스템 경로입니다. 내부 ID가 없을 때 사용됩니다.
         /// </summary>
-        public FilePath? localPath
+        public FilePath? path
         {
-            readonly get => _localPath;
+            readonly get => _path;
             set
             {
-                _internalID = null;
-                _localPath = value;
+                _identifier = null;
+                _path = value;
             }
         }
-        [SerializeField] SerializableNullable<FilePath> _localPath;
+        [SerializeField, JsonIgnore] SerializableNullable<FilePath> _path;
 
         /// <summary>
         /// 이 식별자가 유효한 상태인지 여부를 나타냅니다.
-        /// <br/> <see cref="internalID"/>와 <see cref="localPath"/> 중 정확히 하나만 값을 가질 때 유효합니다.
+        /// <br/> <see cref="identifier"/>와 <see cref="path"/> 중 정확히 하나만 값을 가질 때 유효합니다.
         /// </summary>
-        public readonly bool isValid => (internalID != null && localPath == null) || (internalID == null && localPath != null);
+        public readonly bool isValid => (identifier != null && path == null) || (identifier == null && path != null);
 
         
         
@@ -55,27 +56,27 @@ namespace RuniEngine.Resource
         /// <see cref="PackIdentifier"/>의 새 인스턴스를 초기화합니다.
         /// 이 생성자는 내부에서 사용되며, <see cref="CreateByID"/> 또는 <see cref="CreateByPath"/> 메서드를 사용하여 인스턴스를 생성하는 것을 권장합니다.
         /// </summary>
-        /// <param name="internalID">팩의 내부 식별자입니다.</param>
-        /// <param name="localPath">팩의 로컬 경로입니다.</param>
-        PackIdentifier(Identifier? internalID, FilePath? localPath)
+        /// <param name="identifier">팩의 내부 식별자입니다.</param>
+        /// <param name="path">팩의 로컬 경로입니다.</param>
+        PackIdentifier(Identifier? identifier, FilePath? path)
         {
-            _internalID = internalID;
-            _localPath = localPath;
+            _identifier = identifier;
+            _path = path;
         }
 
         /// <summary>
         /// 내부 식별자를 사용하여 <see cref="PackIdentifier"/>의 새 인스턴스를 생성합니다.
         /// </summary>
-        /// <param name="internalID">팩의 내부 식별자입니다.</param>
+        /// <param name="identifier">팩의 내부 식별자입니다.</param>
         /// <returns>생성된 <see cref="PackIdentifier"/> 인스턴스입니다.</returns>
-        public static PackIdentifier CreateByID(Identifier internalID) => new PackIdentifier(internalID, null);
+        public static PackIdentifier CreateByID(Identifier identifier) => new PackIdentifier(identifier, null);
 
         /// <summary>
         /// 로컬 경로를 사용하여 <see cref="PackIdentifier"/>의 새 인스턴스를 생성합니다.
         /// </summary>
-        /// <param name="localPath">팩의 로컬 경로입니다.</param>
+        /// <param name="path">팩의 로컬 경로입니다.</param>
         /// <returns>생성된 <see cref="PackIdentifier"/> 인스턴스입니다.</returns>
-        public static PackIdentifier CreateByPath(FilePath localPath) => new PackIdentifier(null, localPath);
+        public static PackIdentifier CreateByPath(FilePath path) => new PackIdentifier(null, path);
 
 
 
@@ -86,7 +87,7 @@ namespace RuniEngine.Resource
         /// <list type="bullet">
         /// <item><description>두 인스턴스 모두 유효하지 않으면 (즉, <see cref="isValid"/>가 false이면) 서로 동등하다고 간주합니다 (예: "잘못된 객체끼리는 서로 동일함").</description></item>
         /// <item><description>한쪽만 유효하고 다른 쪽은 유효하지 않으면 항상 동등하지 않다고 간주합니다.</description></item>
-        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_internalID"/> 또는 <see cref="_localPath"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
+        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_identifier"/> 또는 <see cref="_path"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
         /// </list>
         /// </summary>
         /// <param name="lhs">왼쪽 <see cref="PackIdentifier"/> 인스턴스입니다.</param>
@@ -104,10 +105,10 @@ namespace RuniEngine.Resource
 
             // 두 식별자가 모두 유효한 경우, 실제 값 비교
             // isValid 속성 덕분에 internalID와 localPath 둘 중 하나만 null이 아님을 보장합니다.
-            if (lhs._internalID != null && rhs._internalID != null)
-                return lhs._internalID == rhs._internalID;
-            else if (lhs._localPath != null && rhs._localPath != null)
-                return lhs._localPath == rhs._localPath;
+            if (lhs._identifier != null && rhs._identifier != null)
+                return lhs._identifier == rhs._identifier;
+            else if (lhs._path != null && rhs._path != null)
+                return lhs._path == rhs._path;
 
             return false;
         }
@@ -119,7 +120,7 @@ namespace RuniEngine.Resource
         /// <list type="bullet">
         /// <item><description>두 인스턴스 모두 유효하지 않으면 (즉, <see cref="isValid"/>가 false이면) 서로 동등하다고 간주합니다 (예: "잘못된 객체끼리는 서로 동일함").</description></item>
         /// <item><description>한쪽만 유효하고 다른 쪽은 유효하지 않으면 항상 동등하지 않다고 간주합니다.</description></item>
-        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_internalID"/> 또는 <see cref="_localPath"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
+        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_identifier"/> 또는 <see cref="_path"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
         /// </list>
         /// </summary>
         /// <param name="lhs">왼쪽 <see cref="PackIdentifier"/> 인스턴스입니다.</param>
@@ -143,7 +144,7 @@ namespace RuniEngine.Resource
         /// <list type="bullet">
         /// <item><description>두 인스턴스 모두 유효하지 않으면 (즉, <see cref="isValid"/>가 false이면) 서로 동등하다고 간주합니다 (예: "잘못된 객체끼리는 서로 동일함").</description></item>
         /// <item><description>한쪽만 유효하고 다른 쪽은 유효하지 않으면 항상 동등하지 않다고 간주합니다.</description></item>
-        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_internalID"/> 또는 <see cref="_localPath"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
+        /// <item><description>두 인스턴스 모두 유효하면, <see cref="_identifier"/> 또는 <see cref="_path"/> 중 유효한 필드의 값이 같을 때 동등하다고 간주합니다.</description></item>
         /// </list>
         /// </summary>
         /// <param name="other">비교할 <see cref="PackIdentifier"/> 인스턴스입니다.</param>
@@ -156,7 +157,7 @@ namespace RuniEngine.Resource
         /// <br/>**해시 코드 규칙:**
         /// <list type="bullet">
         /// <item><description>유효하지 않은 모든 인스턴스 (<see cref="isValid"/>가 false인 경우)는 동일한 고정된 해시 코드 값 (<see cref="int.MinValue"/>)을 반환합니다.</description></item>
-        /// <item><description>유효한 인스턴스는 해당 <see cref="_internalID"/> 또는 <see cref="_localPath"/> 필드의 해시 코드를 반환합니다.</description></item>
+        /// <item><description>유효한 인스턴스는 해당 <see cref="_identifier"/> 또는 <see cref="_path"/> 필드의 해시 코드를 반환합니다.</description></item>
         /// </list>
         /// </summary>
         /// <returns>이 인스턴스의 해시 코드입니다.</returns>
@@ -169,45 +170,45 @@ namespace RuniEngine.Resource
 
             // 유효한 객체는 해당 식별자 필드를 기반으로 해시 코드를 반환합니다.
             // isValid 속성 덕분에 internalID와 localPath 둘 중 하나만 null이 아님을 보장합니다.
-            if (_internalID != null)
-                return _internalID.GetHashCode();
+            if (_identifier != null)
+                return _identifier.GetHashCode();
             else // localPath != null 인 경우
-                return _localPath.GetHashCode();
+                return _path.GetHashCode();
         }
 
 
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
-            if (_internalID != null)
+            if (_identifier != null)
             {
-                _localPath = null;
+                _path = null;
                 return;
             }
-            else if (_localPath != null)
+            else if (_path != null)
             {
-                _internalID = null;
+                _identifier = null;
                 return;
             }
 
-            _internalID = Identifier.empty;
-            _localPath = null;
+            _identifier = Identifier.empty;
+            _path = null;
         }
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
-            if (_internalID != null)
+            if (_identifier != null)
             {
-                _localPath = null;
+                _path = null;
                 return;
             }
-            else if (_localPath != null)
+            else if (_path != null)
             {
-                _internalID = null;
+                _identifier = null;
                 return;
             }
 
-            _internalID = Identifier.empty;
-            _localPath = null;
+            _identifier = Identifier.empty;
+            _path = null;
         }
     }
 }
