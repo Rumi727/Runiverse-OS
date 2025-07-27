@@ -18,8 +18,7 @@ namespace RuniEngine
 
             if (nullableType.IsGenericType && !nullableType.IsGenericTypeDefinition)
             {
-                Type genericType = nullableType.GetGenericTypeDefinition();
-                if (genericType == typeof(SerializableNullable<>))
+                if (nullableType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
                     return nullableType.GetGenericArguments()[0];
             }
 
