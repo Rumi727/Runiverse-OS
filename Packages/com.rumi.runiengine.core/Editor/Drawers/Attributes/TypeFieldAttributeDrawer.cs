@@ -1,6 +1,7 @@
 #nullable enable
 using RuniEngine.UIElements;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -17,6 +18,10 @@ namespace RuniEngine.Editor.Drawers.Attributes
                 label = property.displayName, 
                 bindingPath = SerializableTypePropertyDrawer.GetChildProperty(property).propertyPath
             };
+            
+            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
+            typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
+            typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
             
             return typeField;
         }

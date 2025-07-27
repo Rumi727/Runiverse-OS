@@ -1,10 +1,11 @@
 #nullable enable
-using RuniEngine.UIElements;
 using System;
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
+using TypeField = RuniEngine.UIElements.TypeField;
 using static RuniEngine.Editor.EditorTool;
 
 namespace RuniEngine.Editor.Drawers
@@ -12,11 +13,20 @@ namespace RuniEngine.Editor.Drawers
     [CustomPropertyDrawer(typeof(SerializableType))]
     public class SerializableTypePropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new TypeField
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            label = property.displayName, 
-            bindingPath = GetChildProperty(property).propertyPath
-        };
+            TypeField typeField = new TypeField
+            {
+                label = property.displayName,
+                bindingPath = GetChildProperty(property).propertyPath
+            };
+            
+            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
+            typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
+            typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
+            
+            return typeField;
+        }
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
