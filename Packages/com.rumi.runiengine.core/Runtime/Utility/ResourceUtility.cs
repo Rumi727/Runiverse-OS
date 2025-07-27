@@ -13,7 +13,7 @@ namespace RuniEngine
             get
             {
                 if (_emptyTransform == null)
-                    _emptyTransform = Resources.Load<Transform>("Empty Transform");
+                    _emptyTransform = Resources.Load<Transform>("RuniOS/Empty Transform");
 
                 return _emptyTransform;
             }
@@ -28,7 +28,7 @@ namespace RuniEngine
             get
             {
                 if (_emptyRectTransform == null)
-                    _emptyRectTransform = Resources.Load<RectTransform>("Empty Rect Transform");
+                    _emptyRectTransform = Resources.Load<RectTransform>("RuniOS/Empty Rect Transform");
 
                 return _emptyRectTransform;
             }
@@ -45,7 +45,7 @@ namespace RuniEngine
             get
             {
                 if (_defaultMaterial == null)
-                    _defaultMaterial = Resources.Load<Material>("Default Material");
+                    _defaultMaterial = Resources.Load<Material>("RuniOS/Default Material");
 
                 return _defaultMaterial;
             }
