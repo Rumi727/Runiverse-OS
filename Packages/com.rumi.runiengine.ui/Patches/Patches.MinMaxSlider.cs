@@ -14,7 +14,7 @@ namespace RuniEngine.Patches.UI
             //마진 값이 의도한대로 작동하게 수정합니다.
             [HarmonyPrefix]
             [HarmonyPatch("UpdateDragElementPosition", new Type[0])]
-            static bool UpdateDragElementPosition(MinMaxSlider __instance)
+            public static bool UpdateDragElementPosition(MinMaxSlider __instance)
             {
                 if (__instance.panel != null)
                 {
