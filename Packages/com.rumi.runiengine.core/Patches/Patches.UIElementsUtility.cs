@@ -3,6 +3,7 @@
 using HarmonyLib;
 using System;
 using System.Reflection;
+using UnityEngine.UIElements;
 
 namespace RuniEngine.Patches
 {
@@ -17,10 +18,7 @@ namespace RuniEngine.Patches
             {
                 public static MethodBase TargetMethod() => AccessTools.Method(TargetType(), "BeginContainerGUI");
                 
-                public static void Postfix()
-                {
-                    
-                }
+                public static void Postfix(IMGUIContainer container) => IMGUIUtility.currentIMGUIContainer = container;
             }
             
             [HarmonyPatch]
@@ -28,10 +26,7 @@ namespace RuniEngine.Patches
             {
                 public static MethodBase TargetMethod() => AccessTools.Method(TargetType(), "EndContainerGUI");
                 
-                public static void Postfix()
-                {
-                    
-                }
+                public static void Postfix() => IMGUIUtility.currentIMGUIContainer = null;
             }
         }
     }

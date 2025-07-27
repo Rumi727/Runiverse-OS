@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static RuniEngine.Editor.EditorTool;
 
 using EditorGUI = UnityEditor.EditorGUI;
@@ -96,7 +96,16 @@ namespace RuniEngine.Editor.Drawers.Collections.Generic
                 }
                 
                 animFloat.target = height;
-                return animFloat.value + headerHeight;
+                height = animFloat.value + headerHeight;
+                
+                if (IMGUIUtility.currentIMGUIContainer != null)
+                {
+                    StyleLength lastHeight = IMGUIUtility.currentIMGUIContainer.style.height;
+                    //IMGUIUtility.currentIMGUIContainer.style.height = Length.Pixels(height);
+                    IMGUIUtility.currentIMGUIContainer.style.height = lastHeight;
+                }
+                
+                return height;
             }
             else
                 return height + headerHeight;

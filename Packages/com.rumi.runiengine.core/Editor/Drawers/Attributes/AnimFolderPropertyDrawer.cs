@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEngine;
+using UnityEngine.UIElements;
 using static RuniEngine.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 
@@ -100,17 +101,29 @@ namespace RuniEngine.Editor.Drawers.Attributes
                 }
                 animFloat.target = property.isExpanded ? 1 : 0;
 
-                bool isExpanded = property.isExpanded;
+                if (animFloat.isAnimating)
+                {
+                    bool isExpanded = property.isExpanded;
 
-                property.isExpanded = true;
-                float childHeight = EditorGUI.GetPropertyHeight(property, label, true);
-                property.isExpanded = isExpanded;
+                    property.isExpanded = true;
+                    float childHeight = EditorGUI.GetPropertyHeight(property, label, true);
+                    property.isExpanded = isExpanded;
 
-                float headHeight = GetYSize(label, EditorStyles.foldout) + 3;
-                return headHeight.Lerp(childHeight, animFloat.value);
+                    float headHeight = EditorGUIUtility.singleLineHeight;
+                    float height = headHeight.Lerp(childHeight, animFloat.value);
+
+                    if (IMGUIUtility.currentIMGUIContainer != null)
+                    {
+                        StyleLength lastHeight = IMGUIUtility.currentIMGUIContainer.style.height;
+                        IMGUIUtility.currentIMGUIContainer.style.height = Length.Pixels(height);
+                        IMGUIUtility.currentIMGUIContainer.style.height = lastHeight;
+                    }
+
+                    return height;
+                }
             }
-            else
-                return EditorGUI.GetPropertyHeight(property, label, property.IsGeneric());
+            
+            return EditorGUI.GetPropertyHeight(property, label, property.IsGeneric());
         }
     }
 }
