@@ -70,8 +70,8 @@ namespace RuniEngine.Resource
             readonly get => string.IsNullOrEmpty(_nameSpace) ? defaultNamespace : _nameSpace;
             set
             {
-                if (value == defaultNamespace)
-                    _nameSpace = null;
+                if (string.IsNullOrEmpty(value))
+                    _nameSpace = defaultNamespace;
                 else if (IsNamespaceValid(value))
                     _nameSpace = value;
                 else
@@ -124,14 +124,8 @@ namespace RuniEngine.Resource
         /// <summary>
         /// 이 식별자의 문자열 표현을 반환합니다.
         /// </summary>
-        /// <returns>네임스페이스가 비어 있거나 기본값인 경우 "path" 형식의 문자열이고, 그렇지 않으면 "namespace:path" 형식의 문자열입니다.</returns>
-        public override readonly string ToString()
-        {
-            if (string.IsNullOrEmpty(nameSpace) || nameSpace == defaultNamespace) // 기본 네임스페이스도 짧은 문자열을 위해 고려
-                return _path.ToString();
-            else
-                return _nameSpace + separator + _path.ToString();
-        }
+        /// <returns>"namespace:path" 형식의 문자열입니다.</returns>
+        public override readonly string ToString() => nameSpace + separator + path.ToString();
 
 
 
