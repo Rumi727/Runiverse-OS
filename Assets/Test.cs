@@ -43,7 +43,7 @@ public sealed class Test : MonoBehaviour
     public SerializableNullable<Rect> nRect;
     public SerializableNullable<Color> nColor;
     public SerializableNullable<Align> nEnum;
-    public SerializableNullable<char> nChar = 'a';
+    [ReadOnlyField] public SerializableNullable<char> nChar = 'a';
     public char @char = 'a';
     [Range(10, 20)] public float slider;
     public FilePath filePath;
@@ -56,7 +56,10 @@ public sealed class Test : MonoBehaviour
     public PackIdentifier packIdentifier;
     public TextAlignment textAlignment;
     public SerializableNullable<SerializableNullable<float>> nullableNullableFloat;
-
+    [TypeField(typeof(Label))] public SerializableType type = typeof(Object);
+    [ReadOnlyField, TypeField(typeof(Label))] public SerializableType readOnlyType = typeof(Object);
+    public float test;
+    
     void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
 
     void Start()
