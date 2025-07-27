@@ -382,11 +382,11 @@ namespace RuniEngine.IO
 
 
         /// <summary>
-        /// 현재 경로를 "file:///" 접두사가 붙은 URL 호환 문자열로 변환한 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
+        /// 현재 경로를 "file:///" 접두사가 붙은 URL 호환 문자열로 변환한 문자열을 반환합니다.<br/>
         /// 경로 내의 특수 문자는 <see cref="UnityWebRequest.EscapeURL(string)"/>을 사용하여 URL 인코딩됩니다.
         /// </summary>
-        /// <returns>"file:///" 접두사가 붙고 URL 인코딩된 새 <see cref="FilePath"/> 인스턴스.</returns>
-        public readonly FilePath UrlPathPrefix() => urlPathPrefix + UnityWebRequest.EscapeURL(value);
+        /// <returns>"file:///" 접두사가 붙고 URL 인코딩된 문자열.</returns>
+        public readonly string UrlPathPrefix() => urlPathPrefix + UnityWebRequest.EscapeURL(value);
 
 
 
