@@ -29,11 +29,9 @@ namespace RuniEngine.Editor.Drawers
             {
                 EditorGUI.LabelField(position, label, new GUIContent($"{GetTextOrKey("serializable_nullable.invalid_serialization_type")}"));
 
-                int indentLevel = EditorGUI.indentLevel;
-                EditorGUI.indentLevel = 0;
-
+                BeginIndentLevel(0);
                 toggle.boolValue = EditorGUI.Toggle(toggleRect, toggle.boolValue);
-                EditorGUI.indentLevel = indentLevel;
+                EndIndentLevel();
 
                 return;
             }

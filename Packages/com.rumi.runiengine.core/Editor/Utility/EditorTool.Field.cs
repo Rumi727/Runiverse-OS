@@ -57,6 +57,8 @@ namespace RuniEngine.Editor
                     break;
                 }
             }
+            
+            BeginIndentLevel(0);
 
             EditorGUI.BeginChangeCheck();
             stringValue = EditorGUI.TextField(position, stringValue);
@@ -93,6 +95,8 @@ namespace RuniEngine.Editor
                     }
                 }
             }
+            
+            EndIndentLevel();
 
             return value;
         }
