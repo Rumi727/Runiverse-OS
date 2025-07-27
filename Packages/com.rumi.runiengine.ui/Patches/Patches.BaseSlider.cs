@@ -20,7 +20,7 @@ namespace RuniEngine.Patches.UI
             [HarmonyPatch]
             public static class UpdateFillPatch
             {
-                static IEnumerable<MethodBase> TargetMethods()
+                public static IEnumerable<MethodBase> TargetMethods()
                 {
                     // BaseSlider<> 제네릭 정의를 가져옵니다.
                     Type genericBaseSliderType = typeof(BaseSlider<>);
@@ -46,7 +46,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static bool Prefix(object __instance, float normalizedValue)
+                public static bool Prefix(object __instance, float normalizedValue)
                 {
                     Type instanceType = __instance.GetType();
 
@@ -124,7 +124,7 @@ namespace RuniEngine.Patches.UI
             [HarmonyPatch]
             public static class UpdateDragElementPositionPatch
             {
-                static IEnumerable<MethodBase> TargetMethods()
+                public static IEnumerable<MethodBase> TargetMethods()
                 {
                     Type genericBaseSliderType = typeof(BaseSlider<>);
 
@@ -145,7 +145,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     var codes = instructions.ToList();
                     int normalizeCallIndex = -1;
@@ -174,7 +174,7 @@ namespace RuniEngine.Patches.UI
             [HarmonyPatch]
             public static class ValueSetterChangePatch
             {
-                static IEnumerable<MethodBase> TargetMethods()
+                public static IEnumerable<MethodBase> TargetMethods()
                 {
                     Type genericBaseSliderType = typeof(BaseSlider<>);
 
@@ -195,7 +195,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static void Prefix(object __instance, ref object value)
+                public static void Prefix(object __instance, ref object value)
                 {
                     if (__instance is IUnclampedSlider unclampedSlider)
                     {
@@ -206,7 +206,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static void Postfix(object __instance)
+                public static void Postfix(object __instance)
                 {
                     if (__instance is IUnclampedSlider unclampedSlider and VisualElement visualElement)
                     {
@@ -224,7 +224,7 @@ namespace RuniEngine.Patches.UI
             [HarmonyPatch]
             public static class OnTextFieldValueChangePatch
             {
-                static IEnumerable<MethodBase> TargetMethods()
+                public static IEnumerable<MethodBase> TargetMethods()
                 {
                     Type genericBaseSliderType = typeof(BaseSlider<>);
 
@@ -245,7 +245,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     var codes = instructions.ToList();
 
@@ -283,7 +283,7 @@ namespace RuniEngine.Patches.UI
             [HarmonyPatch]
             public static class AdjustDragElementPatch
             {
-                static IEnumerable<MethodBase> TargetMethods()
+                public static IEnumerable<MethodBase> TargetMethods()
                 {
                     Type genericBaseSliderType = typeof(BaseSlider<>);
 
@@ -304,7 +304,7 @@ namespace RuniEngine.Patches.UI
                     }
                 }
 
-                static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+                public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
                 {
                     CodeMatcher codeMatcher = new CodeMatcher(instructions);
                     codeMatcher.MatchStartForward(Code.Brfalse);
@@ -331,9 +331,9 @@ namespace RuniEngine.Patches.UI
                     return codeMatcher.Instructions();
                 }
 
-                static void Prefix(ref float factor) => factor = factor.Clamp01();
+                public static void Prefix(ref float factor) => factor = factor.Clamp01();
 
-                static void Postfix(object __instance, float factor)
+                public static void Postfix(object __instance, float factor)
                 {
                     if (__instance is VisualElement visualElement)
                         visualElement.EnableInClassList(RuniScrollView.scrollerOutOfRangeUssClassName, factor >= 1);
