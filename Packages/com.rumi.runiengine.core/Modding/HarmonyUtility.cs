@@ -4,7 +4,7 @@ using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
 
-namespace RuniEngine.Modding
+namespace RuniEngine.Patches
 {
     public static class HarmonyUtility
     {

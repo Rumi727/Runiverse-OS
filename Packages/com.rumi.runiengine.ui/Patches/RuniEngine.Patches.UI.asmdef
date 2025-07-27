@@ -1,6 +1,6 @@
 {
-    "name": "RuniEngine.Modding.UI",
-    "rootNamespace": "RuniEngine.Modding.UI",
+    "name": "RuniEngine.Patches.UI",
+    "rootNamespace": "RuniEngine.Patches.UI",
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:c77e46b23ddba8e4dae2558b74e85ac5",

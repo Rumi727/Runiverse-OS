@@ -10,7 +10,7 @@ using System.Linq;
 using UnityEngine;
 using RuniEngine.UI;
 
-namespace RuniEngine.Modding.UI
+namespace RuniEngine.Patches.UI
 {
     public static partial class Patches
     {
@@ -88,13 +88,12 @@ namespace RuniEngine.Modding.UI
                         normalizedValue = 1 - normalizedValue;
                         if (direction == SliderDirection.Vertical)
                         {
-                            Length length;
-                            if (normalizedValue > 1)
-                                length = Length.Percent(100);
-                            else if (normalizedValue < 0)
-                                length = Length.Percent(0);
-                            else
-                                length = Length.Pixels((trackElement.contentRect.height * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingBottom : trackElement.resolvedStyle.paddingTop));
+                            Length length = normalizedValue switch
+                            {
+                                > 1 => Length.Percent(100),
+                                < 0 => Length.Percent(0),
+                                _ => Length.Pixels((trackElement.contentRect.height * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingBottom : trackElement.resolvedStyle.paddingTop))
+                            };
 
                             fillElement.style.right = 0f;
                             fillElement.style.left = 0f;
@@ -103,13 +102,12 @@ namespace RuniEngine.Modding.UI
                         }
                         else
                         {
-                            Length length;
-                            if (normalizedValue > 1)
-                                length = Length.Percent(100);
-                            else if (normalizedValue < 0)
-                                length = Length.Percent(0);
-                            else
-                                length = Length.Pixels(((trackElement.contentRect.width * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingLeft : trackElement.resolvedStyle.paddingRight)));
+                            Length length = normalizedValue switch
+                            {
+                                > 1 => Length.Percent(100),
+                                < 0 => Length.Percent(0),
+                                _ => Length.Pixels(((trackElement.contentRect.width * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingLeft : trackElement.resolvedStyle.paddingRight)))
+                            };
 
                             fillElement.style.top = 0f;
                             fillElement.style.bottom = 0f;

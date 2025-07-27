@@ -4,7 +4,7 @@ using HarmonyLib;
 using System;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.Modding.UI
+namespace RuniEngine.Patches.UI
 {
     public static partial class Patches
     {
