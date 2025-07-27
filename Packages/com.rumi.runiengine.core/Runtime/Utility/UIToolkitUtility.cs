@@ -1,4 +1,5 @@
 #nullable enable
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace RuniEngine
@@ -8,6 +9,21 @@ namespace RuniEngine
     /// </summary>
     public static class UIToolkitUtility
     {
+        /// <summary>
+        /// RuniOS 컨트롤 스타일
+        /// </summary>
+        public static StyleSheet rosControlStyle
+        {
+            get
+            {
+                if (_rosControlStyle == null)
+                    _rosControlStyle = Resources.Load<StyleSheet>("RuniOS/UI Elements/ROS Control Style");
+
+                return _rosControlStyle;
+            }
+        }
+        static StyleSheet? _rosControlStyle;
+        
 #if UNITY_EDITOR
         /// <summary>
         /// 지정된 <see cref="VisualElement"/>가 런타임 패널에 속하는지 여부를 반환합니다.
