@@ -23,7 +23,7 @@
     --transition-duration: 0.2s;
     font-size: 12px;
     color: var(--label-color);
-    -unity-font-definition: resource('Fonts/Pretendard/Pretendard');
+    -unity-font-definition: resource('RuniOS/Fonts/Pretendard/Pretendard');
 }
 
 .runios-background-element {
