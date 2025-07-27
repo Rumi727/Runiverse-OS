@@ -1,5 +1,6 @@
 #nullable enable
 using Newtonsoft.Json;
+using RuniEngine.Json.Converters;
 using System;
 using UnityEngine;
 
@@ -14,6 +15,7 @@ namespace RuniEngine
     /// <see cref="ISerializationCallbackReceiver"/>를 통해 유니티 직렬화 시 <see cref="Nullable{T}"/> 값을 처리합니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(VersionConverter))]
     public struct Version : IEquatable<Version>, IEquatable<VersionRange>, IComparable, IComparable<Version>, ISerializationCallbackReceiver
     {
         /// <summary>
@@ -88,54 +90,61 @@ namespace RuniEngine
             string[]? versions = value.RemoveWhitespace().Split(separatorChar);
             if (versions == null || versions.Length <= 0)
                 major = minor = patch = null;
-            else if (versions.Length == 1)
+            else switch (versions.Length)
             {
-                if (int.TryParse(versions[0], out int major))
-                    this.major = major;
-                else
-                    this.major = null;
-
-                minor = null;
-                patch = null;
-            }
-            else if (versions.Length == 2)
-            {
-                if (int.TryParse(versions[0], out int major))
-                    this.major = major;
-                else
-                    this.major = null;
-
-                if (int.TryParse(versions[1], out int minor))
-                    this.minor = minor;
-                else
-                    this.minor = null;
-
-                patch = null;
-            }
-            else
-            {
+                case 1:
                 {
                     if (int.TryParse(versions[0], out int major))
                         this.major = major;
                     else
                         this.major = null;
-                }
 
+                    minor = null;
+                    patch = null;
+                    break;
+                }
+                case 2:
                 {
+                    if (int.TryParse(versions[0], out int major))
+                        this.major = major;
+                    else
+                        this.major = null;
+
                     if (int.TryParse(versions[1], out int minor))
                         this.minor = minor;
                     else
                         this.minor = null;
-                }
 
+                    patch = null;
+                    break;
+                }
+                default:
                 {
-                    if (int.TryParse(versions[2], out int patch))
-                        this.patch = patch;
-                    else
-                        this.patch = null;
+                    {
+                        if (int.TryParse(versions[0], out int major))
+                            this.major = major;
+                        else
+                            this.major = null;
+                    }
+
+                    {
+                        if (int.TryParse(versions[1], out int minor))
+                            this.minor = minor;
+                        else
+                            this.minor = null;
+                    }
+
+                    {
+                        if (int.TryParse(versions[2], out int patch))
+                            this.patch = patch;
+                        else
+                            this.patch = null;
+                    }
+                    break;
                 }
             }
         }
+        
         /// <summary>
         /// 지정된 메이저, 마이너, 패치 구성 요소를 사용하여 <see cref="Version"/> 구조체의 새 인스턴스를 초기화합니다.
         /// </summary>

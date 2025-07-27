@@ -15,7 +15,7 @@ namespace RuniEngine.Json.Converters
         /// <summary>
         /// <see cref="HexColor"/> 객체를 JSON 문자열로 직렬화합니다.
         /// <br/>
-        /// <see cref="HexColor"/>의 <see cref="object.ToString"/> 메서드를 사용하여 16진수 색상 문자열을 기록합니다.
+        /// <see cref="HexColor"/>의 <see cref="HexColor.ToString"/> 메서드를 사용하여 16진수 색상 문자열을 기록합니다.
         /// </summary>
         /// <param name="writer">JSON 작성을 위한 <see cref="JsonWriter"/> 객체입니다.</param>
         /// <param name="value">직렬화할 <see cref="HexColor"/> 값입니다.</param>
