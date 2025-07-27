@@ -20,7 +20,7 @@ namespace RuniEngine
     [JsonConverter(typeof(SerializableNullableConverter))]
     public struct SerializableNullable<T> : ISerializableNullable<T>, IEquatable<T>, IEquatable<T?>, IEquatable<SerializableNullable<T>>, ISerializationCallbackReceiver where T : struct
     {
-        [SerializeField, AnimFolder, JsonIgnore] T value;
+        [SerializeField, JsonIgnore] T value;
         [SerializeField, JsonIgnore] bool hasValue;
 
         /// <summary>
