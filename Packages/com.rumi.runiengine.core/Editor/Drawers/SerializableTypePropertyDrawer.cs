@@ -20,7 +20,11 @@ namespace RuniEngine.Editor.Drawers
         public static void Draw(Rect position, SerializedProperty property, GUIContent label, Type? baseType = null)
         {
             property = GetChildProperty(property);
-            TypeField(position, label, TypeUtility.DeserializeFromString(property.stringValue), x => property.stringValue = x?.SerializeToString() ?? string.Empty, baseType);
+            
+            EditorGUI.BeginChangeCheck();
+            Type? type = TypeField(position, label, TypeUtility.DeserializeFromString(property.stringValue), baseType);
+            if (EditorGUI.EndChangeCheck())
+                property.stringValue = type?.SerializeToString() ?? string.Empty;
         }
         
         public static SerializedProperty GetChildProperty(SerializedProperty property)

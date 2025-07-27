@@ -621,15 +621,17 @@ namespace RuniEngine.Editor
         
         
         
-        public static void TypeFieldLayout(Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), value, result, baseType);
-        public static void TypeFieldLayout(string label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, result, baseType);
-        public static void TypeFieldLayout(GUIContent label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, result, baseType);
+        public static Type? TypeFieldLayout(Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), value, baseType);
+        public static Type? TypeFieldLayout(string label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
+        public static Type? TypeFieldLayout(GUIContent label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
 
-        public static void TypeField(Rect position, Type? value, Action<Type?>? result, Type? baseType = null) => DoTypeField(position, value, result, baseType);
-        public static void TypeField(Rect position, string label, Type? value, Action<Type?>? result, Type? baseType = null) => TypeField(position, new GUIContent(label), value, result, baseType);
-        public static void TypeField(Rect position, GUIContent label, Type? value, Action<Type?>? result, Type? baseType = null) => DoTypeField(EditorGUI.PrefixLabel(position, label), value, result, baseType);
+        public static Type? TypeField(Rect position, Type? value, Type? baseType = null) => DoTypeField(position, value, baseType);
+        public static Type? TypeField(Rect position, string label, Type? value, Type? baseType = null) => TypeField(position, new GUIContent(label), value, baseType);
+        public static Type? TypeField(Rect position, GUIContent label, Type? value, Type? baseType = null) => DoTypeField(EditorGUI.PrefixLabel(position, label), value, baseType);
 
-        static void DoTypeField(Rect position, Type? value, Action<Type?>? result, Type? baseType)
+        static int? typeFieldLastControlID;
+        static Type? typeFieldSelectedType;
+        static Type? DoTypeField(Rect position, Type? value, Type? baseType)
         {
             string buttonText = GetTextOrKey("gui.type_field.select_type");
             float buttonWidth = GetXSize(buttonText, GUI.skin.button);
@@ -643,6 +645,8 @@ namespace RuniEngine.Editor
 
             if (GUI.Button(position, buttonText))
             {
+                int lastControlID = APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID;
+                
                 var provider = APIBridge.UnityEditor.UIElements.TypeSearchProvider.CreateInstance(baseType ?? typeof(object));
                 var context = UnityEditor.Search.SearchService.CreateContext(provider.instance, "type:");
                 var viewState = new UnityEditor.Search.SearchViewState(context)
@@ -654,16 +658,30 @@ namespace RuniEngine.Editor
                     {
                         if (cancelled)
                             return;
+
+                        typeFieldLastControlID = lastControlID;
                         
                         if (item.data is Type type)
-                            result?.Invoke(type);
+                            typeFieldSelectedType = type;
                         else
-                            result?.Invoke(null);
+                            typeFieldSelectedType = null;
                     },
                     flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
                 };
                 UnityEditor.Search.SearchService.ShowPicker(viewState);
             }
+
+            if (typeFieldLastControlID != null && typeFieldLastControlID == APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID)
+            {
+                value = typeFieldSelectedType;
+                
+                typeFieldSelectedType = null;
+                typeFieldLastControlID = null;
+                
+                GUI.changed = true;
+            }
+
+            return value;
         }
     }
 }
