@@ -1,6 +1,7 @@
 ﻿#nullable enable
-using System.ComponentModel;
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/IsExternalInit.cs
+using System.ComponentModel;
+
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices
 {

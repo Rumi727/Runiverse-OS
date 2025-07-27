@@ -2,8 +2,10 @@
     "name": "RuniEngine",
     "rootNamespace": "RuniEngine",
     "references": [
+        "GUID:86a00593d8bfd984891c836c79df0b4e",
         "GUID:c6d2ee51b86b95246ae92eebdcffddee",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "RuniEngine.DotNetExtended"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
