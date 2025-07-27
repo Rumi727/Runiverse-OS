@@ -97,6 +97,16 @@ MonoBehaviour:
         automatically in the GUI, the field name must be exactly "value".'
     - key: serializable_nullable.invalid_serialization_type
       value: Invalid serialization type
+    - key: identifier.invalid.namespace
+      value: 'Invalid namespace: ''{value}''.
+
+        Allowed characters are ''a-z'',
+        ''0-9'', ''.'', ''-'', and ''_''.'
+    - key: identifier.invalid.path
+      value: 'Invalid path: ''{value}''.
+
+        Allowed characters are ''a-z'',
+        ''0-9'', ''.'', ''/'', ''-'', and ''_''.'
     - key: ui.unclamped_slider.tooltip
       value: Clamps the value independently of the slider's range. null removes the
         limit in that direction.
