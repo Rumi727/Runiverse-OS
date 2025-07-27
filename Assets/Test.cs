@@ -58,6 +58,7 @@ public sealed class Test : MonoBehaviour
     public SerializableNullable<SerializableNullable<float>> nullableNullableFloat;
     [TypeField(typeof(Label))] public SerializableType type = typeof(Object);
     [ReadOnlyField, TypeField(typeof(Label))] public SerializableType readOnlyType = typeof(Object);
+    public SerializableNullable<RuniEngine.RectOffset> nullableRectOffset;
     public float test;
     
     void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
