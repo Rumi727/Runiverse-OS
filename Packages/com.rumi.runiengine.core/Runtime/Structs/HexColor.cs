@@ -94,7 +94,7 @@ namespace RuniEngine
                 _value = ToString();
             }
         }
-        byte _r;
+        [JsonIgnore] byte _r;
 
         [JsonIgnore]
         public byte g
@@ -106,7 +106,7 @@ namespace RuniEngine
                 _value = ToString();
             }
         }
-        byte _g;
+        [JsonIgnore] byte _g;
 
         [JsonIgnore]
         public byte b
@@ -118,7 +118,7 @@ namespace RuniEngine
                 _value = ToString();
             }
         }
-        byte _b;
+        [JsonIgnore] byte _b;
 
         [JsonIgnore]
         public byte a
@@ -130,7 +130,7 @@ namespace RuniEngine
                 _value = ToString();
             }
         }
-        byte _a;
+        [JsonIgnore] byte _a;
 
 
 

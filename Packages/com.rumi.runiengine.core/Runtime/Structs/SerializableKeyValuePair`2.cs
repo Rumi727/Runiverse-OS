@@ -1,5 +1,6 @@
 #nullable enable
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Collections/Generic/KeyValuePair.cs
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -18,8 +19,8 @@ namespace RuniEngine
         }
 
         // 이름은 바꾸지 마세요 (직렬화)
-        [SerializeField, FieldName("gui.key"), DebuggerBrowsable(DebuggerBrowsableState.Never)] TKey key;
-        [SerializeField, FieldName("gui.value"), DebuggerBrowsable(DebuggerBrowsableState.Never)] TValue value;
+        [SerializeField, FieldName("gui.key"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TKey key;
+        [SerializeField, FieldName("gui.value"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TValue value;
 
         public TKey Key
         {
