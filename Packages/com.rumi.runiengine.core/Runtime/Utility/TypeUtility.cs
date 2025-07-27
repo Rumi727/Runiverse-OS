@@ -85,39 +85,39 @@ namespace RuniEngine
             // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (givenType == null)
                 throw new ArgumentNullException(nameof(givenType), "The given type cannot be null.");
-            else if (genericTypeDefinition == null)
+            if (genericTypeDefinition == null)
                 throw new ArgumentNullException(nameof(genericTypeDefinition), "The generic type definition cannot be null.");
             else if (!genericTypeDefinition.IsGenericTypeDefinition)
                 throw new ArgumentException("The provided genericTypeDefinition must be a valid generic type definition (e.g., typeof(List<>) or typeof(IDictionary<,>)).", nameof(genericTypeDefinition));
             // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
-            // 인터페이스 확인
-            var interfaceTypes = givenType.GetInterfaces();
-            foreach (var it in interfaceTypes)
+            Type? currentType = givenType;
+            while (currentType != null)
             {
-                if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+                // 인터페이스 확인
+                var interfaceTypes = currentType.GetInterfaces();
+                foreach (var it in interfaceTypes)
                 {
-                    resolvedType = it;
+                    if (it.IsGenericType && it.GetGenericTypeDefinition() == genericTypeDefinition)
+                    {
+                        resolvedType = it;
+                        return true;
+                    }
+                }
+
+                // 현재 타입 확인 (직접적인 제네릭 타입 정의 일치)
+                if (currentType.IsGenericType && currentType.GetGenericTypeDefinition() == genericTypeDefinition)
+                {
+                    resolvedType = currentType;
                     return true;
                 }
+
+                // 기반 클래스 확인
+                currentType = currentType.BaseType;
             }
 
-            // 현재 타입 확인 (직접적인 제네릭 타입 정의 일치)
-            if (givenType.IsGenericType && givenType.GetGenericTypeDefinition() == genericTypeDefinition)
-            {
-                resolvedType = givenType;
-                return true;
-            }
-
-            // 기반 클래스 확인 (재귀 호출)
-            Type? baseType = givenType.BaseType;
-            if (baseType == null)
-            {
-                resolvedType = null;
-                return false; // 더 이상 상위 클래스가 없음
-            }
-
-            return IsAssignableToGenericDefinition(baseType, genericTypeDefinition, out resolvedType);
+            resolvedType = null;
+            return false;
         }
 
         /// <summary>
@@ -386,6 +386,7 @@ namespace RuniEngine
         /// <exception cref="ArgumentException">지원하지 않는 타입인 경우 발생합니다.</exception>
         public static object GetMinValue(this Type type)
         {
+            // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
             return Type.GetTypeCode(type) switch
             {
                 TypeCode.SByte => sbyte.MinValue,
@@ -411,6 +412,7 @@ namespace RuniEngine
         /// <exception cref="ArgumentException">지원하지 않는 타입인 경우 발생합니다.</exception>
         public static object GetMaxValue(this Type type)
         {
+            // ReSharper disable once SwitchExpressionHandlesSomeKnownEnumValuesWithExceptionInDefault
             return Type.GetTypeCode(type) switch
             {
                 TypeCode.SByte => sbyte.MaxValue,
