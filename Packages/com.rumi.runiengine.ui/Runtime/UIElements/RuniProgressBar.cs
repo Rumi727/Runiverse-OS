@@ -121,16 +121,16 @@ namespace RuniEngine.UIElements
             container.AddToClassList(containerUssClassName);
             hierarchy.Add(container);
 
-            background = new VisualElement() { name = backgroundUssClassName };
+            background = new VisualElement { name = backgroundUssClassName };
             background.AddToClassList(AbstractProgressBar.backgroundUssClassName);
             background.AddToClassList(backgroundUssClassName);
             container.Add(background);
 
-            viewport = new VisualElement() { name = viewportUssClassName };
+            viewport = new VisualElement { name = viewportUssClassName };
             viewport.AddToClassList(viewportUssClassName);
             background.Add(viewport);
 
-            progress = new VisualElement() { name = progressUssClassName };
+            progress = new VisualElement { name = progressUssClassName };
             progress.AddToClassList(AbstractProgressBar.progressUssClassName);
             progress.AddToClassList(progressUssClassName);
             viewport.Add(progress);
