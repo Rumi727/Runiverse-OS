@@ -8,10 +8,6 @@ namespace RuniEngine.UIElements
     [UxmlElement]
     public partial class TypeField : BaseField<string>
     {
-        public APIBridge.UnityEngine.UIElements.BaseField<string> apiBridge { get; }
-
-
-
         public new const string ussClassName = "runios-type-field";
 
         public const string textUssClassName = ussClassName + "__text";
@@ -116,24 +112,28 @@ namespace RuniEngine.UIElements
 
 
 
+        public VisualElement visualInput { get; }
+        
         public Label textElement { get; }
         public Button buttonElement { get; }
 
 
 
         public TypeField() : this(string.Empty) { }
-        public TypeField(string label, Type? baseType = null) : base(label, null)
+        public TypeField(Type? baseType) : this(string.Empty, baseType) { }
+        public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
-            apiBridge = APIBridge.UnityEngine.UIElements.BaseField<string>.GetInstance(this);
             AddToClassList(ussClassName);
+
+            visualInput = this.Q<VisualElement>(inputUssClassName);
 
             textElement = new Label { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
-            apiBridge.visualInput.Add(textElement);
+            visualInput.Add(textElement);
 
             buttonElement = new Button(ShowSelector) { name = buttonUssClassName, text = "Select Type..." };
             buttonElement.AddToClassList(buttonUssClassName);
-            apiBridge.visualInput.Add(buttonElement);
+            visualInput.Add(buttonElement);
             
             this.baseType = baseType;
         }

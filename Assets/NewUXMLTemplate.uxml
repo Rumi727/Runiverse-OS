@@ -3,7 +3,7 @@
     <Style src="project://database/Packages/com.rumi.runiengine.ui/Runtime/UI/Themes/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
     <ui:ScrollView name="ScrollView" mode="Vertical" vertical-scroller-visibility="AlwaysVisible" enabled="true" class="runios-background-element" style="width: 480px;">
         <ui:VisualElement style="padding-top: 10px; padding-right: 20px; padding-bottom: 10px; padding-left: 20px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; overflow: hidden; flex-grow: 1;">
-            <RuniEngine.UI.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="Label" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
+            <RuniEngine.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="Label" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
             <ui:ScrollView horizontal-scroller-visibility="AlwaysVisible" mode="VerticalAndHorizontal" vertical-scroller-visibility="AlwaysVisible" style="flex-direction: column; height: 100px;">
                 <ui:Label text="Label" />
                 <ui:Button text="Button" />
