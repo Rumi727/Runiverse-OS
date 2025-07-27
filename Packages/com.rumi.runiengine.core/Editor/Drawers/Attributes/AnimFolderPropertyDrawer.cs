@@ -45,7 +45,6 @@ namespace RuniEngine.Editor.Drawers.Attributes
             }
             catch (Exception e)
             {
-                Debug.Log(property.propertyPath);
                 Debug.LogException(e);
             }
         }
