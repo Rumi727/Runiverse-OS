@@ -751,7 +751,21 @@ PlayerSettings:
   webGLCloseOnQuit: 0
   webWasm2023: 0
   webEnableSubmoduleStrippingCompatibility: 0
-  scriptingDefineSymbols: {}
+  scriptingDefineSymbols:
+    Android: RUNI_ENGINE
+    EmbeddedLinux: RUNI_ENGINE
+    LinuxHeadlessSimulation: RUNI_ENGINE
+    Nintendo Switch: RUNI_ENGINE
+    PS4: RUNI_ENGINE
+    PS5: RUNI_ENGINE
+    QNX: RUNI_ENGINE
+    Server: RUNI_ENGINE
+    Standalone: RUNI_ENGINE
+    WebGL: RUNI_ENGINE
+    Windows Store Apps: RUNI_ENGINE
+    XboxOne: RUNI_ENGINE
+    iPhone: RUNI_ENGINE
+    tvOS: RUNI_ENGINE
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:
