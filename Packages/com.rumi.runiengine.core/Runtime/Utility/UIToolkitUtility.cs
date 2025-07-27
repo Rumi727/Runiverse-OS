@@ -1,4 +1,7 @@
 #nullable enable
+using RuniEngine.UIElements;
+using System;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -67,5 +70,25 @@ namespace RuniEngine
         // ReSharper restore UnusedParameter.Global
 #pragma warning restore IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
 #endif
+
+        static PropertyInfo? pseudoStatesProperty;
+        
+        public static PseudoStates GetPsuedoState(this VisualElement element)
+        {
+            pseudoStatesProperty ??= element.GetType().GetProperty("pseudoStates", BindingFlags.NonPublic | BindingFlags.Instance);
+            return (PseudoStates)(int)pseudoStatesProperty!.GetValue(element);
+        }
+        
+        public static void SetPsuedoState(this VisualElement element, PseudoStates state)
+        {
+            pseudoStatesProperty ??= element.GetType().GetProperty("pseudoStates", BindingFlags.NonPublic | BindingFlags.Instance);
+            pseudoStatesProperty!.SetValue(element, Enum.ToObject(pseudoStatesProperty.PropertyType, (int)state));
+        }
+
+        public static void AddPsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() | state);
+
+        public static void RemovePsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() & ~state);
+
+        public static bool HasPseudoFlag(this VisualElement element, PseudoStates flag) => (element.GetPsuedoState() & flag) == flag;
     }
 }
