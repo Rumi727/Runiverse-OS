@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace RuniEngine
@@ -6,14 +7,14 @@ namespace RuniEngine
     [Serializable]
     public struct SerializableType : IEquatable<SerializableType>, ISerializationCallbackReceiver
     {
-        public SerializableType(Type type)
+        public SerializableType(Type? type)
         {
             value = type;
             _value = string.Empty;
         }
 
         public Type? value { get; set; }
-        [SerializeField] string? _value;
+        [SerializeField, JsonIgnore] string? _value;
         
         public bool Equals(SerializableType other) => this == other;
         public override bool Equals(object? obj) => obj is SerializableType other && Equals(other);
