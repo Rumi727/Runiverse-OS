@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace RuniEngine.Editor.APIBridge
 {
-    internal static class EditorAssemblyManager
+    static class EditorAssemblyManager
     {
         public static Assembly[] assemblys => _assemblys ??= AppDomain.CurrentDomain.GetAssemblies();
         static Assembly[]? _assemblys;
