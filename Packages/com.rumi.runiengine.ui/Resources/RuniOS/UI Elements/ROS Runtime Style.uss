@@ -263,6 +263,7 @@
     padding: 0 2px 0 0;
     margin: 0;
     flex-basis: 0;
+    padding-right: 0;
 }
 
 .unity-toggle {
@@ -1160,6 +1161,7 @@
     background-image: resource('UIPackageResources/Images/Vanilla/arrow-down@2x.png');
     -unity-background-image-tint-color: var(--scroll-color);
     background-size: 200% 200%;
+    margin-right: 2px;
 }
 
 .unity-base-popup-field__text {
@@ -1239,6 +1241,7 @@
     background-image: resource('UIPackageResources/Images/Vanilla/arrow-down@2x.png');
     -unity-background-image-tint-color: var(--scroll-color);
     background-size: 200% 200%;
+    margin-right: 2px;
 }
 
 .unity-enum-field__text {

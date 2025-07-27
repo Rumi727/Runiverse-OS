@@ -123,10 +123,11 @@ namespace RuniEngine.UIElements
         public TypeField(Type? baseType) : this(string.Empty, baseType) { }
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
+            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+
             AddToClassList(ussClassName);
-
-            visualInput = this.Q<VisualElement>(className: ussClassName);
-
+            visualInput = this.Q<VisualElement>(className: inputUssClassName);
+            
             textElement = new Label { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
             visualInput.Add(textElement);

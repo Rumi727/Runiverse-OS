@@ -111,6 +111,8 @@ namespace RuniEngine.UIElements
 
         public RuniProgressBar()
         {
+            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            
             AddToClassList(AbstractProgressBar.ussClassName);
             AddToClassList(ussClassName);
 

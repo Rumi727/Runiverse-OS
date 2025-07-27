@@ -1,4 +1,5 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="True" gen-cs-file="482a500a49bdff54195f270f49cd340a">
     <Style src="project://database/Packages/com.rumi.runiengine.core/Resources/RuniOS/UI%20Elements/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
+    <RuniEngine.UIElements.RuniProgressBar value="20" />
     <RuniEngine.UIElements.TypeField label="Label" base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
 </ui:UXML>
