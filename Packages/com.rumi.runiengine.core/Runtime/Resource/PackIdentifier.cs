@@ -1,6 +1,7 @@
 #nullable enable
 using Newtonsoft.Json;
 using RuniEngine.IO;
+using RuniEngine.Json.Converters.Resource;
 using System;
 using UnityEngine;
 
@@ -12,6 +13,7 @@ namespace RuniEngine.Resource
     /// <br/>두 필드가 모두 null이거나 모두 null이 아니면 유효하지 않은 상태로 간주됩니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(PackIdentifierConverter))]
     public struct PackIdentifier : IEquatable<PackIdentifier>, ISerializationCallbackReceiver
     {
         public static readonly PackIdentifier empty = new PackIdentifier();

@@ -1,5 +1,6 @@
 #nullable enable
 using Newtonsoft.Json;
+using RuniEngine.Json.Converters.IO;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -17,6 +18,7 @@ namespace RuniEngine.IO
     /// 모든 경로는 내부적으로 표준 구분자(<see cref="directorySeparatorChar"/>)를 사용하도록 정규화됩니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(FilePathConverter))]
     public struct FilePath : IEquatable<FilePath>, ISerializationCallbackReceiver
     {
         /// <summary>

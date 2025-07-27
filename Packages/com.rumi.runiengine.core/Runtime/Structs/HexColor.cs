@@ -1,11 +1,13 @@
 #nullable enable
 using Newtonsoft.Json;
+using RuniEngine.Json.Converters;
 using System;
 using UnityEngine;
 
 namespace RuniEngine
 {
     [Serializable]
+    [JsonConverter(typeof(HexColorConverter))]
     public struct HexColor : IEquatable<HexColor>, ISerializationCallbackReceiver
     {
         public const string clearHex = "#00000000";

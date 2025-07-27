@@ -1,10 +1,12 @@
 ﻿using System;
 using Newtonsoft.Json;
+using RuniEngine.Json.Converters;
 using UnityEngine;
 
 namespace RuniEngine
 {
     [Serializable]
+    [JsonConverter(typeof(SerializableTypeConverter))]
     public struct SerializableType : IEquatable<SerializableType>, ISerializationCallbackReceiver
     {
         public SerializableType(Type? type)

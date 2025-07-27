@@ -1,6 +1,7 @@
 #nullable enable
 using Newtonsoft.Json;
 using RuniEngine.IO;
+using RuniEngine.Json.Converters.Resource;
 using RuniEngine.Spans;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -13,6 +14,7 @@ namespace RuniEngine.Resource
     /// 네임스페이스와 경로로 구성된 리소스에 대한 고유 식별자를 나타냅니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(IdentifierConverter))]
     public struct Identifier : IEquatable<Identifier>, ISerializationCallbackReceiver
     {
         public static readonly Identifier empty = new Identifier();
