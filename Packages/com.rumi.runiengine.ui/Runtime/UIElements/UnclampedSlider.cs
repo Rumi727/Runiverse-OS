@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UI
+namespace RuniEngine.UIElements
 {
     [UxmlElement]
     public partial class UnclampedSlider : Slider, IUnclampedSlider<float>

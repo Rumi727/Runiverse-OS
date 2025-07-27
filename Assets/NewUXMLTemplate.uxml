@@ -22,10 +22,10 @@
             <ui:Label text="Label" />
             <ui:Button text="Button">
                 <Bindings>
-                    <RuniEngine.UI.Bindings.HalfTheSizeBinding property="style.borderTopLeftRadius" />
-                    <RuniEngine.UI.Bindings.HalfTheSizeBinding property="style.borderTopRightRadius" />
-                    <RuniEngine.UI.Bindings.HalfTheSizeBinding property="style.borderBottomRightRadius" />
-                    <RuniEngine.UI.Bindings.HalfTheSizeBinding property="style.borderBottomLeftRadius" />
+                    <RuniEngine.UIElements.Bindings.HalfTheSizeBinding property="style.borderTopLeftRadius" />
+                    <RuniEngine.UIElements.Bindings.HalfTheSizeBinding property="style.borderTopRightRadius" />
+                    <RuniEngine.UIElements.Bindings.HalfTheSizeBinding property="style.borderBottomRightRadius" />
+                    <RuniEngine.UIElements.Bindings.HalfTheSizeBinding property="style.borderBottomLeftRadius" />
                 </Bindings>
             </ui:Button>
             <ui:Toggle label=" " />
@@ -39,11 +39,11 @@
                 <ui:Slider label="Slider" value="42" high-value="100" show-input-field="true" fill="true" />
                 <ui:Slider label="Slider" value="43" high-value="100" direction="Vertical" fill="true" style="height: 160px;" />
                 <ui:SliderInt label="SliderInt" value="42" high-value="100" show-input-field="false" />
-                <RuniEngine.UI.UnclampedSlider label="Label" fill="true" show-input-field="true" />
+                <RuniEngine.UIElements.UnclampedSlider label="Label" fill="true" show-input-field="true" />
             </ui:Foldout>
             <ui:MinMaxSlider label="Min/Max Slider" value="30,40" low-limit="0" high-limit="100" />
             <ui:ProgressBar value="50" />
-            <RuniEngine.UI.RuniProgressBar inverted="true" value="50" />
+            <RuniEngine.UIElements.RuniProgressBar inverted="true" value="50" />
             <ui:DropdownField label="Dropdown" choices="asdf,asdf2,asdf3" index="0" />
             <ui:EnumField label="Enum" value="Center" type="UnityEngine.TextAlignment, UnityEngine.TextRenderingModule" />
             <ui:RadioButton label="Radio Button" />

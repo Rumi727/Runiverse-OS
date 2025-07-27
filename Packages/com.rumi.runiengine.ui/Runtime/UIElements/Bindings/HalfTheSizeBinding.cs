@@ -3,7 +3,7 @@ using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UI.Bindings
+namespace RuniEngine.UIElements.Bindings
 {
     [UxmlObject]
     public partial class HalfTheSizeBinding : CustomBinding

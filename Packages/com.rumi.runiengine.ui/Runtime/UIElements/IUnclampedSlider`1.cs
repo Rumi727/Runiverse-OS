@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.UI
+namespace RuniEngine.UIElements
 {
     public interface IUnclampedSlider<T> : IUnclampedSlider where T : struct, IComparable<T>, IComparable
     {

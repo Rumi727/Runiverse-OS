@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
-using RuniEngine.UI;
+using RuniEngine.UIElements;
 
 namespace RuniEngine.Patches.UI
 {

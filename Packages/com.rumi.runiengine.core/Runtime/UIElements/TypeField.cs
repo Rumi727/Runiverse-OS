@@ -125,7 +125,7 @@ namespace RuniEngine.UIElements
         {
             AddToClassList(ussClassName);
 
-            visualInput = this.Q<VisualElement>(inputUssClassName);
+            visualInput = this.Q<VisualElement>(className: ussClassName);
 
             textElement = new Label { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
