@@ -1,6 +1,8 @@
 #nullable enable
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 using static RuniEngine.Editor.EditorTool;
 
@@ -9,6 +11,12 @@ namespace RuniEngine.Editor.Drawers.Attributes
     [CustomPropertyDrawer(typeof(FieldNameAttribute))]
     public class FieldNameAttributeDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property)
+        {
+            FieldNameAttribute attribute = (FieldNameAttribute)this.attribute;
+            return new PropertyField(property, GetTextOrKey(attribute.name));
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             FieldNameAttribute attribute = (FieldNameAttribute)this.attribute;
