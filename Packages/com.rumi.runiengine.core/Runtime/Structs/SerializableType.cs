@@ -34,7 +34,7 @@ namespace RuniEngine
         /// <summary>
         /// 유니티 직렬화를 위한 <see cref="Type"/>의 문자열 표현을 저장하는 내부 필드입니다.
         /// </summary>
-        [SerializeField, JsonIgnore] string? _value;
+        [SerializeField, Delayed, JsonIgnore] string? _value;
         
         /// <summary>
         /// 이 <see cref="SerializableType"/> 인스턴스와 다른 지정된 <see cref="SerializableType"/> 인스턴스의 값이 같은지 여부를 결정합니다.
