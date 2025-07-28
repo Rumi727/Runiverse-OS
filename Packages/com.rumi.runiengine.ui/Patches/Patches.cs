@@ -15,7 +15,7 @@ namespace RuniEngine.Patches.UI
         static void Awaken()
         {
             harmony.UnpatchSelf();
-            HarmonyUtility.EditorPatchAll(harmony);
+            harmony.PatchAll();
         }
     }
 }
