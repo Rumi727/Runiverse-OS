@@ -1,5 +1,5 @@
 # Runiverse OS
-User-friendly game engine library for Unity Engine
+Game Engine Library for Unity Engine
 
 It's currently under development!!!!\
 The basic system hasn't even been implemented!!!!!!
