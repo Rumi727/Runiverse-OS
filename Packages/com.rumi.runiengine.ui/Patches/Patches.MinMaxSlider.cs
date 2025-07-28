@@ -4,49 +4,57 @@ using HarmonyLib;
 using System;
 using UnityEngine.UIElements;
 
+using UniMinMaxSlider = UnityEngine.UIElements.MinMaxSlider; 
+
 namespace RuniEngine.Patches.UI
 {
     public static partial class Patches
     {
-        [HarmonyPatch(typeof(MinMaxSlider))]
-        public static class MinMaxSliderPatch
+        public static partial class UnityEngine
         {
-            //마진 값이 의도한대로 작동하게 수정합니다.
-            [HarmonyPrefix]
-            [HarmonyPatch("UpdateDragElementPosition", new Type[0])]
-            public static bool UpdateDragElementPosition(MinMaxSlider __instance)
+            public static partial class UIElements
             {
-                if (__instance.panel != null)
+                [HarmonyPatch(typeof(UniMinMaxSlider))]
+                public static class MinMaxSlider
                 {
-                    VisualElement dragElement = (VisualElement)AccessTools.DeclaredProperty(typeof(MinMaxSlider), "dragElement").GetValue(__instance);
-                    VisualElement dragMinThumb = (VisualElement)AccessTools.DeclaredProperty(typeof(MinMaxSlider), "dragMinThumb").GetValue(__instance);
-                    VisualElement dragMaxThumb = (VisualElement)AccessTools.DeclaredProperty(typeof(MinMaxSlider), "dragMaxThumb").GetValue(__instance);
-                    VisualElement visualInput = (VisualElement)AccessTools.Property(typeof(MinMaxSlider), "visualInput").GetValue(__instance);
+                    //마진 값이 의도한대로 작동하게 수정합니다.
+                    [HarmonyPrefix]
+                    [HarmonyPatch("UpdateDragElementPosition", new Type[0])]
+                    public static bool UpdateDragElementPosition(UniMinMaxSlider __instance)
+                    {
+                        if (__instance.panel != null)
+                        {
+                            VisualElement dragElement = (VisualElement)AccessTools.DeclaredProperty(typeof(UniMinMaxSlider), "dragElement").GetValue(__instance);
+                            VisualElement dragMinThumb = (VisualElement)AccessTools.DeclaredProperty(typeof(UniMinMaxSlider), "dragMinThumb").GetValue(__instance);
+                            VisualElement dragMaxThumb = (VisualElement)AccessTools.DeclaredProperty(typeof(UniMinMaxSlider), "dragMaxThumb").GetValue(__instance);
+                            VisualElement visualInput = (VisualElement)AccessTools.Property(typeof(UniMinMaxSlider), "visualInput").GetValue(__instance);
 
-                    float minThumbOffset = dragMinThumb.resolvedStyle.marginLeft + dragMinThumb.resolvedStyle.marginRight;
-                    float maxThumbOffset = dragMaxThumb.resolvedStyle.marginLeft + dragMaxThumb.resolvedStyle.marginRight;
+                            float minThumbOffset = dragMinThumb.resolvedStyle.marginLeft + dragMinThumb.resolvedStyle.marginRight;
+                            float maxThumbOffset = dragMaxThumb.resolvedStyle.marginLeft + dragMaxThumb.resolvedStyle.marginRight;
 
-                    float minThumbWidth = dragMinThumb.resolvedStyle.width + minThumbOffset;
-                    float maxThumbWidth = dragMaxThumb.resolvedStyle.width;
+                            float minThumbWidth = dragMinThumb.resolvedStyle.width + minThumbOffset;
+                            float maxThumbWidth = dragMaxThumb.resolvedStyle.width;
 
-                    float leftOffset = dragElement.resolvedStyle.borderLeftWidth + dragElement.resolvedStyle.marginLeft + minThumbOffset;
-                    float rightOffset = dragElement.resolvedStyle.borderRightWidth + dragElement.resolvedStyle.marginRight + maxThumbOffset;
-                    float offsetWidth = rightOffset + leftOffset;
+                            float leftOffset = dragElement.resolvedStyle.borderLeftWidth + dragElement.resolvedStyle.marginLeft + minThumbOffset;
+                            float rightOffset = dragElement.resolvedStyle.borderRightWidth + dragElement.resolvedStyle.marginRight + maxThumbOffset;
+                            float offsetWidth = rightOffset + leftOffset;
 
-                    float inputWidth = (visualInput.layout.width - offsetWidth - maxThumbWidth) + minThumbOffset;
+                            float inputWidth = (visualInput.layout.width - offsetWidth - maxThumbWidth) + minThumbOffset;
 
-                    float position = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.minValue));
-                    float width = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.maxValue));
+                            float position = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.minValue));
+                            float width = minThumbWidth.LerpUnclamped(inputWidth, SliderNormalizeValue(__instance.maxValue));
 
-                    dragElement.style.width = width - position;
-                    dragElement.style.left = position;
-                    dragMinThumb.style.left = -dragMinThumb.resolvedStyle.width - leftOffset;
-                    dragMaxThumb.style.right = -dragMaxThumb.resolvedStyle.width - rightOffset;
+                            dragElement.style.width = width - position;
+                            dragElement.style.left = position;
+                            dragMinThumb.style.left = -dragMinThumb.resolvedStyle.width - leftOffset;
+                            dragMaxThumb.style.right = -dragMaxThumb.resolvedStyle.width - rightOffset;
 
-                    float SliderNormalizeValue(float currentValue) => (currentValue - __instance.lowLimit) / (__instance.highLimit - __instance.lowLimit);
+                            float SliderNormalizeValue(float currentValue) => (currentValue - __instance.lowLimit) / (__instance.highLimit - __instance.lowLimit);
+                        }
+
+                        return false;
+                    }
                 }
-
-                return false;
             }
         }
     }
