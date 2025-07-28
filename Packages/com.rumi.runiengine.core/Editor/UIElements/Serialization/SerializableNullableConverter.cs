@@ -3,7 +3,7 @@ using RuniEngine.Editor.APIBridge.UnityEditor.UIElements;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.Editor.UI.Serialization
+namespace RuniEngine.Editor.UIElements.Serialization
 {
     public sealed class SerializableNullableConverter<T> : UxmlAttributeConverter<SerializableNullable<T>> where T : struct
     {
