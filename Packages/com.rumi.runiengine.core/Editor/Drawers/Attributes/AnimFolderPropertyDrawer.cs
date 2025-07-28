@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
+using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static RuniEngine.Editor.EditorTool;
@@ -14,6 +15,8 @@ namespace RuniEngine.Editor.Drawers.Attributes
     public class AnimFolderPropertyDrawer : PropertyDrawer
     {
         readonly Dictionary<string, AnimFloat> cachedAnimFloat = new();
+
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PropertyField(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -65,7 +68,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                                 position.height = EditorGUI.GetPropertyHeight(property);
 
                                 BeginLabelWidth(EditorGUIUtility.labelWidth);
-                                EditorGUI.PropertyField(position, property, false);
+                                EditorGUI.PropertyField(position, property, property.IsGeneric());
                                 EndLabelWidth();
 
                                 position.y += position.height + 2;
