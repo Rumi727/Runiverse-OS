@@ -86,5 +86,7 @@ namespace RuniEngine
                 }
             }
         }
+        
+        public static MethodInfo GetMethodInfo(Delegate method) => method.Method;
     }
 }
