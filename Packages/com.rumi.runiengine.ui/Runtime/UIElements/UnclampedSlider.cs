@@ -6,6 +6,7 @@ namespace RuniEngine.UIElements
     [UxmlElement]
     public partial class UnclampedSlider : Slider, IUnclampedSlider<float>
     {
+        // RuniEngine.Patches.UI.Patches+UnityEngine++UIElements+BaseSlider에서 사용함
         public const string outOfRangeUssClassName = "runios-unclamped-slider--out-of-range";
         public const string outOfLowUssClassName = "runios-unclamped-slider--out-of-low";
         public const string outOfHighUssClassName = "runios-unclamped-slider--out-of-high";
