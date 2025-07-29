@@ -6,7 +6,7 @@ namespace RuniEngine.Editor.Patches
 {
     public static partial class Patches
     {
-        public static readonly Harmony harmony = new Harmony("Rumi.RuniOS");
+        public static readonly Harmony harmony = new Harmony("Rumi.RuniOS.Editor");
 
         [InitializeOnLoadMethod]
         static void Awaken()
