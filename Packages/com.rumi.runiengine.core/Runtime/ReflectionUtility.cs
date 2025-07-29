@@ -58,7 +58,7 @@ namespace RuniEngine
             (
                 static x =>
                     x.AttributeContains<T>() &&
-                    x.GetParameters().Length <= 0
+                    x.GetParameters().IsEmpty()
             );
 
             foreach (var item in methods)

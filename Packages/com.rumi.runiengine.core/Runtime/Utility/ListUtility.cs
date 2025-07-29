@@ -2259,5 +2259,7 @@ namespace RuniEngine
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
+        
+        public static bool IsEmpty(this ICollection collection) => collection.Count == 0;
     }
 }
