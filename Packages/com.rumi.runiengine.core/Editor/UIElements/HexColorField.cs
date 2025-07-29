@@ -3,7 +3,7 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UIElements
+namespace RuniEngine.Editor.UIElements
 {
     [UxmlElement]
     public partial class HexColorField : BaseField<HexColor>
