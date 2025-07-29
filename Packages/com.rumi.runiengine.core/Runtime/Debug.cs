@@ -3,6 +3,7 @@ using RuniEngine;
 using System;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 // ReSharper disable once CheckNamespace
 public static class Debug
@@ -79,9 +80,14 @@ public static class Debug
             if (type.IsCompilerGenerated())
             {
                 string name = type.FullName ?? string.Empty;
-                int startIndex = name.LastIndexOf('.') + 1;
 
-                return name.Substring(startIndex, name.LastIndexOf('+') - startIndex);
+                const string pattern = @"\.(.*?)\+"; 
+                Match matches = Regex.Match(name, pattern);
+                
+                if (matches.Groups.Count > 1)
+                    return matches.Groups[1].Value;
+                else
+                    return name;
             }
 
             return type.Name;

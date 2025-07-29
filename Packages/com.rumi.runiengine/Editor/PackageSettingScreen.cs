@@ -114,7 +114,7 @@ namespace RuniEngine.Installer
                 }
 
                 GUILayout.Label(InstallerWindow.TryGetText("installer.package_setting.setting_info"));
-                AddScopedRegistry(openupmName, "https://package.openupm.com", "com.cysharp.unitask", "com.quickeye.ui-toolkit-plus", "com.coffee.csharp-compiler-settings");
+                AddScopedRegistry(openupmName, "https://package.openupm.com", "com.cysharp.unitask", "com.quickeye.ui-toolkit-plus", "com.coffee.csharp-compiler-settings", "com.realitystop.linkmerge");
                 //Debug.Log(UnityEditor.PackageManager.PackageInfo.IsPackageRegistered("com.cysharp.unitask"));
                 bool AddScopedRegistry(string name, string url, params string?[] scopes)
                 {

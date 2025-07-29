@@ -1,3 +1,24 @@
+.runios-foldout__viewport-clipping {
+    transition-property: height;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out-circ;
+    overflow: hidden;
+    flex-grow: 1;
+}
+
+.runios-foldout__viewport {
+    transition-property: height;
+    transition-duration: 0.5s;
+    transition-timing-function: ease-out-circ;
+    overflow: scroll;
+    flex-shrink: 0;
+}
+
+.unity-foldout__content {
+    flex-shrink: 0;
+    overflow: visible;
+}
+
 .runios-progress-bar__viewport {
     overflow: hidden;
 }

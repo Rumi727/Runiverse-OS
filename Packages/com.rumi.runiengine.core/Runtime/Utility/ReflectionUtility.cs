@@ -64,12 +64,14 @@ namespace RuniEngine
                         Debug.LogWarning($"The method {x.DeclaringType?.Name}.{x.Name} is invoked via '{nameof(AttributeInvoke)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
                     
                     return result;
-                });
+                }
+            );
 
             foreach (var item in methods)
             {
                 try
                 {
+                    Debug.Log(item.DeclaringType);
                     item.Invoke(null, null);
                 }
                 catch (Exception e)
