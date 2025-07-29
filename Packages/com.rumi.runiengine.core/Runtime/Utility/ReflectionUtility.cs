@@ -76,6 +76,13 @@ namespace RuniEngine
         
         public static MethodInfo GetMethodInfo(Delegate method) => method.Method;
         
-        public static bool HasDefaultConstructor(this Type t) => t.IsValueType || t.GetConstructor(Type.EmptyTypes) != null;
+        public static bool HasDefaultConstructor(this Type t, bool nonPublic = false)
+        {
+            BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
+            if (nonPublic)
+                flags |= BindingFlags.NonPublic; 
+            
+            return t.IsValueType || t.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
+        }
     }
 }
