@@ -75,5 +75,7 @@ namespace RuniEngine
         }
         
         public static MethodInfo GetMethodInfo(Delegate method) => method.Method;
+        
+        public static bool HasDefaultConstructor(this Type t) => t.IsValueType || t.GetConstructor(Type.EmptyTypes) != null;
     }
 }
