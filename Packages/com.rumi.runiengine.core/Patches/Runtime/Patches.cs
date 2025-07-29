@@ -10,7 +10,7 @@ namespace RuniEngine.Patches
 
         [Awaken]
 #if UNITY_EDITOR
-        [global::UnityEditor.InitializeOnLoadMethod]
+        [UnityEditor.InitializeOnLoadMethod]
 #endif
         static void Awaken()
         {
