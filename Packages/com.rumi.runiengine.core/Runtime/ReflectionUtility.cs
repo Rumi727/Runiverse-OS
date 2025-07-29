@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
@@ -22,17 +23,17 @@ namespace RuniEngine
 
 
 
-        public static bool AttributeContains<T>(this MemberInfo element) where T : Attribute => element.AttributeContains(typeof(T));
-        public static bool AttributeContains(this MemberInfo element, Type attribute) => Attribute.GetCustomAttributes(element, attribute).Length > 0;
+        public static bool AttributeContains<T>(this MemberInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
+        public static bool AttributeContains(this MemberInfo element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
 
-        public static bool AttributeContains<T>(this Assembly element) where T : Attribute => element.AttributeContains(typeof(T));
-        public static bool AttributeContains(this Assembly element, Type attribute) => Attribute.GetCustomAttributes(element, attribute).Length > 0;
+        public static bool AttributeContains<T>(this Assembly element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
+        public static bool AttributeContains(this Assembly element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
 
-        public static bool AttributeContains<T>(this ParameterInfo element) where T : Attribute => element.AttributeContains(typeof(T));
-        public static bool AttributeContains(this ParameterInfo element, Type attribute) => Attribute.GetCustomAttributes(element, attribute).Length > 0;
+        public static bool AttributeContains<T>(this ParameterInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
+        public static bool AttributeContains(this ParameterInfo element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
 
-        public static bool AttributeContains<T>(this Module element) where T : Attribute => element.AttributeContains(typeof(T));
-        public static bool AttributeContains(this Module element, Type attribute) => element.GetCustomAttributes(attribute, false).Length > 0;
+        public static bool AttributeContains<T>(this Module element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
+        public static bool AttributeContains(this Module element, Type attribute, bool inherit = true) => element.GetCustomAttributes(attribute, inherit).Length > 0;
 
         public static bool IsAsyncMethod(this MethodBase methodBase) => methodBase.AttributeContains<AsyncStateMachineAttribute>();
 
@@ -44,41 +45,27 @@ namespace RuniEngine
         public static void Refresh()
         {
             assemblys = Array.AsReadOnly(AppDomain.CurrentDomain.GetAssemblies());
-
-            List<Type> result = new List<Type>();
-            for (int assemblysIndex = 0; assemblysIndex < assemblys.Count; assemblysIndex++)
-            {
-                Type[] types = assemblys[assemblysIndex].GetTypes();
-                for (int typesIndex = 0; typesIndex < types.Length; typesIndex++)
-                {
-                    Type type = types[typesIndex];
-                    result.Add(type);
-                }
-            }
-
-            types = result.AsReadOnly();
+            types = assemblys.SelectMany(static x => x.GetTypes()).ToArray().AsReadOnly();
         }
 
         public static void AttributeInvoke<T>() where T : Attribute
         {
-            List<MethodInfo> methods = new List<MethodInfo>();
-            IReadOnlyList<Type> types = ReflectionUtility.types;
-            for (int typesIndex = 0; typesIndex < types.Count; typesIndex++)
-            {
-                MethodInfo[] methodInfos = types[typesIndex].GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-                for (int methodInfoIndex = 0; methodInfoIndex < methodInfos.Length; methodInfoIndex++)
-                {
-                    MethodInfo methodInfo = methodInfos[methodInfoIndex];
-                    if (methodInfo.AttributeContains<T>() && methodInfo.GetParameters().Length <= 0)
-                        methods.Add(methodInfo);
-                }
-            }
+            var methods = types.SelectMany
+            (
+                static x => x.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static)
+            )
+            .Where
+            (
+                static x =>
+                    x.AttributeContains<T>() &&
+                    x.GetParameters().Length <= 0
+            );
 
-            for (int i = 0; i < methods.Count; i++)
+            foreach (var item in methods)
             {
                 try
                 {
-                    methods[i].Invoke(null, null);
+                    item.Invoke(null, null);
                 }
                 catch (Exception e)
                 {
