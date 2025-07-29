@@ -4,6 +4,7 @@ using RuniEngine.Booting;
 using RuniEngine.Json.Converters;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine.Scripting;
 
 namespace RuniEngine.Json
 {
@@ -25,6 +26,7 @@ namespace RuniEngine.Json
         public static IReadOnlyList<JsonConverter> runiConverts { get; } = _runiConverts.AsReadOnly();
         
         [Awaken]
+        [Preserve]
         static void Awaken()
         {
             // 현재 기본 설정이 있으면 가져오고, 없으면 새로운 설정을 생성합니다.

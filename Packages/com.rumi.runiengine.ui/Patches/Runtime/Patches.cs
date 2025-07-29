@@ -1,6 +1,7 @@
 #nullable enable
 using HarmonyLib;
 using RuniEngine.Booting;
+using UnityEngine.Scripting;
 
 namespace RuniEngine.Patches.UI
 {
@@ -9,6 +10,7 @@ namespace RuniEngine.Patches.UI
         public static readonly Harmony harmony = new Harmony("Rumi.RuniOS.UI");
 
         [Awaken]
+        [Preserve]
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif

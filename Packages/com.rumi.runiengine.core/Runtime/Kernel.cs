@@ -3,6 +3,7 @@ using RuniEngine.Booting;
 using System;
 using System.Diagnostics;
 using UnityEngine;
+using UnityEngine.Scripting;
 
 namespace RuniEngine
 {
@@ -131,6 +132,7 @@ namespace RuniEngine
 
 
         [Awaken]
+        [Preserve]
         static void Awaken()
         {
             CustomPlayerLoopSetter.initEvent += Update;

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using System;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
+using UnityEngine.Scripting;
 
 namespace RuniEngine.Booting
 {
@@ -27,6 +28,7 @@ namespace RuniEngine.Booting
 #endif
 
         [Awaken]
+        [Preserve]
         static void Awaken()
         {
             Kernel.quitting += static () =>

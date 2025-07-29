@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using UnityEngine.Scripting;
 
 namespace RuniEngine
 {
@@ -57,9 +58,13 @@ namespace RuniEngine
             .Where
             (
                 static x =>
-                    x.AttributeContains<T>() &&
-                    x.GetParameters().IsEmpty()
-            );
+                {
+                    bool result = x.AttributeContains<T>() && x.GetParameters().IsEmpty();
+                    if (result && !x.AttributeContains<PreserveAttribute>())
+                        Debug.LogWarning($"The method {x.DeclaringType?.Name}.{x.Name} is invoked via '{nameof(AttributeInvoke)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
+                    
+                    return result;
+                });
 
             foreach (var item in methods)
             {

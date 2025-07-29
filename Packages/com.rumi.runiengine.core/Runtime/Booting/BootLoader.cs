@@ -17,6 +17,7 @@ namespace RuniEngine.Booting
 #endif
         static async UniTaskVoid Boot()
         {
+            Debug.Log("BootLoder");
             //UniTask Setting
             PlayerLoopSystem loopSystems = PlayerLoop.GetDefaultPlayerLoop();
             PlayerLoopHelper.Initialize(ref loopSystems);
