@@ -14,7 +14,7 @@ namespace RuniEngine.Editor.APIBridge.UnityEditor
         static MethodInfo? m_GetFieldInfoFromProperty;
         static readonly object?[] mp_GetFieldInfoFromProperty = new object?[2];
         static readonly Type[] mpt_GetFieldInfoFromProperty = new Type[] { typeof(SerializedProperty), typeof(Type) };
-        public FieldInfo? GetFieldInfoFromProperty(SerializedProperty property, out Type? type)
+        public static FieldInfo? GetFieldInfoFromProperty(SerializedProperty property, out Type? type)
         {
             m_GetFieldInfoFromProperty ??= ScriptAttributeUtility.type.GetMethod("GetFieldInfoFromProperty", BindingFlags.NonPublic | BindingFlags.Static, null, mpt_GetFieldInfoFromProperty, null);
 
