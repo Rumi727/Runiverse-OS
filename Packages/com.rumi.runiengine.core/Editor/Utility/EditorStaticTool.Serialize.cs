@@ -1,5 +1,7 @@
 #nullable enable
 using RuniEngine.Editor.APIBridge.UnityEditorInternal;
+using System;
+using System.Reflection;
 using UnityEditor;
 
 namespace RuniEngine.Editor
@@ -58,5 +60,7 @@ namespace RuniEngine.Editor
         }
 
         public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapper.GetPropertyIdentifier(property);
+
+        public static FieldInfo? GetFieldInfoFromProperty(this SerializedProperty property, out Type? type) => APIBridge.UnityEditor.ScriptAttributeUtility.GetFieldInfoFromProperty(property, out type);
     }
 }
