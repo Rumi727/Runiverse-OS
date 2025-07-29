@@ -1,0 +1,18 @@
+#nullable enable
+using HarmonyLib;
+using UnityEditor;
+
+namespace RuniEngine.Editor.Patches
+{
+    public static partial class Patches
+    {
+        public static readonly Harmony harmony = new Harmony("Rumi.RuniOS");
+
+        [InitializeOnLoadMethod]
+        static void Awaken()
+        {
+            harmony.UnpatchSelf();
+            harmony.PatchAll();
+        }
+    }
+}
