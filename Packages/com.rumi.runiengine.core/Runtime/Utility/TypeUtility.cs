@@ -198,16 +198,19 @@ namespace RuniEngine
             return false;
         }
 
+        /// <summary>
+        /// 지정된 타입의 상위 계층(상속 체인)을 열거합니다.<br/>
+        /// 이 메서드는 현재 타입부터 시작하여 <see cref="object"/> 타입까지 모든 기본 타입을 반환합니다.
+        /// </summary>
+        /// <param name="type">상위 계층을 가져올 시작 <see cref="Type"/>입니다.</param>
+        /// <returns>
+        /// 지정된 타입과 그 상위 기본 타입을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="Type"/> 컬렉션입니다.<br/>
+        /// 만약 <paramref name="type"/>이 null인 경우 빈 컬렉션을 반환합니다.
+        /// </returns>
         public static IEnumerable<Type> GetHierarchy(this Type? type)
         {
-            if (type == typeof(object))
-                yield break;
-
-            while (type != null)
-            {
+            for (; type != null; type = type.BaseType)
                 yield return type;
-                type = type.BaseType;
-            }
         }
 
         /// <summary><see cref="IList"/> 인터페이스의 리스트 타입을 가져옵니다</summary>
