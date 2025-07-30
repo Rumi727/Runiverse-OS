@@ -18,13 +18,7 @@ namespace RuniOS.Json.Converters
         /// </summary>
         /// <param name="objectType">변환을 확인할 <see cref="Type"/>입니다.</param>
         /// <returns>지정된 <see cref="Type"/>이 <see cref="ISerializableNullable{T}"/>를 구현하는 경우 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-        public override bool CanConvert(Type objectType)
-        {
-            // SerializableNullable.GetUnderlyingType 메서드는 T?도 함께 확인하므로 직접 사용하지 않습니다.
-            // 호환성과 확장성을 위해 관련 없는 타입은 무시하는 것이 좋습니다.
-            // objectType이 제네릭 타입이고 ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
-            return objectType.IsGenericType && objectType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>));
-        }
+        public override bool CanConvert(Type objectType) => SerializableNullable.GetUnderlyingType(objectType) != null;
         
         /// <summary>
         /// <see cref="ISerializableNullable{T}"/> 객체를 JSON으로 직렬화합니다.

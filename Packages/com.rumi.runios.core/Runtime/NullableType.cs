@@ -48,7 +48,7 @@ namespace RuniOS
         /// </summary>
         static NullableType()
         {
-            isNullable += static x => x.IsClass || x.IsInterface || Nullable.GetUnderlyingType(x) != null;
+            isNullable += static x => x.IsClass || x.IsInterface || Nullable.GetUnderlyingType(x) != null || SerializableNullable.GetUnderlyingType(x) != null;
             
             getNullableUnderlyingType += static x => Nullable.GetUnderlyingType(x);
             getNullableUnderlyingType += static x => SerializableNullable.GetUnderlyingType(x);
