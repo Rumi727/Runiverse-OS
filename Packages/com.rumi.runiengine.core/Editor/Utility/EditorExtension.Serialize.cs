@@ -6,7 +6,7 @@ using UnityEditor;
 
 namespace RuniEngine.Editor
 {
-    public static partial class EditorStaticTool
+    public static partial class EditorExtension
     {
         public static bool IsGeneric(this SerializedProperty property) => property.propertyType == SerializedPropertyType.Generic;
         public static bool IsTextField(this SerializedProperty property) => property.propertyType == SerializedPropertyType.Integer || property.propertyType == SerializedPropertyType.Float || property.propertyType == SerializedPropertyType.Character || property.propertyType == SerializedPropertyType.String;

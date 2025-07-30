@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace RuniEngine.Editor
 {
-    public static partial class EditorStaticTool
+    public static partial class EditorExtension
     {
         public static IEnumerable<DictionaryEntry> ToGeneric(this IDictionary source)
         {
