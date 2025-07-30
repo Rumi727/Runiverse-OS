@@ -2,15 +2,18 @@
 using HarmonyLib;
 using RuniOS.Editor.UIElements.Bindings;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Reflection.Emit;
 using UnityEditor;
 using UnityEngine.UIElements;
 
+#if UNITY_6000_0_OR_NEWER
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+
 using Label = System.Reflection.Emit.Label;
+#endif
 
 namespace RuniOS.Editor.Patches
 {
@@ -31,6 +34,7 @@ namespace RuniOS.Editor.Patches
                         {
                             public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(targetType, "CreateBindingObjectForProperty");
 
+#if UNITY_6000_0_OR_NEWER
                             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
                             {
                                 CodeMatcher matcher = new CodeMatcher(instructions, generator);
@@ -94,15 +98,25 @@ namespace RuniOS.Editor.Patches
 
                                 return matcher.InstructionEnumeration();
                             }
+#else
+                            public static bool Prefix(object __instance, VisualElement element, SerializedProperty prop)
+                            {
+                                if (prop.propertyType == SerializedPropertyType.Generic)
+                                    return !CustomPreCondition(__instance, element, prop);
+
+                                return true;
+                            }
+#endif
 
                             static readonly object[] defaultBindParms = new object[5];
-                            static bool CustomPreCondition(object instance, VisualElement element, SerializedProperty prop)
+                            public static bool CustomPreCondition(object instance, VisualElement element, SerializedProperty prop)
                             {
                                 try
                                 {
+#if !UNITY_6000_0_OR_NEWER
                                     if (ActiveEditorTracker.sharedTracker.inspectorMode != InspectorMode.Normal)
                                         return false;
-                                    
+#endif
                                     // DefaultBind 메소드를 포함하는 대상 인스턴스의 타입을 가져옵니다.
                                     Type targetType = instance.GetType();
                                     // 대상 인스턴스에서 "DefaultBind" 제네릭 메소드의 정의를 찾아옵니다.
@@ -145,6 +159,16 @@ namespace RuniOS.Editor.Patches
                                         Debug.LogWarning($"No suitable PropertyBinder found for property type {propertyType}. Property: {prop.propertyPath}");
                                         return false;
                                     }
+                                    
+                                    // propertyType이 Nullable인지 확인합니다
+                                    bool isNullable = NullableType.IsNullable(propertyType);
+                                    Type? nullableUnderlyingType = NullableType.GetNullableUnderlyingType(propertyType);
+
+                                    if ((nullableUnderlyingType == null && !propertyType.HasDefaultConstructor()) || (nullableUnderlyingType != null && !nullableUnderlyingType.HasDefaultConstructor()))
+                                    {
+                                        Debug.LogWarning($"Property '{prop.propertyPath}' of type '{propertyType}' cannot be bound because it requires a default public constructor but doesn't have one, or it's a nullable type whose underlying type lacks a default public constructor.");
+                                        return false;
+                                    }
 
                                     // Read 델리게이트 (Func<SerializedProperty, TValue>)를 동적으로 생성합니다.
                                     Delegate readFunc;
@@ -152,11 +176,13 @@ namespace RuniOS.Editor.Patches
                                     Type readFuncType = typeof(Func<,>).MakeGenericType(typeof(SerializedProperty), propertyType);
                                     {
                                         // Read 작업을 수행할 내부 로컬 함수를 정의합니다.
-                                        // 이 함수는 'binder', 'element', 'propertyType'을 클로저로 캡처합니다.
+                                        // 이 함수는 'binder', 'element', 'propertyType', 'isNullable'을 클로저로 캡처합니다.
                                         object? InternalReadFunc(SerializedProperty property)
                                         {
                                             try
                                             {
+                                                property = property.Copy();
+                                                
                                                 // 바인더를 통해 값을 읽어옵니다.
                                                 object? value = binder.Read(element, property, propertyType);
 
@@ -164,7 +190,7 @@ namespace RuniOS.Editor.Patches
                                                 if (value == null)
                                                 {
                                                     // propertyType이 참조 타입, 인터페이스, 또는 Nullable<T>인 경우 null을 허용합니다.
-                                                    if (propertyType.IsClass || propertyType.IsInterface || SerializableNullable.GetUnderlyingType(propertyType) != null)
+                                                    if (isNullable)
                                                         return null;
 
                                                     // non-nullable 값 타입인데 null이 반환된 경우 경고를 로깅하고 기본값을 반환합니다.
@@ -181,7 +207,7 @@ namespace RuniOS.Editor.Patches
                                                 }
 
                                                 // 타입 불일치 시 타입의 기본값을 반환합니다.
-                                                return propertyType.GetDefaultValue();
+                                                return propertyType.GetDefaultValueNotNull();
                                             }
                                             catch (Exception e) // 바인더 내부에서 예외가 발생한 경우 처리
                                             {
@@ -230,6 +256,8 @@ namespace RuniOS.Editor.Patches
                                         {
                                             try
                                             {
+                                                property = property.Copy();
+                                                
                                                 // 바인더를 통해 값을 씁니다.
                                                 binder.Write(element, property, propertyType, value);
                                             }
@@ -280,6 +308,8 @@ namespace RuniOS.Editor.Patches
                                         {
                                             try
                                             {
+                                                property = property.Copy();
+                                                
                                                 // 전달받은 readFunc 델리게이트를 사용하여 현재 속성 값을 가져옵니다.
                                                 object? currentValue = readFunc.DynamicInvoke(property);
 

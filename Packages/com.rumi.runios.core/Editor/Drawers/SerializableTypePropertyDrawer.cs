@@ -1,14 +1,12 @@
 #nullable enable
-using RuniOS.UIElements;
 using System;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-using TypeField = RuniOS.UIElements.TypeField;
 using static RuniOS.Editor.EditorTool;
-using UIElements_TypeField = RuniOS.UIElements.TypeField;
+using TypeField = RuniOS.UIElements.TypeField;
 
 namespace RuniOS.Editor.Drawers
 {
@@ -17,13 +15,13 @@ namespace RuniOS.Editor.Drawers
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            UIElements_TypeField typeField = new UIElements_TypeField
+            TypeField typeField = new TypeField
             {
                 label = property.displayName,
                 bindingPath = GetChildProperty(property).propertyPath
             };
             
-            typeField.AddToClassList(UIElements_TypeField.alignedFieldUssClassName);
+            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
             typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
             typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
             

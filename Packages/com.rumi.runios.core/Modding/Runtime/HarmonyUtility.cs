@@ -1,6 +1,7 @@
 #nullable enable
 using HarmonyLib;
 using System.Diagnostics;
+using System.Reflection;
 
 namespace RuniOS.Modding
 {
@@ -19,14 +20,15 @@ namespace RuniOS.Modding
         /// <summary>
         /// 에디터 환경에서는 패치를 다시 적용하지만, 빌드된 환경에서는 최적화를 위해 기존 패치를 제거하지 않습니다.<br/>
         /// </summary>
-        /// <param name="harmony">패치 작업을 수행할 <see cref="Harmony"/> 인스턴스입니다.</param>
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
-        public static void PatchInEditor(Harmony harmony)
+        public static void PatchInEditor(Harmony harmony, Assembly? assembly = null)
         {
+            assembly ??= Assembly.GetCallingAssembly();
+            
 #if UNITY_EDITOR
-            Repatch(harmony);
+            Repatch(harmony, assembly);
 #else
-            Patch(harmony);
+            Patch(harmony, assembly);
 #endif
         }
 
@@ -34,15 +36,16 @@ namespace RuniOS.Modding
         /// 지정된 <see cref="Harmony"/> 인스턴스의 모든 패치를 적용합니다.<br/>
         /// 이 메서드는 기존 패치를 제거하지 않고 새로운 패치만 적용합니다.
         /// </summary>
-        /// <param name="harmony">패치를 적용할 <see cref="Harmony"/> 인스턴스입니다.</param>
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
-        public static void Patch(Harmony harmony)
+        public static void Patch(Harmony harmony, Assembly? assembly = null)
         {
+            assembly ??= Assembly.GetCallingAssembly();
+            
             if (logEnable)
                 Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            harmony.PatchAll();
+            harmony.PatchAll(assembly);
             stopwatch.Stop();
             
             if (logEnable)
@@ -53,7 +56,6 @@ namespace RuniOS.Modding
         /// 지정된 <see cref="Harmony"/> 인스턴스의 모든 패치를 제거합니다.<br/>
         /// 이 메서드는 현재 적용된 모든 패치를 원상복구합니다.
         /// </summary>
-        /// <param name="harmony">패치를 제거할 <see cref="Harmony"/> 인스턴스입니다.</param>
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public static void Unpatch(Harmony harmony)
         {
@@ -72,10 +74,11 @@ namespace RuniOS.Modding
         /// 지정된 <see cref="Harmony"/> 인스턴스의 기존 패치를 제거한 후 모든 패치를 다시 적용합니다.<br/>
         /// 주로 개발 환경에서 패치 변경 사항을 빠르게 반영할 때 유용합니다.
         /// </summary>
-        /// <param name="harmony">패치를 다시 적용할 <see cref="Harmony"/> 인스턴스입니다.</param>
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
-        public static void Repatch(Harmony harmony)
+        public static void Repatch(Harmony harmony, Assembly? assembly = null)
         {
+            assembly ??= Assembly.GetCallingAssembly();
+            
             if (logEnable)
                 Debug.Log($"[{harmony.Id}] Patching operations started.");
 
@@ -87,7 +90,7 @@ namespace RuniOS.Modding
                 Debug.Log($"[{harmony.Id}] Existing patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
 
             stopwatch.Restart();
-            harmony.PatchAll();
+            harmony.PatchAll(assembly);
             stopwatch.Stop();
             
             if (logEnable)

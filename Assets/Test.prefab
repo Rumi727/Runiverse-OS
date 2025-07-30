@@ -108,7 +108,7 @@ MonoBehaviour:
                   value: 0
                   hasValue: 0
             identifier:
-              _nameSpace: 
+              _nameSpace: ros
               _path:
                 _value: 
             nInt:
@@ -132,7 +132,7 @@ MonoBehaviour:
               hasValue: 0
             nIdentifier:
               value:
-                _nameSpace: 
+                _nameSpace: ros
                 _path:
                   _value: 
               hasValue: 0
@@ -222,7 +222,7 @@ MonoBehaviour:
                   value: 0
                   hasValue: 0
             identifier:
-              _nameSpace: 
+              _nameSpace: ros
               _path:
                 _value: 
             nInt:
@@ -246,7 +246,7 @@ MonoBehaviour:
               hasValue: 0
             nIdentifier:
               value:
-                _nameSpace: 
+                _nameSpace: ros
                 _path:
                   _value: 
               hasValue: 0
@@ -342,7 +342,7 @@ MonoBehaviour:
                   value: 0
                   hasValue: 0
             identifier:
-              _nameSpace: 
+              _nameSpace: ros
               _path:
                 _value: 
             nInt:
@@ -366,7 +366,7 @@ MonoBehaviour:
               hasValue: 0
             nIdentifier:
               value:
-                _nameSpace: 
+                _nameSpace: ros
                 _path:
                   _value: 
               hasValue: 0
@@ -479,7 +479,7 @@ MonoBehaviour:
       hasValue: 0
     nIdentifier:
       value:
-        _nameSpace: 
+        _nameSpace: ros
         _path:
           _value: 
       hasValue: 0
@@ -625,7 +625,7 @@ MonoBehaviour:
   fileExtension:
     _value: .asdf
   hexColor:
-    _value: '#00000000'
+    _value: '#2C2CDBBC'
   rectCorner:
     bottomLeft: {x: 0, y: 0}
     topLeft: {x: 0, y: 0}
@@ -649,6 +649,35 @@ MonoBehaviour:
     value:
       value: 0
       hasValue: 0
+  packIdentifier:
+    _identifier:
+      value:
+        _nameSpace: ros
+        _path:
+          _value: 
+      hasValue: 1
+    _path:
+      value:
+        _value: 
+      hasValue: 0
+  textAlignment: 0
+  nullableNullableFloat:
+    value:
+      value: 0
+      hasValue: 0
+    hasValue: 0
+  type:
+    _value: UnityEngine.Object, UnityEngine.CoreModule
+  readOnlyType:
+    _value: UnityEngine.Object, UnityEngine.CoreModule
+  nullableRectOffset:
+    value:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+    hasValue: 0
+  test: 0
   references:
     version: 2
     RefIds:
@@ -693,7 +722,7 @@ MonoBehaviour:
               value: 0
               hasValue: 0
         identifier:
-          _nameSpace: 
+          _nameSpace: ros
           _path:
             _value: 
         nInt:
@@ -717,7 +746,7 @@ MonoBehaviour:
           hasValue: 0
         nIdentifier:
           value:
-            _nameSpace: 
+            _nameSpace: ros
             _path:
               _value: 
           hasValue: 0
@@ -783,10 +812,6 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 9cdd7e61695d9cd43b19a08bf7512e85, type: 3}
   m_SortingOrder: 0
-  m_Position: 0
   m_WorldSpaceSizeMode: 0
   m_WorldSpaceWidth: 310
   m_WorldSpaceHeight: 1013.8
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}

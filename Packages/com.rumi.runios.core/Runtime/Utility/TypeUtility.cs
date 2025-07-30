@@ -18,10 +18,19 @@ namespace RuniOS
 
         public static object GetDefaultValueNotNull(this Type type)
         {
-            if (type == typeof(string))
-                return string.Empty;
+            while (true)
+            {
+                Type? nullableUnderlyingType = type.GetNullableUnderlyingType();
+                if (nullableUnderlyingType != null)
+                {
+                    type = nullableUnderlyingType;
+                    continue;
+                }
+                else if (type == typeof(string))
+                    return string.Empty;
 
-            return Activator.CreateInstance(type);
+                return Activator.CreateInstance(type);
+            }
         }
 
         /// <summary>type != typeof(T) &amp;&amp; typeof(T).IsAssignableFrom(type)</summary>

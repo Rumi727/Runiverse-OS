@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 using Object = UnityEngine.Object;
-using UniDrivenPropertyManager = RuniOS.APIBridge.UnityEngine.DrivenPropertyManager;
 
 namespace RuniOS
 {

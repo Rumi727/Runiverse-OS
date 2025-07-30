@@ -862,7 +862,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: hexColor._value
-      value: '#2C2CDB57'
+      value: '#F8D743BC'
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.size

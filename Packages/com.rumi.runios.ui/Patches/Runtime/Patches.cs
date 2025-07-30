@@ -2,7 +2,6 @@
 using HarmonyLib;
 using RuniOS.Booting;
 using RuniOS.Modding;
-using System.Diagnostics;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Patches.UI
