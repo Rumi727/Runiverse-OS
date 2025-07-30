@@ -93,7 +93,7 @@ namespace RuniEngine.Patches.UI
                                     {
                                         > 1 => Length.Percent(100),
                                         < 0 => Length.Percent(0),
-                                        _ => Length.Pixels((trackElement.contentRect.height * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingBottom : trackElement.resolvedStyle.paddingTop))
+                                        _ => new Length((trackElement.contentRect.height * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingBottom : trackElement.resolvedStyle.paddingTop))
                                     };
 
                                     fillElement.style.right = 0f;
@@ -107,7 +107,7 @@ namespace RuniEngine.Patches.UI
                                     {
                                         > 1 => Length.Percent(100),
                                         < 0 => Length.Percent(0),
-                                        _ => Length.Pixels(((trackElement.contentRect.width * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingLeft : trackElement.resolvedStyle.paddingRight)))
+                                        _ => new Length(((trackElement.contentRect.width * normalizedValue) + (inverted ? trackElement.resolvedStyle.paddingLeft : trackElement.resolvedStyle.paddingRight)))
                                     };
 
                                     fillElement.style.top = 0f;

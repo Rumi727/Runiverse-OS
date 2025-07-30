@@ -118,7 +118,7 @@ namespace RuniEngine.Editor.Drawers.Attributes
                     if (IMGUIUtility.currentIMGUIContainer != null)
                     {
                         StyleLength lastHeight = IMGUIUtility.currentIMGUIContainer.style.height;
-                        IMGUIUtility.currentIMGUIContainer.style.height = Length.Pixels(height);
+                        IMGUIUtility.currentIMGUIContainer.style.height = new Length(height);
                         IMGUIUtility.currentIMGUIContainer.style.height = lastHeight;
                     }
 

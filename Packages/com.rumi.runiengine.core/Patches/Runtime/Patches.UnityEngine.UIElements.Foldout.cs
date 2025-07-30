@@ -55,9 +55,9 @@ namespace RuniEngine.Patches
                             content.RegisterCallback<GeometryChangedEvent>(x =>
                             {
                                 if (__instance.value)
-                                    viewportClipping.style.height = Length.Pixels(x.newRect.height.Max(1));
+                                    viewportClipping.style.height = new Length(x.newRect.height.Max(1));
                                 else
-                                    viewportClipping.style.height = Length.Pixels(0);
+                                    viewportClipping.style.height = Length.None();
                             });
                         }
                     }
@@ -109,11 +109,11 @@ namespace RuniEngine.Patches
                                 if (newValue)
                                 {
                                     __instance.contentContainer.style.display = DisplayStyle.Flex;
-                                    viewportClipping.style.height = Length.Pixels(__instance.contentContainer.resolvedStyle.height.Max(1));
+                                    viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
                                 }
                                 else
                                 {
-                                    viewportClipping.style.height = Length.Pixels(0);
+                                    viewportClipping.style.height = Length.None();
                                     viewportClipping.RegisterCallbackOnce<TransitionEndEvent, UniFoldout>(TransitionEndEvent, __instance);
                                 }
                             }
