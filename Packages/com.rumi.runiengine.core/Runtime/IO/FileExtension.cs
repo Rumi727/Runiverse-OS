@@ -6,6 +6,11 @@ using UnityEngine;
 
 namespace RuniEngine.IO
 {
+    /// <summary>
+    /// 파일 확장자를 나타내는 구조체입니다.<br/>
+    /// 확장자는 항상 '.'으로 시작하며, 경로 문자열에서 확장자 부분만 파싱하여 관리합니다.<br/>
+    /// 경로의 마지막 '.' 이후 문자열만 확장자로 간주합니다.
+    /// </summary>
     [Serializable]
     public struct FileExtension : IEquatable<FileExtension>, ISerializationCallbackReceiver
     {
@@ -14,8 +19,25 @@ namespace RuniEngine.IO
         /// </summary>
         public const char extensionSeparatorChar = '.';
 
+        /// <summary>
+        /// <see cref="FilePath"/>에서 파일 확장자를 초기화합니다.
+        /// </summary>
+        /// <param name="path">확장자를 추출할 <see cref="FilePath"/>입니다.</param>
         public FileExtension(FilePath path) : this(path.value) { }
+        
+        /// <summary>
+        /// nullable <see cref="FilePath"/>에서 파일 확장자를 초기화합니다.<br/>
+        /// <paramref name="path"/>가 <see langword="null"/>이면 빈 확장자로 초기화됩니다.
+        /// </summary>
+        /// <param name="path">확장자를 추출할 nullable <see cref="FilePath"/>입니다.</param>
         public FileExtension(FilePath? path) : this(path?.value) { }
+        
+        /// <summary>
+        /// 문자열 값에서 파일 확장자를 초기화합니다.<br/>
+        /// 제공된 문자열에서 마지막 '.' 이후의 부분을 확장자로 설정합니다.<br/>
+        /// 만약 '.'이 없거나 <see langword="null"/> 또는 비어있는 문자열이 제공되면 빈 확장자로 초기화됩니다.
+        /// </summary>
+        /// <param name="value">확장자를 포함할 수 있는 문자열 값입니다.</param>
         public FileExtension(string? value)
         {
             _value = string.Empty;
@@ -23,6 +45,12 @@ namespace RuniEngine.IO
                 this.value = value;
         }
 
+        /// <summary>
+        /// 파일 확장자의 실제 문자열 값을 가져오거나 설정합니다.<br/>
+        /// 설정 시, 값에서 마지막 '.' 이후의 문자열만 확장자로 추출하여 저장합니다.<br/>
+        /// 예를 들어, ".png", "jpg", "image.gif" 등의 값이 주어지면 각각 ".png", ".jpg", ".gif"로 저장됩니다.<br/>
+        /// 만약 '.'이 없으면 빈 문자열로 설정됩니다.
+        /// </summary>
         [AllowNull]
         public string value
         {
@@ -45,6 +73,11 @@ namespace RuniEngine.IO
 
 
 
+        /// <summary>
+        /// 현재 <see cref="FileExtension"/> 인스턴스의 문자열 표현을 반환합니다.<br/>
+        /// 이는 <see cref="value"/> 속성과 동일합니다.
+        /// </summary>
+        /// <returns>현재 <see cref="FileExtension"/>의 문자열 값입니다.</returns>
         public override readonly string ToString()
         {
             if (string.IsNullOrEmpty(value))
@@ -116,7 +149,16 @@ namespace RuniEngine.IO
 
 
 
-        public void OnBeforeSerialize() => value = value;
-        public void OnAfterDeserialize() => value = value;
+        /// <summary>
+        /// 직렬화 전에 호출됩니다.<br/>
+        /// <see cref="value"/> 속성을 재설정하여 올바른 확장자 형식을 유지하도록 합니다.
+        /// </summary>
+        void ISerializationCallbackReceiver.OnBeforeSerialize() => value = value;
+        
+        /// <summary>
+        /// 역직렬화 후에 호출됩니다.<br/>
+        /// <see cref="value"/> 속성을 재설정하여 올바른 확장자 형식을 유지하도록 합니다.
+        /// </summary>
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => value = value;
     }
 }
