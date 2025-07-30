@@ -515,7 +515,7 @@ namespace RuniEngine
         /// <see cref="major"/>, <see cref="minor"/>, <see cref="patch"/> <see cref="Nullable{T}"/> 값을
         /// 유니티 직렬화 가능한 내부 필드(<see cref="_major"/>, <see cref="_minor"/>, <see cref="_patch"/>)로 동기화합니다.
         /// </summary>
-        public void OnBeforeSerialize()
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
         {
             _major = major;
             _minor = minor;
@@ -528,7 +528,7 @@ namespace RuniEngine
         /// 유니티 직렬화 가능한 내부 필드(<see cref="_major"/>, <see cref="_minor"/>, <see cref="_patch"/>)로부터
         /// <see cref="major"/>, <see cref="minor"/>, <see cref="patch"/> <see cref="Nullable{T}"/> 값을 동기화합니다.
         /// </summary>
-        public void OnAfterDeserialize()
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
             major = _major;
             minor = _minor;
