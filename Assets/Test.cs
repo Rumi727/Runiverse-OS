@@ -25,6 +25,7 @@ public sealed class Test : MonoBehaviour
 
     [AnimFolder] public Test2 test2 = new Test2();
     [SerializeReference] public Test2 test3Ref = new Test2();
+    public Vector3 vector3;
     public Vector4 vector4;
     public Version version;
     public VersionRange versionRange;
