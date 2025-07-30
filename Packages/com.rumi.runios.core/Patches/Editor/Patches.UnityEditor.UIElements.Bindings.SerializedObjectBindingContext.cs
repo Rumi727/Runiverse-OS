@@ -100,6 +100,9 @@ namespace RuniOS.Editor.Patches
                             {
                                 try
                                 {
+                                    if (ActiveEditorTracker.sharedTracker.inspectorMode != InspectorMode.Normal)
+                                        return false;
+                                    
                                     // DefaultBind 메소드를 포함하는 대상 인스턴스의 타입을 가져옵니다.
                                     Type targetType = instance.GetType();
                                     // 대상 인스턴스에서 "DefaultBind" 제네릭 메소드의 정의를 찾아옵니다.

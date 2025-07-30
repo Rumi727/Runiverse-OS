@@ -13,10 +13,7 @@ PluginImporter:
   platformData:
     Android:
       enabled: 1
-      settings:
-        AndroidLibraryDependee: UnityLibrary
-        AndroidSharedLibraryType: Executable
-        CPU: ARMv7
+      settings: {}
     Any:
       enabled: 1
       settings:
@@ -29,25 +26,19 @@ PluginImporter:
     Editor:
       enabled: 1
       settings:
-        CPU: AnyCPU
         DefaultValueInitialized: true
-        OS: AnyOS
     Linux64:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
     OSXUniversal:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
     Win:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
     Win64:
       enabled: 1
-      settings:
-        CPU: AnyCPU
+      settings: {}
     WindowsStoreApps:
       enabled: 0
       settings:
