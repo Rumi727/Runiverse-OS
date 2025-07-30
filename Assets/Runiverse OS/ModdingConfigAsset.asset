@@ -12,3 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 754f0853c73f41c43bc39179ad68e06f, type: 3}
   m_Name: ModdingConfigAsset
   m_EditorClassIdentifier: 
+  _logInEditor: 0
