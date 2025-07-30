@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine.Editor.Modding
+namespace RuniOS.Editor.Modding
 {
     public sealed class ModdingConfigAsset : RuniOSConfigObject<ModdingConfigAsset>
     {

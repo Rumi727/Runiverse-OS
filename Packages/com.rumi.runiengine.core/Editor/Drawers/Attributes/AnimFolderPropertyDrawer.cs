@@ -6,10 +6,10 @@ using UnityEditor.AnimatedValues;
 using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
-using static RuniEngine.Editor.EditorTool;
+using static RuniOS.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 
-namespace RuniEngine.Editor.Drawers.Attributes
+namespace RuniOS.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(AnimFolderAttribute))]
     public class AnimFolderPropertyDrawer : PropertyDrawer

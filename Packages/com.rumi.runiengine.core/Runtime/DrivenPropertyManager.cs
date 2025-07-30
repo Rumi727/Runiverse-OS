@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 using Object = UnityEngine.Object;
-using UniDrivenPropertyManager = RuniEngine.APIBridge.UnityEngine.DrivenPropertyManager;
+using UniDrivenPropertyManager = RuniOS.APIBridge.UnityEngine.DrivenPropertyManager;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class DrivenPropertyManager
     {
@@ -21,7 +21,7 @@ namespace RuniEngine
             try
             {
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-                UniDrivenPropertyManager.RegisterProperty(driver, target, propertyPath);
+                APIBridge.UnityEngine.DrivenPropertyManager.RegisterProperty(driver, target, propertyPath);
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)
@@ -39,7 +39,7 @@ namespace RuniEngine
             try
             {
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-                UniDrivenPropertyManager.UnregisterProperty(driver, target, propertyPath);
+                APIBridge.UnityEngine.DrivenPropertyManager.UnregisterProperty(driver, target, propertyPath);
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)

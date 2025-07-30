@@ -1,12 +1,12 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniEngine.Spans;
+using RuniOS.Spans;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 시스템 경로를 처리하고 파일 및 디렉토리 작업에 대한 기능을 제공하는 핸들러입니다.

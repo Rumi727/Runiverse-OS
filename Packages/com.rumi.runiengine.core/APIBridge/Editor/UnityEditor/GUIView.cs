@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor
+namespace RuniOS.Editor.APIBridge.UnityEditor
 {
     public class GUIView : View, IWindowModel
     {

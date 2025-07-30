@@ -3,7 +3,7 @@ using UnityEditor;
 using TMPro;
 using UnityEngine;
 
-namespace RuniEngine.Installer
+namespace RuniOS.Installer
 {
     sealed class TMPSettingScreen : IInstallerScreen
     {

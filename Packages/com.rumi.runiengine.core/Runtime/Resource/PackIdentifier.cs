@@ -1,11 +1,11 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.IO;
-using RuniEngine.Json.Converters.Resource;
+using RuniOS.IO;
+using RuniOS.Json.Converters.Resource;
 using System;
 using UnityEngine;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     /// <summary>
     /// 팩 식별자를 나타내는 구조체입니다.

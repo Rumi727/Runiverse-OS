@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings
 {
     public abstract class PropertyBinder
     {

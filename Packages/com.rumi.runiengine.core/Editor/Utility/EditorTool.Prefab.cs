@@ -4,7 +4,7 @@ using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public partial class EditorTool
     {

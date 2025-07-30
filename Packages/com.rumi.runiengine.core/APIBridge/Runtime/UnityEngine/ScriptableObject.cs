@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.APIBridge.UnityEngine
+namespace RuniOS.APIBridge.UnityEngine
 {
     public class ScriptableObject : Object
     {

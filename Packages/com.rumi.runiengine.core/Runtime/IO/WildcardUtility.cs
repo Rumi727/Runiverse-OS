@@ -1,7 +1,7 @@
 #nullable enable
 using System.Text.RegularExpressions;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     public static class WildcardUtility
     {

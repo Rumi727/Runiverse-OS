@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using UnityEngine;
 
-namespace RuniEngine.Collections.Generic
+namespace RuniOS.Collections.Generic
 {
     [Serializable]
     public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>, ISerializableDictionary

@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine.Installer
+namespace RuniOS.Installer
 {
     interface IInstallerScreen
     {

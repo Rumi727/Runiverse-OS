@@ -1,10 +1,10 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.Json.Converters;
+using RuniOS.Json.Converters;
 using System;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 메이저, 마이너, 패치 버전 구성 요소를 가질 수 있는 유니티 직렬화 가능한 버전 구조체입니다.

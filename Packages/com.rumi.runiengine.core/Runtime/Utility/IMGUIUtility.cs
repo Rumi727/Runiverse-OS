@@ -1,6 +1,6 @@
 ﻿using UnityEngine.UIElements;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class IMGUIUtility
     {

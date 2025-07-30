@@ -4,9 +4,9 @@ using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-using static RuniEngine.Editor.EditorTool;
+using static RuniOS.Editor.EditorTool;
 
-namespace RuniEngine.Editor.Drawers.Attributes
+namespace RuniOS.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(FieldNameAttribute))]
     public class FieldNameAttributeDrawer : PropertyDrawer

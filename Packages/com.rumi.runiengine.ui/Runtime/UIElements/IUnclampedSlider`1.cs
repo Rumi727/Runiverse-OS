@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.UIElements
+namespace RuniOS.UIElements
 {
     public interface IUnclampedSlider<T> : IUnclampedSlider where T : struct, IComparable<T>, IComparable
     {

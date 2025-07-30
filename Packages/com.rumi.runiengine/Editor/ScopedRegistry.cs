@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-namespace RuniEngine.Installer
+namespace RuniOS.Installer
 {
     //[CreateAssetMenu(fileName = "ScopedRegistry", menuName = "Scriptable Objects/ScopedRegistry")]
     class ScopedRegistry : ScriptableObject

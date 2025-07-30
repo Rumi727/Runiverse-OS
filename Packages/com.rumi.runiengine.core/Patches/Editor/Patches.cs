@@ -1,9 +1,9 @@
 #nullable enable
 using HarmonyLib;
-using RuniEngine.Modding;
+using RuniOS.Modding;
 using UnityEditor;
 
-namespace RuniEngine.Editor.Patches
+namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
     {

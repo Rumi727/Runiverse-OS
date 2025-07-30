@@ -1,19 +1,19 @@
 {
-    "name": "RuniEngine.Editor",
-    "rootNamespace": "RuniEngine.Editor",
+    "name": "RuniOS",
+    "rootNamespace": "RuniOS",
     "references": [
-        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:c6d2ee51b86b95246ae92eebdcffddee",
-        "GUID:e0d7720a211379b4bab82afbf6fc6b14"
+        "GUID:e0d7720a211379b4bab82afbf6fc6b14",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
-    "includePlatforms": [
-        "Editor"
-    ],
+    "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "ExtendedNumerics.BigDecimal.dll"
+        "ExtendedNumerics.BigDecimal.dll",
+        "Newtonsoft.Json.dll",
+        "0Harmony.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

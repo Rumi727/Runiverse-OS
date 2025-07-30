@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System;
 
-namespace RuniEngine.Json.Converters
+namespace RuniOS.Json.Converters
 {
     /// <summary>
     /// <see cref="HexColor"/> 구조체를 16진수 색상 문자열로 직렬화하고 역직렬화하는 <see cref="JsonConverter"/>입니다.

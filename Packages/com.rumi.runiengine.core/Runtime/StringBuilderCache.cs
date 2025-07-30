@@ -2,7 +2,7 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class StringBuilderCache
     {

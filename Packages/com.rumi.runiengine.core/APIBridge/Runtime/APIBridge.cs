@@ -15,7 +15,7 @@ using System.Reflection;
  * t : Type
  */
 
-namespace RuniEngine.APIBridge
+namespace RuniOS.APIBridge
 {
     class APIBridge
     {

@@ -1,8 +1,8 @@
 #nullable enable
-using RuniEngine.APIBridge.UnityEngine;
+using RuniOS.APIBridge.UnityEngine;
 using System;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor
+namespace RuniOS.Editor.APIBridge.UnityEditor
 {
     public class EditorWindow : ScriptableObject
     {

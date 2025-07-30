@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class TimeUtility
     {

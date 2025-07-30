@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace RuniEngine.APIBridge
+namespace RuniOS.APIBridge
 {
     static class AssemblyManager
     {

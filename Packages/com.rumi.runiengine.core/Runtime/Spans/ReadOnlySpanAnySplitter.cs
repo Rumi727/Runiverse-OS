@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace RuniEngine.Spans
+namespace RuniOS.Spans
 {
     public readonly ref struct ReadOnlySpanAnySplitter<T> where T : IEquatable<T>
     {

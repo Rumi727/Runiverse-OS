@@ -1,5 +1,5 @@
 #nullable enable
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 가상 파일 시스템 내의 노드를 나타내는 인터페이스입니다.<br/>

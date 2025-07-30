@@ -1,6 +1,6 @@
 {
-    "name": "RuniEngine.Modding",
-    "rootNamespace": "RuniEngine.Modding",
+    "name": "RuniOS.Modding",
+    "rootNamespace": "RuniOS.Modding",
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:539740484accacd4292d8460e00aac39",

@@ -1,7 +1,7 @@
 #nullable enable
 using System.Collections;
 
-namespace RuniEngine.Collections
+namespace RuniOS.Collections
 {
     public interface ISerializableDictionary : IDictionary
     {

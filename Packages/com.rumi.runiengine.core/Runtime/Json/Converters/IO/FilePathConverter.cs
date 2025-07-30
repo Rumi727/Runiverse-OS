@@ -1,9 +1,9 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.IO;
+using RuniOS.IO;
 using System;
 
-namespace RuniEngine.Json.Converters.IO
+namespace RuniOS.Json.Converters.IO
 {
     /// <summary>
     /// <see cref="FilePath"/> 구조체를 JSON 문자열로 직렬화하고 역직렬화하는 <see cref="JsonConverter"/>입니다.

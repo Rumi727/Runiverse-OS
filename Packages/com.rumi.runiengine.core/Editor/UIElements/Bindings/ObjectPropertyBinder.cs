@@ -3,7 +3,7 @@ using System;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings
 {
     [CustomPropertyBinder(typeof(object), true)]
     public class ObjectPropertyBinder : PropertyBinder

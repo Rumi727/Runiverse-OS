@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 using UniMinMaxSlider = UnityEngine.UIElements.MinMaxSlider; 
 
-namespace RuniEngine.Patches.UI
+namespace RuniOS.Patches.UI
 {
     public static partial class Patches
     {

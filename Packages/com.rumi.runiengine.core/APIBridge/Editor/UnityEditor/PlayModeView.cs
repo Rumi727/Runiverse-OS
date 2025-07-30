@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor
+namespace RuniOS.Editor.APIBridge.UnityEditor
 {
     public class PlayModeView : EditorWindow
     {

@@ -8,7 +8,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniEngine.Installer
+namespace RuniOS.Installer
 {
     sealed class PackageSettingScreen : IInstallerScreen
     {

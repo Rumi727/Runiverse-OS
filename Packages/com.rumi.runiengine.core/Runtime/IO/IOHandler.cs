@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 시스템 작업을 처리하는 추상 기본 클래스입니다.

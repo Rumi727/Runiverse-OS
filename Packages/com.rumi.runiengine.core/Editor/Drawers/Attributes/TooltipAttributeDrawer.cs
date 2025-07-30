@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniEngine.Editor.Drawers.Attributes
+namespace RuniOS.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(TooltipAttribute))]
     public class TooltipAttributeAttributeDrawer : PropertyDrawer

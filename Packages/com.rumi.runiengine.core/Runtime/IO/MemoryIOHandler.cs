@@ -3,10 +3,10 @@ using Cysharp.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using System;
-using RuniEngine.Spans;
+using RuniOS.Spans;
 using System.Linq;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 가상 메모리 내의 파일 및 디렉토리 구조를 처리하는 핸들러입니다. 이 클래스는 상속될 수 없습니다.

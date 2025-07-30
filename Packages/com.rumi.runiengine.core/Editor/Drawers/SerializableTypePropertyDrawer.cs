@@ -1,27 +1,29 @@
 #nullable enable
+using RuniOS.UIElements;
 using System;
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
-using TypeField = RuniEngine.UIElements.TypeField;
-using static RuniEngine.Editor.EditorTool;
+using TypeField = RuniOS.UIElements.TypeField;
+using static RuniOS.Editor.EditorTool;
+using UIElements_TypeField = RuniOS.UIElements.TypeField;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniOS.Editor.Drawers
 {
     [CustomPropertyDrawer(typeof(SerializableType))]
     public class SerializableTypePropertyDrawer : PropertyDrawer
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
-            TypeField typeField = new TypeField
+            UIElements_TypeField typeField = new UIElements_TypeField
             {
                 label = property.displayName,
                 bindingPath = GetChildProperty(property).propertyPath
             };
             
-            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
+            typeField.AddToClassList(UIElements_TypeField.alignedFieldUssClassName);
             typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
             typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
             

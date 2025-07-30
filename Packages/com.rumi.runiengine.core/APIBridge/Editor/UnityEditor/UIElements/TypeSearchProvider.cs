@@ -1,10 +1,9 @@
 #nullable enable
 using System;
-using RuniEngine.Editor.APIBridge.UnityEditor.Search;
-
+using RuniOS.Editor.APIBridge.UnityEditor.Search;
 using UniSearchProvider = UnityEditor.Search.SearchProvider;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor.UIElements
+namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
 {
     public class TypeSearchProvider : SearchProvider
     {

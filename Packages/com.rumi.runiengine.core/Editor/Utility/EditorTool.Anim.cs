@@ -3,7 +3,7 @@ using System;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public partial class EditorTool
     {

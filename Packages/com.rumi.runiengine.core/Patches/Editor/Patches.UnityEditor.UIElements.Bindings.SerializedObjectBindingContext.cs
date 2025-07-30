@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using HarmonyLib;
-using RuniEngine.Editor.UIElements.Bindings;
+using RuniOS.Editor.UIElements.Bindings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +12,7 @@ using UnityEngine.UIElements;
 
 using Label = System.Reflection.Emit.Label;
 
-namespace RuniEngine.Editor.Patches
+namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
     {

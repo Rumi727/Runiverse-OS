@@ -1,11 +1,11 @@
 #nullable enable
-using RuniEngine.Booting;
+using RuniOS.Booting;
 using System;
 using System.Diagnostics;
 using UnityEngine;
 using UnityEngine.Scripting;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static partial class Kernel
     {

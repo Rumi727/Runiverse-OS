@@ -1,6 +1,6 @@
 {
-    "name": "RuniEngine.Editor.APIBridge",
-    "rootNamespace": "RuniEngine.Editor.APIBridge",
+    "name": "RuniOS.Editor.APIBridge",
+    "rootNamespace": "RuniOS.Editor.APIBridge",
     "references": [
         "GUID:c6d2ee51b86b95246ae92eebdcffddee"
     ],

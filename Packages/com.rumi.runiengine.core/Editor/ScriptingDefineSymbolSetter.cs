@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEditor.Build;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     [InitializeOnLoad]
     public static class ScriptingDefineSymbolSetter

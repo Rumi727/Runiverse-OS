@@ -4,7 +4,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 확장자를 나타내는 구조체입니다.<br/>

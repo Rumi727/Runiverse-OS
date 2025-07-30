@@ -2,7 +2,7 @@
 using HarmonyLib;
 using System.Diagnostics;
 
-namespace RuniEngine.Modding
+namespace RuniOS.Modding
 {
     /// <summary>
     /// Harmony 패치 관련 유틸리티 메서드를 제공합니다.<br/>

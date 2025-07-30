@@ -1,7 +1,7 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
 using HarmonyLib;
-using RuniEngine.UIElements;
+using RuniOS.UIElements;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,7 +10,7 @@ using UnityEngine.UIElements;
 
 using UniFoldout = UnityEngine.UIElements.Foldout;
 
-namespace RuniEngine.Patches
+namespace RuniOS.Patches
 {
     public static partial class Patches
     {

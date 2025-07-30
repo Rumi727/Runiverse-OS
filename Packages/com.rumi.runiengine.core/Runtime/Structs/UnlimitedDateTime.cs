@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// <see cref="DateTime"/>의 제한된 범위(예: 0001년 1월 1일)를 넘어 무제한적인 날짜 및 시간 값을 표현하는 직렬화 가능한 구조체입니다.

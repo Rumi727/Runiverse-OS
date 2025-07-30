@@ -1,7 +1,7 @@
 #nullable enable
 using System.IO;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class StreamUtility
     {

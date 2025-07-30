@@ -2,7 +2,7 @@
 using System;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.APIBridge.UnityEngine.UIElements
+namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class CallbackEventHandler : IEventHandler
     {

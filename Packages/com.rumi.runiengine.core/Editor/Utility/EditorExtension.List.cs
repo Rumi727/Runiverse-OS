@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public static partial class EditorExtension
     {

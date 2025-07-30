@@ -1,10 +1,10 @@
 #nullable enable
-using RuniEngine.Editor.APIBridge.UnityEditorInternal;
+using RuniOS.Editor.APIBridge.UnityEditorInternal;
 using System;
 using System.Reflection;
 using UnityEditor;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public static partial class EditorExtension
     {

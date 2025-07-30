@@ -2,9 +2,9 @@
 using UnityEditor;
 using UnityEngine;
 
-using static RuniEngine.Editor.EditorTool;
+using static RuniOS.Editor.EditorTool;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniOS.Editor.Drawers
 {
     [CustomPropertyDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyDrawer : PropertyDrawer

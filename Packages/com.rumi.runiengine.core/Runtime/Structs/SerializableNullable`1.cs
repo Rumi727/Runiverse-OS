@@ -2,12 +2,12 @@
 #pragma warning disable IDE1006 // 명명 스타일
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Nullable.cs
 using Newtonsoft.Json;
-using RuniEngine.Json.Converters;
+using RuniOS.Json.Converters;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// <see cref="Nullable{T}"/>과 유사하지만 유니티에서 직렬화 가능한 제네릭 구조체입니다.

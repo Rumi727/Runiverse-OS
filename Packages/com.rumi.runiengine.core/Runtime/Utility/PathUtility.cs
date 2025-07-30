@@ -1,7 +1,7 @@
 #nullable enable
-using RuniEngine.IO;
+using RuniOS.IO;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class PathUtility
     {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     public readonly struct WildcardPatterns
     {

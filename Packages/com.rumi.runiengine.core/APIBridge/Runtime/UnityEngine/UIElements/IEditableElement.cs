@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace RuniEngine.APIBridge.UnityEngine.UIElements
+namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public interface IEditableElement
     {

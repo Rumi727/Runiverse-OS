@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 가상 파일 시스템 내의 파일을 나타내는 클래스입니다.

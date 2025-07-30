@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using System;
 
-namespace RuniEngine.Json.Converters
+namespace RuniOS.Json.Converters
 {
     /// <summary>
     /// <see cref="Version"/> 구조체를 JSON 문자열로 직렬화하고 역직렬화하는 <see cref="JsonConverter"/>입니다.

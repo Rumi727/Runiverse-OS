@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace RuniEngine.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class CustomPropertyBinderAttribute : Attribute

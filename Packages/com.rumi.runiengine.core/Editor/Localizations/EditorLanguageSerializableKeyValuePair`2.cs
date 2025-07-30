@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace RuniEngine.Editor.Localizations
+namespace RuniOS.Editor.Localizations
 {
     [Serializable]
     struct EditorLanguageSerializableKeyValuePair : ISerializableKeyValuePair, ISerializableKeyValuePair<string?, string?>

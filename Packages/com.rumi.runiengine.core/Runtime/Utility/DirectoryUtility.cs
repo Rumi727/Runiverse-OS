@@ -1,11 +1,11 @@
 #nullable enable
-using RuniEngine.IO;
+using RuniOS.IO;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class DirectoryUtility
     {

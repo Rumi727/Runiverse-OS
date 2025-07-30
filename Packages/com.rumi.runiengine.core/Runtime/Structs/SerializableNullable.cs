@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// <see cref="SerializableNullable{T}"/> 및 <see cref="Nullable{T}"/> 타입과 관련된 유틸리티 메서드 및 상수를 제공하는 정적 클래스입니다.

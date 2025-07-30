@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     public abstract class AssetScope : IDisposable
     {

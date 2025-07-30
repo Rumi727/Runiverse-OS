@@ -1,11 +1,11 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.Json.Converters;
+using RuniOS.Json.Converters;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 16진수 문자열로 색상을 표현하고 관리하는 직렬화 가능한 구조체입니다.

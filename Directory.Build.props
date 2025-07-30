@@ -1,5 +1,5 @@
 <Project>
-  <PropertyGroup Condition=" '$(MSBuildProjectName)' != '' And '$(MSBuildProjectName.Substring(0,10))' == 'RuniEngine' ">
+  <PropertyGroup Condition=" '$(MSBuildProjectName.Length)' >= 6 And '$(MSBuildProjectName.Substring(0,6))' == 'RuniOS' ">
     <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>

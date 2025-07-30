@@ -2,7 +2,7 @@
 using System.Runtime.CompilerServices;
 using System;
 
-namespace RuniEngine.Spans
+namespace RuniOS.Spans
 {
     public static class ExtensionMethods
     {

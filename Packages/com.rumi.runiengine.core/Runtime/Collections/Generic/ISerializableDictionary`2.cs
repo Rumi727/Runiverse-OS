@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace RuniEngine.Collections.Generic
+namespace RuniOS.Collections.Generic
 {
     /// <summary>
     /// 인스펙터상에 표시되려면 이름의 가진 직렬화 가능 필드가 있어야합니다!

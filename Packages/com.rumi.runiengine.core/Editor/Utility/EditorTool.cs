@@ -1,5 +1,5 @@
 #nullable enable
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public static partial class EditorTool
     {

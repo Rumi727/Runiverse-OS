@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     public sealed class StreamingIOHandler : FileIOHandler
     {

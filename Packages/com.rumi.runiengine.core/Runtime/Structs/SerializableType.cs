@@ -1,10 +1,10 @@
 ﻿#nullable enable
 using System;
 using Newtonsoft.Json;
-using RuniEngine.Json.Converters;
+using RuniOS.Json.Converters;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 유니티에서 직렬화 가능한 <see cref="Type"/>을 나타내는 구조체입니다.

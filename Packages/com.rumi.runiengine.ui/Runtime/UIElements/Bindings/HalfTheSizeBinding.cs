@@ -3,7 +3,7 @@ using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UIElements.Bindings
+namespace RuniOS.UIElements.Bindings
 {
     [UxmlObject]
     public partial class HalfTheSizeBinding : CustomBinding

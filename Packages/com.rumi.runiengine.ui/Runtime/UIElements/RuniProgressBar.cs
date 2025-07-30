@@ -2,7 +2,7 @@
 using Unity.Properties;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UIElements
+namespace RuniOS.UIElements
 {
     [UxmlElement]
     public partial class RuniProgressBar : BindableElement, INotifyValueChanged<float>

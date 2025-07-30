@@ -3,7 +3,7 @@ using System;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class ComponentUtility
     {

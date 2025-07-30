@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using UnityEngine;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor.UI
+namespace RuniOS.Editor.APIBridge.UnityEditor.UI
 {
     public static class SpriteDrawUtility
     {

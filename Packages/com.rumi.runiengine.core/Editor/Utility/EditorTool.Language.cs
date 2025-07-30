@@ -1,7 +1,7 @@
 #nullable enable
-using RuniEngine.Editor.Localizations;
+using RuniOS.Editor.Localizations;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public partial class EditorTool
     {

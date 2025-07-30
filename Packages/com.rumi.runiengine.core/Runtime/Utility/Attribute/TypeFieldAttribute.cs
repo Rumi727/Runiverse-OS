@@ -2,7 +2,7 @@
 using System;
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public sealed class TypeFieldAttribute : PropertyAttribute
     {

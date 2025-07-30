@@ -5,7 +5,7 @@ using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
 using UnityEngine.Scripting;
 
-namespace RuniEngine.Booting
+namespace RuniOS.Booting
 {
     /// <summary>
     /// 이 클래스에 있는 모든 이벤트는 플레이 모드가 해제될 때 자동으로 이벤트가 해제됩니다

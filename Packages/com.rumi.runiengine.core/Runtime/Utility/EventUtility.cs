@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class EventUtility
     {

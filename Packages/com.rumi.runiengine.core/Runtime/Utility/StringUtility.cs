@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static partial class StringUtility
     {

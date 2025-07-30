@@ -1,7 +1,8 @@
 #nullable enable
-using GUIView = RuniEngine.Editor.APIBridge.UnityEditor.GUIView;
+using RuniOS.Editor.APIBridge.UnityEditor;
+using GUIView = RuniOS.Editor.APIBridge.UnityEditor.GUIView;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     public partial class EditorTool
     {

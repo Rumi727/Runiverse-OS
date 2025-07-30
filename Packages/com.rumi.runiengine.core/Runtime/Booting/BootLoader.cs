@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
-namespace RuniEngine.Booting
+namespace RuniOS.Booting
 {
     /// <summary>
     /// ROS의 부팅을 담당하는 클래스입니다. 초기 로딩을 수행합니다.

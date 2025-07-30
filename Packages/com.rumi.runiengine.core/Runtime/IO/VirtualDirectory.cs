@@ -1,5 +1,5 @@
 #nullable enable
-using RuniEngine.Spans;
+using RuniOS.Spans;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 
-namespace RuniEngine.IO
+namespace RuniOS.IO
 {
     /// <summary>
     /// 가상 파일 시스템 내의 디렉토리를 나타내는 클래스입니다.<br/>

@@ -1,8 +1,8 @@
 #nullable enable
-using RuniEngine.Editor.Drawers.Attributes;
+using RuniOS.Editor.Drawers.Attributes;
 using UnityEditor;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniOS.Editor.Drawers
 {
     [CustomPropertyDrawer(typeof(RectCorner))]
     public class RectCornerPropertyDrawer : AnimFolderPropertyDrawer { }

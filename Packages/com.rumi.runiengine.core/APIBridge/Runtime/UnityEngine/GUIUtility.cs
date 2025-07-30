@@ -2,7 +2,7 @@
 using System;
 using System.Reflection;
 
-namespace RuniEngine.APIBridge.UnityEngine
+namespace RuniOS.APIBridge.UnityEngine
 {
     public class GUIUtility
     {

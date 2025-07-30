@@ -1,7 +1,7 @@
 #nullable enable
 // ReSharper disable InconsistentNaming
 #pragma warning disable IDE1006 // 명명 스타일
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 제네릭 키와 값을 가진 직렬화 가능한 키-값 쌍의 인터페이스입니다.

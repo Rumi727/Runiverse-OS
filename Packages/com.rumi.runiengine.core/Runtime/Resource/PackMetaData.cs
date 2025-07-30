@@ -1,5 +1,5 @@
 #nullable enable
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     public readonly struct PackMetaData
     {

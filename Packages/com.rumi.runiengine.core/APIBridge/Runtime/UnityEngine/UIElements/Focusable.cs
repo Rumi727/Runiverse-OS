@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.APIBridge.UnityEngine.UIElements
+namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class Focusable : CallbackEventHandler
     {

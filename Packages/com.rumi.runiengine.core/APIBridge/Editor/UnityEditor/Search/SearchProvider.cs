@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor.Search
+namespace RuniOS.Editor.APIBridge.UnityEditor.Search
 {
     public class SearchProvider
     {

@@ -8,7 +8,7 @@ using UnityEngine;
 using EditorGUI = UnityEditor.EditorGUI;
 using EditorGUIUtility = UnityEditor.EditorGUIUtility;
 
-namespace RuniEngine.Editor.Drawers
+namespace RuniOS.Editor.Drawers
 {
     [CustomPropertyDrawer(typeof(ISerializableDictionary), true)]
     sealed class SerializableDictionaryPropertyDrawer : PropertyDrawer

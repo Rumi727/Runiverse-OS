@@ -3,7 +3,7 @@ using System;
 using System.Linq;
 using System.Reflection;
 
-namespace RuniEngine.Editor.APIBridge
+namespace RuniOS.Editor.APIBridge
 {
     static class EditorAssemblyManager
     {

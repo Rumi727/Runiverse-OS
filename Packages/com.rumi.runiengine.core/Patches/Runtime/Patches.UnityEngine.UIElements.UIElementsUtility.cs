@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using UnityEngine.UIElements;
 
-namespace RuniEngine.Patches
+namespace RuniOS.Patches
 {
     public static partial class Patches
     {

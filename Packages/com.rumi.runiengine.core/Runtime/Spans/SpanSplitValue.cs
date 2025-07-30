@@ -2,7 +2,7 @@
 using System;
 // ReSharper disable InconsistentNaming
 
-namespace RuniEngine.Spans
+namespace RuniOS.Spans
 {
     public readonly ref struct SpanSplitValue<T> where T : IEquatable<T>
     {

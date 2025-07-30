@@ -3,7 +3,7 @@ using ExtendedNumerics;
 using System;
 using System.Numerics;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class GuidUtility
     {

@@ -1,5 +1,5 @@
 #nullable enable
-namespace RuniEngine.UIElements
+namespace RuniOS.UIElements
 {
     public interface IUnclampedSlider
     {

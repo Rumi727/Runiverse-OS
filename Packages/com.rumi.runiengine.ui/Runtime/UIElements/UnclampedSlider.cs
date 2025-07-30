@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine.UIElements;
 
-namespace RuniEngine.UIElements
+namespace RuniOS.UIElements
 {
     [UxmlElement]
     public partial class UnclampedSlider : Slider, IUnclampedSlider<float>

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class TypeUtility
     {

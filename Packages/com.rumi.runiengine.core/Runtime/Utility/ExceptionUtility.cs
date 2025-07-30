@@ -2,7 +2,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public static class ExceptionUtility
     {

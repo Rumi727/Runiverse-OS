@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace RuniEngine.Editor.Localizations
+namespace RuniOS.Editor.Localizations
 {
     public static class EditorLocalization
     {

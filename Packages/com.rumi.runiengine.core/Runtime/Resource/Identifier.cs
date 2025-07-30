@@ -1,14 +1,14 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniEngine.IO;
-using RuniEngine.Json.Converters.Resource;
-using RuniEngine.Spans;
+using RuniOS.Spans;
+using RuniOS.IO;
+using RuniOS.Json.Converters.Resource;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     /// <summary>
     /// 네임스페이스와 경로로 구성된 리소스에 대한 고유 식별자를 나타냅니다.

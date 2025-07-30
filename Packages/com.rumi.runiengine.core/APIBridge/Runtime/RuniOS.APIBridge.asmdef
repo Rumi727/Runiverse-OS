@@ -1,6 +1,6 @@
 {
-    "name": "RuniEngine.APIBridge",
-    "rootNamespace": "RuniEngine.APIBridge",
+    "name": "RuniOS.APIBridge",
+    "rootNamespace": "RuniOS.APIBridge",
     "references": [],
     "includePlatforms": [],
     "excludePlatforms": [],

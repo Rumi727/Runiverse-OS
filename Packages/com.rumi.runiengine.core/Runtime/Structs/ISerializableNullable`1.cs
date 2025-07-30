@@ -1,10 +1,10 @@
 #nullable enable
-using RuniEngine.Json.Converters;
+using RuniOS.Json.Converters;
 using System;
 
 // ReSharper disable InconsistentNaming
 #pragma warning disable IDE1006 // 명명 스타일
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 인스펙터상에 표시되려면 'value', 'hasValue' 이름의 직렬화 가능 필드가 있어야 합니다!

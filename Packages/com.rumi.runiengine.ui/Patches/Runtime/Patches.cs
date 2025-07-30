@@ -1,11 +1,11 @@
 #nullable enable
 using HarmonyLib;
-using RuniEngine.Booting;
-using RuniEngine.Modding;
+using RuniOS.Booting;
+using RuniOS.Modding;
 using System.Diagnostics;
 using UnityEngine.Scripting;
 
-namespace RuniEngine.Patches.UI
+namespace RuniOS.Patches.UI
 {
     public static partial class Patches
     {

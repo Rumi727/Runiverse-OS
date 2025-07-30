@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine
+namespace RuniOS
 {
     public sealed class TooltipAttribute : PropertyAttribute
     {

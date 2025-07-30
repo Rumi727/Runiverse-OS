@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniEngine.Editor.Localizations
+namespace RuniOS.Editor.Localizations
 {
     sealed class EditorLocalizationRegister : ScriptableObject, IEditorLocalizationRegister
     {

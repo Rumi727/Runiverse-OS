@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using System;
 using System.Reflection;
 
-namespace RuniEngine.Json.Converters
+namespace RuniOS.Json.Converters
 {
     /// <summary>
     /// <see cref="ISerializableNullable{T}"/> 인터페이스를 구현하는 구조체를

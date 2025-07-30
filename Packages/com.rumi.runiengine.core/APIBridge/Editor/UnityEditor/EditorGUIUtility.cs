@@ -1,9 +1,9 @@
 #nullable enable
-using RuniEngine.APIBridge.UnityEngine;
+using RuniOS.APIBridge.UnityEngine;
 using System;
 using System.Reflection;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor
+namespace RuniOS.Editor.APIBridge.UnityEditor
 {
     public sealed class EditorGUIUtility : GUIUtility
     {

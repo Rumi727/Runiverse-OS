@@ -1,11 +1,11 @@
 #nullable enable
-using RuniEngine.UIElements;
+using RuniOS.UIElements;
 using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// UI Toolkit과 관련된 유틸리티 함수들을 제공하는 정적 클래스입니다.

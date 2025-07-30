@@ -8,9 +8,9 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using System.Linq;
 using UnityEngine;
-using RuniEngine.UIElements;
+using RuniOS.UIElements;
 
-namespace RuniEngine.Patches.UI
+namespace RuniOS.Patches.UI
 {
     public static partial class Patches
     {

@@ -1,10 +1,10 @@
 {
-    "name": "RuniEngine.Patches",
-    "rootNamespace": "RuniEngine.Patches",
+    "name": "RuniOS.UI",
+    "rootNamespace": "RuniOS",
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
-        "GUID:c77e46b23ddba8e4dae2558b74e85ac5",
-        "GUID:1926334cbf393eb4c80a82210a1144e3"
+        "GUID:c6d2ee51b86b95246ae92eebdcffddee",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,7 +14,7 @@
         "0Harmony.dll",
         "ExtendedNumerics.BigDecimal.dll"
     ],
-    "autoReferenced": false,
+    "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

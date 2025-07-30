@@ -1,9 +1,9 @@
 #nullable enable
-using RuniEngine.IO;
+using RuniOS.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniEngine.Editor
+namespace RuniOS.Editor
 {
     /// <summary>
     /// RuniOS 설정을 위한 추상화된 ScriptableObject 클래스입니다.<br/>

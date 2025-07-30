@@ -1,10 +1,10 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
-using RuniEngine.IO;
+using RuniOS.IO;
 using System;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     public sealed class ResourcePackReference : IDisposable
     {

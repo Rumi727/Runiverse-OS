@@ -3,7 +3,7 @@ using System;
 using System.Reflection;
 using UnityEditor;
 
-namespace RuniEngine.Editor.APIBridge.UnityEditor
+namespace RuniOS.Editor.APIBridge.UnityEditor
 {
     public class ScriptAttributeUtility
     {

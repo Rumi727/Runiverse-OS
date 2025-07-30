@@ -5,7 +5,7 @@ using System.Reflection;
 
 using UniObject = UnityEngine.Object;
 
-namespace RuniEngine.APIBridge.UnityEngine
+namespace RuniOS.APIBridge.UnityEngine
 {
     public class DrivenPropertyManager
     {

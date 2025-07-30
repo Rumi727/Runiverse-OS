@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace RuniEngine
+namespace RuniOS
 {
     /// <summary>
     /// 두 <see cref="Version"/> 값(최소 및 최대)을 사용하여 버전 범위를 나타내는 직렬화 가능한 구조체입니다.
