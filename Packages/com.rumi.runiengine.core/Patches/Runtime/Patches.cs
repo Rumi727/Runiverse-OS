@@ -1,7 +1,7 @@
 #nullable enable
 using HarmonyLib;
 using RuniEngine.Booting;
-using System.Diagnostics;
+using RuniEngine.Modding;
 using UnityEngine.Scripting;
 
 namespace RuniEngine.Patches
@@ -15,15 +15,6 @@ namespace RuniEngine.Patches
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
-        static void Awaken()
-        {
-            Debug.Log("Patch");
-            Stopwatch stopwatch = Stopwatch.StartNew();
-            harmony.UnpatchSelf();
-            Debug.Log(stopwatch.Elapsed.TotalSeconds);
-            stopwatch = Stopwatch.StartNew();
-            harmony.PatchAll();
-            Debug.Log(stopwatch.Elapsed.TotalSeconds);
-        }
+        static void Awaken() => HarmonyUtility.PatchInEditor(harmony);
     }
 }
