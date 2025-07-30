@@ -2,8 +2,6 @@
 using HarmonyLib;
 using System.Diagnostics;
 
-using Debug = UnityEngine.Debug;
-
 namespace RuniEngine.Modding
 {
     /// <summary>
@@ -12,6 +10,12 @@ namespace RuniEngine.Modding
     /// </summary>
     public static class HarmonyUtility
     {
+#if UNITY_EDITOR
+        public static bool logEnable => Editor.Modding.ModdingConfigAsset.instance.logInEditor;
+#else
+        public static bool logEnable => true;
+#endif
+        
         /// <summary>
         /// 에디터 환경에서는 패치를 다시 적용하지만, 빌드된 환경에서는 최적화를 위해 기존 패치를 제거하지 않습니다.<br/>
         /// </summary>
@@ -34,12 +38,15 @@ namespace RuniEngine.Modding
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public static void Patch(Harmony harmony)
         {
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] Patching operations started.");
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.PatchAll();
             stopwatch.Stop();
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
 
         /// <summary>
@@ -50,12 +57,15 @@ namespace RuniEngine.Modding
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public static void Unpatch(Harmony harmony)
         {
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] Unpatching operations started.");
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] Unpatching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.UnpatchSelf();
             stopwatch.Stop();
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] All patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] All patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
 
         /// <summary>
@@ -66,17 +76,22 @@ namespace RuniEngine.Modding
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public static void Repatch(Harmony harmony)
         {
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] Patching operations started.");
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.UnpatchSelf();
             stopwatch.Stop();
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] Existing patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] Existing patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
 
             stopwatch.Restart();
             harmony.PatchAll();
             stopwatch.Stop();
-            Debug.Log($"[{nameof(HarmonyUtility)}] [{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            
+            if (logEnable)
+                Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
     }
 }

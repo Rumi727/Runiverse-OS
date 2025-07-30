@@ -2,7 +2,9 @@
     "name": "RuniEngine.Modding",
     "rootNamespace": "RuniEngine.Modding",
     "references": [
-        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:539740484accacd4292d8460e00aac39",
+        "GUID:e9d9626a625649a6aac6a3592ce3e974"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
