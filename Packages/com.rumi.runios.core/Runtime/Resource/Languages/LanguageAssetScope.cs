@@ -1,7 +1,6 @@
-using RuniEngine.Resource;
 using System.Collections.Generic;
 
-namespace RuniEngine
+namespace RuniOS.Resource.Languages
 {
     public class LanguageAssetScope : AssetScope
     {

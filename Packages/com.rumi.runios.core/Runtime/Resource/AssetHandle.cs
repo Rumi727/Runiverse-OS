@@ -1,43 +1,37 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniEngine.IO;
+using RuniOS.IO;
 using System;
 using System.Collections.Generic;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
-    public abstract class AssetHandle : ICloneable
+    public abstract class AssetHandle
     {
         public IOHandler ioHandler { get; }
 
-        protected internal AssetHandle(IOHandler ioHandler) => this.ioHandler = ioHandler;
+        public object? assetObject { get; private set; }
+
+
+        protected AssetHandle(IOHandler ioHandler) => this.ioHandler = ioHandler;
 
         internal readonly List<WeakReference<AssetScope>> assetScopes = new List<WeakReference<AssetScope>>();
 
         public async UniTask<AssetScope?> GetScope()
         {
             AssetScope? scope = null;
-            object? asset = null;
+            if (assetObject == null)
+                await Reload();
 
-            try
-            {
-                asset = await Load();
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                Debug.LogError($"Failed to load asset at path {ioHandler.childFullPath}!");
-            }
-
-            if (asset != null)
-                scope = CreateScope(asset);
+            if (assetObject != null)
+                scope = CreateScope(assetObject);
 
             if (scope != null)
                 assetScopes.Add(new WeakReference<AssetScope>(scope));
 
             return scope;
         }
-
+        
         internal void ReturnScope(AssetScope assetScope)
         {
             int lastCount = assetScopes.Count;
@@ -59,21 +53,33 @@ namespace RuniEngine.Resource
             {
                 try
                 {
-                    Unload();
+                    assetObject = null;
+                    Unload().Forget();
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    Debug.LogError($"Failed to unload asset at path {ioHandler.childFullPath}!");
+                    Debug.LogError($"Failed to unload asset at path {ioHandler.fullPath}!");
                 }
+            }
+        }
+
+        public async UniTask Reload()
+        {
+            try
+            {
+                assetObject = await Load();
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                Debug.LogError($"Failed to load asset at path {ioHandler.fullPath}!");
             }
         }
 
         protected abstract AssetScope CreateScope(object assets);
 
         protected abstract UniTask<object?> Load();
-        protected abstract void Unload();
-
-        public object Clone() => MemberwiseClone();
+        protected abstract UniTask Unload();
     }
 }

@@ -1,10 +1,10 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
-using RuniEngine.IO;
+using RuniOS.IO;
 using System.Collections.Generic;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource.Languages
 {
     public class LanguageAssetHandle : AssetHandle
     {
@@ -18,6 +18,6 @@ namespace RuniEngine.Resource
             return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
         }
 
-        protected override void Unload() { }
+        protected override UniTask Unload() => UniTask.CompletedTask;
     }
 }

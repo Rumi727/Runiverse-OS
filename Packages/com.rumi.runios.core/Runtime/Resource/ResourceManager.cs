@@ -2,14 +2,16 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection;
 
-namespace RuniEngine.Resource
+namespace RuniOS.Resource
 {
     public static class ResourceManager
     {
-        static readonly Dictionary<PackIdentifier, ResourcePackReference> _resourcePacks = new();
-        public static IReadOnlyDictionary<PackIdentifier, ResourcePackReference> resourcePacks { get; } = _resourcePacks.AsReadOnly();
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        internal static readonly Dictionary<PackIdentifier, ResourcePackReference> internalLoadedResourcePacks = new();
+        public static IReadOnlyDictionary<PackIdentifier, ResourcePackReference> loadedResourcePacks { get; } = internalLoadedResourcePacks.AsReadOnly();
         
         static readonly Dictionary<Type, AssetRegistry> _assetRegistries = new();
         public static IReadOnlyDictionary<Type, AssetRegistry> assetRegistries { get; } = _assetRegistries.AsReadOnly();
