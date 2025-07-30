@@ -878,7 +878,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nDecimal2.hasValue
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: pair.value.hasValue
@@ -941,10 +941,6 @@ PrefabInstance:
       value: ros
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: nullableNullableFloat.hasValue
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: stringList2.Array.data[0].test
       value: fdsfdsfsdfdsfassdfdsdsdfdfgfdsdsdfdgdsgdsgdsgfdssddsfsdfgdsffsgdffgd
       objectReference: {fileID: 0}
@@ -963,10 +959,6 @@ PrefabInstance:
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.data[1].hexColor._value
       value: '#00000000'
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: nullableNullableFloat.value.hasValue
-      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.data[0].identifier._nameSpace
