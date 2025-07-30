@@ -12,6 +12,8 @@ namespace RuniEngine.Installer
         public static InstallerWindow? instance;
         public Texture2D? logoTexture;
 
+        public ScopedRegistry? scopedRegistrys;
+
         public LanguageScriptableObject? ko_kr;
         public LanguageScriptableObject? en_us;
         public LanguageScriptableObject? ja_jp;

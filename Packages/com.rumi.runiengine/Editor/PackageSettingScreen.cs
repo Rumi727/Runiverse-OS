@@ -31,6 +31,9 @@ namespace RuniEngine.Installer
         GUIStyle? largeBoldLabel;
         public void DrawGUI()
         {
+            if (mainWindow == null || mainWindow.scopedRegistrys == null)
+                return;
+            
             largeBoldLabel ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 14 };
 
             const string manifestPath = "Packages/manifest.json";
@@ -62,13 +65,11 @@ namespace RuniEngine.Installer
                     manifestObject.Add("scopedRegistries", scopedRegistries);
                 }
 
-                const string openupmName = "package.openupm.com";
-
                 Dictionary<string, JObject> parsedScopes = new Dictionary<string, JObject>();
                 if (scopedRegistries.Type == JTokenType.Array)
                 {
                     JArray array = (JArray)scopedRegistries;
-                    if (CheckNameAndUrl(openupmName, "https://package.openupm.com"))
+                    if (mainWindow.scopedRegistrys.scopedRegistries.Any(x => CheckNameAndUrl(x.name ?? string.Empty, x.url ?? string.Empty)))
                         return;
                     //true면 return
                     bool CheckNameAndUrl(string name, string url)
@@ -114,10 +115,13 @@ namespace RuniEngine.Installer
                 }
 
                 GUILayout.Label(InstallerWindow.TryGetText("installer.package_setting.setting_info"));
-                AddScopedRegistry(openupmName, "https://package.openupm.com", "com.cysharp.unitask", "com.quickeye.ui-toolkit-plus", "com.coffee.csharp-compiler-settings", "com.realitystop.linkmerge");
-                //Debug.Log(UnityEditor.PackageManager.PackageInfo.IsPackageRegistered("com.cysharp.unitask"));
+
+                foreach (var item in mainWindow.scopedRegistrys.scopedRegistries)
+                    AddScopedRegistry(item.name ?? string.Empty, item.url ?? string.Empty, item.scopes ?? Array.Empty<string>());
+                
                 bool AddScopedRegistry(string name, string url, params string?[] scopes)
                 {
+                    scopes = scopes.ToArray();
                     bool noChanges = true;
 
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
