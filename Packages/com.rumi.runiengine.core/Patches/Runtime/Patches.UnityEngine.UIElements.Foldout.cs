@@ -57,7 +57,7 @@ namespace RuniEngine.Patches
                                 if (__instance.value)
                                     viewportClipping.style.height = new Length(x.newRect.height.Max(1));
                                 else
-                                    viewportClipping.style.height = Length.None();
+                                    viewportClipping.style.height = new Length(0);
                             });
                         }
                     }
@@ -113,7 +113,7 @@ namespace RuniEngine.Patches
                                 }
                                 else
                                 {
-                                    viewportClipping.style.height = Length.None();
+                                    viewportClipping.style.height = new Length(0);
                                     viewportClipping.RegisterCallbackOnce<TransitionEndEvent, UniFoldout>(TransitionEndEvent, __instance);
                                 }
                             }
