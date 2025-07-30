@@ -800,6 +800,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test
       objectReference: {fileID: 0}
+    - target: {fileID: 2859357255860281847, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3326928128437109631, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: m_LocalPosition.x
       value: -51.40004
@@ -845,8 +849,20 @@ PrefabInstance:
       value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: type._value
+      value: UnityEditor.UIElements.Debugger.CodeLine, UnityEditor.UIElementsModule
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: test2.slider
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nChar.hasValue
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: hexColor._value
+      value: '#2C2CDB57'
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.size
@@ -869,12 +885,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: test2.nInt.hasValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: test2.test3.hasValue
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: identifier._nameSpace
-      value: 
+      value: ros
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: stringList.Array.size
@@ -889,8 +909,20 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: test2.nDouble.hasValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: unlimitedDateTime.year
+      value: 31
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: identifier._path._value
       value: fdsafd
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: rectCorner.bottomLeft.x
+      value: 0.27
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: 'stringList.Array.data[0]'
@@ -901,8 +933,12 @@ PrefabInstance:
       value: adsfa
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[0].slider
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nIdentifier.value._nameSpace
-      value: 
+      value: ros
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nullableNullableFloat.hasValue
@@ -917,6 +953,10 @@ PrefabInstance:
       value: sdfgsfdgdsfgdsfg
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[0].test3.hasValue
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: list.Array.data[0].hexColor._value
       value: '#00000000'
       objectReference: {fileID: 0}
@@ -925,28 +965,32 @@ PrefabInstance:
       value: '#00000000'
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: packIdentifier._localPath.hasValue
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: packIdentifier._internalID.hasValue
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nullableNullableFloat.value.hasValue
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[0].identifier._nameSpace
+      value: ros
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[1].identifier._nameSpace
+      value: ros
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: serializableDictionary3.pairs.Array.size
-      value: 3
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: managedReferences[3096582668136218625].slider
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: serializableDictionary3.pairs.Array.data[3].key
-      value: 
+      propertyPath: list.Array.data[0].nIdentifier.value._nameSpace
+      value: ros
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[1].nIdentifier.value._nameSpace
+      value: ros
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: managedReferences[3096582668136218625].nChar.value
@@ -1143,7 +1187,7 @@ Camera:
     serializedVersion: 2
     x: 0
     y: 0
-    width: 1
+    width: 0.9999999
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
