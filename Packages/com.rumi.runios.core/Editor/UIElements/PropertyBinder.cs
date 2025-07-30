@@ -6,7 +6,7 @@ using System.Reflection;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements
 {
     /// <summary>
     /// Provides an abstract base class for binding <see cref="SerializedProperty">SerializedProperties</see> to <see cref="VisualElement">VisualElements</see>.

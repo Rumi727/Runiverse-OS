@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements
 {
     /// <summary>
     /// Specifies that a class is a custom property binder for a specific type.
