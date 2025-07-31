@@ -1,13 +1,11 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="True" gen-cs-file="482a500a49bdff54195f270f49cd340a">
-    <Style src="project://database/Packages/com.rumi.runiengine.core/Resources/RuniOS/UI%20Elements/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
+    <Style src="project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
     <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" value="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="asdf" />
     <RuniOS.UIElements.UnclampedSlider />
     <RuniOS.UIElements.RuniProgressBar />
-    <RuniOS.UIElements.HexColorField label="Test" show-alpha="true" value="#FF0000A4" show-eye-dropper="true" hdr="true" />
-    <RuniOS.UIElements.AnimFoldout text="test">
-        <ui:VisualElement style="flex-grow: 1; height: 121px; margin-top: 0;" />
-        <ui:Foldout text="Foldout" />
+    <RuniOS.Editor.UIElements.HexColorField label="Test" show-alpha="true" value="#FF0000A4" show-eye-dropper="true" hdr="true" />
+    <ui:Foldout text="Foldout">
         <ui:TextField label="Text Field" placeholder-text="filler text" style="height: auto;" />
-    </RuniOS.UIElements.AnimFoldout>
+    </ui:Foldout>
     <uie:ColorField label="Color" value="#00FFFFFF" show-alpha="false" show-eye-dropper="false" hdr="true" />
 </ui:UXML>
