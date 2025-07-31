@@ -45,8 +45,33 @@ namespace RuniOS
 
         public static void Refresh()
         {
-            assemblys = Array.AsReadOnly(AppDomain.CurrentDomain.GetAssemblies());
-            types = assemblys.SelectMany(static x => x.GetTypes()).ToArray().AsReadOnly();
+            try
+            {
+                assemblys = Array.AsReadOnly(AppDomain.CurrentDomain.GetAssemblies());
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            
+            types = assemblys.SelectMany(static x =>
+            {
+                try
+                {
+                    return x.GetTypes();
+                }
+                catch (ReflectionTypeLoadException e)
+                {
+                    Debug.LogException(e);
+                    return e.Types.Where(static x => x != null);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+                    
+                return Array.Empty<Type>();
+            }).ToArray().AsReadOnly();
         }
 
         public static void AttributeInvoke<T>() where T : Attribute
