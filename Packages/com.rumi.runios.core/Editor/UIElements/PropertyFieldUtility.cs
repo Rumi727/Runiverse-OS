@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.UIElements;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
@@ -72,7 +73,7 @@ namespace RuniOS.Editor.UIElements
             
             VisualElement? visualInput = field.Q<VisualElement>(BaseField<TValue>.inputUssClassName);
             visualInput?.AddToClassList(PropertyField.inputUssClassName);
-            visualInput?.Query<VisualElement>(null, BaseField<TValue>.ussClassName, BaseCompositeField<int, IntegerField, int>.ussClassName)
+            visualInput?.Query<VisualElement>(null, BaseField<TValue>.ussClassName, BaseCompositeField<int, IntegerField, int>.ussClassName, RuniBaseCompositeField<int>.ussClassName)
                 .ForEach(static x => x.AddToClassList(BaseField<TValue>.alignedFieldUssClassName));
 
             return field;
