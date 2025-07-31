@@ -98,12 +98,8 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
                 animFloat.target = height;
                 height = animFloat.value + headerHeight;
                 
-                if (IMGUIUtility.currentIMGUIContainer != null)
-                {
-                    StyleLength lastHeight = IMGUIUtility.currentIMGUIContainer.style.height;
-                    IMGUIUtility.currentIMGUIContainer.style.height = new Length(height);
-                    IMGUIUtility.currentIMGUIContainer.style.height = lastHeight;
-                }
+                if (animFloat.isAnimating)
+                    IMGUIUtility.UpdateContainerHeight(height);
                 
                 return height;
             }

@@ -115,12 +115,8 @@ namespace RuniOS.Editor.Drawers.Attributes
                     float headHeight = EditorGUIUtility.singleLineHeight;
                     float height = headHeight.Lerp(childHeight, animFloat.value);
 
-                    if (IMGUIUtility.currentIMGUIContainer != null)
-                    {
-                        StyleLength lastHeight = IMGUIUtility.currentIMGUIContainer.style.height;
-                        IMGUIUtility.currentIMGUIContainer.style.height = new Length(height);
-                        IMGUIUtility.currentIMGUIContainer.style.height = lastHeight;
-                    }
+                    if (animFloat.isAnimating)
+                        IMGUIUtility.UpdateContainerHeight(height);
 
                     return height;
                 }
