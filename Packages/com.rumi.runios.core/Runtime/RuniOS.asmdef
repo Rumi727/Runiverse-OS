@@ -12,8 +12,7 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "ExtendedNumerics.BigDecimal.dll",
-        "Newtonsoft.Json.dll",
-        "0Harmony.dll"
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
