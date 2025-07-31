@@ -531,6 +531,7 @@ MonoBehaviour:
       millisecond: 0
   test3Ref:
     rid: 3096582668136218625
+  vector3: {x: 0, y: 0, z: 0}
   vector4: {x: -2.5, y: 0, z: 0, w: 0}
   version:
     _major:
@@ -632,9 +633,9 @@ MonoBehaviour:
     topRight: {x: 0, y: 0}
     bottomRight: {x: 0, y: 0}
   rectOffset:
-    left: 0
+    left: 1.57
     right: 0
-    top: 0
+    top: 2.72
     bottom: 0
   unlimitedDateTime:
     year: 0
