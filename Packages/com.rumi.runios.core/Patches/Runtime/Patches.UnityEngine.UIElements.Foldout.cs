@@ -21,7 +21,7 @@ namespace RuniOS.Patches
                 [HarmonyPatch(typeof(UniFoldout))]
                 public static class Foldout
                 {
-                    static readonly ConditionalWeakTable<UniFoldout, VisualElement> viewportClippingElements = new();
+                    public static readonly ConditionalWeakTable<UniFoldout, VisualElement> viewportClippingElements = new();
 
                     [HarmonyPatch]
                     public static class Constructor
@@ -32,17 +32,11 @@ namespace RuniOS.Patches
                         {
                             __instance.styleSheets.Add(UIToolkitUtility.rosControlStyle);
 
-                            VisualElement viewportClipping = new VisualElement
-                            {
-                                name = AnimFoldout.viewportClippingUssClassName
-                            };
+                            VisualElement viewportClipping = new VisualElement { name = AnimFoldout.viewportClippingUssClassName };
                             viewportClipping.AddToClassList(AnimFoldout.viewportClippingUssClassName);
                             __instance.hierarchy.Add(viewportClipping);
 
-                            VisualElement viewport = new VisualElement
-                            {
-                                name = AnimFoldout.viewportUssClassName
-                            };
+                            VisualElement viewport = new VisualElement { name = AnimFoldout.viewportUssClassName };
                             viewport.AddToClassList(AnimFoldout.viewportUssClassName);
                             viewportClipping.hierarchy.Add(viewport);
 
@@ -58,6 +52,13 @@ namespace RuniOS.Patches
                                     viewportClipping.style.height = new Length(x.newRect.height.Max(1));
                                 else
                                     viewportClipping.style.height = new Length(0);
+                            });
+                            
+                            // 애니메이션이 끝나는 이벤트를 쓰면 GeometryChangedEvent 이벤트가 호출되지 않아서 프리팹 바가 사라지지 않음
+                            viewportClipping.RegisterCallback<GeometryChangedEvent>(x =>
+                            {
+                                if (!__instance.value && x.newRect.height <= 1)
+                                    content.style.display = DisplayStyle.None;
                             });
                         }
                     }
@@ -95,35 +96,23 @@ namespace RuniOS.Patches
                     [HarmonyPatch("SetValueWithoutNotify")]
                     public static void SetValueWithoutNotify(UniFoldout __instance, bool newValue)
                     {
-                        if (viewportClippingElements.TryGetValue(__instance, out VisualElement viewportClipping))
+                        if (!viewportClippingElements.TryGetValue(__instance, out VisualElement viewportClipping))
+                            return;
+                        
+                        if (viewportClipping.resolvedStyle.transitionDuration.Max().value <= 0)
                         {
-                            viewportClipping.UnregisterCallback<TransitionEndEvent, UniFoldout>(TransitionEndEvent);
-
-                            if (viewportClipping.resolvedStyle.transitionDuration.Max().value <= 0)
+                            __instance.contentContainer.style.display = newValue ? DisplayStyle.Flex : DisplayStyle.None;
+                            viewportClipping.style.height = StyleKeyword.Null;
+                        }
+                        else
+                        {
+                            if (newValue)
                             {
-                                __instance.contentContainer.style.display = newValue ? DisplayStyle.Flex : DisplayStyle.None;
-                                viewportClipping.style.height = StyleKeyword.Null;
+                                __instance.contentContainer.style.display = DisplayStyle.Flex;
+                                viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
                             }
                             else
-                            {
-                                if (newValue)
-                                {
-                                    __instance.contentContainer.style.display = DisplayStyle.Flex;
-                                    viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
-                                }
-                                else
-                                {
-                                    viewportClipping.style.height = new Length(0);
-                                    viewportClipping.RegisterCallbackOnce<TransitionEndEvent, UniFoldout>(TransitionEndEvent, __instance);
-                                }
-                            }
-                        }
-
-                        return;
-
-                        static void TransitionEndEvent(TransitionEndEvent e, UniFoldout instance)
-                        {
-                            instance.contentContainer.style.display = DisplayStyle.None;
+                                viewportClipping.style.height = new Length(0);
                         }
                     }
                 }
