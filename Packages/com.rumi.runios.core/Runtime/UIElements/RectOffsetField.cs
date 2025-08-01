@@ -9,7 +9,11 @@ namespace RuniOS.UIElements
         public new const string ussClassName = "runios-type-field";
         
         public RectOffsetField() : this(null) { }
-        public RectOffsetField(string? label) : base(label, 4) => AddToClassList(ussClassName);
+        public RectOffsetField(string? label) : base(label)
+        {
+            AddToClassList(ussClassName);
+            SetFieldsByLine(4);
+        }
 
         protected override IEnumerable<IElementDescription> DescribeFields()
         {

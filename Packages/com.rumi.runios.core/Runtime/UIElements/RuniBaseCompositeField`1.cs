@@ -24,8 +24,9 @@ namespace RuniOS.UIElements
         
         public VisualElement visualInput { get; }
 
-        public IReadOnlyList<IElementDescription> descriptions { get; }
-
+        public IReadOnlyList<IElementDescription> descriptions => _descriptions ??= DescribeFields().ToArray().AsReadOnly();
+        IReadOnlyList<IElementDescription>? _descriptions;
+        
         protected RuniBaseCompositeField(string? label) : base(label, new VisualElement())
         {
             AddToClassList(ussClassName);
@@ -36,12 +37,11 @@ namespace RuniOS.UIElements
             visualInput = this.Q<VisualElement>(className: BaseField<TValueType>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             visualInput.focusable = false;
-            
-            // ReSharper disable once VirtualMemberCallInConstructor
-            descriptions = DescribeFields().ToArray().AsReadOnly();
         }
-        protected RuniBaseCompositeField(int fieldsByLine) : this(null, fieldsByLine) { }
-        protected RuniBaseCompositeField(string? label, int fieldsByLine) : this(label)
+        
+        protected abstract IEnumerable<IElementDescription> DescribeFields();
+
+        public void SetFieldsByLine(int fieldsByLine)
         {
             int line = 1;
             if (fieldsByLine > 1)
@@ -184,14 +184,9 @@ namespace RuniOS.UIElements
 
             return;
         }
-
-        /// <summary>
-        /// 이 메소드는 자식 등록을 위해 생성자에서 호출됩니다.
-        /// </summary>
-        protected abstract IEnumerable<IElementDescription> DescribeFields();
         
         
-
+        
         public override void SetValueWithoutNotify(TValueType newValue)
         {
             base.SetValueWithoutNotify(newValue);
