@@ -94,13 +94,13 @@ namespace RuniOS.UIElements
         /// <summary>
         /// 이 복합 필드의 자식 필드들을 한 줄에 <paramref name="fieldsByLine"/> 개수만큼 배치하여 시각적 레이아웃을 구성합니다.
         /// </summary>
-        /// <param name="fieldsByLine">한 줄에 배치할 자식 필드의 개수입니다. 1보다 클 경우 여러 줄로 표시됩니다.</param>
+        /// <param name="fieldsByLine">한 줄에 배치할 자식 필드의 개수입니다. 0보다 클 경우 여러 줄로 표시됩니다.</param>
         public void SetFieldsByLine(int fieldsByLine)
         {
             visualInput.Clear();
             
             int line = 1;
-            if (fieldsByLine > 1)
+            if (fieldsByLine >= 1)
                 line = ((float)descriptions.Count / fieldsByLine).CeilToInt();
             
             bool multiLine = line > 1;
