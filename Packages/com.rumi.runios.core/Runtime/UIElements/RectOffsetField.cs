@@ -12,7 +12,7 @@ namespace RuniOS.UIElements
         public RectOffsetField(string? label) : base(label)
         {
             AddToClassList(ussClassName);
-            SetFieldsByLine(4);
+            SetFieldsByHorizontal();
         }
 
         protected override IEnumerable<IElementDescription> GetElementDescriptions()

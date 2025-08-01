@@ -90,7 +90,12 @@ namespace RuniOS.UIElements
         /// </summary>
         /// <returns>자식 요소들의 설명을 담은 <see cref="IEnumerable{T}"/>입니다.</returns>
         protected abstract IEnumerable<IElementDescription> GetElementDescriptions();
-
+        
+        /// <summary>
+        /// 이 복합 필드의 자식 필드들을 한 줄에 배치하여 시각적 레이아웃을 구성합니다.
+        /// </summary>
+        public void SetFieldsByHorizontal() => SetFieldsByLine(0);
+        
         /// <summary>
         /// 이 복합 필드의 자식 필드들을 한 줄에 <paramref name="fieldsByLine"/> 개수만큼 배치하여 시각적 레이아웃을 구성합니다.
         /// </summary>
