@@ -116,7 +116,7 @@ namespace RuniOS.UIElements
 
         public VisualElement visualInput { get; }
         
-        public Label textElement { get; }
+        public TextElement textElement { get; }
         public Button buttonElement { get; }
 
 
@@ -130,10 +130,10 @@ namespace RuniOS.UIElements
             labelElement.AddToClassList(labelUssClassName);
 
             AddToClassList(ussClassName);
-            visualInput = this.Q<VisualElement>(className: inputUssClassName);
+            visualInput = this.Q<VisualElement>(className: BaseField<HexColor>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             
-            textElement = new Label { name = textUssClassName, pickingMode = PickingMode.Ignore };
+            textElement = new TextElement { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
             visualInput.Add(textElement);
 
