@@ -6,7 +6,7 @@ namespace RuniOS.UIElements
 {
     public class RectOffsetField : RuniBaseCompositeField<RectOffset>
     {
-        public new const string ussClassName = "runios-type-field";
+        public new const string ussClassName = "runios-rect-offset-field";
         
         public RectOffsetField() : this(null) { }
         public RectOffsetField(string? label) : base(label)
