@@ -21,7 +21,7 @@ namespace RuniOS.Patches
                 [HarmonyPatch(typeof(UniFoldout))]
                 public static class Foldout
                 {
-                    public static readonly ConditionalWeakTable<UniFoldout, VisualElement> viewportClippingElements = new();
+                    static readonly ConditionalWeakTable<UniFoldout, VisualElement> viewportClippingElements = new();
 
                     [HarmonyPatch]
                     public static class Constructor
@@ -32,11 +32,17 @@ namespace RuniOS.Patches
                         {
                             __instance.styleSheets.Add(UIToolkitUtility.rosControlStyle);
 
-                            VisualElement viewportClipping = new VisualElement { name = AnimFoldout.viewportClippingUssClassName };
+                            VisualElement viewportClipping = new VisualElement
+                            {
+                                name = AnimFoldout.viewportClippingUssClassName
+                            };
                             viewportClipping.AddToClassList(AnimFoldout.viewportClippingUssClassName);
                             __instance.hierarchy.Add(viewportClipping);
 
-                            VisualElement viewport = new VisualElement { name = AnimFoldout.viewportUssClassName };
+                            VisualElement viewport = new VisualElement
+                            {
+                                name = AnimFoldout.viewportUssClassName
+                            };
                             viewport.AddToClassList(AnimFoldout.viewportUssClassName);
                             viewportClipping.hierarchy.Add(viewport);
 
@@ -52,13 +58,6 @@ namespace RuniOS.Patches
                                     viewportClipping.style.height = new Length(x.newRect.height.Max(1));
                                 else
                                     viewportClipping.style.height = new Length(0);
-                            });
-                            
-                            // 애니메이션이 끝나는 이벤트를 쓰면 GeometryChangedEvent 이벤트가 호출되지 않아서 프리팹 바가 사라지지 않음
-                            viewportClipping.RegisterCallback<GeometryChangedEvent>(x =>
-                            {
-                                if (!__instance.value && x.newRect.height <= 1)
-                                    content.style.display = DisplayStyle.None;
                             });
                         }
                     }
@@ -96,23 +95,50 @@ namespace RuniOS.Patches
                     [HarmonyPatch("SetValueWithoutNotify")]
                     public static void SetValueWithoutNotify(UniFoldout __instance, bool newValue)
                     {
-                        if (!viewportClippingElements.TryGetValue(__instance, out VisualElement viewportClipping))
-                            return;
-                        
-                        if (viewportClipping.resolvedStyle.transitionDuration.Max().value <= 0)
+                        if (viewportClippingElements.TryGetValue(__instance, out VisualElement viewportClipping))
                         {
-                            __instance.contentContainer.style.display = newValue ? DisplayStyle.Flex : DisplayStyle.None;
-                            viewportClipping.style.height = StyleKeyword.Null;
-                        }
-                        else
-                        {
-                            if (newValue)
+                            viewportClipping.UnregisterCallback<TransitionEndEvent, UniFoldout>(TransitionEndEvent);
+
+                            if (viewportClipping.resolvedStyle.transitionDuration.Max().value <= 0)
                             {
-                                __instance.contentContainer.style.display = DisplayStyle.Flex;
-                                viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
+                                __instance.contentContainer.style.display = newValue ? DisplayStyle.Flex : DisplayStyle.None;
+                                viewportClipping.style.height = StyleKeyword.Null;
                             }
                             else
-                                viewportClipping.style.height = new Length(0);
+                            {
+                                if (newValue)
+                                {
+                                    __instance.contentContainer.style.display = DisplayStyle.Flex;
+                                    viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
+                                }
+                                else
+                                {
+                                    //__instance.contentContainer.style.display = DisplayStyle.None;
+                                    viewportClipping.style.height = new Length(0);
+                                    viewportClipping.RegisterCallbackOnce<TransitionEndEvent, UniFoldout>(TransitionEndEvent, __instance);
+                                }
+                            }
+                        }
+
+                        return;
+
+                        static void TransitionEndEvent(TransitionEndEvent e, UniFoldout instance)
+                        {
+                            instance.contentContainer.style.display = DisplayStyle.None;
+#if UNITY_EDITOR
+                            // 레이아웃 갱신이 이미 애니메이션에 의해 이루어진 상태라 비활성화가 되어도 레이아웃이 갱신되지 않아 프리팹 바가 나타나는 버그를 수정합니다
+                            UnityEditor.UIElements.InspectorElement inspector = instance.GetFirstAncestorOfType<UnityEditor.UIElements.InspectorElement>();
+                            if (inspector != null)
+                            {
+                                instance.contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(_ =>
+                                {
+                                    GeometryChangedEvent evt = GeometryChangedEvent.GetPooled(inspector.layout, inspector.layout);
+                                    evt.target = inspector;
+                                    
+                                    inspector.SendEvent(evt);
+                                });
+                            }
+#endif
                         }
                     }
                 }
