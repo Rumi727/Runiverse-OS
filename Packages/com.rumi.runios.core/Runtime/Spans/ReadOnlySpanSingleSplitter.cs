@@ -27,7 +27,7 @@ namespace RuniOS.Spans
             readonly T _separator;
 
 #pragma warning disable IDE0032 // auto 속성 사용
-            ReadOnlySpanSplitValue<T> _current;
+            ReadOnlySpan<T> _current;
 #pragma warning restore IDE0032 // auto 속성 사용
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -38,7 +38,7 @@ namespace RuniOS.Spans
                 _source = source;
                 _separator = separator;
 
-                _current = new ReadOnlySpanSplitValue<T>();
+                _current = new ReadOnlySpan<T>();
             }
 
             public bool MoveNext()
@@ -51,7 +51,7 @@ namespace RuniOS.Spans
                 int foundIndex = nextSource.IndexOf(_separator);
                 int length = foundIndex >= 0 ? foundIndex : nextSource.Length;
 
-                _current = new ReadOnlySpanSplitValue<T>(_source, _nextStartIndex, length);
+                _current = _source.Slice(_nextStartIndex, length);
                 _nextStartIndex += _current.Length + 1;
 
                 return true;
@@ -59,7 +59,7 @@ namespace RuniOS.Spans
 
 #pragma warning disable IDE1006 // 명명 스타일
             // ReSharper disable once InconsistentNaming
-            public readonly ReadOnlySpanSplitValue<T> Current
+            public readonly ReadOnlySpan<T> Current
             {
                 [MethodImpl(MethodImplOptions.AggressiveInlining)]
                 get => _current;

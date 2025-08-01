@@ -189,9 +189,9 @@ namespace RuniOS.Resource
             foreach (var item in splittedSpan)
             {
                 if (splitCount == 0)
-                    nameSpace = item.AsSpan().ToString(); // 첫 번째 부분은 네임스페이스로 간주합니다.
+                    nameSpace = new string(item); // 첫 번째 부분은 네임스페이스로 간주합니다.
                 else if (splitCount == 1)
-                    path = item.AsSpan().ToString(); // 두 번째 부분은 경로로 간주합니다.
+                    path = new string(item); // 두 번째 부분은 경로로 간주합니다.
 
                 splitCount++;
             }

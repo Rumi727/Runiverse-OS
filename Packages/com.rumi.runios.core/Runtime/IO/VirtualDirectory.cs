@@ -170,7 +170,7 @@ namespace RuniOS.IO
             VirtualDirectory childDirectory = this;
             foreach (var directoryNameSpan in path.value.AsSpan().Split(FilePath.directorySeparatorChar))
             {
-                string directoryName = new string(directoryNameSpan.AsSpan());
+                string directoryName = new string(directoryNameSpan);
                 if (childDirectory.children.ContainsKey(directoryName))
                 {
                     var entry = children[directoryName];
