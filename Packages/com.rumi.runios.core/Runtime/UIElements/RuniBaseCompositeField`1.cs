@@ -74,6 +74,8 @@ namespace RuniOS.UIElements
         /// <param name="label">필드에 표시될 라벨입니다.</param>
         protected RuniBaseCompositeField(string? label) : base(label, new VisualElement())
         {
+            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            
             AddToClassList(ussClassName);
             delegatesFocus = false;
             
@@ -107,6 +109,8 @@ namespace RuniOS.UIElements
             int line = 1;
             if (fieldsByLine >= 1)
                 line = ((float)descriptions.Count / fieldsByLine).CeilToInt();
+            else
+                fieldsByLine = descriptions.Count;
             
             bool multiLine = line > 1;
             if (multiLine)
@@ -142,7 +146,7 @@ namespace RuniOS.UIElements
                             element.AddToClassList(firstFieldVariantUssClassName);
                             isFirst = false;
                         }
-                        if (j >= lastIndex)
+                        if (j >= lastIndex - 1)
                             element.AddToClassList(lastFieldVariantUssClassName);
                     }
                     
