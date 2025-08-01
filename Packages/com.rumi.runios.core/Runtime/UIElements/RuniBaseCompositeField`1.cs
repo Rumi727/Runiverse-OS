@@ -186,6 +186,8 @@ namespace RuniOS.UIElements
                         MethodInfo? changedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
                         if (changedCallback != null)
                         {
+                            //나중에 element 속성이 변경되어도 이벤트는 원래 값을 참조하도록 포인터 복제
+                            IFieldDescription.WriteDelegate writeDelegate = fieldDescription.writeEvent;
                             Type fieldValueType = fieldDescription.fieldValueType;
                             Action<object> writeFunc = Write;
                             MethodInfo writeMethodInfo = writeFunc.Method;
@@ -220,10 +222,10 @@ namespace RuniOS.UIElements
 
                             void Write(object fieldValue)
                             {
-                                if (fieldDescription.writeEvent != null)
+                                if (writeDelegate != null)
                                 {
                                     var value = this.value;
-                                    fieldDescription.writeEvent.Invoke(ref value, fieldValue);
+                                    writeDelegate.Invoke(ref value, fieldValue);
                                     this.value = value;
                                 }
                             }
