@@ -9,6 +9,8 @@ namespace RuniOS.UIElements
     public partial class TypeField : BaseField<string>
     {
         public new const string ussClassName = "runios-type-field";
+        public new const string labelUssClassName = ussClassName + "__label";
+        public new const string inputUssClassName = ussClassName + "__input";
 
         public const string textUssClassName = ussClassName + "__text";
 
@@ -124,9 +126,12 @@ namespace RuniOS.UIElements
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
             styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            
+            labelElement.AddToClassList(labelUssClassName);
 
             AddToClassList(ussClassName);
             visualInput = this.Q<VisualElement>(className: inputUssClassName);
+            visualInput.AddToClassList(inputUssClassName);
             
             textElement = new Label { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
