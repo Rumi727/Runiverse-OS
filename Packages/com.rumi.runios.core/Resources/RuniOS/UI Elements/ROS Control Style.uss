@@ -1,15 +1,12 @@
 .runios-foldout__viewport-clipping {
     transition-property: height;
     transition-duration: 0.5s;
-    transition-timing-function: ease-out-circ;
+    transition-timing-function: ease-out-cubic;
     overflow: hidden;
     flex-grow: 1;
 }
 
 .runios-foldout__viewport {
-    transition-property: height;
-    transition-duration: 0.5s;
-    transition-timing-function: ease-out-circ;
     overflow: scroll;
     flex-shrink: 0;
 }
