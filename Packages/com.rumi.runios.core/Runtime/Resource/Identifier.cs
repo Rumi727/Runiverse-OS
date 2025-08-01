@@ -52,10 +52,10 @@ namespace RuniOS.Resource
         public Identifier(string nameSpace, string path)
         {
             if (!IsNamespaceValid(nameSpace))
-                ThrowInvalidNamespace(nameSpace);
+                throw new InvalidIdentifierException(GetInvalidNamespaceMessage(nameSpace));
 
             if (!IsPathValid(path))
-                ThrowInvalidPath(path);
+                throw new InvalidIdentifierException(GetInvalidPathMessage(path));
 
             _nameSpace = string.IsNullOrEmpty(nameSpace) ? defaultNamespace : nameSpace;
             _path = path;
@@ -77,7 +77,7 @@ namespace RuniOS.Resource
                 else if (IsNamespaceValid(value))
                     _nameSpace = value;
                 else
-                    ThrowInvalidNamespace(value);
+                    throw new InvalidIdentifierException(GetInvalidNamespaceMessage(value));
             }
         }
         [SerializeField, FieldName("gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
@@ -93,7 +93,7 @@ namespace RuniOS.Resource
                 if (IsPathValid(value))
                     _path = value;
                 else
-                    ThrowInvalidPath(value);
+                    throw new InvalidIdentifierException(GetInvalidPathMessage(value));
             }
         }
         [SerializeField, FieldName("gui.path"), JsonIgnore] FilePath _path;
@@ -240,10 +240,8 @@ namespace RuniOS.Resource
         
         
         
-        [DoesNotReturn]
-        public static void ThrowInvalidNamespace(string nameSpace) => throw new InvalidIdentifierException($"Invalid namespace: '{nameSpace}'. Allowed characters are 'a-z', '0-9', '.', '-', and '_'.");
+        public static string GetInvalidNamespaceMessage(string? nameSpace) => $"Invalid namespace: '{nameSpace}'. Allowed characters are 'a-z', '0-9', '.', '-', and '_'.";
         
-        [DoesNotReturn]
-        public static void ThrowInvalidPath(string path) => throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
+        public static string GetInvalidPathMessage(FilePath path) => $"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.";
     }
 }

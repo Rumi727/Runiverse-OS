@@ -265,16 +265,7 @@ namespace RuniOS.Editor
                 if (Identifier.IsNamespaceValid(nameSpace))
                     value.nameSpace = nameSpace;
                 else
-                {
-                    try
-                    {
-                        Identifier.ThrowInvalidNamespace(nameSpace);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                }
+                    Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(nameSpace));
                 position.x += position.width + 4;
             }
 
@@ -297,7 +288,7 @@ namespace RuniOS.Editor
                 {
                     try
                     {
-                        Identifier.ThrowInvalidPath(path);
+                        Identifier.GetInvalidPathMessage(path);
                     }
                     catch (Exception e)
                     {
