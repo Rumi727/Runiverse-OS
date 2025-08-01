@@ -24,7 +24,7 @@ namespace RuniOS.UIElements
         
         public VisualElement visualInput { get; }
 
-        public IReadOnlyList<IElementDescription> descriptions => _descriptions ??= DescribeFields().ToArray().AsReadOnly();
+        public IReadOnlyList<IElementDescription> descriptions => _descriptions ??= GetElementDescriptions().ToArray().AsReadOnly();
         IReadOnlyList<IElementDescription>? _descriptions;
         
         protected RuniBaseCompositeField(string? label) : base(label, new VisualElement())
@@ -39,10 +39,12 @@ namespace RuniOS.UIElements
             visualInput.focusable = false;
         }
         
-        protected abstract IEnumerable<IElementDescription> DescribeFields();
+        protected abstract IEnumerable<IElementDescription> GetElementDescriptions();
 
         public void SetFieldsByLine(int fieldsByLine)
         {
+            visualInput.Clear();
+            
             int line = 1;
             if (fieldsByLine > 1)
                 line = ((float)descriptions.Count / fieldsByLine).CeilToInt();
@@ -68,7 +70,7 @@ namespace RuniOS.UIElements
                 for (int j = i * fieldsByLine; j < lastIndex; j++)
                 {
                     IElementDescription? description = descriptions[j];
-                    ParseDescription(description);
+                    InitializeElement(description);
                     
                     VisualElement? element = description?.element;
                     if (element == null)
@@ -92,7 +94,7 @@ namespace RuniOS.UIElements
             UpdateDisplay();
         }
 
-        public void ParseDescription(IElementDescription description)
+        public void InitializeElement(IElementDescription description)
         {
             if (description.element != null)
                 return;

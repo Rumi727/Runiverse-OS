@@ -15,7 +15,7 @@ namespace RuniOS.UIElements
             SetFieldsByLine(4);
         }
 
-        protected override IEnumerable<IElementDescription> DescribeFields()
+        protected override IEnumerable<IElementDescription> GetElementDescriptions()
         {
             yield return new FieldDescription<FloatField, float>
             (
