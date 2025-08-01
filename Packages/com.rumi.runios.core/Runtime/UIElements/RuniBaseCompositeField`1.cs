@@ -410,9 +410,9 @@ namespace RuniOS.UIElements
             /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
-            public FieldDescription(string label, string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent)
+            public FieldDescription(string? label, string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent)
             {
-                _label = label;
+                this.label = label;
                 _propertyPath = propertyPath;
                 
                 _field = null;
@@ -432,7 +432,7 @@ namespace RuniOS.UIElements
             /// <param name="field">기존 필드 인스턴스입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
-            public FieldDescription(string label, string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(label, propertyPath, displayEvent, writeEvent) => this.field = field;
+            public FieldDescription(string? label, string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(label, propertyPath, displayEvent, writeEvent) => this.field = field;
 
             /// <summary>
             /// 부모 필드 값으로부터 자식 필드 값을 읽기 위한 델리게이트입니다.
@@ -456,8 +456,7 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 필드의 라벨입니다.
             /// </summary>
-            public readonly string label => _label ?? string.Empty;
-            readonly string? _label;
+            public string? label { get; }
 
             /// <summary>
             /// 필드의 바인딩 경로입니다.
