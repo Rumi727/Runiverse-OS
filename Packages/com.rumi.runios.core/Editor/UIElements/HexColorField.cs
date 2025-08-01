@@ -59,7 +59,7 @@ namespace RuniOS.Editor.UIElements
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);
             
-            visualInput = this.Q<ColorField>(className: inputUssClassName);
+            visualInput = this.Q<ColorField>(className: BaseField<HexColor>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
 
             visualInput.RegisterCallback<ChangeEvent<Color>>(ChangeEventCallback);
