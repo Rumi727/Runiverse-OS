@@ -9,6 +9,8 @@ namespace RuniOS.Editor.UIElements
     public partial class HexColorField : BaseField<HexColor>
     {
         public new const string ussClassName = "runios-hex-color-field";
+        public new const string labelUssClassName = ussClassName + "__label";
+        public new const string inputUssClassName = ussClassName + "__input";
         
         public static readonly BindingId showEyeDropperProperty = (BindingId)nameof(showEyeDropper);
         public static readonly BindingId showAlphaProperty = (BindingId)nameof(showAlpha);
@@ -55,7 +57,10 @@ namespace RuniOS.Editor.UIElements
             styleSheets.Add(UIToolkitUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
+            labelElement.AddToClassList(labelUssClassName);
+            
             visualInput = this.Q<ColorField>(className: inputUssClassName);
+            visualInput.AddToClassList(inputUssClassName);
 
             visualInput.RegisterCallback<ChangeEvent<Color>>(ChangeEventCallback);
         }
