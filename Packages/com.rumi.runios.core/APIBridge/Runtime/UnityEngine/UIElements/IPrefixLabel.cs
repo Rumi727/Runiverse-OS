@@ -33,7 +33,7 @@ namespace RuniOS.APIBridge.UnityEngine.UIElements
 
 
 
-        class PrefixLabel : IPrefixLabel
+        private class PrefixLabel : IPrefixLabel
         {
             public PrefixLabel(object instance) => this.instance = instance;
 

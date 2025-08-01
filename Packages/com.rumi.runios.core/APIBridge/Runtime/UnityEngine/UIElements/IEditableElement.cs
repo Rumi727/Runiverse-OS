@@ -31,7 +31,7 @@ namespace RuniOS.APIBridge.UnityEngine.UIElements
 
 
 
-        class EditableElement : IEditableElement
+        private class EditableElement : IEditableElement
         {
             public EditableElement(BridgeTarget instance) => this.instance = instance;
 

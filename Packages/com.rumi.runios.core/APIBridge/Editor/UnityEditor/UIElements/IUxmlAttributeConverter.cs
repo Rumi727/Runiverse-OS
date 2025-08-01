@@ -33,7 +33,7 @@ namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
 
 
 
-        class UxmlAttributeConverter : IUxmlAttributeConverter
+        private class UxmlAttributeConverter : IUxmlAttributeConverter
         {
             public UxmlAttributeConverter(BridgeTarget instance) => this.instance = instance;
 
