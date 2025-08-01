@@ -15,7 +15,9 @@
         "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": false,
-    "defineConstraints": [],
+    "defineConstraints": [
+        "UNITY_EDITOR || !ENABLE_IL2CPP"
+    ],
     "versionDefines": [],
     "noEngineReferences": false
 }
