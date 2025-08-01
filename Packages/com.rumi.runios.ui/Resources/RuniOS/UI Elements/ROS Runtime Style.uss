@@ -1409,6 +1409,10 @@
     flex-basis: 15px;
 }
 
+.unity-composite-field__field--last {
+    margin-right: 0;
+}
+
 .unity-vector3-field__input > #unity-z-input.unity-composite-field__field {
     margin-right: 0;
 }
