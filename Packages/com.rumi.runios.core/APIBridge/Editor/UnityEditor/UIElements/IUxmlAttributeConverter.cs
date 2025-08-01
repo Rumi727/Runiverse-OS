@@ -1,15 +1,29 @@
 #nullable enable
 using System.Reflection;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
+
+using BridgeTarget = System.Object;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
 {
     public interface IUxmlAttributeConverter
     {
-        public static Type type { get; } = EditorAssemblyManager.UnityEditor_UIElementsModule.GetType("UnityEditor.UIElements.IUxmlAttributeConverter");
+        static Type type { get; } = EditorAssemblyManager.UnityEditor_UIElementsModule.GetType("UnityEditor.UIElements.IUxmlAttributeConverter");
 
-        public static IUxmlAttributeConverter GetInstance(object instance) => new UxmlAttributeConverter(Convert.ChangeType(instance, type));
+        private static readonly ConditionalWeakTable<BridgeTarget, UxmlAttributeConverter> cached = new ConditionalWeakTable<BridgeTarget, UxmlAttributeConverter>();
+        static IUxmlAttributeConverter GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out UxmlAttributeConverter? element))
+            {
+                element = new UxmlAttributeConverter(Convert.ChangeType(instance, type));
+                cached.Add(instance, element);
+            }
+
+            element.instance = instance;
+            return element;
+        }
 
 
 
@@ -21,9 +35,9 @@ namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
 
         class UxmlAttributeConverter : IUxmlAttributeConverter
         {
-            public UxmlAttributeConverter(object instance) => this.instance = instance;
+            public UxmlAttributeConverter(BridgeTarget instance) => this.instance = instance;
 
-            public object instance { get; }
+            public BridgeTarget instance { get; set; }
 
 
 

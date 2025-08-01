@@ -1,7 +1,10 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEditor;
+
+using BridgeTarget = System.Object;
 
 namespace RuniOS.Editor.APIBridge.UnityEditorInternal
 {
@@ -10,11 +13,23 @@ namespace RuniOS.Editor.APIBridge.UnityEditorInternal
         public static Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditorInternal.ReorderableListWrapper");
 
         public static ReorderableListWrapper CreateInstance() => new ReorderableListWrapper(Activator.CreateInstance(type));
-        public static ReorderableListWrapper GetInstance(object instance) => new ReorderableListWrapper(instance);
+        
+        static readonly ConditionalWeakTable<BridgeTarget, ReorderableListWrapper> cached = new ConditionalWeakTable<BridgeTarget, ReorderableListWrapper>();
+        public static ReorderableListWrapper GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out ReorderableListWrapper? element))
+            {
+                element = new ReorderableListWrapper(instance);
+                cached.Add(instance, element);
+            }
 
-        ReorderableListWrapper(object instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public object instance { get; }
+        ReorderableListWrapper(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
 
 
 

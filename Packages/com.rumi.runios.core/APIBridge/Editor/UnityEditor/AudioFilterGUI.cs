@@ -1,7 +1,10 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+using BridgeTarget = System.Object;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {
@@ -10,11 +13,23 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
         public static Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.AudioFilterGUI");
 
         public static AudioFilterGUI CreateInstance() => new AudioFilterGUI(Activator.CreateInstance(type));
-        public static AudioFilterGUI GetInstance(object instance) => new AudioFilterGUI(instance);
+        
+        static readonly ConditionalWeakTable<BridgeTarget, AudioFilterGUI> cached = new ConditionalWeakTable<BridgeTarget, AudioFilterGUI>();
+        public static AudioFilterGUI GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out AudioFilterGUI? element))
+            {
+                element = new AudioFilterGUI(instance);
+                cached.Add(instance, element);
+            }
 
-        AudioFilterGUI(object instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public object instance { get; }
+        AudioFilterGUI(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
 
 
 

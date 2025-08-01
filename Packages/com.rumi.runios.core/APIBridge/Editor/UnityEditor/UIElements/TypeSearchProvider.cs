@@ -1,7 +1,9 @@
 #nullable enable
 using System;
 using RuniOS.Editor.APIBridge.UnityEditor.Search;
-using UniSearchProvider = UnityEditor.Search.SearchProvider;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEditor.Search.SearchProvider;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
 {
@@ -9,12 +11,23 @@ namespace RuniOS.Editor.APIBridge.UnityEditor.UIElements
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_UIBuilderModule.GetType("UnityEditor.UIElements.TypeSearchProvider");
 
-        public static TypeSearchProvider CreateInstance(Type baseType) => new TypeSearchProvider((UniSearchProvider)Activator.CreateInstance(type, baseType));
+        public static TypeSearchProvider CreateInstance(Type baseType) => new TypeSearchProvider((BridgeTarget)Activator.CreateInstance(type, baseType));
 
-        public static TypeSearchProvider GetInstance(UniSearchProvider instance) => new TypeSearchProvider(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, TypeSearchProvider> cached = new ConditionalWeakTable<BridgeTarget, TypeSearchProvider>();
+        public static TypeSearchProvider GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out TypeSearchProvider? element))
+            {
+                element = new TypeSearchProvider(instance);
+                cached.Add(instance, element);
+            }
 
-        TypeSearchProvider(UniSearchProvider instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public UniSearchProvider instance { get; }
+        TypeSearchProvider(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
     }
 }

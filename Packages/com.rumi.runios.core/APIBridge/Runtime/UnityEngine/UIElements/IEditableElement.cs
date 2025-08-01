@@ -1,14 +1,28 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = System.Object;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public interface IEditableElement
     {
-        public static Type type { get; } = AssemblyManager.UnityEngine_CoreModule.GetType("UnityEngine.UIElements.IEditableElement");
+        static Type type { get; } = AssemblyManager.UnityEngine_CoreModule.GetType("UnityEngine.UIElements.IEditableElement");
 
-        public static IEditableElement GetInstance(object instance) => new EditableElement(Convert.ChangeType(instance, type));
+        private static readonly ConditionalWeakTable<BridgeTarget, EditableElement> cached = new ConditionalWeakTable<BridgeTarget, EditableElement>();
+        static IEditableElement GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out EditableElement? element))
+            {
+                element = new EditableElement(Convert.ChangeType(instance, type));
+                cached.Add(instance, element);
+            }
+
+            element.instance = instance;
+            return element;
+        }
 
 
 
@@ -19,9 +33,9 @@ namespace RuniOS.APIBridge.UnityEngine.UIElements
 
         class EditableElement : IEditableElement
         {
-            public EditableElement(object instance) => this.instance = instance;
+            public EditableElement(BridgeTarget instance) => this.instance = instance;
 
-            public object instance { get; }
+            public BridgeTarget instance { get; set; }
 
 
 

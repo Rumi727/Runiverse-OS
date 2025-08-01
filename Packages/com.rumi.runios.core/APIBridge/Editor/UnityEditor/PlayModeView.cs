@@ -1,5 +1,7 @@
 #nullable enable
 using System;
+using System.Runtime.CompilerServices;
+using BridgeTarget = UnityEditor.EditorWindow;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {
@@ -7,11 +9,22 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.PlayModeView");
 
-        public static PlayModeView GetInstance(global::UnityEditor.EditorWindow? instance) => new PlayModeView(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, PlayModeView> cached = new ConditionalWeakTable<BridgeTarget, PlayModeView>();
+        public static PlayModeView GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out PlayModeView? element))
+            {
+                element = new PlayModeView(instance);
+                cached.Add(instance, element);
+            }
 
-        protected PlayModeView(global::UnityEditor.EditorWindow? instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public global::UnityEditor.EditorWindow? instance { get; }
+        protected PlayModeView(BridgeTarget? instance) => this.instance = instance;
+
+        public BridgeTarget? instance { get; set; }
 
 
 

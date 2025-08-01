@@ -1,5 +1,8 @@
 #nullable enable
 using System;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEditor.EditorWindow;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor.IMGUI.Controls
 {
@@ -7,13 +10,25 @@ namespace RuniOS.Editor.APIBridge.UnityEditor.IMGUI.Controls
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.IMGUI.Controls.AdvancedDropdownWindow");
 
-        public static AdvancedDropdownWindow CreateInstance() => new AdvancedDropdownWindow((EditorWindow?)Activator.CreateInstance(type));
-        public static AdvancedDropdownWindow GetInstance(EditorWindow? instance) => new AdvancedDropdownWindow(instance);
+        public static AdvancedDropdownWindow CreateInstance() => new AdvancedDropdownWindow((BridgeTarget?)Activator.CreateInstance(type));
+        
+        static readonly ConditionalWeakTable<BridgeTarget, AdvancedDropdownWindow> cached = new ConditionalWeakTable<BridgeTarget, AdvancedDropdownWindow>();
+        public static AdvancedDropdownWindow GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out AdvancedDropdownWindow? element))
+            {
+                element = new AdvancedDropdownWindow(instance);
+                cached.Add(instance, element);
+            }
 
-        AdvancedDropdownWindow(EditorWindow? instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public EditorWindow? instance { get; }
+        AdvancedDropdownWindow(BridgeTarget? instance) => this.instance = instance;
 
-        public override string ToString() => instance?.ToString() ?? "Null";
+        public BridgeTarget? instance { get; set; }
+
+        public override string ToString() => instance != null ? instance.ToString() : "Null";
     }
 }

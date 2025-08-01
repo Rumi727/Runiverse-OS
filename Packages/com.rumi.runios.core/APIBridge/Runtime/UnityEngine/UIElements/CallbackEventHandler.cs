@@ -1,18 +1,32 @@
 #nullable enable
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
+
+using BridgeTarget = UnityEngine.UIElements.CallbackEventHandler;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class CallbackEventHandler : IEventHandler
     {
-        public static Type type { get; } = typeof(global::UnityEngine.UIElements.CallbackEventHandler);
+        public static Type type { get; } = typeof(BridgeTarget);
 
-        public static CallbackEventHandler GetInstance(global::UnityEngine.UIElements.CallbackEventHandler instance) => new CallbackEventHandler(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, CallbackEventHandler> cached = new ConditionalWeakTable<BridgeTarget, CallbackEventHandler>();
+        public static CallbackEventHandler GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out CallbackEventHandler? element))
+            {
+                element = new CallbackEventHandler(instance);
+                cached.Add(instance, element);
+            }
 
-        protected CallbackEventHandler(global::UnityEngine.UIElements.CallbackEventHandler instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public global::UnityEngine.UIElements.CallbackEventHandler instance { get; set; }
+        protected CallbackEventHandler(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
 
         public void SendEvent(EventBase e) => ((IEventHandler)instance).HandleEvent(e);
         public void HandleEvent(EventBase evt) => ((IEventHandler)instance).HandleEvent(evt);

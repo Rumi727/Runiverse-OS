@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
@@ -9,7 +10,18 @@ namespace RuniOS.APIBridge.UnityEngine.UIElements
     {
         public static new Type type { get; } = typeof(global::UnityEngine.UIElements.BaseField<TValueType>);
 
-        public static BaseField<TValueType> GetInstance(global::UnityEngine.UIElements.BaseField<TValueType> instance) => new BaseField<TValueType>(instance);
+        static readonly ConditionalWeakTable<global::UnityEngine.UIElements.BaseField<TValueType>, BaseField<TValueType>> cached = new ConditionalWeakTable<global::UnityEngine.UIElements.BaseField<TValueType>, BaseField<TValueType>>();
+        public static BaseField<TValueType> GetInstance(global::UnityEngine.UIElements.BaseField<TValueType> instance)
+        {
+            if (!cached.TryGetValue(instance, out BaseField<TValueType>? element))
+            {
+                element = new BaseField<TValueType>(instance);
+                cached.Add(instance, element);
+            }
+
+            element.instance = instance;
+            return element;
+        }
 
         protected BaseField(global::UnityEngine.UIElements.BaseField<TValueType> instance) : base(instance) => this.instance = instance;
 

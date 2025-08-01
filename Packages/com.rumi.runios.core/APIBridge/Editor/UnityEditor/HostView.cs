@@ -1,6 +1,9 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEngine.ScriptableObject;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {
@@ -8,11 +11,22 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.HostView");
 
-        public static new HostView GetInstance(UnityEngine.ScriptableObject? instance) => new HostView(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, HostView> cached = new ConditionalWeakTable<BridgeTarget, HostView>();
+        public static new HostView GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out HostView? element))
+            {
+                element = new HostView(instance);
+                cached.Add(instance, element);
+            }
 
-        protected HostView(UnityEngine.ScriptableObject? instance) : base(instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public new UnityEngine.ScriptableObject? instance { get; }
+        protected HostView(BridgeTarget? instance) : base(instance) => this.instance = instance;
+
+        public new UnityEngine.ScriptableObject? instance { get; set; }
 
 
 

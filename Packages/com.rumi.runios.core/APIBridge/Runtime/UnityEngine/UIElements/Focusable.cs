@@ -1,16 +1,30 @@
 #nullable enable
 using System;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEngine.UIElements.Focusable;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class Focusable : CallbackEventHandler
     {
-        public static new Type type { get; } = typeof(global::UnityEngine.UIElements.Focusable);
+        public static new Type type { get; } = typeof(BridgeTarget);
 
-        public static Focusable GetInstance(global::UnityEngine.UIElements.Focusable instance) => new Focusable(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, Focusable> cached = new ConditionalWeakTable<BridgeTarget, Focusable>();
+        public static Focusable GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out Focusable? element))
+            {
+                element = new Focusable(instance);
+                cached.Add(instance, element);
+            }
 
-        protected Focusable(global::UnityEngine.UIElements.Focusable instance) : base(instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public new global::UnityEngine.UIElements.Focusable instance { get; set; }
+        protected Focusable(BridgeTarget instance) : base(instance) => this.instance = instance;
+
+        public new BridgeTarget instance { get; set; }
     }
 }

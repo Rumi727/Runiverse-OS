@@ -1,6 +1,9 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEditor.EditorWindow;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {
@@ -8,11 +11,22 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.InspectorWindow");
 
-        public static InspectorWindow GetInstance(global::UnityEditor.EditorWindow? instance) => new InspectorWindow(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, InspectorWindow> cached = new ConditionalWeakTable<BridgeTarget, InspectorWindow>();
+        public static InspectorWindow GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out InspectorWindow? element))
+            {
+                element = new InspectorWindow(instance);
+                cached.Add(instance, element);
+            }
 
-        protected InspectorWindow(global::UnityEditor.EditorWindow? instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public global::UnityEditor.EditorWindow? instance { get; }
+        protected InspectorWindow(BridgeTarget? instance) => this.instance = instance;
+
+        public BridgeTarget? instance { get; set; }
 
 
 

@@ -2,6 +2,9 @@
 #if UNITY_EDITOR
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = System.Object;
 
 /*
  * APIBridge 템플릿
@@ -22,11 +25,23 @@ namespace RuniOS.APIBridge
         public static Type type { get; } = typeof(APIBridge);
 
         public static APIBridge CreateInstance() => new APIBridge(Activator.CreateInstance(type));
-        public static APIBridge GetInstance(object instance) => new APIBridge(instance);
+        
+        static readonly ConditionalWeakTable<BridgeTarget, APIBridge> cached = new ConditionalWeakTable<BridgeTarget, APIBridge>();
+        public static APIBridge GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out APIBridge? element))
+            {
+                element = new APIBridge(instance);
+                cached.Add(instance, element);
+            }
 
-        APIBridge(object instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public object instance { get; }
+        APIBridge(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
 
 
 

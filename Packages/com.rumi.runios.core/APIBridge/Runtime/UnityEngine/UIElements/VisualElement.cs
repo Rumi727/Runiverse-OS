@@ -1,19 +1,33 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
+
+using BridgeTarget = UnityEngine.UIElements.VisualElement;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class VisualElement : Focusable
     {
-        public static new Type type { get; } = typeof(global::UnityEngine.UIElements.VisualElement);
+        public static new Type type { get; } = typeof(BridgeTarget);
 
-        public static VisualElement GetInstance(global::UnityEngine.UIElements.VisualElement instance) => new VisualElement(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, VisualElement> cached = new ConditionalWeakTable<BridgeTarget, VisualElement>();
+        public static VisualElement GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out VisualElement? element))
+            {
+                element = new VisualElement(instance);
+                cached.Add(instance, element);
+            }
 
-        protected VisualElement(global::UnityEngine.UIElements.VisualElement instance) : base(instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public new global::UnityEngine.UIElements.VisualElement instance { get; set; }
+        protected VisualElement(BridgeTarget instance) : base(instance) => this.instance = instance;
+
+        public new BridgeTarget instance { get; set; }
 
         
 

@@ -1,15 +1,29 @@
 #nullable enable
 using System.Reflection;
 using System;
+using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
+
+using BridgeTarget = System.Object;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public interface IPrefixLabel
     {
-        public static Type type { get; } = AssemblyManager.UnityEngine_CoreModule.GetType("UnityEngine.UIElements.IPrefixLabel");
+        static Type type { get; } = AssemblyManager.UnityEngine_CoreModule.GetType("UnityEngine.UIElements.IPrefixLabel");
 
-        public static IPrefixLabel GetInstance(object instance) => new PrefixLabel(Convert.ChangeType(instance, type));
+        private static readonly ConditionalWeakTable<BridgeTarget, PrefixLabel> cached = new ConditionalWeakTable<BridgeTarget, PrefixLabel>();
+        static IPrefixLabel GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out PrefixLabel? element))
+            {
+                element = new PrefixLabel(Convert.ChangeType(instance, type));
+                cached.Add(instance, element);
+            }
+
+            element.instance = instance;
+            return element;
+        }
 
 
 
@@ -23,7 +37,7 @@ namespace RuniOS.APIBridge.UnityEngine.UIElements
         {
             public PrefixLabel(object instance) => this.instance = instance;
 
-            public object instance { get; }
+            public object instance { get; set; }
 
 
 

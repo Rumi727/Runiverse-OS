@@ -1,6 +1,10 @@
 #nullable enable
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEngine.ScriptableObject;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {
@@ -8,11 +12,26 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
     {
         public static new Type type { get; } = EditorAssemblyManager.UnityEditor_CoreModule.GetType("UnityEditor.GUIView");
 
-        public static new GUIView GetInstance(UnityEngine.ScriptableObject? instance) => new GUIView(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, GUIView> cached = new ConditionalWeakTable<BridgeTarget, GUIView>();
+        [return: NotNullIfNotNull("instance")]
+        public static new GUIView? GetInstance(BridgeTarget? instance)
+        {
+            if (instance == null)
+                return null;
+            
+            if (!cached.TryGetValue(instance, out GUIView? element))
+            {
+                element = new GUIView(instance);
+                cached.Add(instance, element);
+            }
 
-        protected GUIView(UnityEngine.ScriptableObject? instance) : base(instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public new UnityEngine.ScriptableObject? instance { get; }
+        protected GUIView(BridgeTarget? instance) : base(instance) => this.instance = instance;
+
+        public new BridgeTarget? instance { get; set; }
 
 
         public static GUIView? current
@@ -20,7 +39,7 @@ namespace RuniOS.Editor.APIBridge.UnityEditor
             get
             {
                 f_current ??= type.GetProperty("current", BindingFlags.Public | BindingFlags.Static);
-                return GetInstance((UnityEngine.ScriptableObject?)f_current!.GetValue(null));
+                return GetInstance((BridgeTarget?)f_current!.GetValue(null));
             }
             set
             {

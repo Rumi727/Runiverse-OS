@@ -1,21 +1,34 @@
 #nullable enable
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using UniAdvancedDropdown = UnityEditor.IMGUI.Controls.AdvancedDropdown;
+
+using BridgeTarget = UnityEditor.IMGUI.Controls.AdvancedDropdown;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor.IMGUI.Controls
 {
     public class AdvancedDropdown
     {
-        public static Type type { get; } = typeof(UniAdvancedDropdown);
+        public static Type type { get; } = typeof(BridgeTarget);
 
-        public static AdvancedDropdown GetInstance(UniAdvancedDropdown instance) => new AdvancedDropdown(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, AdvancedDropdown> cached = new ConditionalWeakTable<BridgeTarget, AdvancedDropdown>();
+        public static AdvancedDropdown GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out AdvancedDropdown? element))
+            {
+                element = new AdvancedDropdown(instance);
+                cached.Add(instance, element);
+            }
 
-        AdvancedDropdown(UniAdvancedDropdown instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public UniAdvancedDropdown instance { get; set; }
+        AdvancedDropdown(BridgeTarget instance) => this.instance = instance;
+
+        public BridgeTarget instance { get; set; }
 
         public AdvancedDropdownState m_State
         {

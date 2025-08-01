@@ -1,16 +1,30 @@
 #nullable enable
 using System;
+using System.Runtime.CompilerServices;
+
+using BridgeTarget = UnityEngine.UIElements.BindableElement;
 
 namespace RuniOS.APIBridge.UnityEngine.UIElements
 {
     public class BindableElement : VisualElement
     {
-        public static new Type type { get; } = typeof(global::UnityEngine.UIElements.BindableElement);
+        public static new Type type { get; } = typeof(BridgeTarget);
 
-        public static BindableElement GetInstance(global::UnityEngine.UIElements.BindableElement instance) => new BindableElement(instance);
+        static readonly ConditionalWeakTable<BridgeTarget, BindableElement> cached = new ConditionalWeakTable<BridgeTarget, BindableElement>();
+        public static BindableElement GetInstance(BridgeTarget instance)
+        {
+            if (!cached.TryGetValue(instance, out BindableElement? element))
+            {
+                element = new BindableElement(instance);
+                cached.Add(instance, element);
+            }
 
-        protected BindableElement(global::UnityEngine.UIElements.BindableElement instance) : base(instance) => this.instance = instance;
+            element.instance = instance;
+            return element;
+        }
 
-        public new global::UnityEngine.UIElements.BindableElement instance { get; set; }
+        protected BindableElement(BridgeTarget instance) : base(instance) => this.instance = instance;
+
+        public new BridgeTarget instance { get; set; }
     }
 }
