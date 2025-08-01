@@ -4,13 +4,19 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
 {
-    public class RectOffsetField : RuniBaseCompositeField<RectOffset>
+    [UxmlElement]
+    public partial class RectOffsetField : RuniBaseCompositeField<RectOffset>
     {
         public new const string ussClassName = "runios-rect-offset-field";
+        public new const string labelUssClassName = ussClassName + "__label";
+        public new const string inputUssClassName = ussClassName + "__input";
         
         public RectOffsetField() : this(null) { }
         public RectOffsetField(string? label) : base(label)
         {
+            labelElement.AddToClassList(labelUssClassName);
+            visualInput.AddToClassList(inputUssClassName);
+            
             AddToClassList(ussClassName);
             SetFieldsByHorizontal();
         }
