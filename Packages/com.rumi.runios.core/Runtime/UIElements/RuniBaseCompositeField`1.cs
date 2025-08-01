@@ -406,6 +406,14 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 새로운 <see cref="FieldDescription{TField, TFieldValueType}"/> 인스턴스를 초기화합니다.
             /// </summary>
+            /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
+            /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
+            /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
+            public FieldDescription(string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, displayEvent, writeEvent) { }
+            
+            /// <summary>
+            /// 새로운 <see cref="FieldDescription{TField, TFieldValueType}"/> 인스턴스를 초기화합니다.
+            /// </summary>
             /// <param name="label">필드에 표시될 라벨입니다.</param>
             /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
@@ -425,7 +433,12 @@ namespace RuniOS.UIElements
             }
             
             /// <summary>
-            /// 이름과 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
+            /// 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
+            /// </summary>
+            public FieldDescription(string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, field, displayEvent, writeEvent) => this.field = field;
+            
+            /// <summary>
+            /// 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
             /// </summary>
             /// <param name="label">필드에 표시될 라벨입니다.</param>
             /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
