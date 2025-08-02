@@ -1,3 +1,11 @@
+.unity-foldout {
+    flex-shrink: 0;
+}
+
+.unity-composite-field .unity-composite-field__field--last {
+    margin-right: 0;
+}
+
 .runios-foldout__viewport-clipping {
     transition-property: height;
     transition-duration: 0.5s;
@@ -16,8 +24,30 @@
     overflow: visible;
 }
 
+.runios-hex-color-field .unity-color-field {
+    margin-left: 0;
+}
+
+.runios-file-path-field .unity-text-field {
+    margin-left: 0;
+}
+
+.runios-identifier-field .unity-composite-field__field {
+    margin-right: 0;
+}
+
+.runios-identifier-field #separator {
+    margin-left: 2px;
+    margin-right: 2px;
+    -unity-text-align: upper-center;
+}
+
+.runios-identifier-field .unity-composite-field__field--last {
+    flex-grow: 2;
+}
+
 .runios-progress-bar__viewport {
-    overflow: hidden;
+    transform-origin: left;
 }
 
 .runios-type-field {
@@ -33,6 +63,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     align-self: center;
+    white-space: nowrap;
 }
 
 .runios-type-field__button {

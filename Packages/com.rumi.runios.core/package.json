@@ -14,7 +14,8 @@
     "com.unity.nuget.newtonsoft-json": "3.2.1",
     "com.unity.localization": "1.5.5",
     "com.cysharp.unitask": "2.5.10",
-    "com.realitystop.linkmerge": "1.0.0"
+    "com.realitystop.linkmerge": "1.0.0",
+    "com.unity.inputsystem": "1.14.1"
   },
   "unity": "6000.1"
 }

@@ -51,7 +51,7 @@ namespace RuniOS.Patches
                             viewport.hierarchy.Add(content);
 
                             viewportClippingElements.Add(__instance, viewportClipping);
-
+                            
                             content.RegisterCallback<GeometryChangedEvent>(x =>
                             {
                                 if (__instance.value)
