@@ -96,7 +96,6 @@ namespace RuniOS
             {
                 try
                 {
-                    Debug.Log(item.DeclaringType);
                     item.Invoke(null, null);
                 }
                 catch (Exception e)
