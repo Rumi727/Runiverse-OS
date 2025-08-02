@@ -2,6 +2,7 @@
 using RuniOS;
 using RuniOS.Collections.Generic;
 using RuniOS.IO;
+using RuniOS.APIMarshal.UnityEngine.UIElements;
 using RuniOS.Resource;
 using System.Collections.Generic;
 using UnityEngine;
@@ -68,6 +69,14 @@ public sealed class Test : MonoBehaviour
     {
         if (!Application.isPlaying || document == null)
             return;
+        
+        Asdf asdf = new Asdf();
+        document.rootVisualElement.Add(asdf);
+        Debug.Log(asdf);
+        
+        Asdf2 asdf2 = new Asdf2("asdf", 3);
+        document.rootVisualElement.Add(asdf2);
+        Debug.Log(asdf2);
 
         document.rootVisualElement.Add(new Button() { text = "asdf" });
         document.rootVisualElement.Q<ListView>("test").itemsSource = new List<Vector2>();
@@ -127,5 +136,28 @@ public sealed class Test : MonoBehaviour
     public struct StringListTestStruct
     {
         public string test;
+    }
+
+    public class Asdf2 : BaseCompositeFieldMarshal<string, IntegerField, int>
+    {
+        public Asdf2(string label, int fieldsByLine) : base(label, fieldsByLine)
+        {
+            
+        }
+
+        public override IEnumerable<FieldDescriptionMarshal> DescribeFieldsMarshal()
+        {
+            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
+            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
+            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
+        }
+    }
+
+    public class Asdf : TextInputBaseFieldMarshal<string>.TextInputBaseMarshal
+    {
+        public Asdf()
+        {
+            Debug.Log("asdf");
+        }
     }
 }
