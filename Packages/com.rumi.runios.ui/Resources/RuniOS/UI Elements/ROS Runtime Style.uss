@@ -16,7 +16,7 @@
     --radio-color: rgb(200, 200, 200);
     --label-width: 120px;
     --input-width: 150px;
-    --text-field-height: 18px;
+    --text-field-height: 16px;
     --focus-alpha: 0.7;
     --hover-alpha: 0.5;
     --disabled-alpha: 0.4;
@@ -77,7 +77,10 @@
     border-right-color: var(--border-color);
     border-bottom-color: var(--border-color);
     border-top-color: var(--border-color);
-    border-radius: 5px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
     padding-top: 3px;
     padding-bottom: 3px;
     min-height: 10px;
@@ -97,7 +100,8 @@
     border-right-width: 1px;
     border-bottom-width: 1px;
     border-left-width: 1px;
-    border-radius: 0 0 5px 5px;
+    border-bottom-right-radius: 5px;
+    border-bottom-left-radius: 5px;
 }
 
 .unity-list-view__footer > .unity-button {
@@ -118,8 +122,14 @@
 }
 
 .unity-label {
-    padding: 0;
-    margin: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     align-self: flex-start;
     overflow: hidden;
 }
@@ -129,8 +139,14 @@
 }
 
 .unity-button {
-    padding: 1px 6px;
-    margin: 10px 5px;
+    padding-top: 1px;
+    padding-right: 6px;
+    padding-bottom: 1px;
+    padding-left: 6px;
+    margin-top: 10px;
+    margin-right: 5px;
+    margin-bottom: 10px;
+    margin-left: 5px;
     height: 40px;
     border-radius: 20px;
     background-color: var(--system-color);
@@ -241,15 +257,24 @@
 
 .unity-base-field {
     white-space: nowrap;
-    margin: 3px 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 3px;
+    margin-bottom: 3px;
     padding-left: 0;
     flex-wrap: nowrap;
 }
 
 .unity-base-field__label {
     white-space: nowrap;
-    margin: 0 2px 0 0;
-    padding: 1px 0 0;
+    margin-left: 0;
+    margin-right: 2px;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 1px;
+    padding-bottom: 0;
     min-width: var(--label-width);
     max-width: var(--label-width);
     text-overflow: ellipsis;
@@ -260,10 +285,12 @@
 }
 
 .unity-base-field__input {
-    padding: 0 2px 0 0;
-    margin: 0;
-    flex-basis: 0;
     padding-right: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    flex-basis: 0;
 }
 
 .unity-toggle {
@@ -292,7 +319,10 @@
     border-bottom-width: 3px;
     border-left-width: 3px;
     background-color: rgba(0, 0, 0, 0);
-    border-radius: 9px;
+    border-top-left-radius: 9px;
+    border-bottom-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
     transition-property: background-color, scale, border-color;
     transition-duration: var(--transition-duration), 1s, var(--transition-duration);
     transition-timing-function: ease, ease-out-elastic, ease;
@@ -402,7 +432,10 @@
 .unity-foldout__toggle > .unity-toggle__input > .unity-toggle__checkmark {
     width: 13px;
     height: 13px;
-    margin: 0 3px 0 0;
+    margin-left: 0;
+    margin-right: 3px;
+    margin-top: 0;
+    margin-bottom: 0;
     background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-size: 200% 200%;
     -unity-background-image-tint-color: var(--scroll-color);
@@ -413,11 +446,14 @@
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
-    border-radius: 0;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
 }
 
 .unity-foldout__toggle > .unity-toggle__input:focus:enabled > .unity-toggle__checkmark {
@@ -482,7 +518,10 @@
 }
 
 .unity-foldout__toggle .unity-text-element {
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     padding-top: 1px;
 }
 
@@ -534,8 +573,14 @@
     top: auto;
     bottom: auto;
     position: absolute;
-    margin: 0;
-    border-radius: 8px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -561,7 +606,6 @@
 
 .unity-base-slider__text-field > .unity-base-text-field__input {
     min-width: auto;
-    height: var(--text-field-height);
 }
 
 .unity-base-slider__drag-container {
@@ -585,7 +629,10 @@
 }
 
 .unity-base-slider--horizontal .unity-base-slider__tracker {
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     top: auto;
     height: 8px;
     bottom: auto;
@@ -631,7 +678,10 @@
 }
 
 .unity-base-slider--vertical .unity-base-slider__tracker {
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     top: auto;
     width: 8px;
     bottom: auto;
@@ -730,7 +780,6 @@
 }
 
 .unity-scroller--horizontal > .unity-scroller__slider {
-    margin: 0 16px 0 16px;
     margin-right: 0;
     margin-left: 0;
     height: 10px;
@@ -801,7 +850,6 @@
 
 .unity-scroller--vertical > .unity-scroller__slider {
     width: 10px;
-    margin: 16px 0 16px 0;
     margin-top: 0;
     margin-bottom: 0;
     min-width: auto;
@@ -862,23 +910,26 @@
     flex-basis: auto;
     align-self: flex-start;
     min-width: var(--input-width);
-    border-radius: 9px;
     background-color: var(--field-color);
     border-left-color: var(--field-color);
     border-right-color: var(--field-color);
     border-top-color: var(--field-color);
     border-bottom-color: var(--field-color);
-    padding: 1px 0;
-    height: var(--text-field-height);
+    padding-top: 0;
+    padding-bottom: 0;
     transition-property: border-color;
     transition-duration: var(--transition-duration);
     border-top-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
     border-left-width: 2px;
-}
-
-.unity-base-text-field:focus:enabled .unity-base-text-field__input {
+    min-height: var(--text-field-height);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .unity-base-text-field__input:disabled {
@@ -887,18 +938,24 @@
 
 .unity-base-text-field__input .unity-text-element {
     flex-basis: auto;
-    height: 100%;
     align-self: flex-start;
     flex-shrink: 1;
     padding-right: 3px;
     padding-left: 3px;
+    width: 100%;
+    height: 100%;
+    font-size: 11px;
 }
 
 .unity-text-field__input {
     flex-basis: auto;
-    height: 100%;
     align-self: flex-start;
     flex-shrink: 1;
+    min-height: var(--text-field-height);
+}
+
+.unity-base-text-field__input--single-line {
+    height: var(--text-field-height);
 }
 
 .unity-min-max-slider {
@@ -952,7 +1009,10 @@
     align-items: center;
     border-top-width: 0;
     border-bottom-width: 0;
-    margin: 0 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 0;
+    margin-bottom: 0;
     border-left-width: 0;
     border-right-width: 0;
     min-width: 0;
@@ -997,7 +1057,10 @@
     border-bottom-color: rgba(0, 0, 0, 0);
     min-width: auto;
     border-radius: 8px 0 0 8px;
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     transition-property: background-color;
     transition-duration: var(--transition-duration);
 }
@@ -1022,7 +1085,10 @@
     left: auto;
     right: auto;
     bottom: auto;
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     border-left-color: rgba(0, 0, 0, 0);
     border-right-color: rgba(0, 0, 0, 0);
     border-top-color: rgba(0, 0, 0, 0);
@@ -1054,7 +1120,8 @@
 
 .unity-progress-bar {
     height: 8px;
-    margin: 3px 0;
+    margin-top: 3px;
+    margin-bottom: 3px;
 }
 
 .unity-progress-bar__container {
@@ -1079,7 +1146,10 @@
 .unity-progress-bar__progress {
     border-radius: 2px;
     background-color: var(--background-depth-color);
-    margin: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .unity-progress-bar__title {
@@ -1097,8 +1167,14 @@
 }
 
 .unity-base-popup-field__label {
-    margin: 0;
-    padding: 0 0 3px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 3px;
     max-width: none;
     min-width: auto;
     width: 100%;
@@ -1165,7 +1241,10 @@
 }
 
 .unity-base-popup-field__text {
-    margin: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .unity-enum-field {
@@ -1177,8 +1256,14 @@
 }
 
 .unity-enum-field__label {
-    margin: 0;
-    padding: 0 0 3px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 3px;
     max-width: none;
     min-width: auto;
     width: 100%;
@@ -1245,7 +1330,10 @@
 }
 
 .unity-enum-field__text {
-    margin: 5px;
+    margin-left: 5px;
+    margin-right: 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
 .unity-base-dropdown__container-outer {
@@ -1262,7 +1350,10 @@
     border-bottom-width: 0;
     border-left-width: 0;
     background-color: var(--field-color);
-    padding: 3px 4px;
+    padding-left: 4px;
+    padding-right: 4px;
+    padding-top: 3px;
+    padding-bottom: 3px;
 }
 
 .unity-base-dropdown__item {
@@ -1281,7 +1372,10 @@
 }
 
 .unity-base-dropdown__checkmark {
-    margin: 0 5px 0 3px;
+    margin-left: 3px;
+    margin-right: 5px;
+    margin-top: 0;
+    margin-bottom: 0;
     width: 16px;
     height: 16px;
 }
@@ -1310,7 +1404,10 @@
 .unity-radio-button__checkmark-background {
     width: 12px;
     height: 12px;
-    padding: 0;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 0;
+    padding-bottom: 0;
     justify-content: center;
     margin-right: 2px;
     align-content: flex-start;
@@ -1385,17 +1482,19 @@
 
 .unity-composite-field__field {
     flex-grow: 1;
-    margin: 0 4px 0 0;
+    margin-right: 4px;
     min-width: 0;
     flex-basis: 0;
     flex-wrap: nowrap;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .unity-composite-field__field > .unity-base-field__label {
     min-width: 13px;
     flex-grow: 0;
     flex-basis: 13px;
-    margin-right: 0;
+    margin-right: 2px;
     -unity-text-align: upper-center;
 }
 
@@ -1407,6 +1506,7 @@
     min-width: 15px;
     flex-grow: 0;
     flex-basis: 15px;
+    margin-right: 0;
 }
 
 .unity-composite-field__field--last {
@@ -1444,7 +1544,6 @@
 }
 
 .unity-bounds-field__input {
-    padding-right: 0;
 }
 
 .unity-vector3-int-field__input > #unity-z-input.unity-composite-field__field {
@@ -1456,20 +1555,28 @@
 }
 
 .unity-bounds-int-field__input {
-    padding-right: 0;
 }
 
 .runios-progress-bar__viewport {
-    margin: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-top: 2px;
+    margin-bottom: 2px;
 }
 
 .runios-progress-bar__progress {
-    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
     min-width: 4px;
 }
 
 .runios-type-field__button {
-    margin: 0 0 0 5px;
+    margin-left: 5px;
     height: 20px;
     border-radius: 10px;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
