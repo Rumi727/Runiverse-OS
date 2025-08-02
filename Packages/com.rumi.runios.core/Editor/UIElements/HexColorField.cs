@@ -62,7 +62,7 @@ namespace RuniOS.Editor.UIElements
             visualInput = this.Q<ColorField>(className: BaseField<HexColor>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
 
-            visualInput.RegisterCallback<ChangeEvent<Color>>(ChangeEventCallback);
+            visualInput.RegisterValueChangedCallback(ChangeEventCallback);
         }
         
         void ChangeEventCallback(ChangeEvent<Color> x) => value = new HexColor(x.newValue);
