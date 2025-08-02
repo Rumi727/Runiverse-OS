@@ -1,6 +1,6 @@
 {
-    "name": "RuniEngine.Editor.UI",
-    "rootNamespace": "RuniEngine.Editor.UI",
+    "name": "RuniOS.Editor.UI",
+    "rootNamespace": "RuniOS.Editor.UI",
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:539740484accacd4292d8460e00aac39",
