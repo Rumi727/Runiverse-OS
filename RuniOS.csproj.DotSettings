@@ -4,5 +4,6 @@
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Eruniengine_002Ecore_005Cruntime_005Cutility/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Eruniengine_002Ecore_005Cruntime_005Cutility_005Cattribute/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Eruniengine_002Ecore_005Cruntime_005Cutility_005Cdotnet/@EntryIndexedValue">True</s:Boolean>
+	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Erunios_002Ecore_005Cdotnet/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Erunios_002Ecore_005Cruntime_005Cstructs/@EntryIndexedValue">True</s:Boolean>
 	<s:Boolean x:Key="/Default/CodeInspection/NamespaceProvider/NamespaceFoldersToSkip/=packages_005Ccom_002Erumi_002Erunios_002Ecore_005Cruntime_005Cutility/@EntryIndexedValue">True</s:Boolean></wpf:ResourceDictionary>
