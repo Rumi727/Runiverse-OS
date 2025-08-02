@@ -266,6 +266,7 @@ namespace RuniOS.Editor
                     value.nameSpace = nameSpace;
                 else
                     Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(nameSpace));
+                
                 position.x += position.width + 4;
             }
 
@@ -285,16 +286,7 @@ namespace RuniOS.Editor
                 if (Identifier.IsPathValid(path))
                     value.path = path;
                 else
-                {
-                    try
-                    {
-                        Identifier.GetInvalidPathMessage(path);
-                    }
-                    catch (Exception e)
-                    {
-                        Debug.LogException(e);
-                    }
-                }
+                    Debug.LogWarning(Identifier.GetInvalidPathMessage(path));
             }
 
             EndIndentLevel();
