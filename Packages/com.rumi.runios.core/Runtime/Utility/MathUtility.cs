@@ -1142,310 +1142,274 @@ namespace RuniOS
         public static bool IsPowerOfTwo(this int value) => Mathf.IsPowerOfTwo(value);
 
         #region Lerp
-        public static sbyte Lerp(this sbyte current, sbyte target, sbyte t)
-        {
-            t = t.Clamp01();
-            return (sbyte)(((1 - t) * current) + (target * t));
-        }
+        public static sbyte Lerp(this sbyte current, sbyte target, sbyte t) => t > 0 ? target : current;
 
         public static sbyte Lerp(this sbyte current, sbyte target, float t)
         {
             t = t.Clamp01();
-            return (sbyte)(((1 - t) * current) + (target * t));
+            return (sbyte)(current + ((target - current) * t));
         }
 
         public static sbyte Lerp(this sbyte current, sbyte target, double t)
         {
             t = t.Clamp01();
-            return (sbyte)(((1 - t) * current) + (target * t));
+            return (sbyte)(current + ((target - current) * t));
         }
 
         public static sbyte Lerp(this sbyte current, sbyte target, decimal t)
         {
             t = t.Clamp01();
-            return (sbyte)(((1 - t) * current) + (target * t));
+            return (sbyte)(current + ((target - current) * t));
         }
 
         public static sbyte Lerp(this sbyte current, sbyte target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (sbyte)(((1 - t) * current) + (target * t));
+            return (sbyte)(current + ((target - current) * t));
         }
 
-        public static byte Lerp(this byte current, byte target, byte t)
-        {
-            t = t.Clamp01();
-            return (byte)(((1 - t) * current) + (target * t));
-        }
+        public static byte Lerp(this byte current, byte target, byte t) => t > 0 ? target : current;
 
         public static byte Lerp(this byte current, byte target, float t)
         {
             t = t.Clamp01();
-            return (byte)(((1 - t) * current) + (target * t));
+            return (byte)(current + ((target - current) * t));
         }
 
         public static byte Lerp(this byte current, byte target, double t)
         {
             t = t.Clamp01();
-            return (byte)(((1 - t) * current) + (target * t));
+            return (byte)(current + ((target - current) * t));
         }
 
         public static byte Lerp(this byte current, byte target, decimal t)
         {
             t = t.Clamp01();
-            return (byte)(((1 - t) * current) + (target * t));
+            return (byte)(current + ((target - current) * t));
         }
 
         public static byte Lerp(this byte current, byte target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (byte)(decimal)(((1 - t) * current) + (target * t));
+            return (byte)(decimal)(current + ((target - current) * t));
         }
 
-        public static short Lerp(this short current, short target, short t)
-        {
-            t = t.Clamp01();
-            return (short)(((1 - t) * current) + (target * t));
-        }
+        public static short Lerp(this short current, short target, short t) => t > 0 ? target : current;
 
         public static short Lerp(this short current, short target, float t)
         {
             t = t.Clamp01();
-            return (short)(((1 - t) * current) + (target * t));
+            return (short)(current + ((target - current) * t));
         }
 
         public static short Lerp(this short current, short target, double t)
         {
             t = t.Clamp01();
-            return (short)(((1 - t) * current) + (target * t));
+            return (short)(current + ((target - current) * t));
         }
 
         public static short Lerp(this short current, short target, decimal t)
         {
             t = t.Clamp01();
-            return (short)(((1 - t) * current) + (target * t));
+            return (short)(current + ((target - current) * t));
         }
 
         public static short Lerp(this short current, short target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (short)(((1 - t) * current) + (target * t));
+            return (short)(current + ((target - current) * t));
         }
 
-        public static ushort Lerp(this ushort current, ushort target, ushort t)
-        {
-            t = t.Clamp01();
-            return (ushort)(((1 - t) * current) + (target * t));
-        }
+        public static ushort Lerp(this ushort current, ushort target, ushort t) => t > 0 ? target : current;
 
         public static ushort Lerp(this ushort current, ushort target, float t)
         {
             t = t.Clamp01();
-            return (ushort)(((1 - t) * current) + (target * t));
+            return (ushort)(current + ((target - current) * t));
         }
 
         public static ushort Lerp(this ushort current, ushort target, double t)
         {
             t = t.Clamp01();
-            return (ushort)(((1 - t) * current) + (target * t));
+            return (ushort)(current + ((target - current) * t));
         }
 
         public static ushort Lerp(this ushort current, ushort target, decimal t)
         {
             t = t.Clamp01();
-            return (ushort)(((1 - t) * current) + (target * t));
+            return (ushort)(current + ((target - current) * t));
         }
 
         public static ushort Lerp(this ushort current, ushort target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (ushort)(decimal)(((1 - t) * current) + (target * t));
+            return (ushort)(decimal)(current + ((target - current) * t));
         }
 
-        public static int Lerp(this int current, int target, int t)
-        {
-            t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
-        }
+        public static int Lerp(this int current, int target, int t) => t > 0 ? target : current;
 
         public static int Lerp(this int current, int target, float t)
         {
             t = t.Clamp01();
-            return (int)(((1 - t) * current) + (target * t));
+            return (int)(current + ((target - current) * t));
         }
 
         public static int Lerp(this int current, int target, double t)
         {
             t = t.Clamp01();
-            return (int)(((1 - t) * current) + (target * t));
+            return (int)(current + ((target - current) * t));
         }
 
         public static int Lerp(this int current, int target, decimal t)
         {
             t = t.Clamp01();
-            return (int)(((1 - t) * current) + (target * t));
+            return (int)(current + ((target - current) * t));
         }
 
         public static int Lerp(this int current, int target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (int)(((1 - t) * current) + (target * t));
+            return (int)(current + ((target - current) * t));
         }
 
-        public static uint Lerp(this uint current, uint target, uint t)
-        {
-            t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
-        }
+        public static uint Lerp(this uint current, uint target, uint t) => t > 0 ? target : current;
 
         public static uint Lerp(this uint current, uint target, float t)
         {
             t = t.Clamp01();
-            return (uint)(((1 - t) * current) + (target * t));
+            return (uint)(current + ((target - current) * t));
         }
 
         public static uint Lerp(this uint current, uint target, double t)
         {
             t = t.Clamp01();
-            return (uint)(((1 - t) * current) + (target * t));
+            return (uint)(current + ((target - current) * t));
         }
 
         public static uint Lerp(this uint current, uint target, decimal t)
         {
             t = t.Clamp01();
-            return (uint)(((1 - t) * current) + (target * t));
+            return (uint)(current + ((target - current) * t));
         }
 
         public static uint Lerp(this uint current, uint target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (uint)(((1 - t) * current) + (target * t));
+            return (uint)(current + ((target - current) * t));
         }
 
-        public static long Lerp(this long current, long target, long t)
-        {
-            t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
-        }
+        public static long Lerp(this long current, long target, long t) => t > 0 ? target : current;
 
         public static long Lerp(this long current, long target, float t)
         {
             t = t.Clamp01();
-            return (long)(((1 - t) * current) + (target * t));
+            return (long)(current + ((target - current) * t));
         }
 
         public static long Lerp(this long current, long target, double t)
         {
             t = t.Clamp01();
-            return (long)(((1 - t) * current) + (target * t));
+            return (long)(current + ((target - current) * t));
         }
 
         public static long Lerp(this long current, long target, decimal t)
         {
             t = t.Clamp01();
-            return (long)(((1 - t) * current) + (target * t));
+            return (long)(current + ((target - current) * t));
         }
 
         public static long Lerp(this long current, long target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (long)(decimal)(((1 - t) * current) + (target * t));
+            return (long)(decimal)(current + ((target - current) * t));
         }
 
-        public static ulong Lerp(this ulong current, ulong target, ulong t)
-        {
-            t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
-        }
+        public static ulong Lerp(this ulong current, ulong target, ulong t) => t > 0 ? target : current;
 
         public static ulong Lerp(this ulong current, ulong target, float t)
         {
             t = t.Clamp01();
-            return (ulong)(((1 - t) * current) + (target * t));
+            return (ulong)(current + ((target - current) * t));
         }
 
         public static ulong Lerp(this ulong current, ulong target, double t)
         {
             t = t.Clamp01();
-            return (ulong)(((1 - t) * current) + (target * t));
+            return (ulong)(current + ((target - current) * t));
         }
 
         public static ulong Lerp(this ulong current, ulong target, decimal t)
         {
             t = t.Clamp01();
-            return (ulong)(((1 - t) * current) + (target * t));
+            return (ulong)(current + ((target - current) * t));
         }
 
         public static ulong Lerp(this ulong current, ulong target, BigDecimal t)
         {
             t = t.Clamp01();
-            return (ulong)(((1 - t) * current) + (target * t));
+            return (ulong)(current + ((target - current) * t));
         }
 
         public static float Lerp(this float current, float target, float t)
         {
             t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
+            return current + ((target - current) * t);
         }
 
         public static double Lerp(this double current, double target, double t)
         {
             t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
+            return current + ((target - current) * t);
         }
 
         public static decimal Lerp(this decimal current, decimal target, decimal t)
         {
             t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
+            return current + ((target - current) * t);
         }
 
-        public static BigInteger Lerp(this BigInteger current, BigInteger target, BigInteger t)
-        {
-            t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
-        }
+        public static BigInteger Lerp(this BigInteger current, BigInteger target, BigInteger t) => t > 0 ? target : current;
 
         public static BigDecimal Lerp(this BigDecimal current, BigDecimal target, BigDecimal t)
         {
             t = t.Clamp01();
-            return ((1 - t) * current) + (target * t);
+            return current + ((target - current) * t);
         }
 
         public static nint Lerp(this nint current, nint target, float t)
         {
             t = t.Clamp01();
-            return (nint)(((1 - t) * current) + (target * t));
+            return (nint)(current + ((target - current) * t));
         }
 
         public static nint Lerp(this nint current, nint target, double t)
         {
             t = t.Clamp01();
-            return (nint)(((1 - t) * current) + (target * t));
+            return (nint)(current + ((target - current) * t));
         }
 
         public static nint Lerp(this nint current, nint target, decimal t)
         {
             t = t.Clamp01();
-            return (nint)(((1 - t) * current) + (target * t));
+            return (nint)(current + ((target - current) * t));
         }
 
         public static nuint Lerp(this nuint current, nuint target, float t)
         {
             t = t.Clamp01();
-            return (nuint)(((1 - t) * current) + (target * t));
+            return (nuint)(current + ((target - current) * t));
         }
 
         public static nuint Lerp(this nuint current, nuint target, double t)
         {
             t = t.Clamp01();
-            return (nuint)(((1 - t) * current) + (target * t));
+            return (nuint)(current + ((target - current) * t));
         }
 
         public static nuint Lerp(this nuint current, nuint target, decimal t)
         {
             t = t.Clamp01();
-            return (nuint)(((1 - t) * current) + (target * t));
+            return (nuint)(current + ((target - current) * t));
         }
 
         public static Vector2 Lerp(this Vector2 current, Vector2 target, float t)
@@ -1535,68 +1499,68 @@ namespace RuniOS
         #endregion
 
         #region Lerp Unclamped
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, sbyte t) => (sbyte)(((1 - t) * current) + (target * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, float t) => (sbyte)(((1 - t) * current) + (target * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, double t) => (sbyte)(((1 - t) * current) + (target * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, decimal t) => (sbyte)(((1 - t) * current) + (target * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, BigDecimal t) => (sbyte)(((1 - t) * current) + (target * t));
+        public static sbyte LerpUnclamped(this sbyte current, sbyte target, sbyte t) => (sbyte)(current + ((target - current) * t));
+        public static sbyte LerpUnclamped(this sbyte current, sbyte target, float t) => (sbyte)(current + ((target - current) * t));
+        public static sbyte LerpUnclamped(this sbyte current, sbyte target, double t) => (sbyte)(current + ((target - current) * t));
+        public static sbyte LerpUnclamped(this sbyte current, sbyte target, decimal t) => (sbyte)(current + ((target - current) * t));
+        public static sbyte LerpUnclamped(this sbyte current, sbyte target, BigDecimal t) => (sbyte)(current + ((target - current) * t));
 
-        public static byte LerpUnclamped(this byte current, byte target, byte t) => (byte)(((1 - t) * current) + (target * t));
-        public static byte LerpUnclamped(this byte current, byte target, float t) => (byte)(((1 - t) * current) + (target * t));
-        public static byte LerpUnclamped(this byte current, byte target, double t) => (byte)(((1 - t) * current) + (target * t));
-        public static byte LerpUnclamped(this byte current, byte target, decimal t) => (byte)(((1 - t) * current) + (target * t));
-        public static byte LerpUnclamped(this byte current, byte target, BigDecimal t) => (byte)(decimal)(((1 - t) * current) + (target * t));
+        public static byte LerpUnclamped(this byte current, byte target, byte t) => (byte)(current + ((target - current) * t));
+        public static byte LerpUnclamped(this byte current, byte target, float t) => (byte)(current + ((target - current) * t));
+        public static byte LerpUnclamped(this byte current, byte target, double t) => (byte)(current + ((target - current) * t));
+        public static byte LerpUnclamped(this byte current, byte target, decimal t) => (byte)(current + ((target - current) * t));
+        public static byte LerpUnclamped(this byte current, byte target, BigDecimal t) => (byte)(decimal)(current + ((target - current) * t));
 
-        public static short LerpUnclamped(this short current, short target, short t) => (short)(((1 - t) * current) + (target * t));
-        public static short LerpUnclamped(this short current, short target, float t) => (short)(((1 - t) * current) + (target * t));
-        public static short LerpUnclamped(this short current, short target, double t) => (short)(((1 - t) * current) + (target * t));
-        public static short LerpUnclamped(this short current, short target, decimal t) => (short)(((1 - t) * current) + (target * t));
-        public static short LerpUnclamped(this short current, short target, BigDecimal t) => (short)(((1 - t) * current) + (target * t));
+        public static short LerpUnclamped(this short current, short target, short t) => (short)(current + ((target - current) * t));
+        public static short LerpUnclamped(this short current, short target, float t) => (short)(current + ((target - current) * t));
+        public static short LerpUnclamped(this short current, short target, double t) => (short)(current + ((target - current) * t));
+        public static short LerpUnclamped(this short current, short target, decimal t) => (short)(current + ((target - current) * t));
+        public static short LerpUnclamped(this short current, short target, BigDecimal t) => (short)(current + ((target - current) * t));
 
-        public static ushort LerpUnclamped(this ushort current, ushort target, ushort t) => (ushort)(((1 - t) * current) + (target * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, float t) => (ushort)(((1 - t) * current) + (target * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, double t) => (ushort)(((1 - t) * current) + (target * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, decimal t) => (ushort)(((1 - t) * current) + (target * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, BigDecimal t) => (ushort)(decimal)(((1 - t) * current) + (target * t));
+        public static ushort LerpUnclamped(this ushort current, ushort target, ushort t) => (ushort)(current + ((target - current) * t));
+        public static ushort LerpUnclamped(this ushort current, ushort target, float t) => (ushort)(current + ((target - current) * t));
+        public static ushort LerpUnclamped(this ushort current, ushort target, double t) => (ushort)(current + ((target - current) * t));
+        public static ushort LerpUnclamped(this ushort current, ushort target, decimal t) => (ushort)(current + ((target - current) * t));
+        public static ushort LerpUnclamped(this ushort current, ushort target, BigDecimal t) => (ushort)(decimal)(current + ((target - current) * t));
 
-        public static int LerpUnclamped(this int current, int target, int t) => ((1 - t) * current) + (target * t);
-        public static int LerpUnclamped(this int current, int target, float t) => (int)(((1 - t) * current) + (target * t));
-        public static int LerpUnclamped(this int current, int target, double t) => (int)(((1 - t) * current) + (target * t));
-        public static int LerpUnclamped(this int current, int target, decimal t) => (int)(((1 - t) * current) + (target * t));
-        public static int LerpUnclamped(this int current, int target, BigDecimal t) => (int)(((1 - t) * current) + (target * t));
+        public static int LerpUnclamped(this int current, int target, int t) => current + ((target - current) * t);
+        public static int LerpUnclamped(this int current, int target, float t) => (int)(current + ((target - current) * t));
+        public static int LerpUnclamped(this int current, int target, double t) => (int)(current + ((target - current) * t));
+        public static int LerpUnclamped(this int current, int target, decimal t) => (int)(current + ((target - current) * t));
+        public static int LerpUnclamped(this int current, int target, BigDecimal t) => (int)(current + ((target - current) * t));
 
-        public static uint LerpUnclamped(this uint current, uint target, uint t) => ((1 - t) * current) + (target * t);
-        public static uint LerpUnclamped(this uint current, uint target, float t) => (uint)(((1 - t) * current) + (target * t));
-        public static uint LerpUnclamped(this uint current, uint target, double t) => (uint)(((1 - t) * current) + (target * t));
-        public static uint LerpUnclamped(this uint current, uint target, decimal t) => (uint)(((1 - t) * current) + (target * t));
-        public static uint LerpUnclamped(this uint current, uint target, BigDecimal t) => (uint)(((1 - t) * current) + (target * t));
+        public static uint LerpUnclamped(this uint current, uint target, uint t) => current + ((target - current) * t);
+        public static uint LerpUnclamped(this uint current, uint target, float t) => (uint)(current + ((target - current) * t));
+        public static uint LerpUnclamped(this uint current, uint target, double t) => (uint)(current + ((target - current) * t));
+        public static uint LerpUnclamped(this uint current, uint target, decimal t) => (uint)(current + ((target - current) * t));
+        public static uint LerpUnclamped(this uint current, uint target, BigDecimal t) => (uint)(current + ((target - current) * t));
 
-        public static long LerpUnclamped(this long current, long target, long t) => ((1 - t) * current) + (target * t);
-        public static long LerpUnclamped(this long current, long target, float t) => (long)(((1 - t) * current) + (target * t));
-        public static long LerpUnclamped(this long current, long target, double t) => (long)(((1 - t) * current) + (target * t));
-        public static long LerpUnclamped(this long current, long target, decimal t) => (long)(((1 - t) * current) + (target * t));
-        public static long LerpUnclamped(this long current, long target, BigDecimal t) => (long)(decimal)(((1 - t) * current) + (target * t));
+        public static long LerpUnclamped(this long current, long target, long t) => current + ((target - current) * t);
+        public static long LerpUnclamped(this long current, long target, float t) => (long)(current + ((target - current) * t));
+        public static long LerpUnclamped(this long current, long target, double t) => (long)(current + ((target - current) * t));
+        public static long LerpUnclamped(this long current, long target, decimal t) => (long)(current + ((target - current) * t));
+        public static long LerpUnclamped(this long current, long target, BigDecimal t) => (long)(decimal)(current + ((target - current) * t));
 
-        public static ulong LerpUnclamped(this ulong current, ulong target, ulong t) => ((1 - t) * current) + (target * t);
-        public static ulong LerpUnclamped(this ulong current, ulong target, float t) => (ulong)(((1 - t) * current) + (target * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, double t) => (ulong)(((1 - t) * current) + (target * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, decimal t) => (ulong)(((1 - t) * current) + (target * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, BigDecimal t) => (ulong)(((1 - t) * current) + (target * t));
+        public static ulong LerpUnclamped(this ulong current, ulong target, ulong t) => current + ((target - current) * t);
+        public static ulong LerpUnclamped(this ulong current, ulong target, float t) => (ulong)(current + ((target - current) * t));
+        public static ulong LerpUnclamped(this ulong current, ulong target, double t) => (ulong)(current + ((target - current) * t));
+        public static ulong LerpUnclamped(this ulong current, ulong target, decimal t) => (ulong)(current + ((target - current) * t));
+        public static ulong LerpUnclamped(this ulong current, ulong target, BigDecimal t) => (ulong)(current + ((target - current) * t));
 
-        public static float LerpUnclamped(this float current, float target, float t) => ((1 - t) * current) + (target * t);
-        public static double LerpUnclamped(this double current, double target, double t) => ((1 - t) * current) + (target * t);
-        public static decimal LerpUnclamped(this decimal current, decimal target, decimal t) => ((1 - t) * current) + (target * t);
+        public static float LerpUnclamped(this float current, float target, float t) => current + ((target - current) * t);
+        public static double LerpUnclamped(this double current, double target, double t) => current + ((target - current) * t);
+        public static decimal LerpUnclamped(this decimal current, decimal target, decimal t) => current + ((target - current) * t);
 
-        public static BigInteger LerpUnclamped(this BigInteger current, BigInteger target, BigInteger t) => ((1 - t) * current) + (target * t);
-        public static BigDecimal LerpUnclamped(this BigDecimal current, BigDecimal target, BigDecimal t) => ((1 - t) * current) + (target * t);
+        public static BigInteger LerpUnclamped(this BigInteger current, BigInteger target, BigInteger t) => current + ((target - current) * t);
+        public static BigDecimal LerpUnclamped(this BigDecimal current, BigDecimal target, BigDecimal t) => current + ((target - current) * t);
 
-        public static nint LerpUnclamped(this nint current, nint target, float t) => (nint)(((1 - t) * current) + (target * t));
-        public static nint LerpUnclamped(this nint current, nint target, double t) => (nint)(((1 - t) * current) + (target * t));
-        public static nint LerpUnclamped(this nint current, nint target, decimal t) => (nint)(((1 - t) * current) + (target * t));
+        public static nint LerpUnclamped(this nint current, nint target, float t) => (nint)(current + ((target - current) * t));
+        public static nint LerpUnclamped(this nint current, nint target, double t) => (nint)(current + ((target - current) * t));
+        public static nint LerpUnclamped(this nint current, nint target, decimal t) => (nint)(current + ((target - current) * t));
 
-        public static nuint LerpUnclamped(this nuint current, nuint target, float t) => (nuint)(((1 - t) * current) + (target * t));
-        public static nuint LerpUnclamped(this nuint current, nuint target, double t) => (nuint)(((1 - t) * current) + (target * t));
-        public static nuint LerpUnclamped(this nuint current, nuint target, decimal t) => (nuint)(((1 - t) * current) + (target * t));
+        public static nuint LerpUnclamped(this nuint current, nuint target, float t) => (nuint)(current + ((target - current) * t));
+        public static nuint LerpUnclamped(this nuint current, nuint target, double t) => (nuint)(current + ((target - current) * t));
+        public static nuint LerpUnclamped(this nuint current, nuint target, decimal t) => (nuint)(current + ((target - current) * t));
 
         public static Vector2 LerpUnclamped(this Vector2 current, Vector2 target, float t) => new Vector2(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t));
         public static Vector3 LerpUnclamped(this Vector3 current, Vector3 target, float t) => new Vector3(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t), current.z + ((target.z - current.z) * t));
@@ -4839,6 +4803,11 @@ namespace RuniOS
         
         #region To Double
         public static double ToDouble(this decimal value) => (double)value;
+        #endregion
+        
+        #region To Decimal
+        public static decimal ToDecimal(this float value) => (decimal)value.Clamp(decimal.MinValue.ToFloat(), decimal.MaxValue.ToFloat());
+        public static decimal ToDecimal(this double value) => (decimal)value.Clamp(decimal.MinValue.ToFloat(), decimal.MaxValue.ToFloat());
         #endregion
 
         #region To Int
