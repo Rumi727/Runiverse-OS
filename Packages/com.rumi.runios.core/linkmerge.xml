@@ -1,8 +1,10 @@
 <linker>
-    <assembly fullname="RuniEngine">
-        <type fullname="RuniEngine.Booting.AwakenAttribute" preserve="all"/>
+    <assembly fullname="RuniOS">
+        <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all"/>
+        <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all"/>
+        <type fullname="RuniOS.MathUtility" preserve="all"/>
     </assembly>
-    <assembly fullname="RuniEngine.Modding" preserve="all"/>
-    <assembly fullname="RuniEngine.Patches" preserve="all"/>
+    <assembly fullname="RuniOS.Modding" preserve="all"/>
+    <assembly fullname="RuniOS.Patches" preserve="all"/>
     <assembly fullname="0Harmony" preserve="all"/>
 </linker>

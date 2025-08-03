@@ -4834,12 +4834,18 @@ namespace RuniOS
 
         #region To Float
         public static float ToFloat(this double value) => (float)value.Clamp(float.MinValue, float.MaxValue);
+        public static float ToFloat(this decimal value) => (float)value;
+        #endregion
+        
+        #region To Double
+        public static double ToDouble(this decimal value) => (double)value;
         #endregion
 
         #region To Int
         public static int ToInt(this long value) => (int)value.Clamp(int.MinValue, int.MaxValue);
         public static int ToInt(this float value) => (int)value.Clamp(int.MinValue, int.MaxValue);
         public static int ToInt(this double value) => (int)value.Clamp(int.MinValue, int.MaxValue);
+        public static int ToInt(this decimal value) => (int)value.Clamp(int.MinValue, int.MaxValue);
         #endregion
 
         #region Truncate
