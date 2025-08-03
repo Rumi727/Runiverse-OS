@@ -75,13 +75,13 @@ namespace RuniOS
         
         public static PseudoStates GetPsuedoState(this VisualElement element)
         {
-            pseudoStatesProperty ??= element.GetType().GetProperty("pseudoStates", BindingFlags.NonPublic | BindingFlags.Instance);
+            pseudoStatesProperty ??= AccessUtility.Property(element.GetType(), "pseudoStates");
             return (PseudoStates)(int)pseudoStatesProperty!.GetValue(element);
         }
         
         public static void SetPsuedoState(this VisualElement element, PseudoStates state)
         {
-            pseudoStatesProperty ??= element.GetType().GetProperty("pseudoStates", BindingFlags.NonPublic | BindingFlags.Instance);
+            pseudoStatesProperty ??= AccessUtility.Property(element.GetType(), "pseudoStates");
             pseudoStatesProperty!.SetValue(element, Enum.ToObject(pseudoStatesProperty.PropertyType, (int)state));
         }
 
@@ -90,5 +90,7 @@ namespace RuniOS
         public static void RemovePsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() & ~state);
 
         public static bool HasPseudoFlag(this VisualElement element, PseudoStates flag) => (element.GetPsuedoState() & flag) == flag;
+        
+        public static void SetValueWithoutNotify<T>(this INotifyValueChanged<T> element, T newValue) => element.SetValueWithoutNotify(newValue);
     }
 }

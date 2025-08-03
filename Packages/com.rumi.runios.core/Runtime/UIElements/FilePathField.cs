@@ -1,49 +1,47 @@
 #nullable enable
+using RuniOS.APIMarshal.UnityEngine.UIElements;
 using RuniOS.IO;
-using System.Linq;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
 {
     [UxmlElement]
-    public partial class FilePathField : BaseField<FilePath>
+    public partial class FilePathField : TextInputBaseFieldMarshal<FilePath>
     {
         public new const string ussClassName = "runios-file-path-field";
         public new const string labelUssClassName = ussClassName + "__label";
         public new const string inputUssClassName = ussClassName + "__input";
 
-        public TextField visualInput { get; }
+        public TextInput textInput => (TextInput)textInputBase;
+        public TextElement textElement => textInput.textElement;
 
-        public FilePathField() : this(string.Empty) { }
-        public FilePathField(string label) : base(label, new TextField(label))
+        public FilePathField() : this(null) { }
+        public FilePathField(string? label) : base(label, -1, '*', new TextInput())
         {
             styleSheets.Add(UIToolkitUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);
             
-            visualInput = this.Q<TextField>(className: BaseField<HexColor>.inputUssClassName);
-            visualInput.AddToClassList(inputUssClassName);
-            
-            visualInput.RegisterValueChangedCallback(ChangeEventCallback);
-            visualInput.RegisterCallback<FocusOutEvent>(FocusOutEventCallback);
+            textInput.AddToClassList(inputUssClassName);
+
+            textInput.textElement.RegisterValueChangedCallback(ChangeEventCallback);
+            textInput.RegisterCallback<FocusOutEvent>(FocusOutEventCallback);
         }
         
         void ChangeEventCallback(ChangeEvent<string> evt)
         {
-            value = evt.newValue;
-
             string inputValue = rawValue.value;
             if (evt.newValue.Length > 0 && evt.newValue[^1] == FilePath.directorySeparatorChar)
                 inputValue += FilePath.directorySeparatorChar;
             
             int indexDifference = inputValue.Length - evt.newValue.Length;
-            visualInput.SetValueWithoutNotify(inputValue);
-            visualInput.cursorIndex += indexDifference;
-            visualInput.selectIndex += indexDifference;
+            textElement.SetValueWithoutNotify(inputValue);
+            cursorIndex += indexDifference;
+            selectIndex += indexDifference;
         }
 
-        void FocusOutEventCallback(FocusOutEvent evt) => visualInput.SetValueWithoutNotify(rawValue);
+        void FocusOutEventCallback(FocusOutEvent evt) => textElement.SetValueWithoutNotify(rawValue.value);
 
 
 
@@ -52,12 +50,15 @@ namespace RuniOS.UIElements
             base.SetValueWithoutNotify(newValue);
             
             string inputValue = newValue;
-            if (visualInput.text.Length > 0 && visualInput.text[^1] == FilePath.directorySeparatorChar)
+            if (textElement.text.Length > 0 && textElement.text[^1] == FilePath.directorySeparatorChar)
                 inputValue += FilePath.directorySeparatorChar;
             
-            visualInput.SetValueWithoutNotify(inputValue);
+            textElement.SetValueWithoutNotify(inputValue);
         }
 
-        protected override void UpdateMixedValueContent() => visualInput.showMixedValue = showMixedValue;
+        protected override string ValueToString(FilePath value) => value;
+        protected override FilePath StringToValue(string str) => str;
+
+        public class TextInput : TextInputBaseMarshal { }
     }
 }

@@ -13,6 +13,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "RuniOS.APIMarshal.UnityEngine.UIElementsModule.dll",
         "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": true,
