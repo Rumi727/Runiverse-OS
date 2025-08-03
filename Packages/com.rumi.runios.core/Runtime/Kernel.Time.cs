@@ -53,7 +53,7 @@ namespace RuniOS
             fps = 1f / unscaledDeltaTime;
 
             //Smooth Delta Time
-            //유니티 내부 구현이랑 100% 일치하진 않지만 98% 일치합니다
+            //테스트 결과 유니티 내부 구현이랑 100% 일치하진 않지만 오차를 무시할 수 있을 만큼 일치합니다
             {
                 unscaledSmoothDeltaTime = (0.2f * unscaledDeltaTime) + ((1 - 0.2f) * unscaledSmoothDeltaTime);
                 smoothDeltaTime = unscaledDeltaTime * gameSpeed;

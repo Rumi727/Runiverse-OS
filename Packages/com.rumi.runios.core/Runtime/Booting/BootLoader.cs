@@ -18,16 +18,15 @@ namespace RuniOS.Booting
         static async UniTaskVoid Boot()
         {
             Debug.Log("BootLoder");
+            
             //UniTask Setting
-            PlayerLoopSystem loopSystems = PlayerLoop.GetDefaultPlayerLoop();
-            PlayerLoopHelper.Initialize(ref loopSystems);
+            PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
+            PlayerLoopHelper.Initialize(ref loop);
+            PlayerLoop.SetPlayerLoop(loop);
 
             //Awaken Invoke
             ReflectionUtility.AttributeInvoke<AwakenAttribute>();
-
-            //Custom Loop Setting
-            CustomPlayerLoopSetter.EventRegister(ref loopSystems);
-
+            
             await UniTask.CompletedTask;
         }
     }

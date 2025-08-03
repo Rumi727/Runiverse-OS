@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Booting;
+using RuniOS.LowLevel;
 using System;
 using System.Diagnostics;
 using UnityEngine;
@@ -135,7 +136,7 @@ namespace RuniOS
         [Preserve]
         static void Awaken()
         {
-            CustomPlayerLoopSetter.initEvent += Update;
+            RuniPlayerLoop.onInit += Update;
             Application.quitting += Quitting;
 
 #if UNITY_EDITOR
@@ -170,6 +171,7 @@ namespace RuniOS
 #endif
         }
 
+        // ReSharper disable once UnusedParameter.Global
         public static void Quit(int exitCode)
         {
 #if UNITY_EDITOR
