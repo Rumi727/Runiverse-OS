@@ -1,7 +1,6 @@
 #nullable enable
 using RuniOS.Editor.UIElements;
 using RuniOS.IO;
-using RuniOS.Resource;
 using RuniOS.UIElements;
 using UnityEditor;
 using UnityEngine;

@@ -6,20 +6,22 @@
     margin-right: 0;
 }
 
-.runios-foldout__viewport-clipping {
-    transition-property: height;
-    transition-duration: 0.5s;
-    transition-timing-function: ease-out-cubic;
+.runios-animated-faded-group {
+    --runios-animated_faded_group-easing: EaseOutQuart;
+    --runios-animated_faded_group-duration: 0.5;
+}
+
+.runios-animated-faded-group__viewport-clipping {
     overflow: hidden;
     flex-grow: 1;
 }
 
-.runios-foldout__viewport {
+.runios-animated-faded-group__viewport {
     overflow: scroll;
     flex-shrink: 0;
 }
 
-.unity-foldout__content {
+.runios-animated-faded-group__content {
     flex-shrink: 0;
     overflow: visible;
 }

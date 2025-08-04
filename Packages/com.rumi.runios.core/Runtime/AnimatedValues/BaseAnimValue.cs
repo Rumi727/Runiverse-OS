@@ -26,6 +26,9 @@ namespace RuniOS.AnimatedValues
         public bool isAnimating => _isAnimating;
         [NonSerialized] bool _isAnimating;
 
+        public event Action? onAnimationBegin;
+        public event Action? onAnimationEnd;
+
         public T start { get => _start; set => _start = value; }
         [SerializeField] T _start;
         
@@ -38,17 +41,26 @@ namespace RuniOS.AnimatedValues
             {
                 if (EqualityComparer<T>.Default.Equals(target, value))
                     return;
-
+                
                 start = this.value;
-                _target = target;
+                _target = value;
 
                 _currentTime = 0;
                 BeginAnimating();
             }
         }
         [SerializeField] T _target;
-        
-        public double currentTime { get => _currentTime; set => _currentTime = value.Clamp(0); }
+
+        public double currentTime
+        {
+            get => _currentTime;
+            set
+            {
+                _currentTime = value.Clamp(0);
+                if (EqualityComparer<T>.Default.Equals(this.value, target) || currentTime >= duration)
+                    StopAnimating();
+            }
+        }
         [SerializeField] double _currentTime = 0;
 
         public double duration { get => _duration; set => _duration = value; }
@@ -59,7 +71,7 @@ namespace RuniOS.AnimatedValues
             get
             {
                 if (duration > 0)
-                    return isAnimating ? (currentTime / duration).Clamp01() : 1;
+                    return isAnimating ? EasingFunction.EasingCalculate(0, 1, (currentTime / duration).Clamp01(), easing) : 1;
                 else
                     return 1;
             }
@@ -79,41 +91,58 @@ namespace RuniOS.AnimatedValues
 
         void BeginAnimating()
         {
-            if (duration <= 0 || isAnimating)
+            if (isAnimating)
                 return;
             
             _isAnimating = true;
-
+            onAnimationBegin?.Invoke();
+            
+            if (duration > 0)
+            {
 #if UNITY_EDITOR
-            if (Kernel.isPlaying)
-                RuniPlayerLoop.onPostLateUpdate += Update;
-            else
-                UnityEditor.EditorApplication.update += Update;
+                if (Kernel.isPlaying)
+                    RuniPlayerLoop.onPostLateUpdate += Update;
+                else
+                    UnityEditor.EditorApplication.update += Update;
 #else
-            LowLevel.RuniPlayerLoop.onPreLateUpdate += Update;
+                RuniPlayerLoop.onPreLateUpdate += Update;
 #endif
-        }
-
-        void Update()
-        {
-            currentTime += Kernel.deltaTimeDouble;
-            if (currentTime >= duration)
+            }
+            else
                 StopAnimating();
         }
 
+        void Update() => currentTime += Kernel.deltaTimeDouble;
+
         public void StopAnimating()
         {
+            if (!isAnimating)
+                return;
+
+            if (duration > 0)
+            {
 #if UNITY_EDITOR
-            if (Kernel.isPlaying)
-                RuniPlayerLoop.onPostLateUpdate -= Update;
-            else
-                UnityEditor.EditorApplication.update -= Update;
+                if (Kernel.isPlaying)
+                    RuniPlayerLoop.onPostLateUpdate -= Update;
+                else
+                    UnityEditor.EditorApplication.update -= Update;
 #else
-            RuniPlayerLoop.onPreLateUpdate -= Update;
+                RuniPlayerLoop.onPreLateUpdate -= Update;
 #endif
-            
+            }
+
             _isAnimating = false;
             currentTime = duration.Clamp(0);
+            
+            onAnimationEnd?.Invoke();
+        }
+
+        public void SetValue(T value)
+        {
+            StopAnimating();
+            
+            _start = value;
+            _target = value;
         }
         
         public void OnBeforeSerialize() { }

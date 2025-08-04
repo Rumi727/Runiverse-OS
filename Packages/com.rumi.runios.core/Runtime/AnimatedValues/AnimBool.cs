@@ -4,7 +4,7 @@ using System;
 namespace RuniOS.AnimatedValues
 {
     [Serializable]
-    public class AnimBool : AnimFloat
+    public class AnimBool : BaseAnimValue<float>
     {
         public AnimBool(bool value) : base(value ? 1 : 0) { }
         
@@ -15,5 +15,9 @@ namespace RuniOS.AnimatedValues
             get => base.target > 0;
             set => base.target = value ? 1 : 0;
         }
+        
+        public override float value => MathUtility.Lerp(start.Clamp01(), base.target.Clamp01(), progress).ToFloat();
+
+        public void SetValue(bool value) => base.SetValue(value ? 1 : 0);
     }
 }

@@ -125,7 +125,7 @@ namespace RuniOS.UIElements
         public TypeField(Type? baseType) : this(string.Empty, baseType) { }
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
-            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
             
             labelElement.AddToClassList(labelUssClassName);
 

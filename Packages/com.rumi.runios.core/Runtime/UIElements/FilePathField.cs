@@ -18,7 +18,7 @@ namespace RuniOS.UIElements
         public FilePathField() : this(null) { }
         public FilePathField(string? label) : base(label, -1, '*', new TextInput())
         {
-            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

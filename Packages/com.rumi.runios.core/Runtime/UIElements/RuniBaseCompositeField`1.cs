@@ -74,7 +74,7 @@ namespace RuniOS.UIElements
         /// <param name="label">필드에 표시될 라벨입니다.</param>
         protected RuniBaseCompositeField(string? label) : base(label, new VisualElement())
         {
-            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
             delegatesFocus = false;
@@ -219,10 +219,7 @@ namespace RuniOS.UIElements
                             Delegate compiledDelegate = lambda.Compile();
 
                             changedCallback = changedCallback.MakeGenericMethod(fieldValueType);
-                            changedCallback.Invoke(null, new object[]
-                            {
-                                description.element, compiledDelegate
-                            });
+                            changedCallback.Invoke(null, new object[] { description.element, compiledDelegate });
 
                             void Write(object fieldValue)
                             {

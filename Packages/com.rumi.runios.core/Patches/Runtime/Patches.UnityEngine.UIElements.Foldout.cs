@@ -3,9 +3,7 @@
 using HarmonyLib;
 using RuniOS.UIElements;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
 
 using UniFoldout = UnityEngine.UIElements.Foldout;
@@ -21,8 +19,6 @@ namespace RuniOS.Patches
                 [HarmonyPatch(typeof(UniFoldout))]
                 public static class Foldout
                 {
-                    static readonly ConditionalWeakTable<UniFoldout, VisualElement> viewportClippingElements = new();
-
                     [HarmonyPatch]
                     public static class Constructor
                     {
@@ -30,34 +26,17 @@ namespace RuniOS.Patches
 
                         public static void Postfix(UniFoldout __instance)
                         {
-                            __instance.styleSheets.Add(UIToolkitUtility.rosControlStyle);
-
-                            VisualElement viewportClipping = new VisualElement
-                            {
-                                name = AnimFoldout.viewportClippingUssClassName
-                            };
-                            viewportClipping.AddToClassList(AnimFoldout.viewportClippingUssClassName);
-                            __instance.hierarchy.Add(viewportClipping);
-
-                            VisualElement viewport = new VisualElement
-                            {
-                                name = AnimFoldout.viewportUssClassName
-                            };
-                            viewport.AddToClassList(AnimFoldout.viewportUssClassName);
-                            viewportClipping.hierarchy.Add(viewport);
-
                             VisualElement content = __instance.contentContainer;
                             __instance.hierarchy.Remove(content);
-                            viewport.hierarchy.Add(content);
 
-                            viewportClippingElements.Add(__instance, viewportClipping);
+                            AnimatedFadedGroup animatedFadedGroup = new AnimatedFadedGroup(false, content);
+                            animatedFadedGroup.SetValueWithoutNotify(__instance.value);
                             
-                            content.RegisterCallback<GeometryChangedEvent>(x =>
+                            __instance.hierarchy.Add(animatedFadedGroup);
+                            __instance.RegisterValueChangedCallback(x =>
                             {
-                                if (__instance.value)
-                                    viewportClipping.style.height = new Length(x.newRect.height.Max(1));
-                                else
-                                    viewportClipping.style.height = new Length(0);
+                                if (x.target == __instance)
+                                    animatedFadedGroup.SetValueWithoutNotify(x.newValue);
                             });
                         }
                     }
@@ -89,57 +68,6 @@ namespace RuniOS.Patches
 
                         codeMatcher.RemoveInstructionsInRange(startIndex, endIndex);
                         return codeMatcher.InstructionEnumeration();
-                    }
-
-                    [HarmonyPostfix]
-                    [HarmonyPatch("SetValueWithoutNotify")]
-                    public static void SetValueWithoutNotify(UniFoldout __instance, bool newValue)
-                    {
-                        if (viewportClippingElements.TryGetValue(__instance, out VisualElement viewportClipping))
-                        {
-                            viewportClipping.UnregisterCallback<TransitionEndEvent, UniFoldout>(TransitionEndEvent);
-
-                            if (viewportClipping.resolvedStyle.transitionDuration.Max().value <= 0)
-                            {
-                                __instance.contentContainer.style.display = newValue ? DisplayStyle.Flex : DisplayStyle.None;
-                                viewportClipping.style.height = StyleKeyword.Null;
-                            }
-                            else
-                            {
-                                if (newValue)
-                                {
-                                    __instance.contentContainer.style.display = DisplayStyle.Flex;
-                                    viewportClipping.style.height = new Length(__instance.contentContainer.resolvedStyle.height.Max(1));
-                                }
-                                else
-                                {
-                                    //__instance.contentContainer.style.display = DisplayStyle.None;
-                                    viewportClipping.style.height = new Length(0);
-                                    viewportClipping.RegisterCallbackOnce<TransitionEndEvent, UniFoldout>(TransitionEndEvent, __instance);
-                                }
-                            }
-                        }
-
-                        return;
-
-                        static void TransitionEndEvent(TransitionEndEvent e, UniFoldout instance)
-                        {
-                            instance.contentContainer.style.display = DisplayStyle.None;
-#if UNITY_EDITOR
-                            // 레이아웃 갱신이 이미 애니메이션에 의해 이루어진 상태라 비활성화가 되어도 레이아웃이 갱신되지 않아 프리팹 바가 나타나는 버그를 수정합니다
-                            UnityEditor.UIElements.InspectorElement inspector = instance.GetFirstAncestorOfType<UnityEditor.UIElements.InspectorElement>();
-                            if (inspector != null)
-                            {
-                                instance.contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(_ =>
-                                {
-                                    GeometryChangedEvent evt = GeometryChangedEvent.GetPooled(inspector.layout, inspector.layout);
-                                    evt.target = inspector;
-                                    
-                                    inspector.SendEvent(evt);
-                                });
-                            }
-#endif
-                        }
                     }
                 }
             }
