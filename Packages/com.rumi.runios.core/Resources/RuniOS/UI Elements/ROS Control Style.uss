@@ -9,11 +9,19 @@
 .runios-animated-faded-group {
     --runios-animated_faded_group-easing: EaseOutQuart;
     --runios-animated_faded_group-duration: 0.5;
+    flex-shrink: 0;
 }
 
 .runios-animated-faded-group__viewport-clipping {
     overflow: hidden;
     flex-grow: 1;
+}
+
+.runios-animated-faded-group__horizontal .runios-animated-faded-group__viewport {
+    flex-direction: row;
+}
+
+.runios-animated-faded-group__vertical .runios-animated-faded-group__content {
 }
 
 .runios-animated-faded-group__viewport {
@@ -23,7 +31,14 @@
 
 .runios-animated-faded-group__content {
     flex-shrink: 0;
-    overflow: visible;
+    flex-grow: 1;
+}
+
+.runios-animated-faded-group__horizontal .runios-animated-faded-group__content {
+    flex-direction: row;
+}
+
+.runios-animated-faded-group__vertical .runios-animated-faded-group__content {
 }
 
 .runios-hex-color-field .unity-color-field {

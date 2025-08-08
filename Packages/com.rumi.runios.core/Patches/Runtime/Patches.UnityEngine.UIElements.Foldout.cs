@@ -32,7 +32,7 @@ namespace RuniOS.Patches
                             VisualElement content = __instance.contentContainer;
                             __instance.hierarchy.Remove(content);
 
-                            AnimatedFadedGroup animatedFadedGroup = new AnimatedFadedGroup(false, content);
+                            AnimatedFadedGroup animatedFadedGroup = new AnimatedFadedGroup(false, __instance, content);
                             animatedFadedGroup.SetValueWithoutNotify(__instance.value);
                             
                             __instance.hierarchy.Add(animatedFadedGroup);

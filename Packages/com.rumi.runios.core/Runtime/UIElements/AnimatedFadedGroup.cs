@@ -10,9 +10,11 @@ namespace RuniOS.UIElements
     public partial class AnimatedFadedGroup : BindableElement, INotifyValueChanged<bool>
     {
         public const string ussClassName = "runios-animated-faded-group";
-        public const string viewportClippingUssClassName = "runios-animated-faded-group__viewport-clipping";
-        public const string viewportUssClassName = "runios-animated-faded-group__viewport";
-        public const string contentUssClassName = "runios-animated-faded-group__content";
+        public const string horizontalUssClassName = ussClassName + "__horizontal";
+        public const string verticalUssClassName = ussClassName + "__vertical";
+        public const string viewportClippingUssClassName = ussClassName + "__viewport-clipping";
+        public const string viewportUssClassName = ussClassName + "__viewport";
+        public const string contentUssClassName = ussClassName + "__content";
         
         public static readonly BindingId valueProperty = nameof(value);
         public static readonly BindingId directionProperty = nameof(direction);
@@ -55,9 +57,12 @@ namespace RuniOS.UIElements
                 NotifyPropertyChanged(in directionProperty);
                 
                 Update();
+                
+                EnableInClassList(horizontalUssClassName, direction == Direction.horizontal);
+                EnableInClassList(verticalUssClassName, direction == Direction.vertical);
             }
         }
-        Direction _direction = Direction.vertical;
+        Direction _direction;
 
         public EasingFunction.Ease easing => easingStyle.keyword != StyleKeyword.Null ? easingStyle.value : _easing;
         EasingFunction.Ease _easing = EasingFunction.Ease.Linear;
@@ -91,6 +96,8 @@ namespace RuniOS.UIElements
         }
         StyleFloat _durationStyle = StyleKeyword.Null;
 
+        public VisualElement? contentParent { get; }
+        
         public VisualElement viewportClipping { get; }
         public VisualElement viewport { get; }
         public override VisualElement contentContainer { get; }
@@ -101,10 +108,15 @@ namespace RuniOS.UIElements
         readonly IVisualElementScheduledItem scheduledItem;
 
         public AnimatedFadedGroup() : this(false) { }
-        public AnimatedFadedGroup(bool value) : this(value, new VisualElement()) { }
-        public AnimatedFadedGroup(VisualElement contentContainer) : this(false, contentContainer) { }
-        public AnimatedFadedGroup(bool value, VisualElement contentContainer)
+        public AnimatedFadedGroup(bool value, Direction direction = Direction.vertical) : this(value, null, new VisualElement { name = contentUssClassName }, direction) { }
+        public AnimatedFadedGroup(VisualElement contentContainer, Direction direction = Direction.vertical) : this(false, null, contentContainer, direction) { }
+        public AnimatedFadedGroup(VisualElement contentParent, VisualElement contentContainer, Direction direction = Direction.vertical) : this(false, contentParent, contentContainer, direction) { }
+        public AnimatedFadedGroup(bool value, VisualElement contentContainer, Direction direction = Direction.vertical) : this(value, null, contentContainer, direction) { }
+        public AnimatedFadedGroup(bool value, VisualElement? contentParent, VisualElement contentContainer, Direction direction = Direction.vertical)
         {
+            _value = value;
+            this.contentParent = contentParent;
+            
             AddToClassList(ussClassName);
             
             styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
@@ -118,14 +130,30 @@ namespace RuniOS.UIElements
             viewportClipping.hierarchy.Add(viewport);
             
             this.contentContainer = contentContainer;
-            contentContainer.AddToClassList(contentUssClassName);
-            viewport.hierarchy.Add(contentContainer);
+
+            if (contentParent == null)
+            {
+                contentContainer.AddToClassList(contentUssClassName);
+                viewport.hierarchy.Add(contentContainer);
+            }
+
+            _direction = direction;
+            
+            EnableInClassList(horizontalUssClassName, direction == Direction.horizontal);
+            EnableInClassList(verticalUssClassName, direction == Direction.vertical);
             
             RegisterCallback<AttachToPanelEvent>(_ => Update());
             RegisterCallback<CustomStyleResolvedEvent>(CustomStyleResolvedEventCallback);
-            contentContainer.RegisterCallback<GeometryChangedEvent>(_ => Update());
+            contentContainer.RegisterCallback<GeometryChangedEvent>(x =>
+            {
+                if (animBool?.isAnimating ?? false)
+                {
+                    targetWidth ??= this.RoundToPanelPixelSize(x.newRect.width);
+                    targetHeight ??= this.RoundToPanelPixelSize(x.newRect.height);
+                }
 
-            _value = value;
+                Update();
+            });
             
             animBool = new AnimBool(value);
             animBool.onAnimationBegin += OnAnimationBegin;
@@ -134,38 +162,63 @@ namespace RuniOS.UIElements
             animBool.onAnimationEnd += OnAnimationEnd;
         }
 
-        void OnAnimationBegin() => scheduledItem.Resume();
-
-        void Update()
+        void OnAnimationBegin()
         {
-            if (panel == null)
-                return;
-
-            float width = this.RoundToPanelPixelSize(contentContainer.resolvedStyle.width * animBool.value);
-            float height = this.RoundToPanelPixelSize(contentContainer.resolvedStyle.height * animBool.value);
-            
             if (value)
                 contentContainer.style.display = DisplayStyle.Flex;
             else
             {
-                if ((direction == Direction.horizontal && width <= 1) || (direction == Direction.vertical && height <= 1))
-                    contentContainer.style.display = DisplayStyle.None;
+                targetWidth ??= this.RoundToPanelPixelSize(contentContainer.resolvedStyle.width);
+                targetHeight ??= this.RoundToPanelPixelSize(contentContainer.resolvedStyle.height);
+            }
+            
+            if (contentParent != null)
+            {
+                contentContainer.AddToClassList(contentUssClassName);
+                viewport.hierarchy.Add(contentContainer);
             }
 
-            if (direction == Direction.horizontal)
-            {
+            scheduledItem.Resume();
+        }
+
+        float? targetWidth;
+        float? targetHeight;
+
+        void Update()
+        {
+            if (panel == null || float.IsNaN(contentContainer.resolvedStyle.width) || float.IsNaN(contentContainer.resolvedStyle.height))
+                return;
+            
+            float width = targetWidth * animBool.value ?? 0;
+            float height = targetHeight * animBool.value ?? 0;
+            
+            if (value)
+                contentContainer.style.display = DisplayStyle.Flex;
+            else if ((direction == Direction.horizontal && width <= 1) || (direction == Direction.vertical && height <= 1))
+                contentContainer.style.display = DisplayStyle.None;
+
+            if (animBool.isAnimating && direction == Direction.horizontal)
                 viewportClipping.style.width = width;
-                viewportClipping.style.height = StyleKeyword.Null;
-            }
             else
-            {
                 viewportClipping.style.width = StyleKeyword.Null;
+            
+            if (animBool.isAnimating && direction == Direction.vertical)
                 viewportClipping.style.height = height;
-            }
+            else
+                viewportClipping.style.height = StyleKeyword.Null;
         }
 
         void OnAnimationEnd()
         {
+            targetWidth = null;
+            targetHeight = null;
+            
+            if (contentParent != null)
+            {
+                contentParent.hierarchy.Add(contentContainer);
+                contentContainer.RemoveFromClassList(contentUssClassName);
+            }
+
             scheduledItem.Pause();
             Update();
         }
