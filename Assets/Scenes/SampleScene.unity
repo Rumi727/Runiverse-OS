@@ -811,10 +811,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Test
       objectReference: {fileID: 0}
-    - target: {fileID: 420919353065644578, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2859357255860281847, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: m_Enabled
       value: 1
@@ -980,6 +976,10 @@ PrefabInstance:
       value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
+      propertyPath: list.Array.data[1].slider
+      value: 10
+      objectReference: {fileID: 0}
+    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nIdentifier.value._nameSpace
       value: ros
       objectReference: {fileID: 0}
@@ -1070,27 +1070,8 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 420919353065644578, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 884968294}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
---- !u!1 &884968293 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 420919353065644578, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-  m_PrefabInstance: {fileID: 884968292}
-  m_PrefabAsset: {fileID: 0}
---- !u!192 &884968294
-OcclusionArea:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 884968293}
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
-  m_IsViewVolume: 1
 --- !u!1 &960910674
 GameObject:
   m_ObjectHideFlags: 0
