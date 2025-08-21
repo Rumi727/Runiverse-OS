@@ -18,6 +18,12 @@ namespace RuniOS.IO
         /// 표준 확장자 구분 문자로, 항상 '.'입니다.<br/>
         /// </summary>
         public const char extensionSeparatorChar = '.';
+        
+        /// <summary>
+        /// 빈 파일 확장자를 나타내는 정적 읽기 전용 인스턴스입니다.<br/>
+        /// <c>new FileExtension()</c>와 동일하며, 확장자가 없는 상태를 표현할 때 사용됩니다.
+        /// </summary>
+        public static readonly FileExtension empty = new FileExtension();
 
         /// <summary>
         /// <see cref="FilePath"/>에서 파일 확장자를 초기화합니다.
@@ -48,7 +54,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 파일 확장자의 실제 문자열 값을 가져오거나 설정합니다.<br/>
         /// 설정 시, 값에서 마지막 '.' 이후의 문자열만 확장자로 추출하여 저장합니다.<br/>
-        /// 예를 들어, ".png", "jpg", "image.gif" 등의 값이 주어지면 각각 ".png", ".jpg", ".gif"로 저장됩니다.<br/>
+        /// 예를 들어, ".png", "jpg", "image.gif" 등의 값이 주어지면 각각 ".png", "", ".gif"로 저장됩니다.<br/>
         /// 만약 '.'이 없으면 빈 문자열로 설정됩니다.
         /// </summary>
         [AllowNull]

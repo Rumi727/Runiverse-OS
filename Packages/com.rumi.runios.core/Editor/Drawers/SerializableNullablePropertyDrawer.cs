@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor;
 using System;
 using UnityEditor;
 using UnityEngine;
@@ -120,7 +121,7 @@ namespace RuniOS.Editor.Drawers
                         {
                             value = EditorGUI.LongField(fieldRect, label, 0);
 
-                            if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+                            if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
                                 GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
                             else
                                 GUI.Box(Rect.zero, GUIContent.none);
@@ -131,7 +132,7 @@ namespace RuniOS.Editor.Drawers
                         {
                             value = EditorGUI.DoubleField(fieldRect, label, 0);
 
-                            if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+                            if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
                                 GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
                             else
                                 GUI.Box(Rect.zero, GUIContent.none);
@@ -192,6 +193,6 @@ namespace RuniOS.Editor.Drawers
                 return EditorGUIUtility.singleLineHeight;
         }
 
-        public static (SerializedProperty? field, SerializedProperty? toggle) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableNullable.nameofValue), property.FindPropertyRelative(SerializableNullable.nameofHasValue));
+        public static (SerializedProperty? field, SerializedProperty? toggle) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableNullable.nameOfInternalValue), property.FindPropertyRelative(SerializableNullable.nameOfInternalHasValue));
     }
 }

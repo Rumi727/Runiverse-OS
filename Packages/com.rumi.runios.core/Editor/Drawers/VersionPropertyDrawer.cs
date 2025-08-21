@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,8 +16,8 @@ namespace RuniOS.Editor.Drawers
         {
             EditorGUI.BeginProperty(position, label, property.Copy());
             
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
             position.height = 18f;
             
             property.Next(true);

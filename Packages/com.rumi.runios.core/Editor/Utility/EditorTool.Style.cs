@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -65,7 +66,7 @@ namespace RuniOS.Editor
 
 
 
-        public static void BeginMinLabelWidth(float min = 120, float offset = 0) => BeginMinLabelWidth(min, APIBridge.UnityEditor.EditorGUIUtility.contextWidth, offset);
+        public static void BeginMinLabelWidth(float min = 120, float offset = 0) => BeginMinLabelWidth(min, EditorGUIUtilityBridge.contextWidth, offset);
         public static void BeginMinLabelWidth(float min, float contextWidth, float offset) => BeginLabelWidth(Mathf.Max((contextWidth * 0.45f) - 40f, min) + offset);
 
         public static void BeginLabelWidth(string label) => BeginLabelWidth(new GUIContent(label));
@@ -81,7 +82,7 @@ namespace RuniOS.Editor
         static readonly Stack<float> labelWidthStack = new Stack<float>();
         public static void BeginLabelWidth(float width)
         {
-            labelWidthStack.Push(APIBridge.UnityEditor.EditorGUIUtility.s_LabelWidth);
+            labelWidthStack.Push(EditorGUIUtilityBridge.s_LabelWidth);
             EditorGUIUtility.labelWidth = width;
         }
 
@@ -133,7 +134,7 @@ namespace RuniOS.Editor
         static readonly Stack<float> fieldWidthQueue = new Stack<float>();
         public static void BeginFieldWidth(float width)
         {
-            fieldWidthQueue.Push(APIBridge.UnityEditor.EditorGUIUtility.s_FieldWidth);
+            fieldWidthQueue.Push(EditorGUIUtilityBridge.s_FieldWidth);
             EditorGUIUtility.fieldWidth = width;
         }
 

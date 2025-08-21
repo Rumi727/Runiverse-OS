@@ -1,5 +1,6 @@
 #nullable enable
-using RuniOS.Editor.APIBridge.UnityEditorInternal;
+using RuniOS.APIBridge.UnityEditor;
+using RuniOS.APIBridge.UnityEditorInternal;
 using System;
 using System.Reflection;
 using UnityEditor;
@@ -59,8 +60,8 @@ namespace RuniOS.Editor
             return false;
         }
 
-        public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapper.GetPropertyIdentifier(property);
+        public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapperBridge.GetPropertyIdentifier(property);
 
-        public static FieldInfo? GetFieldInfoFromProperty(this SerializedProperty property, out Type? type) => APIBridge.UnityEditor.ScriptAttributeUtility.GetFieldInfoFromProperty(property, out type);
+        public static FieldInfo? GetFieldInfoFromProperty(this SerializedProperty property, out Type? type) => ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out type);
     }
 }

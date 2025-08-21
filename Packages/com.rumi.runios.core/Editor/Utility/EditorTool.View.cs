@@ -1,5 +1,5 @@
 #nullable enable
-using GUIView = RuniOS.Editor.APIBridge.UnityEditor.GUIView;
+using RuniOS.APIBridge.UnityEditor;
 
 namespace RuniOS.Editor
 {
@@ -7,8 +7,8 @@ namespace RuniOS.Editor
     {
         public static void RepaintCurrentWindow()
         {
-            if (GUIView.current?.instance != null)
-                GUIView.current.Repaint();
+            if (GUIViewBridge.current?.__instance != null)
+                GUIViewBridge.current.Repaint();
         }
     }
 }

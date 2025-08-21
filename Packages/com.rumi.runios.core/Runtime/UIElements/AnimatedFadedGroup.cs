@@ -17,7 +17,10 @@ namespace RuniOS.UIElements
         public const string contentUssClassName = ussClassName + "__content";
         
         public static readonly BindingId valueProperty = nameof(value);
+        public static readonly BindingId sizeProperty = nameof(size);
+        public static readonly BindingId maxSizeProperty = nameof(maxSize);
         public static readonly BindingId directionProperty = nameof(direction);
+        public static readonly BindingId viewportSizeChangeProperty = nameof(viewportSizeChange);
         
         public static readonly CustomStyleProperty<string> easingStyleProperty = new CustomStyleProperty<string>("--runios-animated_faded_group-easing");
         public static readonly CustomStyleProperty<float> durationStyleProperty = new CustomStyleProperty<float>("--runios-animated_faded_group-duration");
@@ -62,7 +65,74 @@ namespace RuniOS.UIElements
                 EnableInClassList(verticalUssClassName, direction == Direction.vertical);
             }
         }
-        Direction _direction;
+        Direction _direction = Direction.vertical;
+        
+        public float? size
+        {
+            get => serializableSize;
+            set => serializableSize = value;
+        }
+        
+        [UxmlAttribute("size")]
+        [CreateProperty]
+        SerializableNullable<float> serializableSize
+        {
+            get => _serializableSize;
+            set
+            {
+                if (_serializableSize == value)
+                    return;
+
+                _serializableSize = value;
+                NotifyPropertyChanged(in sizeProperty);
+                
+                Update();
+            }
+        }
+        SerializableNullable<float> _serializableSize = null;
+        
+        public float? maxSize
+        {
+            get => serializableMaxSize;
+            set => serializableMaxSize = value;
+        }
+        
+        [UxmlAttribute("max-size")]
+        [CreateProperty]
+        SerializableNullable<float> serializableMaxSize
+        {
+            get => _serializableMaxSize;
+            set
+            {
+                if (_serializableMaxSize == value)
+                    return;
+
+                _serializableMaxSize = value;
+                NotifyPropertyChanged(in maxSizeProperty);
+                
+                Update();
+            }
+        }
+        SerializableNullable<float> _serializableMaxSize = null;
+        
+        
+        [UxmlAttribute]
+        [CreateProperty]
+        public bool viewportSizeChange
+        {
+            get => _viewportSizeChange;
+            set
+            {
+                if (_viewportSizeChange == value)
+                    return;
+
+                _viewportSizeChange = value;
+                NotifyPropertyChanged(in viewportSizeChangeProperty);
+                
+                Update();
+            }
+        }
+        bool _viewportSizeChange = false;
 
         public EasingFunction.Ease easing => easingStyle.keyword != StyleKeyword.Null ? easingStyle.value : _easing;
         EasingFunction.Ease _easing = EasingFunction.Ease.Linear;
@@ -108,18 +178,18 @@ namespace RuniOS.UIElements
         readonly IVisualElementScheduledItem scheduledItem;
 
         public AnimatedFadedGroup() : this(false) { }
-        public AnimatedFadedGroup(bool value, Direction direction = Direction.vertical) : this(value, null, new VisualElement { name = contentUssClassName }, direction) { }
-        public AnimatedFadedGroup(VisualElement contentContainer, Direction direction = Direction.vertical) : this(false, null, contentContainer, direction) { }
-        public AnimatedFadedGroup(VisualElement contentParent, VisualElement contentContainer, Direction direction = Direction.vertical) : this(false, contentParent, contentContainer, direction) { }
-        public AnimatedFadedGroup(bool value, VisualElement contentContainer, Direction direction = Direction.vertical) : this(value, null, contentContainer, direction) { }
-        public AnimatedFadedGroup(bool value, VisualElement? contentParent, VisualElement contentContainer, Direction direction = Direction.vertical)
+        public AnimatedFadedGroup(bool value, Direction direction = Direction.vertical, float? maxHeight = null) : this(value, null, new VisualElement { name = contentUssClassName }, direction, maxHeight) { }
+        public AnimatedFadedGroup(VisualElement contentContainer, Direction direction = Direction.vertical, float? maxHeight = null) : this(false, null, contentContainer, direction, maxHeight) { }
+        public AnimatedFadedGroup(VisualElement contentParent, VisualElement contentContainer, Direction direction = Direction.vertical, float? maxHeight = null) : this(false, contentParent, contentContainer, direction, maxHeight) { }
+        public AnimatedFadedGroup(bool value, VisualElement contentContainer, Direction direction = Direction.vertical, float? maxHeight = null) : this(value, null, contentContainer, direction, maxHeight) { }
+        public AnimatedFadedGroup(bool value, VisualElement? contentParent, VisualElement contentContainer, Direction direction = Direction.vertical, float? maxHeight = null)
         {
             _value = value;
             this.contentParent = contentParent;
             
             AddToClassList(ussClassName);
             
-            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
+            this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             
             viewportClipping = new VisualElement { name = viewportClippingUssClassName };
             viewportClipping.AddToClassList(viewportClippingUssClassName);
@@ -138,22 +208,14 @@ namespace RuniOS.UIElements
             }
 
             _direction = direction;
+            _serializableMaxSize = maxHeight;
             
             EnableInClassList(horizontalUssClassName, direction == Direction.horizontal);
             EnableInClassList(verticalUssClassName, direction == Direction.vertical);
             
             RegisterCallback<AttachToPanelEvent>(_ => Update());
             RegisterCallback<CustomStyleResolvedEvent>(CustomStyleResolvedEventCallback);
-            contentContainer.RegisterCallback<GeometryChangedEvent>(x =>
-            {
-                if (animBool?.isAnimating ?? false)
-                {
-                    targetWidth ??= this.RoundToPanelPixelSize(x.newRect.width);
-                    targetHeight ??= this.RoundToPanelPixelSize(x.newRect.height);
-                }
-
-                Update();
-            });
+            contentContainer.RegisterCallback<GeometryChangedEvent>(_ => Update());
             
             animBool = new AnimBool(value);
             animBool.onAnimationBegin += OnAnimationBegin;
@@ -166,11 +228,6 @@ namespace RuniOS.UIElements
         {
             if (value)
                 contentContainer.style.display = DisplayStyle.Flex;
-            else
-            {
-                targetWidth ??= this.RoundToPanelPixelSize(contentContainer.resolvedStyle.width);
-                targetHeight ??= this.RoundToPanelPixelSize(contentContainer.resolvedStyle.height);
-            }
             
             if (contentParent != null)
             {
@@ -181,38 +238,55 @@ namespace RuniOS.UIElements
             scheduledItem.Resume();
         }
 
-        float? targetWidth;
-        float? targetHeight;
-
         void Update()
         {
             if (panel == null || float.IsNaN(contentContainer.resolvedStyle.width) || float.IsNaN(contentContainer.resolvedStyle.height))
                 return;
             
-            float width = targetWidth * animBool.value ?? 0;
-            float height = targetHeight * animBool.value ?? 0;
+            float width = (size ?? contentContainer.resolvedStyle.width)
+                .Min(maxSize ?? float.MaxValue)
+                .Min((contentParent?.resolvedStyle.maxWidth == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxWidth.value : null) ?? float.MaxValue)
+                * animBool.value;
+            
+            float height = (size ?? contentContainer.resolvedStyle.height)
+                .Min(maxSize ?? float.MaxValue)
+                .Min((contentParent?.resolvedStyle.maxHeight == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxHeight.value : null) ?? float.MaxValue)
+                * animBool.value;
             
             if (value)
                 contentContainer.style.display = DisplayStyle.Flex;
-            else if ((direction == Direction.horizontal && width <= 1) || (direction == Direction.vertical && height <= 1))
+            else if ((direction == Direction.horizontal && width <= 0) || (direction == Direction.vertical && height <= 0))
                 contentContainer.style.display = DisplayStyle.None;
 
+            // Null 값으로 설정해도 확률적으로 인라인 값이 돌아오지 않는 버그가 있어서 따로 처리
+            viewportClipping.style.display = animBool.isAnimating ? DisplayStyle.Flex : DisplayStyle.None;
+            viewportClipping.style.maxHeight = maxSize != null ? maxSize.Value : StyleKeyword.Null;
+
             if (animBool.isAnimating && direction == Direction.horizontal)
+            {
                 viewportClipping.style.width = width;
+                contentContainer.style.width = viewportSizeChange ? width : StyleKeyword.Null;
+            }
             else
+            {
                 viewportClipping.style.width = StyleKeyword.Null;
-            
+                contentContainer.style.width = StyleKeyword.Null;
+            }
+
             if (animBool.isAnimating && direction == Direction.vertical)
+            {
                 viewportClipping.style.height = height;
+                contentContainer.style.height = viewportSizeChange ? height : StyleKeyword.Null;
+            }
             else
+            {
                 viewportClipping.style.height = StyleKeyword.Null;
+                contentContainer.style.height = StyleKeyword.Null;
+            }
         }
 
         void OnAnimationEnd()
         {
-            targetWidth = null;
-            targetHeight = null;
-            
             if (contentParent != null)
             {
                 contentParent.hierarchy.Add(contentContainer);
@@ -221,6 +295,21 @@ namespace RuniOS.UIElements
 
             scheduledItem.Pause();
             Update();
+            
+#if UNITY_EDITOR
+            // 레이아웃 갱신이 이미 애니메이션에 의해 이루어진 상태라 비활성화가 되어도 레이아웃이 갱신되지 않아 프리팹 바가 나타나는 버그를 수정합니다
+            UnityEditor.UIElements.InspectorElement inspector = GetFirstAncestorOfType<UnityEditor.UIElements.InspectorElement>();
+            if (inspector != null)
+            {
+                contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(_ =>
+                {
+                    GeometryChangedEvent evt = GeometryChangedEvent.GetPooled(inspector.layout, inspector.layout);
+                    evt.target = inspector;
+                                    
+                    inspector.SendEvent(evt);
+                });
+            }
+#endif
         }
 
         void CustomStyleResolvedEventCallback(CustomStyleResolvedEvent evt)
@@ -241,8 +330,7 @@ namespace RuniOS.UIElements
         public void SetValueWithoutNotify(bool newValue)
         {
             _value = newValue;
-            SetCheckedPseudoState(newValue);
-            
+            this.SetCheckedPseudoState(newValue);
             animBool.target = newValue;
         }
         

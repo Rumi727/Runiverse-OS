@@ -34,6 +34,12 @@
     flex-grow: 1;
 }
 
+.unity-list-view > .unity-foldout > .runios-animated-faded-group .runios-animated-faded-group__content {
+    flex-shrink: 0;
+    flex-grow: 1;
+    margin-left: 0;
+}
+
 .runios-animated-faded-group__horizontal .runios-animated-faded-group__content {
     flex-direction: row;
 }
@@ -43,6 +49,17 @@
 
 .runios-hex-color-field .unity-color-field {
     margin-left: 0;
+}
+
+.runios-file-extension-field .runios-file-extension-field__extension-separator {
+    padding-left: 2px;
+    margin-right: -1px;
+    width: auto;
+    padding-right: 0;
+}
+
+.runios-file-extension-field .unity-text-element--inner-input-field-component {
+    padding-left: 0;
 }
 
 .runios-file-path-field .unity-text-field {

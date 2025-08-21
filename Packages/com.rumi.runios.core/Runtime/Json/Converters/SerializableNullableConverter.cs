@@ -40,14 +40,14 @@ namespace RuniOS.Json.Converters
             }
 
             // HasValue 속성을 리플렉션을 통해 가져와 값을 확인합니다.
-            bool hasValue = (bool)(nullableType.GetProperty(SerializableNullable.nameofHasValue, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                ?? throw new JsonSerializationException($"'{nullableType.FullName}' type does not contain a readable '{SerializableNullable.nameofHasValue}' property for serialization."))
+            bool hasValue = (bool)(nullableType.GetProperty(SerializableNullable.nameOfInternalHasValue, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+                ?? throw new JsonSerializationException($"'{nullableType.FullName}' type does not contain a readable '{SerializableNullable.nameOfInternalHasValue}' property for serialization."))
                 .GetValue(value);
             
             if (hasValue)
             {
-                object innerValue = nullableType.GetProperty(SerializableNullable.nameofValue, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(value)
-                    ?? throw new JsonSerializationException($"'{nullableType.FullName}' type does not contain a readable '{SerializableNullable.nameofValue}' property for serialization.");
+                object innerValue = nullableType.GetProperty(SerializableNullable.nameOfInternalValue, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(value)
+                    ?? throw new JsonSerializationException($"'{nullableType.FullName}' type does not contain a readable '{SerializableNullable.nameOfInternalValue}' property for serialization.");
                 
                 serializer.Serialize(writer, innerValue);
             }

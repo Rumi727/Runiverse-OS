@@ -1,6 +1,7 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
 using HarmonyLib;
+using RuniOS.APIBridge.UnityEngine.UIElements;
 using RuniOS.UIElements;
 using System.Collections.Generic;
 using System.Reflection;
@@ -31,11 +32,51 @@ namespace RuniOS.Patches
                         {
                             VisualElement content = __instance.contentContainer;
                             __instance.hierarchy.Remove(content);
-
+                            
                             AnimatedFadedGroup animatedFadedGroup = new AnimatedFadedGroup(false, __instance, content);
                             animatedFadedGroup.SetValueWithoutNotify(__instance.value);
-                            
+
                             __instance.hierarchy.Add(animatedFadedGroup);
+                            __instance.schedule.Execute(() =>
+                            {
+                                if (__instance.parent is BaseListView listView)
+                                {
+                                    float childHeight = 0;
+                                    float maxHeight = listView.resolvedStyle.maxHeight.value;
+                                    if (__instance.Q(classes: "unity-foldout__toggle") is { } toggle)
+                                        maxHeight -= toggle.resolvedStyle.height;
+
+                                    ScrollView listContent = BaseVerticalCollectionViewBridge.__GetInstanceFrom(listView).scrollView;
+                                    if (listContent != null)
+                                    {
+                                        IResolvedStyle listContentStyle = listContent.resolvedStyle;
+                                        
+                                        childHeight += listContentStyle.marginBottom + listContentStyle.marginTop;
+                                        childHeight += listContentStyle.paddingBottom + listContentStyle.paddingTop;
+                                        childHeight += listContentStyle.borderBottomWidth + listContentStyle.borderTopWidth;
+                                        
+                                        if (listContent.Q(classes: "unity-scroll-view__content-container") is { } scrollViewContent)
+                                            childHeight += scrollViewContent.resolvedStyle.height;
+
+                                        if (listView.Q(classes: "unity-list-view__footer") is { } listViewFooter)
+                                        {
+                                            IResolvedStyle listViewFooterStyle = listViewFooter.resolvedStyle;
+                                            childHeight += listViewFooterStyle.height;
+                                            
+                                            childHeight += listViewFooterStyle.marginBottom + listViewFooterStyle.marginTop;
+                                            childHeight += listViewFooterStyle.paddingBottom + listViewFooterStyle.paddingTop;
+                                            childHeight += listViewFooterStyle.borderBottomWidth + listViewFooterStyle.borderTopWidth;
+                                        }
+                                    }
+
+                                    animatedFadedGroup.size = childHeight;
+                                    animatedFadedGroup.maxSize = maxHeight;
+                                    
+                                    animatedFadedGroup.viewportSizeChange = true;
+                                }
+                                else
+                                    animatedFadedGroup.viewportSizeChange = false;
+                            }).Every(0);
                             
                             fadedGroups.Add(__instance, animatedFadedGroup);
                         }

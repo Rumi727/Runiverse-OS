@@ -1,6 +1,6 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEngine.UIElements;
 using RuniOS.UIElements;
-using System;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -72,25 +72,55 @@ namespace RuniOS
 #endif
 
         static PropertyInfo? pseudoStatesProperty;
+
+        public static PseudoStates GetPsuedoState(this VisualElement element) => (PseudoStates)VisualElementBridge.__GetInstanceFrom(element).pseudoStates;
         
-        public static PseudoStates GetPsuedoState(this VisualElement element)
-        {
-            pseudoStatesProperty ??= AccessUtility.Property(element.GetType(), "pseudoStates");
-            return (PseudoStates)(int)pseudoStatesProperty!.GetValue(element);
-        }
-        
-        public static void SetPsuedoState(this VisualElement element, PseudoStates state)
-        {
-            pseudoStatesProperty ??= AccessUtility.Property(element.GetType(), "pseudoStates");
-            pseudoStatesProperty!.SetValue(element, Enum.ToObject(pseudoStatesProperty.PropertyType, (int)state));
-        }
+        public static void SetPsuedoState(this VisualElement element, PseudoStates state) => VisualElementBridge.__GetInstanceFrom(element).pseudoStates = (PseudoStatesBridge)state;
 
         public static void AddPsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() | state);
 
         public static void RemovePsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() & ~state);
 
         public static bool HasPseudoFlag(this VisualElement element, PseudoStates flag) => (element.GetPsuedoState() & flag) == flag;
+
+#if !UNITY_6000_3_OR_NEWER
+        public static void SetCheckedPseudoState(this VisualElement element, bool value)
+        {
+            if (value)
+                element.AddPsuedoState(PseudoStates.Checked);
+            else
+                element.RemovePsuedoState(PseudoStates.Checked);
+        }
+#endif
         
         public static void SetValueWithoutNotify<T>(this INotifyValueChanged<T> element, T newValue) => element.SetValueWithoutNotify(newValue);
+
+        /// <summary>
+        /// 요소가 패널에 등록될 때마다 루트 요소에 스타일 시트를 맨 위에 등록합니다
+        /// </summary>
+        public static void RegisterDefaultStyleSheet(this VisualElement element, StyleSheet styleSheet)
+        {
+            element.RegisterCallback<AttachToPanelEvent>(x =>
+            {
+                VisualElement root = x.destinationPanel.visualTree;
+                if (!root.styleSheets.Contains(styleSheet))
+                    root.styleSheets.Insert(0, styleSheet);
+
+                if (!element.IsEditorPanel())
+                    return;
+         
+                /*
+                 * 디버거 찍어보심 아시겠지만 root 안의 rootVisualContainer2 요소에 스타일 시트가 적용되서
+                 * 이렇게 해주지 않으면 유니티의 내장 스타일 시트가 먹어버립니다
+                 */
+                
+                for (int i = 0; i < root.hierarchy.childCount; i++)
+                {
+                    VisualElement child = root.hierarchy[i];
+                    if (!child.styleSheets.Contains(styleSheet))
+                        child.styleSheets.Add(styleSheet);
+                }
+            });
+        }
     }
 }

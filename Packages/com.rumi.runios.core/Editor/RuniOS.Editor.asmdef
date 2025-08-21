@@ -2,9 +2,7 @@
     "name": "RuniOS.Editor",
     "rootNamespace": "RuniOS.Editor",
     "references": [
-        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
-        "GUID:c6d2ee51b86b95246ae92eebdcffddee",
-        "GUID:e0d7720a211379b4bab82afbf6fc6b14"
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a"
     ],
     "includePlatforms": [
         "Editor"
@@ -13,6 +11,9 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "RuniOS.APIBridge.UnityEditor.CoreModule.dll",
+        "RuniOS.APIBridge.UnityEditor.UIBuilderModule.dll",
+        "RuniOS.APIBridge.UnityEditor.UIElementsModule.dll",
         "RuniOS.APIMarshal.UnityEngine.UIElementsModule.dll",
         "ExtendedNumerics.BigDecimal.dll"
     ],

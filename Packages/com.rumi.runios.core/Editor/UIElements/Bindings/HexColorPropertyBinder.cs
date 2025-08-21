@@ -10,6 +10,7 @@ namespace RuniOS.Editor.UIElements.Bindings
     public class HexColorPropertyBinder : PropertyBinder
     {
         public override object Read(VisualElement element, SerializedProperty property, Type propertyType) => new HexColor(HexColorPropertyDrawer.GetChildProperty(property).stringValue);
+        
         public override void Write(VisualElement element, SerializedProperty property, Type propertyType, object? value)
         {
             if (value is HexColor hexColor)

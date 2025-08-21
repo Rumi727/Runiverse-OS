@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor.UIElements;
 using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
@@ -125,7 +126,7 @@ namespace RuniOS.UIElements
         public TypeField(Type? baseType) : this(string.Empty, baseType) { }
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
-            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
+            this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             
             labelElement.AddToClassList(labelUssClassName);
 
@@ -150,8 +151,8 @@ namespace RuniOS.UIElements
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
             {
-                var provider = Editor.APIBridge.UnityEditor.UIElements.TypeSearchProvider.CreateInstance(baseType ?? typeof(object));
-                var context = UnityEditor.Search.SearchService.CreateContext(provider.instance, "type:");
+                var provider = TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
+                var context = UnityEditor.Search.SearchService.CreateContext(provider.__instance, "type:");
                 var viewState = new UnityEditor.Search.SearchViewState(context)
                 {
                     title = "Type",

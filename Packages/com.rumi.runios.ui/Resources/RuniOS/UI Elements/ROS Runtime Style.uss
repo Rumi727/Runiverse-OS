@@ -133,7 +133,7 @@
     transition-property: color;
     transition-duration: var(--transition-duration);
     transition-timing-function: ease;
-    -unity-font-definition: resource("RuniOS/Fonts/Pretendard/Pretendard");
+    -unity-font-definition: resource('RuniOS/Fonts/Pretendard/Pretendard');
     font-size: 12px;
     color: var(--label-color);
 }
@@ -457,7 +457,7 @@
     margin-right: 3px;
     margin-top: 0;
     margin-bottom: 0;
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-size: 200% 200%;
     -unity-background-image-tint-color: var(--button-color);
     transition-property: opacity, scale, rotate;
@@ -479,18 +479,18 @@
 
 .unity-foldout__toggle > .unity-toggle__input:focus:enabled > .unity-toggle__checkmark {
     opacity: var(--focus-alpha);
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-color: rgba(0, 0, 0, 0);
 }
 
 .unity-foldout__toggle > .unity-toggle__input:hover:enabled > .unity-toggle__checkmark {
     opacity: var(--hover-alpha);
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-color: rgba(0, 0, 0, 0);
 }
 
 .unity-foldout__toggle:active > .unity-toggle__input:enabled > .unity-toggle__checkmark {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     scale: 0.85 0.85;
     transition-property: scale, rotate;
     transition-timing-function: ease-out-circ, ease;
@@ -501,29 +501,29 @@
 
 .unity-foldout__toggle:checked > .unity-toggle__input > .unity-toggle__checkmark {
     background-color: rgba(0, 0, 0, 0);
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     rotate: 90deg;
 }
 
 .unity-foldout__toggle:checked > .unity-toggle__input:disabled > .unity-toggle__checkmark {
     background-color: rgba(0, 0, 0, 0);
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     rotate: 90deg;
 }
 
 .unity-foldout__toggle > .unity-toggle__input:focus:checked:enabled > .unity-toggle__checkmark {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     background-color: rgba(0, 0, 0, 0);
 }
 
 .unity-foldout__toggle > .unity-toggle__input:hover:checked:enabled > .unity-toggle__checkmark {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     opacity: var(--hover-alpha);
     background-color: rgba(0, 0, 0, 0);
 }
 
 .unity-foldout__toggle:active > .unity-toggle__input:checked:enabled > .unity-toggle__checkmark {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-right@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-right@2x.png');
     scale: 0.85 0.85;
     transition-property: scale, rotate;
     transition-duration: 0.5s, var(--transition-duration);
@@ -1266,7 +1266,7 @@
 }
 
 .unity-base-popup-field__arrow {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-down@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-down@2x.png');
     -unity-background-image-tint-color: var(--button-color);
     background-size: 200% 200%;
     margin-right: 2px;
@@ -1355,7 +1355,7 @@
 }
 
 .unity-enum-field__arrow {
-    background-image: resource("UIPackageResources/Images/Vanilla/arrow-down@2x.png");
+    background-image: resource('UIPackageResources/Images/Vanilla/arrow-down@2x.png');
     -unity-background-image-tint-color: var(--button-color);
     background-size: 200% 200%;
     margin-right: 2px;
@@ -1618,4 +1618,17 @@
     margin-top: 0;
     margin-bottom: 0;
     height: 20px;
+}
+
+.runios-file-extension-field .runios-file-extension-field__extension-separator {
+    border-radius: 10px;
+    padding-left: 3px;
+    width: auto;
+    padding-right: 0;
+    margin-right: 0;
+}
+
+.runios-file-extension-field .unity-text-element--inner-input-field-component {
+    border-radius: 10px;
+    padding-left: 0;
 }

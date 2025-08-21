@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -20,7 +21,7 @@ namespace RuniOS
             try
             {
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-                APIBridge.UnityEngine.DrivenPropertyManager.RegisterProperty(driver, target, propertyPath);
+                DrivenPropertyManagerBridge.RegisterProperty(driver, target, propertyPath);
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)
@@ -38,7 +39,7 @@ namespace RuniOS
             try
             {
 #pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
-                APIBridge.UnityEngine.DrivenPropertyManager.UnregisterProperty(driver, target, propertyPath);
+                DrivenPropertyManagerBridge.UnregisterProperty(driver, target, propertyPath);
 #pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)

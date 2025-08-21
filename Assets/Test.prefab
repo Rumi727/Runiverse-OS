@@ -504,7 +504,7 @@ MonoBehaviour:
       value: 97
       hasValue: 1
     char: 97
-    slider: 0
+    slider: 10
     filePath:
       _value: 
     fileExtension:
@@ -624,7 +624,7 @@ MonoBehaviour:
   filePath:
     _value: asdfsa/asdf
   fileExtension:
-    _value: .asdf
+    _value: 
   hexColor:
     _value: '#2C2CDBBC'
   rectCorner:
@@ -813,6 +813,10 @@ MonoBehaviour:
   m_ParentUI: {fileID: 0}
   sourceAsset: {fileID: 9197481963319205126, guid: 9cdd7e61695d9cd43b19a08bf7512e85, type: 3}
   m_SortingOrder: 0
+  m_Position: 0
   m_WorldSpaceSizeMode: 0
   m_WorldSpaceWidth: 310
   m_WorldSpaceHeight: 1013.8
+  m_PivotReferenceSize: 0
+  m_Pivot: 0
+  m_WorldSpaceCollider: {fileID: 0}

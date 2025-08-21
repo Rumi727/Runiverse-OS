@@ -20,6 +20,9 @@ namespace RuniOS
     [JsonConverter(typeof(SerializableNullableConverter))]
     public struct SerializableNullable<T> : ISerializableNullable<T>, IEquatable<T>, IEquatable<T?>, IEquatable<SerializableNullable<T>>, ISerializationCallbackReceiver where T : struct
     {
+        // 필드랑 프로퍼티 이름 바꾸지 마세요.
+        // 직렬화에 사용합니다.
+        
         [SerializeField, JsonIgnore] T value;
         [SerializeField, JsonIgnore] bool hasValue;
 

@@ -1,4 +1,6 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor;
+using RuniOS.APIBridge.UnityEditor.UIElements;
 using RuniOS.IO;
 using RuniOS.Resource;
 using System;
@@ -232,7 +234,7 @@ namespace RuniOS.Editor
             position.x += 2;
             position.y += 1;
 
-            if (value.value.Length > 0 || APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+            if (value.value.Length > 0 || EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
                 GUI.Label(position, FileExtension.extensionSeparatorChar.ToString(), EditorStyles.label);
 
             return value;
@@ -248,8 +250,8 @@ namespace RuniOS.Editor
         public static Identifier IdentifierField(Rect position, string label, Identifier value) => IdentifierField(position, new GUIContent(label), value);
         public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value)
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 3);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
 
             return DoIdentifierField(position, value);
         }
@@ -303,8 +305,8 @@ namespace RuniOS.Editor
         public static RectOffset RectOffsetField(Rect position, string label, RectOffset value) => RectOffsetField(position, new GUIContent(label), value);
         public static RectOffset RectOffsetField(Rect position, GUIContent label, RectOffset value)
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
             return DoRectOffsetField(position, value);
         }
@@ -338,8 +340,8 @@ namespace RuniOS.Editor
         public static T? NullableField<T>(Rect position, string label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(position, new GUIContent(label), value, drawAction, nullText);
         public static T? NullableField<T>(Rect position, GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
             return DoNullableField(position, label, value, drawAction, nullText);
         }
@@ -373,8 +375,8 @@ namespace RuniOS.Editor
         public static T? NullablePrimitiveField<T>(Rect position, string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(position, new GUIContent(label), value, nullText);
         public static T? NullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
             return DoNullablePrimitiveField(position, label, value, nullText);
         }
@@ -414,7 +416,7 @@ namespace RuniOS.Editor
                     {
                         value = PrimitiveField(fieldRect, label, default(T));
 
-                        if (!APIBridge.UnityEditor.EditorGUI.HasKeyboardFocus(APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID))
+                        if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
                             GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
                         else
                             GUI.Box(Rect.zero, GUIContent.none);
@@ -466,8 +468,8 @@ namespace RuniOS.Editor
         public static Vector4 Vector4Field(Rect position, string label, Vector4 value) => Vector4Field(position, new GUIContent(label), value);
         public static Vector4 Vector4Field(Rect position, GUIContent label, Vector4 value)
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4); // 2로 하면 크기 절반 줄어듬
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4); // 2로 하면 크기 절반 줄어듬
 
             return DoVector4Field(position, value);
         }
@@ -501,8 +503,8 @@ namespace RuniOS.Editor
         public static Version VersionField(Rect position, string label, Version value) => VersionField(position, new GUIContent(label), value);
         public static Version VersionField(Rect position, GUIContent label, Version value)
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 4);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
             return DoVersionField(position, value);
         }
@@ -564,8 +566,8 @@ namespace RuniOS.Editor
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(position, new GUIContent(label), value, drawKeyAction, drawValueAction);
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
         {
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
 
             return DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
         }
@@ -632,10 +634,10 @@ namespace RuniOS.Editor
 
             if (GUI.Button(position, buttonText))
             {
-                int lastControlID = APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID;
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
                 
-                var provider = APIBridge.UnityEditor.UIElements.TypeSearchProvider.CreateInstance(baseType ?? typeof(object));
-                var context = UnityEditor.Search.SearchService.CreateContext(provider.instance, "type:");
+                var provider = TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
+                var context = UnityEditor.Search.SearchService.CreateContext(provider.__instance, "type:");
                 var viewState = new UnityEditor.Search.SearchViewState(context)
                 {
                     title = "Type",
@@ -658,7 +660,7 @@ namespace RuniOS.Editor
                 UnityEditor.Search.SearchService.ShowPicker(viewState);
             }
 
-            if (typeFieldLastControlID != null && typeFieldLastControlID == APIBridge.UnityEditor.EditorGUIUtility.s_LastControlID)
+            if (typeFieldLastControlID != null && typeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
             {
                 value = typeFieldSelectedType;
                 

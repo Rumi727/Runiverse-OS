@@ -1,5 +1,5 @@
 #nullable enable
-using RuniOS.Editor.APIBridge.UnityEditor.UIElements;
+using RuniOS.APIBridge.UnityEditor.UIElements;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -12,7 +12,7 @@ namespace RuniOS.Editor.UIElements.Serialization
             if (value == "null")
                 return null;
 
-            if (UxmlAttributeConverter.TryGetConverter(typeof(T), out IUxmlAttributeConverter converter))
+            if (UxmlAttributeConverterBridge.TryGetConverter(typeof(T), out IUxmlAttributeConverterBridge converter))
                 return (T)converter.FromString(value, CreationContext.Default);
             else
                 return null;

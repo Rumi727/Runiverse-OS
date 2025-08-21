@@ -11,11 +11,20 @@ namespace RuniOS
         /// <summary>
         /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 필드 이름입니다.
         /// </summary>
-        public const string nameofValue = "value";
+        public const string nameOfValue = "Value";
         /// <summary>
-        /// <see cref="SerializableNullable{T}"/> 구조체의 값 존재 여부 필드 이름입니다.
+        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 존재 여부 필드 이름입니다.
         /// </summary>
-        public const string nameofHasValue = "hasValue";
+        public const string nameOfHasValue = "HasValue";
+        
+        /// <summary>
+        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 필드 이름입니다.
+        /// </summary>
+        public const string nameOfInternalValue = "value";
+        /// <summary>
+        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 존재 여부 필드 이름입니다.
+        /// </summary>
+        public const string nameOfInternalHasValue = "hasValue";
         
         /// <summary>
         /// 지정된 nullable 타입의 기본 (<see cref="ISerializableNullable{T}"/>의 내부) 타입을 가져옵니다.

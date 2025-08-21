@@ -140,18 +140,7 @@ namespace RuniOS.Editor.Patches
                                     }
 
                                     // 해당 propertyType에 맞는 PropertyBinder를 찾습니다.
-                                    PropertyBinder? binder = null;
-                                    foreach ((Type type, CustomPropertyBinderAttribute attribute) in PropertyBinder.propertyBinderTypes)
-                                    {
-                                        // propertyType이 바인더의 targetType과 정확히 일치하거나,
-                                        // 바인더가 하위 타입 호환성을 지원하고 propertyType이 targetType에 할당 가능한 경우
-                                        if (propertyType == attribute.targetType || (attribute.isSubtypeCompatible && propertyType.IsAssignableToAny(attribute.targetType)))
-                                        {
-                                            // 해당 PropertyBinder 인스턴스를 생성하고 루프를 종료합니다 (가장 적합한 바인더 선택).
-                                            binder = (PropertyBinder)Activator.CreateInstance(type);
-                                            break;
-                                        }
-                                    }
+                                    PropertyBinder? binder = PropertyBinder.FindBinder(propertyType);
 
                                     // 적합한 PropertyBinder를 찾지 못한 경우 false를 반환합니다.
                                     if (binder == null)

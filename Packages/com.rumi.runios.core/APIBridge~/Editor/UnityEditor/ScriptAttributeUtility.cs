@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using UnityEditor;
+using UnityEditorInternal;
 
 namespace RuniOS.Editor.APIBridge.UnityEditor
 {

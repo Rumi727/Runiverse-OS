@@ -1,30 +1,31 @@
 <ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" noNamespaceSchemaLocation="../UIElementsSchema/UIElements.xsd" editor-extension-mode="True" gen-cs-file="482a500a49bdff54195f270f49cd340a">
-    <Style src="project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style"/>
+    <Style src="project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/ROS%20Control%20Style.uss?fileID=7433441132597879392&amp;guid=a02e567ba1c6a97479dbf4a52b228aef&amp;type=3#ROS Control Style" />
     <ui:Foldout text="Foldout" value="false" style="overflow: hidden;">
-        <ui:TextField label="Text Field" placeholder-text="filler text"/>
+        <ui:TextField label="Text Field" placeholder-text="filler text" />
         <ui:Foldout text="Foldout">
-            <ui:TextField label="Text Field" placeholder-text="filler text"/>
+            <ui:TextField label="Text Field" placeholder-text="filler text" />
             <ui:Foldout text="Foldout">
-                <ui:TextField label="Text Field" placeholder-text="filler text"/>
+                <ui:TextField label="Text Field" placeholder-text="filler text" />
                 <ui:Foldout text="Foldout">
-                    <ui:TextField label="Text Field" placeholder-text="filler text"/>
+                    <ui:TextField label="Text Field" placeholder-text="filler text" />
                 </ui:Foldout>
             </ui:Foldout>
         </ui:Foldout>
     </ui:Foldout>
-    <RuniOS.Editor.UIElements.HexColorField label="Test" show-alpha="true" value="#FF0000A4" show-eye-dropper="true" hdr="true"/>
-    <RuniOS.UIElements.AnimatedFadedGroup direction="vertical" value="false" style="flex-direction: column;">
-        <ui:Slider label="Slider" value="42" high-value="100"/>
-        <ui:TextField label="Text Field" placeholder-text="filler text"/>
-        <ui:Toggle label="Toggle"/>
-        <ui:Button text="Button"/>
-        <ui:Button text="Button"/>
+    <RuniOS.Editor.UIElements.HexColorField label="Test" show-alpha="true" value="#FF0000A4" show-eye-dropper="true" hdr="true" />
+    <RuniOS.UIElements.AnimatedFadedGroup direction="vertical" max-size="262.9" value="true" size="123.7" style="flex-direction: column;">
+        <ui:Slider label="Slider" value="42" high-value="100" />
+        <ui:TextField label="Text Field" placeholder-text="filler text" />
+        <ui:Toggle label="Toggle" />
+        <ui:Button text="Button" />
+        <ui:Button text="Button" />
     </RuniOS.UIElements.AnimatedFadedGroup>
-    <RuniOS.UIElements.FilePathField label="File Path" value="path/path"/>
-    <ui:IntegerField label="Integer Field" value="42"/>
-    <RuniOS.UIElements.IdentifierField label="Identifier" value="ros:asdf"/>
-    <RuniOS.UIElements.RectOffsetField label="Label"/>
-    <RuniOS.UIElements.RuniProgressBar value="50"/>
-    <RuniOS.UIElements.UnclampedSlider label="Label"/>
-    <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" value="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="asdf"/>
+    <RuniOS.UIElements.FileExtensionField label="File Extension" value=".extension" />
+    <RuniOS.UIElements.FilePathField label="File Path" value="path/path" />
+    <ui:IntegerField label="Integer Field" value="42" />
+    <RuniOS.UIElements.IdentifierField label="Identifier" value="ros:asdf" />
+    <RuniOS.UIElements.RectOffsetField label="Label" />
+    <RuniOS.UIElements.RuniProgressBar value="50" />
+    <RuniOS.UIElements.UnclampedSlider label="Label" />
+    <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" value="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="asdf" />
 </ui:UXML>

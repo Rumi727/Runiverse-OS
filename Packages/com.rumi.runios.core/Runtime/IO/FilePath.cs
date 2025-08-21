@@ -53,7 +53,7 @@ namespace RuniOS.IO
 
         /// <summary>
         /// 빈 파일 경로를 나타내는 정적 읽기 전용 인스턴스입니다.<br/>
-        /// <c>FilePath.Create(string.Empty)</c>와 동일하며, 경로가 없는 상태를 표현할 때 사용됩니다.
+        /// <c>new FilePath()</c>와 동일하며, 경로가 없는 상태를 표현할 때 사용됩니다.
         /// </summary>
         public static readonly FilePath empty = new FilePath();
 

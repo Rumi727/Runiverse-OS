@@ -3,7 +3,7 @@ using RuniOS.APIMarshal.UnityEngine.UIElements;
 using RuniOS.IO;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements
+namespace RuniOS.UIElements.IO
 {
     [UxmlElement]
     public partial class FilePathField : TextInputBaseFieldMarshal<FilePath>
@@ -18,27 +18,13 @@ namespace RuniOS.UIElements
         public FilePathField() : this(null) { }
         public FilePathField(string? label) : base(label, -1, '*', new TextInput())
         {
-            styleSheets.Insert(0, UIToolkitUtility.rosControlStyle);
+            this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);
             
             textInput.AddToClassList(inputUssClassName);
-
-            textInput.textElement.RegisterValueChangedCallback(ChangeEventCallback);
             textInput.RegisterCallback<FocusOutEvent>(FocusOutEventCallback);
-        }
-        
-        void ChangeEventCallback(ChangeEvent<string> evt)
-        {
-            string inputValue = rawValue.value;
-            if (evt.newValue.Length > 0 && evt.newValue[^1] == FilePath.directorySeparatorChar)
-                inputValue += FilePath.directorySeparatorChar;
-            
-            int indexDifference = inputValue.Length - evt.newValue.Length;
-            textElement.SetValueWithoutNotify(inputValue);
-            cursorIndex += indexDifference;
-            selectIndex += indexDifference;
         }
 
         void FocusOutEventCallback(FocusOutEvent evt) => textElement.SetValueWithoutNotify(rawValue.value);

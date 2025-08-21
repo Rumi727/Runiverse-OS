@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEditor;
 using UnityEditor;
 using UnityEngine;
 
@@ -30,8 +31,8 @@ namespace RuniOS.Editor.Drawers
                 return;
             }
 
-            int controlID = GUIUtility.GetControlID(APIBridge.UnityEditor.EditorGUI.s_FoldoutHash, FocusType.Keyboard, position);
-            position = APIBridge.UnityEditor.EditorGUI.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
             
             BeginIndentLevel(0);
             float fieldWidth = (position.width - 15) / 2f;
