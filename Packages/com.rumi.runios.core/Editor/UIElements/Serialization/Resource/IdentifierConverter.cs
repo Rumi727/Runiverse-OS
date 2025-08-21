@@ -2,7 +2,7 @@
 using RuniOS.Resource;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization
+namespace RuniOS.Editor.UIElements.Serialization.Resource
 {
     public sealed class IdentifierConverter : UxmlAttributeConverter<Identifier>
     {

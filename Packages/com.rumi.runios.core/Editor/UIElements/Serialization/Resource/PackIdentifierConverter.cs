@@ -3,7 +3,7 @@ using RuniOS.Resource;
 using UnityEditor.UIElements;
 using UnityEngine;
 
-namespace RuniOS.Editor.UIElements.Serialization
+namespace RuniOS.Editor.UIElements.Serialization.Resource
 {
     public sealed class PackIdentifierConverter : UxmlAttributeConverter<PackIdentifier>
     {

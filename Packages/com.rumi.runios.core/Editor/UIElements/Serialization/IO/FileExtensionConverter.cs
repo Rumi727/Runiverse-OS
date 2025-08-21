@@ -2,7 +2,7 @@
 using RuniOS.IO;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization
+namespace RuniOS.Editor.UIElements.Serialization.IO
 {
     public sealed class FileExtensionConverter : UxmlAttributeConverter<FileExtension>
     {
