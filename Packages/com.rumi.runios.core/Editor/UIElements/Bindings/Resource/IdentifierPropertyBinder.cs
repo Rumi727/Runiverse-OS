@@ -6,7 +6,7 @@ using System;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings.Resource
 {
     [CustomPropertyBinder(typeof(Identifier))]
     public class IdentifierPropertyBinder : PropertyBinder

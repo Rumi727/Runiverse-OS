@@ -1,13 +1,14 @@
 ﻿#nullable enable
 using RuniOS.Editor.Drawers;
 using RuniOS.Editor.Drawers.Resource;
+using RuniOS.Editor.UIElements.Bindings.IO;
 using RuniOS.IO;
 using RuniOS.Resource;
 using System;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings.Resource
 {
     [CustomPropertyBinder(typeof(PackIdentifier))]
     public class PackIdentifierPropertyBinder : PropertyBinder

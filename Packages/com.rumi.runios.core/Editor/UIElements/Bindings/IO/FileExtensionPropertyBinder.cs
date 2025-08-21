@@ -5,7 +5,7 @@ using System;
 using UnityEditor;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.UIElements.Bindings.IO
 {
     [CustomPropertyBinder(typeof(FileExtension))]
     public class FileExtensionPropertyBinder : PropertyBinder
