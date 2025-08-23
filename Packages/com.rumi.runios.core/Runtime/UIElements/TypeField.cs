@@ -7,7 +7,7 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements
 {
     [UxmlElement]
-    public partial class TypeField : BaseField<string>
+    public partial class TypeField : BaseField<SerializableType>
     {
         public new const string ussClassName = "runios-type-field";
         public new const string labelUssClassName = ussClassName + "__label";
@@ -19,18 +19,17 @@ namespace RuniOS.UIElements
 
 
 
-        public override string value
+        public override SerializableType value
         {
-            get => base.value ?? string.Empty;
+            get => base.value;
             set
             {
                 if (base.value != value)
                 {
-                    Type? valueAsType = TypeUtility.DeserializeFromString(value);
-                    if (valueAsType != null && (baseType == null || baseType.IsAssignableFrom(valueAsType)))
-                        base.value = valueAsType.SerializeToString();
+                    if (value != null && (baseType == null || baseType.IsAssignableFrom(value)))
+                        base.value = value;
                     else
-                        base.value = string.Empty;
+                        base.value = null;
                 }
             }
         }
@@ -38,36 +37,6 @@ namespace RuniOS.UIElements
 
 #pragma warning disable CS8601 // 가능한 null 참조 할당입니다.
 #pragma warning disable CS8603 // 가능한 null 참조 반환입니다.
-        public Type? valueAsType
-        {
-            get => nullableValueAsType;
-            set => nullableValueAsType = value;
-        }
-        Type? cachedType = null;
-        
-        // ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-        [CreateProperty]
-        [UxmlAttribute("value")]
-        Type nullableValueAsType
-        {
-            get
-            {
-                if (cachedType != null)
-                    return cachedType;
-                else
-                    return string.IsNullOrEmpty(value) ? null : TypeUtility.DeserializeFromString(value);
-            }
-            set
-            {
-                this.value = value?.SerializeToString() ?? string.Empty;
-                NotifyPropertyChanged(valueProperty);
-            }
-        }
-        static readonly BindingId valueProperty = nameof(nullableValueAsType);
-        // ReSharper restore ConditionalAccessQualifierIsNonNullableAccordingToAPIContract
-
-
-
         public Type? baseType
         {
             get => nullableBaseType;
@@ -83,8 +52,8 @@ namespace RuniOS.UIElements
             set
             {
                 _baseType = value;
-                if (valueAsType == null || (_baseType != null && !_baseType.IsAssignableFrom(valueAsType)))
-                    this.value = string.Empty;
+                if (this.value != null && (_baseType != null && !_baseType.IsAssignableFrom(this.value)))
+                    this.value = null;
 
                 NotifyPropertyChanged(baseTypeProperty);
             }
@@ -143,7 +112,6 @@ namespace RuniOS.UIElements
             visualInput.Add(buttonElement);
             
             this.baseType = baseType;
-            UpdateButtonText();
             
 #if UNITY_EDITOR
             RegisterCallback<DetachFromPanelEvent>(_ => EditorLocalizationBridge.onLanguageUpdate -= UpdateButtonText);
@@ -151,6 +119,9 @@ namespace RuniOS.UIElements
             {
                 if (this.IsEditorPanel())
                     EditorLocalizationBridge.onLanguageUpdate += UpdateButtonText;
+                
+                UpdateLabel();
+                UpdateButtonText();
             });
 #endif
         }
@@ -179,20 +150,18 @@ namespace RuniOS.UIElements
         }
 
 #if UNITY_EDITOR
-        void Select(UnityEditor.Search.SearchItem item, bool cancelled)
+        void Select(UnityEditor.Search.SearchItem? item, bool cancelled)
         {
-            if (item.data is Type type)
-                value = type.SerializeToString();
+            if (item?.data is Type type)
+                value = type;
             else
-                value = string.Empty;
+                value = null;
         }
 #endif
 
-        public override void SetValueWithoutNotify(string newValue)
+        public override void SetValueWithoutNotify(SerializableType newValue)
         {
             base.SetValueWithoutNotify(newValue);
-            
-            cachedType = null;
             UpdateLabel();
         }
 
@@ -206,20 +175,22 @@ namespace RuniOS.UIElements
 
         void UpdateLabel()
         {
+            if (value.value == null)
+            {
+#if UNITY_EDITOR
+                if (this.IsEditorPanel())
+                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(EditorLocalizationBridge.GetTextOrKey("gui.none"));
+                else
+#endif
+                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
+                
+                return;
+            }
+            
             if (displayFullName)
-            {
-                if (string.IsNullOrEmpty(value))
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
-                else
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(value);
-            }
+                ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(value.value.SerializeToString());
             else
-            {
-                if (valueAsType == null)
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
-                else
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(valueAsType.GetTypeDisplayName());
-            }
+                ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(value.value.GetTypeDisplayName());
         }
 
         void UpdateButtonText()

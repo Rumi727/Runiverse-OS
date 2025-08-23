@@ -80,7 +80,7 @@ namespace RuniOS
         /// </summary>
         /// <param name="type">변환할 <see cref="Type"/> 값입니다.</param>
         /// <returns>변환된 <see cref="SerializableType"/> 인스턴스입니다.</returns>
-        public static implicit operator SerializableType(Type type) => new SerializableType(type);
+        public static implicit operator SerializableType(Type? type) => new SerializableType(type);
         
         /// <summary>
         /// <see cref="SerializableType"/>를 <see cref="Type"/>로 암시적으로 변환합니다.

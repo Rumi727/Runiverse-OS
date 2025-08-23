@@ -75,6 +75,7 @@
     margin-left: 2px;
     margin-right: 2px;
     -unity-text-align: upper-center;
+    -unity-font-style: normal;
 }
 
 .runios-identifier-field .unity-composite-field__field--last {
@@ -108,4 +109,5 @@
 
 .runios-type-field__button {
     align-self: center;
+    -unity-font-style: normal;
 }

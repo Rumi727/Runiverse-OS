@@ -1,8 +1,8 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
 using System;
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
 using static RuniOS.Editor.EditorTool;
@@ -13,20 +13,7 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(SerializableType))]
     public class SerializableTypePropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property)
-        {
-            TypeField typeField = new TypeField
-            {
-                label = property.displayName,
-                bindingPath = GetChildProperty(property).propertyPath
-            };
-            
-            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
-            typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
-            typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
-            
-            return typeField;
-        }
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new TypeField().SetProperty<TypeField, SerializableType>(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

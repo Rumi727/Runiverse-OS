@@ -42,11 +42,14 @@ namespace RuniOS.Editor.UIElements.Bindings
             (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
             if (field == null || toggle == null)
                 return;
-            
-            object? value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
-            toggle.boolValue = value != null;
+
+            object? value = null;
+            bool hasValue = (bool)(AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfHasValue)?.GetValue(nullable) ?? false);
+            if (hasValue)
+                value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
             
             FindBinder(underlyingType)?.Write(element, field, underlyingType, value);
+            toggle.boolValue = hasValue;
         }
     }
 }

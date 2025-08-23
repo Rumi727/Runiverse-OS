@@ -1,7 +1,7 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
 using RuniOS.UIElements;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,15 +13,7 @@ namespace RuniOS.Editor.Drawers.Attributes
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             TypeFieldAttribute attribute = (TypeFieldAttribute)this.attribute;
-            TypeField typeField = new TypeField(attribute.baseType)
-            {
-                label = property.displayName, 
-                bindingPath = SerializableTypePropertyDrawer.GetChildProperty(property).propertyPath
-            };
-            
-            typeField.AddToClassList(TypeField.alignedFieldUssClassName);
-            typeField.labelElement.AddToClassList(PropertyField.labelUssClassName);
-            typeField.visualInput.AddToClassList(PropertyField.inputUssClassName);
+            TypeField typeField = new TypeField(attribute.baseType).SetProperty<TypeField, SerializableType>(property);
             
             return typeField;
         }
