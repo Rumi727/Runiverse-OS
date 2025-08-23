@@ -59,6 +59,10 @@ namespace RuniOS.Installer
                 ShowInstallerWindow();
                 EditorApplication.update -= ShowOnce;
             }
+            
+#if RUNI_ENGINE
+            Editor.Localizations.EditorLocalization.currentLanguage = ConfigScriptableObject.config.currentLanguage;
+#endif
         }
 
         static readonly Dictionary<GUIStyle, Stack<TextAnchor>> alignmentQueue = new Dictionary<GUIStyle, Stack<TextAnchor>>();
@@ -166,6 +170,11 @@ namespace RuniOS.Installer
 
             foreach (var screen in installerScreens)
                 screen.mainWindow = this;
+            
+#if RUNI_ENGINE
+            ConfigScriptableObject.config.currentLanguage = Editor.Localizations.EditorLocalization.currentLanguage;
+            ConfigScriptableObject.config.SetDirty();
+#endif
         }
 
         void OnGUI() => DrawGUI();
@@ -342,13 +351,18 @@ namespace RuniOS.Installer
 
             if (selectedLanguageIndex != languageIndex)
             {
-                ConfigScriptableObject.config.currentLanguage = selectedLanguageIndex switch
+                ConfigScriptableObject.config.currentLanguage = 
+#if RUNI_ENGINE
+                Editor.Localizations.EditorLocalization.currentLanguage =
+#endif
+                selectedLanguageIndex switch
                 {
                     0 => "en_us",
                     1 => "ko_kr",
                     2 => "ja_jp",
                     _ => "en_us",
-                };
+                }; 
+                
 
                 ConfigScriptableObject.config.SetDirty();
             }

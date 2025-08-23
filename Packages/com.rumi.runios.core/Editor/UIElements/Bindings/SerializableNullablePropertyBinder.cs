@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.UIElements.Bindings
 {
-    [CustomPropertyBinder(typeof(SerializableNullable<>), true)]
+    [CustomPropertyBinder(typeof(ISerializableNullable<>), true)]
     public class SerializableNullablePropertyBinder : PropertyBinder
     {
         public override object Read(VisualElement element, SerializedProperty property, Type propertyType)

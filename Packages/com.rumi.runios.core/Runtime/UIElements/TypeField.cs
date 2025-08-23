@@ -1,5 +1,5 @@
 #nullable enable
-using RuniOS.APIBridge.UnityEditor.UIElements;
+using RuniOS.Localizations;
 using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
@@ -137,12 +137,22 @@ namespace RuniOS.UIElements
             textElement = new TextElement { name = textUssClassName, pickingMode = PickingMode.Ignore };
             textElement.AddToClassList(textUssClassName);
             visualInput.Add(textElement);
-
-            buttonElement = new Button(ShowSelector) { name = buttonUssClassName, text = "Select Type..." };
+            
+            buttonElement = new Button(ShowSelector) { name = buttonUssClassName };
             buttonElement.AddToClassList(buttonUssClassName);
             visualInput.Add(buttonElement);
             
             this.baseType = baseType;
+            UpdateButtonText();
+            
+#if UNITY_EDITOR
+            RegisterCallback<DetachFromPanelEvent>(_ => EditorLocalizationBridge.onLanguageUpdate -= UpdateButtonText);
+            RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                if (this.IsEditorPanel())
+                    EditorLocalizationBridge.onLanguageUpdate += UpdateButtonText;
+            });
+#endif
         }
 
         //런타임 지원 예정
@@ -151,7 +161,7 @@ namespace RuniOS.UIElements
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
             {
-                var provider = TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
+                var provider = APIBridge.UnityEditor.UIElements.TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
                 var context = UnityEditor.Search.SearchService.CreateContext(provider.__instance, "type:");
                 var viewState = new UnityEditor.Search.SearchViewState(context)
                 {
@@ -210,6 +220,16 @@ namespace RuniOS.UIElements
                 else
                     ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(valueAsType.GetTypeDisplayName());
             }
+        }
+
+        void UpdateButtonText()
+        {
+#if UNITY_EDITOR
+            if (this.IsEditorPanel())
+                buttonElement.text = EditorLocalizationBridge.GetTextOrKey("gui.type_field.select_type");
+            else
+#endif
+                buttonElement.text = "Select Type...";
         }
     }
 }

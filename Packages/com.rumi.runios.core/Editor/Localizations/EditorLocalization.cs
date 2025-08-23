@@ -1,4 +1,5 @@
 #nullable enable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,7 +8,18 @@ namespace RuniOS.Editor.Localizations
 {
     public static class EditorLocalization
     {
-        public static string currentLanguage => EditorLanguageConfigAsset.currentLanguage;
+        public static string currentLanguage
+        {
+            get => EditorLanguageConfigAsset.currentLanguage;
+            set => EditorLanguageConfigAsset.currentLanguage = value;
+        }
+
+        internal static Action? _onLanguageUpdate;
+        public static event Action? onLanguageUpdate
+        {
+            add => _onLanguageUpdate += value;
+            remove => _onLanguageUpdate -= value;
+        }
 
         static readonly Dictionary<string, List<EditorLanguageDataAsset>> _registeredDataAssets = new();
         public static IReadOnlyDictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets { get; } = _registeredDataAssets.AsReadOnly();

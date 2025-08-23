@@ -7,7 +7,7 @@
             <RuniOS.UIElements.Resource.IdentifierField label="Identifier" value="ros:path/path" />
             <RuniOS.UIElements.Resource.PackIdentifierField label="Pack Identifier Field" />
             <RuniOS.UIElements.RectOffsetField label="Rect Offset" />
-            <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="Type Field" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
+            <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="Type Field" />
             <ui:ScrollView horizontal-scroller-visibility="AlwaysVisible" mode="VerticalAndHorizontal" vertical-scroller-visibility="AlwaysVisible" style="flex-direction: column; height: 100px;">
                 <ui:Label text="Label" />
                 <ui:Button text="Button" />
