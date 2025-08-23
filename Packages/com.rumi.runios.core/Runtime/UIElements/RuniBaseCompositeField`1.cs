@@ -130,6 +130,7 @@ namespace RuniOS.UIElements
 
                 bool isFirst = true;
                 int lastIndex = ((i * fieldsByLine) + fieldsByLine).Min(descriptions.Count);
+                VisualElement? lastElement = null;
                 for (int j = i * fieldsByLine; j < lastIndex; j++)
                 {
                     IElementDescription? description = descriptions[j];
@@ -146,12 +147,13 @@ namespace RuniOS.UIElements
                             element.AddToClassList(firstFieldVariantUssClassName);
                             isFirst = false;
                         }
-                        if (j >= lastIndex - 1)
-                            element.AddToClassList(lastFieldVariantUssClassName);
+                        lastElement = element;
                     }
                     
                     hierarchy.Add(element);
                 }
+                
+                lastElement?.AddToClassList(lastFieldVariantUssClassName);
             }
 
             UpdateDisplay();
@@ -282,15 +284,23 @@ namespace RuniOS.UIElements
         /// CSS에 의해 너비가 조정되는 빈 <see cref="VisualElement"/>를 반환합니다.
         /// </summary>
         /// <returns>스페이서 역할을 하는 <see cref="ElementDescription{TElement}"/>입니다.</returns>
-        protected ElementDescription<VisualElement> GetSpacer()
+        protected ElementDescription<VisualElement> GetSpacer(string? ussClassName = null)
         {
             VisualElement spacer = new VisualElement();
-            
+
+            string name = spacerUssClassName;
             spacer.AddToClassList(spacerUssClassName);
+            
+            if (ussClassName != null)
+            {
+                name = ussClassName;
+                spacer.AddToClassList(ussClassName);
+            }
+            
             spacer.visible = false;
             spacer.focusable = false;
 
-            return new ElementDescription<VisualElement>(spacerUssClassName, spacer);
+            return new ElementDescription<VisualElement>(name, spacer);
         }
         
         

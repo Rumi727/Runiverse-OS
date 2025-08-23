@@ -165,7 +165,10 @@
     margin-bottom: 10px;
     margin-left: 5px;
     height: 40px;
-    border-radius: 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 20px;
     background-color: var(--system-color);
     border-top-color: var(--system-color);
     border-right-color: var(--system-color);
@@ -261,7 +264,10 @@
 }
 
 .unity-button-group__button--mid {
-    border-radius: 3px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
     margin-right: 2px;
     margin-left: 2px;
 }
@@ -560,7 +566,10 @@
     background-color: var(--background-depth-color);
     position: relative;
     align-self: stretch;
-    border-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
     transition-property: padding-left, padding-right, padding-top, padding-bottom;
     transition-duration: var(--transition-duration), var(--transition-duration), var(--transition-duration), var(--transition-duration);
     transition-timing-function: ease-out-circ, ease-out-circ, ease-out-circ, ease-out-circ;
@@ -571,7 +580,10 @@
 }
 
 .unity-base-slider .unity-base-slider__fill {
-    border-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
     background-color: var(--system-color);
     transition-property: background-color;
     transition-duration: var(--transition-duration);
@@ -762,7 +774,6 @@
     border-width: 1px;
     border-color: rgb(185, 185, 185);
     background-color: rgb(154, 154, 154);
-    border-radius: 6px;
     min-height: 12px;
     border-top-left-radius: 5px;
     border-top-right-radius: 5px;
@@ -1012,7 +1023,10 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    border-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
     background-color: var(--background-depth-color);
     position: absolute;
     top: auto;
@@ -1030,7 +1044,10 @@
 
 .unity-min-max-slider__dragger {
     background-color: var(--system-color);
-    border-radius: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
     height: 16px;
     position: absolute;
     top: auto;
@@ -1088,7 +1105,10 @@
     border-top-color: rgba(0, 0, 0, 0);
     border-bottom-color: rgba(0, 0, 0, 0);
     min-width: auto;
-    border-radius: 8px 0 0 8px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 8px;
     margin-left: 0;
     margin-right: 0;
     margin-top: 0;
@@ -1171,12 +1191,18 @@
     border-right-width: 0;
     border-bottom-width: 0;
     border-left-width: 0;
-    border-radius: 4px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
     background-color: var(--background-color);
 }
 
 .unity-progress-bar__progress {
-    border-radius: 2px;
+    border-top-left-radius: 2px;
+    border-top-right-radius: 2px;
+    border-bottom-right-radius: 2px;
+    border-bottom-left-radius: 2px;
     background-color: var(--background-depth-color);
     margin-left: 2px;
     margin-right: 2px;
@@ -1185,7 +1211,10 @@
 }
 
 .unity-progress-bar__title {
-    border-radius: 6px;
+    border-top-left-radius: 6px;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+    border-bottom-left-radius: 6px;
     align-self: stretch;
     flex-grow: 1;
 }
@@ -1213,7 +1242,10 @@
 }
 
 .unity-base-popup-field__input {
-    border-radius: 9px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
     border-top-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
@@ -1228,6 +1260,10 @@
     transition-duration: var(--transition-duration), 1s;
     transition-timing-function: ease, ease-out-elastic;
     border-left-color: var(--field-color);
+    padding-top: 0;
+    padding-right: 3px;
+    padding-bottom: 0;
+    padding-left: 6px;
 }
 
 .unity-base-popup-field:active:enabled .unity-base-popup-field__input {
@@ -1273,10 +1309,10 @@
 }
 
 .unity-base-popup-field__text {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .unity-enum-field {
@@ -1302,13 +1338,15 @@
 }
 
 .unity-enum-field__input {
-    border-radius: 9px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
     border-top-width: 2px;
     border-right-width: 2px;
     border-bottom-width: 2px;
     border-left-width: 2px;
     min-width: var(--input-width);
-    min-height: 32px;
     background-color: var(--field-color);
     border-right-color: var(--field-color);
     border-top-color: var(--field-color);
@@ -1317,6 +1355,11 @@
     transition-duration: var(--transition-duration), 1s;
     transition-timing-function: ease, ease-out-elastic;
     border-left-color: var(--field-color);
+    padding-top: 0;
+    padding-right: 3px;
+    padding-bottom: 0;
+    padding-left: 6px;
+    min-height: 32px;
 }
 
 .unity-enum-field:active:enabled .unity-enum-field__input {
@@ -1362,10 +1405,10 @@
 }
 
 .unity-enum-field__text {
-    margin-left: 5px;
-    margin-right: 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
 }
 
 .unity-base-dropdown__container-outer {
@@ -1376,7 +1419,10 @@
 }
 
 .unity-base-dropdown__container-inner {
-    border-radius: 9px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
     border-top-width: 0;
     border-right-width: 0;
     border-bottom-width: 0;
@@ -1390,7 +1436,10 @@
 
 .unity-base-dropdown__item {
     height: 18px;
-    border-radius: 9px;
+    border-top-left-radius: 9px;
+    border-top-right-radius: 9px;
+    border-bottom-right-radius: 9px;
+    border-bottom-left-radius: 9px;
     background-color: var(--field-color);
     margin-top: 1px;
     margin-bottom: 1px;
@@ -1613,7 +1662,10 @@
 
 .runios-type-field__button {
     margin-left: 5px;
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     margin-right: 0;
     margin-top: 0;
     margin-bottom: 0;
@@ -1621,7 +1673,10 @@
 }
 
 .runios-file-extension-field .runios-file-extension-field__extension-separator {
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     padding-left: 3px;
     width: auto;
     padding-right: 0;
@@ -1629,6 +1684,19 @@
 }
 
 .runios-file-extension-field .unity-text-element--inner-input-field-component {
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
     padding-left: 0;
+}
+
+.runios-pack-identifier-field > .runios-pack-identifier-field__input > .unity-composite-field__field--last .unity-enum-field__input {
+    min-height: var(--text-field-height);
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    border-bottom-left-radius: 8px;
+    padding-left: 4px;
+    padding-right: 1px;
 }

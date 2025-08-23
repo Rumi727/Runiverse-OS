@@ -15,7 +15,8 @@
         "RuniOS.APIBridge.UnityEditor.UIBuilderModule.dll",
         "RuniOS.APIBridge.UnityEditor.UIElementsModule.dll",
         "RuniOS.APIMarshal.UnityEngine.UIElementsModule.dll",
-        "ExtendedNumerics.BigDecimal.dll"
+        "ExtendedNumerics.BigDecimal.dll",
+        "Newtonsoft.Json.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

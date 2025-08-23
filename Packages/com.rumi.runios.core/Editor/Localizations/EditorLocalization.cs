@@ -9,7 +9,8 @@ namespace RuniOS.Editor.Localizations
     {
         public static string currentLanguage => EditorLanguageConfigAsset.currentLanguage;
 
-        public static readonly Dictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets = new();
+        static readonly Dictionary<string, List<EditorLanguageDataAsset>> _registeredDataAssets = new();
+        public static IReadOnlyDictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets { get; } = _registeredDataAssets.AsReadOnly();
 
         public static void RegisterLanguage(params EditorLanguageDataAsset?[] dataAssets)
         {
@@ -19,8 +20,8 @@ namespace RuniOS.Editor.Localizations
                 if (dataAsset == null)
                     continue;
 
-                if (!registeredDataAssets.TryGetValue(dataAsset.languageKey, out List<EditorLanguageDataAsset> dataList))
-                    registeredDataAssets.Add(dataAsset.languageKey, dataList = new List<EditorLanguageDataAsset>());
+                if (!_registeredDataAssets.TryGetValue(dataAsset.languageKey, out List<EditorLanguageDataAsset> dataList))
+                    _registeredDataAssets.Add(dataAsset.languageKey, dataList = new List<EditorLanguageDataAsset>());
 
                 if (!dataList.Contains(dataAsset))
                     dataList.Add(dataAsset);
@@ -32,13 +33,13 @@ namespace RuniOS.Editor.Localizations
             if (string.IsNullOrEmpty(languageKey))
                 languageKey = currentLanguage;
 
-            if (registeredDataAssets.Count <= 0)
+            if (_registeredDataAssets.Count <= 0)
             {
                 foreach (var item in ReflectionUtility.types.Where(static x => typeof(ScriptableObject).IsAssignableFrom(x) && typeof(IEditorLocalizationRegister).IsAssignableFrom(x)))
                     ScriptableObject.CreateInstance(item);
             }
 
-            if (registeredDataAssets.TryGetValue(languageKey, out var datas))
+            if (_registeredDataAssets.TryGetValue(languageKey, out var datas))
                 return datas.Select(static x => x._languages);
 
             return Enumerable.Empty<Dictionary<string, string>>();

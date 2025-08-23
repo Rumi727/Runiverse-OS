@@ -2,9 +2,10 @@
     <Style src="project://database/Packages/com.rumi.runios.ui/Resources/RuniOS/UI%20Elements/ROS%20Runtime%20Style.uss?fileID=7433441132597879392&amp;guid=392ed92ce27bbfb4f9ce74320be4ee82&amp;type=3#ROS Runtime Style" />
     <ui:ScrollView name="ScrollView" mode="Vertical" vertical-scroller-visibility="AlwaysVisible" enabled="true" class="runios-background-element" style="width: 480px; height: 100%;">
         <ui:VisualElement style="padding-top: 10px; padding-right: 20px; padding-bottom: 10px; padding-left: 20px; margin-top: 0; margin-right: 0; margin-bottom: 0; margin-left: 0; overflow: hidden; flex-grow: 1;">
-            <RuniOS.UIElements.FilePathField label="File Path" value="path/path" />
-            <RuniOS.UIElements.FileExtensionField label="File Extension" value=".extension" />
-            <RuniOS.UIElements.IdentifierField label="Identifier" value="ros:path/path" />
+            <RuniOS.UIElements.IO.FilePathField label="File Path" value="path/path" />
+            <RuniOS.UIElements.IO.FileExtensionField label="File Extension" value=".extension" />
+            <RuniOS.UIElements.Resource.IdentifierField label="Identifier" value="ros:path/path" />
+            <RuniOS.UIElements.Resource.PackIdentifierField label="Pack Identifier Field" />
             <RuniOS.UIElements.RectOffsetField label="Rect Offset" />
             <RuniOS.UIElements.TypeField base-type="UnityEngine.UIElements.Label, UnityEngine.UIElementsModule" label="Type Field" value="UnityEditor.Localization.UI.TableCreatorWindow+LocaleLabel, Unity.Localization.Editor" />
             <ui:ScrollView horizontal-scroller-visibility="AlwaysVisible" mode="VerticalAndHorizontal" vertical-scroller-visibility="AlwaysVisible" style="flex-direction: column; height: 100px;">

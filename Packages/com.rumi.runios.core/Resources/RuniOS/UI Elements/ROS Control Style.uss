@@ -56,6 +56,7 @@
     margin-right: -1px;
     width: auto;
     padding-right: 0;
+    flex-shrink: 0;
 }
 
 .runios-file-extension-field .unity-text-element--inner-input-field-component {
@@ -78,6 +79,11 @@
 
 .runios-identifier-field .unity-composite-field__field--last {
     flex-grow: 2;
+}
+
+.runios-pack-identifier-field > .runios-pack-identifier-field__input > .unity-composite-field__field--last {
+    flex-grow: 0;
+    min-width: 50px;
 }
 
 .runios-progress-bar__viewport {

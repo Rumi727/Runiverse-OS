@@ -668,7 +668,7 @@ MonoBehaviour:
       hasValue: 0
     hasValue: 0
   type:
-    _value: UnityEngine.Object, UnityEngine.CoreModule
+    _value: 
   readOnlyType:
     _value: UnityEngine.Object, UnityEngine.CoreModule
   nullableRectOffset:

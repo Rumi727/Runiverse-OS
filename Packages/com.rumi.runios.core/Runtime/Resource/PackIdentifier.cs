@@ -26,8 +26,17 @@ namespace RuniOS.Resource
             readonly get => _identifier;
             set
             {
-                _identifier = value;
-                _path = null;
+                if (value != null)
+                {
+                    _identifier = value;
+                    _path = null;
+                }
+                else
+                {
+                    _identifier = null;
+                    if (_path == null)
+                        _path = FilePath.empty;
+                }
             }
         }
         [SerializeField, JsonIgnore] SerializableNullable<Identifier> _identifier;
@@ -40,8 +49,17 @@ namespace RuniOS.Resource
             readonly get => _path;
             set
             {
-                _identifier = null;
-                _path = value;
+                if (value != null)
+                {
+                    _identifier = null;
+                    _path = value;
+                }
+                else
+                {
+                    if (_identifier == null)
+                        _identifier = Identifier.empty;
+                    _path = null;
+                }
             }
         }
         [SerializeField, JsonIgnore] SerializableNullable<FilePath> _path;

@@ -256,6 +256,7 @@ namespace RuniOS.Editor
             return DoIdentifierField(position, value);
         }
 
+        // ReSharper disable Unity.PerformanceAnalysis
         static Identifier DoIdentifierField(Rect position, Identifier value)
         {
             BeginIndentLevel(0);

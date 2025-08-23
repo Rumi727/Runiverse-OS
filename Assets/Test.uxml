@@ -20,10 +20,11 @@
         <ui:Button text="Button" />
         <ui:Button text="Button" />
     </RuniOS.UIElements.AnimatedFadedGroup>
-    <RuniOS.UIElements.FileExtensionField label="File Extension" value=".extension" />
-    <RuniOS.UIElements.FilePathField label="File Path" value="path/path" />
+    <RuniOS.UIElements.IO.FileExtensionField label="File Extension" value=".extension" />
+    <RuniOS.UIElements.IO.FilePathField label="File Path" value="path/path" />
     <ui:IntegerField label="Integer Field" value="42" />
-    <RuniOS.UIElements.IdentifierField label="Identifier" value="ros:asdf" />
+    <RuniOS.UIElements.Resource.IdentifierField label="Identifier" value="ros:asdf" />
+    <RuniOS.UIElements.Resource.PackIdentifierField label="Pack Identifier Field" />
     <RuniOS.UIElements.RectOffsetField label="Label" />
     <RuniOS.UIElements.RuniProgressBar value="50" />
     <RuniOS.UIElements.UnclampedSlider label="Label" />

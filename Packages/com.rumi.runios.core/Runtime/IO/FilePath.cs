@@ -563,14 +563,6 @@ namespace RuniOS.IO
         /// <param name="other">현재 인스턴스와 비교할 다른 <see cref="FilePath"/> 인스턴스입니다.</param>
         /// <returns>두 <see cref="FilePath"/> 인스턴스가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
         public readonly bool Equals(FilePath other) => value == other.value;
-
-        /// <summary>
-        /// 현재 <see cref="FilePath"/> 인스턴스가 지정된 nullable <see cref="FilePath"/> 인스턴스와 동일한지 여부를 확인합니다.<br/>
-        /// <paramref name="other"/>가 null이면 빈 경로(<see cref="string.Empty"/>)와 비교합니다.
-        /// </summary>
-        /// <param name="other">현재 인스턴스와 비교할 nullable <see cref="FilePath"/> 인스턴스입니다.</param>
-        /// <returns>두 <see cref="FilePath"/> 인스턴스(또는 null 처리된 빈 경로)가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public readonly bool Equals(FilePath? other) => value == (other?.value ?? string.Empty);
         #endregion
 
 
@@ -592,13 +584,6 @@ namespace RuniOS.IO
         /// </summary>
         /// <param name="path">변환할 <see cref="FilePath"/> 인스턴스입니다.</param>
         public static implicit operator string(FilePath path) => path.value;
-
-        /// <summary>
-        /// nullable <see cref="FilePath"/>를 <see cref="string"/>으로 암시적으로 변환합니다.<br/>
-        /// <paramref name="path"/>가 null이면 <see cref="string.Empty"/>를 반환하고, 그렇지 않으면 <see cref="value"/>를 반환합니다.
-        /// </summary>
-        /// <param name="path">변환할 nullable <see cref="FilePath"/> 인스턴스입니다.</param>
-        public static implicit operator string(FilePath? path) => path?.value ?? string.Empty;
 
         /// <summary>
         /// <see cref="string"/>을 <see cref="FilePath"/>로 암시적으로 변환합니다.<br/>
@@ -797,7 +782,6 @@ namespace RuniOS.IO
 
 
 
-        #region == operator
         /// <summary>
         /// 두 <see cref="FilePath"/> 객체가 동일한지 여부를 확인합니다.<br/>
         /// 이는 <see cref="Equals(FilePath)"/> 메서드와 동일합니다.
@@ -808,35 +792,6 @@ namespace RuniOS.IO
         public static bool operator ==(FilePath left, FilePath right) => left.Equals(right);
 
         /// <summary>
-        /// <see cref="FilePath"/>와 nullable <see cref="FilePath"/>가 동일한지 여부를 확인합니다.<br/>
-        /// 이는 <see cref="Equals(FilePath?)"/> 메서드와 동일합니다.
-        /// </summary>
-        /// <param name="left">비교할 <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 nullable <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator ==(FilePath left, FilePath? right) => left.Equals(right);
-
-        /// <summary>
-        /// nullable <see cref="FilePath"/>와 <see cref="FilePath"/>가 동일한지 여부를 확인합니다.<br/>
-        /// null <paramref name="left"/>는 <see cref="empty"/>로 처리됩니다.
-        /// </summary>
-        /// <param name="left">비교할 nullable <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator ==(FilePath? left, FilePath right) => (left ?? empty).Equals(right);
-
-        /// <summary>
-        /// 두 nullable <see cref="FilePath"/> 객체가 동일한지 여부를 확인합니다.<br/>
-        /// null 값은 <see cref="empty"/>로 처리됩니다.
-        /// </summary>
-        /// <param name="left">비교할 첫 번째 nullable <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 두 번째 nullable <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator ==(FilePath? left, FilePath? right) => left.Equals(right);
-        #endregion
-
-        #region != operator
-        /// <summary>
         /// 두 <see cref="FilePath"/> 객체가 동일하지 않은지 여부를 확인합니다.<br/>
         /// 이는 <c>operator ==</c>의 반대입니다.
         /// </summary>
@@ -844,34 +799,6 @@ namespace RuniOS.IO
         /// <param name="right">비교할 두 번째 <see cref="FilePath"/>입니다.</param>
         /// <returns>두 경로가 동일하지 않으면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
         public static bool operator !=(FilePath left, FilePath right) => !(left == right);
-
-        /// <summary>
-        /// <see cref="FilePath"/>와 nullable <see cref="FilePath"/>가 동일하지 않은지 여부를 확인합니다.<br/>
-        /// 이는 <c>operator ==</c>의 반대입니다.
-        /// </summary>
-        /// <param name="left">비교할 <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 nullable <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하지 않으면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator !=(FilePath left, FilePath? right) => !(left == right);
-
-        /// <summary>
-        /// nullable <see cref="FilePath"/>와 <see cref="FilePath"/>가 동일하지 않은지 여부를 확인합니다.<br/>
-        /// 이는 <c>operator ==</c>의 반대입니다.
-        /// </summary>
-        /// <param name="left">비교할 nullable <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하지 않으면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator !=(FilePath? left, FilePath right) => !(left == right);
-
-        /// <summary>
-        /// 두 nullable <see cref="FilePath"/> 객체가 동일하지 않은지 여부를 확인합니다.<br/>
-        /// 이는 <c>operator ==</c>의 반대입니다.
-        /// </summary>
-        /// <param name="left">비교할 첫 번째 nullable <see cref="FilePath"/>입니다.</param>
-        /// <param name="right">비교할 두 번째 nullable <see cref="FilePath"/>입니다.</param>
-        /// <returns>두 경로가 동일하지 않으면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public static bool operator !=(FilePath? left, FilePath? right) => !(left == right);
-        #endregion
         #endregion
 
 
