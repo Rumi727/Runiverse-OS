@@ -20,6 +20,9 @@ namespace RuniOS
     [Serializable]
     public struct SerializableKeyValuePair<TKey, TValue> : ISerializableKeyValuePair, ISerializableKeyValuePair<TKey, TValue>
     {
+        // 필드랑 프로퍼티 이름 바꾸지 마세요.
+        // 직렬화에 사용합니다.
+        
         /// <summary>
         /// 지정된 키와 값을 사용하여 <see cref="SerializableKeyValuePair{TKey, TValue}"/> 구조체의 새 인스턴스를 초기화합니다.
         /// </summary>
@@ -33,14 +36,10 @@ namespace RuniOS
 
         /// <summary>
         /// 유니티 직렬화를 위한 키의 내부 필드입니다.
-        /// <br/>
-        /// 이 필드의 이름은 변경하지 마십시오.
         /// </summary>
         [SerializeField, FieldName("gui.key"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TKey key;
         /// <summary>
         /// 유니티 직렬화를 위한 값의 내부 필드입니다.
-        /// <br/>
-        /// 이 필드의 이름은 변경하지 마십시오.
         /// </summary>
         [SerializeField, FieldName("gui.value"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TValue value;
 

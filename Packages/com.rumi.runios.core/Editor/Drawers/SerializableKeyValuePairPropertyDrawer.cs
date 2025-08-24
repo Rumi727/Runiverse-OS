@@ -82,6 +82,6 @@ namespace RuniOS.Editor.Drawers
                 return height + EditorGUIUtility.singleLineHeight + 4;
         }
 
-        public static (SerializedProperty? key, SerializedProperty? value) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableKeyValuePair.nameofKey), property.FindPropertyRelative(SerializableKeyValuePair.nameofValue));
+        public static (SerializedProperty? key, SerializedProperty? value) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableKeyValuePair.nameOfInternalKey), property.FindPropertyRelative(SerializableKeyValuePair.nameOfInternalValue));
     }
 }

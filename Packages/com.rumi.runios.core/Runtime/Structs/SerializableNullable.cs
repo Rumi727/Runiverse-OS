@@ -9,20 +9,26 @@ namespace RuniOS
     public static class SerializableNullable
     {
         /// <summary>
-        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 필드 이름입니다.
+        /// <see cref="SerializableNullable{T}"/> 구조체의 값 필드 이름입니다.
+        /// <br/>
+        /// 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
         public const string nameOfValue = "Value";
         /// <summary>
-        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 존재 여부 필드 이름입니다.
+        /// <see cref="SerializableNullable{T}"/> 구조체의 값 존재 여부 필드 이름입니다.
+        /// <br/>
+        /// 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
         public const string nameOfHasValue = "HasValue";
         
         /// <summary>
-        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 필드 이름입니다.
+        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 필드 이름입니다.<br/>
+        /// 유니티 직렬화 및 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
         public const string nameOfInternalValue = "value";
         /// <summary>
-        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 존재 여부 필드 이름입니다.
+        /// <see cref="SerializableNullable{T}"/> 구조체의 내부 값 존재 여부 필드 이름입니다.<br/>
+        /// 유니티 직렬화 및 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
         public const string nameOfInternalHasValue = "hasValue";
         
@@ -40,9 +46,9 @@ namespace RuniOS
             if (nullableType.IsGenericType && !nullableType.IsGenericTypeDefinition)
             {
                 // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
-                if (nullableType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
+                if (nullableType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>), out Type? resolvedType))
                 {
-                    Type type = nullableType.GetGenericArguments()[0];
+                    Type type = resolvedType.GetGenericArguments()[0];
                     Type? underlyingType = GetUnderlyingType(type);
                     if (underlyingType != null)
                         return underlyingType; // 제네릭 인자(T)를 반환합니다.

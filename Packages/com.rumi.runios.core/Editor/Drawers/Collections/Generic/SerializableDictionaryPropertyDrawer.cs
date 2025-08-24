@@ -236,6 +236,6 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
             return reorderableList;
         }
         
-        static SerializedProperty? GetKeyElement(SerializedProperty pairProperty) => pairProperty.FindPropertyRelative(SerializableKeyValuePair.nameofKey);
+        static SerializedProperty? GetKeyElement(SerializedProperty pairProperty) => pairProperty.FindPropertyRelative(SerializableKeyValuePair.nameOfInternalKey);
     }
 }
