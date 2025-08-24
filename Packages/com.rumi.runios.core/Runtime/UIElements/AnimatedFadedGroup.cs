@@ -259,7 +259,7 @@ namespace RuniOS.UIElements
                 contentContainer.style.display = DisplayStyle.None;
 
             // Null 값으로 설정해도 확률적으로 인라인 값이 돌아오지 않는 버그가 있어서 따로 처리
-            viewportClipping.style.display = animBool.isAnimating ? DisplayStyle.Flex : DisplayStyle.None;
+            viewportClipping.style.display = contentParent == null || animBool.isAnimating ? DisplayStyle.Flex : DisplayStyle.None;
             viewportClipping.style.maxHeight = maxSize != null ? maxSize.Value : StyleKeyword.Null;
 
             if (animBool.isAnimating && direction == Direction.horizontal)
