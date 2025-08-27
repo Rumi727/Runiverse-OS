@@ -7,7 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using UnityEngine;
 
-namespace RuniOS
+namespace RuniOS.Collections.Generic
 {
     /// <summary>
     /// 직렬화 가능한 키와 값을 저장하는 제네릭 키-값 쌍 구조체입니다.
