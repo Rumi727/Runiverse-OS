@@ -25,8 +25,5 @@ namespace RuniOS.Collections.Generic
 
         IList<SerializableKeyValuePair<TKey?, TValue?>> ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>.pairs => pairs;
         IList ISerializableDictionary.pairs => pairs;
-
-        public Type keyType => typeof(TKey);
-        public Type valueType => typeof(TValue);
     }
 }
