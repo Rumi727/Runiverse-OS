@@ -193,7 +193,7 @@ namespace RuniOS.IO
         public UniTask<Stream> OpenRead()
         {
             ThrowIfDeletedException();
-            return ioHandler?.OpenRead() ?? UniTask.FromResult((Stream)new MemoryStream(content, false));
+            return ioHandler?.OpenRead() ?? UniTask.FromResult<Stream>(new MemoryStream(content, false));
         }
 
 
