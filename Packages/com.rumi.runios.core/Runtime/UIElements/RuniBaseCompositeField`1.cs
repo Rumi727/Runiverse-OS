@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEngine.UIElements;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -140,7 +141,7 @@ namespace RuniOS.UIElements
                     if (element == null)
                         continue;
                     
-                    if (description is IFieldDescription)
+                    if (description is IAnonymousFieldDescription)
                     {
                         if (isFirst)
                         {
@@ -180,13 +181,13 @@ namespace RuniOS.UIElements
                     return;
                 }
 
-                description.element ??= (VisualElement)Activator.CreateInstance(description.elementType);
                 description.element.delegatesFocus = true;
+                
+                if (description is IAnonymousFieldDescription)
+                    description.element.AddToClassList(fieldUssClassName);
 
                 if (description is IFieldDescription fieldDescription && fieldDescription.writeEvent != null && typeof(INotifyValueChanged<>).MakeGenericType(fieldDescription.fieldValueType).IsInstanceOfType(description.element))
                 {
-                    description.element.AddToClassList(fieldUssClassName);
-                    
                     try
                     {
                         MethodInfo? changedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
@@ -225,11 +226,19 @@ namespace RuniOS.UIElements
 
                             void Write(object fieldValue)
                             {
-                                if (writeDelegate != null)
+                                try
                                 {
-                                    var value = this.value;
-                                    writeDelegate.Invoke(ref value, fieldValue);
-                                    this.value = value;
+                                    if (writeDelegate != null)
+                                    {
+                                        var value = this.value;
+                                        writeDelegate.Invoke(ref value, fieldValue);
+                                        this.value = value;
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    Debug.LogException(e);
+                                    Debug.LogWarning("An exception occurred while executing a write event on an inner field of a composite field, preventing the actual value of the composite field from being modified.");
                                 }
                             }
                         }
@@ -317,14 +326,14 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 이 설명이 나타내는 실제 <see cref="VisualElement"/> 인스턴스입니다.
             /// </summary>
-            [DisallowNull] VisualElement? element { get; set; }
+            VisualElement element { get; }
         }
         
         /// <summary>
         /// <see cref="RuniBaseCompositeField{TValueType}"/>를 구성하는 일반적인 <see cref="VisualElement"/>에 대한 설명 구조체입니다.
         /// </summary>
         /// <typeparam name="TElement">설명하는 요소의 타입입니다.</typeparam>
-        public struct ElementDescription<TElement> : IElementDescription where TElement : VisualElement, new()
+        public readonly struct ElementDescription<TElement> : IElementDescription where TElement : VisualElement, new()
         {
             /// <summary>
             /// 이름만 사용하여 <see cref="ElementDescription{TElement}"/>의 새 인스턴스를 초기화합니다.
@@ -332,7 +341,7 @@ namespace RuniOS.UIElements
             /// <param name="name">요소의 이름입니다.</param>
             public ElementDescription(string name)
             {
-                _element = null;
+                element = new TElement();
                 _name = name;
             }
             
@@ -343,10 +352,10 @@ namespace RuniOS.UIElements
             /// <param name="element">기존 요소 인스턴스입니다.</param>
             public ElementDescription(string name, TElement element)
             {
-                _element = null;
-                _name = name;
-                
                 this.element = element;
+                element.name = name;
+                
+                _name = name;
             }
 
             /// <inheritdoc/>
@@ -355,37 +364,24 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 이 설명이 나타내는 실제 <typeparamref name="TElement"/> 인스턴스입니다.
             /// </summary>
-            [DisallowNull]
-            public TElement? element
-            {
-                readonly get => _element;
-                set
-                {
-                    _element = value;
-                    _element.name = name;
-                }
-            }
-            TElement? _element;
+            public TElement element { get; }
 
             /// <inheritdoc/>
-            [DisallowNull]
-            VisualElement? IElementDescription.element
-            {
-                get => element;
-                set => element = (TElement)value;
-            }
+            VisualElement IElementDescription.element => element;
 
             /// <summary>
             /// 요소의 고유한 이름입니다.
             /// </summary>
-            public readonly string name => _name ?? string.Empty;
+            public string name => _name ?? string.Empty;
             readonly string? _name;
         }
+
+        public interface IAnonymousFieldDescription : IElementDescription { }
         
         /// <summary>
         /// <see cref="RuniBaseCompositeField{TValueType}"/>를 구성하는 자식 필드의 속성을 기술하는 인터페이스입니다.
         /// </summary>
-        public interface IFieldDescription : IElementDescription
+        public interface IFieldDescription : IAnonymousFieldDescription
         {
             /// <summary>
             /// 필드가 나타내는 값의 타입입니다.
@@ -396,6 +392,7 @@ namespace RuniOS.UIElements
             /// 부모 필드의 값이 변경될 때 호출되는 이벤트입니다.
             /// </summary>
             Action<TValueType>? displayEvent { get; }
+            
             /// <summary>
             /// 자식 필드의 값이 변경될 때 호출되는 이벤트입니다.
             /// </summary>
@@ -406,7 +403,55 @@ namespace RuniOS.UIElements
             /// </summary>
             /// <param name="value">참조로 전달되는 부모 필드의 값입니다.</param>
             /// <param name="fieldValue">자식 필드의 새 값입니다.</param>
-            delegate void WriteDelegate(ref TValueType value, object? fieldValue);
+            delegate void WriteDelegate(ref TValueType value, object fieldValue);
+        }
+
+        public readonly struct AnonymousFieldDescription<TField> : IAnonymousFieldDescription where TField : VisualElement, new()
+        {
+            /// <summary>
+            /// 기존 필드 인스턴스를 사용하여 <see cref="AnonymousFieldDescription{TField}"/>의 새 인스턴스를 초기화합니다.
+            /// </summary>
+            public AnonymousFieldDescription(string propertyPath, TField field) : this(null, propertyPath, field) => this.field = field;
+            
+            /// <summary>
+            /// 기존 필드 인스턴스를 사용하여 <see cref="AnonymousFieldDescription{TField}"/>의 새 인스턴스를 초기화합니다.
+            /// </summary>
+            /// <param name="label">필드에 표시될 라벨입니다.</param>
+            /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
+            /// <param name="field">기존 필드 인스턴스입니다.</param>
+            public AnonymousFieldDescription(string? label, string propertyPath, TField field)
+            {
+                this.label = label;
+                _propertyPath = propertyPath;
+
+                this.field = field;
+                if (IPrefixLabelBridge.__targetType.IsInstanceOfType(field))
+                    IPrefixLabelBridge.__GetInstanceFrom(field).SetLabel(label);
+                    
+                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함
+            }
+
+            /// <inheritdoc/>
+            public Type elementType => typeof(TField);
+
+            /// <summary>
+            /// 필드의 라벨입니다.
+            /// </summary>
+            public string? label { get; }
+
+            /// <summary>
+            /// 필드의 바인딩 경로입니다.
+            /// </summary>
+            public string propertyPath => _propertyPath ?? string.Empty;
+            readonly string? _propertyPath;
+
+            /// <summary>
+            /// 이 설명이 나타내는 실제 <typeparamref name="TField"/> 인스턴스입니다.
+            /// </summary>
+            public TField field { get; }
+
+            /// <inheritdoc/>
+            public VisualElement element => field;
         }
         
         /// <summary>
@@ -414,7 +459,7 @@ namespace RuniOS.UIElements
         /// </summary>
         /// <typeparam name="TField">설명하는 필드의 타입입니다.</typeparam>
         /// <typeparam name="TFieldValueType">설명하는 필드의 값 타입입니다.</typeparam>
-        public struct FieldDescription<TField, TFieldValueType> : IFieldDescription where TField : VisualElement, INotifyValueChanged<TFieldValueType>, new()
+        public readonly struct FieldDescription<TField, TFieldValueType> : IFieldDescription where TField : VisualElement, INotifyValueChanged<TFieldValueType>, new()
         {
             /// <summary>
             /// 새로운 <see cref="FieldDescription{TField, TFieldValueType}"/> 인스턴스를 초기화합니다.
@@ -422,7 +467,7 @@ namespace RuniOS.UIElements
             /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
-            public FieldDescription(string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, displayEvent, writeEvent) { }
+            public FieldDescription(string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, new TField(), displayEvent, writeEvent) { }
             
             /// <summary>
             /// 새로운 <see cref="FieldDescription{TField, TFieldValueType}"/> 인스턴스를 초기화합니다.
@@ -431,25 +476,13 @@ namespace RuniOS.UIElements
             /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
-            public FieldDescription(string? label, string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent)
-            {
-                this.label = label;
-                _propertyPath = propertyPath;
-                
-                _field = null;
-
-                this.displayEvent = displayEvent;
-                this.writeEvent = writeEvent;
-
-                internalDisplayEvent = null;
-                internalWriteEvent = null;
-            }
+            public FieldDescription(string? label, string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(label, propertyPath, new TField(), displayEvent, writeEvent) { }
             
             /// <summary>
             /// 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
             /// </summary>
-            public FieldDescription(string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, field, displayEvent, writeEvent) => this.field = field;
-            
+            public FieldDescription(string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, field, displayEvent, writeEvent) { }
+
             /// <summary>
             /// 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
             /// </summary>
@@ -458,7 +491,28 @@ namespace RuniOS.UIElements
             /// <param name="field">기존 필드 인스턴스입니다.</param>
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
-            public FieldDescription(string? label, string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(label, propertyPath, displayEvent, writeEvent) => this.field = field;
+            public FieldDescription(string? label, string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent)
+            {
+                this.label = label;
+                _propertyPath = propertyPath;
+                
+                this.field = field;
+
+                if (IPrefixLabelBridge.__targetType.IsInstanceOfType(field))
+                    IPrefixLabelBridge.__GetInstanceFrom(field).SetLabel(label);
+
+                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함
+
+                this.displayEvent = displayEvent;
+                this.writeEvent = writeEvent;
+
+                internalDisplayEvent = null;
+                internalWriteEvent = null;
+
+                var thisClone = this;
+                internalDisplayEvent = x => field.SetValueWithoutNotify(thisClone.displayEvent.Invoke(x));
+                internalWriteEvent = (ref TValueType value, object fieldValue) => thisClone.writeEvent.Invoke(ref value, (TFieldValueType)fieldValue);
+            }
 
             /// <summary>
             /// 부모 필드 값으로부터 자식 필드 값을 읽기 위한 델리게이트입니다.
@@ -471,7 +525,7 @@ namespace RuniOS.UIElements
             /// </summary>
             /// <param name="value">참조로 전달되는 부모 필드의 값입니다.</param>
             /// <param name="fieldValue">자식 필드의 새 값입니다.</param>
-            public delegate void WriteDelegate(ref TValueType value, TFieldValueType? fieldValue);
+            public delegate void WriteDelegate(ref TValueType value, TFieldValueType fieldValue);
 
             /// <inheritdoc/>
             public Type elementType => typeof(TField);
@@ -487,45 +541,23 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 필드의 바인딩 경로입니다.
             /// </summary>
-            public readonly string propertyPath => _propertyPath ?? string.Empty;
+            public string propertyPath => _propertyPath ?? string.Empty;
             readonly string? _propertyPath;
 
             /// <summary>
             /// 이 설명이 나타내는 실제 <typeparamref name="TField"/> 인스턴스입니다.
             /// </summary>
             [DisallowNull]
-            public TField? field
-            {
-                readonly get => _field;
-                set
-                {
-                    _field = value;
+            public TField field { get; }
 
-                    var thisClone = this;
-                    if (value is BaseField<TFieldValueType> prefixLabel)
-                        prefixLabel.label = label;
-                    
-                    value.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함
-
-                    internalDisplayEvent = x => value.SetValueWithoutNotify(thisClone.displayEvent.Invoke(x));
-                    internalWriteEvent = (ref TValueType value, object? fieldValue) => thisClone.writeEvent.Invoke(ref value, fieldValue != null ? (TFieldValueType)fieldValue : default);
-                }
-            }
-            TField? _field;
-            
             /// <inheritdoc/>
-            [DisallowNull]
-            public VisualElement? element
-            {
-                readonly get => field;
-                set => field = (TField)value;
-            }
+            public VisualElement element => field;
 
             /// <summary>
             /// 부모 필드의 값이 변경될 때 호출되는 이벤트입니다.
             /// </summary>
             public ReadDelegate displayEvent { get; }
-            Action<TValueType>? internalDisplayEvent;
+            readonly Action<TValueType>? internalDisplayEvent;
             /// <inheritdoc/>
             Action<TValueType>? IFieldDescription.displayEvent => internalDisplayEvent;
  
@@ -533,7 +565,7 @@ namespace RuniOS.UIElements
             /// 자식 필드의 값이 변경될 때 호출되는 이벤트입니다.
             /// </summary>
             public WriteDelegate writeEvent { get; }
-            IFieldDescription.WriteDelegate? internalWriteEvent;
+            readonly IFieldDescription.WriteDelegate? internalWriteEvent;
             IFieldDescription.WriteDelegate? IFieldDescription.writeEvent => internalWriteEvent;
         }
     }
