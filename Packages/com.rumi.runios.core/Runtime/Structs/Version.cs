@@ -87,7 +87,7 @@ namespace RuniOS
                 return;
             }
 
-            string[]? versions = value.RemoveWhitespace().Split(separatorChar);
+            string[]? versions = value.RemoveAllWhitespace().Split(separatorChar);
             if (versions == null || versions.Length <= 0)
                 major = minor = patch = null;
             else switch (versions.Length)

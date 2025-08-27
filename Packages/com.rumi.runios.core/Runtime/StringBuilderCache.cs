@@ -9,15 +9,21 @@ namespace RuniOS
         static readonly ConcurrentBag<StringBuilder> cachedStringBuilders = new ConcurrentBag<StringBuilder>();
 
         public static StringBuilder Acquire() => Acquire(string.Empty);
+        
+        public static StringBuilder Acquire(int capacity)
+        {
+            if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
+                return result;
+
+            return new StringBuilder(capacity);
+        }
+        
         public static StringBuilder Acquire(string value)
         {
-            if (cachedStringBuilders.TryTake(out StringBuilder? result))
+            if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
             {
-                if (result != null)
-                {
-                    result.Clear();
-                    return result.Append(value);
-                }
+                result.Clear();
+                return result.Append(value);
             }
 
             return new StringBuilder(value);

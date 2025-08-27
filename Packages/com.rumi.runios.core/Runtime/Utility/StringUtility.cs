@@ -8,8 +8,7 @@ namespace RuniOS
 {
     public static partial class StringUtility
     {
-        public const char quotedChar = '"';
-        public const char anotherQuotedChar = '\'';
+        public static readonly char[] splitQuotes = { '\'', '"' };
 
         /*public static string ConstEnvironmentVariable(this string value)
         {
@@ -25,102 +24,154 @@ namespace RuniOS
         }*/
 
         /// <summary>
-        /// (text = "AddSpacesToSentence") = "Add Spaces To Sentence"
+        /// 문자열에 대문자를 기준으로 공백을 추가합니다.
+        /// <br/>(예: "AddSpacesToSentence" -> "Add Spaces To Sentence")
+        /// <exception cref="ArgumentNullException">입력 문자열이 null일 경우 발생합니다.</exception>
         /// </summary>
-        /// <param name="text">텍스트</param>
-        /// <param name="preserveAcronyms">약어(준말) 보존 (true = (UnscaledFPSDeltaTime = Unscaled FPS Delta Time), false = (UnscaledFPSDeltaTime = Unscaled FPSDelta Time))</param>
-        /// <returns></returns>
+        /// <param name="text">변환할 문자열입니다.</param>
+        /// <param name="preserveAcronyms">
+        /// <see langword="true"/>일 경우 약어(준말)를 보존합니다.
+        /// <br/>(예: "UnscaledFPSDeltaTime" -> "Unscaled FPS Delta Time")
+        /// <br/><see langword="false"/>일 경우 약어를 분리합니다.
+        /// <br/>(예: "UnscaledFPSDeltaTime" -> "Unscaled F P S Delta Time")
+        /// </param>
+        /// <returns>공백이 추가된 문자열입니다.</returns>
         public static string AddSpacesToSentence(this string text, bool preserveAcronyms = true)
         {
-            if (string.IsNullOrWhiteSpace(text))
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
+
+            if (text.Length == 0)
                 return string.Empty;
 
-            StringBuilder newText = StringBuilderCache.Acquire();
+            StringBuilder newText = StringBuilderCache.Acquire(text.Length * 2);
             newText.Append(text[0]);
 
             for (int i = 1; i < text.Length; i++)
             {
-                if (char.IsUpper(text[i]) && ((text[i - 1] != ' ' && !char.IsUpper(text[i - 1])) || (preserveAcronyms && char.IsUpper(text[i - 1]) && i < text.Length - 1 && !char.IsUpper(text[i + 1]))))
-                    newText.Append(' ');
-
+                if (char.IsUpper(text[i]))
+                {
+                    if (text[i - 1] != ' ')
+                    {
+                        if (!char.IsUpper(text[i - 1]) || (preserveAcronyms && i < text.Length - 1 && !char.IsUpper(text[i + 1])))
+                        {
+                            newText.Append(' ');
+                        }
+                    }
+                }
                 newText.Append(text[i]);
             }
 
-            return StringBuilderCache.Release(newText);
+            return newText.ToString();
         }
 
-        public static string[] QuotedSplit(this string text, string separator) => text.EnumerateQuotedSplit(separator).ToArray();
+        /// <summary>
+        /// 큰따옴표 또는 작은따옴표로 감싸진 부분을 제외하고 특정 구분자를 기준으로 문자열을 나눕니다.
+        /// <br/>또한, 따옴표 안의 이스케이프 문자(예: <c>\"</c>, <c>\'</c>, <c>\\</c>)를 올바르게 처리하며,
+        /// 유효하지 않은 이스케이프 문자는 그대로 유지합니다.
+        /// <exception cref="ArgumentNullException">입력 문자열이 null일 경우 발생합니다.</exception>
+        /// </summary>
+        /// <param name="text">분할할 문자열입니다.</param>
+        /// <param name="separator">분할에 사용할 구분자입니다.</param>
+        /// <param name="trimEntries">분할된 각 항목의 앞뒤 공백을 제거할지 여부입니다.</param>
+        /// <returns>분할된 문자열들의 배열을 반환합니다.</returns>
+        public static string[] QuotedSplit(this string text, char separator, bool trimEntries = false) => text.EnumerateQuotedSplit(separator, trimEntries).ToArray();
 
-        //https://codereview.stackexchange.com/a/166801
-        public static IEnumerable<string> EnumerateQuotedSplit(this string text, string separator)
+        /// <summary>
+        /// 큰따옴표 또는 작은따옴표로 감싸진 부분을 제외하고 특정 구분자를 기준으로 문자열을 나누는 열거자(IEnumerable)를 반환합니다.
+        /// <br/>이 메서드는 문자열 전체를 한 번에 메모리에 로드하지 않아 큰 문자열에 효율적입니다.
+        /// <br/>또한, 따옴표 안의 이스케이프 문자(예: <c>\"</c>, <c>\'</c>, <c>\\</c>)를 올바르게 처리하며,
+        /// 유효하지 않은 이스케이프 문자는 그대로 유지합니다.
+        /// <exception cref="ArgumentNullException">입력 문자열이 null일 경우 발생합니다.</exception>
+        /// </summary>
+        /// <param name="text">분할할 문자열입니다.</param>
+        /// <param name="separator">분할에 사용할 구분자입니다.</param>
+        /// <param name="trimEntries">분할된 각 항목의 앞뒤 공백을 제거할지 여부입니다.</param>
+        /// <returns>분할된 문자열들을 열거하는 <see cref="IEnumerable{T}"/>를 반환합니다.</returns>
+        public static IEnumerable<string> EnumerateQuotedSplit(this string text, char separator, bool trimEntries = false)
         {
-            const char quote = '\"';
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
 
-            StringBuilder sb = new StringBuilder(text.Length);
-            int counter = 0;
-            while (counter < text.Length)
+            StringBuilder currentPart = StringBuilderCache.Acquire();
+            char? currentQuote = null;
+
+            for (int i = 0; i < text.Length; i++)
             {
-                // if starts with delmiter if so read ahead to see if matches
-                if (separator[0] == text[counter] && separator.SequenceEqual(ReadNext(text, counter, separator.Length)))
-                {
-                    yield return sb.ToString();
+                char c = text[i];
 
-                    sb.Clear();
-                    counter += separator.Length; // Move the counter past the delimiter 
+                // 따옴표 시작 및 종료
+                if (currentQuote == null && (c == '"' || c == '\''))
+                {
+                    currentQuote = c;
+                    continue; // 따옴표는 결과 문자열에 포함시키지 않음
                 }
-                else if (text[counter] == quote) // if we hit a quote read until we hit another quote or end of string
+                else if (currentQuote == c)
                 {
-                    sb.Append(text[counter++]);
-                    while (counter < text.Length && text[counter] != quote)
-                        sb.Append(text[counter++]);
+                    currentQuote = null;
+                    continue; // 따옴표는 결과 문자열에 포함시키지 않음
+                }
 
-                    // if not end of string then we hit a quote add the quote
-                    if (counter < text.Length)
-                        sb.Append(text[counter++]);
+                // 이스케이프 문자 처리
+                if (currentQuote != null && c == '\\' && i + 1 < text.Length)
+                {
+                    char nextChar = text[i + 1];
+                    if (nextChar == currentQuote || nextChar == '\\')
+                    {
+                        currentPart.Append(nextChar);
+                        i++;
+                        
+                        continue;
+                    }
+                }
+
+                // 구분자 처리
+                if (currentQuote == null && c == separator)
+                {
+                    string result = currentPart.ToString();
+                    yield return trimEntries ? result.Trim() : result;
+                    currentPart.Clear();
                 }
                 else
-                    sb.Append(text[counter++]);
+                    currentPart.Append(c);
             }
 
-            if (sb.Length > 0)
-                yield return sb.ToString();
-
-            static IEnumerable<char> ReadNext(string str, int currentPosition, int count)
-            {
-                for (var i = 0; i < count; i++)
-                {
-                    if (currentPosition + i >= str.Length)
-                        yield break;
-                    else
-                        yield return str[currentPosition + i];
-                }
-            }
+            string finalResult = currentPart.ToString();
+            yield return trimEntries ? finalResult.Trim() : finalResult;
+            
+            StringBuilderCache.Release(currentPart);
         }
 
-        public static string RemoveWhitespace(this string text) => string.Join(string.Empty, text.Split(string.Empty, StringSplitOptions.RemoveEmptyEntries));
-
-        public static IEnumerable<string> ReadLines(this string text)
+        /// <summary>
+        /// 문자열에서 모든 공백 문자(스페이스, 탭 등)를 제거합니다.
+        /// </summary>
+        /// <param name="text">공백을 제거할 문자열입니다.</param>
+        /// <returns>공백이 제거된 문자열을 반환합니다.</returns>
+        public static string RemoveAllWhitespace(this string? text)
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            if (text == null)
+                return string.Empty;
 
-            char lastChar = char.MinValue;
-            foreach (var item in text)
-            {
-                if (item == '\r' || item == '\n')
-                {
-                    if (lastChar == '\r' && item == '\n')
-                        continue;
+            return new string(text.Where(c => !char.IsWhiteSpace(c)).ToArray());
+        }
 
-                    yield return stringBuilder.ToString();
-                    stringBuilder.Clear();
+        /// <summary>
+        /// 문자열을 줄 단위로 나누어 열거자(IEnumerable)를 반환합니다.
+        /// <br/>줄 바꿈 문자는 CRLF(<c>\r\n</c>), CR(<c>\r</c>), LF(<c>\n</c>)를 모두 인식합니다.
+        /// </summary>
+        /// <param name="text">줄을 읽어올 문자열입니다.</param>
+        /// <returns>한 줄씩 읽어오는 <see cref="IEnumerable{T}"/>를 반환합니다.</returns>
+        public static IEnumerable<string> GetLines(this string text)
+        {
+            if (text == null)
+                throw new ArgumentNullException(nameof(text));
 
-                    lastChar = item;
-                }
+            if (text.Length == 0)
+                yield break;
 
-                stringBuilder.Append(item);
-            }
-
-            yield return StringBuilderCache.Release(stringBuilder);
+            using var reader = new System.IO.StringReader(text);
+            while (reader.ReadLine() is { } line)
+                yield return line;
         }
     }
 }

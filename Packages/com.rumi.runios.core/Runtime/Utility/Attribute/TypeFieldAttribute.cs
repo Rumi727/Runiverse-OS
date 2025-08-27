@@ -6,7 +6,8 @@ namespace RuniOS
 {
     public sealed class TypeFieldAttribute : PropertyAttribute
     {
-        public Type baseType;
         public TypeFieldAttribute(Type baseType) => this.baseType = baseType;
+        
+        public Type baseType { get; }
     }
 }

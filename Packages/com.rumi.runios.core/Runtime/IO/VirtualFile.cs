@@ -179,7 +179,7 @@ namespace RuniOS.IO
         public UniTask<IEnumerable<string>> ReadLines()
         {
             ThrowIfDeletedException();
-            return ioHandler?.ReadLines() ?? UniTask.FromResult(Encoding.UTF8.GetString(content).ReadLines());
+            return ioHandler?.ReadLines() ?? UniTask.FromResult(Encoding.UTF8.GetString(content).GetLines());
         }
 
         /// <summary>

@@ -32,10 +32,6 @@ namespace RuniOS.Editor.Drawers
             
             Type fieldType = typeof(KeyValuePairField<>).MakeGenericType(pairType);
             VisualElement element = ((VisualElement)Activator.CreateInstance(fieldType, keyDescription, valueDescription)).SetProperty(property);
-            element.RegisterCallback<PropertyField>(_ =>
-            {
-                element.Q(className: ".unity-base-field__aligned")?.RemoveFromClassList(".unity-base-field__aligned");
-            });
 
             return element;
         }
