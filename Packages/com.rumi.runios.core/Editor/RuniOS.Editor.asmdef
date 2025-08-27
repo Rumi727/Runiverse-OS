@@ -11,6 +11,7 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
+        "RuniOS.APIBridge.UnityEngine.UIElementsModule.dll",
         "RuniOS.APIBridge.UnityEditor.CoreModule.dll",
         "RuniOS.APIBridge.UnityEditor.UIBuilderModule.dll",
         "RuniOS.APIBridge.UnityEditor.UIElementsModule.dll",

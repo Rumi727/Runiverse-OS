@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(Vector4))]
     public class Vector4PropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new Vector4Field().SetProperty<Vector4Field, Vector4>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new Vector4Field().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
         

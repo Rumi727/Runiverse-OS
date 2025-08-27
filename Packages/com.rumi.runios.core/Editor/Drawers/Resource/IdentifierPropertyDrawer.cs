@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Drawers.Resource
     [CustomPropertyDrawer(typeof(Identifier))]
     public class IdentifierPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty<IdentifierField, Identifier>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

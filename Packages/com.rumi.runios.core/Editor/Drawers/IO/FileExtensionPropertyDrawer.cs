@@ -12,7 +12,7 @@ namespace RuniOS.Editor.Drawers.IO
     [CustomPropertyDrawer(typeof(FileExtension))]
     public class FileExtensionPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FileExtensionField().SetProperty<FileExtensionField, FileExtension>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FileExtensionField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(HexColor))]
     public class HexColorPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new HexColorField().SetProperty<HexColorField, HexColor>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new HexColorField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

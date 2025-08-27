@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Drawers.Attributes
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
             TypeFieldAttribute attribute = (TypeFieldAttribute)this.attribute;
-            TypeField typeField = new TypeField(attribute.baseType).SetProperty<TypeField, SerializableType>(property);
+            TypeField typeField = (TypeField)new TypeField(attribute.baseType).SetProperty(property);
             
             return typeField;
         }

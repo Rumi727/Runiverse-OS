@@ -30,7 +30,7 @@ namespace RuniOS.UIElements.Resource
             (
                 "_nameSpace",
                 static x => x.nameSpace,
-                static (ref Identifier identifier, string? fieldValue) =>
+                static (ref Identifier identifier, string fieldValue) =>
                 {
                     if (Identifier.IsNamespaceValid(fieldValue))
                         identifier.nameSpace = fieldValue;

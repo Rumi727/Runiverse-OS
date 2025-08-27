@@ -873,20 +873,12 @@ PrefabInstance:
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: rectOffset.right
-      value: 6.19
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nVector2.hasValue
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nVector3.hasValue
       value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
-      propertyPath: rectOffset.bottom
-      value: 2.5
       objectReference: {fileID: 0}
     - target: {fileID: 3920671259197382881, guid: c9f152b42d1641c4d828f57b5418a5cb, type: 3}
       propertyPath: nDecimal2.hasValue

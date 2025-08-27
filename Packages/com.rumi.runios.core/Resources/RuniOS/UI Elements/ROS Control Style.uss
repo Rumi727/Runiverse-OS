@@ -6,6 +6,11 @@
     margin-right: 0;
 }
 
+.runios-key-value-pair-field .unity-composite-field__field-spacer {
+    width: 10px;
+    flex-grow: 0;
+}
+
 .runios-animated-faded-group {
     --runios-animated_faded_group-easing: EaseOutQuart;
     --runios-animated_faded_group-duration: 0.5;

@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Drawers.IO
     [CustomPropertyDrawer(typeof(FilePath))]
     public class FilePathPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FilePathField().SetProperty<FilePathField, FilePath>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FilePathField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {

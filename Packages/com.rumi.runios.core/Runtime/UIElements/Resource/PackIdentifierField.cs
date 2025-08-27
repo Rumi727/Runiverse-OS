@@ -74,11 +74,8 @@ namespace RuniOS.UIElements.Resource
                 "mode",
                 modeField,
                 static x => x.path != null ? PackIdentifierMode.path : PackIdentifierMode.id,
-                static (ref PackIdentifier packIdentifier, Enum? fieldValue) =>
+                static (ref PackIdentifier packIdentifier, Enum fieldValue) =>
                 {
-                    if (fieldValue == null)
-                        return;
-                    
                     PackIdentifierMode mode = (PackIdentifierMode)fieldValue;
                     if (mode == PackIdentifierMode.id)
                         packIdentifier.path = null;

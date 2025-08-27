@@ -1,8 +1,12 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEditor;
+using RuniOS.Editor.UIElements;
+using RuniOS.UIElements;
+using System;
 using UnityEditor;
+using UnityEditor.UIElements;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers
@@ -10,6 +14,32 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement? CreatePropertyGUI(SerializedProperty property)
+        {
+            Type pairType = fieldInfo.FieldType;
+            (Type? keyType, Type? valueType) = SerializableKeyValuePair.GetUnderlyingType(pairType);
+            if (keyType == null || valueType == null)
+                return null;
+
+            (SerializedProperty? keyProperty, SerializedProperty? valueProperty) = GetChildProperty(property);
+            if (keyProperty == null || valueProperty == null)
+                return null;
+            
+            Type descriptionType = typeof(KeyValuePairField<>.AnonymousFieldDescription<>).MakeGenericType(pairType, typeof(PropertyField));
+            
+            object keyDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalKey, new PropertyField(keyProperty));
+            object valueDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalValue, new PropertyField(valueProperty));
+            
+            Type fieldType = typeof(KeyValuePairField<>).MakeGenericType(pairType);
+            VisualElement element = ((VisualElement)Activator.CreateInstance(fieldType, keyDescription, valueDescription)).SetProperty(property);
+            element.RegisterCallback<PropertyField>(_ =>
+            {
+                element.Q(className: ".unity-base-field__aligned")?.RemoveFromClassList(".unity-base-field__aligned");
+            });
+
+            return element;
+        }
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);

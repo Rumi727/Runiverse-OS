@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(SerializableType))]
     public class SerializableTypePropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new TypeField().SetProperty<TypeField, SerializableType>(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new TypeField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
