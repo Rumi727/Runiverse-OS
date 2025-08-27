@@ -2172,6 +2172,7 @@ namespace RuniOS
             dic[toKey] = value;
         }
 
+        #region Array
         public static Array Add(this Array array, object? item)
         {
             array = array.Resize(array.Length + 1);
@@ -2226,7 +2227,31 @@ namespace RuniOS
 
             return array;
         }
+        
+        public static Array Move(this Array list, int oldIndex, int newIndex)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
 
+            object? temp = list.GetValue(oldIndex);
+            list.RemoveAt(oldIndex);
+            list.Insert(newIndex, temp);
+
+            return list;
+        }
+        
+        public static T[] Move<T>(this T[] list, int oldIndex, int newIndex)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            T temp = list[oldIndex];
+            list.RemoveAt(oldIndex);
+            list.Insert(newIndex, temp);
+
+            return list;
+        }
+        
         public static Array Resize(this Array array, int newSize)
         {
             if (array.Length != newSize)
@@ -2255,6 +2280,7 @@ namespace RuniOS
 
             return result;
         }
+        #endregion
 
         public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
 
