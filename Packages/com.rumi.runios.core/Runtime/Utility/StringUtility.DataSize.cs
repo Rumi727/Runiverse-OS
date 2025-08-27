@@ -25,30 +25,24 @@ namespace RuniOS
             int loopCount = 0;
             double size = byteSize;
 
-            while (size > 1024.0)
+            while (size > 1000.0)
             {
-                size /= 1024.0;
+                size /= 1000.0;
                 loopCount++;
             }
 
-            if (loopCount == 0)
-                space = "B";
-            else if (loopCount == 1)
-                space = "KB";
-            else if (loopCount == 2)
-                space = "MB";
-            else if (loopCount == 3)
-                space = "GB";
-            else if (loopCount == 4)
-                space = "TB";
-            else if (loopCount == 5)
-                space = "PB";
-            else if (loopCount == 6)
-                space = "EB";
-            else if (loopCount == 7)
-                space = "ZB";
-            else
-                space = "YB";
+            space = loopCount switch
+            {
+                0 => "B",
+                1 => "KB",
+                2 => "MB",
+                3 => "GB",
+                4 => "TB",
+                5 => "PB",
+                6 => "EB",
+                7 => "ZB",
+                _ => "YB"
+            };
 
             return size;
         }
