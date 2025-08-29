@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Reflection;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
@@ -186,64 +184,29 @@ namespace RuniOS.UIElements
                 if (description is IAnonymousFieldDescription)
                     description.element.AddToClassList(fieldUssClassName);
 
-                if (description is IFieldDescription fieldDescription && fieldDescription.writeEvent != null && typeof(INotifyValueChanged<>).MakeGenericType(fieldDescription.fieldValueType).IsInstanceOfType(description.element))
+                if (description is IFieldDescription fieldDescription && fieldDescription.writeEvent != null)
                 {
                     try
                     {
-                        MethodInfo? changedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
-                        if (changedCallback != null)
+                        description.element.RegisterValueChangedCallback(fieldDescription.fieldValueType, Write);
+                        
+                        void Write(object fieldValue)
                         {
-                            //나중에 element 속성이 변경되어도 이벤트는 원래 값을 참조하도록 포인터 복제
-                            IFieldDescription.WriteDelegate writeDelegate = fieldDescription.writeEvent;
-                            Type fieldValueType = fieldDescription.fieldValueType;
-                            Action<object> writeFunc = Write;
-                            MethodInfo writeMethodInfo = writeFunc.Method;
-
-                            var changeEventType = typeof(ChangeEvent<>).MakeGenericType(fieldValueType);
-                            var eventParameter = Expression.Parameter(changeEventType, "evt");
-
-                            // `evt.newValue`를 가져오는 Expression을 생성합니다.
-                            var newValueProperty = Expression.Property(eventParameter, "newValue");
-
-                            // `evt.newValue`를 `object`로 변환하는 Expression을 생성합니다.
-                            var convertedValue = Expression.Convert(newValueProperty, typeof(object));
-
-                            // 딜리게이트의 타겟을 Expression으로 만듭니다.
-                            var instanceExpression = Expression.Constant(writeFunc.Target);
-
-                            // `Write` 메소드를 호출하는 Expression을 생성합니다.
-                            var methodCall = Expression.Call(instanceExpression, writeMethodInfo, convertedValue);
-
-                            // 최종 람다 Expression을 생성합니다.
-                            var delegateType = typeof(EventCallback<>).MakeGenericType(changeEventType);
-                            var lambda = Expression.Lambda(delegateType, methodCall, eventParameter);
-
-                            // Expression을 컴파일하여 델리게이트를 얻습니다.
-                            Delegate compiledDelegate = lambda.Compile();
-
-                            changedCallback = changedCallback.MakeGenericMethod(fieldValueType);
-                            changedCallback.Invoke(null, new object[] { description.element, compiledDelegate });
-
-                            void Write(object fieldValue)
+                            try
                             {
-                                try
+                                if (fieldDescription.writeEvent != null)
                                 {
-                                    if (writeDelegate != null)
-                                    {
-                                        var value = this.value;
-                                        writeDelegate.Invoke(ref value, fieldValue);
-                                        this.value = value;
-                                    }
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.LogException(e);
-                                    Debug.LogWarning("An exception occurred while executing a write event on an inner field of a composite field, preventing the actual value of the composite field from being modified.");
+                                    var value = this.value;
+                                    fieldDescription.writeEvent.Invoke(ref value, fieldValue);
+                                    this.value = value;
                                 }
                             }
+                            catch (Exception e)
+                            {
+                                Debug.LogException(e);
+                                Debug.LogWarning("An exception occurred while executing a write event on an inner field of a composite field, preventing the actual value of the composite field from being modified.");
+                            }
                         }
-                        else
-                            Debug.LogWarning($"Method not found: '{nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback)}'.");
                     }
                     catch (Exception e)
                     {

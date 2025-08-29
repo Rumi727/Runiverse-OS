@@ -1,6 +1,8 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEngine.UIElements;
 using RuniOS.UIElements;
+using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -121,6 +123,52 @@ namespace RuniOS
                         child.styleSheets.Add(styleSheet);
                 }
             });
+        }
+
+        public static bool RegisterValueChangedCallback(this VisualElement element, Type targetType, Action<object> callback)
+        {
+            if (typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
+            {
+                MethodInfo? registerValueChangedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
+                if (registerValueChangedCallback != null)
+                {
+                    MethodInfo callbackMethodInfo = callback.Method;
+
+                    var changeEventType = typeof(ChangeEvent<>).MakeGenericType(targetType);
+                    var eventParameter = Expression.Parameter(changeEventType, "evt");
+
+                    // `evt.newValue`를 가져오는 Expression을 생성합니다.
+                    var newValueProperty = Expression.Property(eventParameter, "newValue");
+
+                    // `evt.newValue`를 `object`로 변환하는 Expression을 생성합니다.
+                    var convertedValue = Expression.Convert(newValueProperty, typeof(object));
+
+                    // 딜리게이트의 타겟을 Expression으로 만듭니다.
+                    var instanceExpression = Expression.Constant(callback.Target);
+
+                    // `Write` 메소드를 호출하는 Expression을 생성합니다.
+                    var methodCall = Expression.Call(instanceExpression, callbackMethodInfo, convertedValue);
+
+                    // 최종 람다 Expression을 생성합니다.
+                    var delegateType = typeof(EventCallback<>).MakeGenericType(changeEventType);
+                    var lambda = Expression.Lambda(delegateType, methodCall, eventParameter);
+
+                    // Expression을 컴파일하여 델리게이트를 얻습니다.
+                    Delegate compiledDelegate = lambda.Compile();
+
+                    registerValueChangedCallback = registerValueChangedCallback.MakeGenericMethod(targetType);
+                    registerValueChangedCallback.Invoke(null, new object[]
+                    {
+                        element, compiledDelegate
+                    });
+                    
+                    return true;
+                }
+                else
+                    Debug.LogWarning($"Method not found: '{nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback)}'.");
+            }
+
+            return false;
         }
     }
 }
