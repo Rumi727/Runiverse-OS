@@ -285,7 +285,6 @@ namespace RuniOS
         /// <param name="parameters">Optional parameters to target a specific overload of the method</param>
         /// <param name="generics">Optional list of types that define the generic version of the method</param>
         /// <returns>A method or null when type/name is null or when the method cannot be found</returns>
-        ///
         public static MethodInfo? Method(Type type, string name, Type[]? parameters = null, Type[]? generics = null)
         {
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
