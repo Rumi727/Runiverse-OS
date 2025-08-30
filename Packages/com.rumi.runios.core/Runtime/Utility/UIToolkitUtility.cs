@@ -125,11 +125,11 @@ namespace RuniOS
             });
         }
 
+        static readonly MethodInfo? registerValueChangedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
         public static bool RegisterValueChangedCallback(this VisualElement element, Type targetType, Action<object> callback)
         {
             if (typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
             {
-                MethodInfo? registerValueChangedCallback = AccessUtility.DeclaredMethod(typeof(INotifyValueChangedExtensions), nameof(INotifyValueChangedExtensions.RegisterValueChangedCallback));
                 if (registerValueChangedCallback != null)
                 {
                     MethodInfo callbackMethodInfo = callback.Method;
@@ -156,11 +156,7 @@ namespace RuniOS
                     // Expression을 컴파일하여 델리게이트를 얻습니다.
                     Delegate compiledDelegate = lambda.Compile();
 
-                    registerValueChangedCallback = registerValueChangedCallback.MakeGenericMethod(targetType);
-                    registerValueChangedCallback.Invoke(null, new object[]
-                    {
-                        element, compiledDelegate
-                    });
+                    registerValueChangedCallback.MakeGenericMethod(targetType).Invoke(null, new object[] { element, compiledDelegate });
                     
                     return true;
                 }
