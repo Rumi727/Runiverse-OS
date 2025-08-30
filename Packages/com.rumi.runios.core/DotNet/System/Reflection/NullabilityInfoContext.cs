@@ -346,7 +346,7 @@ namespace System.Reflection
  
             if (underlyingType.IsValueType)
             {
-                if (Nullable.GetUnderlyingType(underlyingType) is { } nullableUnderlyingType)
+                if (underlyingType.GetNullableUnderlyingType() is { } nullableUnderlyingType)
                 {
                     underlyingType = nullableUnderlyingType;
                     state = NullabilityState.Nullable;
