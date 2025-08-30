@@ -4,14 +4,13 @@ using RuniOS.Editor.Drawers.Resource;
 using RuniOS.Resource;
 using System;
 using UnityEditor;
-using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings.Resource
+namespace RuniOS.Editor.Serialization.Converters.Resource
 {
-    [CustomPropertyBinder(typeof(Identifier))]
-    public class IdentifierPropertyBinder : PropertyBinder
+    [CustomPropertyConverter(typeof(Identifier))]
+    public class IdentifierPropertyConverter : PropertyConverter
     {
-        public override object Read(VisualElement element, SerializedProperty property, Type propertyType)
+        public override object Read(SerializedProperty property, Type propertyType)
         {
             (SerializedProperty nameSpace, SerializedProperty path) = IdentifierPropertyDrawer.GetChildProperty(property);
             path = FilePathPropertyDrawer.GetChildProperty(path);
@@ -19,7 +18,7 @@ namespace RuniOS.Editor.UIElements.Bindings.Resource
             return new Identifier(nameSpace.stringValue, path.stringValue);
         }
         
-        public override void Write(VisualElement element, SerializedProperty property, Type propertyType, object? value)
+        public override void Write(SerializedProperty property, Type propertyType, object? value)
         {
             if (value is Identifier identifier)
             {

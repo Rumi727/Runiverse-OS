@@ -2,14 +2,13 @@
 using RuniOS.Editor.Drawers;
 using System;
 using UnityEditor;
-using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.Serialization.Converters
 {
-    [CustomPropertyBinder(typeof(ISerializableNullable<>), true)]
-    public class SerializableNullablePropertyBinder : PropertyBinder
+    [CustomPropertyConverter(typeof(ISerializableNullable<>), true)]
+    public class SerializableNullablePropertyConverter : PropertyConverter
     {
-        public override object Read(VisualElement element, SerializedProperty property, Type propertyType)
+        public override object Read(SerializedProperty property, Type propertyType)
         {
             object instance = Activator.CreateInstance(propertyType);
             
@@ -17,7 +16,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             if (underlyingType == null)
                 return instance;
             
-            PropertyBinder? valueBinder = FindBinder(underlyingType);
+            PropertyConverter? valueBinder = FindConverter(underlyingType);
             if (valueBinder == null)
                 return instance;
             
@@ -25,7 +24,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             if (field == null || toggle is not { boolValue: true })
                 return instance;
             
-            object? value = valueBinder.Read(element, field, underlyingType);
+            object? value = valueBinder.Read(field, underlyingType);
             if (value == null)
                 return instance;
             
@@ -33,7 +32,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             return instance;
         }
         
-        public override void Write(VisualElement element, SerializedProperty property, Type propertyType, object? nullable)
+        public override void Write(SerializedProperty property, Type propertyType, object? nullable)
         {
             Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
             if (underlyingType == null)
@@ -48,7 +47,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             if (hasValue)
                 value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
             
-            FindBinder(underlyingType)?.Write(element, field, underlyingType, value);
+            FindConverter(underlyingType)?.Write(field, underlyingType, value);
             toggle.boolValue = hasValue;
         }
     }

@@ -3,14 +3,13 @@ using RuniOS.Collections.Generic;
 using RuniOS.Editor.Drawers;
 using System;
 using UnityEditor;
-using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Bindings
+namespace RuniOS.Editor.Serialization.Converters
 {
-    [CustomPropertyBinder(typeof(ISerializableKeyValuePair<,>), true)]
-    public class SerializableKeyValuePairPropertyBinder : PropertyBinder
+    [CustomPropertyConverter(typeof(ISerializableKeyValuePair<,>), true)]
+    public class SerializableKeyValuePairPropertyConverter : PropertyConverter
     {
-        public override object Read(VisualElement element, SerializedProperty property, Type propertyType)
+        public override object Read(SerializedProperty property, Type propertyType)
         {
             object instance = Activator.CreateInstance(propertyType);
             (Type? keyType, Type? valueType) = SerializableKeyValuePair.GetUnderlyingType(propertyType);
@@ -18,20 +17,20 @@ namespace RuniOS.Editor.UIElements.Bindings
             (SerializedProperty? keyProperty, SerializedProperty? valueProperty) = SerializableKeyValuePairPropertyDrawer.GetChildProperty(property);
             if (keyType != null && keyProperty != null)
             {
-                PropertyBinder? keyBinder = FindBinder(keyType);
+                PropertyConverter? keyBinder = FindConverter(keyType);
                 if (keyBinder != null)
                 {
-                    object? key = keyBinder.Read(element, keyProperty, keyType);
+                    object? key = keyBinder.Read(keyProperty, keyType);
                     AccessUtility.DeclaredProperty(propertyType, SerializableKeyValuePair.nameOfKey)?.SetValue(key, instance);
                 }
             }
 
             if (valueType != null && valueProperty != null)
             {
-                PropertyBinder? valueBinder = FindBinder(valueType);
+                PropertyConverter? valueBinder = FindConverter(valueType);
                 if (valueBinder != null)
                 {
-                    object? value = valueBinder.Read(element, valueProperty, valueType);
+                    object? value = valueBinder.Read(valueProperty, valueType);
                     AccessUtility.DeclaredProperty(propertyType, SerializableKeyValuePair.nameOfValue)?.SetValue(value, instance);
                 }
             }
@@ -39,7 +38,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             return instance;
         }
         
-        public override void Write(VisualElement element, SerializedProperty property, Type propertyType, object? nullable)
+        public override void Write(SerializedProperty property, Type propertyType, object? nullable)
         {
             Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
             if (underlyingType == null)
@@ -54,7 +53,7 @@ namespace RuniOS.Editor.UIElements.Bindings
             if (hasValue)
                 value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
             
-            FindBinder(underlyingType)?.Write(element, field, underlyingType, value);
+            FindConverter(underlyingType)?.Write(field, underlyingType, value);
             toggle.boolValue = hasValue;
         }
     }

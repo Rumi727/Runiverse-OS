@@ -100,7 +100,7 @@ namespace RuniOS.UIElements
             labelElement.AddToClassList(labelUssClassName);
 
             AddToClassList(ussClassName);
-            visualInput = this.Q<VisualElement>(className: BaseField<HexColor>.inputUssClassName);
+            visualInput = this.Q<VisualElement>(className: BaseField<SerializableType>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             
             textElement = new TextElement { name = textUssClassName, pickingMode = PickingMode.Ignore };

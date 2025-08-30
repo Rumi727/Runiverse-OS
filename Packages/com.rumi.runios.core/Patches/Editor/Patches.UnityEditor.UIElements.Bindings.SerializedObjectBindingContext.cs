@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using HarmonyLib;
-using RuniOS.Editor.UIElements;
+using RuniOS.Editor.Serialization;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -140,7 +140,7 @@ namespace RuniOS.Editor.Patches
                                     }
 
                                     // 해당 propertyType에 맞는 PropertyBinder를 찾습니다.
-                                    PropertyBinder? binder = PropertyBinder.FindBinder(propertyType);
+                                    PropertyConverter? binder = PropertyConverter.FindConverter(propertyType);
 
                                     // 적합한 PropertyBinder를 찾지 못한 경우 false를 반환합니다.
                                     if (binder == null)
@@ -173,7 +173,7 @@ namespace RuniOS.Editor.Patches
                                                 property = property.Copy();
                                                 
                                                 // 바인더를 통해 값을 읽어옵니다.
-                                                object? value = binder.Read(element, property, propertyType);
+                                                object? value = binder.Read(property, propertyType);
 
                                                 // 읽어온 값이 null인 경우의 처리 로직
                                                 if (value == null)
@@ -248,7 +248,7 @@ namespace RuniOS.Editor.Patches
                                                 property = property.Copy();
                                                 
                                                 // 바인더를 통해 값을 씁니다.
-                                                binder.Write(element, property, propertyType, value);
+                                                binder.Write(property, propertyType, value);
                                             }
                                             catch (Exception e) // 바인더 내부에서 예외가 발생한 경우 처리
                                             {
@@ -303,7 +303,7 @@ namespace RuniOS.Editor.Patches
                                                 object? currentValue = readFunc.DynamicInvoke(property);
 
                                                 // 바인더의 Comparer 메소드를 호출하여 값을 비교합니다.
-                                                return binder.Comparer(element, property, propertyType, currentValue, valueToCompare);
+                                                return binder.Comparer(property, propertyType, currentValue, valueToCompare);
                                             }
                                             catch (Exception e) // 바인더 내부에서 예외가 발생한 경우 처리
                                             {
