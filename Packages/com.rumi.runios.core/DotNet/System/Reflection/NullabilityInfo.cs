@@ -8,7 +8,10 @@ namespace System.Reflection
     /// <summary>
     /// A class that represents nullability info
     /// </summary>
-    public sealed class NullabilityInfo
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_NULLABILITY_INFO 
+    public 
+#endif
+    sealed class NullabilityInfo
     {
         internal NullabilityInfo(Type type, NullabilityState readState, NullabilityState writeState,
             NullabilityInfo? elementType, NullabilityInfo[] typeArguments)

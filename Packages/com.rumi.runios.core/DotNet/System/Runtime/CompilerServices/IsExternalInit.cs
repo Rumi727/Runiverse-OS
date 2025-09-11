@@ -10,5 +10,8 @@ namespace System.Runtime.CompilerServices
     /// This class should not be used by developers in source code.
     /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class IsExternalInit { }
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT 
+    public 
+#endif
+    static class IsExternalInit { }
 }

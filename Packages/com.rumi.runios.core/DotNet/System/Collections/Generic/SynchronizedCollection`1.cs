@@ -5,7 +5,10 @@
 namespace System.Collections.Generic
 {
     [Runtime.InteropServices.ComVisible(false)]
-    public class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyList<T>
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_SYNCHRONIZED_COLLECTION_1 
+    public 
+#endif
+    class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyList<T>
     {
         public readonly List<T> internalList;
         public readonly object internalSync = new();

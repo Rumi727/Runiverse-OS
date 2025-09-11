@@ -8,7 +8,10 @@ namespace System.Reflection
     /// <summary>
     /// An enum that represents nullability state
     /// </summary>
-    public enum NullabilityState
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_NULLABILITY_STATE 
+    public 
+#endif
+    enum NullabilityState
     {
         /// <summary>
         /// Nullability context not enabled (oblivious)

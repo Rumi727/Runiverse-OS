@@ -1,12 +1,16 @@
 ﻿#nullable enable
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Reflection/NullabilityInfoContext.cs
+#if !NET
 using RuniOS;
 
 #pragma warning disable
 // ReSharper disable all
 namespace System.Reflection
 {
-    public static class NetstandardHelpers
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_NETSTANDARD_HELPERS 
+    public 
+#endif
+    static class NetstandardHelpers
     {
         public static MemberInfo GetMemberWithSameMetadataDefinitionAs(this Type type, MemberInfo member)
         {
@@ -42,3 +46,4 @@ namespace System.Reflection
             => metaMethod.GetParameters();
     }
 }
+#endif

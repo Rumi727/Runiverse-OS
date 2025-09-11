@@ -13,7 +13,10 @@ namespace System.Reflection
     /// Provides APIs for populating nullability information/context from reflection members:
     /// <see cref="ParameterInfo"/>, <see cref="FieldInfo"/>, <see cref="PropertyInfo"/> and <see cref="EventInfo"/>.
     /// </summary>
-    public sealed class NullabilityInfoContext
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_NULLABILITY_INFO_CONTEXT 
+    public 
+#endif
+    sealed class NullabilityInfoContext
     {
         const string CompilerServicesNameSpace = "System.Runtime.CompilerServices";
         readonly Dictionary<Module, NotAnnotatedStatus> _publicOnlyModules = new();
