@@ -16,7 +16,7 @@ namespace RuniOS.AnimatedValues
             set => base.target = value ? 1 : 0;
         }
         
-        public override float value => MathUtility.Lerp(start.Clamp01(), base.target.Clamp01(), progress).ToFloat();
+        public override float value => MathUtility.Lerp(start.Clamp01(), base.target.Clamp01(), progress).ClampToFloat();
 
         public void SetValue(bool value) => base.SetValue(value ? 1 : 0);
     }

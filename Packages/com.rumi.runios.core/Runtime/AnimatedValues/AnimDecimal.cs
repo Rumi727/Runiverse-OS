@@ -10,6 +10,6 @@ namespace RuniOS.AnimatedValues
         
         public AnimDecimal(decimal value, EasingFunction.Ease easing, double duration) : base(value, easing, duration) {}
 
-        public override decimal value => MathUtility.Lerp(start.ToDouble(), target.ToDouble(), progress).ToDecimal();
+        public override decimal value => MathUtility.Lerp(start.ClampToDouble(), target.ClampToDouble(), progress).ClampToDecimal();
     }
 }
