@@ -18,7 +18,7 @@ namespace RuniOS.Collections.Generic
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
-                // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                // IEnumerable<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(IEnumerable<>), out Type? resolvedType))
                     return resolvedType.GetGenericArguments()[0];
             }
@@ -39,7 +39,7 @@ namespace RuniOS.Collections.Generic
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
-                // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                // ICollection<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? resolvedType))
                     return resolvedType.GetGenericArguments()[0];
             }
@@ -60,7 +60,7 @@ namespace RuniOS.Collections.Generic
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
-                // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                // IList<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(IList<>), out Type? resolvedType))
                     return resolvedType.GetGenericArguments()[0];
             }
@@ -81,7 +81,7 @@ namespace RuniOS.Collections.Generic
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
-                // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                // IDictionary<,>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(IDictionary<,>), out Type? resolvedType))
                 {
                     Type key = resolvedType.GetGenericArguments()[0];
@@ -107,7 +107,7 @@ namespace RuniOS.Collections.Generic
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
             {
-                // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                // KeyValuePair<,>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(KeyValuePair<,>), out Type? resolvedType))
                 {
                     Type key = resolvedType.GetGenericArguments()[0];
