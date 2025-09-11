@@ -1,8 +1,10 @@
 #nullable enable
 using ExtendedNumerics;
 using System;
+using System.Linq;
 using System.Numerics;
 using UnityEngine;
+
 using Quaternion = UnityEngine.Quaternion;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -48,6 +50,12 @@ namespace RuniOS
         public const double rad2DegDouble = 180 / piDouble;
 
         public const float epsilonFloatWithAccuracy = 0.0001f;
+        
+        public static long nintMinSize => -((1L << (8 * UIntPtr.Size)) / 2);
+        public static long nintMaxSize => ((1L << (8 * UIntPtr.Size)) / 2) - 1;
+
+        public const ulong nuintMinSize = 0;
+        public static ulong nuintMaxSize => 1uL << (8 * UIntPtr.Size);
 
         /*public static void FunctionList()
         {
@@ -104,90 +112,31 @@ namespace RuniOS
         }*/
 
         #region Abs
-        public static sbyte Abs(this sbyte value)
-        {
-            if (value < 0)
-                return (sbyte)-value;
-            else
-                return value;
-        }
+        public static sbyte Abs(this sbyte value) => value < 0 ? (sbyte)-value : value;
 
-        public static short Abs(this short value)
-        {
-            if (value < 0)
-                return (sbyte)-value;
-            else
-                return value;
-        }
+        public static short Abs(this short value) => value < 0 ? (sbyte)-value : value;
 
-        public static int Abs(this int value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static int Abs(this int value) => value < 0 ? -value : value;
 
-        public static long Abs(this long value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static long Abs(this long value) => value < 0 ? -value : value;
 
-        public static float Abs(this float value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static float Abs(this float value) => value < 0 ? -value : value;
 
-        public static double Abs(this double value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static double Abs(this double value) => value < 0 ? -value : value;
 
-        public static decimal Abs(this decimal value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static decimal Abs(this decimal value) => value < 0 ? -value : value;
 
-        public static BigInteger Abs(this BigInteger value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static BigInteger Abs(this BigInteger value) => value < 0 ? -value : value;
 
-        public static BigDecimal Abs(this BigDecimal value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static BigDecimal Abs(this BigDecimal value) => value < 0 ? -value : value;
 
-        public static nint Abs(this nint value)
-        {
-            if (value < 0)
-                return -value;
-            else
-                return value;
-        }
+        public static nint Abs(this nint value) => value < 0 ? -value : value;
         #endregion Abs
 
         #region Acos
         public static float Acos(this float value) => (float)Math.Acos(value);
         public static double Acos(this double value) => Math.Acos(value);
+        public static decimal Acos(this decimal value) => DecimalMath.Acos(value);
         #endregion
 
         #region Acosh
@@ -227,6 +176,7 @@ namespace RuniOS
         #region Asin
         public static float Asin(this float value) => (float)Math.Asin(value);
         public static double Asin(this double value) => Math.Asin(value);
+        public static decimal Asin(this decimal value) => DecimalMath.Asin(value);
         #endregion
 
         #region Asinh
@@ -237,11 +187,13 @@ namespace RuniOS
         #region Atan
         public static float Atan(this float value) => (float)Math.Atan(value);
         public static double Atan(this double value) => Math.Atan(value);
+        public static decimal Atan(this decimal value) => DecimalMath.ATan(value);
         #endregion
 
         #region Atan2
         public static float Atan2(this float y, float x) => (float)Math.Atan2(y, x);
         public static double Atan2(this double y, double x) => Math.Atan2(y, x);
+        public static decimal Atan2(this decimal y, decimal x) => DecimalMath.Atan2(y, x);
         #endregion
 
         #region Atanh
@@ -292,21 +244,251 @@ namespace RuniOS
             BigDecimal num = roundPower10BigDecimal[digits];
             return (value * num).Ceil() / num;
         }
-
-        public static int CeilToInt(this float value) => (int)Math.Ceiling(value);
-        public static int CeilToInt(this double value) => (int)Math.Ceiling(value);
-        public static int CeilToInt(this decimal value) => (int)Math.Ceiling(value);
+        #endregion
+        
+        #region Ceil To SByte
+        public static sbyte CeilToSByte(this float value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Ceiling(value)
+            };
+        }
+        public static sbyte CeilToSByte(this double value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Ceiling(value)
+            };
+        }
+        public static sbyte CeilToSByte(this decimal value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To Byte
+        public static byte CeilToByte(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Ceiling(value)
+            };
+        }
+        public static byte CeilToByte(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Ceiling(value)
+            };
+        }
+        public static byte CeilToByte(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To Short
+        public static short CeilToShort(this float value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Ceiling(value)
+            };
+        }
+        public static short CeilToShort(this double value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Ceiling(value)
+            };
+        }
+        public static short CeilToShort(this decimal value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To Ushort
+        public static ushort CeilToUShort(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Ceiling(value)
+            };
+        }
+        public static ushort CeilToUShort(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Ceiling(value)
+            };
+        }
+        public static ushort CeilToUShort(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To Int
+        public static int CeilToInt(this float value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Ceiling(value)
+            };
+        }
+        public static int CeilToInt(this double value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Ceiling(value)
+            };
+        }
+        public static int CeilToInt(this decimal value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Ceiling(value)
+            };
+        }
         public static BigInteger CeilToInt(this BigDecimal value) => (BigInteger)BigDecimal.Ceiling(value);
+        #endregion
+        
+        #region Ceil To UInt
+        public static uint CeilToUInt(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Ceiling(value)
+            };
+        }
+        public static uint CeilToUInt(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Ceiling(value)
+            };
+        }
+        public static uint CeilToUInt(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To Long
+        public static long CeilToLong(this float value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Ceiling(value)
+            };
+        }
+        public static long CeilToLong(this double value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Ceiling(value)
+            };
+        }
+        public static long CeilToLong(this decimal value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Ceiling(value)
+            };
+        }
+        #endregion
+        
+        #region Ceil To ULong
+        public static ulong CeilToULong(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Ceiling(value)
+            };
+        }
+        public static ulong CeilToULong(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Ceiling(value)
+            };
+        }
+        public static ulong CeilToULong(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Ceiling(value)
+            };
+        }
         #endregion
 
         #region Clamp
-        public static sbyte Clamp(this sbyte value, sbyte min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static sbyte Clamp(this sbyte value, sbyte min) => value < min ? min : value;
 
         public static sbyte Clamp(this sbyte value, sbyte min, sbyte max)
         {
@@ -318,13 +500,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static byte Clamp(this byte value, byte min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static byte Clamp(this byte value, byte min) => value < min ? min : value;
 
         public static byte Clamp(this byte value, byte min, byte max)
         {
@@ -336,13 +512,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static short Clamp(this short value, short min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static short Clamp(this short value, short min) => value < min ? min : value;
 
         public static short Clamp(this short value, short min, short max)
         {
@@ -354,13 +524,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static ushort Clamp(this ushort value, ushort min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static ushort Clamp(this ushort value, ushort min) => value < min ? min : value;
 
         public static ushort Clamp(this ushort value, ushort min, ushort max)
         {
@@ -372,13 +536,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static int Clamp(this int value, int min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static int Clamp(this int value, int min) => value < min ? min : value;
 
         public static int Clamp(this int value, int min, int max)
         {
@@ -390,13 +548,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static uint Clamp(this uint value, uint min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static uint Clamp(this uint value, uint min) => value < min ? min : value;
 
         public static uint Clamp(this uint value, uint min, uint max)
         {
@@ -408,13 +560,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static long Clamp(this long value, long min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static long Clamp(this long value, long min) => value < min ? min : value;
 
         public static long Clamp(this long value, long min, long max)
         {
@@ -426,13 +572,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static ulong Clamp(this ulong value, ulong min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static ulong Clamp(this ulong value, ulong min) => value < min ? min : value;
 
         public static ulong Clamp(this ulong value, ulong min, ulong max)
         {
@@ -444,13 +584,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static float Clamp(this float value, float min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static float Clamp(this float value, float min) => value < min ? min : value;
 
         public static float Clamp(this float value, float min, float max)
         {
@@ -465,13 +599,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static double Clamp(this double value, double min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static double Clamp(this double value, double min) => value < min ? min : value;
 
         public static double Clamp(this double value, double min, double max)
         {
@@ -486,13 +614,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static decimal Clamp(this decimal value, decimal min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static decimal Clamp(this decimal value, decimal min) => value < min ? min : value;
 
         public static decimal Clamp(this decimal value, decimal min, decimal max)
         {
@@ -504,13 +626,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static BigInteger Clamp(this BigInteger value, BigInteger min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static BigInteger Clamp(this BigInteger value, BigInteger min) => value < min ? min : value;
 
         public static BigInteger Clamp(this BigInteger value, BigInteger min, BigInteger max)
         {
@@ -522,13 +638,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static BigDecimal Clamp(this BigDecimal value, BigDecimal min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static BigDecimal Clamp(this BigDecimal value, BigDecimal min) => value < min ? min : value;
 
         public static BigDecimal Clamp(this BigDecimal value, BigDecimal min, BigDecimal max)
         {
@@ -540,13 +650,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static nint Clamp(this nint value, nint min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static nint Clamp(this nint value, nint min) => value < min ? min : value;
 
         public static nint Clamp(this nint value, nint min, nint max)
         {
@@ -558,13 +662,7 @@ namespace RuniOS
                 return value;
         }
 
-        public static nuint Clamp(this nuint value, nuint min)
-        {
-            if (value < min)
-                return min;
-            else
-                return value;
-        }
+        public static nuint Clamp(this nuint value, nuint min) => value < min ? min : value;
 
         public static nuint Clamp(this nuint value, nuint min, nuint max)
         {
@@ -757,11 +855,13 @@ namespace RuniOS
         #region Cos
         public static float Cos(this float value) => (float)Math.Cos(value);
         public static double Cos(this double value) => Math.Cos(value);
+        public static decimal Cos(this decimal value) => DecimalMath.Cos(value);
         #endregion
 
         #region Cosh
         public static float Cosh(this float value) => (float)Math.Cosh(value);
         public static double Cosh(this double value) => Math.Cosh(value);
+        public static decimal Cosh(this decimal value) => DecimalMath.Cosh(value);
         #endregion
 
         #region Delta Angle
@@ -936,6 +1036,7 @@ namespace RuniOS
         #region Exp
         public static float Exp(this float value) => (float)Math.Exp(value);
         public static double Exp(this double value) => Math.Exp(value);
+        public static decimal Exp(this decimal value) => DecimalMath.Exp(value);
         public static BigDecimal Exp(this BigInteger value) => BigDecimal.Exp(value);
         #endregion
 
@@ -977,11 +1078,247 @@ namespace RuniOS
             BigDecimal num = roundPower10BigDecimal[digits];
             return (value * num).Floor() / num;
         }
-
-        public static int FloorToInt(this float value) => (int)Math.Floor(value);
-        public static int FloorToInt(this double value) => (int)Math.Floor(value);
-        public static int FloorToInt(this decimal value) => (int)Math.Floor(value);
+        #endregion
+        
+        #region Floor To SByte
+        public static sbyte FloorToSByte(this float value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Floor(value)
+            };
+        }
+        public static sbyte FloorToSByte(this double value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Floor(value)
+            };
+        }
+        public static sbyte FloorToSByte(this decimal value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To Byte
+        public static byte FloorToByte(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Floor(value)
+            };
+        }
+        public static byte FloorToByte(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Floor(value)
+            };
+        }
+        public static byte FloorToByte(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To Short
+        public static short FloorToShort(this float value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Floor(value)
+            };
+        }
+        public static short FloorToShort(this double value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Floor(value)
+            };
+        }
+        public static short FloorToShort(this decimal value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To Ushort
+        public static ushort FloorToUShort(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Floor(value)
+            };
+        }
+        public static ushort FloorToUShort(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Floor(value)
+            };
+        }
+        public static ushort FloorToUShort(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To Int
+        public static int FloorToInt(this float value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Floor(value)
+            };
+        }
+        public static int FloorToInt(this double value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Floor(value)
+            };
+        }
+        public static int FloorToInt(this decimal value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Floor(value)
+            };
+        }
         public static BigInteger FloorToInt(this BigDecimal value) => (BigInteger)BigDecimal.Floor(value);
+        #endregion
+        
+        #region Floor To UInt
+        public static uint FloorToUInt(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Floor(value)
+            };
+        }
+        public static uint FloorToUInt(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Floor(value)
+            };
+        }
+        public static uint FloorToUInt(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To Long
+        public static long FloorToLong(this float value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Floor(value)
+            };
+        }
+        public static long FloorToLong(this double value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Floor(value)
+            };
+        }
+        public static long FloorToLong(this decimal value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Floor(value)
+            };
+        }
+        #endregion
+        
+        #region Floor To ULong
+        public static ulong FloorToULong(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Floor(value)
+            };
+        }
+        public static ulong FloorToULong(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Floor(value)
+            };
+        }
+        public static ulong FloorToULong(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Floor(value)
+            };
+        }
         #endregion
 
         #region Gamma
@@ -1024,6 +1361,58 @@ namespace RuniOS
             else
                 return result;
         }
+        #endregion
+
+        #region GCD
+        /// <summary>
+        /// 두 정수의 최대 공약수(GCD)를 계산합니다.
+        /// </summary>
+        /// <param name="a">첫 번째 정수입니다.</param>
+        /// <param name="b">두 번째 정수입니다.</param>
+        /// <returns>두 정수의 최대 공약수입니다.</returns>
+        /// <exception cref="ArgumentException">두 입력이 모두 0인 경우 발생합니다. GCD는 0,0에 대해 정의되지 않습니다.</exception>
+        public static ulong GCD(this ulong a, ulong b)
+        {
+            if (a == 0 && b == 0)
+                throw new ArgumentException("GCD is not defined for both arguments being zero.");
+    
+            while (a != 0 && b != 0)
+            {
+                if (a > b)
+                    a %= b;
+                else
+                    b %= a;
+            }
+
+            return a | b;
+        }
+        
+        /// <summary>
+        /// 주어진 정수 배열의 모든 요소에 대한 최대 공약수(GCD)를 계산합니다.
+        /// </summary>
+        /// <param name="numbers">GCD를 계산할 정수 배열입니다. <br/> 배열에는 2개 이상의 정수가 포함되어야 합니다.</param>
+        /// <returns>배열의 모든 요소에 대한 최대 공약수입니다.</returns>
+        /// <exception cref="ArgumentException">배열이 <see langword="null"/>이거나, 2개 미만의 요소를 포함하거나, 모든 요소가 0인 경우 발생합니다.</exception>
+        public static ulong GCD(params ulong[] numbers)
+        {
+            if (numbers == null || numbers.Length < 2)
+                throw new ArgumentException("Input array must not be null and contain at least two numbers.");
+    
+            if (numbers.All(static n => n == 0))
+                throw new ArgumentException("GCD is not defined for all arguments being zero.");
+
+            ulong result = numbers[0];
+            for (int i = 1; i < numbers.Length; i++)
+                result = GCD(result, numbers[i]);
+
+            return result;
+        }
+        #endregion
+
+        #region Get Number Of Decimals For Minimum Difference
+        public static int GetNumberOfDecimalsForMinimumDifference(this float minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
+        public static int GetNumberOfDecimalsForMinimumDifference(this double minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
+        public static int GetNumberOfDecimalsForMinimumDifference(this decimal minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
         #endregion
 
         public static float GammaToLinearSpace(this float value) => Mathf.GammaToLinearSpace(value);
@@ -1580,11 +1969,13 @@ namespace RuniOS
         #region Log
         public static float Log(this float value) => (float)Math.Log(value);
         public static double Log(this double value) => Math.Log(value);
+        public static decimal Log(this decimal value) => DecimalMath.Log(value);
         #endregion
 
         #region Log 10
         public static float Log10(this float value) => (float)Math.Log10(value);
         public static double Log10(this double value) => Math.Log10(value);
+        public static decimal Log10(this decimal value) => DecimalMath.Log10(value);
         #endregion
 
         #region Max
@@ -3701,8 +4092,58 @@ namespace RuniOS
         #endregion
 
         #region Pow
+        public static long Pow(this int baseValue, int exponent) => ((long)baseValue).Pow(exponent);
+        public static ulong Pow(this uint baseValue, uint exponent) => ((ulong)baseValue).Pow(exponent);
+        public static long Pow(this long baseValue, long exponent)
+        {
+            if (exponent < 0)
+            {
+                // 음수 지수는 일반적으로 분수나 실수를 반환하므로,
+                // 정수 거듭제곱에서는 예외를 발생시키거나 다른 처리가 필요합니다.
+                // 여기서는 예외를 발생시킵니다.
+                throw new ArgumentException("The exponent cannot be negative.", nameof(exponent));
+            }
+
+            long result = 1;
+            while (exponent > 0)
+            {
+                // 지수가 홀수이면 결과에 현재 밑 값을 곱합니다.
+                if (exponent % 2 == 1)
+                    result *= baseValue;
+
+                // 밑 값을 제곱합니다.
+                baseValue *= baseValue;
+
+                // 지수를 2로 나눕니다.
+                exponent /= 2;
+            }
+
+            return result;
+        }
+        
+        public static ulong Pow(this ulong baseValue, ulong exponent)
+        {
+            ulong result = 1;
+            while (exponent > 0)
+            {
+                // 지수가 홀수이면 결과에 현재 밑 값을 곱합니다.
+                if (exponent % 2 == 1)
+                    result *= baseValue;
+
+                // 밑 값을 제곱합니다.
+                baseValue *= baseValue;
+
+                // 지수를 2로 나눕니다.
+                exponent /= 2;
+            }
+
+            return result;
+        }
+        
         public static float Pow(this float x, float y) => (float)Math.Pow(x, y);
         public static double Pow(this double x, double y) => Math.Pow(x, y);
+        public static decimal Pow(this decimal x, int y) => DecimalMath.PowerN(x, y);
+        public static decimal Pow(this decimal x, decimal y) => DecimalMath.Power(x, y);
         public static BigInteger Pow(this BigInteger x, int y) => BigInteger.Pow(x, y);
         public static BigDecimal Pow(this BigDecimal x, BigInteger y) => BigDecimal.Pow(x, y);
         #endregion
@@ -4667,12 +5108,254 @@ namespace RuniOS
         public static float Round(this float value, int digits, MidpointRounding midpointRounding) => (float)Math.Round(value, digits, midpointRounding);
         public static double Round(this double value, int digits, MidpointRounding midpointRounding) => Math.Round(value, digits, midpointRounding);
         public static decimal Round(this decimal value, int digits, MidpointRounding midpointRounding) => Math.Round(value, digits, midpointRounding);
-
-        public static int RoundToInt(this float value) => (int)Math.Round(value);
-        public static int RoundToInt(this double value) => (int)Math.Round(value);
-        public static int RoundToInt(this decimal value) => (int)Math.Round(value);
+        #endregion
+        
+        #region Round To SByte
+        public static sbyte RoundToSByte(this float value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Round(value)
+            };
+        }
+        public static sbyte RoundToSByte(this double value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Round(value)
+            };
+        }
+        public static sbyte RoundToSByte(this decimal value)
+        {
+            return value switch
+            {
+                <= sbyte.MinValue => sbyte.MinValue,
+                >= sbyte.MaxValue => sbyte.MaxValue,
+                _ => (sbyte)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To Byte
+        public static byte RoundToByte(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Round(value)
+            };
+        }
+        public static byte RoundToByte(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Round(value)
+            };
+        }
+        public static byte RoundToByte(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= byte.MaxValue => byte.MaxValue,
+                _ => (byte)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To Short
+        public static short RoundToShort(this float value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Round(value)
+            };
+        }
+        public static short RoundToShort(this double value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Round(value)
+            };
+        }
+        public static short RoundToShort(this decimal value)
+        {
+            return value switch
+            {
+                <= short.MinValue => short.MinValue,
+                >= short.MaxValue => short.MaxValue,
+                _ => (short)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To Ushort
+        public static ushort RoundToUShort(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Round(value)
+            };
+        }
+        public static ushort RoundToUShort(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Round(value)
+            };
+        }
+        public static ushort RoundToUShort(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ushort.MaxValue => ushort.MaxValue,
+                _ => (ushort)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To Int
+        public static int RoundToInt(this float value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Round(value)
+            };
+        }
+        public static int RoundToInt(this double value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Round(value)
+            };
+        }
+        public static int RoundToInt(this decimal value)
+        {
+            return value switch
+            {
+                <= int.MinValue => int.MinValue,
+                >= int.MaxValue => int.MaxValue,
+                _ => (int)Math.Round(value)
+            };
+        }
         public static BigInteger RoundToInt(this BigDecimal value) => BigDecimal.Round(value);
         #endregion
+        
+        #region Round To UInt
+        public static uint RoundToUInt(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Round(value)
+            };
+        }
+        public static uint RoundToUInt(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Round(value)
+            };
+        }
+        public static uint RoundToUInt(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= uint.MaxValue => uint.MaxValue,
+                _ => (uint)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To Long
+        public static long RoundToLong(this float value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Round(value)
+            };
+        }
+        public static long RoundToLong(this double value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Round(value)
+            };
+        }
+        public static long RoundToLong(this decimal value)
+        {
+            return value switch
+            {
+                <= long.MinValue => long.MinValue,
+                >= long.MaxValue => long.MaxValue,
+                _ => (long)Math.Round(value)
+            };
+        }
+        #endregion
+        
+        #region Round To ULong
+        public static ulong RoundToULong(this float value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Round(value)
+            };
+        }
+        public static ulong RoundToULong(this double value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Round(value)
+            };
+        }
+        public static ulong RoundToULong(this decimal value)
+        {
+            return value switch
+            {
+                <= 0 => 0,
+                >= ulong.MaxValue => ulong.MaxValue,
+                _ => (ulong)Math.Round(value)
+            };
+        }
+        #endregion
+
+        #region  Round Based On Minimum Difference
+        public static float RoundBasedOnMinimumDifference(this float valueToRound, float minDifference) => minDifference == 0.0f ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
+        public static double RoundBasedOnMinimumDifference(this double valueToRound, double minDifference) => minDifference == 0.0 ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
+        public static decimal RoundBasedOnMinimumDifference(this decimal valueToRound, decimal minDifference) => minDifference == 0.0m ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
+        #endregion 
 
         #region Sign
         public static int Sign(this sbyte value)
@@ -4683,7 +5366,7 @@ namespace RuniOS
                 return 1;
         }
 
-        public static short Sign(this short value)
+        public static int Sign(this short value)
         {
             if (value < 0)
                 return -1;
@@ -4699,7 +5382,7 @@ namespace RuniOS
                 return 1;
         }
 
-        public static long Sign(this long value)
+        public static int Sign(this long value)
         {
             if (value < 0)
                 return -1;
@@ -4755,15 +5438,119 @@ namespace RuniOS
                 return 1;
         }
         #endregion
+        
+        #region Sign With Zero
+        public static int SignWithZero(this sbyte value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this short value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this int value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this long value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this float value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this double value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this decimal value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this BigInteger value)
+        {
+            if (value < BigInteger.Zero)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this BigDecimal value)
+        {
+            if (value < BigDecimal.Zero)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+
+        public static int SignWithZero(this nint value)
+        {
+            if (value < 0)
+                return -1;
+            else if (value > 0)
+                return 1;
+                
+            return 0;
+        }
+        #endregion
 
         #region Sin
         public static float Sin(this float value) => (float)Math.Sin(value);
         public static double Sin(this double value) => Math.Sin(value);
+        public static decimal Sin(this decimal value) => DecimalMath.Sin(value);
         #endregion
 
         #region Sinh
         public static float Sinh(this float value) => (float)Math.Sinh(value);
         public static double Sinh(this double value) => Math.Sinh(value);
+        public static decimal Sinh(this decimal value) => DecimalMath.Sinh(value);
         #endregion
 
         #region Smooth Damp
@@ -4783,38 +5570,227 @@ namespace RuniOS
         #region Sqrt
         public static float Sqrt(this float value) => (float)Math.Sqrt(value);
         public static double Sqrt(this double value) => Math.Sqrt(value);
-        public static decimal Sqrt(this decimal value) => (decimal)Math.Sqrt((double)value);
+        public static decimal Sqrt(this decimal value) => DecimalMath.Sqrt(value);
         #endregion
 
         #region Tan
         public static float Tan(this float value) => (float)Math.Tan(value);
         public static double Tan(this double value) => Math.Tan(value);
+        public static decimal Tan(this decimal value) => DecimalMath.Tan(value);
         #endregion
 
         #region Tanh
         public static float Tanh(this float value) => (float)Math.Tanh(value);
         public static double Tanh(this double value) => Math.Tanh(value);
-        #endregion
-
-        #region To Float
-        public static float ToFloat(this double value) => (float)value.Clamp(float.MinValue, float.MaxValue);
-        public static float ToFloat(this decimal value) => (float)value;
+        public static decimal Tanh(this decimal value) => DecimalMath.Tanh(value);
         #endregion
         
-        #region To Double
-        public static double ToDouble(this decimal value) => (double)value;
+        #region Clamp To SByte
+        public static sbyte ClampToSByte(this sbyte value) => value;
+        public static sbyte ClampToSByte(this byte value) => (sbyte)value.Clamp(0, (byte)sbyte.MaxValue);
+        public static sbyte ClampToSByte(this short value) => (sbyte)value.Clamp(sbyte.MinValue, sbyte.MaxValue);
+        public static sbyte ClampToSByte(this ushort value) => (sbyte)value.Clamp(0, (ushort)sbyte.MaxValue);
+        public static sbyte ClampToSByte(this int value) => (sbyte)value.Clamp(sbyte.MinValue, sbyte.MaxValue);
+        public static sbyte ClampToSByte(this uint value) => (sbyte)value.Clamp(0, (uint)sbyte.MaxValue);
+        public static sbyte ClampToSByte(this long value) => (sbyte)value.Clamp(sbyte.MinValue, sbyte.MaxValue);
+        public static sbyte ClampToSByte(this ulong value) => (sbyte)value.Clamp(0, (ulong)sbyte.MaxValue);
+        public static sbyte ClampToSByte(this float value) => value.FloorToSByte();
+        public static sbyte ClampToSByte(this double value) => value.FloorToSByte();
+        public static sbyte ClampToSByte(this decimal value) => value.FloorToSByte();
+        public static sbyte ClampToSByte(this nint value) => (sbyte)value.Clamp(sbyte.MinValue, sbyte.MaxValue);
+        public static sbyte ClampToSByte(this nuint value) => (sbyte)value.Clamp(0, (nuint)sbyte.MaxValue);
         #endregion
         
-        #region To Decimal
-        public static decimal ToDecimal(this float value) => (decimal)value.Clamp(decimal.MinValue.ToFloat(), decimal.MaxValue.ToFloat());
-        public static decimal ToDecimal(this double value) => (decimal)value.Clamp(decimal.MinValue.ToFloat(), decimal.MaxValue.ToFloat());
+        #region Clamp To Byte
+        public static byte ClampToByte(this sbyte value) => (byte)value.Clamp(0);
+        public static byte ClampToByte(this byte value) => value;
+        public static byte ClampToByte(this short value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this ushort value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this int value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this uint value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this long value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this ulong value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this float value) => value.FloorToByte();
+        public static byte ClampToByte(this double value) => value.FloorToByte();
+        public static byte ClampToByte(this decimal value) => value.FloorToByte();
+        public static byte ClampToByte(this nint value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        public static byte ClampToByte(this nuint value) => (byte)value.Clamp(byte.MinValue, byte.MaxValue);
+        #endregion
+        
+        #region Clamp To Short
+        public static short ClampToShort(this sbyte value) => value;
+        public static short ClampToShort(this byte value) => value;
+        public static short ClampToShort(this short value) => value;
+        public static short ClampToShort(this ushort value) => (short)value.Clamp(0, (ushort)short.MaxValue);
+        public static short ClampToShort(this int value) => (short)value.Clamp(short.MinValue, short.MaxValue);
+        public static short ClampToShort(this uint value) => (short)value.Clamp(0, (uint)short.MaxValue);
+        public static short ClampToShort(this long value) => (short)value.Clamp(short.MinValue, short.MaxValue);
+        public static short ClampToShort(this ulong value) => (short)value.Clamp(0, (uint)short.MaxValue);
+        public static short ClampToShort(this float value) => value.FloorToShort();
+        public static short ClampToShort(this double value) => value.FloorToShort();
+        public static short ClampToShort(this decimal value) => value.FloorToShort();
+        public static short ClampToShort(this nint value) => (short)value.Clamp(short.MinValue, short.MaxValue);
+        public static short ClampToShort(this nuint value) => (short)value.Clamp(0, (nuint)short.MaxValue);
+        #endregion
+        
+        #region Clamp To UShort
+        public static ushort ClampToUShort(this sbyte value) => (ushort)value.Clamp(0);
+        public static ushort ClampToUShort(this byte value) => value;
+        public static ushort ClampToUShort(this short value) => (ushort)value.Clamp(0);
+        public static ushort ClampToUShort(this ushort value) => value;
+        public static ushort ClampToUShort(this int value) => (ushort)value.Clamp(short.MinValue, short.MaxValue);
+        public static ushort ClampToUShort(this uint value) => (ushort)value.Clamp(0, (uint)short.MaxValue);
+        public static ushort ClampToUShort(this long value) => (ushort)value.Clamp(short.MinValue, short.MaxValue);
+        public static ushort ClampToUShort(this ulong value) => (ushort)value.Clamp(0, (ulong)short.MaxValue);
+        public static ushort ClampToUShort(this float value) => value.FloorToUShort();
+        public static ushort ClampToUShort(this double value) => value.FloorToUShort();
+        public static ushort ClampToUShort(this decimal value) => value.FloorToUShort();
+        public static ushort ClampToUShort(this nint value) => (ushort)value.Clamp(ushort.MinValue, ushort.MaxValue);
+        public static ushort ClampToUShort(this nuint value) => (ushort)value.Clamp(ushort.MinValue, ushort.MaxValue);
         #endregion
 
-        #region To Int
-        public static int ToInt(this long value) => (int)value.Clamp(int.MinValue, int.MaxValue);
-        public static int ToInt(this float value) => (int)value.Clamp(int.MinValue, int.MaxValue);
-        public static int ToInt(this double value) => (int)value.Clamp(int.MinValue, int.MaxValue);
-        public static int ToInt(this decimal value) => (int)value.Clamp(int.MinValue, int.MaxValue);
+        #region Clamp To Int
+        public static int ClampToInt(this sbyte value) => value;
+        public static int ClampToInt(this byte value) => value;
+        public static int ClampToInt(this short value) => value;
+        public static int ClampToInt(this ushort value) => value;
+        public static int ClampToInt(this int value) => value;
+        public static int ClampToInt(this uint value) => (int)value.Clamp(0, int.MaxValue);
+        public static int ClampToInt(this long value) => (int)value.Clamp(int.MinValue, int.MaxValue);
+        public static int ClampToInt(this ulong value) => (int)value.Clamp(0, int.MaxValue);
+        public static int ClampToInt(this float value) => value.FloorToInt();
+        public static int ClampToInt(this double value) => value.FloorToInt();
+        public static int ClampToInt(this decimal value) => value.FloorToInt();
+        public static int ClampToInt(this nint value) => (int)value.Clamp(int.MinValue, int.MaxValue);
+        public static int ClampToInt(this nuint value) => (int)value.Clamp(0, int.MaxValue);
+        #endregion
+        
+        #region Clamp To UInt
+        public static uint ClampToUInt(this sbyte value) => (uint)value.Clamp(0);
+        public static uint ClampToUInt(this byte value) => value;
+        public static uint ClampToUInt(this short value) => (uint)value.Clamp(0);
+        public static uint ClampToUInt(this ushort value) => value;
+        public static uint ClampToUInt(this int value) => (uint)value.Clamp(0);
+        public static uint ClampToUInt(this uint value) => value;
+        public static uint ClampToUInt(this long value) => (uint)value.Clamp(uint.MinValue, uint.MaxValue);
+        public static uint ClampToUInt(this ulong value) => (uint)value.Clamp(0, uint.MaxValue);
+        public static uint ClampToUInt(this float value) => value.FloorToUInt();
+        public static uint ClampToUInt(this double value) => value.FloorToUInt();
+        public static uint ClampToUInt(this decimal value) => value.FloorToUInt();
+        public static uint ClampToUInt(this nint value) => (uint)value.Clamp(0, uint.MaxValue.ClampToNInt());
+        public static uint ClampToUInt(this nuint value) => (uint)value.Clamp(uint.MinValue, uint.MaxValue);
+        #endregion
+        
+        #region Clamp To Long
+        public static long ClampToLong(this sbyte value) => value;
+        public static long ClampToLong(this byte value) => value;
+        public static long ClampToLong(this short value) => value;
+        public static long ClampToLong(this ushort value) => value;
+        public static long ClampToLong(this int value) => value;
+        public static long ClampToLong(this uint value) => value;
+        public static long ClampToLong(this long value) => value;
+        public static long ClampToLong(this ulong value) => (long)value.Clamp(0, long.MaxValue);
+        public static long ClampToLong(this float value) => value.FloorToLong();
+        public static long ClampToLong(this double value) => value.FloorToLong();
+        public static long ClampToLong(this decimal value) => value.FloorToLong();
+        public static long ClampToLong(this nint value) => value.Clamp(long.MinValue.ClampToNInt(), long.MaxValue.ClampToNInt());
+        public static long ClampToLong(this nuint value) => (long)value.Clamp(0, long.MaxValue.ClampToNUInt());
+        #endregion
+        
+        #region Clamp To ULong
+        public static ulong ClampToULong(this sbyte value) => (ulong)value.Clamp(0);
+        public static ulong ClampToULong(this byte value) => value;
+        public static ulong ClampToULong(this short value) => (ulong)value.Clamp(0);
+        public static ulong ClampToULong(this ushort value) => value;
+        public static ulong ClampToULong(this int value) => (ulong)value.Clamp(0);
+        public static ulong ClampToULong(this uint value) => value;
+        public static ulong ClampToULong(this long value) => (ulong)value.Clamp(0);
+        public static ulong ClampToULong(this ulong value) => value;
+        public static ulong ClampToULong(this float value) => value.FloorToULong();
+        public static ulong ClampToULong(this double value) => value.FloorToULong();
+        public static ulong ClampToULong(this decimal value) => value.FloorToULong();
+        public static ulong ClampToULong(this nint value) => (ulong)value.Clamp(0, ulong.MaxValue.ClampToNInt());
+        public static ulong ClampToULong(this nuint value) => value.Clamp(ulong.MinValue.ClampToNUInt(), ulong.MaxValue.ClampToNUInt());
+        #endregion
+        
+        #region Clamp To Float
+        public static float ClampToFloat(this sbyte value) => value;
+        public static float ClampToFloat(this byte value) => value;
+        public static float ClampToFloat(this short value) => value;
+        public static float ClampToFloat(this ushort value) => value;
+        public static float ClampToFloat(this int value) => value;
+        public static float ClampToFloat(this uint value) => value;
+        public static float ClampToFloat(this long value) => value;
+        public static float ClampToFloat(this ulong value) => value;
+        public static float ClampToFloat(this float value) => value;
+        public static float ClampToFloat(this double value) => (float)value.Clamp(float.MinValue, float.MaxValue);
+        public static float ClampToFloat(this decimal value) => (float)value;
+        public static float ClampToFloat(this nint value) => value;
+        public static float ClampToFloat(this nuint value) => value;
+        #endregion
+        
+        #region Clamp To Double
+        public static double ClampToDouble(this sbyte value) => value;
+        public static double ClampToDouble(this byte value) => value;
+        public static double ClampToDouble(this short value) => value;
+        public static double ClampToDouble(this ushort value) => value;
+        public static double ClampToDouble(this int value) => value;
+        public static double ClampToDouble(this uint value) => value;
+        public static double ClampToDouble(this long value) => value;
+        public static double ClampToDouble(this ulong value) => value;
+        public static double ClampToDouble(this float value) => value;
+        public static double ClampToDouble(this double value) => value;
+        public static double ClampToDouble(this decimal value) => (double)value;
+        public static double ClampToDouble(this nint value) => value;
+        public static double ClampToDouble(this nuint value) => value;
+        #endregion
+        
+        #region Clamp To Decimal
+        public static decimal ClampToDecimal(this sbyte value) => value;
+        public static decimal ClampToDecimal(this byte value) => value;
+        public static decimal ClampToDecimal(this short value) => value;
+        public static decimal ClampToDecimal(this ushort value) => value;
+        public static decimal ClampToDecimal(this int value) => value;
+        public static decimal ClampToDecimal(this uint value) => value;
+        public static decimal ClampToDecimal(this long value) => value;
+        public static decimal ClampToDecimal(this ulong value) => value;
+        public static decimal ClampToDecimal(this float value) => (decimal)value.Clamp(decimal.MinValue.ClampToFloat(), decimal.MaxValue.ClampToFloat());
+        public static decimal ClampToDecimal(this double value) => (decimal)value.Clamp(decimal.MinValue.ClampToFloat(), decimal.MaxValue.ClampToFloat());
+        public static decimal ClampToDecimal(this decimal value) => value; 
+        public static decimal ClampToDecimal(this nint value) => value; 
+        public static decimal ClampToDecimal(this nuint value) => value;
+        #endregion
+        
+        #region Clamp To NInt
+        public static nint ClampToNInt(this sbyte value) => value;
+        public static nint ClampToNInt(this byte value) => value;
+        public static nint ClampToNInt(this short value) => value;
+        public static nint ClampToNInt(this ushort value) => value;
+        public static nint ClampToNInt(this int value) => value;
+        public static nint ClampToNInt(this uint value) => (nint)value.Clamp(0, nintMaxSize.ClampToUInt());
+        public static nint ClampToNInt(this long value) => (nint)value.Clamp(nintMinSize, nintMaxSize);
+        public static nint ClampToNInt(this ulong value) => (nint)value.Clamp(0, nintMaxSize.ClampToULong());
+        public static nint ClampToNInt(this float value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
+        public static nint ClampToNInt(this double value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
+        public static nint ClampToNInt(this decimal value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
+        public static nint ClampToNInt(this nint value) => value;
+        public static nint ClampToNInt(this nuint value) => (nint)value.Clamp(0, nintMaxSize.ClampToNUInt());
+        #endregion
+        
+        #region Clamp To NUInt
+        public static nuint ClampToNUInt(this sbyte value) => (nuint)value.Clamp(0);
+        public static nuint ClampToNUInt(this byte value) => value;
+        public static nuint ClampToNUInt(this short value) => (nuint)value.Clamp(0);
+        public static nuint ClampToNUInt(this ushort value) => value;
+        public static nuint ClampToNUInt(this int value) => (nuint)value.Clamp(0);
+        public static nuint ClampToNUInt(this uint value) => value;
+        public static nuint ClampToNUInt(this long value) => (nuint)value.Clamp(0, nuintMaxSize.ClampToLong());
+        public static nuint ClampToNUInt(this ulong value) => (nuint)value.Clamp(0, nuintMaxSize);
+        public static nuint ClampToNUInt(this float value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
+        public static nuint ClampToNUInt(this double value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
+        public static nuint ClampToNUInt(this decimal value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
+        public static nuint ClampToNUInt(this nint value) => (nuint)value.Clamp(0);
+        public static nuint ClampToNUInt(this nuint value) => value;
         #endregion
 
         #region Truncate
@@ -4837,6 +5813,36 @@ namespace RuniOS
         public static Vector4 Multiply(this Vector4 a, Vector4 b) => new Vector4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
 
         public static Color32 Multiply(this Color32 a, Color32 b) => new Color32((byte)(a.r * b.r), (byte)(a.g * b.g), (byte)(a.b * b.b), (byte)(a.a * b.a));
+        #endregion
+
+        #region Discard Least Significant Decimal
+        public static float DiscardLeastSignificantDecimal(this float value) => ((double)value).DiscardLeastSignificantDecimal().ClampToFloat();
+
+        public static double DiscardLeastSignificantDecimal(this double value)
+        {
+            int digits = (int)(5 - value.Abs().Log10()).Clamp(0);
+            try
+            {
+                return value.Round(digits);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return 0;
+            }
+        }
+        
+        public static decimal DiscardLeastSignificantDecimal(this decimal value)
+        {
+            int digits = (int)(5 - value.Abs().Log10()).Clamp(0);
+            try
+            {
+                return value.Round(digits);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                return 0;
+            }
+        }
         #endregion
 
         #region Divide
