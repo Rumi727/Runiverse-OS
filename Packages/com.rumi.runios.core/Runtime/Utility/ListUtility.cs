@@ -2288,5 +2288,65 @@ namespace RuniOS
         
         public static bool IsEmpty(this ICollection collection) => collection.Count == 0;
         public static bool Any(this ICollection collection) => collection.Count > 0;
+        
+        public static bool SequenceEqual(this IEnumerable first, IEnumerable second) =>
+            SequenceEqual(first, second, null);
+ 
+        public static bool SequenceEqual(this IEnumerable first, IEnumerable second, IEqualityComparer? comparer)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(first, nameof(first));
+            ExceptionUtility.ThrowIfArgumentNull(second, nameof(second));
+ 
+            if (first is ICollection firstCol && second is ICollection secondCol)
+            {
+                if (firstCol.Count != secondCol.Count)
+                    return false;
+ 
+                if (firstCol is IList firstList && secondCol is IList secondList)
+                {
+                    int count = firstCol.Count;
+                    for (int i = 0; i < count; i++)
+                    {
+                        if (comparer != null)
+                        {
+                            if (!comparer.Equals(firstList[i], secondList[i]))
+                                return false;
+                        }
+                        else
+                        {
+                            if (!Equals(firstList[i], secondList[i]))
+                                return false;
+                        }
+                    }
+ 
+                    return true;
+                }
+            }
+ 
+            IEnumerator e1 = first.GetEnumerator();
+            IEnumerator e2 = second.GetEnumerator();
+            
+            using var d1 = e1 as IDisposable;
+            using var d2 = e2 as IDisposable;
+ 
+            while (e1.MoveNext())
+            {
+                if (!e2.MoveNext())
+                    return false;
+                
+                if (comparer != null)
+                {
+                    if (!comparer.Equals(e1.Current, e2.Current))
+                        return false;
+                }
+                else
+                {
+                    if (!Equals(e1.Current, e2.Current))
+                        return false;
+                }
+            }
+ 
+            return !e2.MoveNext();
+        }
     }
 }
