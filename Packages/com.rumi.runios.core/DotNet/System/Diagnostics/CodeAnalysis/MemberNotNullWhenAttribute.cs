@@ -5,8 +5,9 @@
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
 {
+    // Uxml 이슈로 필드에도 어트리뷰트가 붙을 수 있게 수정했습니다.
     /// <summary>Specifies that the method or property will ensure that the listed field and property members have not-null values when returning with the specified return value condition.</summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field, Inherited = false, AllowMultiple = true)]
 #if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_MEMBER_NOT_NULL_WHEN_ATTRIBUTE 
     public 
 #endif
