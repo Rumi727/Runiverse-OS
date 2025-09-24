@@ -19,18 +19,14 @@ namespace RuniOS
     /// 생성자를 제공해야 합니다 (예: <c>public MySerializableNullable(T value)</c>).
     /// </summary>
     /// <typeparam name="T">값이 될 수 있는 기본 값 타입입니다.</typeparam>
-    public interface ISerializableNullable<out T> where T : struct
+    public interface ISerializableNullable<out T> : ISerializableNullable where T : struct
     {
-        /// <summary>
-        /// 이 <see cref="ISerializableNullable{T}"/> 인스턴스에 값이 할당되었는지 여부를 가져옵니다.
-        /// </summary>
-        bool HasValue { get; }
         /// <summary>
         /// 이 <see cref="ISerializableNullable{T}"/> 인스턴스에 할당된 값을 가져옵니다.
         /// <br/>
-        /// <see cref="HasValue"/>가 <see langword="false"/>일 경우, 이 속성에 접근하면 <see cref="InvalidOperationException"/>이 발생합니다.
+        /// <see cref="ISerializableNullable.HasValue"/>가 <see langword="false"/>일 경우, 이 속성에 접근하면 <see cref="InvalidOperationException"/>이 발생합니다.
         /// </summary>
-        /// <exception cref="InvalidOperationException"><see cref="HasValue"/>가 <see langword="false"/>일 때 발생합니다.</exception>
+        /// <exception cref="InvalidOperationException"><see cref="ISerializableNullable.HasValue"/>가 <see langword="false"/>일 때 발생합니다.</exception>
         T Value { get; }
     }
 }

@@ -1,20 +1,24 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Drawers.Attributes
 {
     [CustomPropertyDrawer(typeof(NullableFieldAttribute))]
     public class NullableFieldPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => SerializableNullablePropertyDrawer.CreatePropertyGUI(property.GetPropertyTypeWithoutList(), property, ((NullableFieldAttribute)attribute).customNullText);
+        
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic && fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
+            if (property.propertyType == SerializedPropertyType.Generic && property.GetPropertyTypeWithoutList().IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
             {
                 EditorGUI.BeginProperty(position, label, property);
                 
                 string? nullText = ((NullableFieldAttribute)attribute).customNullText;
-                SerializableNullablePropertyDrawer.Draw(position, property, label, fieldInfo.FieldType, nullText);
+                SerializableNullablePropertyDrawer.Draw(position, property, label, nullText);
                 
                 EditorGUI.EndProperty();
             }
@@ -24,7 +28,7 @@ namespace RuniOS.Editor.Drawers.Attributes
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (property.propertyType == SerializedPropertyType.Generic && fieldInfo.FieldType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
+            if (property.propertyType == SerializedPropertyType.Generic && property.GetPropertyTypeWithoutList().IsAssignableToGenericDefinition(typeof(ISerializableNullable<>)))
             {
                 (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
 

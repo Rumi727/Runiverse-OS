@@ -47,14 +47,7 @@ namespace RuniOS
             {
                 // ISerializableNullable<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (nullableType.IsAssignableToGenericDefinition(typeof(ISerializableNullable<>), out Type? resolvedType))
-                {
-                    Type type = resolvedType.GetGenericArguments()[0];
-                    Type? underlyingType = GetUnderlyingType(type);
-                    if (underlyingType != null)
-                        return underlyingType; // 제네릭 인자(T)를 반환합니다.
-                    else
-                        return type;
-                }
+                    return resolvedType.GetGenericArguments()[0];
             }
 
             return null;

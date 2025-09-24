@@ -11,25 +11,23 @@ namespace RuniOS.Editor.Serialization.Converters
         public override object Read(SerializedProperty property, Type propertyType)
         {
             object instance = Activator.CreateInstance(propertyType);
-            
             Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
             if (underlyingType == null)
                 return instance;
             
-            PropertyConverter? valueBinder = FindConverter(underlyingType);
-            if (valueBinder == null)
-                return instance;
-            
             (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
-            if (field == null || toggle is not { boolValue: true })
+            if (toggle is not { boolValue: true })
                 return instance;
             
+            PropertyConverter? valueBinder = FindConverter(underlyingType);
+            if (field == null || valueBinder == null)
+                return Activator.CreateInstance(propertyType, underlyingType.GetDefaultValueNotNull());
+
             object? value = valueBinder.Read(field, underlyingType);
             if (value == null)
                 return instance;
-            
-            AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.SetValue(value, instance);
-            return instance;
+
+            return Activator.CreateInstance(propertyType, value);
         }
         
         public override void Write(SerializedProperty property, Type propertyType, object? nullable)
@@ -39,15 +37,19 @@ namespace RuniOS.Editor.Serialization.Converters
                 return;
             
             (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
-            if (field == null || toggle == null)
+            if (toggle == null)
                 return;
-
-            object? value = null;
-            bool hasValue = (bool)(AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfHasValue)?.GetValue(nullable) ?? false);
-            if (hasValue)
-                value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
             
-            FindConverter(underlyingType)?.Write(field, underlyingType, value);
+            bool hasValue = (bool)(AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfHasValue)?.GetValue(nullable) ?? false);
+            if (field != null)
+            {
+                object? value = Activator.CreateInstance(underlyingType);
+                if (hasValue)
+                    value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
+                
+                FindConverter(underlyingType)?.Write(field, underlyingType, value);
+            }
+
             toggle.boolValue = hasValue;
         }
     }
