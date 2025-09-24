@@ -26,7 +26,8 @@ namespace RuniOS.Editor.Serialization
         /// <br/>
         /// 이 목록은 대상 타입의 계층 깊이(내림차순)에 따라 정렬되어, 더 구체적인 컨버터가 우선적으로 처리되도록 합니다.
         /// </summary>
-        public static IReadOnlyList<(Type type, CustomPropertyConverterAttribute attribute)> propertyConverterTypes { get; } = ReflectionUtility.types.Where
+        public static IReadOnlyList<(Type type, CustomPropertyConverterAttribute attribute)> propertyConverterTypes { get; } = ReflectionUtility.types
+        .Where
         (
             static x =>
                 x.AttributeContains(typeof(CustomPropertyConverterAttribute)) &&
@@ -36,9 +37,18 @@ namespace RuniOS.Editor.Serialization
         .Select(static x => (x, x.GetCustomAttribute<CustomPropertyConverterAttribute>()))
         .OrderByDescending
         (
-            static x => x.Item2.targetType
-                .GetHierarchy()
-                .Count()
+            static x =>
+            {
+                if (x.Item2.priority == 0)
+                {
+                    if (x.Item2.targetType.IsInterface)
+                        return 0;
+                    
+                    return x.Item2.targetType.GetHierarchy().Count() * 100;
+                }
+                else
+                    return x.Item2.priority;
+            }
         ).ToArray().AsReadOnly();
 
 
