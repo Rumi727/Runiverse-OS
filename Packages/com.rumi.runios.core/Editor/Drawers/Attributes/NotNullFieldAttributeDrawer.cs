@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEditor;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers.Attributes
@@ -13,14 +13,15 @@ namespace RuniOS.Editor.Drawers.Attributes
         {
             if (property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
             {
-                position.width *= 0.6666666666666666666666666666666666666f;
-                position.width -= 4;
-
+                float labelWidth = EditorGUIUtility.labelWidth;
+                float fieldWidth = position.width - EditorGUIUtility.labelWidth;
+                
+                position.width = labelWidth + (fieldWidth * 0.6f);
                 EditorGUI.PropertyField(position, property, label);
 
                 position.x += position.width + 4;
-                position.width *= 0.5f;
-                position.width += 2;
+                position.width = fieldWidth * 0.4f;
+                position.width -= 4;
 
                 EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
             }
