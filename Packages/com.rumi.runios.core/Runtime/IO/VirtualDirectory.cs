@@ -124,7 +124,6 @@ namespace RuniOS.IO
 
         /// <summary>
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 상태인지 나타내는 값입니다.
-        /// 이 속성을 <see langword="true"/>로 설정하면, 해당 디렉토리의 모든 하위 항목(디렉토리 및 파일)의 상태도 재귀적으로 <see langword="true"/>로 설정됩니다.
         /// </summary>
         public bool isDeleted { get; private set; } = false;
 
@@ -578,7 +577,7 @@ namespace RuniOS.IO
         /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        void ThrowDirectoryNotFoundException(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was not found or is invalid.");
+        static void ThrowDirectoryNotFoundException(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was not found or is invalid.");
 
 
         /// <summary>
@@ -593,7 +592,7 @@ namespace RuniOS.IO
         /// 시스템은 기대하는 디렉토리를 찾을 수 없으므로 이 예외를 발생시킵니다.
         /// </exception>
         [DoesNotReturn]
-        void ThrowPathIsFileException(FilePath path, string segmentName)
+        static void ThrowPathIsFileException(FilePath path, string segmentName)
         {
             throw new DirectoryNotFoundException(
                 $"Path operation failed for '{path}'. " +
@@ -614,7 +613,7 @@ namespace RuniOS.IO
         /// 해당 디렉토리에 대한 파일 작업이 허용되지 않음을 나타냅니다.
         /// </exception>
         [DoesNotReturn]
-        void ThrowPathIsDirectoryException(FilePath path, string segmentName)
+        static void ThrowPathIsDirectoryException(FilePath path, string segmentName)
         {
             throw new UnauthorizedAccessException(
                 $"Path operation failed for '{path}'. " +
