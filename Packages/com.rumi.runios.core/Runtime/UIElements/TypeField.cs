@@ -34,19 +34,10 @@ namespace RuniOS.UIElements
             }
         }
 
-
-#pragma warning disable CS8601 // 가능한 null 참조 할당입니다.
-#pragma warning disable CS8603 // 가능한 null 참조 반환입니다.
-        public Type? baseType
-        {
-            get => nullableBaseType;
-            set => nullableBaseType = value;
-        }
-
-        //아니 미친 nullable 왜 지원 안함 유니티 병신 오류가 아니라 경고로라도 바꿔주던가 시ㅣ발
+#pragma warning disable UITKSG015
         [CreateProperty]
         [UxmlAttribute("base-type")]
-        Type nullableBaseType
+        public Type? baseType
         {
             get => _baseType;
             set
@@ -59,9 +50,8 @@ namespace RuniOS.UIElements
             }
         }
         Type? _baseType = null;
-        static readonly BindingId baseTypeProperty = nameof(nullableBaseType);
-#pragma warning restore CS8603 // 가능한 null 참조 반환입니다.
-#pragma warning restore CS8601 // 가능한 null 참조 할당입니다.
+        static readonly BindingId baseTypeProperty = nameof(baseType);
+#pragma warning restore UITKSG015
 
         [UxmlAttribute]
         [CreateProperty]
