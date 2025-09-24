@@ -16,6 +16,8 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
     [CustomPropertyDrawer(typeof(ISerializableDictionary<,,>), true)]
     public sealed class SerializableDictionaryPropertyDrawer : PropertyDrawer
     {
+        //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PropertyField(property);
+
         readonly Dictionary<string, SerializedProperty> cachedPairs = new();
         
         readonly Dictionary<string, AnimFloat> cachedAnimFloat = new();
