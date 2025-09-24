@@ -11,31 +11,26 @@ namespace RuniOS.Editor.Serialization.Converters
     {
         public override object Read(SerializedProperty property, Type propertyType)
         {
-            object instance = Activator.CreateInstance(propertyType);
             (Type? keyType, Type? valueType) = SerializableKeyValuePair.GetUnderlyingType(propertyType);
-            
+
+            object? key = null;
             (SerializedProperty? keyProperty, SerializedProperty? valueProperty) = SerializableKeyValuePairPropertyDrawer.GetChildProperty(property);
             if (keyType != null && keyProperty != null)
             {
                 PropertyConverter? keyBinder = FindConverter(keyType);
                 if (keyBinder != null)
-                {
-                    object? key = keyBinder.Read(keyProperty, keyType);
-                    AccessUtility.DeclaredProperty(propertyType, SerializableKeyValuePair.nameOfKey)?.SetValue(key, instance);
-                }
+                    key = keyBinder.Read(keyProperty, keyType);
             }
 
+            object? value = null;
             if (valueType != null && valueProperty != null)
             {
                 PropertyConverter? valueBinder = FindConverter(valueType);
                 if (valueBinder != null)
-                {
-                    object? value = valueBinder.Read(valueProperty, valueType);
-                    AccessUtility.DeclaredProperty(propertyType, SerializableKeyValuePair.nameOfValue)?.SetValue(value, instance);
-                }
+                    value = valueBinder.Read(valueProperty, valueType);
             }
 
-            return instance;
+            return Activator.CreateInstance(propertyType, key, value);
         }
         
         public override void Write(SerializedProperty property, Type propertyType, object? nullable)
