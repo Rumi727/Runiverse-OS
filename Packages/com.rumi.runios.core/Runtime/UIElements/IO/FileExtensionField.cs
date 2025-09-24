@@ -18,8 +18,8 @@ namespace RuniOS.UIElements.IO
         
         public TextElement extensionSeparatorTextElement { get; }
 
-        public FileExtensionField() : this(null) { }
-        public FileExtensionField(string? label) : base(label, -1, '*', new TextInput())
+        public FileExtensionField() : this(string.Empty) { }
+        public FileExtensionField(string label) : base(label, -1, '*', new TextInput())
         {
             this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             

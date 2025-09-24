@@ -20,11 +20,11 @@ namespace RuniOS.UIElements.Primitives
         
         
         
-        public SByteField() : this(null) { }
+        public SByteField() : this(string.Empty) { }
 
-        public SByteField(int maxLength) : this(null, maxLength) { }
+        public SByteField(int maxLength) : this(string.Empty, maxLength) { }
         
-        public SByteField(string? label, int maxLength = 1000) : base(label, maxLength, new SByteInput())
+        public SByteField(string label, int maxLength = 1000) : base(label, maxLength, new SByteInput())
         {
             AddToClassList(ussClassName);
             

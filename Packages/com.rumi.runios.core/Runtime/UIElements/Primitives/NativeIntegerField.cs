@@ -19,11 +19,11 @@ namespace RuniOS.UIElements.Primitives
         
         
         
-        public NativeIntegerField() : this(null) { }
+        public NativeIntegerField() : this(string.Empty) { }
 
-        public NativeIntegerField(int maxLength) : this(null, maxLength) { }
+        public NativeIntegerField(int maxLength) : this(string.Empty, maxLength) { }
         
-        public NativeIntegerField(string? label, int maxLength = 1000) : base(label, maxLength, new NativeIntegerInput())
+        public NativeIntegerField(string label, int maxLength = 1000) : base(label, maxLength, new NativeIntegerInput())
         {
             AddToClassList(ussClassName);
             

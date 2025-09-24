@@ -37,8 +37,8 @@ namespace RuniOS.UIElements.Resource
         public FilePathField pathField { get; }
         public EnumField modeField { get; }
         
-        public PackIdentifierField() : this(null) { }
-        public PackIdentifierField(string? label) : base(label)
+        public PackIdentifierField() : this(string.Empty) { }
+        public PackIdentifierField(string label) : base(label)
         {
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);

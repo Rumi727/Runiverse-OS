@@ -15,8 +15,8 @@ namespace RuniOS.UIElements.IO
         public TextInput textInput => (TextInput)textInputBase;
         public TextElement textElement => textInput.textElement;
 
-        public FilePathField() : this(null) { }
-        public FilePathField(string? label) : base(label, -1, '*', new TextInput())
+        public FilePathField() : this(string.Empty) { }
+        public FilePathField(string label) : base(label, -1, '*', new TextInput())
         {
             this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             

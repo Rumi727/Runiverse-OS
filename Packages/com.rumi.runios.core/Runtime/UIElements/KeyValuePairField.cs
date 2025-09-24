@@ -27,7 +27,7 @@ namespace RuniOS.UIElements
         /// </summary>
         /// <param name="keyDescription">키 필드에 대한 설명 데이터입니다.</param>
         /// <param name="valueDescription">값 필드에 대한 설명 데이터입니다.</param>
-        public KeyValuePairField(IElementDescription keyDescription, IElementDescription valueDescription) : this(null, keyDescription, valueDescription) { }
+        public KeyValuePairField(IElementDescription keyDescription, IElementDescription valueDescription) : this(string.Empty, keyDescription, valueDescription) { }
         
         /// <summary>
         /// <see cref="KeyValuePairField{TPair}"/>의 새 인스턴스를 초기화합니다.
@@ -35,7 +35,7 @@ namespace RuniOS.UIElements
         /// <param name="label">필드에 표시될 라벨입니다.</param>
         /// <param name="keyDescription">키 필드에 대한 설명 데이터입니다.</param>
         /// <param name="valueDescription">값 필드에 대한 설명 데이터입니다.</param>
-        public KeyValuePairField(string? label, IElementDescription keyDescription, IElementDescription valueDescription) : base(label)
+        public KeyValuePairField(string label, IElementDescription keyDescription, IElementDescription valueDescription) : base(label)
         {
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);

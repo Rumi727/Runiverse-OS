@@ -14,8 +14,8 @@ namespace RuniOS.UIElements.Resource
         public new const string labelUssClassName = ussClassName + "__label";
         public new const string inputUssClassName = ussClassName + "__input";
         
-        public IdentifierField() : this(null) { }
-        public IdentifierField(string? label) : base(label)
+        public IdentifierField() : this(string.Empty) { }
+        public IdentifierField(string label) : base(label)
         {
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);
@@ -36,7 +36,8 @@ namespace RuniOS.UIElements.Resource
                         identifier.nameSpace = fieldValue;
                     else
                         Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(fieldValue));
-                });
+                }
+            );
 
             yield return new ElementDescription<TextElement>(nameof(Identifier.separator), new TextElement { text = Identifier.separator.ToString() });
             

@@ -11,8 +11,8 @@ namespace RuniOS.UIElements
         public new const string labelUssClassName = ussClassName + "__label";
         public new const string inputUssClassName = ussClassName + "__input";
         
-        public RectOffsetField() : this(null) { }
-        public RectOffsetField(string? label) : base(label)
+        public RectOffsetField() : this(string.Empty) { }
+        public RectOffsetField(string label) : base(label)
         {
             labelElement.AddToClassList(labelUssClassName);
             visualInput.AddToClassList(inputUssClassName);

@@ -19,11 +19,11 @@ namespace RuniOS.UIElements.Primitives
         
         
         
-        public DecimalField() : this(null) { }
+        public DecimalField() : this(string.Empty) { }
 
-        public DecimalField(int maxLength) : this(null, maxLength) { }
+        public DecimalField(int maxLength) : this(string.Empty, maxLength) { }
         
-        public DecimalField(string? label, int maxLength = 1000) : base(label, maxLength, new DecimalInput())
+        public DecimalField(string label, int maxLength = 1000) : base(label, maxLength, new DecimalInput())
         {
             AddToClassList(ussClassName);
             

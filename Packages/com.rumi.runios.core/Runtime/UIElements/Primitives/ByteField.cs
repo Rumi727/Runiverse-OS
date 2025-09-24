@@ -20,11 +20,11 @@ namespace RuniOS.UIElements.Primitives
         
         
         
-        public ByteField() : this(null) { }
+        public ByteField() : this(string.Empty) { }
 
-        public ByteField(int maxLength) : this(null, maxLength) { }
+        public ByteField(int maxLength) : this(string.Empty, maxLength) { }
         
-        public ByteField(string? label, int maxLength = 1000) : base(label, maxLength, new ByteInput())
+        public ByteField(string label, int maxLength = 1000) : base(label, maxLength, new ByteInput())
         {
             AddToClassList(ussClassName);
             

@@ -20,11 +20,11 @@ namespace RuniOS.UIElements.Primitives
         
         
         
-        public ShortField() : this(null) { }
+        public ShortField() : this(string.Empty) { }
 
-        public ShortField(int maxLength) : this(null, maxLength) { }
+        public ShortField(int maxLength) : this(string.Empty, maxLength) { }
         
-        public ShortField(string? label, int maxLength = 1000) : base(label, maxLength, new ShortInput())
+        public ShortField(string label, int maxLength = 1000) : base(label, maxLength, new ShortInput())
         {
             AddToClassList(ussClassName);
             
