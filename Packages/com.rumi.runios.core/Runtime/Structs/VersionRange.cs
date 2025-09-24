@@ -1,4 +1,6 @@
 #nullable enable
+using Newtonsoft.Json;
+using RuniOS.Json.Converters;
 using System;
 
 namespace RuniOS
@@ -10,12 +12,13 @@ namespace RuniOS
     /// 문자열 파싱, 다른 타입과의 변환, 비교 연산자 등을 지원합니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(VersionRangeConverter))]
     public struct VersionRange : IEquatable<Version>, IEquatable<VersionRange>
     {
         /// <summary>
         /// 버전 범위의 최소 및 최대 버전을 구분하는 데 사용되는 문자입니다 (예: '~' in "1.0.0~2.0.0").
         /// </summary>
-        public const char separatorChar = '~';
+        public const char separator = '~';
 
         /// <summary>
         /// 지정된 문자열을 파싱하여 <see cref="VersionRange"/> 구조체의 새 인스턴스를 초기화합니다.
@@ -34,7 +37,7 @@ namespace RuniOS
                 return;
             }
 
-            string[]? versions = value.RemoveAllWhitespace().Split(separatorChar);
+            string[]? versions = value.RemoveAllWhitespace().Split(separator);
             if (versions == null || versions.Length <= 0)
                 min = max = Version.all;
             else
@@ -229,6 +232,6 @@ namespace RuniOS
         /// 예: "1.0.0~2.5.0", "*.*.*~1.0.0"
         /// </summary>
         /// <returns>이 인스턴스의 문자열 표현입니다.</returns>
-        public override readonly string ToString() => $"{min}{separatorChar}{max}";
+        public override readonly string ToString() => $"{min}{separator}{max}";
     }
 }
