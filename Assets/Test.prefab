@@ -73,72 +73,73 @@ MonoBehaviour:
             test3:
               value:
                 asdf2: 0
-              hasValue: 0
+                asdf3: 0
+              hasValue: 1
             asdf: 0
             vector4: {x: 0, y: 0, z: 0, w: 0}
             version:
               _major:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _minor:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _patch:
                 value: 0
-                hasValue: 0
+                hasValue: 1
             versionRange:
               min:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
               max:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
             identifier:
               _nameSpace: ros
               _path:
                 _value: 
             nInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nUInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nLong:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nFloat:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDouble:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDecimal:
-              hasValue: 0
+              hasValue: 1
             nDecimal2:
-              hasValue: 0
+              hasValue: 1
             nIdentifier:
               value:
                 _nameSpace: ros
                 _path:
                   _value: 
-              hasValue: 0
+              hasValue: 1
             nVector4:
               value: {x: 0, y: 0, z: 0, w: 0}
-              hasValue: 0
+              hasValue: 1
             nRect:
               value:
                 serializedVersion: 2
@@ -146,16 +147,16 @@ MonoBehaviour:
                 y: 0
                 width: 0
                 height: 0
-              hasValue: 0
+              hasValue: 1
             nColor:
               value: {r: 0, g: 0, b: 0, a: 0}
-              hasValue: 0
+              hasValue: 1
             nEnum:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nChar:
               value: 0
-              hasValue: 0
+              hasValue: 1
             char: 0
             slider: 0
             filePath:
@@ -187,72 +188,73 @@ MonoBehaviour:
             test3:
               value:
                 asdf2: 0
-              hasValue: 0
+                asdf3: 0
+              hasValue: 1
             asdf: 0
             vector4: {x: 0, y: 0, z: 0, w: 0}
             version:
               _major:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _minor:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _patch:
                 value: 0
-                hasValue: 0
+                hasValue: 1
             versionRange:
               min:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
               max:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
             identifier:
               _nameSpace: ros
               _path:
                 _value: 
             nInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nUInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nLong:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nFloat:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDouble:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDecimal:
-              hasValue: 0
+              hasValue: 1
             nDecimal2:
-              hasValue: 0
+              hasValue: 1
             nIdentifier:
               value:
                 _nameSpace: ros
                 _path:
                   _value: 
-              hasValue: 0
+              hasValue: 1
             nVector4:
               value: {x: 0, y: 0, z: 0, w: 0}
-              hasValue: 0
+              hasValue: 1
             nRect:
               value:
                 serializedVersion: 2
@@ -260,16 +262,16 @@ MonoBehaviour:
                 y: 0
                 width: 0
                 height: 0
-              hasValue: 0
+              hasValue: 1
             nColor:
               value: {r: 0, g: 0, b: 0, a: 0}
-              hasValue: 0
+              hasValue: 1
             nEnum:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nChar:
               value: 0
-              hasValue: 0
+              hasValue: 1
             char: 0
             slider: 0
             filePath:
@@ -307,72 +309,73 @@ MonoBehaviour:
             test3:
               value:
                 asdf2: 0
-              hasValue: 0
+                asdf3: 0
+              hasValue: 1
             asdf: 0
             vector4: {x: 0, y: 0, z: 0, w: 0}
             version:
               _major:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _minor:
                 value: 0
-                hasValue: 0
+                hasValue: 1
               _patch:
                 value: 0
-                hasValue: 0
+                hasValue: 1
             versionRange:
               min:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
               max:
                 _major:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _minor:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
                 _patch:
                   value: 0
-                  hasValue: 0
+                  hasValue: 1
             identifier:
               _nameSpace: ros
               _path:
                 _value: 
             nInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nUInt:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nLong:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nFloat:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDouble:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nDecimal:
-              hasValue: 0
+              hasValue: 1
             nDecimal2:
-              hasValue: 0
+              hasValue: 1
             nIdentifier:
               value:
                 _nameSpace: ros
                 _path:
                   _value: 
-              hasValue: 0
+              hasValue: 1
             nVector4:
               value: {x: 0, y: 0, z: 0, w: 0}
-              hasValue: 0
+              hasValue: 1
             nRect:
               value:
                 serializedVersion: 2
@@ -380,16 +383,16 @@ MonoBehaviour:
                 y: 0
                 width: 0
                 height: 0
-              hasValue: 0
+              hasValue: 1
             nColor:
               value: {r: 0, g: 0, b: 0, a: 0}
-              hasValue: 0
+              hasValue: 1
             nEnum:
               value: 0
-              hasValue: 0
+              hasValue: 1
             nChar:
               value: 0
-              hasValue: 0
+              hasValue: 1
             char: 0
             slider: 0
             filePath:
@@ -420,72 +423,73 @@ MonoBehaviour:
     test3:
       value:
         asdf2: 0
+        asdf3: 0
       hasValue: 1
     asdf: 0
     vector4: {x: 0, y: 0, z: 0, w: 0}
     version:
       _major:
         value: 0
-        hasValue: 0
+        hasValue: 1
       _minor:
         value: 0
-        hasValue: 0
+        hasValue: 1
       _patch:
         value: 0
-        hasValue: 0
+        hasValue: 1
     versionRange:
       min:
         _major:
           value: 0
-          hasValue: 0
+          hasValue: 1
         _minor:
           value: 0
-          hasValue: 0
+          hasValue: 1
         _patch:
           value: 0
-          hasValue: 0
+          hasValue: 1
       max:
         _major:
           value: 0
-          hasValue: 0
+          hasValue: 1
         _minor:
           value: 0
-          hasValue: 0
+          hasValue: 1
         _patch:
           value: 0
-          hasValue: 0
+          hasValue: 1
     identifier:
       _nameSpace: fdsfdasfdf
       _path:
         _value: fdssassdffsf
     nInt:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nUInt:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nLong:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nFloat:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nDouble:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nDecimal:
-      hasValue: 0
+      hasValue: 1
     nDecimal2:
-      hasValue: 0
+      hasValue: 1
     nIdentifier:
       value:
         _nameSpace: ros
         _path:
           _value: 
-      hasValue: 0
+      hasValue: 1
     nVector4:
       value: {x: 0, y: 0, z: 0, w: 0}
-      hasValue: 0
+      hasValue: 1
     nRect:
       value:
         serializedVersion: 2
@@ -493,13 +497,13 @@ MonoBehaviour:
         y: 0
         width: 0
         height: 0
-      hasValue: 0
+      hasValue: 1
     nColor:
       value: {r: 0, g: 0, b: 0, a: 0}
-      hasValue: 0
+      hasValue: 1
     nEnum:
       value: 0
-      hasValue: 0
+      hasValue: 1
     nChar:
       value: 97
       hasValue: 1
@@ -542,7 +546,7 @@ MonoBehaviour:
       hasValue: 0
     _patch:
       value: 0
-      hasValue: 1
+      hasValue: 0
   versionRange:
     min:
       _major:
@@ -573,7 +577,7 @@ MonoBehaviour:
     hasValue: 1
   nUInt:
     value: 0
-    hasValue: 0
+    hasValue: 1
   nLong:
     value: 0
     hasValue: 0
@@ -584,7 +588,7 @@ MonoBehaviour:
     value: 1.3
     hasValue: 1
   nDecimal:
-    hasValue: 1
+    hasValue: 0
   nDecimal2:
     hasValue: 0
   nIdentifier:
@@ -595,10 +599,10 @@ MonoBehaviour:
     hasValue: 1
   nVector2:
     value: {x: 0, y: 0}
-    hasValue: 0
+    hasValue: 1
   nVector3:
     value: {x: 0, y: 0, z: 0}
-    hasValue: 0
+    hasValue: 1
   nVector4:
     value: {x: 0, y: 0, z: 1.7, w: 0}
     hasValue: 1
@@ -649,7 +653,7 @@ MonoBehaviour:
     key: asdfdsaf
     value:
       value: 0
-      hasValue: 0
+      hasValue: 1
   packIdentifier:
     _identifier:
       value:
@@ -665,17 +669,19 @@ MonoBehaviour:
   nullableNullableFloat:
     value:
       value: 0
-      hasValue: 0
-    hasValue: 0
+      hasValue: 1
+    hasValue: 1
   type:
     _value: 
+  readOnlyType:
+    _value: UnityEngine.UIElements.Label, UnityEngine.UIElementsModule
   nullableRectOffset:
     value:
       left: 0
       right: 0
       top: 0
       bottom: 0
-    hasValue: 0
+    hasValue: 1
   test: 0
   references:
     version: 2
@@ -686,72 +692,73 @@ MonoBehaviour:
         test3:
           value:
             asdf2: 0
-          hasValue: 0
+            asdf3: 0
+          hasValue: 1
         asdf: 0
         vector4: {x: 0, y: 0, z: 0, w: 0}
         version:
           _major:
             value: 0
-            hasValue: 0
+            hasValue: 1
           _minor:
             value: 0
-            hasValue: 0
+            hasValue: 1
           _patch:
             value: 0
-            hasValue: 0
+            hasValue: 1
         versionRange:
           min:
             _major:
               value: 0
-              hasValue: 0
+              hasValue: 1
             _minor:
               value: 0
-              hasValue: 0
+              hasValue: 1
             _patch:
               value: 0
-              hasValue: 0
+              hasValue: 1
           max:
             _major:
               value: 0
-              hasValue: 0
+              hasValue: 1
             _minor:
               value: 0
-              hasValue: 0
+              hasValue: 1
             _patch:
               value: 0
-              hasValue: 0
+              hasValue: 1
         identifier:
           _nameSpace: ros
           _path:
             _value: 
         nInt:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nUInt:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nLong:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nFloat:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nDouble:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nDecimal:
-          hasValue: 0
+          hasValue: 1
         nDecimal2:
-          hasValue: 0
+          hasValue: 1
         nIdentifier:
           value:
             _nameSpace: ros
             _path:
               _value: 
-          hasValue: 0
+          hasValue: 1
         nVector4:
           value: {x: 0, y: 0, z: 0, w: 0}
-          hasValue: 0
+          hasValue: 1
         nRect:
           value:
             serializedVersion: 2
@@ -759,13 +766,13 @@ MonoBehaviour:
             y: 0
             width: 0
             height: 0
-          hasValue: 0
+          hasValue: 1
         nColor:
           value: {r: 0, g: 0, b: 0, a: 0}
-          hasValue: 0
+          hasValue: 1
         nEnum:
           value: 0
-          hasValue: 0
+          hasValue: 1
         nChar:
           value: 97
           hasValue: 1
