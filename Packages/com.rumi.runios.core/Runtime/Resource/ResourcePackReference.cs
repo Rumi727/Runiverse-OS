@@ -29,7 +29,7 @@ namespace RuniOS.Resource
         {
             this.identifier = identifier;
             
-            rootFolder = folder;
+            rootFolder = folder.Recreate();
             assetFolder = folder.CreateChild(assetsFolderName);
             infoFile = folder.CreateChild(infoPath);
         }
