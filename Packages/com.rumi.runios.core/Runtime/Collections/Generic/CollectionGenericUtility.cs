@@ -27,11 +27,11 @@ namespace RuniOS.Collections.Generic
         }
         
         /// <summary>
-        /// 지정된 리스트 타입의 요소 (<see cref="IList{T}"/>의 내부) 타입을 가져옵니다.
+        /// 지정된 컬렉션 타입의 요소 (<see cref="ICollection{T}"/>의 내부) 타입을 가져옵니다.
         /// </summary>
-        /// <param name="type">요소 타입을 가져올 리스트 타입입니다 (예: <c>List&lt;int&gt;</c>).</param>
+        /// <param name="type">요소 타입을 가져올 컬렉션 타입입니다 (예: <c>List&lt;int&gt;</c>).</param>
         /// <returns>
-        /// <paramref name="type"/>이 <see cref="IList{T}"/>의 인스턴스이면 해당 T 타입이고,
+        /// <paramref name="type"/>이 <see cref="ICollection{T}"/>의 인스턴스이면 해당 T 타입이고,
         /// 그렇지 않으면 <see langword="null"/>입니다.
         /// </returns>
         public static Type? GetCollectionElementType(Type type)
@@ -41,6 +41,27 @@ namespace RuniOS.Collections.Generic
             {
                 // ICollection<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? resolvedType))
+                    return resolvedType.GetGenericArguments()[0];
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// 지정된 읽기 전용 컬렉션 타입의 요소 (<see cref="IReadOnlyCollection{T}"/>의 내부) 타입을 가져옵니다.
+        /// </summary>
+        /// <param name="type">요소 타입을 가져올 리스트 타입입니다 (예: <c>List&lt;int&gt;</c>).</param>
+        /// <returns>
+        /// <paramref name="type"/>이 <see cref="IReadOnlyCollection{T}"/>의 인스턴스이면 해당 T 타입이고,
+        /// 그렇지 않으면 <see langword="null"/>입니다.
+        /// </returns>
+        public static Type? GetReadOnlyCollectionElementType(Type type)
+        {
+            // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
+            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            {
+                // ICollection<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                if (type.IsAssignableToGenericDefinition(typeof(IReadOnlyCollection<>), out Type? resolvedType))
                     return resolvedType.GetGenericArguments()[0];
             }
 
@@ -62,6 +83,27 @@ namespace RuniOS.Collections.Generic
             {
                 // IList<>의 제네릭 정의에 할당 가능한지 확인합니다.
                 if (type.IsAssignableToGenericDefinition(typeof(IList<>), out Type? resolvedType))
+                    return resolvedType.GetGenericArguments()[0];
+            }
+
+            return null;
+        }
+        
+        /// <summary>
+        /// 지정된 리스트 타입의 요소 (<see cref="IReadOnlyList{T}"/>의 내부) 타입을 가져옵니다.
+        /// </summary>
+        /// <param name="type">요소 타입을 가져올 리스트 타입입니다 (예: <c>List&lt;int&gt;</c>).</param>
+        /// <returns>
+        /// <paramref name="type"/>이 <see cref="IReadOnlyList{T}"/>의 인스턴스이면 해당 T 타입이고,
+        /// 그렇지 않으면 <see langword="null"/>입니다.
+        /// </returns>
+        public static Type? GetReadOnlyListElementType(Type type)
+        {
+            // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
+            if (type.IsGenericType && !type.IsGenericTypeDefinition)
+            {
+                // IList<>의 제네릭 정의에 할당 가능한지 확인합니다.
+                if (type.IsAssignableToGenericDefinition(typeof(IReadOnlyList<>), out Type? resolvedType))
                     return resolvedType.GetGenericArguments()[0];
             }
 
