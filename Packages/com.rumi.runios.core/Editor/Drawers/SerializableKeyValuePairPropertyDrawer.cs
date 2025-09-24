@@ -1,13 +1,8 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using RuniOS.Collections.Generic;
-using RuniOS.Editor.UIElements;
-using RuniOS.UIElements;
-using System;
 using UnityEditor;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers
@@ -15,9 +10,9 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement? CreatePropertyGUI(SerializedProperty property)
+        /*public override VisualElement? CreatePropertyGUI(SerializedProperty property)
         {
-            Type pairType = fieldInfo.FieldType;
+            Type pairType = property.GetPropertyTypeWithoutList();
             (Type? keyType, Type? valueType) = SerializableKeyValuePair.GetUnderlyingType(pairType);
             if (keyType == null || valueType == null)
                 return null;
@@ -26,16 +21,22 @@ namespace RuniOS.Editor.Drawers
             if (keyProperty == null || valueProperty == null)
                 return null;
             
-            Type descriptionType = typeof(KeyValuePairField<>.AnonymousFieldDescription<>).MakeGenericType(pairType, typeof(PropertyField));
+            Type descriptionType = typeof(KeyValuePairField<>.AnonymousFieldDescription<>).MakeGenericType(pairType, typeof(Inspector));
+
+            Inspector keyInspector = new Inspector(new SerializedPropertyElement(keyProperty));
+            keyInspector.Rebuild();
+
+            Inspector valueInspector = new Inspector(new SerializedPropertyElement(valueProperty));
+            valueInspector.Rebuild();
             
-            object keyDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalKey, new PropertyField(keyProperty));
-            object valueDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalValue, new PropertyField(valueProperty));
+            object keyDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalKey, keyInspector);
+            object valueDescription = Activator.CreateInstance(descriptionType, SerializableKeyValuePair.nameOfInternalValue, valueInspector);
             
             Type fieldType = typeof(KeyValuePairField<>).MakeGenericType(pairType);
-            VisualElement element = ((VisualElement)Activator.CreateInstance(fieldType, keyDescription, valueDescription)).SetProperty(property);
+            VisualElement element = ((VisualElement)Activator.CreateInstance(fieldType, keyDescription, valueDescription)).SetProperty(property, false);
 
             return element;
-        }
+        }*/
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
