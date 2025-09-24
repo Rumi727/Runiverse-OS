@@ -31,13 +31,13 @@ public sealed class Test : MonoBehaviour
     public Version version;
     public VersionRange versionRange;
     public Identifier identifier;
-    [NullableField("null")] public SerializableNullable<int> nInt;
+    [NullableField("custom null text")] public SerializableNullable<int> nInt;
     public SerializableNullable<uint> nUInt;
     public SerializableNullable<long> nLong;
     public SerializableNullable<float> nFloat;
     public SerializableNullable<double> nDouble;
     public SerializableNullable<decimal> nDecimal;
-    [NullableField("null")] public SerializableNullable<decimal> nDecimal2;
+    [NullableField("custom null text 2")] public SerializableNullable<decimal> nDecimal2;
     public SerializableNullable<Identifier> nIdentifier;
     public SerializableNullable<Vector2> nVector2;
     public SerializableNullable<Vector3> nVector3;
@@ -123,6 +123,7 @@ public sealed class Test : MonoBehaviour
         public struct Test3
         {
             public float asdf2;
+            public float asdf3;
         }
     }
 
