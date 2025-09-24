@@ -1,8 +1,10 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEditor;
+using RuniOS.Editor.UIElements;
+using RuniOS.UIElements;
 using UnityEditor;
 using UnityEngine;
-
+using UnityEngine.UIElements;
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers
@@ -10,6 +12,8 @@ namespace RuniOS.Editor.Drawers
     [CustomPropertyDrawer(typeof(Version))]
     public class VersionPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new VersionField().SetProperty(property);
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
         
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
@@ -63,6 +67,22 @@ namespace RuniOS.Editor.Drawers
                 return EditorGUIUtility.singleLineHeight;
             else
                 return EditorGUIUtility.singleLineHeight * 2;
+        }
+        
+        public static (SerializedProperty major, SerializedProperty minor, SerializedProperty patch) GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            
+            property.Next(true);
+            SerializedProperty major = property.Copy();
+            
+            property.Next(false);
+            SerializedProperty minor = property.Copy();
+            
+            property.Next(false);
+            SerializedProperty patch = property.Copy();
+
+            return (major, minor, patch);
         }
     }
 }

@@ -16,16 +16,16 @@ namespace RuniOS
     /// </summary>
     [Serializable]
     [JsonConverter(typeof(VersionConverter))]
-    public struct Version : IEquatable<Version>, IEquatable<VersionRange>, IComparable, IComparable<Version>, ISerializationCallbackReceiver
+    public struct Version : IEquatable<Version>, IEquatable<VersionRange>, IComparable, IComparable<Version>
     {
         /// <summary>
         /// 버전 구성 요소를 구분하는 데 사용되는 문자입니다 (예: '.' in "1.2.3").
         /// </summary>
-        public const char separatorChar = '.';
+        public const char separator = '.';
         /// <summary>
         /// 버전 구성 요소가 <see langword="null"/>이거나 지정되지 않았음을 나타내는 데 사용되는 문자입니다.
         /// </summary>
-        public const char noneSeparatorChar = '*';
+        public const char noneSeparator = '*';
 
         /// <summary>
         /// 모든 버전 구성 요소가 <see langword="null"/>인 <see cref="Version"/> 인스턴스를 가져옵니다.
@@ -45,15 +45,29 @@ namespace RuniOS
         /// <summary>
         /// 이 버전의 메이저 구성 요소를 가져오거나 설정합니다. <see langword="null"/>일 수 있습니다.
         /// </summary>
-        public int? major;
+        public int? major
+        {
+            readonly get => _major;
+            set => _major = value;
+        }
+        
         /// <summary>
         /// 이 버전의 마이너 구성 요소를 가져오거나 설정합니다. <see langword="null"/>일 수 있습니다.
         /// </summary>
-        public int? minor;
+        public int? minor
+        {
+            readonly get => _minor;
+            set => _minor = value;
+        }
+        
         /// <summary>
         /// 이 버전의 패치 구성 요소를 가져오거나 설정합니다. <see langword="null"/>일 수 있습니다.
         /// </summary>
-        public int? patch;
+        public int? patch
+        {
+            readonly get => _patch;
+            set => _patch = value;
+        }
 
         /// <summary>
         /// 유니티 직렬화를 위한 메이저 버전 구성 요소의 내부 필드입니다.
@@ -77,68 +91,64 @@ namespace RuniOS
         /// <param name="value">파싱할 버전 문자열입니다. <see langword="null"/>일 수 있습니다.</param>
         public Version(string? value)
         {
-            _major = null;
-            _minor = null;
-            _patch = null;
-
             if (value == null)
             {
-                major = minor = patch = null;
+                _major = _minor = _patch = null;
                 return;
             }
 
-            string[]? versions = value.RemoveAllWhitespace().Split(separatorChar);
+            string[]? versions = value.RemoveAllWhitespace().Split(separator);
             if (versions == null || versions.Length <= 0)
-                major = minor = patch = null;
+                _major = _minor = _patch = null;
             else switch (versions.Length)
             {
                 case 1:
                 {
                     if (int.TryParse(versions[0], out int major))
-                        this.major = major;
+                        _major = major;
                     else
-                        this.major = null;
+                        _major = null;
 
-                    minor = null;
-                    patch = null;
+                    _minor = null;
+                    _patch = null;
                     break;
                 }
                 case 2:
                 {
                     if (int.TryParse(versions[0], out int major))
-                        this.major = major;
+                        _major = major;
                     else
-                        this.major = null;
+                        _major = null;
 
                     if (int.TryParse(versions[1], out int minor))
-                        this.minor = minor;
+                        _minor = minor;
                     else
-                        this.minor = null;
+                        _minor = null;
 
-                    patch = null;
+                    _patch = null;
                     break;
                 }
                 default:
                 {
                     {
                         if (int.TryParse(versions[0], out int major))
-                            this.major = major;
+                            _major = major;
                         else
-                            this.major = null;
+                            _major = null;
                     }
 
                     {
                         if (int.TryParse(versions[1], out int minor))
-                            this.minor = minor;
+                            _minor = minor;
                         else
-                            this.minor = null;
+                            _minor = null;
                     }
 
                     {
                         if (int.TryParse(versions[2], out int patch))
-                            this.patch = patch;
+                            _patch = patch;
                         else
-                            this.patch = null;
+                            _patch = null;
                     }
                     break;
                 }
@@ -153,13 +163,9 @@ namespace RuniOS
         /// <param name="patch">패치 버전 구성 요소입니다. <see langword="null"/>일 수 있습니다.</param>
         public Version(int? major, int? minor, int? patch)
         {
-            this.major = major;
-            this.minor = minor;
-            this.patch = patch;
-
-            _major = null;
-            _minor = null;
-            _patch = null;
+            _major = major;
+            _minor = minor;
+            _patch = patch;
         }
 
         /// <summary>
@@ -241,13 +247,11 @@ namespace RuniOS
 
         /// <summary>
         /// 두 <see cref="Version"/> 인스턴스의 값이 같은지 여부를 결정합니다.
-        /// <br/>
-        /// 두 인스턴스에서 <see langword="null"/>인 구성 요소는 같다고 간주됩니다.
         /// </summary>
         /// <param name="lhs">왼쪽 <see cref="Version"/> 인스턴스입니다.</param>
         /// <param name="rhs">오른쪽 <see cref="Version"/> 인스턴스입니다.</param>
         /// <returns>두 인스턴스의 모든 구성 요소가 같거나 둘 중 하나가 <see langword="null"/>이면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-        public static bool operator ==(Version lhs, Version rhs) => (lhs.major == null || rhs.major == null || lhs.major == rhs.major) && (lhs.minor == null || rhs.minor == null || lhs.minor == rhs.minor) && (lhs.patch == null || rhs.patch == null || lhs.patch == rhs.patch);
+        public static bool operator ==(Version lhs, Version rhs) => lhs.major == rhs.major && lhs.minor == rhs.minor && lhs.patch == rhs.patch;
         
         /// <summary>
         /// 두 <see cref="Version"/> 인스턴스의 값이 다른지 여부를 결정합니다.
@@ -502,37 +506,11 @@ namespace RuniOS
         /// <summary>
         /// 이 <see cref="Version"/> 인스턴스의 문자열 표현을 반환합니다.
         /// <br/>
-        /// 형식은 "메이저.마이너.패치"이며, <see langword="null"/>인 구성 요소는 <see cref="noneSeparatorChar"/>('*')로 표시됩니다.
+        /// 형식은 "메이저.마이너.패치"이며, <see langword="null"/>인 구성 요소는 <see cref="noneSeparator"/>('*')로 표시됩니다.
         /// <br/>
         /// 예: "1.2.3", "1.*.*", "*.*.3"
         /// </summary>
         /// <returns>이 인스턴스의 문자열 표현입니다.</returns>
-        public override readonly string ToString() => $"{major ?? noneSeparatorChar}{separatorChar}{minor ?? noneSeparatorChar}{separatorChar}{patch ?? noneSeparatorChar}";
-
-        /// <summary>
-        /// 유니티 직렬화 전에 호출됩니다.
-        /// <br/>
-        /// <see cref="major"/>, <see cref="minor"/>, <see cref="patch"/> <see cref="Nullable{T}"/> 값을
-        /// 유니티 직렬화 가능한 내부 필드(<see cref="_major"/>, <see cref="_minor"/>, <see cref="_patch"/>)로 동기화합니다.
-        /// </summary>
-        void ISerializationCallbackReceiver.OnBeforeSerialize()
-        {
-            _major = major;
-            _minor = minor;
-            _patch = patch;
-        }
-
-        /// <summary>
-        /// 유니티 역직렬화 후에 호출됩니다.
-        /// <br/>
-        /// 유니티 직렬화 가능한 내부 필드(<see cref="_major"/>, <see cref="_minor"/>, <see cref="_patch"/>)로부터
-        /// <see cref="major"/>, <see cref="minor"/>, <see cref="patch"/> <see cref="Nullable{T}"/> 값을 동기화합니다.
-        /// </summary>
-        void ISerializationCallbackReceiver.OnAfterDeserialize()
-        {
-            major = _major;
-            minor = _minor;
-            patch = _patch;
-        }
+        public override readonly string ToString() => $"{major ?? noneSeparator}{separator}{minor ?? noneSeparator}{separator}{patch ?? noneSeparator}";
     }
 }
