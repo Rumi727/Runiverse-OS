@@ -176,6 +176,10 @@ namespace RuniOS.UIElements
 
         readonly AnimBool animBool;
         readonly IVisualElementScheduledItem scheduledItem;
+        
+#if UNITY_EDITOR
+        int inspectorEndingFrame = 0;
+#endif
 
         public AnimatedFadedGroup() : this(false) { }
         public AnimatedFadedGroup(bool value, Direction direction = Direction.vertical, float? maxHeight = null) : this(value, null, new VisualElement { name = contentUssClassName }, direction, maxHeight) { }
@@ -222,6 +226,26 @@ namespace RuniOS.UIElements
             scheduledItem = viewportClipping.schedule.Execute(Update).Every(0);
             scheduledItem.Pause();
             animBool.onAnimationEnd += OnAnimationEnd;
+            
+#if UNITY_EDITOR
+            schedule.Execute(_ =>
+            {
+                if (inspectorEndingFrame >= 2)
+                    return;
+                
+                inspectorEndingFrame++;
+                
+                // 레이아웃 갱신이 이미 애니메이션에 의해 이루어진 상태라 비활성화가 되어도 레이아웃이 갱신되지 않아 프리팹 바가 나타나는 버그를 수정합니다
+                UnityEditor.UIElements.InspectorElement inspector = GetFirstAncestorOfType<UnityEditor.UIElements.InspectorElement>();
+                if (inspector != null)
+                {
+                    GeometryChangedEvent evt = GeometryChangedEvent.GetPooled(inspector.layout, inspector.layout);
+                    evt.target = inspector;
+
+                    inspector.SendEvent(evt);
+                }
+            }).Every(0);
+#endif
         }
 
         void OnAnimationBegin()
@@ -295,20 +319,9 @@ namespace RuniOS.UIElements
 
             scheduledItem.Pause();
             Update();
-            
+
 #if UNITY_EDITOR
-            // 레이아웃 갱신이 이미 애니메이션에 의해 이루어진 상태라 비활성화가 되어도 레이아웃이 갱신되지 않아 프리팹 바가 나타나는 버그를 수정합니다
-            UnityEditor.UIElements.InspectorElement inspector = GetFirstAncestorOfType<UnityEditor.UIElements.InspectorElement>();
-            if (inspector != null)
-            {
-                contentContainer.RegisterCallbackOnce<GeometryChangedEvent>(_ =>
-                {
-                    GeometryChangedEvent evt = GeometryChangedEvent.GetPooled(inspector.layout, inspector.layout);
-                    evt.target = inspector;
-                                    
-                    inspector.SendEvent(evt);
-                });
-            }
+            inspectorEndingFrame = 0;
 #endif
         }
 
