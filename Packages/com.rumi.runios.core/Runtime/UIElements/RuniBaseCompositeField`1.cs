@@ -67,11 +67,14 @@ namespace RuniOS.UIElements
         public IReadOnlyList<IElementDescription> descriptions => _descriptions ??= GetElementDescriptions().ToArray().AsReadOnly();
         IReadOnlyList<IElementDescription>? _descriptions;
         
+        public CompositeConfig compositeConfig { get; }
+
         /// <summary>
         /// 라벨 텍스트를 사용하여 <see cref="RuniBaseCompositeField{TValueType}"/>의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="label">필드에 표시될 라벨입니다.</param>
-        protected RuniBaseCompositeField(string? label) : base(label, new VisualElement())
+        /// <param name="compositeConfig">복합 필드의 설정입니다.</param>
+        protected RuniBaseCompositeField(string label, CompositeConfig compositeConfig = CompositeConfig.compositedField | CompositeConfig.includeCompositeUSS) : base(label, new VisualElement())
         {
             this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             
@@ -83,6 +86,8 @@ namespace RuniOS.UIElements
             visualInput = this.Q<VisualElement>(className: BaseField<TValueType>.inputUssClassName);
             visualInput.AddToClassList(inputUssClassName);
             visualInput.focusable = false;
+
+            this.compositeConfig = compositeConfig;
         }
         
         /// <summary>
@@ -139,7 +144,7 @@ namespace RuniOS.UIElements
                     if (element == null)
                         continue;
                     
-                    if (description is IAnonymousFieldDescription)
+                    if (compositeConfig.HasFlag(CompositeConfig.includeCompositeUSS) && description is IAnonymousFieldDescription)
                     {
                         if (isFirst)
                         {
@@ -180,9 +185,16 @@ namespace RuniOS.UIElements
                 }
 
                 description.element.delegatesFocus = true;
-                
+
                 if (description is IAnonymousFieldDescription)
-                    description.element.AddToClassList(fieldUssClassName);
+                {
+                    if (compositeConfig.HasFlag(CompositeConfig.includeCompositeUSS))
+                        description.element.AddToClassList(fieldUssClassName);
+                    
+                    // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함 (UnityEditor.UIElements.BindingsStyleHelpers 참고)
+                    if (!compositeConfig.HasFlag(CompositeConfig.compositedField))
+                        description.element.name += "-no-composited-field";
+                }
 
                 if (description is IFieldDescription fieldDescription && fieldDescription.writeEvent != null)
                 {
@@ -374,6 +386,8 @@ namespace RuniOS.UIElements
             /// <summary>
             /// 기존 필드 인스턴스를 사용하여 <see cref="AnonymousFieldDescription{TField}"/>의 새 인스턴스를 초기화합니다.
             /// </summary>
+            /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
+            /// <param name="field">기존 필드 인스턴스입니다.</param>
             public AnonymousFieldDescription(string propertyPath, TField field) : this(null, propertyPath, field) => this.field = field;
             
             /// <summary>
@@ -390,8 +404,8 @@ namespace RuniOS.UIElements
                 this.field = field;
                 if (IPrefixLabelBridge.__targetType.IsInstanceOfType(field))
                     IPrefixLabelBridge.__GetInstanceFrom(field).SetLabel(label);
-                    
-                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함
+
+                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함 (UnityEditor.UIElements.BindingsStyleHelpers 참고)
             }
 
             /// <inheritdoc/>
@@ -431,7 +445,7 @@ namespace RuniOS.UIElements
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
             public FieldDescription(string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, new TField(), displayEvent, writeEvent) { }
-            
+
             /// <summary>
             /// 새로운 <see cref="FieldDescription{TField, TFieldValueType}"/> 인스턴스를 초기화합니다.
             /// </summary>
@@ -440,10 +454,14 @@ namespace RuniOS.UIElements
             /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
             /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
             public FieldDescription(string? label, string propertyPath, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(label, propertyPath, new TField(), displayEvent, writeEvent) { }
-            
+
             /// <summary>
             /// 기존 필드 인스턴스를 사용하여 <see cref="FieldDescription{TField, TFieldValueType}"/>의 새 인스턴스를 초기화합니다.
             /// </summary>
+            /// <param name="propertyPath">필드의 바인딩 경로입니다.</param>
+            /// <param name="field">기존 필드 인스턴스입니다.</param>
+            /// <param name="displayEvent">부모 값이 변경될 때 호출되는 이벤트입니다.</param>
+            /// <param name="writeEvent">자식 필드 값이 변경될 때 호출되는 이벤트입니다.</param>
             public FieldDescription(string propertyPath, TField field, ReadDelegate displayEvent, WriteDelegate writeEvent) : this(null, propertyPath, field, displayEvent, writeEvent) { }
 
             /// <summary>
@@ -464,7 +482,7 @@ namespace RuniOS.UIElements
                 if (IPrefixLabelBridge.__targetType.IsInstanceOfType(field))
                     IPrefixLabelBridge.__GetInstanceFrom(field).SetLabel(label);
 
-                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함
+                field.name = $"unity-{propertyPath}-input"; // 유니티는 부모 바인딩 패치가 정상적이면 재귀적으로 자식을 찾아서 어쩌구 저쩌구 하기에 하여튼 이런식으로 직렬화된 프로퍼티 경로를 기준으로 이름을 짓지 않으면 프로퍼티로 인식 안함 (UnityEditor.UIElements.BindingsStyleHelpers 참고)
 
                 this.displayEvent = displayEvent;
                 this.writeEvent = writeEvent;
