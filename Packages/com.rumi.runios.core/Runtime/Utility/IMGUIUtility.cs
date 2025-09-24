@@ -4,6 +4,7 @@ namespace RuniOS
 {
     public static class IMGUIUtility
     {
+        // Patches/Runtime/UnityEngine.UIElements.UIElementsUtility.cs를 참고해주세요
         /// <summary>
         /// 현재 호출 스택에서 UI Toolkit의 <see cref="IMGUIContainer"/>를 통해 IMGUI 렌더링을 시작한 <see cref="IMGUIContainer"/>를 가져옵니다.<br/>
         /// 현재 스택에 해당 <see cref="IMGUIContainer"/>를 통한 IMGUI 호출이 없거나, IMGUI를 렌더링하게 한 <see cref="IMGUIContainer"/>가 없을 경우 <see langword="null"/>을 반환합니다.

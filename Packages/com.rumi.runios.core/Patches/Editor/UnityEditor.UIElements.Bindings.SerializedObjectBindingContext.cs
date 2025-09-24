@@ -19,15 +19,15 @@ namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
     {
-        public static partial class UnityEditor
+        public static partial class UnityEditorPatch
         {
-            public static partial class UIElements
+            public static partial class UIElementsPatch
             {
-                public static partial class Bindings
+                public static partial class BindingsPatch
                 {
-                    public static class SerializedObjectBindingContext
+                    public static class SerializedObjectBindingContextPatch
                     {
-                        public static Type targetType => AccessTools.TypeByName("UnityEditor.UIElements.Bindings.SerializedObjectBindingContext");
+                        public static Type targetType { get; } = AccessTools.TypeByName("UnityEditor.UIElements.Bindings.SerializedObjectBindingContext");
 
                         [HarmonyPatch]
                         public static class CreateBindingObjectForProperty
@@ -150,8 +150,8 @@ namespace RuniOS.Editor.Patches
                                     }
                                     
                                     // propertyType이 Nullable인지 확인합니다
-                                    bool isNullable = NullableType.IsNullable(propertyType);
-                                    Type? nullableUnderlyingType = NullableType.GetNullableUnderlyingType(propertyType);
+                                    bool isNullable = propertyType.IsNullable();
+                                    Type? nullableUnderlyingType = propertyType.GetNullableUnderlyingType();
 
                                     if ((nullableUnderlyingType == null && !propertyType.HasDefaultConstructor()) || (nullableUnderlyingType != null && !nullableUnderlyingType.HasDefaultConstructor()))
                                     {

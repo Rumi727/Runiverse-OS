@@ -1,14 +1,109 @@
-.unity-foldout {
-    flex-shrink: 0;
-}
-
-.unity-composite-field .unity-composite-field__field--last {
+.unity-composite-field > .unity-base-field__input > .unity-composite-field__field--last {
     margin-right: 0;
 }
 
-.runios-key-value-pair-field .unity-composite-field__field-spacer {
+.unity-composite-field__input > .runios-nullable-field > .runios-nullable-field__input > .runios-nullable-field__field {
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+}
+
+.unity-vector3-field__input > #unity-z-input.unity-composite-field__field {
+    margin-right: 0;
+}
+
+.unity-vector4-field__input > #unity-w-input.unity-composite-field__field {
+    margin-right: 0;
+}
+
+.unity-vector3-int-field__input > #unity-z-input.unity-composite-field__field {
+    margin-right: 0;
+}
+
+.runios-key-value-pair-field > .unity-base-field__input > .unity-composite-field__field-spacer {
     width: 10px;
     flex-grow: 0;
+}
+
+.runios-key-value-pair-field > .unity-base-field__input > .unity-property-field {
+    flex-direction: column;
+}
+
+.runios-key-value-pair-field > .unity-base-field__input > .runios-inspector .unity-label {
+    min-width: auto;
+    flex-grow: 0;
+}
+
+.runios-label-field {
+    height: var(--unity-metrics-single_line-height);
+}
+
+.runios-nullable-field {
+    overflow: visible;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.runios-nullable-field.unity-base-field--no-label .unity-composite-field__field-spacer {
+    position: relative;
+}
+
+.runios-nullable-field__label {
+    display: none;
+}
+
+.runios-nullable-field__input {
+    overflow: visible;
+}
+
+.runios-nullable-field__input > .unity-property-field {
+    flex-direction: column;
+}
+
+.runios-nullable-field--text-field > .runios-nullable-field__input > .unity-property-field {
+    margin-right: 0;
+}
+
+.runios-nullable-field__field {
+    flex-grow: 1;
+}
+
+.runios-nullable-field__null-label-field {
+    flex-grow: 1;
+    display: none;
+}
+
+.runios-nullable-field--non-text-field.runios-nullable-field--is-null .runios-nullable-field__field {
+    position: absolute;
+    visibility: hidden;
+    max-width: 0;
+    max-height: 0;
+}
+
+.runios-nullable-field--non-text-field.runios-nullable-field--is-null .runios-nullable-field__null-label-field {
+    display: flex;
+}
+
+.runios-nullable-field__toggle {
+    margin-bottom: 0;
+    margin-top: 0;
+    align-self: flex-start;
+    height: var(--unity-metrics-single_line-height);
+    top: 0;
+    right: 2px;
+}
+
+.runios-nullable-field__toggle.unity-base-field__inspector-field {
+    margin-left: 5px;
+}
+
+.runios-nullable-field--text-field > .runios-nullable-field__input .runios-nullable-field__toggle {
+    position: absolute;
+    margin-right: 0;
+    margin-left: 0;
 }
 
 .runios-animated-faded-group {
@@ -50,6 +145,10 @@
 }
 
 .runios-animated-faded-group__vertical .runios-animated-faded-group__content {
+}
+
+.runios-inspector {
+    flex-direction: column;
 }
 
 .runios-hex-color-field .unity-color-field {
@@ -114,5 +213,16 @@
 
 .runios-type-field__button {
     align-self: center;
+    -unity-font-style: normal;
+}
+
+.runios-version-field .unity-composite-field__field {
+    margin-right: 0;
+}
+
+.runios-version-field #separator {
+    margin-left: 2px;
+    margin-right: 2px;
+    -unity-text-align: upper-center;
     -unity-font-style: normal;
 }

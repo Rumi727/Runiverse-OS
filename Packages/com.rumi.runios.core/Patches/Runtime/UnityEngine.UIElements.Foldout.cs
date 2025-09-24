@@ -8,27 +8,25 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.UIElements;
 
-using UniFoldout = UnityEngine.UIElements.Foldout;
-
 namespace RuniOS.Patches
 {
     public static partial class Patches
     {
-        public static partial class UnityEngine
+        public static partial class UnityEnginePatch
         {
-            public static partial class UIElements
+            public static partial class UIElementsPatch
             {
-                [HarmonyPatch(typeof(UniFoldout))]
-                public static class Foldout
+                [HarmonyPatch(typeof(Foldout))]
+                public static class FoldoutPatch
                 {
-                    static readonly ConditionalWeakTable<UniFoldout, AnimatedFadedGroup> fadedGroups = new();
+                    static readonly ConditionalWeakTable<Foldout, AnimatedFadedGroup> fadedGroups = new();
                     
                     [HarmonyPatch]
                     public static class Constructor
                     {
-                        public static MethodBase TargetMethod() => typeof(UniFoldout).Constructor();
+                        public static MethodBase TargetMethod() => typeof(Foldout).Constructor();
 
-                        public static void Postfix(UniFoldout __instance)
+                        public static void Postfix(Foldout __instance)
                         {
                             VisualElement content = __instance.contentContainer;
                             __instance.hierarchy.Remove(content);
@@ -113,7 +111,7 @@ namespace RuniOS.Patches
 
                     [HarmonyPostfix]
                     [HarmonyPatch("SetValueWithoutNotify")]
-                    public static void SetValueWithoutNotifyPostfix(UniFoldout __instance)
+                    public static void SetValueWithoutNotifyPostfix(Foldout __instance)
                     {
                         if (fadedGroups.TryGetValue(__instance, out AnimatedFadedGroup? animatedFadedGroup))
                             animatedFadedGroup.SetValueWithoutNotify(__instance.value);

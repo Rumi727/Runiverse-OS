@@ -9,18 +9,18 @@ namespace RuniOS.Patches
 {
     public static partial class Patches
     {
-        public static partial class UnityEngine
+        public static partial class UnityEnginePatch
         {
-            public static partial class UIElements
+            public static partial class UIElementsPatch
             {
-                public static class UIElementsUtility
+                public static class UIElementsUtilityPatch
                 {
-                    public static Type TargetType() => AccessTools.TypeByName("UnityEngine.UIElements.UIElementsUtility");
+                    public static Type targetType { get; } = AccessTools.TypeByName("UnityEngine.UIElements.UIElementsUtility");
             
                     [HarmonyPatch]
                     public static class BeginContainerGUI
                     {
-                        public static MethodBase TargetMethod() => AccessTools.Method(TargetType(), "BeginContainerGUI");
+                        public static MethodBase TargetMethod() => AccessTools.Method(targetType, "BeginContainerGUI");
                 
                         public static void Postfix(IMGUIContainer container) => IMGUIUtility.currentIMGUIContainer = container;
                     }
@@ -28,7 +28,7 @@ namespace RuniOS.Patches
                     [HarmonyPatch]
                     public static class EndContainerGUI
                     {
-                        public static MethodBase TargetMethod() => AccessTools.Method(TargetType(), "EndContainerGUI");
+                        public static MethodBase TargetMethod() => AccessTools.Method(targetType, "EndContainerGUI");
                 
                         public static void Postfix() => IMGUIUtility.currentIMGUIContainer = null;
                     }
