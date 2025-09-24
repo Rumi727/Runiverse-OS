@@ -1,0 +1,169 @@
+﻿#nullable enable
+using RuniOS.APIBridge.UnityEditor;
+using RuniOS.Collections.Generic;
+using RuniOS.Editor.Serialization;
+using RuniOS.Inspectors;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection;
+using UnityEditor;
+
+namespace RuniOS.Editor.Inspectors.Unity
+{
+    public class InspectableSerializedList : IInspectableList
+    {
+        public InspectableSerializedList(SerializedProperty property)
+        {
+            if (property.propertyType == SerializedPropertyType.String || !property.isArray)
+                throw new ArgumentException($"Provided property '{property.propertyPath}' is not a array type.", nameof(property));
+            
+            ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type type);
+            
+            inspectionType = type;
+            inspectionElementType = CollectionGenericUtility.GetListElementType(type) ?? throw new ArgumentException($"Provided property '{property.propertyPath}' is not a list type.", nameof(property));
+            
+            this.property = property;
+            converter = PropertyConverter.FindConverter(inspectionElementType);
+        }
+        
+        public Type inspectionType { get; }
+        public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
+        
+        public Type inspectionElementType { get; }
+        public string inspectionElementDisplayName => inspectionElementType.GetTypeDisplayName();
+
+        public SerializedProperty property { get; }
+        public PropertyConverter? converter { get; }
+
+        NullabilityInfo? IInspectableList.nullabilityInfo => null;
+
+        bool IList.IsReadOnly => false;
+        bool IList.IsFixedSize => false;
+        
+        bool ICollection.IsSynchronized => false;
+        object ICollection.SyncRoot => this;
+        
+        public object? this[int index]
+        {
+            get
+            {
+                if (index < 0 || index >= count)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+
+                return converter?.Read(property.GetArrayElementAtIndex(index), inspectionElementType);
+            }
+            set
+            {
+                if (index < 0 || index >= count)
+                    throw new ArgumentOutOfRangeException(nameof(index));
+
+                converter?.Write(property.GetArrayElementAtIndex(index), inspectionElementType, value);
+            }
+        }
+        
+        public int count
+        {
+            get => property.arraySize;
+            set => property.arraySize = value;
+        }
+        int ICollection.Count => count;
+        
+        
+
+        public int Add(object? value)
+        {
+            int index = count;
+            property.InsertArrayElementAtIndex(index);
+            return index;
+        }
+        
+        public void Insert(int index, object value)
+        {
+            if (index < 0 || index >= count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            
+            property.InsertArrayElementAtIndex(index);
+        }
+
+        public void Remove(object value) => throw new NotImplementedException();
+        
+        public void RemoveAt(int index)
+        {
+            if (index < 0 || index >= count)
+                throw new ArgumentOutOfRangeException(nameof(index));
+            
+            property.DeleteArrayElementAtIndex(index);
+        }
+
+        public void Clear() => property.arraySize = 0;
+
+        public bool Contains(object? value) => throw new NotImplementedException();
+        
+        public int IndexOf(object? value) => throw new NotImplementedException();
+
+        public IEnumerator GetEnumerator() => throw new NotImplementedException();
+        
+        public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
+
+
+
+        List<IInspectorElement>? cachedElements;
+        public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        {
+            if (!flags.HasFlagFast(InspectorFlags.List))
+                return ImmutableArray<IInspectorElement>.Empty;
+            
+            cachedElements ??= new List<IInspectorElement>();
+            if (cachedElements.Count < count)
+            {
+                // 0, 1, 2 : 3
+                // 0 : 1
+                
+                // i = 1
+                // 1 < 3 : true
+                // 0, 1 : 1
+                
+                // i = 2
+                // 2 < 3 : true
+                // 0, 1, 2 : 2
+                
+                // i = 3
+                // 3 < 3 : false
+                
+                for (int i = cachedElements.Count; i < count; i++)
+                    cachedElements.Add(new SerializedListElement(this, property.GetArrayElementAtIndex(i), i));
+            }
+            else if (cachedElements.Count > count)
+            {
+                // 0 : 1
+                // 0, 1, 2 : 3
+                
+                // i = 2
+                // 2 >= 1 : true
+                // 0, 1 : 2
+                
+                // i = 1
+                // 1 >= 1 : true
+                // 0 : 1
+                
+                // i = 0
+                // 0 >= 1 : false
+                
+                for (int i = cachedElements.Count - 1; i >= count; i--)
+                    cachedElements.RemoveAt(i);
+            }
+
+            return cachedElements.ToImmutableArray();
+        }
+        
+        public IInspectorElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
+        {
+            if (!flags.HasFlagFast(InspectorFlags.List))
+                return null;
+            
+            return GetElements()[index];
+        }
+    }
+}
