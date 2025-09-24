@@ -62,6 +62,7 @@ public sealed class Test : MonoBehaviour
     [ReadOnlyField, TypeField(typeof(Label))] public SerializableType readOnlyType = typeof(Label);
     public SerializableNullable<RuniOS.RectOffset> nullableRectOffset;
     public float test;
+    [NotNullField] public Object? uniObject;
     
     void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
 
