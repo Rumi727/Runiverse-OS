@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3326928128437109631}
   - component: {fileID: 3920671259197382881}
-  - component: {fileID: 2859357255860281847}
   m_Layer: 0
   m_Name: Test
   m_TagString: Untagged
@@ -45,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 538b91b5762f6c849a6527da3b470f5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  document: {fileID: 2859357255860281847}
+  document: {fileID: 0}
   _a: 
   list: []
   stringList: []
@@ -683,6 +682,7 @@ MonoBehaviour:
       bottom: 0
     hasValue: 1
   test: 0
+  uniObject: {fileID: 0}
   references:
     version: 2
     RefIds:
@@ -802,26 +802,3 @@ MonoBehaviour:
           minute: 0
           second: 0
           millisecond: 0
---- !u!114 &2859357255860281847
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 420919353065644578}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 19102, guid: 0000000000000000e000000000000000, type: 0}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_PanelSettings: {fileID: 11400000, guid: c1a65cc2bc2b2064888a750ebfe24408, type: 2}
-  m_ParentUI: {fileID: 0}
-  sourceAsset: {fileID: 9197481963319205126, guid: 9cdd7e61695d9cd43b19a08bf7512e85, type: 3}
-  m_SortingOrder: 0
-  m_Position: 0
-  m_WorldSpaceSizeMode: 0
-  m_WorldSpaceWidth: 310
-  m_WorldSpaceHeight: 1013.8
-  m_PivotReferenceSize: 0
-  m_Pivot: 0
-  m_WorldSpaceCollider: {fileID: 0}

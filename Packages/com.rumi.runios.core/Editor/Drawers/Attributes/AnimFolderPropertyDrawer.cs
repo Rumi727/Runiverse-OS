@@ -3,9 +3,7 @@ using System;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
-using UnityEditor.UIElements;
 using UnityEngine;
-using UnityEngine.UIElements;
 using static RuniOS.Editor.EditorTool;
 using EditorGUI = UnityEditor.EditorGUI;
 
@@ -15,8 +13,6 @@ namespace RuniOS.Editor.Drawers.Attributes
     public class AnimFolderPropertyDrawer : PropertyDrawer
     {
         readonly Dictionary<string, AnimFloat> cachedAnimFloat = new();
-
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PropertyField(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -113,12 +109,7 @@ namespace RuniOS.Editor.Drawers.Attributes
                     property.isExpanded = isExpanded;
 
                     float headHeight = EditorGUIUtility.singleLineHeight;
-                    float height = headHeight.Lerp(childHeight, animFloat.value);
-
-                    if (animFloat.isAnimating)
-                        IMGUIUtility.UpdateContainerHeight(height);
-
-                    return height;
+                    return headHeight.Lerp(childHeight, animFloat.value);
                 }
             }
             

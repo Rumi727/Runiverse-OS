@@ -99,9 +99,6 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
                 animFloat.target = height;
                 height = animFloat.value + headerHeight;
                 
-                if (animFloat.isAnimating)
-                    IMGUIUtility.UpdateContainerHeight(height);
-                
                 return height;
             }
             else

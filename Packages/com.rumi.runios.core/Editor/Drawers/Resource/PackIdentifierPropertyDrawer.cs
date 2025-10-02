@@ -1,19 +1,14 @@
 #nullable enable
 using RuniOS.Editor.Drawers.IO;
-using RuniOS.Editor.UIElements;
 using RuniOS.Resource;
-using RuniOS.UIElements.Resource;
 using UnityEditor;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Drawers.Resource
 {
     [CustomPropertyDrawer(typeof(PackIdentifier))]
     public class PackIdentifierPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
@@ -40,22 +35,22 @@ namespace RuniOS.Editor.Drawers.Resource
                 position.x += position.width + 4;
                 position.width = 50;
                 
-                PackIdentifierField.PackIdentifierMode mode = internalIDToggle.boolValue ? PackIdentifierField.PackIdentifierMode.id : PackIdentifierField.PackIdentifierMode.path;
+                PackIdentifierMode mode = internalIDToggle.boolValue ? PackIdentifierMode.id : PackIdentifierMode.path;
                 EditorGUI.BeginChangeCheck();
-                mode = (PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
+                mode = (PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
                 if (EditorGUI.EndChangeCheck())
                 {
                     internalIDToggle.boolValue = mode switch
                     {
-                        PackIdentifierField.PackIdentifierMode.id => true,
-                        PackIdentifierField.PackIdentifierMode.path => false,
+                        PackIdentifierMode.id => true,
+                        PackIdentifierMode.path => false,
                         _ => internalIDToggle.boolValue
                     };
                     
                     localPathToggle.boolValue = mode switch
                     {
-                        PackIdentifierField.PackIdentifierMode.id => false,
-                        PackIdentifierField.PackIdentifierMode.path => true,
+                        PackIdentifierMode.id => false,
+                        PackIdentifierMode.path => true,
                         _ => localPathToggle.boolValue
                     };
                 }
@@ -81,6 +76,12 @@ namespace RuniOS.Editor.Drawers.Resource
             SerializedProperty localPath = property;
 
             return (internalID, localPath);
+        }
+        
+        public enum PackIdentifierMode
+        {
+            id,
+            path
         }
     }
 }
