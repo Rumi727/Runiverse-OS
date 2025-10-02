@@ -1,5 +1,4 @@
 ﻿#nullable enable
-using RuniOS.Editor.UIElements;
 using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
@@ -39,7 +38,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 요소의 디스플레이 이름을 가져옵니다.
         /// </summary>
-        public string displayName => property.GetFieldLabel();
+        public string displayName => property.displayName;
 
         /// <summary>
         /// 이 요소가 속한 검사 가능한 직렬화된 리스트를 가져옵니다.

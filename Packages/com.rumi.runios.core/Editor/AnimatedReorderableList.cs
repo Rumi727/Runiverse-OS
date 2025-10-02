@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.Editor.UIElements;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
@@ -45,7 +44,7 @@ namespace RuniOS.Editor
             if (reorderableList == null)
                 return;
 
-            label ??= new GUIContent(property.GetFieldLabel());
+            label ??= new GUIContent(property.displayName);
 
             bool isInArray = property.IsInArray();
 
@@ -80,7 +79,7 @@ namespace RuniOS.Editor
             if (reorderableList == null)
                 return 0;
 
-            label ??= new GUIContent(property.GetFieldLabel());
+            label ??= new GUIContent(property.displayName);
 
             float headerHeight = GetYSize(label, EditorStyles.foldoutHeader);
             float height;

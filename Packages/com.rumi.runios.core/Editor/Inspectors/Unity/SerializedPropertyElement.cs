@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using RuniOS.Editor.Serialization;
-using RuniOS.Editor.UIElements;
 using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
@@ -58,7 +57,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 프로퍼티의 디스플레이 이름을 가져옵니다.
         /// </summary>
-        public string displayName => property.GetFieldLabel();
+        public string displayName => property.displayName;
 
         /// <summary>
         /// 변수의 타입을 가져옵니다.

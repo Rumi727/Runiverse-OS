@@ -2,17 +2,14 @@
 using RuniOS;
 using RuniOS.Collections.Generic;
 using RuniOS.IO;
-using RuniOS.APIMarshal.UnityEngine.UIElements;
 using RuniOS.Resource;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UIElements;
 
 [ExecuteAlways]
 public sealed class Test : MonoBehaviour
 {
-    public UIDocument? document;
-
     public string a { get => _a; set => _a = value; }
     [SerializeField] string _a = string.Empty;
 
@@ -44,7 +41,7 @@ public sealed class Test : MonoBehaviour
     public SerializableNullable<Vector4> nVector4;
     public SerializableNullable<Rect> nRect;
     public SerializableNullable<Color> nColor;
-    public SerializableNullable<Align> nEnum;
+    public SerializableNullable<TextAlignment> nEnum;
     [ReadOnlyField] public SerializableNullable<char> nChar = 'a';
     public char @char = 'a';
     [Range(10, 20)] public float slider;
@@ -58,34 +55,13 @@ public sealed class Test : MonoBehaviour
     public PackIdentifier packIdentifier;
     public TextAlignment textAlignment;
     public SerializableNullable<SerializableNullable<float>> nullableNullableFloat;
-    [TypeField(typeof(Label))] public SerializableType type = typeof(Object);
-    [ReadOnlyField, TypeField(typeof(Label))] public SerializableType readOnlyType = typeof(Label);
+    [TypeField(typeof(TMP_Text))] public SerializableType type = typeof(Object);
+    [ReadOnlyField, TypeField(typeof(TMP_Text))] public SerializableType readOnlyType = typeof(TMP_Text);
     public SerializableNullable<RuniOS.RectOffset> nullableRectOffset;
     public float test;
     [NotNullField] public Object? uniObject;
     
     void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
-
-    void Start()
-    {
-        if (!Application.isPlaying || document == null)
-            return;
-        
-        Asdf asdf = new Asdf();
-        document.rootVisualElement.Add(asdf);
-        Debug.Log(asdf);
-        
-        Asdf2 asdf2 = new Asdf2("asdf", 3);
-        document.rootVisualElement.Add(asdf2);
-        Debug.Log(asdf2);
-
-        document.rootVisualElement.Add(new Button() { text = "asdf" });
-        document.rootVisualElement.Q<ListView>("test").itemsSource = new List<Vector2>();
-        document.rootVisualElement.Query<TextElement>();
-        document.rootVisualElement.schedule.Execute(static x => { }).Every(0);
-
-        _ = nInt.Value;
-    }
 
     void OnDisable() => DrivenPropertyManager.UnregisterProperty(this, this, "_a");
 
@@ -109,7 +85,7 @@ public sealed class Test : MonoBehaviour
         public SerializableNullable<Vector4> nVector4;
         public SerializableNullable<Rect> nRect;
         public SerializableNullable<Color> nColor;
-        public SerializableNullable<Align> nEnum;
+        public SerializableNullable<TextAlignment> nEnum;
         public SerializableNullable<char> nChar = 'a';
         public char @char = 'a';
         [Range(10, 20)] public float slider;
@@ -138,28 +114,5 @@ public sealed class Test : MonoBehaviour
     public struct StringListTestStruct
     {
         public string test;
-    }
-
-    public class Asdf2 : BaseCompositeFieldMarshal<string, IntegerField, int>
-    {
-        public Asdf2(string label, int fieldsByLine) : base(label, fieldsByLine)
-        {
-            
-        }
-
-        public override IEnumerable<FieldDescriptionMarshal> DescribeFieldsMarshal()
-        {
-            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
-            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
-            yield return new FieldDescriptionMarshal("asdf", "asdf", static x => 0, static (ref string val, int fieldValue) => { });
-        }
-    }
-
-    public class Asdf : TextInputBaseFieldMarshal<string>.TextInputBaseMarshal
-    {
-        public Asdf()
-        {
-            Debug.Log("asdf");
-        }
     }
 }
