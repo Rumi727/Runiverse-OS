@@ -34,7 +34,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="path">식별자의 경로 구성 요소입니다.</param>
         /// <exception cref="InvalidIdentifierException">제공된 경로가 유효하지 않은 경우 발생합니다.</exception>
-        public Identifier(string path)
+        public Identifier(FilePath path)
         {
             if (!IsPathValid(path))
                 throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
@@ -49,7 +49,7 @@ namespace RuniOS.Resource
         /// <param name="nameSpace">식별자의 네임스페이스 구성 요소입니다. null 또는 비어 있는 경우, <see cref="defaultNamespace"/>가 사용됩니다.</param>
         /// <param name="path">식별자의 경로 구성 요소입니다.</param>
         /// <exception cref="InvalidIdentifierException">제공된 네임스페이스 또는 경로가 유효하지 않은 경우 발생합니다.</exception>
-        public Identifier(string nameSpace, string path)
+        public Identifier(string nameSpace, FilePath path)
         {
             if (!IsNamespaceValid(nameSpace))
                 throw new InvalidIdentifierException(GetInvalidNamespaceMessage(nameSpace));
