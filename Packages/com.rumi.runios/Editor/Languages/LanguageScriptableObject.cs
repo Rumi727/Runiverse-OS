@@ -1,7 +1,7 @@
 #nullable enable
 using UnityEngine;
 
-namespace RuniOS.Installer
+namespace RuniOS.Installer.Languages
 {
     //[CreateAssetMenu(fileName = "LanguageScriptableObject", menuName = "Scriptable Objects/LanguageScriptableObject")]
     class LanguageScriptableObject : ScriptableObject

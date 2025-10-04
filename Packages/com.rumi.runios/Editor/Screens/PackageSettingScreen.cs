@@ -8,7 +8,7 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniOS.Installer
+namespace RuniOS.Installer.Screens
 {
     sealed class PackageSettingScreen : IInstallerScreen
     {
@@ -21,15 +21,15 @@ namespace RuniOS.Installer
         public Vector2? windowSize => null;
 
         public string label => InstallerWindow.TryGetText("installer.package_setting.label");
-        public bool headDisable { get; } = false;
+        public bool headDisable => false;
 
-        public int sort { get; } = 1;
+        public int sort => 1;
 
 
 
 
         GUIStyle? largeBoldLabel;
-        public void DrawGUI()
+        public void DrawGUI(Rect position)
         {
             if (mainWindow == null || mainWindow.scopedRegistrys == null)
                 return;
@@ -164,6 +164,8 @@ namespace RuniOS.Installer
 
                                 File.WriteAllText(manifestPath, manifestObject.ToString());
                                 AssetDatabase.Refresh();
+                                
+                                Debug.LogWarning(InstallerWindow.TryGetText("installer.package_setting.warning"));
                             }
                         }
                     }

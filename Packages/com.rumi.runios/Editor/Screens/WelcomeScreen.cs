@@ -2,7 +2,7 @@
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniOS.Installer
+namespace RuniOS.Installer.Screens
 {
     sealed class WelcomeScreen : IInstallerScreen
     {
@@ -26,7 +26,7 @@ namespace RuniOS.Installer
 
 
 
-        public void DrawGUI()
+        public void DrawGUI(Rect position)
         {
             float timer = (float)InstallerWindow.stopwatch.Elapsed.TotalSeconds;
 

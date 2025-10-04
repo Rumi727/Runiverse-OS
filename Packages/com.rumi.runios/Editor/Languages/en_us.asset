@@ -26,9 +26,20 @@ MonoBehaviour:
     - installer.package_setting.setting_info
     - installer.package_setting.apply
     - installer.package_setting.no_changes
+    - installer.package_setting.warning
     - installer.tmp_setting.label
     - installer.tmp_setting.warning
     - installer.tmp_setting.info
+    - installer.install_setting.label
+    - installer.install_setting.install
+    - installer.install_setting.installed
+    - installer.install_setting.dependency
+    - installer.install_setting.core.label
+    - installer.install_setting.core.one_line
+    - installer.install_setting.core.description
+    - installer.install_setting.ui.label
+    - installer.install_setting.ui.one_line
+    - installer.install_setting.ui.description
     serializableValues:
     - English
     - US
@@ -46,9 +57,36 @@ MonoBehaviour:
       to do it automatically.\r"
     - Apply
     - No changes
+    - If it does not refresh automatically, please refresh manually with the shortcut
+      Ctrl + R.
     - TMP Resources
     - The TextMeshPro package is not installed.
     - 'The ROS package utilizes Unity''s TextMesh Pro package.
 
       We recommend
       importing TextMesh Pro''s essential resources for smooth operation.'
+    - Installation time!
+    - Install
+    - "\u2713 Installed"
+    - Dependencies
+    - Runiverse OS Core
+    - User-friendly game engine library for Unity Engine
+    - 'This is the core package.
+
+      All RuniOS packages require this package.
+
+      
+
+      It
+      contains several utilities and a built-in resource management system.'
+    - Runiverse OS UI
+    - RuniOS's official runtime UI/UX system
+    - 'The design is inspired by the game osu!lazer.
+
+      
+
+      It''s the heaviest
+      and most complex app, requiring all of RuniOS''s packages as dependencies...
+
+      However,
+      it offers users easy control over its various features!'

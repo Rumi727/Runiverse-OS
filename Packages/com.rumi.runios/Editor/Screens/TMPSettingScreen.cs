@@ -1,9 +1,9 @@
 #nullable enable
-using UnityEditor;
 using TMPro;
+using UnityEditor;
 using UnityEngine;
 
-namespace RuniOS.Installer
+namespace RuniOS.Installer.Screens
 {
     sealed class TMPSettingScreen : IInstallerScreen
     {
@@ -16,21 +16,21 @@ namespace RuniOS.Installer
         public Vector2? windowSize => new Vector2(584, 333);
 
         public string label => InstallerWindow.TryGetText("installer.tmp_setting.label");
-        public bool headDisable { get; } = false;
+        public bool headDisable => false;
 
-        public int sort { get; } = 2;
+        public int sort => 2;
 
 
 
 #if ENABLE_TEXT_MESH_PRO
         readonly TMP_PackageResourceImporter importer = new TMP_PackageResourceImporter();
-        public void DrawGUI()
+        public void DrawGUI(Rect position)
         {
             GUILayout.Label(InstallerWindow.TryGetText("installer.tmp_setting.info"));
             importer.OnGUI();
         }
 #else
-        public void DrawGUI() => EditorGUILayout.HelpBox(InstallerWindow.TryGetText("installer.tmp_setting.warning"), MessageType.Error);
+        public void DrawGUI(Rect position) => EditorGUILayout.HelpBox(InstallerWindow.TryGetText("installer.tmp_setting.warning"), MessageType.Error);
 #endif
     }
 }

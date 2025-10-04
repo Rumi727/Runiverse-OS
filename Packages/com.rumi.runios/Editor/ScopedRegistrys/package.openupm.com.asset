@@ -18,5 +18,5 @@ MonoBehaviour:
   scopes:
   - com.cysharp.unitask
   - com.quickeye.ui-toolkit-plus
-  - com.coffee.csharp-compiler-settings
   - com.realitystop.linkmerge
+  - com.coffee.softmask-for-ugui

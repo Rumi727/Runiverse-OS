@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 658205eeebfb471dbb77a25e7493b6f9, type: 3}
+  m_Name: com.rumi.runios.ui
+  m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Installer.GitPackages.GitPackage
+  packages:
+  - {fileID: 11400000, guid: 775dbedadb5cef947819fa38009798ed, type: 2}
+  - {fileID: 11400000, guid: b0afe334cb2bea5489bab60376038ebf, type: 2}
+  dependencies:
+  - com.unity.modules.ui
+  - com.unity.ui
+  - com.unity.textmeshpro
+  - com.cysharp.unitask
+  - com.coffee.softmask-for-ugui
+  id: com.rumi.runios.ui
+  gitUrl: https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core
+  label: installer.install_setting.ui.label
+  oneLineDescription: installer.install_setting.ui.one_line
+  description: installer.install_setting.ui.description

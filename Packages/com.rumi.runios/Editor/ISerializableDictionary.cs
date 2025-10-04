@@ -3,7 +3,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 
-namespace RuniOS
+namespace RuniOS.Installer
 {
     public interface ISerializableDictionary : IDictionary, ISerializationCallbackReceiver
     {

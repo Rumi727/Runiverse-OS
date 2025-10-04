@@ -14,6 +14,6 @@ namespace RuniOS.Installer
         int sort { get; }
 
 
-        void DrawGUI();
+        void DrawGUI(Rect position);
     }
 }

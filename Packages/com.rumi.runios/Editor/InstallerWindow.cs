@@ -1,4 +1,8 @@
 #nullable enable
+using RuniOS.Installer.GitPackages;
+using RuniOS.Installer.Languages;
+using RuniOS.Installer.ScopedRegistrys;
+using RuniOS.Installer.Screens;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -13,6 +17,7 @@ namespace RuniOS.Installer
         public Texture2D? logoTexture;
 
         public ScopedRegistry? scopedRegistrys;
+        public GitPackage? gitPackages;
 
         public LanguageScriptableObject? ko_kr;
         public LanguageScriptableObject? en_us;
@@ -120,6 +125,16 @@ namespace RuniOS.Installer
             r.width += 22;
             EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
         }
+        
+        public static void DrawLine(int thickness, int padding, Color color)
+        {
+            Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding - 2));
+            r.height = thickness;
+            r.y += (padding / 2f) - 2;
+            r.x -= 18;
+            r.width += 22;
+            EditorGUI.DrawRect(r, color);
+        }
 
         public static void DrawLine(Rect position, int thickness = 2, int padding = 10)
         {
@@ -128,6 +143,15 @@ namespace RuniOS.Installer
             r.x -= 18;
             r.width += 22;
             EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
+        }
+        
+        public static void DrawLine(Rect position, int thickness, int padding, Color color)
+        {
+            Rect r = new Rect(position.x, position.y, position.width, thickness);
+            r.y += (padding / 2f) - 2;
+            r.x -= 18;
+            r.width += 22;
+            EditorGUI.DrawRect(r, color);
         }
 
         public static void DrawLineV(Rect position, int thickness = 2, int padding = 10)
@@ -259,10 +283,11 @@ namespace RuniOS.Installer
                     GUI.color = new Color(1, 1, 1, 0.5f);*/
 
                     DrawLineV(new Rect(-3, headHeightOffset + 18, area.width, area.height - headHeightOffset));
-                    GUILayout.BeginArea(new Rect(2, screen.headDisable ? 0 : headHeight, area.width - 2, area.height - (screen.headDisable ? 0 : headHeight)));
-
+                    Rect drawRect = new Rect(2, screen.headDisable ? 0 : headHeight, area.width - 2, area.height - (screen.headDisable ? 0 : headHeight));
+                    GUILayout.BeginArea(drawRect);
+                    
                     scrollPosition = GUILayout.BeginScrollView(scrollPosition);
-                    screen.DrawGUI();
+                    screen.DrawGUI(new Rect(3, 3, drawRect.width - 6, drawRect.height - 6));
                     GUILayout.EndScrollView();
 
                     GUILayout.EndArea();
