@@ -195,6 +195,28 @@ namespace RuniOS.Resource
             else // localPath != null 인 경우
                 return _path.GetHashCode();
         }
+        
+        /// <summary>
+        /// 현재 <see cref="PackIdentifier"/> 인스턴스를 나타내는 문자열을 반환합니다.
+        /// <br/>
+        /// <br/><b>반환 값 규칙:</b>
+        /// <list type="bullet">
+        /// <item><description>인스턴스가 유효하지 않으면 (<see cref="isValid"/>가 <see langword="false"/>이면), <c>"Invalid PackIdentifier"</c> 문자열을 반환합니다.</description></item>
+        /// <item><description>내부 식별자 (<see cref="identifier"/>)를 포함하는 유효한 인스턴스이면, 해당 <see cref="Identifier"/>의 <see cref="Identifier.ToString"/> 결과를 반환합니다.</description></item>
+        /// <item><description>로컬 경로 (<see cref="path"/>)를 포함하는 유효한 인스턴스이면, 해당 <see cref="FilePath"/>의 <see cref="FilePath.ToString"/> 결과를 반환합니다.</description></item>
+        /// </list>
+        /// </summary>
+        /// <returns>현재 인스턴스를 나타내는 문자열입니다.</returns>
+        public override string ToString()
+        {
+            if (!isValid)
+                return $"Invalid {nameof(PackIdentifier)}";
+
+            if (_identifier != null)
+                return _identifier.ToString();
+            else
+                return _path.ToString();
+        }
 
 
 
