@@ -25,16 +25,60 @@ namespace RuniOS
 
 
         public static bool AttributeContains<T>(this MemberInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this MemberInfo element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+        public static bool AttributeContains(this MemberInfo element, Type attribute, bool inherit = true)
+        {
+            try
+            {
+                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
+        }
 
         public static bool AttributeContains<T>(this Assembly element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this Assembly element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+        public static bool AttributeContains(this Assembly element, Type attribute, bool inherit = true)
+        {
+            try
+            {
+                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
+        }
 
         public static bool AttributeContains<T>(this ParameterInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this ParameterInfo element, Type attribute, bool inherit = true) => Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+        public static bool AttributeContains(this ParameterInfo element, Type attribute, bool inherit = true)
+        {
+            try
+            {
+                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
+        }
 
         public static bool AttributeContains<T>(this Module element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this Module element, Type attribute, bool inherit = true) => element.GetCustomAttributes(attribute, inherit).Length > 0;
+        public static bool AttributeContains(this Module element, Type attribute, bool inherit = true)
+        {
+            try
+            {
+                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
+        }
 
         public static bool IsAsyncMethod(this MethodBase methodBase) => methodBase.AttributeContains<AsyncStateMachineAttribute>();
 
