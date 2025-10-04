@@ -90,6 +90,13 @@ namespace RuniOS.IO
 
 
         /// <summary>
+        /// 지정된 이름을 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
+        /// </summary>
+        /// <param name="path">자식 핸들러의 이름입니다.</param>
+        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
+        public IOHandler CreateChild(string path) => CreateChild((FilePath)path);
+        
+        /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
         /// <param name="path">자식 핸들러의 경로입니다.</param>
@@ -193,16 +200,31 @@ namespace RuniOS.IO
         public abstract UniTask<IEnumerable<string>> GetDirectories();
 
         /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
+        /// </summary>
+        public async UniTask<IEnumerable<IOHandler>> GetDirectoryHandlers() => (await GetDirectories()).Select(CreateChild);
+
+        /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 이름을 가져옵니다.
         /// </summary>
         /// <returns>모든 디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract UniTask<IEnumerable<FilePath>> GetAllDirectories();
+        
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
+        /// </summary>
+        public async UniTask<IEnumerable<IOHandler>> GetAllDirectoryHandlers() => (await GetAllDirectories()).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <returns>파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract UniTask<IEnumerable<string>> GetFiles();
+        
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
+        /// </summary>
+        public async UniTask<IEnumerable<IOHandler>> GetFileHandlers() => (await GetFiles()).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
@@ -210,12 +232,23 @@ namespace RuniOS.IO
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract UniTask<IEnumerable<string>> GetFiles(WildcardPatterns wildcardPatterns);
+        
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
+        public async UniTask<IEnumerable<IOHandler>> GetFileHandlers(WildcardPatterns wildcardPatterns) => (await GetFiles(wildcardPatterns)).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <returns>모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract UniTask<IEnumerable<FilePath>> GetAllFiles();
+        
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
+        /// </summary>
+        public async UniTask<IEnumerable<IOHandler>> GetAllFileHandlers() => (await GetAllFiles()).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
@@ -223,6 +256,12 @@ namespace RuniOS.IO
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>일치하는 모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract UniTask<IEnumerable<FilePath>> GetAllFiles(WildcardPatterns wildcardPatterns);
+        
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
+        public async UniTask<IEnumerable<IOHandler>> GetAllFileHandlers(WildcardPatterns wildcardPatterns) => (await GetAllFiles(wildcardPatterns)).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일의 모든 바이트를 읽습니다.
