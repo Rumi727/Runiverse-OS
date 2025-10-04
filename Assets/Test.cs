@@ -13,15 +13,15 @@ public sealed class Test : MonoBehaviour
     public string a { get => _a; set => _a = value; }
     [SerializeField] string _a = string.Empty;
 
-    [AnimFolder] public List<Test2> list = new List<Test2>();
-    [AnimFolder] public List<string> stringList = new List<string>();
-    [AnimFolder] public List<StringListTest> stringList2 = new List<StringListTest>();
-    [AnimFolder] public List<StringListTestStruct> stringList3 = new List<StringListTestStruct>();
+    public List<Test2> list = new List<Test2>();
+    public List<string> stringList = new List<string>();
+    public List<StringListTest> stringList2 = new List<StringListTest>();
+    public List<StringListTestStruct> stringList3 = new List<StringListTestStruct>();
     public SerializableDictionary<string, Object> serializableDictionary = new SerializableDictionary<string, Object>();
     public SerializableDictionary<string, int> serializableDictionary2 = new SerializableDictionary<string, int>();
     public SerializableDictionary<string, SerializableDictionary<string, Test2>> serializableDictionary3 = new();
 
-    [AnimFolder] public Test2 test2 = new Test2();
+    public Test2 test2 = new Test2();
     [SerializeReference] public Test2 test3Ref = new Test2();
     public Vector3 vector3;
     public Vector4 vector4;
