@@ -20,9 +20,7 @@ namespace RuniOS
         {
             try
             {
-#pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
                 DrivenPropertyManagerBridge.RegisterProperty(driver, target, propertyPath);
-#pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)
             {
@@ -38,9 +36,7 @@ namespace RuniOS
         {
             try
             {
-#pragma warning disable CS0618 // 형식 또는 멤버는 사용되지 않습니다.
                 DrivenPropertyManagerBridge.UnregisterProperty(driver, target, propertyPath);
-#pragma warning restore CS0618 // 형식 또는 멤버는 사용되지 않습니다.
             }
             catch (Exception e)
             {
