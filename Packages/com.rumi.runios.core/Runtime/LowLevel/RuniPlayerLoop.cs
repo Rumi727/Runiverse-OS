@@ -85,15 +85,11 @@ namespace RuniOS.LowLevel
 
 #if UNITY_EDITOR
         /// <summary>
-        /// 플레이 모드로 진입하거나 플레이 모드가 종료될 때 등록된 모든 델리게이트를 자동으로 해제합니다.
+        /// 플레이 모드가 종료될 때 등록된 모든 델리게이트를 자동으로 해제합니다.
         /// </summary>
         [Awaken]
         [Preserve]
-        static void Awaken()
-        {
-            Clear();
-            Kernel.quitting += Clear;
-        }
+        static void Awaken() => Kernel.quitting += Clear;
 #endif
         
         /// <summary>
