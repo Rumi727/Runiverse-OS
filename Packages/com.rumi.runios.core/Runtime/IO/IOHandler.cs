@@ -50,7 +50,7 @@ namespace RuniOS.IO
         public IOHandler? parent { get; }
 
         /// <summary>
-        /// 이 <see cref="IOHandler"/> 인스턴스가 참조하는 파일 시스템의 구조가 **외부 요인에 의해 임의로 변경되지 않는 독립적인 상태**인지 여부를 나타내는 값을 가져옵니다.<br/>
+        /// 이 <see cref="IOHandler"/> 인스턴스가 참조하는 파일 시스템의 구조가 <b>외부 요인에 의해 임의로 변경되지 않는 독립적인 상태</b>인지 여부를 나타내는 값을 가져옵니다.<br/>
         /// 즉, 이 핸들러가 가리키는 경로 내부의 구조가 해당 핸들러 또는 개발자에 의해 제어되며, OS나 다른 외부 프로그램에 의해 마음대로 바뀔 수 없는 경우 <see langword="true"/>를 반환합니다.
         /// </summary>
         /// <remarks>
