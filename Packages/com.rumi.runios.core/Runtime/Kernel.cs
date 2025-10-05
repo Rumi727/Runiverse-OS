@@ -184,7 +184,7 @@ namespace RuniOS
 
         static void Quitting()
         {
-            quitting?.Invoke();
+            quitting.SafeInvoke();
             quitting = null;
 
             Application.quitting -= Quitting;
