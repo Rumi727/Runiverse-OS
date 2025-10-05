@@ -24,7 +24,7 @@ namespace RuniOS.IO
         /// </summary>
         /// <param name="parent">이 핸들러의 부모 <see cref="FileIOHandler"/>입니다.</param>
         /// <param name="childPath">이 핸들러의 자식 경로입니다.</param>
-        FileIOHandler(FileIOHandler? parent, FilePath childPath) : base(parent, childPath) => targetPath = parent?.targetPath + childPath;
+        FileIOHandler(FileIOHandler? parent, string childPath) : base(parent, childPath) => targetPath = parent?.targetPath + childPath;
 
         /// <summary>
         /// 이 핸들러의 최상위 <see cref="FileIOHandler"/>를 가져옵니다.
@@ -63,10 +63,7 @@ namespace RuniOS.IO
                 return handler;
 
             foreach (var item in path.value.AsSpan().SplitAny(FilePath.directorySeparatorChars))
-            {
-                FilePath childPath = new FilePath(item);
-                handler = new FileIOHandler(handler, childPath);
-            }
+                handler = new FileIOHandler(handler, new string(item));
 
             return handler;
         }

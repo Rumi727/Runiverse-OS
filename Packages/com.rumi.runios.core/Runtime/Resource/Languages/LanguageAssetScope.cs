@@ -1,11 +1,12 @@
+#nullable enable
 using System.Collections.Generic;
 
 namespace RuniOS.Resource.Languages
 {
-    public class LanguageAssetScope : AssetScope
+    public sealed class LanguageAssetScope : AssetScope
     {
-        public Dictionary<string, string> texts;
+        public IReadOnlyDictionary<string, string> texts { get; }
 
-        protected internal LanguageAssetScope(AssetHandle handle, Dictionary<string, string> asset) : base(handle) => texts = asset;
+        internal LanguageAssetScope(AssetHandle handle, IReadOnlyDictionary<string, string> asset) : base(handle) => texts = asset;
     }
 }

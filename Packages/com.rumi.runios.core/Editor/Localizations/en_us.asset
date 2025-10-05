@@ -15,6 +15,10 @@ MonoBehaviour:
   _languageKey: en_us
   _languages:
     pairs:
+    - key: language.name
+      value: English
+    - key: language.region
+      value: US
     - key: gui.key
       value: Key
     - key: gui.value
@@ -115,3 +119,5 @@ MonoBehaviour:
     - key: internal.auto_setter.property.value_info
       value: Changed the {name} property value to {value} to allow RuniOS to work
         correctly
+    - key: internal.editor_resource_loader.loading
+      value: Loading Resource...

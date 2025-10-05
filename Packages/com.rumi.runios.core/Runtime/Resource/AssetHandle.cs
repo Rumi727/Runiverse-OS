@@ -11,7 +11,10 @@ namespace RuniOS.Resource
         public IOHandler ioHandler { get; }
 
         public object? assetObject { get; private set; }
+        
+        public bool isLoading { get; private set; }
 
+        
 
         protected AssetHandle(IOHandler ioHandler) => this.ioHandler = ioHandler;
 
@@ -34,18 +37,38 @@ namespace RuniOS.Resource
         
         internal void ReturnScope(AssetScope assetScope)
         {
-            int lastCount = assetScopes.Count;
-            assetScopes.RemoveAll(x =>
+            bool scopeFound = false;
+            for (int i = assetScopes.Count - 1; i >= 0; i--)
             {
-                if (x.TryGetTarget(out AssetScope outAssetScope))
-                    return assetScope == outAssetScope;
+                WeakReference<AssetScope> weakRef = assetScopes[i];
+        
+                if (weakRef.TryGetTarget(out AssetScope outAssetScope))
+                {
+                    // 1. 현재 제거하려는 Scope를 찾았을 경우
+                    if (assetScope == outAssetScope)
+                    {
+                        assetScopes.RemoveAt(i);
+                        scopeFound = true;
+                        
+                        break; 
+                    }
+                }
+                else
+                {
+                    // 2. WeakReference가 만료되었을 경우 (GC된 경우)
+                    // 청소 목적으로 제거
+                    assetScopes.RemoveAt(i);
+                }
+            }
 
-                return true;
-            });
-
-            if (lastCount == assetScopes.Count)
+            if (!scopeFound)
             {
-                Debug.LogWarning("Attempted to return an invalid asset scope!");
+                Debug.LogWarning
+                (
+                    $"Invalid or already-returned AssetScope detected! Scope for asset '{ioHandler.fullPath}' was not found in the handle's list.\n" +
+                    "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle."
+                );
+                
                 return;
             }
 
@@ -54,7 +77,7 @@ namespace RuniOS.Resource
                 try
                 {
                     assetObject = null;
-                    Unload().Forget();
+                    Unload();
                 }
                 catch (Exception e)
                 {
@@ -66,6 +89,11 @@ namespace RuniOS.Resource
 
         public async UniTask Reload()
         {
+            if (isLoading)
+                return;
+            
+            isLoading = true;
+
             try
             {
                 assetObject = await Load();
@@ -75,11 +103,15 @@ namespace RuniOS.Resource
                 Debug.LogException(e);
                 Debug.LogError($"Failed to load asset at path {ioHandler.fullPath}!");
             }
+            finally
+            {
+                isLoading = false;
+            }
         }
 
         protected abstract AssetScope CreateScope(object assets);
 
         protected abstract UniTask<object?> Load();
-        protected abstract UniTask Unload();
+        protected abstract void Unload();
     }
 }

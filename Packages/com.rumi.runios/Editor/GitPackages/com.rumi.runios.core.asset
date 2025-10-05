@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: com.rumi.runios.core
   m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Installer.GitPackages.GitPackage
   packages:
-  - {fileID: 0}
+  - {fileID: 11400000, guid: f0f04d078c0834a469cbde1447e0b522, type: 2}
   dependencies:
   - com.unity.modules.ui
   - com.unity.ui

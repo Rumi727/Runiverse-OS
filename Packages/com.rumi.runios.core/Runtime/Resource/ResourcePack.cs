@@ -6,15 +6,21 @@ using System;
 
 namespace RuniOS.Resource
 {
-    public sealed class ResourcePackReference : IDisposable
+    /// <summary>
+    /// 리소스팩의 참조입니다.
+    /// 실제 데이터는 레지스트리에 담깁니다.
+    /// </summary>
+    public sealed class ResourcePack : IDisposable
     {
         public static readonly FilePath assetsFolderName = "assets";
         public static readonly FilePath infoPath = "pack.json";
 
-        public static readonly ResourcePackReference emptyPack = new ResourcePackReference();
-        static ResourcePackReference? defaultPack;
+        public static readonly ResourcePack emptyPack = new ResourcePack();
+        static ResourcePack? defaultPack;
 
-        ResourcePackReference()
+        public static readonly PackIdentifier defaultPackIdentifier = PackIdentifier.CreateByID("vanilla");
+
+        ResourcePack()
         {
             identifier = PackIdentifier.empty;
             
@@ -25,7 +31,7 @@ namespace RuniOS.Resource
             metaData = new PackMetaData(string.Empty);
         }
 
-        ResourcePackReference(PackIdentifier identifier, IOHandler folder)
+        ResourcePack(PackIdentifier identifier, IOHandler folder)
         {
             this.identifier = identifier;
             
@@ -34,12 +40,15 @@ namespace RuniOS.Resource
             infoFile = folder.CreateChild(infoPath);
         }
 
-        public static async UniTask<ResourcePackReference> GetDefaultPack() => (defaultPack ??= await Create(PackIdentifier.CreateByID("vanilla"), StreamingIOHandler.instance)) ?? emptyPack;
+        public static async UniTask<ResourcePack> GetDefaultPack() => (defaultPack ??= await Create(PackIdentifier.CreateByID("vanilla"), StreamingIOHandler.instance)) ?? emptyPack;
 
-        public static UniTask<ResourcePackReference?> Create(FileIOHandler handler) => Create(PackIdentifier.CreateByPath(handler.targetPath), handler);
-        public static async UniTask<ResourcePackReference?> Create(PackIdentifier packIdentifier, IOHandler handler)
+        public static UniTask<ResourcePack?> Create(FileIOHandler handler) => Create(PackIdentifier.CreateByPath(handler.targetPath), handler);
+        public static async UniTask<ResourcePack?> Create(PackIdentifier packIdentifier, IOHandler handler)
         {
-            ResourcePackReference resourcePack = new ResourcePackReference(packIdentifier, handler.Recreate());
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, handler.Recreate());
+            if (!await resourcePack.infoFile.FileExists())
+                return null;
+            
             try
             {
                 resourcePack.metaData = JsonConvert.DeserializeObject<PackMetaData>(await resourcePack.infoFile.ReadAllText());

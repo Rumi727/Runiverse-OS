@@ -15,6 +15,10 @@ MonoBehaviour:
   _languageKey: ko_kr
   _languages:
     pairs:
+    - key: language.name
+      value: "\uD55C\uAD6D\uC5B4"
+    - key: language.region
+      value: "\uB300\uD55C\uBBFC\uAD6D"
     - key: gui.key
       value: "\uD0A4"
     - key: gui.value
@@ -113,3 +117,5 @@ MonoBehaviour:
     - key: internal.auto_setter.property.value_info
       value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D
         {name} \uC18D\uC131 \uAC12\uC744 {value}\uC73C(\uB85C) \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
+    - key: internal.editor_resource_loader.loading
+      value: "\uB9AC\uC18C\uC2A4 \uB85C\uB4DC..."

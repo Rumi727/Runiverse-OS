@@ -15,6 +15,10 @@ MonoBehaviour:
   _languageKey: ja_jp
   _languages:
     pairs:
+    - key: language.name
+      value: "\u65E5\u672C\u8A9E"
+    - key: language.region
+      value: "\u65E5\u672C"
     - key: gui.key
       value: "\u30AD\u30FC"
     - key: gui.value
@@ -101,3 +105,5 @@ MonoBehaviour:
       value: "RuniOS\u304C\u6B63\u3057\u304F\u6A5F\u80FD\u3059\u308B\u3088\u3046\u306B{name}\u5C5E\u6027\u306E\u5024\u3092\u5909\u66F4\u3057\u307E\u3057\u305F\u3002"
     - key: internal.auto_setter.property.value_info
       value: "RuniOS\u304C\u6B63\u3057\u304F\u6A5F\u80FD\u3059\u308B\u3088\u3046\u306B\u3001{name}\u5C5E\u6027\u306E\u5024\u3092{value}\u306B\u5909\u66F4\u3057\u307E\u3057\u305F\u3002"
+    - key: internal.editor_resource_loader.loading
+      value: "\u30EA\u30BD\u30FC\u30B9\u306E\u30ED\u30FC\u30C9..."

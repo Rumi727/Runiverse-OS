@@ -6,18 +6,23 @@ using System.Collections.Generic;
 
 namespace RuniOS.Resource.Languages
 {
-    public class LanguageAssetHandle : AssetHandle
+    public sealed class LanguageAssetHandle : AssetHandle
     {
         public LanguageAssetHandle(IOHandler ioHandler) : base(ioHandler) { }
 
-        protected override AssetScope CreateScope(object asset) => new LanguageAssetScope(this, (Dictionary<string, string>)asset);
-
         protected override async UniTask<object?> Load()
         {
-            string json = await ioHandler.ReadAllText();
-            return JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+            if (await ioHandler.FileExists())
+            {
+                string json = await ioHandler.ReadAllText();
+                return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json);
+            }
+            
+            return false;
         }
 
-        protected override UniTask Unload() => UniTask.CompletedTask;
+        protected override void Unload() { }
+        
+        protected override AssetScope CreateScope(object asset) => new LanguageAssetScope(this, ((Dictionary<string, string>)asset).AsReadOnly());
     }
 }
