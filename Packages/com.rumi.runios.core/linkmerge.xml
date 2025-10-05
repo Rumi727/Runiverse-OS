@@ -1,7 +1,6 @@
 <linker>
     <assembly fullname="RuniOS">
         <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all"/>
-        <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all"/>
         <type fullname="RuniOS.MathUtility" preserve="all"/>
     </assembly>
     <assembly fullname="RuniOS.Modding" preserve="all"/>
