@@ -213,5 +213,13 @@ namespace RuniOS.IO
         /// <exception cref="PathTooLongException">경로가 시스템 정의 최대 길이를 초과하는 경우 발생합니다.</exception>
         /// <exception cref="NotSupportedException">경로에 콜론(:)이 포함된 경우 발생합니다.</exception>
         public override UniTask<Stream> OpenRead() => UniTask.FromResult<Stream>(File.OpenRead(targetPath));
+
+        public override bool IsSameTarget(IOHandler? other)
+        {
+            if (other is not FileIOHandler fileIOHandler)
+                return false;
+
+            return targetPath == fileIOHandler.targetPath;
+        }
     }
 }

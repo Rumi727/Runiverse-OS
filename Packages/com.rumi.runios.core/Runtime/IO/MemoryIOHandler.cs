@@ -164,5 +164,13 @@ namespace RuniOS.IO
         /// <returns>지정된 가상 파일에 대한 읽기 전용 <see cref="Stream"/>입니다.</returns>
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
         public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(fullPath)?.OpenRead() ?? throw new FileNotFoundException();
+
+        public override bool IsSameTarget(IOHandler? other)
+        {
+            if (other is not MemoryIOHandler memoryIOHandler)
+                return false;
+            
+            return rootDirectory == memoryIOHandler.rootDirectory && fullPath == memoryIOHandler.fullPath;
+        }
     }
 }

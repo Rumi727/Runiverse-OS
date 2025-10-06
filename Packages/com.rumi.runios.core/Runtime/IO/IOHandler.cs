@@ -286,6 +286,17 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일에서 열린 <see cref="Stream"/>입니다.</returns>
         public abstract UniTask<Stream> OpenRead();
+        
+        
+        
+        /// <summary>
+        /// 이 핸들러가 다른 지정된 핸들러와 동일한 최종 대상(파일 또는 디렉터리)을 참조하는지 확인합니다.<br/>
+        /// 이 비교는 핸들러의 내부 구현 방식이나 객체 인스턴스의 동일성과는 무관하게,
+        /// 두 핸들러가 가리키는 논리적 경로의 동등성만을 확인합니다.
+        /// </summary>
+        /// <param name="other">비교할 다른 <see cref="IOHandler"/> 인스턴스입니다.</param>
+        /// <returns>두 핸들러가 동일한 대상을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
+        public abstract bool IsSameTarget(IOHandler? other);
 
 
 
@@ -324,6 +335,8 @@ namespace RuniOS.IO
             public override UniTask<IEnumerable<string>> ReadLines() => UniTask.FromResult(Enumerable.Empty<string>());
 
             public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
+
+            public override bool IsSameTarget(IOHandler? other) => false;
         }
     }
 }
