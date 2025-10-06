@@ -34,10 +34,10 @@ namespace RuniOS.Resource.Languages
         public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
         {
             _isLoading = true;
+            BeginTracking();
             
             try
             {
-                ClearAssetHandle();
                 _preloadedAsset.Clear();
             
                 progress?.Report(0);
@@ -72,7 +72,7 @@ namespace RuniOS.Resource.Languages
                                             _preloadedAsset.Add(name, scope.texts);
                                     }
                                     
-                                    AddAssetHandle(identifier, handle);
+                                    RecordAssetHandle(identifier, handle);
                                 }
                                 catch (Exception e)
                                 {
@@ -99,6 +99,7 @@ namespace RuniOS.Resource.Languages
                     Debug.LogException(e);
                 }
                 
+                EndTracking();
                 _isLoading = false;
             }
         }

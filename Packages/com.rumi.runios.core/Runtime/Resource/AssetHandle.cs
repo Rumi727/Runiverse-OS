@@ -10,9 +10,11 @@ namespace RuniOS.Resource
     {
         public IOHandler ioHandler { get; }
 
+        public abstract bool isAlwaysLoaded { get; }
         public object? assetObject { get; private set; }
         
         public bool isLoading { get; private set; }
+        
 
         
 
@@ -72,12 +74,12 @@ namespace RuniOS.Resource
                 return;
             }
 
-            if (assetScopes.Count <= 0)
+            if (assetScopes.Count <= 0 && !isAlwaysLoaded)
             {
                 try
                 {
-                    assetObject = null;
                     Unload();
+                    assetObject = null;
                 }
                 catch (Exception e)
                 {
@@ -89,7 +91,7 @@ namespace RuniOS.Resource
 
         public async UniTask Reload()
         {
-            if (isLoading)
+            if ((assetScopes.Count <= 0 && !isAlwaysLoaded) || isLoading)
                 return;
             
             isLoading = true;
