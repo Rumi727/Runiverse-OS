@@ -101,6 +101,7 @@ InitTestScene*.unity*
 # FMOD
 
 [Aa]ssets/Plugins/FMOD/*
+[Aa]ssets/Plugins/FMOD.meta
 
 # Never ignore DLLs in the FMOD subfolder.
 !/[Aa]ssets/Plugins/FMOD/**/lib/*
