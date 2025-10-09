@@ -24,66 +24,10 @@ namespace RuniOS
 
 
 
-        public static bool AttributeContains<T>(this MemberInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this MemberInfo element, Type attribute, bool inherit = true)
-        {
-            try
-            {
-                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return false;
-            }
-        }
+        public static bool IsAsyncMethod(this MethodBase methodBase) => methodBase.IsDefined(typeof(AsyncStateMachineAttribute));
 
-        public static bool AttributeContains<T>(this Assembly element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this Assembly element, Type attribute, bool inherit = true)
-        {
-            try
-            {
-                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return false;
-            }
-        }
-
-        public static bool AttributeContains<T>(this ParameterInfo element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this ParameterInfo element, Type attribute, bool inherit = true)
-        {
-            try
-            {
-                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return false;
-            }
-        }
-
-        public static bool AttributeContains<T>(this Module element, bool inherit = true) where T : Attribute => element.AttributeContains(typeof(T), inherit);
-        public static bool AttributeContains(this Module element, Type attribute, bool inherit = true)
-        {
-            try
-            {
-                return Attribute.GetCustomAttributes(element, attribute, inherit).Length > 0;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return false;
-            }
-        }
-
-        public static bool IsAsyncMethod(this MethodBase methodBase) => methodBase.AttributeContains<AsyncStateMachineAttribute>();
-
-        public static bool IsCompilerGenerated(this Type type) => type.AttributeContains<CompilerGeneratedAttribute>();
-        public static bool IsCompilerGenerated(this MemberInfo memberInfo) => memberInfo.AttributeContains<CompilerGeneratedAttribute>();
+        public static bool IsCompilerGenerated(this Type type) => type.IsDefined(typeof(CompilerGeneratedAttribute));
+        public static bool IsCompilerGenerated(this MemberInfo memberInfo) => memberInfo.IsDefined(typeof(CompilerGeneratedAttribute));
 
 
 
@@ -128,8 +72,8 @@ namespace RuniOS
             (
                 static x =>
                 {
-                    bool result = x.AttributeContains<T>() && x.GetParameters().IsEmpty();
-                    if (result && !x.AttributeContains<PreserveAttribute>())
+                    bool result = x.IsDefined(typeof(T)) && x.GetParameters().IsEmpty();
+                    if (result && !x.IsDefined(typeof(PreserveAttribute)))
                         Debug.LogWarning($"The method {x.DeclaringType?.Name}.{x.Name} is invoked via '{nameof(AttributeInvoke)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
                     
                     return result;

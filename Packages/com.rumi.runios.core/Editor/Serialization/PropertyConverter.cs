@@ -30,7 +30,7 @@ namespace RuniOS.Editor.Serialization
         .Where
         (
             static x =>
-                x.AttributeContains(typeof(CustomPropertyConverterAttribute)) &&
+                x.IsDefined(typeof(CustomPropertyConverterAttribute)) &&
                 x.IsSubclassOf(typeof(PropertyConverter)) &&
                 x.HasDefaultConstructor()
         )
