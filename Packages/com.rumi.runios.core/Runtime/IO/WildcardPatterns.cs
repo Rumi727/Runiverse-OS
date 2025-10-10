@@ -1,6 +1,6 @@
 #nullable enable
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace RuniOS.IO
 {
@@ -20,8 +20,8 @@ namespace RuniOS.IO
 
         public IReadOnlyList<string> patterns { get; }
 
-        public WildcardPatterns(string pattern) => patterns = (new string[] { pattern }).AsReadOnly();
-        public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToArray().AsReadOnly();
+        public WildcardPatterns(string pattern) => patterns = (ImmutableArray.Create(pattern)).AsReadOnly();
+        public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToImmutableArray();
 
         public string this[int index] => patterns[index];
 
