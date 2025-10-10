@@ -97,10 +97,7 @@ namespace RuniOS.LowLevel
         /// </summary>
         static void Clear()
         {
-            PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
-            InternalUnregister(ref loop, null, allRegisteredDelegate);
-            PlayerLoop.SetPlayerLoop(loop);
-
+            UnregisterAll(allRegisteredDelegate);
             allRegisteredDelegate = null;
         }
 
@@ -130,7 +127,7 @@ namespace RuniOS.LowLevel
                 return false;
 
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
-            bool result = Register(ref loop, targetType, updateDelegate);
+            bool result = InternalRegister(ref loop, targetType, updateDelegate);
             PlayerLoop.SetPlayerLoop(loop);
 
             allRegisteredDelegate += updateDelegate;
@@ -148,7 +145,7 @@ namespace RuniOS.LowLevel
         /// 델리게이트 등록에 성공했으면 <see langword="true"/>를,
         /// 일치하는 타입을 찾지 못했거나 <paramref name="targetType"/>이 <see langword="null"/> 또는 <paramref name="updateDelegate"/>가 <see langword="null"/>이어서 실패했으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool Register(ref PlayerLoopSystem loop, Type? targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
+        static bool InternalRegister(ref PlayerLoopSystem loop, Type? targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
         {
             if (targetType == null || updateDelegate == null || loop.subSystemList == null)
                 return false;
@@ -164,7 +161,7 @@ namespace RuniOS.LowLevel
                     return true;
                 }
 
-                if (Register(ref item, targetType, updateDelegate))
+                if (InternalRegister(ref item, targetType, updateDelegate))
                 {
                     loop.subSystemList[i] = item;
                     return true;
@@ -191,11 +188,12 @@ namespace RuniOS.LowLevel
         /// </param>
         public static void Unregister(Type targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
         {
-            if (updateDelegate == null)
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (updateDelegate == null || targetType == null)
                 return;
 
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
-            Unregister(ref loop, targetType, updateDelegate);
+            InternalUnregister(ref loop, targetType, updateDelegate);
             PlayerLoop.SetPlayerLoop(loop);
 
             if (allRegisteredDelegate != null)
@@ -205,28 +203,28 @@ namespace RuniOS.LowLevel
                     allRegisteredDelegate -= (PlayerLoopSystem.UpdateFunction)del;
             }
         }
-        
-        /// <summary>
-        /// PlayerLoop 시스템 구조를 재귀적으로 탐색하여 특정 델리게이트를 제거합니다.
-        /// </summary>
-        /// <param name="loop">탐색을 시작할 PlayerLoop 시스템입니다.</param>
-        /// <param name="targetType">제거할 PlayerLoopSystem의 타입입니다. <see langword="null"/>일 경우 아무것도 하지 않습니다.</param>
-        /// <param name="updateDelegate">제거할 델리게이트입니다.</param>
-        public static void Unregister(ref PlayerLoopSystem loop, Type? targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
-        {
-            if (targetType == null)
-                return;
-            
-            InternalUnregister(ref loop, targetType, updateDelegate);
-        }
 
         /// <summary>
         /// 모든 PlayerLoop 시스템에서 지정된 델리게이트를 제거합니다.
         /// </summary>
-        /// <param name="loop">탐색을 시작할 PlayerLoop 시스템입니다.</param>
         /// <param name="updateDelegate">제거할 델리게이트입니다. 이 델리게이트에 연결된 모든 메소드들이 제거됩니다.</param>
-        public static void UnregisterAll(ref PlayerLoopSystem loop, PlayerLoopSystem.UpdateFunction? updateDelegate) => InternalUnregister(ref loop, null, updateDelegate);
-        
+        public static void UnregisterAll(PlayerLoopSystem.UpdateFunction? updateDelegate)
+        {
+            if (updateDelegate == null)
+                return;
+            
+            PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
+            InternalUnregister(ref loop, null, updateDelegate);
+            PlayerLoop.SetPlayerLoop(loop);
+
+            if (allRegisteredDelegate != null)
+            {
+                Delegate[] delegatesToRemove = updateDelegate.GetInvocationList();
+                foreach (var del in delegatesToRemove)
+                    allRegisteredDelegate -= (PlayerLoopSystem.UpdateFunction)del;
+            }
+        }
+
         /// <summary>
         /// PlayerLoop 시스템 구조를 재귀적으로 탐색하여 특정 델리게이트를 제거합니다.
         /// <br/>이 메소드는 내부용으로, <paramref name="targetType"/>이 <see langword="null"/>일 경우 모든 PlayerLoop 시스템에서 델리게이트를 제거합니다.
