@@ -9,99 +9,52 @@ using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Languages
 {
-    public sealed class LanguageAssetRegistry : AssetRegistry
+    public sealed class LanguageAssetRegistry : SimpleAssetRegistry
     {       
         public override string registryName => "lang";
 
         public override Type handleType => typeof(LanguageAssetHandle);
         public override Type scopeType => typeof(LanguageAssetScope);
 
-        public override bool isLoading => _isLoading;
-        bool _isLoading;
+        public override WildcardPatterns assetFilter => WildcardPatterns.jsonFileFilter;
 
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<string, string>> preloadedAsset { get; }
-        readonly Dictionary<string, IReadOnlyDictionary<string, string>> _preloadedAsset = new();
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<Identifier, string>> preloadedAsset { get; }
+        readonly Dictionary<string, IReadOnlyDictionary<Identifier, string>> _preloadedAsset = new();
 
         public LanguageAssetRegistry() => preloadedAsset = _preloadedAsset.AsReadOnly();
-
+        
         [Awaken]
         [Preserve]
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
         static void Awaken() => ResourceManager.RegisterAssetRegistry<LanguageAssetRegistry>();
-        
-        public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
+
+        protected override AssetHandle CreateHandle(IOHandler ioHandler, string md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
+
+        protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, AssetHandle assetHandle)
         {
-            _isLoading = true;
-            BeginTracking();
+            using LanguageAssetScope? scope = (LanguageAssetScope?)await assetHandle.GetScope();
             
-            try
+            if (scope != null)
             {
-                _preloadedAsset.Clear();
-            
-                progress?.Report(0);
-
-                List<UniTask> uniTasks = new List<UniTask>();
-                int count = 0;
-                
-                foreach (var resourcePack in resourcePacks)
+                if (_preloadedAsset.TryGetValue(identifier, out IReadOnlyDictionary<Identifier, string>? value))
                 {
-                    foreach ((string nameSpace, IOHandler registryHandler) in await GetRegistryFolder(resourcePack))
-                    {
-                        foreach (var ioHandler in await registryHandler.GetFileHandlers(WildcardPatterns.jsonFileFilter))
-                        {
-                            uniTasks.Add(Method());
-
-                            async UniTask Method()
-                            {
-                                await UniTask.Yield();
-                                
-                                try
-                                {
-                                    string name = ioHandler.fullPath.GetFileNameWithoutExtension();
-                                    Identifier identifier = new Identifier(nameSpace, name);
-                                    LanguageAssetHandle handle = new LanguageAssetHandle(ioHandler);
-                                    using LanguageAssetScope? scope = (LanguageAssetScope?)await handle.GetScope();
-
-                                    if (scope != null)
-                                    {
-                                        if (_preloadedAsset.TryGetValue(name, out IReadOnlyDictionary<string, string>? value))
-                                            _preloadedAsset[name] = value.Concat(scope.texts).GroupBy(x => x.Key).ToDictionary(x => x.Key, x => x.First().Value).AsReadOnly();
-                                        else
-                                            _preloadedAsset.Add(name, scope.texts);
-                                    }
+                    _preloadedAsset[identifier] = value
+                        .Concat
+                        (
+                            scope.texts
+                                .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
+                        )
+                        .GroupBy(x => x.Key)
+                        .ToDictionary(x => x.Key, x => x.First().Value)
+                        .AsReadOnly();
+                }
+                else
+                    _preloadedAsset.Add(identifier, scope.texts.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+            }
                                     
-                                    RecordAssetHandle(identifier, handle);
-                                }
-                                catch (Exception e)
-                                {
-                                    Debug.Log($"An exception occurred while loading {ioHandler.fullPath} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
-                                }
-
-                                count++;
-                                progress?.Report((float)count / uniTasks.Count);
-                            }
-                        }
-                    }
-                }
-
-                await UniTask.WhenAll(uniTasks);
-            }
-            finally
-            {
-                try
-                {
-                    progress?.Report(1);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-                
-                EndTracking();
-                _isLoading = false;
-            }
+            RecordAssetHandle(identifier, assetHandle);
         }
     }
 }

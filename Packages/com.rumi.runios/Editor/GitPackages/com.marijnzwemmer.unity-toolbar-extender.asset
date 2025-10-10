@@ -12,8 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 658205eeebfb471dbb77a25e7493b6f9, type: 3}
   m_Name: com.marijnzwemmer.unity-toolbar-extender
   m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Installer.GitPackages.GitPackage
-  packages:
-  - {fileID: 0}
+  packages: []
   dependencies: []
   id: com.marijnzwemmer.unity-toolbar-extender
   gitUrl: https://github.com/marijnz/unity-toolbar-extender.git

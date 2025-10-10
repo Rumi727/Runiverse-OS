@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 
 namespace RuniOS.IO
 {
@@ -300,6 +301,20 @@ namespace RuniOS.IO
 
 
 
+        /// <summary>
+        /// 이 핸들러가 나타내는 파일의 MD5 해시 값을 계산합니다.
+        /// </summary>
+        /// <returns>파일의 MD5 해시를 포함하는 <see cref="byte"/>[]입니다.</returns>
+        /// <exception cref="Exception">파일을 찾을 수 없거나(파일이 존재하지 않거나), 읽는 동안 오류가 발생한 경우입니다.</exception>
+        public virtual async UniTask<byte[]> GetMD5Hash()
+        {
+            using MD5 md5 = MD5.Create();
+            await using Stream stream = await OpenRead();
+            return md5.ComputeHash(stream);
+        }
+
+
+
         public override string ToString() => fullPath;
 
         sealed class EmptyIOHandler : IOHandler
@@ -336,7 +351,8 @@ namespace RuniOS.IO
 
             public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
 
-            public override bool IsSameTarget(IOHandler? other) => false;
+            public override bool IsSameTarget(IOHandler? other) => other is EmptyIOHandler;
+            public override UniTask<byte[]> GetMD5Hash() => UniTask.FromResult(Array.Empty<byte>());
         }
     }
 }

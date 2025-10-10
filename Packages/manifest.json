@@ -1,15 +1,15 @@
 {
   "dependencies": {
+    "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
     "com.marijnzwemmer.unity-toolbar-extender": "https://github.com/marijnz/unity-toolbar-extender.git",
     "com.nobi.roundedcorners": "https://github.com/kirevdokimov/Unity-UI-Rounded-Corners.git",
     "com.rumi.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.singularitygroup.hotreload": "git+https://gitlab.hotreload.net/root/hot-reload-releases.git#1.13.10",
     "com.unity.ide.rider": "3.0.38",
-    "com.unity.ide.visualstudio": "2.0.23",
+    "com.unity.ide.visualstudio": "2.0.25",
     "com.unity.memoryprofiler": "1.1.9",
-    "com.unity.multiplayer.center": "1.0.0",
-    "com.unity.modules.accessibility": "1.0.0"
+    "com.unity.multiplayer.center": "1.0.0"
   },
   "scopedRegistries": [
     {

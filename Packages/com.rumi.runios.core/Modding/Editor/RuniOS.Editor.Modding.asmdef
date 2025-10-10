@@ -5,7 +5,9 @@
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:539740484accacd4292d8460e00aac39"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

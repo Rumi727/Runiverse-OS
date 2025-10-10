@@ -12,56 +12,56 @@ public static class Debug
     public static void Log(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.Log(LogText(className, message));
+        UnityEngine.Debug.Log(GetLogText(className, message));
     }
 
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     public static void LogWarning(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.LogWarning(LogText(className, message));
+        UnityEngine.Debug.LogWarning(GetLogText(className, message));
     }
 
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     public static void LogError(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.LogError(LogText(className, message));
+        UnityEngine.Debug.LogError(GetLogText(className, message));
     }
 
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
     public static void Assert(bool condition, object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.Assert(condition, LogText(className, message));
+        UnityEngine.Debug.Assert(condition, GetLogText(className, message));
     }
 
-    public static void ForceLog(object? message, string? className = null)
+    public static void RuntimeLog(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.Log(ForceLogText(className, message));
+        UnityEngine.Debug.Log(GetRuntimeLogText(className, message));
     }
 
-    public static void ForceLogWarning(object? message, string? className = null)
+    public static void RuntimeLogWarning(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.LogWarning(ForceLogText(className, message));
+        UnityEngine.Debug.LogWarning(GetRuntimeLogText(className, message));
     }
 
-    public static void ForceLogError(object? message, string? className = null)
+    public static void RuntimeLogError(object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.LogError(ForceLogText(className, message));
+        UnityEngine.Debug.LogError(GetRuntimeLogText(className, message));
     }
 
-    public static void ForceAssert(bool condition, object? message, string? className = null)
+    public static void RuntimeAssert(bool condition, object? message, string? className = null)
     {
         className ??= NameOfCallingClass();
-        UnityEngine.Debug.Assert(condition, ForceLogText(className, message));
+        UnityEngine.Debug.Assert(condition, GetRuntimeLogText(className, message));
     }
 
-    static string LogText(string className, object? message) => "[" + className + "] " + message;
-    static string ForceLogText(string className, object? message) => "<b>[" + className + "]</b> " + message;
+    static string GetLogText(string className, object? message) => "[" + className + "] " + message;
+    static string GetRuntimeLogText(string className, object? message) => "<b>[" + className + "]</b> " + message;
 
 
     public static void LogException(Exception exception) => UnityEngine.Debug.LogException(exception);

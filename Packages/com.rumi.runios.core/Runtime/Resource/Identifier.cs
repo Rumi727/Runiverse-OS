@@ -22,7 +22,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 네임스페이스가 지정되지 않았을 때 사용되는 기본 네임스페이스입니다.
         /// </summary>
-        public const string defaultNamespace = "ros";
+        public const string defaultNamespace = "runios";
 
         /// <summary>
         /// 네임스페이스와 경로를 구분하는 데 사용되는 문자입니다.

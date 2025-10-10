@@ -9,6 +9,15 @@
       },
       "url": "https://package.openupm.com"
     },
+    "com.cysharp.r3": {
+      "version": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {
+        "com.unity.modules.imgui": "1.0.0"
+      },
+      "hash": "24d04125d68719816e24dfb79c60dd97ca396038"
+    },
     "com.cysharp.unitask": {
       "version": "2.5.10",
       "depth": 1,
@@ -45,6 +54,14 @@
         "com.unity.modules.imgui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",
         "com.unity.nuget.newtonsoft-json": "3.2.1"
+      }
+    },
+    "com.rumi.runios.audio": {
+      "version": "file:com.rumi.runios.audio",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "1.0.0"
       }
     },
     "com.rumi.runios.core": {
@@ -130,11 +147,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.23",
+      "version": "2.0.25",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.9"
+        "com.unity.test-framework": "1.1.31"
       },
       "url": "https://packages.unity.com"
     },
@@ -227,12 +244,6 @@
     "com.unity.ui": {
       "version": "2.0.0",
       "depth": 1,
-      "source": "builtin",
-      "dependencies": {}
-    },
-    "com.unity.modules.accessibility": {
-      "version": "1.0.0",
-      "depth": 0,
       "source": "builtin",
       "dependencies": {}
     },

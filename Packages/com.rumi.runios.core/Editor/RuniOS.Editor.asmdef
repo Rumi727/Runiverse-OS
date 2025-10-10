@@ -16,7 +16,8 @@
         "RuniOS.APIBridge.UnityEditor.CoreModule.dll",
         "System.Collections.Immutable.dll",
         "ExtendedNumerics.BigDecimal.dll",
-        "Newtonsoft.Json.dll"
+        "Newtonsoft.Json.dll",
+        "R3.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

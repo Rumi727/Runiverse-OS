@@ -20,7 +20,7 @@ namespace RuniOS.IO
 
         public IReadOnlyList<string> patterns { get; }
 
-        public WildcardPatterns(string pattern) => patterns = new string[] { pattern };
+        public WildcardPatterns(string pattern) => patterns = (new string[] { pattern }).AsReadOnly();
         public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToArray().AsReadOnly();
 
         public string this[int index] => patterns[index];

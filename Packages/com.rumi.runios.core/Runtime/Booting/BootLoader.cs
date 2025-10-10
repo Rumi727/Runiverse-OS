@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Resource;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.LowLevel;
 
@@ -19,32 +20,25 @@ namespace RuniOS.Booting
 #endif
         static async UniTaskVoid Boot()
         {
-            Debug.ForceLog("UniTask Initialize", nameof(BootLoader));
+            Debug.RuntimeLog("UniTask Initialize", nameof(BootLoader));
             
             //UniTask Setting
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
             PlayerLoopHelper.Initialize(ref loop);
-            
+
             //Awaken Invoke
-            Debug.ForceLog("Awaken Method Invoke", nameof(BootLoader));
-            ReflectionUtility.AttributeInvoke<AwakenAttribute>();
+            Debug.RuntimeLog("Awaken Method Invoke", nameof(BootLoader));
+            await ReflectionUtility.InvokeDefinedMethods<AwakenAttribute>();
             
-            Debug.ForceLog("Loading the resource registry", nameof(BootLoader));
+            Debug.RuntimeLog("Loading the resource registry", nameof(BootLoader));
             
-#if UNITY_EDITOR
-            if (!ResourceManager.isLoading)
-                await ResourceManager.Reload();
-            
-            await UniTask.WaitUntil(() => ResourceManager.isPreloaded);
-#else
             await ResourceManager.Reload();
-#endif
             
             //Starten Invoke
-            Debug.ForceLog("Starten Method Invoke", nameof(BootLoader));
-            ReflectionUtility.AttributeInvoke<StartenAttribute>();
+            Debug.RuntimeLog("Starten Method Invoke", nameof(BootLoader));
+            await ReflectionUtility.InvokeDefinedMethods<StartenAttribute>();
             
-            Debug.ForceLog("Exit bootloader", nameof(BootLoader));
+            Debug.RuntimeLog("Exit bootloader", nameof(BootLoader));
         }
     }
 }

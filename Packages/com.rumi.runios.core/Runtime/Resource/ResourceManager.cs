@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Collections.Generic;
+using RuniOS.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -33,8 +34,11 @@ namespace RuniOS.Resource
         /// 런타임에는 리소스 레지스트리를 처음으로 로드한 이후라면 true입니다.
         /// </summary>
         public static bool isPreloaded { get; private set; } = false;
-        public static bool isLoading { get; private set; } = false;
+
+        public static bool isLoading => currentTask != null;
+        public static AsyncTask? currentTask { get; private set; } = null;
         
+        public static event Action<AsyncTask>? reloadStartEvent;
         public static event Action? reloadCompletionEvent;
 
 
@@ -47,7 +51,10 @@ namespace RuniOS.Resource
                 return;
             }
 
-            isLoading = true;
+            Debug.RuntimeLog("Initiate resource registry reload", nameof(ResourceManager));
+            currentTask = new AsyncTask("runios:resource.loading.title", "runios:resource.loading.description");
+            
+            reloadStartEvent?.SafeInvoke(currentTask);
             
             try
             {
@@ -60,13 +67,15 @@ namespace RuniOS.Resource
                 
                 for (int i = 0; i < uniTasks.Length; i++)
                 {
-                    uniTasks[i] = RegistryReload(assetRegistries[i], i);
+                    AssetRegistry assetRegistry = assetRegistries[i];
+                    int targetIndex = i;
+                    
+                    uniTasks[i] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
                     
                     async UniTask RegistryReload(AssetRegistry assetRegistry, int targetIndex)
                     {
                         try
                         {
-                            await UniTask.Yield();
                             await assetRegistry.Reload
                             (
                                 loadedResourcePacks
@@ -75,13 +84,18 @@ namespace RuniOS.Resource
                                 Progress.Create<float>(x =>
                                 {
                                     assetRegistryProgresses[targetIndex] = x;
-                                    progress?.Report(assetRegistryProgresses.Sum() / assetRegistryProgresses.Length);
+                                    
+                                    float value = assetRegistryProgresses.Sum() / assetRegistryProgresses.Length;
+                                    if (currentTask != null)
+                                        currentTask.progress.Value = value;
+                                    
+                                    progress?.Report(value);
                                 })
                             );
                         }
                         catch (Exception e)
                         {
-                            Debug.LogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}");
+                            Debug.LogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
                         }
                     }
                 }
@@ -96,24 +110,28 @@ namespace RuniOS.Resource
             {
                 try
                 {
+                    currentTask.progress.Value = 1;
                     progress?.Report(1);
+                    
+                    currentTask.Dispose();
+                    currentTask = null;
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
                 }
                 
-                isLoading = false;
                 isPreloaded = true;
+                
+                Debug.RuntimeLog("Resource registry reload complete!", nameof(ResourceManager));
+                reloadCompletionEvent.SafeInvoke();
             }
-            
-            reloadCompletionEvent.SafeInvoke();
         }
         
         
 
-        public static UniTask RegisterAssetRegistry<T>() where T : AssetRegistry, new() => RegisterAssetRegistry(typeof(T));
-        public static async UniTask RegisterAssetRegistry(Type registryType)
+        public static void RegisterAssetRegistry<T>() where T : AssetRegistry, new() => RegisterAssetRegistry(typeof(T));
+        public static void RegisterAssetRegistry(Type registryType)
         {
             if (registryType.IsAbstract)
                 throw new ArgumentException($"Type '{registryType.FullName}' cannot be abstract.", nameof(registryType));
@@ -123,15 +141,21 @@ namespace RuniOS.Resource
 
             if (!registryType.HasDefaultConstructor())
                 throw new ArgumentException($"Type '{registryType.FullName}' must have a public parameterless constructor.", nameof(registryType));
-            
+
             if (isLoading)
-                await UniTask.WaitWhile(() => isLoading);
+                throw new InvalidOperationException("The registry is still reloading!");
             
             _assetRegistries.Add((AssetRegistry)Activator.CreateInstance(registryType));
         }
 
         public static void UnregisterAssetRegistry<T>() where T : AssetRegistry, new() => UnregisterAssetRegistry(typeof(T));
-        public static void UnregisterAssetRegistry(Type type) => _assetRegistries.RemoveOfType(type);
+        public static void UnregisterAssetRegistry(Type type)
+        {
+            if (isLoading)
+                throw new InvalidOperationException("The registry is still reloading!");
+            
+            _assetRegistries.RemoveOfType(type);
+        }
 
 
 

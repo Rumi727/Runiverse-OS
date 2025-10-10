@@ -10,7 +10,6 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "0Harmony.dll",
         "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": true,

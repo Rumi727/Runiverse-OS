@@ -90,7 +90,7 @@ namespace System.Linq
             foreach (var item in list)
                 hash.Add(item);
 
-            return hash.GetHashCode();
+            return hash.ToHashCode();
         }
 
         public static IEnumerable<KeyValuePair<TKey, TElement>> AsDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) => source.Select(item => new KeyValuePair<TKey, TElement>(keySelector(item), elementSelector(item))); 

@@ -8,9 +8,7 @@ namespace RuniOS.Resource.Languages
 {
     public sealed class LanguageAssetHandle : AssetHandle
     {
-        public override bool isAlwaysLoaded => true;
-
-        public LanguageAssetHandle(IOHandler ioHandler) : base(ioHandler) { }
+        public LanguageAssetHandle(IOHandler ioHandler, string md5Hash) : base(ioHandler, md5Hash) { }
 
         protected override async UniTask<object?> Load()
         {

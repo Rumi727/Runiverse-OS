@@ -1,8 +1,7 @@
 ﻿using Cysharp.Threading.Tasks;
+using R3;
 using RuniOS.Resource;
 using UnityEditor;
-
-using Progress = Cysharp.Threading.Tasks.Progress;
 
 namespace RuniOS.Editor
 {
@@ -15,28 +14,16 @@ namespace RuniOS.Editor
         [InitializeOnLoadMethod]
         static async UniTaskVoid Initialize()
         {
+            ResourceManager.reloadStartEvent += x => x.progress.Subscribe(x => SetProgress(typeof(EditorResourceLoader).FullName ?? nameof(EditorResourceLoader), x));
+            
             if (Kernel.isPlaying)
                 return;
             
             await UniTask.DelayFrame(10);
-            Reload().Forget();
+            ResourceManager.Reload().Forget();
         }
 
         public const string progressText = "internal.editor_resource_loader.loading";
-
-        /// <summary>
-        /// 리소스 레지스트리를 재로드 합니다.
-        /// </summary>
-        public static async UniTask Reload()
-        {
-            await ResourceManager.Reload
-            (
-                Progress.Create<float>
-                (
-                    x => SetProgress(typeof(EditorResourceLoader).FullName ?? nameof(EditorResourceLoader), x)
-                )
-            );
-        }
 
         /// <summary>
         /// <see cref="ProgressInToolbar.SetProgress"/> 메소드랑 기능적으론 동일하지만, progressText 매개변수의 값이 <see cref="progressText"/> 상수로 설정됩니다.

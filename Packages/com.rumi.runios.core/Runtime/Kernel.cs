@@ -188,10 +188,8 @@ namespace RuniOS
             quitting = null;
 
             Application.quitting -= Quitting;
-
-            /*AsyncTask.AllAsyncTaskCancel();
-
-            if (UserAccountManager.currentAccount != null)
+            
+            /*if (UserAccountManager.currentAccount != null)
                 UserAccountManager.LogoutWithoutUnload();
 
             if (BootLoader.isDataLoaded)

@@ -36,7 +36,7 @@ namespace RuniOS
             {
                 try
                 {
-                    delegates[i].DynamicInvoke(e, args);
+                    delegates[i].DynamicInvoke(args);
                 }
                 catch (Exception ex)
                 {
