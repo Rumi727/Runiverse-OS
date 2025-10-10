@@ -32,6 +32,12 @@ namespace RuniOS.Resource.Languages
 
         protected override AssetHandle CreateHandle(IOHandler ioHandler, string md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
 
+        protected override UniTask OnBeginAssetLoop()
+        {
+            _preloadedAsset.Clear();
+            return UniTask.CompletedTask;
+        }
+
         protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, AssetHandle assetHandle)
         {
             using LanguageAssetScope? scope = (LanguageAssetScope?)await assetHandle.GetScope();

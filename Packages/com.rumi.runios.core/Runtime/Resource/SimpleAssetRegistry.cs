@@ -56,9 +56,11 @@ namespace RuniOS.Resource
             {
                 progress?.Report(0);
 
+                await OnBeginAssetLoop();
+
                 List<UniTask> uniTasks = new List<UniTask>();
                 int count = 0;
-
+                
                 // 모든 리소스 팩을 순회하며 에셋 핸들을 비동기적으로 로드 및 등록
                 foreach (var resourcePack in resourcePacks)
                 {
@@ -87,6 +89,8 @@ namespace RuniOS.Resource
                     }
                 }
 
+                await OnEndAssetLoop();
+
                 // 모든 에셋 등록 작업을 병렬로 대기
                 await UniTask.WhenAll(uniTasks);
             }
@@ -105,6 +109,9 @@ namespace RuniOS.Resource
                 _isLoading = false;
             }
         }
+
+        protected virtual UniTask OnBeginAssetLoop() => UniTask.CompletedTask;
+        protected virtual UniTask OnEndAssetLoop() => UniTask.CompletedTask;
 
         /// <summary>
         /// 각 에셋을 순회하며 핸들을 등록하는 로직을 수행합니다.

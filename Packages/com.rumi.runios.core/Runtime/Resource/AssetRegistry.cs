@@ -81,8 +81,11 @@ namespace RuniOS.Resource
 
             var keysToRemove = assetHandles.Keys.Where(x => !trackedIdentifier.Contains(x)).ToArray();
             foreach (var item in keysToRemove)
+            {
                 _assetHandles.Remove(item);
-            
+                Debug.Log($"{item} asset handle removed.", GetType().Name);
+            }
+
             trackedIdentifier.Clear();
             isTracking = false;
         }
@@ -140,7 +143,10 @@ namespace RuniOS.Resource
             
             // 핸들이 없거나 IOHandler가 다를 경우에만 교체 (Register/Update)
             if (!_assetHandles.TryGetValue(identifier, out AssetHandle? value) || !value.IsSameTarget(assetHandle))
+            {
                 _assetHandles[identifier] = assetHandle;
+                Debug.Log($"{identifier} asset handle registered.", GetType().Name);
+            }
         }
     }
 }
