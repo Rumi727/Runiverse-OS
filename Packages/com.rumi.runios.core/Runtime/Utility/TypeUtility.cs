@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -32,11 +31,6 @@ namespace RuniOS
                 return Activator.CreateInstance(type);
             }
         }
-
-        /// <summary>type != typeof(T) &amp;&amp; typeof(T).IsAssignableFrom(type)</summary>
-        public static bool IsSubtypeOf<T>(this Type type) => type != typeof(T) && typeof(T).IsAssignableFrom(type);
-        /// <summary>type != surclass &amp;&amp; surclass.IsAssignableFrom(type)</summary>
-        public static bool IsSubtypeOf(this Type type, Type surclass) => type != surclass && surclass.IsAssignableFrom(type);
 
         /// <summary>
         /// 주어진 <paramref name="givenType"/>이 특정 제네릭 타입 정의(<paramref name="genericTypeDefinition"/>)를
@@ -220,33 +214,6 @@ namespace RuniOS
         {
             for (; type != null; type = type.BaseType)
                 yield return type;
-        }
-
-        /// <summary><see cref="IList"/> 인터페이스의 리스트 타입을 가져옵니다</summary>
-        public static Type GetListType(this IList list) => GetListType(list.GetType()) ?? typeof(object);
-
-        /// <summary><see cref="IList"/> 인터페이스의 리스트 타입을 가져옵니다</summary>
-        public static Type? GetListType(this Type type)
-        {
-            if (type.IsAssignableToGenericDefinition(typeof(IList<>), out Type? resultType))
-                return resultType.GetGenericArguments()[0];
-            else
-                return typeof(IList).IsAssignableFrom(type) ? typeof(object) : null;
-        }
-
-        /// <summary><see cref="IList"/> 인터페이스의 리스트 타입을 가져옵니다</summary>
-        public static (Type key, Type value) GetDictionaryType(this IDictionary list) => GetDictionaryType(list.GetType()) ?? (typeof(object), typeof(object));
-
-        /// <summary><see cref="IDictionary"/> 인터페이스의 리스트 타입을 가져옵니다</summary>
-        public static (Type key, Type value)? GetDictionaryType(this Type type)
-        {
-            if (type.IsAssignableToGenericDefinition(typeof(IDictionary<,>), out Type? resultType))
-            {
-                Type[] types = resultType.GetGenericArguments();
-                return (types[0], types[1]);
-            }
-            else
-                return null;
         }
 
         public static string GetTypeDisplayName(this Type type) => Unity.Properties.TypeUtility.GetTypeDisplayName(type);
