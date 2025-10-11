@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using RuniOS.APIBridge.UnityEditorInternal;
+using RuniOS.Collections.Generic;
 using System;
 using System.Reflection;
 using UnityEditor;
@@ -63,5 +64,34 @@ namespace RuniOS.Editor
         public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapperBridge.GetPropertyIdentifier(property);
 
         public static FieldInfo? GetFieldInfoFromProperty(this SerializedProperty property, out Type? type) => ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out type);
+        
+        public static Type GetPropertyTypeWithoutList(this SerializedProperty property)
+        {
+            ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type type);
+            if (property.isArray)
+            {
+                while (true)
+                {
+                    if (type.IsArray)
+                    {
+                        type = type.GetElementType()!;
+                        continue;
+                    }
+                    else
+                    {
+                        Type? elementType = CollectionGenericUtility.GetListElementType(type);
+                        if (elementType != null)
+                        {
+                            type = elementType;
+                            continue;
+                        }
+                    }
+
+                    break;
+                }
+            }
+
+            return type;
+        }
     }
 }
