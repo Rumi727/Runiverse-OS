@@ -10,7 +10,7 @@ using UnityEngine.Scripting;
 namespace RuniOS.Resource.Languages
 {
     public sealed class LanguageAssetRegistry : SimpleAssetRegistry
-    {       
+    {
         public override string registryName => "lang";
 
         public override Type handleType => typeof(LanguageAssetHandle);
@@ -18,10 +18,10 @@ namespace RuniOS.Resource.Languages
 
         public override WildcardPatterns assetFilter => WildcardPatterns.jsonFileFilter;
 
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<Identifier, string>> preloadedAsset { get; }
-        readonly Dictionary<string, IReadOnlyDictionary<Identifier, string>> _preloadedAsset = new();
+        public IReadOnlyDictionary<string, IReadOnlyDictionary<Identifier, string>> calculatedAsset { get; }
+        readonly Dictionary<string, IReadOnlyDictionary<Identifier, string>> _calculatedAsset = new();
 
-        public LanguageAssetRegistry() => preloadedAsset = _preloadedAsset.AsReadOnly();
+        public LanguageAssetRegistry() => calculatedAsset = _calculatedAsset.AsReadOnly();
         
         [Awaken]
         [Preserve]
@@ -34,7 +34,7 @@ namespace RuniOS.Resource.Languages
 
         protected override UniTask OnBeginAssetLoop()
         {
-            _preloadedAsset.Clear();
+            _calculatedAsset.Clear();
             return UniTask.CompletedTask;
         }
 
@@ -44,9 +44,9 @@ namespace RuniOS.Resource.Languages
             
             if (scope != null)
             {
-                if (_preloadedAsset.TryGetValue(identifier, out IReadOnlyDictionary<Identifier, string>? value))
+                if (_calculatedAsset.TryGetValue(identifier.path, out IReadOnlyDictionary<Identifier, string>? value))
                 {
-                    _preloadedAsset[identifier] = value
+                    _calculatedAsset[identifier.path] = value
                         .Concat
                         (
                             scope.texts
@@ -57,7 +57,7 @@ namespace RuniOS.Resource.Languages
                         .AsReadOnly();
                 }
                 else
-                    _preloadedAsset.Add(identifier, scope.texts.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+                    _calculatedAsset.Add(identifier.path, scope.texts.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
             }
                                     
             RecordAssetHandle(identifier, assetHandle);
