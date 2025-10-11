@@ -1,4 +1,6 @@
 #nullable enable
+using RuniOS.Localizations;
+using RuniOS.Resource;
 using System;
 using System.Globalization;
 using System.Text;
@@ -31,7 +33,7 @@ namespace RuniOS
         /// <param name="timeSpan">계산할 시간 간격입니다.</param>
         /// <returns>정수 형태의 전체 년도 수입니다.</returns>
         public static int GetYears(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / ticksPerYear);
-        
+
         /// <summary>
         /// 주어진 <see cref="TimeSpan"/>에서 전체 년도를 소수점 형태로 반환합니다.
         /// <br/>이 값은 평균 365.25일 기준으로 계산됩니다.
@@ -46,7 +48,7 @@ namespace RuniOS
         /// <param name="timeSpan">계산할 시간 간격입니다.</param>
         /// <returns>정수 형태의 전체 월 수입니다.</returns>
         public static int GetMonths(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / ticksPerMonth);
-        
+
         /// <summary>
         /// 주어진 <see cref="TimeSpan"/>에서 전체 월을 소수점 형태로 반환합니다.
         /// <br/>이 값은 평균 30.4375일 기준으로 계산됩니다.
@@ -61,7 +63,7 @@ namespace RuniOS
         /// <param name="timeSpan">계산할 시간 간격입니다.</param>
         /// <returns>정수 형태의 전체 주 수입니다.</returns>
         public static int GetWeeks(this TimeSpan timeSpan) => (int)(timeSpan.Ticks / ticksPerWeek);
-        
+
         /// <summary>
         /// 주어진 <see cref="TimeSpan"/>에서 전체 주를 소수점 형태로 반환합니다.
         /// </summary>
@@ -127,7 +129,7 @@ namespace RuniOS
             {
                 string format = hasAppendedUnit ? "00" : "0";
                 sb.AppendFormat(CultureInfo.InvariantCulture, $"{{0:{format}}}:", totalHours % 24);
-                
+
                 hasAppendedUnit = true;
             }
 
@@ -136,7 +138,7 @@ namespace RuniOS
             {
                 string format = hasAppendedUnit ? "00" : "0";
                 sb.AppendFormat(CultureInfo.InvariantCulture, $"{{0:{format}}}:", totalMinutes % 60);
-                
+
                 hasAppendedUnit = true;
             }
 
@@ -144,7 +146,7 @@ namespace RuniOS
             string secondsFormat = hasAppendedUnit ? "00" : "0";
             if (decimalPlaces > 0)
                 secondsFormat += "." + new string('0', decimalPlaces);
-            
+
             sb.AppendFormat(CultureInfo.InvariantCulture, $"{{0:{secondsFormat}}}", secondAbs % 60);
             return StringBuilderCache.Release(sb);
         }
@@ -154,75 +156,47 @@ namespace RuniOS
 
         #region Relative Time
         /// <summary>
-        /// 틱(tick) 값을 상대적인 시간 문자열로 변환합니다.
-        /// <br/>이 메서드는 현재 호환되지 않는 외부 구조체에 의존하므로 주석 처리되어 있습니다.
-        /// <br/>향후 필요 시, 틱 값을 활용하여 새로운 구현이 가능합니다.
+        /// 지정된 <see cref="TimeSpan"/>을 상대적인 시간 문자열(예: "5 days ago", "2 months later")에 해당하는
+        /// <see cref="Localization"/> 객체로 변환합니다.
         /// </summary>
-        /*public static NameSpacePathReplacePair ToRelativeString(this TimeSpan timeSpan, int digits = 2)
+        /// <param name="timeSpan">변환할 <see cref="TimeSpan"/>입니다.</param>
+        /// <param name="digits">표시할 소수점 이하 자릿수입니다.</param>
+        /// <returns>상대적인 시간 문자열을 포함하는 <see cref="Localization"/> 객체입니다.</returns>
+        public static Localization ToRelativeString(this TimeSpan timeSpan, int digits = 2)
         {
-            try
+            // 1. 시간 방향 결정 및 절대값 계산
+            bool isNegative = timeSpan < TimeSpan.Zero;
+            if (isNegative)
+                timeSpan = -timeSpan;
+
+            string isAgoOrLater = isNegative ? "ago" : "later";
+
+            // 2. 시간 단위와 총합을 한 번에 계산
+            (string unitPath, double totalValue) = timeSpan.Ticks switch
             {
-                NameSpacePathReplacePair nameSpacePathReplacePair = new NameSpacePathReplacePair();
-                ReplaceOldNewPair replaceOldNewPair = new ReplaceOldNewPair("%value%", "");
+                >= ticksPerYear => ("years", timeSpan.GetTotalYears()),
+                >= ticksPerMonth => ("months", timeSpan.GetTotalMonths()),
+                >= ticksPerWeek => ("weeks", timeSpan.GetTotalWeeks()),
+                >= TimeSpan.TicksPerDay => ("days", timeSpan.TotalDays),
+                >= TimeSpan.TicksPerHour => ("hours", timeSpan.TotalHours),
+                >= TimeSpan.TicksPerMinute => ("minutes", timeSpan.TotalMinutes),
+                >= TimeSpan.TicksPerSecond => ("seconds", timeSpan.TotalSeconds),
+                >= TimeSpan.TicksPerMillisecond => ("milliseconds", timeSpan.TotalMilliseconds),
+                _ => (string.Empty, 0.0) // 0 또는 아주 작은 값
+            };
+            
+            if (string.IsNullOrEmpty(unitPath))
+                return "runios:gui.now";
 
-                nameSpacePathReplacePair.nameSpace = "sc-krm";
-                nameSpacePathReplacePair.path = "gui.";
+            // 4. Localization Identifier 구성
+            Identifier identifier = "runios:gui." + isAgoOrLater + "." + unitPath;
 
-                string isAgo = "later";
-                if (timeSpan < TimeSpan.Zero)
-                {
-                    timeSpan = -timeSpan;
-                    isAgo = "ago";
-                }
+            // 5. ReplacePair 구성
+            string formattedValue = totalValue.Floor(digits).ToString("F" + digits, CultureInfo.InvariantCulture);
+            PlaceholderReplacePair replace = new PlaceholderReplacePair("{value}", formattedValue);
 
-                nameSpacePathReplacePair.path += isAgo + ".";
-
-                switch (timeSpan.Ticks)
-                {
-                    case >= timeSpanTicksPerYear:
-                        nameSpacePathReplacePair.path += "years";
-                        replaceOldNewPair.replaceNew = timeSpan.GetTotalYears().Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= timeSpanTicksPerMonth:
-                        nameSpacePathReplacePair.path += "months";
-                        replaceOldNewPair.replaceNew = timeSpan.GetTotalMonths().Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= timeSpanTicksPerWeek:
-                        nameSpacePathReplacePair.path += "weeks";
-                        replaceOldNewPair.replaceNew = timeSpan.GetTotalWeeks().Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= TimeSpan.TicksPerDay:
-                        nameSpacePathReplacePair.path += "days";
-                        replaceOldNewPair.replaceNew = timeSpan.TotalDays.Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= TimeSpan.TicksPerHour:
-                        nameSpacePathReplacePair.path += "hours";
-                        replaceOldNewPair.replaceNew = timeSpan.TotalHours.Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= TimeSpan.TicksPerMinute:
-                        nameSpacePathReplacePair.path += "minutes";
-                        replaceOldNewPair.replaceNew = timeSpan.TotalMinutes.Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= TimeSpan.TicksPerSecond:
-                        nameSpacePathReplacePair.path += "seconds";
-                        replaceOldNewPair.replaceNew = timeSpan.TotalSeconds.Floor(digits).ToString("F" + digits);
-                        break;
-                    case >= TimeSpan.TicksPerMillisecond:
-                        nameSpacePathReplacePair.path += "milliseconds";
-                        replaceOldNewPair.replaceNew = timeSpan.TotalMilliseconds.Floor(digits).ToString("F" + digits);
-                        break;
-                    default:
-                        return "";
-                }
-
-                nameSpacePathReplacePair.replace = new ReplaceOldNewPair[] { replaceOldNewPair };
-                return nameSpacePathReplacePair;
-            }
-            catch (Exception)
-            {
-                return "";
-            }
-        }*/
+            return new Localization(identifier, null, replace);
+        }
         #endregion
 
         #region Lunisolar Calendar
