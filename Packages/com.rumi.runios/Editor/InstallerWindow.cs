@@ -40,7 +40,7 @@ namespace RuniOS.Installer
         static readonly AnimVector3 sizeAnim = new AnimVector3(new Vector3(584, 298));
         static Vector2? lastAnimSize = null;
 
-        [MenuItem("Runi Engine/Show Installer")]
+        [MenuItem("RuniOS/Show Installer")]
         public static void ShowInstallerWindow()
         {
             if (!HasOpenInstances<InstallerWindow>())
