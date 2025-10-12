@@ -75,6 +75,13 @@ namespace System.Linq
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) => source.Where(static x => x != null)!;
         
         /// <summary>
+        /// null이 아닌 요소만 포함하는 시퀀스를 반환합니다.
+        /// </summary>
+        /// <param name="source">필터링할 시퀀스입니다.</param>
+        /// <returns>null이 아닌 요소만 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public static IEnumerable<T> WhereNotFakeNull<T>(this IEnumerable<T?> source) where T : UnityEngine.Object => source.Where(static x => x != null)!;
+        
+        /// <summary>
         /// 지정된 열거형의 순서와 내용을 기반으로 해시코드를 생성합니다.<br/>
         /// 열거형의 요소가 순서까지 같으면 동일한 해시코드를 반환합니다.
         /// </summary>
