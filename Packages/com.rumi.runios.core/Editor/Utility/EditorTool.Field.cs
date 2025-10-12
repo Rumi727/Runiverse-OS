@@ -634,31 +634,12 @@ namespace RuniOS.Editor
 
             if (GUI.Button(position, buttonText))
             {
-                Debug.LogWarning("Not implemented!");
-                /*int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-                
-                var provider = TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
-                var context = UnityEditor.Search.SearchService.CreateContext(provider.__instance, "type:");
-                var viewState = new UnityEditor.Search.SearchViewState(context)
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                ShowTypePicker(x =>
                 {
-                    title = "Type",
-                    queryBuilderEnabled = true,
-                    hideTabs = true,
-                    selectHandler = (UnityEditor.Search.SearchItem item, bool cancelled) =>
-                    {
-                        if (cancelled)
-                            return;
-
-                        typeFieldLastControlID = lastControlID;
-                        
-                        if (item.data is Type type)
-                            typeFieldSelectedType = type;
-                        else
-                            typeFieldSelectedType = null;
-                    },
-                    flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
-                };
-                UnityEditor.Search.SearchService.ShowPicker(viewState);*/
+                    typeFieldLastControlID = lastControlID;
+                    typeFieldSelectedType = x;
+                }, baseType);
             }
 
             if (typeFieldLastControlID != null && typeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
@@ -672,6 +653,30 @@ namespace RuniOS.Editor
             }
 
             return value;
+        }
+
+        public static void ShowTypePicker(Action<Type?> selectHandler, Type? baseType = null)
+        {
+            var provider = new TypeSearchProvider(baseType ?? typeof(object));
+            var context = UnityEditor.Search.SearchService.CreateContext(provider, "type:");
+            var viewState = new UnityEditor.Search.SearchViewState(context)
+            {
+                title = "Type",
+                queryBuilderEnabled = true,
+                hideTabs = true,
+                selectHandler = (UnityEditor.Search.SearchItem item, bool cancelled) =>
+                {
+                    if (cancelled)
+                        return;
+                        
+                    if (item.data is Type type)
+                        selectHandler.Invoke(type);
+                    else
+                        selectHandler.Invoke(null);
+                },
+                flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
+            };
+            UnityEditor.Search.SearchService.ShowPicker(viewState);
         }
     }
 }

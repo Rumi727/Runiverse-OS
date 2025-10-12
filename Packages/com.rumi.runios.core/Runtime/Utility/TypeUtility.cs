@@ -189,6 +189,12 @@ namespace RuniOS
                 throw new ArgumentNullException(nameof(targetType), "The target type cannot be null.");
             // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
 
+            if (targetType == typeof(object))
+            {
+                resolvedType = targetType;
+                return true;
+            }
+
             if (targetType.IsGenericTypeDefinition)
                 return givenType.IsAssignableToGenericDefinition(targetType, out resolvedType);
             else if (targetType.IsAssignableFrom(givenType))
