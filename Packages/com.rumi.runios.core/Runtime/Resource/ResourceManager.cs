@@ -136,7 +136,7 @@ namespace RuniOS.Resource
             if (registryType.IsAbstract)
                 throw new ArgumentException($"Type '{registryType.FullName}' cannot be abstract.", nameof(registryType));
 
-            if (!registryType.IsSubtypeOf(typeof(AssetRegistry)))
+            if (!typeof(AssetRegistry).IsAssignableFrom(registryType))
                 throw new ArgumentException($"Type '{registryType.FullName}' must inherit from AssetRegistry.", nameof(registryType));
 
             if (!registryType.HasDefaultConstructor())
