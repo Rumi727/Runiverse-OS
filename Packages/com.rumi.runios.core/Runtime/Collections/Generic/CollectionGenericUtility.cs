@@ -1,10 +1,20 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace RuniOS.Collections.Generic
 {
     public static class CollectionGenericUtility
     {
+        /// <summary>
+        /// 지정된 열거 가능한 타입의 요소 (<see cref="IEnumerable{T}"/>의 내부) 타입을 가져옵니다.
+        /// </summary>
+        /// <returns>
+        /// <paramref name="source"/>이 <see cref="IEnumerable{T}"/>의 인스턴스이면 해당 T 타입이고,
+        /// 그렇지 않으면 <see cref="object"/>입니다.
+        /// </returns>
+        public static Type GetElementType(this IEnumerable source) => GetEnumerableElementType(source.GetType()) ?? typeof(object);
+        
         /// <summary>
         /// 지정된 열거 가능한 타입의 요소 (<see cref="IEnumerable{T}"/>의 내부) 타입을 가져옵니다.
         /// </summary>
