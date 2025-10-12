@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
@@ -15,14 +16,21 @@ namespace RuniOS
         static ReflectionUtility() => Refresh();
 
         /// <summary>
-        /// All loaded assemblys
+        /// 현재 로드된 모든 어셈블리 목록입니다.<br/>
+        /// 이 목록은 <see cref="Refresh"/> 메서드에 의해 업데이트됩니다.
+        /// <br/><br/>
+        /// 이 속성은 스레드에 안전합니다.
         /// </summary>
-        public static IReadOnlyList<Assembly> assemblys { get; private set; } = Array.Empty<Assembly>();
+        public static ImmutableArray<Assembly> assemblys { get; private set; } = ImmutableArray<Assembly>.Empty;
+        static readonly object assemblysLock = new();
 
         /// <summary>
-        /// All loaded types
+        /// 현재 로드된 모든 형식(<see cref="Type"/>) 목록입니다.<br/>
+        /// 이 목록은 <see cref="Refresh"/> 메서드에 의해 업데이트됩니다.
+        /// <br/><br/>
+        /// 이 속성은 스레드에 안전합니다.
         /// </summary>
-        public static IReadOnlyList<Type> types { get; private set; } = Array.Empty<Type>();
+        public static ImmutableArray<Type> types { get; private set; } = ImmutableArray<Type>.Empty;
 
 
 
@@ -33,36 +41,43 @@ namespace RuniOS
 
 
 
+        /// <summary>
+        /// 현재 애플리케이션 도메인에 로드된 어셈블리와 형식 목록을 새로고침(업데이트)합니다.<br/>
+        /// 이 메서드는 내부적으로 잠금(<see langword="lock"/>)을 사용하여 스레드에 안전하게 데이터를 갱신합니다.
+        /// </summary>
         public static void Refresh()
         {
-            try
-            {
-                assemblys = Array.AsReadOnly(AppDomain.CurrentDomain.GetAssemblies());
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-            }
-            
-            types = assemblys.Where(x => /* 병신; */ !x.FullName.StartsWith("JetBrains", StringComparison.Ordinal))
-            .SelectMany(static x =>
+            lock (assemblysLock)
             {
                 try
                 {
-                    return x.GetTypes();
-                }
-                catch (ReflectionTypeLoadException e)
-                {
-                    Debug.LogException(e);
-                    return e.Types.Where(static x => x != null);
+                    assemblys = AppDomain.CurrentDomain.GetAssemblies().ToImmutableArray();
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
                 }
-                    
-                return Array.Empty<Type>();
-            }).ToArray().AsReadOnly();
+
+                types = assemblys.Where(x => /* 병신; */ !x.FullName.StartsWith("JetBrains", StringComparison.Ordinal))
+                    .SelectMany(static x =>
+                    {
+                        try
+                        {
+                            return x.GetTypes();
+                        }
+                        catch (ReflectionTypeLoadException e)
+                        {
+                            Debug.LogException(e);
+                            return e.Types.Where(static x => x != null);
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.LogException(e);
+                        }
+
+                        return Array.Empty<Type>();
+                    }).ToArray().ToImmutableArray();
+            }
         }
 
         /// <summary>
@@ -84,30 +99,30 @@ namespace RuniOS
 #endif
             await UniTask.RunOnThreadPool(() =>
             {
-                for (int i = 0; i < types.Count; i++)
+                for (int i = 0; i < types.Length; i++)
                 {
                     foreach (var method in types[i].GetRuntimeMethods())
                     {
                         if (!method.IsStatic || method.IsSpecialName || method.IsAbstract)
                             return;
+
+                        if (!method.IsDefined(typeof(T)))
+                            continue;
                         
-                        if (method.IsDefined(typeof(T)))
-                        {
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-                            if (!method.GetParameters().IsEmpty())
-                            {
-                                Debug.LogWarning
-                                (
-                                    $"A method {method.DeclaringType?.Name}.{method.Name} defined as an attribute has been found with a non-zero number of parameters.\n" +
-                                    "This is currently ignored, but the built program will not check the number of parameters, so this will cause problems!"
-                                );
-                                return;
-                            }
-                            else if (!method.IsDefined(typeof(PreserveAttribute)))
-                                Debug.LogWarning($"The method {method.DeclaringType?.Name}.{method.Name} is invoked via '{nameof(InvokeDefinedMethods)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
-#endif
-                            methods.Add(method);
+                        if (!method.GetParameters().IsEmpty())
+                        {
+                            Debug.LogWarning
+                            (
+                                $"A method {method.DeclaringType?.Name}.{method.Name} defined as an attribute has been found with a non-zero number of parameters.\n" +
+                                "This is currently ignored, but the built program will not check the number of parameters, so this will cause problems!"
+                            );
+                            return;
                         }
+                        else if (!method.IsDefined(typeof(PreserveAttribute)))
+                            Debug.LogWarning($"The method {method.DeclaringType?.Name}.{method.Name} is invoked via '{nameof(InvokeDefinedMethods)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
+#endif
+                        methods.Add(method);
                     }
                 }
             });
@@ -115,7 +130,7 @@ namespace RuniOS
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Debug.Log($"It took {stopwatch.Elapsed.TotalSeconds} seconds to create a list of methods that match the condition.", $"{nameof(ReflectionUtility)}.{nameof(InvokeDefinedMethods)}<{typeof(T).Name}>");
 #endif
-   
+            
             foreach (var item in methods)
             {
                 try
