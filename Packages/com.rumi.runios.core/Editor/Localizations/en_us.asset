@@ -121,3 +121,112 @@ MonoBehaviour:
         correctly
     - key: internal.editor_resource_loader.loading
       value: Loading Resource...
+    - key: control_panel.title
+      value: RuniOS Control Panel
+    - key: control_panel.refresh_delay
+      value: Refresh Delay
+    - key: control_panel.generic
+      value: Generic
+    - key: control_panel.generic.delta_time
+      value: Delta Time
+    - key: control_panel.generic.smooth_delta_time
+      value: Smooth Delta Time
+    - key: control_panel.generic.fps_delta_time
+      value: Delta Time * Frame Of Reference
+    - key: control_panel.generic.fps_smooth_delta_time
+      value: Smooth Delta Time * Frame Of Reference
+    - key: control_panel.generic.unscaled_delta_time
+      value: Unscaled Delta Time
+    - key: control_panel.generic.unscaled_smooth_delta_time
+      value: Unscaled Smooth Delta Time
+    - key: control_panel.generic.fps_unscaled_delta_time
+      value: Unscaled Delta Time * Frame Of Reference
+    - key: control_panel.generic.fps_unscaled_smooth_delta_time
+      value: Unscaled Smooth Delta Time * Frame Of Reference
+    - key: control_panel.generic.fps
+      value: FPS
+    - key: control_panel.generic.memory
+      value: Total allocated memory (MB)
+    - key: control_panel.generic.main_thread_id
+      value: Main Thread ID
+    - key: control_panel.generic.data_path
+      value: Data Path
+    - key: control_panel.generic.streaming_assets_path
+      value: Streaming Assets Path
+    - key: control_panel.generic.persistent_data_path
+      value: Persistent Data Path
+    - key: control_panel.generic.temporary_cache_path
+      value: temporary Cache Path
+    - key: control_panel.generic.resource_pack_path
+      value: REsource Pack Path
+    - key: control_panel.generic.project_data_path
+      value: Project Data Path
+    - key: control_panel.generic.company_name
+      value: Company Name
+    - key: control_panel.generic.product_name
+      value: Product Name
+    - key: control_panel.generic.account_status
+      value: Account Status
+    - key: control_panel.generic.account_login
+      value: Login
+    - key: control_panel.generic.account_logout
+      value: Logout
+    - key: control_panel.generic.account_name
+      value: Account Name
+    - key: control_panel.generic.account_path
+      value: Account Path
+    - key: control_panel.generic.account_hashed_password
+      value: Account Hashed Password
+    - key: control_panel.generic.version
+      value: Version
+    - key: control_panel.generic.unity_version
+      value: Unity Version
+    - key: control_panel.generic.platform
+      value: Platform
+    - key: control_panel.generic.operating_system
+      value: OS
+    - key: control_panel.generic.device_model
+      value: Device Model
+    - key: control_panel.generic.device_name
+      value: Device Name
+    - key: control_panel.generic.internet_reachability
+      value: Internet Reachability
+    - key: control_panel.generic.battery_status
+      value: Battery Status
+    - key: control_panel.generic.processor_type
+      value: Processor Type
+    - key: control_panel.generic.processor_frequency
+      value: Processor Frequency
+    - key: control_panel.generic.processor_count
+      value: Processor Count
+    - key: control_panel.generic.graphics_device_name
+      value: Graphics Device Name
+    - key: control_panel.generic.graphics_memory_size
+      value: Graphics Memory Size (MB)
+    - key: control_panel.generic.system_memory_size
+      value: System Memory Size (MB)
+    - key: control_panel.generic.game_speed
+      value: Game Speed
+    - key: control_panel.development
+      value: Development
+    - key: control_panel.development.warning
+      value: 'This is the Utility tab for developing RuniOS.
+
+        If you don''t
+        know what this tab does, please turn back.'
+    - key: control_panel.development.localization
+      value: Localization
+    - key: control_panel.development.localization.asset
+      value: Editor Language Asset
+    - key: control_panel.development.localization.json_import
+      value: Import from JSON
+    - key: control_panel.development.localization.json_export
+      value: Export to JSON
+    - key: control_panel.development.localization.overwrite.message
+      value: Would you like to overwrite or append?
+    - key: control_panel.development.localization.overwrite.ok
+      value: Overwrite
+    - key: control_panel.development.localization.overwrite.cancel
+      value: Cancel
+    - key: control_panel.development.localization.overwrite.alt
+      value: Append

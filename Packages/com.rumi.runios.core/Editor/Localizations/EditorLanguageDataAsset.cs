@@ -1,5 +1,5 @@
 #nullable enable
-using RuniOS.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace RuniOS.Editor.Localizations
@@ -8,9 +8,9 @@ namespace RuniOS.Editor.Localizations
     public sealed class EditorLanguageDataAsset : ScriptableObject
     {
         public string languageKey => _languageKey;
-        public ISerializableDictionary languages => _languages;
+        public IReadOnlyDictionary<string, string> languages => _languages;
 
-        [SerializeField] internal string _languageKey = "";
+        [SerializeField] string _languageKey = "";
         [SerializeField] internal EditorLanguageDictionary _languages = new EditorLanguageDictionary();
     }
 }

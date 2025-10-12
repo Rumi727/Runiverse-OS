@@ -8,7 +8,7 @@ namespace RuniOS.Editor
     {
         public static void DrawHLine(int thickness = 1, int padding = 10) => DrawHLine(new Color(0.4980392f, 0.4980392f, 0.4980392f), thickness, padding);
 
-        public static void DrawHLine(Color color, int thickness = 2, int padding = 10)
+        public static void DrawHLine(Color color, int thickness = 1, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding - 2));
             r.height = thickness;
@@ -20,7 +20,7 @@ namespace RuniOS.Editor
 
         public static void DrawVLine(int thickness = 1, int padding = 10) => DrawVLine(new Color(0.4980392f, 0.4980392f, 0.4980392f), thickness, padding);
 
-        public static void DrawVLine(Color color, int thickness = 2, int padding = 10)
+        public static void DrawVLine(Color color, int thickness = 1, int padding = 10)
         {
             Rect r = EditorGUILayout.GetControlRect(GUILayout.Width(padding - 2));
             r.width = thickness;

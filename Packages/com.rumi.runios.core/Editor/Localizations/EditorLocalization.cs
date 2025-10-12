@@ -40,7 +40,7 @@ namespace RuniOS.Editor.Localizations
             }
         }
 
-        public static IEnumerable<Dictionary<string, string>> GetLanguageDictionarys(string languageKey = "")
+        public static IEnumerable<IReadOnlyDictionary<string, string>> GetLanguageDictionarys(string languageKey = "")
         {
             if (string.IsNullOrEmpty(languageKey))
                 languageKey = currentLanguage;
@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Localizations
             }
 
             if (_registeredDataAssets.TryGetValue(languageKey, out var datas))
-                return datas.Select(static x => x._languages);
+                return datas.Select(static x => x.languages);
 
             return Enumerable.Empty<Dictionary<string, string>>();
         }

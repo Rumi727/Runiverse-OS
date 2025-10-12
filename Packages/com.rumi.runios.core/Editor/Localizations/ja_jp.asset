@@ -107,3 +107,114 @@ MonoBehaviour:
       value: "RuniOS\u304C\u6B63\u3057\u304F\u6A5F\u80FD\u3059\u308B\u3088\u3046\u306B\u3001{name}\u5C5E\u6027\u306E\u5024\u3092{value}\u306B\u5909\u66F4\u3057\u307E\u3057\u305F\u3002"
     - key: internal.editor_resource_loader.loading
       value: "\u30EA\u30BD\u30FC\u30B9\u306E\u30ED\u30FC\u30C9..."
+    - key: control_panel.title
+      value: "RuniOS\u30B3\u30F3\u30C8\u30ED\u30FC\u30EB\u30D1\u30CD\u30EB"
+    - key: control_panel.refresh_delay
+      value: "\u30EA\u30D5\u30EC\u30C3\u30B7\u30E5\u30C7\u30A3\u30EC\u30A4"
+    - key: control_panel.generic
+      value: "\u30B8\u30A7\u30CD\u30EA\u30C3\u30AF"
+    - key: control_panel.generic.delta_time
+      value: "\u30C7\u30EB\u30BF\u30BF\u30A4\u30E0"
+    - key: control_panel.generic.smooth_delta_time
+      value: "\u30BD\u30D5\u30C8 \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0"
+    - key: control_panel.generic.fps_delta_time
+      value: "\u30C7\u30EB\u30BF\u30BF\u30A4\u30E0 * \u57FA\u6E96\u30D5\u30EC\u30FC\u30E0"
+    - key: control_panel.generic.fps_smooth_delta_time
+      value: "\u30BD\u30D5\u30C8 \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0 * \u57FA\u6E96\u30D5\u30EC\u30FC\u30E0"
+    - key: control_panel.generic.unscaled_delta_time
+      value: "\u30B9\u30B1\u30FC\u30EB\u3055\u308C\u3066\u3044\u306A\u3044 \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0"
+    - key: control_panel.generic.unscaled_smooth_delta_time
+      value: "\u30B9\u30B1\u30FC\u30EB\u3055\u308C\u3066\u3044\u306A\u3044 \u30BD\u30D5\u30C8
+        \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0"
+    - key: control_panel.generic.fps_unscaled_delta_time
+      value: "\u30B9\u30B1\u30FC\u30EB\u3055\u308C\u3066\u3044\u306A\u3044 \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0
+        * \u57FA\u6E96\u30D5\u30EC\u30FC\u30E0"
+    - key: control_panel.generic.fps_unscaled_smooth_delta_time
+      value: "\u30B9\u30B1\u30FC\u30EB\u3055\u308C\u3066\u3044\u306A\u3044 \u30BD\u30D5\u30C8
+        \u30C7\u30EB\u30BF\u30BF\u30A4\u30E0 * \u57FA\u6E96\u30D5\u30EC\u30FC\u30E0"
+    - key: control_panel.generic.fps
+      value: "\u73FE\u5728\u306E\u30D5\u30EC\u30FC\u30E0"
+    - key: control_panel.generic.memory
+      value: "\u5408\u8A08\u5272\u308A\u5F53\u3066\u3089\u308C\u305F\u30E1\u30E2\u30EA
+        (MB)"
+    - key: control_panel.generic.main_thread_id
+      value: "\u30E1\u30A4\u30F3\u30B9\u30EC\u30C3\u30C9ID"
+    - key: control_panel.generic.data_path
+      value: "\u30C7\u30FC\u30BF\u30D1\u30B9"
+    - key: control_panel.generic.streaming_assets_path
+      value: "\u30B9\u30C8\u30EA\u30FC\u30DF\u30F3\u30B0\u30A2\u30BB\u30C3\u30C8\u30D1\u30B9"
+    - key: control_panel.generic.persistent_data_path
+      value: "\u6C38\u7D9A\u30C7\u30FC\u30BF\u30D1\u30B9"
+    - key: control_panel.generic.temporary_cache_path
+      value: "\u4E00\u6642\u30AD\u30E3\u30C3\u30B7\u30E5\u30D1\u30B9"
+    - key: control_panel.generic.resource_pack_path
+      value: "\u30EA\u30BD\u30FC\u30B9\u30D1\u30C3\u30AF\u30D1\u30B9"
+    - key: control_panel.generic.project_data_path
+      value: "\u30D7\u30ED\u30B8\u30A7\u30AF\u30C8\u30C7\u30FC\u30BF\u30D1\u30B9"
+    - key: control_panel.generic.company_name
+      value: "\u4F1A\u793E\u540D"
+    - key: control_panel.generic.product_name
+      value: "\u88FD\u54C1\u540D"
+    - key: control_panel.generic.account_status
+      value: "\u30A2\u30AB\u30A6\u30F3\u30C8\u30B9\u30C6\u30FC\u30BF\u30B9"
+    - key: control_panel.generic.account_login
+      value: "\u30ED\u30B0\u30A4\u30F3"
+    - key: control_panel.generic.account_logout
+      value: "\u30ED\u30B0\u30A2\u30A6\u30C8"
+    - key: control_panel.generic.account_name
+      value: "\u30A2\u30AB\u30A6\u30F3\u30C8\u540D"
+    - key: control_panel.generic.account_path
+      value: "\u30A2\u30AB\u30A6\u30F3\u30C8\u30D1\u30B9"
+    - key: control_panel.generic.account_hashed_password
+      value: "\u30A2\u30AB\u30A6\u30F3\u30C8\u30CF\u30C3\u30B7\u30E5\u30D1\u30B9\u30EF\u30FC\u30C9"
+    - key: control_panel.generic.version
+      value: "\u30D0\u30FC\u30B8\u30E7\u30F3"
+    - key: control_panel.generic.unity_version
+      value: "Unity\u30D0\u30FC\u30B8\u30E7\u30F3"
+    - key: control_panel.generic.platform
+      value: "\u30D7\u30E9\u30C3\u30C8\u30D5\u30A9\u30FC\u30E0"
+    - key: control_panel.generic.operating_system
+      value: OS
+    - key: control_panel.generic.device_model
+      value: "\u30C7\u30D0\u30A4\u30B9\u30E2\u30C7\u30EB"
+    - key: control_panel.generic.device_name
+      value: "\u30C7\u30D0\u30A4\u30B9\u540D"
+    - key: control_panel.generic.internet_reachability
+      value: "\u30A4\u30F3\u30BF\u30FC\u30CD\u30C3\u30C8\u63A5\u7D9A\u65B9\u5F0F"
+    - key: control_panel.generic.battery_status
+      value: "\u30D0\u30C3\u30C6\u30EA\u30FC\u306E\u72B6\u614B"
+    - key: control_panel.generic.processor_type
+      value: "\u30D7\u30ED\u30BB\u30C3\u30B5\u30BF\u30A4\u30D7"
+    - key: control_panel.generic.processor_frequency
+      value: "\u30D7\u30ED\u30BB\u30C3\u30B5\u901F\u5EA6"
+    - key: control_panel.generic.processor_count
+      value: "\u30B3\u30A2\u6570"
+    - key: control_panel.generic.graphics_device_name
+      value: "\u30B0\u30E9\u30D5\u30A3\u30C3\u30AF\u30C7\u30D0\u30A4\u30B9\u540D"
+    - key: control_panel.generic.graphics_memory_size
+      value: "\u30B0\u30E9\u30D5\u30A3\u30C3\u30AF\u30E1\u30E2\u30EA\u30B5\u30A4\u30BA
+        (MB)"
+    - key: control_panel.generic.system_memory_size
+      value: "\u30B7\u30B9\u30C6\u30E0\u30E1\u30E2\u30EA\u30B5\u30A4\u30BA (MB)"
+    - key: control_panel.generic.game_speed
+      value: "\u30B2\u30FC\u30E0\u30B9\u30D4\u30FC\u30C9"
+    - key: control_panel.development
+      value: "\u767A\u9054"
+    - key: control_panel.development.warning
+      value: "RuniOS\u958B\u767A\u7528\u306E\u30E6\u30FC\u30C6\u30A3\u30EA\u30C6\u30A3\u30BF\u30D6\u3067\u3059\u3002\r\n\u3053\u306E\u30BF\u30D6\u306E\u6A5F\u80FD\u304C\u308F\u304B\u3089\u306A\u3044\u5834\u5408\u306F\u3001\u623B\u3063\u3066\u304F\u3060\u3055\u3044\u3002"
+    - key: control_panel.development.localization
+      value: "\u30ED\u30FC\u30AB\u30E9\u30A4\u30BA"
+    - key: control_panel.development.localization.asset
+      value: "\u30A8\u30C7\u30A3\u30BF\u8A00\u8A9E\u30A2\u30BB\u30C3\u30C8"
+    - key: control_panel.development.localization.json_import
+      value: "JSON\u304B\u3089\u30A4\u30F3\u30DD\u30FC\u30C8"
+    - key: control_panel.development.localization.json_export
+      value: "JSON\u306B\u30A8\u30AF\u30B9\u30DD\u30FC\u30C8"
+    - key: control_panel.development.localization.overwrite.message
+      value: "\u4E0A\u66F8\u304D\u3057\u307E\u3059\u304B\u3001\u305D\u308C\u3068\u3082\u8FFD\u52A0\u3057\u307E\u3059\u304B\uFF1F"
+    - key: control_panel.development.localization.overwrite.ok
+      value: "\u4E0A\u66F8\u304D"
+    - key: control_panel.development.localization.overwrite.cancel
+      value: "\u30AD\u30E3\u30F3\u30BB\u30EB"
+    - key: control_panel.development.localization.overwrite.alt
+      value: "\u8FFD\u52A0"

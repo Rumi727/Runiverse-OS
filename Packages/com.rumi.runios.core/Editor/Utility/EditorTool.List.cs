@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Collections.Generic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -67,7 +68,7 @@ namespace RuniOS.Editor
                                 if (addAction != null)
                                     addAction(list, listIndex, index);
                                 else
-                                    list.Add(list.GetListType().GetDefaultValue());
+                                    list.Add(list.GetElementType().GetDefaultValue());
                             }
                         }
                         else
