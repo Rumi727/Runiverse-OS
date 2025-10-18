@@ -233,8 +233,18 @@ MonoBehaviour:
       value: "\uB36E\uC5B4\uC4F0\uC2DC\uACA0\uC2B5\uB2C8\uAE4C, \uC544\uB2C8\uBA74
         \uCD94\uAC00\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
     - key: control_panel.development.localization.overwrite.ok
-      value: "\uB36E\uC5B4\uC4F0\uAE30"
+      value: "\uBAA8\uB450 \uB36E\uC5B4\uC4F0\uAE30"
     - key: control_panel.development.localization.overwrite.cancel
       value: "\uCDE8\uC18C"
     - key: control_panel.development.localization.overwrite.alt
       value: "\uCD94\uAC00"
+    - key: control_panel.development.driven_property
+      value: "\uC81C\uC5B4\uB41C \uC18D\uC131"
+    - key: control_panel.development.driven_property.driver
+      value: "\uC81C\uC5B4\uCCB4"
+    - key: control_panel.development.driven_property.target
+      value: "\uBAA9\uD45C"
+    - key: control_panel.development.driven_property.unregister
+      value: "\uC81C\uC5B4 \uD574\uC81C"
+    - key: control_panel.development.driven_property.zero_count
+      value: "\uC81C\uC5B4\uB41C \uC18D\uC131\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."

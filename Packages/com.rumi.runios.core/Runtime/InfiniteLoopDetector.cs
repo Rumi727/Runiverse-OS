@@ -7,10 +7,10 @@ namespace RuniOS
 {
     public static class InfiniteLoopDetector
     {
-        [ThreadStatic] static int detectionCount;
+        static int detectionCount;
         public const int detectionThreshold = 1000000;
 
-        [Conditional("UNITY_EDITOR")]
+        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
         public static void Run([CallerFilePath] string fp = "", [CallerLineNumber] int ln = 0, [CallerMemberName] string mn = "")
         {
             string currentPoint = $"{fp}:{ln}, {mn}()";
@@ -35,9 +35,11 @@ namespace RuniOS
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
-        static void Init() => UnityEditor.EditorApplication.update += static () => detectionCount = 0;
+        static void Init() => UnityEditor.EditorApplication.update += Update;
 #elif DEVELOPMENT_BUILD
-        static void Awaken() => Booting.CustomPlayerLoopSetter.initEvent += static () => detectionCount = 0;
+        static void Awaken() => Booting.CustomPlayerLoopSetter.initEvent += Update;
 #endif
+
+        static void Update() => detectionCount = 0;
     }
 }

@@ -2348,5 +2348,48 @@ namespace RuniOS
  
             return !e2.MoveNext();
         }
+        
+        /// <summary>
+        /// 지정된 열거형의 순서와 내용을 기반으로 해시코드를 생성합니다.<br/>
+        /// 열거형의 요소가 순서까지 같으면 동일한 해시코드를 반환합니다.
+        /// </summary>
+        /// <param name="list">해시코드를 계산할 리스트 또는 배열입니다.</param>
+        /// <typeparam name="T">리스트 또는 배열의 요소 타입입니다.</typeparam>
+        /// <returns>생성된 해시코드를 반환합니다.</returns>
+        public static int GetSequenceHashCode<T>(this IEnumerable<T>? list)
+        {
+            if (list == null)
+                return 0;
+            
+            var hash = new HashCode();
+            foreach (var item in list)
+                hash.Add(item);
+
+            return hash.ToHashCode();
+        }
+        
+        /// <summary>
+        /// 대상 Dictionary의 키들을 주어진 List의 아이템들과 동기화합니다.<br/>
+        /// List에 없는 키는 제거되고, Dictionary에 없는 키는 valueFactory를 통해 추가됩니다.<br/>
+        /// 기존 키에 대한 값(Value)은 유지됩니다.
+        /// </summary>
+        /// <typeparam name="TKey">키 타입입니다.</typeparam>
+        /// <typeparam name="TValue">값 타입입니다.</typeparam>
+        /// <param name="targetDictionary">키를 동기화할 대상 Dictionary입니다.</param>
+        /// <param name="sourceList">동기화의 기준이 되는 List입니다.</param>
+        /// <param name="valueFactory">새로운 키가 추가될 때 사용할 기본 값을 생성하는 함수입니다.</param>
+        public static void SyncKeysWithList<TKey, TValue>(this Dictionary<TKey, TValue> targetDictionary, IReadOnlyList<TKey> sourceList, Func<TKey, TValue>? valueFactory = null) where TKey : notnull
+        {
+            // 1. 제거: List에는 없지만 Dictionary에는 있는 키 제거
+            // Dictionary의 Keys 컬렉션은 순회 중 수정할 수 없으므로, Except 결과를 List로 만듭니다.
+            TKey[] keysToRemove = targetDictionary.Keys.Except(sourceList).ToArray();
+            foreach (var key in keysToRemove)
+                targetDictionary.Remove(key);
+
+            // 2. 추가: List에는 있지만 Dictionary에는 없는 키 추가
+            TKey[] keysToAdd = sourceList.Except(targetDictionary.Keys).ToArray();
+            foreach (var key in keysToAdd)
+                targetDictionary.Add(key, valueFactory != null ? valueFactory.Invoke(key) : Activator.CreateInstance<TValue>());
+        }
     }
 }

@@ -225,8 +225,18 @@ MonoBehaviour:
     - key: control_panel.development.localization.overwrite.message
       value: Would you like to overwrite or append?
     - key: control_panel.development.localization.overwrite.ok
-      value: Overwrite
+      value: All Overwrite
     - key: control_panel.development.localization.overwrite.cancel
       value: Cancel
     - key: control_panel.development.localization.overwrite.alt
       value: Append
+    - key: control_panel.development.driven_property
+      value: Driven Property
+    - key: control_panel.development.driven_property.driver
+      value: Driver
+    - key: control_panel.development.driven_property.target
+      value: Target
+    - key: control_panel.development.driven_property.unregister
+      value: Unregister
+    - key: control_panel.development.driven_property.zero_count
+      value: There are no driven properties.

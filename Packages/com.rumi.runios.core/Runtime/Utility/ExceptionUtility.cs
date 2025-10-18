@@ -13,5 +13,11 @@ namespace RuniOS
             if (argument is null)
                 throw new ArgumentNullException(paramName ?? nameof(argument));
         }
+        
+        public static void ThrowIfArgumentNull([NotNull] UnityEngine.Object? argument, string? paramName = null)
+        {
+            if (argument == null)
+                throw new ArgumentNullException(paramName ?? nameof(argument));
+        }
     }
 }

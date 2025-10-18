@@ -14,6 +14,7 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "RuniOS.APIBridge.UnityEditor.CoreModule.dll",
+        "RuniOS.APIBridge.UnityEditor.QuickSearchModule.dll",
         "System.Collections.Immutable.dll",
         "ExtendedNumerics.BigDecimal.dll",
         "Newtonsoft.Json.dll",

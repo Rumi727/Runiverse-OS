@@ -145,5 +145,18 @@ namespace RuniOS.Editor.Windows
             selectedPanel.OnGUI();
             GUILayout.EndScrollView();
         }
+
+        void OnDestroy()
+        {
+            if (_panels == null)
+                return;
+            
+            for (int i = 0; i < _panels.Length; i++)
+            {
+                ScriptableObject? panel = _panels[i];
+                if (panel != null)
+                    DestroyImmediate(_panels[i]);
+            }
+        }
     }
 }

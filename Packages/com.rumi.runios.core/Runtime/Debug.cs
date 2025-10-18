@@ -64,6 +64,7 @@ public static class Debug
     static string GetRuntimeLogText(string className, object? message) => "<b>[" + className + "]</b> " + message;
 
 
+    // ReSharper disable Unity.PerformanceAnalysis
     public static void LogException(Exception exception) => UnityEngine.Debug.LogException(exception);
 
     public static string NameOfCallingClass(int skipFrames = 0)

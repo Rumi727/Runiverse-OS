@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Diagnostics.CodeAnalysis;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 
@@ -32,7 +33,7 @@ namespace RuniOS.Editor
             return false;
         }
 
-        public static bool FadeGroup(ref AnimBool? animBool, bool target, Action action)
+        public static bool FadeGroup([AllowNull] ref AnimBool animBool, bool target, Action action)
         {
             animBool ??= new AnimBool(target);
             animBool.target = target;

@@ -6,8 +6,7 @@ using UnityEditor;
 namespace RuniOS.Editor
 {
     /// <summary>
-    /// 에디터에서 리소스를 미리 로딩시키는 클래스입니다.<br/>
-    /// <see cref="ResourceManager.Reload"/>를 직접 사용해도 문제 없지만, 이 클래스를 통해 리로딩 하면 자동으로 상단 툴바 프로그레스바에 등록됩니다.
+    /// 에디터에서 리소스를 미리 로딩시키는 클래스입니다.
     /// </summary>
     public static class EditorResourceLoader
     {
