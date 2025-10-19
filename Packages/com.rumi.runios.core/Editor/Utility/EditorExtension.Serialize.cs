@@ -64,6 +64,12 @@ namespace RuniOS.Editor
         public static string GetGlobalIdentifier(this SerializedProperty property) => ReorderableListWrapperBridge.GetPropertyIdentifier(property);
 
         public static FieldInfo? GetFieldInfoFromProperty(this SerializedProperty property, out Type? type) => ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out type);
+
+        public static Type GetPropertyType(this SerializedProperty property)
+        {
+            ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type type);
+            return type;
+        }
         
         public static Type GetPropertyTypeWithoutList(this SerializedProperty property)
         {
