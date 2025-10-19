@@ -37,7 +37,7 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            ListHeader(position, pairs, label, index =>
+            DrawListHeader(position, pairs, label, index =>
             {
                 pairs.InsertArrayElementAtIndex(index);
 

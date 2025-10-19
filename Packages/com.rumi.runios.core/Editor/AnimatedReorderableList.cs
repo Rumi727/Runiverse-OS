@@ -51,7 +51,7 @@ namespace RuniOS.Editor
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            ListHeader(position, property, label);
+            DrawListHeader(position, property, label);
             position.y += headHeight + 2;
 
             if (!isInArray && animFloat != null)
