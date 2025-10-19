@@ -11,18 +11,18 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public delegate void ListHeaderAddAction(IList list, int listIndex, int index);
-        public delegate void ListHeaderRemoveAction(IList list, int listIndex, int index);
+        public delegate void ListHeaderAddAction(IList list, int index);
+        public delegate void ListHeaderRemoveAction(IList list, int index);
 
-        public static bool ListHeaderLayout(IEnumerable<IList>? lists, string label, bool foldout, bool isInArray = false) => ListHeaderLayout(lists, new GUIContent(label), foldout, null, null, isInArray);
-        public static bool ListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool foldout, bool isInArray = false) => ListHeaderLayout(lists, label, foldout, null, null, isInArray);
-        public static bool ListHeaderLayout(IEnumerable<IList>? lists, string label, bool foldout, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => ListHeaderLayout(lists, new GUIContent(label), foldout, addAction, removeAction, isInArray);
-        public static bool ListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool foldout, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => ListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), lists, label, foldout, addAction, removeAction, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, null, null, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, label, isExpanded, null, null, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, addAction, removeAction, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), lists, label, isExpanded, addAction, removeAction, isInArray);
 
-        public static bool ListHeader(Rect position, IEnumerable<IList>? lists, string label, bool foldout, bool isInArray = false) => ListHeader(position, lists, new GUIContent(label), foldout, null, null, isInArray);
-        public static bool ListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool foldout, bool isInArray = false) => ListHeader(position, lists, label, foldout, null, null, isInArray);
-        public static bool ListHeader(Rect position, IEnumerable<IList>? lists, string label, bool foldout, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => ListHeader(position, lists, new GUIContent(label), foldout, addAction, removeAction, isInArray);
-        public static bool ListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool foldout, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false)
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, null, null, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, label, isExpanded, null, null, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, addAction, removeAction, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false)
         {
             {
                 Rect headerPosition = position;
@@ -30,11 +30,11 @@ namespace RuniOS.Editor
 
                 if (!isInArray)
                 {
-                    foldout = EditorGUI.BeginFoldoutHeaderGroup(headerPosition, foldout, label);
+                    isExpanded = EditorGUI.BeginFoldoutHeaderGroup(headerPosition, isExpanded, label);
                     EditorGUI.EndFoldoutHeaderGroup();
                 }
                 else
-                    foldout = EditorGUI.Foldout(headerPosition, foldout, label, true);
+                    isExpanded = EditorGUI.Foldout(headerPosition, isExpanded, label, true);
             }
 
             {
@@ -43,7 +43,7 @@ namespace RuniOS.Editor
                 countPosition.width = 48;
 
                 if (lists == null)
-                    return foldout;
+                    return isExpanded;
 
                 EditorGUI.BeginChangeCheck();
 
@@ -56,7 +56,6 @@ namespace RuniOS.Editor
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    int listIndex = 0;
                     foreach (var list in lists)
                     {
                         int addCount = count - list.Count;
@@ -66,7 +65,7 @@ namespace RuniOS.Editor
                             {
                                 int index = list.Count;
                                 if (addAction != null)
-                                    addAction(list, listIndex, index);
+                                    addAction(list, index);
                                 else
                                     list.Add(list.GetElementType().GetDefaultValue());
                             }
@@ -78,24 +77,22 @@ namespace RuniOS.Editor
                             {
                                 int index = list.Count - 1;
                                 if (removeAction != null)
-                                    removeAction(list, listIndex, index);
+                                    removeAction(list, index);
                                 else
                                     list.RemoveAt(index);
                             }
                         }
-
-                        listIndex++;
                     }
                 }
             }
 
-            return foldout;
+            return isExpanded;
         }
 
-        public static void ListHeaderLayout(SerializedProperty property, string label) => ListHeaderLayout(property, new GUIContent(label), null, null);
-        public static void ListHeaderLayout(SerializedProperty property, GUIContent label) => ListHeaderLayout(property, label, null, null);
-        public static void ListHeaderLayout(SerializedProperty property, string label, Action<int>? addAction, Action<int>? removeAction) => ListHeaderLayout(property, new GUIContent(label), addAction, removeAction);
-        public static void ListHeaderLayout(SerializedProperty property, GUIContent label, Action<int>? addAction, Action<int>? removeAction)
+        public static void DrawListHeaderLayout(SerializedProperty property, string label) => DrawListHeaderLayout(property, new GUIContent(label), null, null);
+        public static void DrawListHeaderLayout(SerializedProperty property, GUIContent label) => DrawListHeaderLayout(property, label, null, null);
+        public static void DrawListHeaderLayout(SerializedProperty property, string label, Action<int>? addAction, Action<int>? removeAction) => DrawListHeaderLayout(property, new GUIContent(label), addAction, removeAction);
+        public static void DrawListHeaderLayout(SerializedProperty property, GUIContent label, Action<int>? addAction, Action<int>? removeAction)
         {
             float height;
             if (property.IsInArray())
@@ -103,13 +100,13 @@ namespace RuniOS.Editor
             else
                 height = GetYSize(EditorStyles.foldoutHeader);
 
-            ListHeader(EditorGUILayout.GetControlRect(false, height), property, label, addAction, removeAction);
+            DrawListHeader(EditorGUILayout.GetControlRect(false, height), property, label, addAction, removeAction);
         }
 
-        public static void ListHeader(Rect position, SerializedProperty property, string label) => ListHeader(position, property, new GUIContent(label), null, null);
-        public static void ListHeader(Rect position, SerializedProperty property, GUIContent label) => ListHeader(position, property, label, null, null);
-        public static void ListHeader(Rect position, SerializedProperty property, string label, Action<int>? addAction, Action<int>? removeAction) => ListHeader(position, property, new GUIContent(label), addAction, removeAction);
-        public static void ListHeader(Rect position, SerializedProperty property, GUIContent label, Action<int>? addAction, Action<int>? removeAction)
+        public static void DrawListHeader(Rect position, SerializedProperty property, string label) => DrawListHeader(position, property, new GUIContent(label), null, null);
+        public static void DrawListHeader(Rect position, SerializedProperty property, GUIContent label) => DrawListHeader(position, property, label, null, null);
+        public static void DrawListHeader(Rect position, SerializedProperty property, string label, Action<int>? addAction, Action<int>? removeAction) => DrawListHeader(position, property, new GUIContent(label), addAction, removeAction);
+        public static void DrawListHeader(Rect position, SerializedProperty property, GUIContent label, Action<int>? addAction, Action<int>? removeAction)
         {
             bool isInArray = property.IsInArray();
 
