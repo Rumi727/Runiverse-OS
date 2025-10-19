@@ -7,9 +7,9 @@ namespace RuniOS.Inspectors
     public interface IInspectorElement
     {
         IInspectable inspectable { get; }
+        
         string name { get; }
-
-        string displayName { get; }
+        string displayName { get; set; }
 
         protected static string ToDisplayName(string name)
         {

@@ -12,18 +12,19 @@ namespace RuniOS.Inspectors.Csharp
         public ListElement(InspectableList inspectable, int index)
         {
             name = $"Element {index}";
+            displayName = name;
             
             this.inspectable = inspectable;
             this.index = index;
             
-            _inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
+            _inspectableObjectElement = new InspectableObject(variableType, this);
 
             if (typeof(IList).IsAssignableFrom(variableType))
                 _inspectableElementList = new InspectableList(variableType, nullabilityInfo?.GenericTypeArguments.FirstOrDefault());
         }
 
         public string name { get; }
-        public string displayName => name;
+        public string displayName { get; set; }
 
         public InspectableList inspectable { get; }
         IInspectable IInspectorElement.inspectable => inspectable;
@@ -74,7 +75,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    return inspectable.instances.Any(x => inspectable[index] != value);
+                    return inspectable.instances.Any(x => x[index] != value);
                 }
                 catch (Exception e)
                 {

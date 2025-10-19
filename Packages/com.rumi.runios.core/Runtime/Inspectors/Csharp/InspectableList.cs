@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -52,9 +53,15 @@ namespace RuniOS.Inspectors.Csharp
         bool ICollection.IsSynchronized => false;
         object ICollection.SyncRoot => this;
 
-        public IList instance
+        public IList? instance
         {
-            get => instances.MinBy(static x => x.Count);
+            get
+            {
+                if (instances.Any())
+                    return instances.MinBy(static x => x.Count);
+                
+                return null;
+            }
             set
             {
                 if (value != null && inspectionType != value.GetType())
@@ -85,11 +92,16 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         IEnumerable<IList> _instances;
-        
+
+        [MemberNotNullWhen(false, nameof(instance))]
+        public bool instancesIsEmpty => instance == null;
+
         public object? this[int index]
         {
             get
             {
+                ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+                
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
@@ -110,7 +122,11 @@ namespace RuniOS.Inspectors.Csharp
         
         public int count
         {
-            get => instance.Count;
+            get
+            {
+                ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+                return instance.Count;
+            }
             set
             {
                 foreach (var list in instances)
@@ -182,16 +198,38 @@ namespace RuniOS.Inspectors.Csharp
                 list.Clear();
         }
         
-        public bool Contains(object? value) => instance.Contains(value);
-        
-        public int IndexOf(object value) => instance.IndexOf(value);
+        public bool Contains(object? value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+            return instance.Contains(value);
+        }
 
-        public IEnumerator GetEnumerator() => instance.GetEnumerator();
-        
+        public int IndexOf(object value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+            return instance.IndexOf(value);
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+            return instance.GetEnumerator();
+        }
+
         public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
         
-        
-        
+        public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
+        {
+            type = inspectionType;
+            return true;
+        }
+
+        public bool TryGetInspectionElementType(out Type? type)
+        {
+            type = inspectionElementType;
+            return true;
+        }
+
         List<IInspectorElement>? cachedElements;
         public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
         {
@@ -240,13 +278,13 @@ namespace RuniOS.Inspectors.Csharp
 
             return cachedElements.ToImmutableArray();
         }
-        
-        public IInspectorElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
+
+        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return null;
             
-            return GetElements()[index];
+            return GetElements()[index] as IInspectorListElement;
         }
     }
 }

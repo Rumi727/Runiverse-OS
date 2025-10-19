@@ -20,6 +20,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <param name="property">이 요소가 나타내는 직렬화된 프로퍼티입니다.</param>
         public SerializedPropertyElement(SerializedProperty property)
         {
+            displayName = name;
+            
             ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type elementType);
 
             inspectable = new InspectableSerializedObject(property.serializedObject);
@@ -57,7 +59,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 프로퍼티의 디스플레이 이름을 가져옵니다.
         /// </summary>
-        public string displayName => property.displayName;
+        public string displayName { get; set; }
 
         /// <summary>
         /// 변수의 타입을 가져옵니다.

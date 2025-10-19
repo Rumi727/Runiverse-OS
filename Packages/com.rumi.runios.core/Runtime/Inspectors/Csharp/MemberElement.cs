@@ -28,9 +28,9 @@ namespace RuniOS.Inspectors.Csharp
         public string name { get; }
 
         /// <summary>
-        /// 멤버의 이름을 가져옵니다.
+        /// UI에서 표시되는 멤버의 이름을 가져옵니다.
         /// </summary>
-        public string displayName { get; }
+        public string displayName { get; set; }
 
         /// <summary>
         /// 이 멤버가 속한 <see cref="InspectableObject"/>를 가져옵니다.

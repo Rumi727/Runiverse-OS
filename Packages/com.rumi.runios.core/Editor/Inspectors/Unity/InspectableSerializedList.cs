@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using UnityEditor;
 
@@ -30,6 +31,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
+        
+        public bool instancesIsEmpty => false;
         
         public Type inspectionElementType { get; }
         public string inspectionElementDisplayName => inspectionElementType.GetTypeDisplayName();
@@ -106,6 +109,20 @@ namespace RuniOS.Editor.Inspectors.Unity
         public IEnumerator GetEnumerator() => throw new NotImplementedException();
         
         public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
+        
+        
+        
+        public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
+        {
+            type = inspectionType;
+            return true;
+        }
+        
+        public bool TryGetInspectionElementType(out Type? type)
+        {
+            type = inspectionElementType;
+            return true;
+        }
 
 
 
@@ -157,13 +174,13 @@ namespace RuniOS.Editor.Inspectors.Unity
 
             return cachedElements.ToImmutableArray();
         }
-        
-        public IInspectorElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
+
+        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return null;
             
-            return GetElements()[index];
+            return GetElements()[index] as IInspectorListElement;
         }
     }
 }

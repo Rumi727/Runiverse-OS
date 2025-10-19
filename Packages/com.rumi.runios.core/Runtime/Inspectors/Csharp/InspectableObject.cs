@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 
@@ -9,19 +10,16 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableObject : IInspectableObject
     {
-        public IInspectorVariableElement? parentElement { get; init; }
+        public IInspectorVariableElement? parentElement { get; }
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
         
         public object? instance
         {
-            get => instances.FirstOrDefault();
+            get => instances.WhereNotNull().FirstOrDefault();
             set
             {
-                if (value != null && !inspectionType.IsInstanceOfType(value))
-                    throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
-                
                 if (value != null)
                     instances = Enumerable.Repeat(value, 1);
                 else
@@ -31,27 +29,18 @@ namespace RuniOS.Inspectors.Csharp
 
         public IEnumerable<object> instances
         {
-            get => _instances;
-            set
-            {
-                if (value.Any(x => !inspectionType.IsInstanceOfType(x)))
-                {
-                    string invalidTypes = string.Join(", ", value.Where(x => x != null && !inspectionType.IsInstanceOfType(x))
-                        .Select(static x => $"'{x!.GetType().FullName}'")
-                        .Distinct());
-                                            
-                    throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
-                }
-
-                _instances = value;
-            }
+            get => _instances.Where(x => inspectionType.IsInstanceOfType(x));
+            set => _instances = value;
         }
         IEnumerable<object> _instances;
+
+        [MemberNotNullWhen(false, nameof(instance))]
+        public bool instancesIsEmpty => instance == null;
 
         IEnumerable<object> IInspectableObject.instances => instances;
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
-        public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
+        public InspectableObject(Type inspectionType, IInspectorVariableElement? parentElement = null) : this(inspectionType, Enumerable.Empty<object>()) => this.parentElement = parentElement; 
         public InspectableObject(Type inspectionType, params object?[] instances) : this(inspectionType, instances.WhereNotNull()) { }
         
         public InspectableObject(Type inspectionType, IEnumerable<object> instances)
@@ -60,6 +49,12 @@ namespace RuniOS.Inspectors.Csharp
             
             _instances = null!;
             this.instances = instances;
+        }
+
+        public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
+        {
+            type = inspectionType;
+            return true;
         }
 
         public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
@@ -85,6 +80,23 @@ namespace RuniOS.Inspectors.Csharp
             }
 
             return elements.WhereNotNull().ToImmutableArray();
+        }
+
+        public void InstanceTypeCheck()
+        {
+            if (_instances.Any(x => !inspectionType.IsInstanceOfType(x)))
+            {
+                string invalidTypes = string.Join
+                (
+                    ", ", 
+                    _instances
+                        .Where(x => x != null && !inspectionType.IsInstanceOfType(x))
+                        .Select(static x => $"'{x!.GetType().FullName}'")
+                        .Distinct()
+                );
+                                            
+                throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
+            }
         }
     }
 }

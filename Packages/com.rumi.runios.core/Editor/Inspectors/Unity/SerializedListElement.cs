@@ -20,6 +20,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <param name="index">리스트에서 이 요소의 인덱스입니다.</param>
         public SerializedListElement(InspectableSerializedList inspectable, SerializedProperty property, int index)
         {
+            displayName = name;
+            
             this.inspectable = inspectable;
 
             this.property = property;
@@ -38,7 +40,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 요소의 디스플레이 이름을 가져옵니다.
         /// </summary>
-        public string displayName => property.displayName;
+        public string displayName { get; set; }
 
         /// <summary>
         /// 이 요소가 속한 검사 가능한 직렬화된 리스트를 가져옵니다.

@@ -4,6 +4,7 @@ using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEditor;
 
@@ -15,6 +16,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public SerializedObject serializedObject { get; }
         public SerializedProperty targetProperty { get; }
+        
+        public bool instancesIsEmpty => serializedObject.targetObject == null;
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -28,6 +31,12 @@ namespace RuniOS.Editor.Inspectors.Unity
             
             ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(this.targetProperty, out Type type);
             inspectionType = type;
+        }
+        
+        public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
+        {
+            type = inspectionType;
+            return true;
         }
 
         public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
