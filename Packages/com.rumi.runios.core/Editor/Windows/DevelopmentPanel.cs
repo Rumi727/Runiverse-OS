@@ -26,15 +26,18 @@ namespace RuniOS.Editor.Windows
         [SerializeField] Vector2 languageScrollPosition;
 
         readonly Dictionary<DrivenPropertyManager.DrivenPropertyData, DrivenPropertyDataExtension> drivenPropertyDatas = new();
+        [SerializeField] Vector2 drivenPropertyScrollPosition;
+        
         public void OnGUI()
         {
             EditorGUILayout.HelpBox(GetTextOrKey("control_panel.development.warning"), MessageType.Warning);
             Space();
             
             {
-                GUILayout.Label(GetTextOrKey("control_panel.development.localization"), ControlPanel.bigLabelStyle);
-
                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
+                GUILayout.Label(GetTextOrKey("control_panel.development.localization"), ControlPanel.bigLabelStyle);
+                DrawHLine();
+
                 {
                     EditorGUILayout.BeginHorizontal();
                     selectedLanguageDataAsset = (EditorLanguageDataAsset)EditorGUILayout.ObjectField(GetTextOrKey("control_panel.development.localization.asset"), selectedLanguageDataAsset, typeof(EditorLanguageDataAsset), false);
@@ -97,15 +100,12 @@ namespace RuniOS.Editor.Windows
             {
                 Space();
                 GUILayout.Label(GetTextOrKey("control_panel.development.driven_property"), ControlPanel.bigLabelStyle);
-
                 drivenPropertyDatas.SyncKeysWithList(DrivenPropertyManager.drivenProperties, x => new DrivenPropertyDataExtension(x));
                 if (DrivenPropertyManager.drivenProperties.Count <= 0)
-                {
-                    EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     GUILayout.Label(GetTextOrKey("control_panel.development.driven_property.zero_count"));
-                    EditorGUILayout.EndVertical();
-                }
 
+                drivenPropertyScrollPosition = EditorGUILayout.BeginScrollView(drivenPropertyScrollPosition, GUILayout.ExpandHeight(false), GUILayout.Height(400));
+                
                 for (int i = 0; i < DrivenPropertyManager.drivenProperties.Count; i++)
                 {
                     DrivenPropertyManager.DrivenPropertyData data = DrivenPropertyManager.drivenProperties[i];
@@ -168,6 +168,8 @@ namespace RuniOS.Editor.Windows
                     drivenPropertyDatas[data] = extData;
                     EditorGUILayout.EndVertical();
                 }
+                
+                EditorGUILayout.EndScrollView();
             }
         }
 
