@@ -214,7 +214,7 @@ namespace RuniOS.Installer.Screens
                     {
                         Rect rect = area;
                         rect.y = labelSize.y + oneLineLabelYSize + 4;
-                        InstallerWindow.DrawLine(rect, 1, 10, new Color(0.6627450980f, 0.6627450980f, 0.6627450980f));
+                        InstallerWindow.DrawLine(rect, 1);
                     }
 
                     {
@@ -226,7 +226,7 @@ namespace RuniOS.Installer.Screens
 
                         if (gitPackage.packages.Length > 0 || gitPackage.dependencies.Length > 0)
                         {
-                            InstallerWindow.DrawLine(1, 5, new Color(0.6627450980f, 0.6627450980f, 0.6627450980f));
+                            InstallerWindow.DrawLine(1, 5);
                             GUILayout.Label(InstallerWindow.TryGetText("installer.install_setting.dependency"));
 
                             for (int i = 0; i < gitPackage.dependencies.Length; i++)

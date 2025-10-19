@@ -123,17 +123,7 @@ namespace RuniOS.Installer
             r.y += (padding / 2f) - 2;
             r.x -= 18;
             r.width += 22;
-            EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
-        }
-        
-        public static void DrawLine(int thickness, int padding, Color color)
-        {
-            Rect r = EditorGUILayout.GetControlRect(GUILayout.Height(padding - 2));
-            r.height = thickness;
-            r.y += (padding / 2f) - 2;
-            r.x -= 18;
-            r.width += 22;
-            EditorGUI.DrawRect(r, color);
+            EditorGUI.DrawRect(r, EditorGUIUtility.isProSkin ? new Color32(26, 26, 26, 255) : new Color32(127, 127, 127, 255));
         }
 
         public static void DrawLine(Rect position, int thickness = 2, int padding = 10)
@@ -142,16 +132,7 @@ namespace RuniOS.Installer
             r.y += (padding / 2f) - 2;
             r.x -= 18;
             r.width += 22;
-            EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
-        }
-        
-        public static void DrawLine(Rect position, int thickness, int padding, Color color)
-        {
-            Rect r = new Rect(position.x, position.y, position.width, thickness);
-            r.y += (padding / 2f) - 2;
-            r.x -= 18;
-            r.width += 22;
-            EditorGUI.DrawRect(r, color);
+            EditorGUI.DrawRect(r, EditorGUIUtility.isProSkin ? new Color32(26, 26, 26, 255) : new Color32(127, 127, 127, 255));
         }
 
         public static void DrawLineV(Rect position, int thickness = 2, int padding = 10)
@@ -160,7 +141,7 @@ namespace RuniOS.Installer
             r.x += (padding / 2f) - 2;
             r.y -= 18;
             r.height += 22;
-            EditorGUI.DrawRect(r, new Color(0.498f, 0.498f, 0.498f));
+            EditorGUI.DrawRect(r, EditorGUIUtility.isProSkin ? new Color32(26, 26, 26, 255) : new Color32(127, 127, 127, 255));
         }
 
         public static string TryGetText(string key) => TryGetText(key, instance != null && ConfigScriptableObject.config ? ConfigScriptableObject.config.currentLanguage : "en_us");
@@ -328,7 +309,7 @@ namespace RuniOS.Installer
         {
             if (instance == null || ConfigScriptableObject.config == null)
                 return;
-
+            
             DrawLine(2, 0);
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
