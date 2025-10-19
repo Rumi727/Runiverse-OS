@@ -2382,14 +2382,22 @@ namespace RuniOS
         {
             // 1. 제거: List에는 없지만 Dictionary에는 있는 키 제거
             // Dictionary의 Keys 컬렉션은 순회 중 수정할 수 없으므로, Except 결과를 List로 만듭니다.
-            TKey[] keysToRemove = targetDictionary.Keys.Except(sourceList).ToArray();
-            foreach (var key in keysToRemove)
-                targetDictionary.Remove(key);
+            IEnumerable<TKey> keysToRemoveEnumerable = targetDictionary.Keys.Except(sourceList);
+            if (keysToRemoveEnumerable.Any())
+            {
+                TKey[] keysToRemove = keysToRemoveEnumerable.ToArray();
+                foreach (var key in keysToRemove)
+                    targetDictionary.Remove(key);
+            }
 
             // 2. 추가: List에는 있지만 Dictionary에는 없는 키 추가
-            TKey[] keysToAdd = sourceList.Except(targetDictionary.Keys).ToArray();
-            foreach (var key in keysToAdd)
-                targetDictionary.Add(key, valueFactory != null ? valueFactory.Invoke(key) : Activator.CreateInstance<TValue>());
+            IEnumerable<TKey> keysToAddEnumerable = sourceList.Except(targetDictionary.Keys);
+            if (keysToAddEnumerable.Any())
+            {
+                TKey[] keysToAdd = keysToAddEnumerable.ToArray();
+                foreach (var key in keysToAdd)
+                    targetDictionary.Add(key, valueFactory != null ? valueFactory.Invoke(key) : Activator.CreateInstance<TValue>());
+            }
         }
     }
 }
