@@ -37,6 +37,7 @@ namespace RuniOS.Inspectors.Csharp
         
         public int index { get; }
 
+        public bool isPublic => true;
         public bool isStatic => false;
 
         public bool isReadable => true;
@@ -120,6 +121,20 @@ namespace RuniOS.Inspectors.Csharp
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
+        }
+
+        public bool HasFlags(InspectorFlags flags)
+        {
+            if (flags == InspectorFlags.None)
+                return false;
+            
+            if (!flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
+                return false;
+            
+            if (!isWritable && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+                return false;
+
+            return true;
         }
     }
 }

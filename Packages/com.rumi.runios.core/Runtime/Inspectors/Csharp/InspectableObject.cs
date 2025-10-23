@@ -57,7 +57,7 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
 
-        public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
         {
             if (flags == InspectorFlags.None)
                 return ImmutableArray<IInspectorElement>.Empty;

@@ -21,13 +21,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             isExpanded = EditorGUI.Foldout(position, isExpanded, label);
             
+            if (inspector.inspectable != variableElement.inspectableObjectElement || inspector.inspectorFlags != inspectorFlags)
+                inspector.Rebuild(variableElement.inspectableObjectElement, inspectorFlags);
+            
             BeginIndentLevel();
-            
-            inspector.targetInspectable = variableElement.inspectableObjectElement;
-            inspector.inspectorFlags = inspectorFlags;
-            
             inspector.Draw(position, label, isInArray);
-            
             EndIndentLevel();
         }
 

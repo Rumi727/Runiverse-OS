@@ -42,10 +42,33 @@ namespace RuniOS.Inspectors.Csharp
         /// 이 요소가 나타내는 <see cref="MemberInfo"/>를 가져옵니다.
         /// </summary>
         public MemberInfo member { get; }
+        
+        /// <summary>
+        /// 멤버가 공개되어있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        public abstract bool isPublic { get; }
 
         /// <summary>
         /// 멤버가 정적인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         public abstract bool isStatic { get; }
+
+        public virtual bool HasFlags(InspectorFlags flags)
+        {
+            if (flags == InspectorFlags.None)
+                return false;
+            
+            if (isPublic && !flags.HasFlagFast(InspectorFlags.Public))
+                return false;
+            if (!isPublic && !flags.HasFlagFast(InspectorFlags.NonPublic))
+                return false;
+            
+            if (isStatic && !flags.HasFlagFast(InspectorFlags.Static))
+                return false;
+            if (!isStatic && !flags.HasFlagFast(InspectorFlags.Instance))
+                return false;
+
+            return true;
+        }
     }
 }

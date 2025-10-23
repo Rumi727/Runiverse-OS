@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Inspectors
@@ -11,7 +11,7 @@ namespace RuniOS.Inspectors
 
         bool instancesIsEmpty { get; }
         
-        ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All);
+        IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All);
 
         /// <summary>
         /// 검사 중인 인스턴스의 타입을 가져옵니다.

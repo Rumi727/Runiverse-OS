@@ -19,6 +19,8 @@ namespace RuniOS.Inspectors.Csharp
         public NullabilityInfo? returnNullabilityInfo { get; }
         
         public MethodInfo method { get; }
+
+        public override bool isPublic => method.IsPublic;
         
         public override bool isStatic => method.IsStatic;
 
@@ -41,6 +43,17 @@ namespace RuniOS.Inspectors.Csharp
                     throw new InspectorException($"An error occurred while trying to invoke method '{memberName}' on an instance of '{instanceType}'.", e);
                 }
             }
+        }
+        
+        public override bool HasFlags(InspectorFlags flags)
+        {
+            if (!base.HasFlags(flags))
+                return false;
+
+            if (!flags.HasFlagFast(InspectorFlags.Method))
+                return false;
+
+            return true;
         }
     }
 }

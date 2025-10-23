@@ -56,6 +56,11 @@ namespace RuniOS.Inspectors.Csharp
         /// 이 요소가 나타내는 <see cref="FieldInfo"/>를 가져옵니다.
         /// </summary>
         public FieldInfo field { get; }
+        
+        /// <summary>
+        /// 필드가 공개되어있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        public override bool isPublic => field.IsPublic;
 
         /// <summary>
         /// 필드가 정적인지 여부를 나타내는 값을 가져옵니다.
@@ -180,6 +185,22 @@ namespace RuniOS.Inspectors.Csharp
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
+        }
+        
+        public override bool HasFlags(InspectorFlags flags)
+        {
+            if (!base.HasFlags(flags))
+                return false;
+
+            if (!flags.HasFlagFast(InspectorFlags.Field))
+                return false;
+            
+            if ((isReadable && !isWritable) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+                return false;
+            if ((!isReadable && isWritable) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+                return false;
+
+            return true;
         }
     }
 }

@@ -68,16 +68,18 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             else if (isExpanded)
                 reorderableList.DoList(position);
         }
-        
-        public Inspector? GetElementInspector(int index, InspectorFlags inspectorFlags)
+
+        public override float GetHeight() => reorderableList?.GetHeight() ?? base.GetHeight();
+
+        public Inspector? GetElementInspector(int index, InspectorFlags flags)
         {
-            IInspectorElement? element = inspectableList?.GetElement(index, inspectorFlags);
+            IInspectorElement? element = inspectableList?.GetElement(index, flags);
             if (element is not IInspectorListElement listElement)
                 return null;
                     
             Inspector inspector = elementInspectors[element];
-            inspector.targetElement = listElement;
-            inspector.inspectorFlags = inspectorFlags;
+            if (inspector.elements.Length != 1 || inspector.elements[0] == listElement || inspector.inspectorFlags != flags)
+                inspector.Rebuild(Enumerable.Repeat(listElement, 1));
 
             return inspector;
         }

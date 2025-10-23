@@ -21,11 +21,6 @@ namespace RuniOS.Inspectors
         NullabilityInfo? nullabilityInfo { get; }
 
         /// <summary>
-        /// 변수가 정적인지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        bool isStatic { get; }
-
-        /// <summary>
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         bool isReadable { get; }

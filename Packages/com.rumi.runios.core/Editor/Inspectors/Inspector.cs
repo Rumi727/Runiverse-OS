@@ -6,7 +6,6 @@ using RuniOS.Inspectors.Drawers;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEditor;
 using UnityEngine;
@@ -20,58 +19,14 @@ namespace RuniOS.Editor.Inspectors
         /// </summary>
         public Inspector rootInspector { get; }
         
-        [DisallowNull]
-        public IInspectable? targetInspectable
-        {
-            get => _targetInspectable;
-            set
-            {
-                if (targetInspectable == value)
-                    return;
-
-                _targetInspectable = value;
-                _targetElement = null;
-                
-                Rebuild();
-            }
-        }
-        IInspectable? _targetInspectable;
+        public IInspectable? inspectable { get; private set; }
+        public ImmutableArray<IInspectorElement> elements { get; private set; }
         
-        [DisallowNull]
-        public IInspectorElement? targetElement
-        {
-            get => _targetElement;
-            set
-            {
-                if (targetElement == value)
-                    return;
-
-                _targetElement = value;
-                _targetInspectable = null;
-                
-                Rebuild();
-            }
-        }
-        IInspectorElement? _targetElement;
-        
-        public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
-        IEnumerable<InspectorDrawer?> IInspector.drawers => drawers.OfType<InspectorDrawer>();
-
-        public InspectorFlags inspectorFlags
-        {
-            get => _inspectorFlags;
-            set
-            {
-                if (_inspectorFlags == value)
-                    return;
-                
-                _inspectorFlags = value;
-                Rebuild();
-            }
-        }
-        InspectorFlags _inspectorFlags = InspectorFlags.All;
-
+        IEnumerable<InspectorDrawer?> IInspector.drawers => drawers;
+        
+        public InspectorFlags inspectorFlags { get; private set; }
+        
         (string label, string message)? lastException = null;
 
         public Inspector() => rootInspector = this;
@@ -87,29 +42,12 @@ namespace RuniOS.Editor.Inspectors
         public Inspector(Type type, params object[] instances) : this(new InspectableObject(type, instances)) { }
         public Inspector(Type type, IEnumerable<object> instances) : this(new InspectableObject(type, instances)) { }
 
-        public Inspector(IInspectable inspectable) : this() => targetInspectable = inspectable;
-        public Inspector(IInspectorElement inspectorElement) : this() => targetElement = inspectorElement;
-        
-        public void Rebuild()
+        public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.All) : this() => Rebuild(inspectable, flags);
+        public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.All) : this() => Rebuild(elements, flags);
+
+        public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.All)
         {
-            lastException = null;
-            
-            if (targetElement != null)
-            {
-                IMGUIInspectorDrawer? drawer = null;
-                if (targetElement is IInspectorVariableElement variableElement)
-                    drawer = IMGUIInspectorDrawer.FindDrawer(variableElement, rootInspector);
-                
-                elements = ImmutableArray.Create(targetElement);
-                drawers = ImmutableArray.Create(drawer);
-
-                return;
-            }
-
-            if (targetInspectable == null)
-                return;
-            
-            if (targetInspectable is IInspectableList inspectableList)
+            if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
             {
                 try
                 {
@@ -121,7 +59,7 @@ namespace RuniOS.Editor.Inspectors
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    lastException = (targetInspectable.inspectionDisplayName, e.ToString());
+                    lastException = (inspectable.inspectionDisplayName, e.ToString());
 
                     return;
                 }
@@ -130,18 +68,33 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    elements = targetInspectable.GetElements(inspectorFlags);
+                    elements = inspectable.GetElements(flags).ToImmutableArray();
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
-                    lastException = (targetInspectable.inspectionDisplayName, e.ToString());
+                    lastException = (inspectable.inspectionDisplayName, e.ToString());
 
                     return;
                 }
 
                 drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector)).ToImmutableArray();
             }
+            
+            this.inspectable = inspectable;
+            inspectorFlags = flags;
+        }
+
+        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.All)
+        {
+            lastException = null;
+
+            elements = elements.Where(x => x.HasFlags(flags));
+            
+            this.elements = elements.ToImmutableArray();
+            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector)).ToImmutableArray();
+            
+            inspectorFlags = flags;
         }
 
         public void DrawLayout(GUIContent? label = null, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight()), label, isInArray);
@@ -157,19 +110,19 @@ namespace RuniOS.Editor.Inspectors
             Rect elementPosition = position;
             foreach (var item in drawers.WhereNotNull())
             {
-                elementPosition.height += item.GetHeight();
+                elementPosition.height = item.GetHeight();
 
                 try
                 {
-                    if (targetInspectable is IInspectableList)
+                    if (inspectable is IInspectableList)
                         item.OnGUI(elementPosition, label, inspectorFlags, isInArray);
                     else
                         item.OnGUI(elementPosition, null, inspectorFlags, isInArray);
                 }
                 catch (Exception e)
                 {
-                    if (targetInspectable is IInspectableList)
-                        EditorGUI.LabelField(elementPosition, label ?? new GUIContent(targetInspectable.inspectionDisplayName), new GUIContent(e.Message));
+                    if (inspectable is IInspectableList)
+                        EditorGUI.LabelField(elementPosition, label ?? new GUIContent(inspectable.inspectionDisplayName), new GUIContent(e.Message));
                     else
                         EditorGUI.LabelField(elementPosition, item.element?.displayName ?? string.Empty, e.Message);
                 }

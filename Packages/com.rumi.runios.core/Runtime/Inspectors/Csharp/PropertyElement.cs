@@ -27,6 +27,8 @@ namespace RuniOS.Inspectors.Csharp
         
         public PropertyInfo property { get; }
         
+        public override bool isPublic => property.GetMethod?.IsPublic ?? property.SetMethod?.IsPublic ?? false;
+        
         public override bool isStatic => property.GetMethod?.IsStatic ?? property.SetMethod?.IsStatic ?? false;
         
         public bool isReadable => property.GetMethod != null;
@@ -122,6 +124,22 @@ namespace RuniOS.Inspectors.Csharp
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
+        }
+        
+        public override bool HasFlags(InspectorFlags flags)
+        {
+            if (!base.HasFlags(flags))
+                return false;
+
+            if (!flags.HasFlagFast(InspectorFlags.Property))
+                return false;
+            
+            if ((isReadable && !isWritable) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+                return false;
+            if ((!isReadable && isWritable) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+                return false;
+
+            return true;
         }
     }
 }

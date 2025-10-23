@@ -231,12 +231,15 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         List<IInspectorElement>? cachedElements;
-        public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return ImmutableArray<IInspectorElement>.Empty;
             
             cachedElements ??= new List<IInspectorElement>();
+            readOnlyCachedElements ??= cachedElements.AsReadOnly();
+            
             if (cachedElements.Count < count)
             {
                 // 0, 1, 2 : 3
@@ -276,7 +279,7 @@ namespace RuniOS.Inspectors.Csharp
                     cachedElements.RemoveAt(i);
             }
 
-            return cachedElements.ToImmutableArray();
+            return readOnlyCachedElements;
         }
 
         public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)

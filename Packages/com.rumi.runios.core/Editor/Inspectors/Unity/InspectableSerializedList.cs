@@ -127,12 +127,15 @@ namespace RuniOS.Editor.Inspectors.Unity
 
 
         List<IInspectorElement>? cachedElements;
-        public ImmutableArray<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return ImmutableArray<IInspectorElement>.Empty;
             
             cachedElements ??= new List<IInspectorElement>();
+            readOnlyCachedElements ??= cachedElements.AsReadOnly();
+            
             if (cachedElements.Count < count)
             {
                 // 0, 1, 2 : 3
@@ -172,7 +175,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                     cachedElements.RemoveAt(i);
             }
 
-            return cachedElements.ToImmutableArray();
+            return readOnlyCachedElements;
         }
 
         public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)

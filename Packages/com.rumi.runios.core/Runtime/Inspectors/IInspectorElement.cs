@@ -10,6 +10,18 @@ namespace RuniOS.Inspectors
         
         string name { get; }
         string displayName { get; set; }
+        
+        /// <summary>
+        /// 요소가 공개되어있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        bool isPublic { get; }
+
+        /// <summary>
+        /// 요소가 정적인지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        bool isStatic { get; }
+
+        bool HasFlags(InspectorFlags flags);
 
         protected static string ToDisplayName(string name)
         {
