@@ -37,8 +37,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true)
             {
                 multiSelect = true,
-                drawElementCallback = (rect, index, _, _) => GetInspector(index, inspectorFlags)?.Draw(rect, null, true),
-                elementHeightCallback = index => GetInspector(index, inspectorFlags)?.GetHeight() ?? EditorGUIUtility.singleLineHeight
+                drawElementCallback = (rect, index, _, _) => GetElementInspector(index, inspectorFlags)?.Draw(rect, null, true),
+                elementHeightCallback = index => GetElementInspector(index, inspectorFlags)?.GetHeight() ?? EditorGUIUtility.singleLineHeight
             };
             
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
@@ -69,7 +69,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 reorderableList.DoList(position);
         }
         
-        public Inspector? GetInspector(int index, InspectorFlags inspectorFlags)
+        public Inspector? GetElementInspector(int index, InspectorFlags inspectorFlags)
         {
             IInspectorElement? element = inspectableList?.GetElement(index, inspectorFlags);
             if (element is not IInspectorListElement listElement)
