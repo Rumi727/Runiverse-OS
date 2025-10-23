@@ -13,7 +13,7 @@ namespace RuniOS.Inspectors
         
         InspectorFlags inspectorFlags { get; }
 
-        void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.All);
-        void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.All);
+        void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
+        void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
     }
 }

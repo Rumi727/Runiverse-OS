@@ -97,9 +97,9 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         /// <summary>
         /// UI 요소를 렌더링합니다.
         /// </summary>
-        public abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags inspectorFlags = InspectorFlags.All, bool isInArray = false);
+        public abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false);
 
-        public virtual float GetHeight() => EditorGUIUtility.singleLineHeight;
+        public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
         protected IMGUIInspectorDrawer(IInspectorElement element, Inspector? rootInspector = null) : base(element) => this.rootInspector = rootInspector;
         protected IMGUIInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList) => this.rootInspector = rootInspector;

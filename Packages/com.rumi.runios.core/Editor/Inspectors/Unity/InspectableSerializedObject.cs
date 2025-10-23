@@ -39,7 +39,7 @@ namespace RuniOS.Editor.Inspectors.Unity
             return true;
         }
 
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.Public) || !flags.HasFlagFast(InspectorFlags.Instance))
                 return ImmutableArray<IInspectorElement>.Empty;

@@ -128,7 +128,7 @@ namespace RuniOS.Editor.Inspectors.Unity
 
         List<IInspectorElement>? cachedElements;
         IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return ImmutableArray<IInspectorElement>.Empty;
@@ -178,7 +178,7 @@ namespace RuniOS.Editor.Inspectors.Unity
             return readOnlyCachedElements;
         }
 
-        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
+        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return null;

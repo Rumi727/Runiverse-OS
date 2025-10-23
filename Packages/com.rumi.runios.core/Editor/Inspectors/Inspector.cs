@@ -42,10 +42,10 @@ namespace RuniOS.Editor.Inspectors
         public Inspector(Type type, params object[] instances) : this(new InspectableObject(type, instances)) { }
         public Inspector(Type type, IEnumerable<object> instances) : this(new InspectableObject(type, instances)) { }
 
-        public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.All) : this() => Rebuild(inspectable, flags);
-        public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.All) : this() => Rebuild(elements, flags);
+        public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(inspectable, flags);
+        public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(elements, flags);
 
-        public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.All)
+        public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
             {
@@ -85,7 +85,7 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
-        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.All)
+        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             lastException = null;
 
@@ -97,7 +97,7 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
-        public void DrawLayout(GUIContent? label = null, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight()), label, isInArray);
+        public void DrawLayout(GUIContent? label = null, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray)), label, isInArray);
         
         public void Draw(Rect position, GUIContent? label = null, bool isInArray = false)
         {
@@ -110,33 +110,33 @@ namespace RuniOS.Editor.Inspectors
             Rect elementPosition = position;
             foreach (var item in drawers.WhereNotNull())
             {
-                elementPosition.height = item.GetHeight();
+                GUIContent elementLabel;
+                if (inspectable is IInspectableList)
+                    elementLabel = label ?? GUIContent.none;
+                else
+                    elementLabel = new GUIContent(item.element?.displayName ?? string.Empty);
+                
+                elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
 
                 try
                 {
-                    if (inspectable is IInspectableList)
-                        item.OnGUI(elementPosition, label, inspectorFlags, isInArray);
-                    else
-                        item.OnGUI(elementPosition, null, inspectorFlags, isInArray);
+                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
                 }
                 catch (Exception e)
                 {
-                    if (inspectable is IInspectableList)
-                        EditorGUI.LabelField(elementPosition, label ?? new GUIContent(inspectable.inspectionDisplayName), new GUIContent(e.Message));
-                    else
-                        EditorGUI.LabelField(elementPosition, item.element?.displayName ?? string.Empty, e.Message);
+                    EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent(e.Message));
                 }
                 
-                elementPosition.y += item.GetHeight() + 2;
+                elementPosition.y += item.GetHeight(label, inspectorFlags, isInArray) + 2;
             }
         }
 
-        public float GetHeight()
+        public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
             if (lastException != null)
                 return EditorGUIUtility.singleLineHeight;
             
-            return (drawers.WhereNotNull().Sum(item => item.GetHeight() + 2) - 2).Clamp(0);
+            return (drawers.WhereNotNull().Sum(item => item.GetHeight(label, flags, isInArray) + 2) - 2).Clamp(0);
         }
     }
 }

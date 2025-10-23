@@ -1,4 +1,7 @@
 ﻿#nullable enable
+using System;
+using System.Diagnostics.CodeAnalysis;
+
 namespace RuniOS.Inspectors.Drawers
 {
     public abstract class InspectorDrawer
@@ -25,6 +28,34 @@ namespace RuniOS.Inspectors.Drawers
         {
             inspectable = inspectableList;
             this.inspectableList = inspectableList;
+        }
+        
+        [MemberNotNull(nameof(inspectableList))]
+        protected void CheckInspectableList()
+        {
+            if (inspectableList == null)
+                throw new InvalidOperationException($"{nameof(inspectableList)} is null");
+        }
+        
+        [MemberNotNull(nameof(element))]
+        protected void CheckElement()
+        {
+            if (element == null)
+                throw new InvalidOperationException($"{nameof(element)} is null");
+        }
+
+        [MemberNotNull(nameof(element), nameof(variableElement))]
+        protected void CheckVariableElement()
+        {
+            if (element == null || variableElement == null)
+                throw new InvalidOperationException($"{nameof(variableElement)} is null");
+        }
+        
+        [MemberNotNull(nameof(element), nameof(actionElement))]
+        protected void CheckActionElement()
+        {
+            if (element == null || actionElement == null)
+                throw new InvalidOperationException($"{nameof(actionElement)} is null");
         }
     }
 }

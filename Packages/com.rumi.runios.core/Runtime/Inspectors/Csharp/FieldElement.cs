@@ -130,7 +130,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    return inspectable.instances.Any(x => field.GetValue(x) != value);
+                    return inspectable.instances.Any(x => !Equals(field.GetValue(x), value));
                 }
                 catch (Exception e)
                 {

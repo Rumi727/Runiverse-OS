@@ -14,7 +14,7 @@ namespace RuniOS.Inspectors
         
         NullabilityInfo? nullabilityInfo { get; }
         
-        IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All);
+        IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
         
         /// <summary>
         /// 리스트의 요소 타입을 가져옵니다.

@@ -57,7 +57,7 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
 
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (flags == InspectorFlags.None)
                 return ImmutableArray<IInspectorElement>.Empty;
@@ -70,7 +70,11 @@ namespace RuniOS.Inspectors.Csharp
             
             for (int i = 0; i < members.Length; i++)
             {
-                elements[i] = members[i] switch
+                MemberInfo member = members[i];
+                if (member.IsCompilerGenerated())
+                    continue;
+                
+                elements[i] = member switch
                 {
                     PropertyInfo property when flags.HasFlagFast(InspectorFlags.Property) && (property.SetMethod != null || includeReadOnly) && (property.GetMethod != null || includeWriteOnly) => new PropertyElement(this, property),
                     FieldInfo field when flags.HasFlagFast(InspectorFlags.Field) && ((!field.IsInitOnly && !field.IsLiteral) || includeReadOnly) => new FieldElement(this, field),

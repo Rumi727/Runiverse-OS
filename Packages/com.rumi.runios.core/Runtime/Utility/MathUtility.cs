@@ -51,11 +51,20 @@ namespace RuniOS
 
         public const float epsilonFloatWithAccuracy = 0.0001f;
         
-        public static long nintMinSize => -((1L << (8 * UIntPtr.Size)) / 2);
-        public static long nintMaxSize => ((1L << (8 * UIntPtr.Size)) / 2) - 1;
+        public static long nintMinSize => -(1L << ((8 * UIntPtr.Size) - 1));
+        public static long nintMaxSize => (1L << ((8 * UIntPtr.Size) - 1)) - 1;
 
         public const ulong nuintMinSize = 0;
-        public static ulong nuintMaxSize => 1uL << (8 * UIntPtr.Size);
+        public static ulong nuintMaxSize
+        {
+            get
+            {
+                if (UIntPtr.Size >= 8)
+                    return ulong.MaxValue;
+                else
+                    return (1uL << ((8 * UIntPtr.Size) - 1));
+            }
+        }
 
         /*public static void FunctionList()
         {
@@ -5638,10 +5647,10 @@ namespace RuniOS
         public static ushort ClampToUShort(this byte value) => value;
         public static ushort ClampToUShort(this short value) => (ushort)value.Clamp(0);
         public static ushort ClampToUShort(this ushort value) => value;
-        public static ushort ClampToUShort(this int value) => (ushort)value.Clamp(short.MinValue, short.MaxValue);
-        public static ushort ClampToUShort(this uint value) => (ushort)value.Clamp(0, (uint)short.MaxValue);
-        public static ushort ClampToUShort(this long value) => (ushort)value.Clamp(short.MinValue, short.MaxValue);
-        public static ushort ClampToUShort(this ulong value) => (ushort)value.Clamp(0, (ulong)short.MaxValue);
+        public static ushort ClampToUShort(this int value) => (ushort)value.Clamp(ushort.MinValue, ushort.MaxValue);
+        public static ushort ClampToUShort(this uint value) => (ushort)value.Clamp(0, ushort.MaxValue);
+        public static ushort ClampToUShort(this long value) => (ushort)value.Clamp(ushort.MinValue, ushort.MaxValue);
+        public static ushort ClampToUShort(this ulong value) => (ushort)value.Clamp(0, ushort.MaxValue);
         public static ushort ClampToUShort(this float value) => value.FloorToUShort();
         public static ushort ClampToUShort(this double value) => value.FloorToUShort();
         public static ushort ClampToUShort(this decimal value) => value.FloorToUShort();

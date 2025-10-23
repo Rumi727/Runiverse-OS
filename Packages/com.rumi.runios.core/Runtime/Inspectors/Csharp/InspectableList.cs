@@ -232,7 +232,7 @@ namespace RuniOS.Inspectors.Csharp
 
         List<IInspectorElement>? cachedElements;
         IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All)
+        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return ImmutableArray<IInspectorElement>.Empty;
@@ -282,7 +282,7 @@ namespace RuniOS.Inspectors.Csharp
             return readOnlyCachedElements;
         }
 
-        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.All)
+        public IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return null;

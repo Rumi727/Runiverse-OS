@@ -76,7 +76,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    return inspectable.instances.Any(x => x[index] != value);
+                    return inspectable.instances.Any(x => !Equals(x[index], value));
                 }
                 catch (Exception e)
                 {

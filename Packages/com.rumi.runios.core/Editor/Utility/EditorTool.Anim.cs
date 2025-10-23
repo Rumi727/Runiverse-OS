@@ -8,7 +8,7 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static bool FadeGroup(ref AnimBool animBool, Action action)
+        public static bool FadeGroup(AnimBool animBool, Action action)
         {
             if (EditorGUILayout.BeginFadeGroup(animBool.faded))
             {
@@ -38,7 +38,7 @@ namespace RuniOS.Editor
             animBool ??= new AnimBool(target);
             animBool.target = target;
 
-            return FadeGroup(ref animBool, action);
+            return FadeGroup(animBool, action);
         }
     }
 }

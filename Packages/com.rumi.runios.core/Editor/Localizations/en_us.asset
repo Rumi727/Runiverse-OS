@@ -240,3 +240,8 @@ MonoBehaviour:
       value: Unregister
     - key: control_panel.development.driven_property.zero_count
       value: There are no driven properties.
+    - key: inspector.invalid.collection
+      value: 'Invalid collection. The default inspector will be displayed.
+
+        Please
+        ensure that it inherits from IList.'

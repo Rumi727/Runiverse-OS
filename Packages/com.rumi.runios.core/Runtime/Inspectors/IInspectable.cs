@@ -11,7 +11,7 @@ namespace RuniOS.Inspectors
 
         bool instancesIsEmpty { get; }
         
-        IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.All);
+        IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
         /// <summary>
         /// 검사 중인 인스턴스의 타입을 가져옵니다.

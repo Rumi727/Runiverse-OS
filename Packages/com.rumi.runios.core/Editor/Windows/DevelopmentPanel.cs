@@ -114,7 +114,7 @@ namespace RuniOS.Editor.Windows
                     EditorGUILayout.BeginVertical(EditorStyles.helpBox);
                     extData.animBool.target = EditorGUILayout.Foldout(extData.animBool.target, $"{data.target} : {extData.property?.propertyPath ?? string.Empty}", true);
 
-                    FadeGroup(ref extData.animBool, () =>
+                    FadeGroup(extData.animBool, () =>
                     {
                         BeginIndentLevel();
 

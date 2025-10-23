@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Drawers;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor;
@@ -12,34 +14,33 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
+    [CustomInspectorDrawer(typeof(IList))]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ListInspectorDrawer(IInspectorElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public ListInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
         public ListInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList, rootInspector) { }
 
-        public ReorderableList? reorderableList;
+        public ReorderableList? reorderableList { get; private set; }
         public bool isExpanded { get; set; } = false;
 
         readonly AnimFloat animFloat = new AnimFloat(0);
 
         readonly Dictionary<IInspectorElement, Inspector> elementInspectors = new();
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags inspectorFlags = InspectorFlags.All, bool isInArray = false)
+        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
-            label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
-            if (inspectableList == null)
-                throw new InvalidOperationException($"{nameof(inspectableList)} is null");
-
+            CheckInspectableList();
+            
             if (!inspectableList.TryGetInspectionElementType(out Type? elementType) || elementType == null)
                 throw new InvalidOperationException($"Cannot get managed type of {nameof(inspectableList)}");
 
-            elementInspectors.SyncKeysWithList(inspectableList.GetElements(inspectorFlags), _ => new Inspector(rootInspector));
+            label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
             
-            reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true)
-            {
-                multiSelect = true,
-                drawElementCallback = (rect, index, _, _) => GetElementInspector(index, inspectorFlags)?.Draw(rect, null, true),
-                elementHeightCallback = index => GetElementInspector(index, inspectorFlags)?.GetHeight() ?? EditorGUIUtility.singleLineHeight
-            };
+            elementInspectors.SyncKeysWithList(inspectableList.GetElements(flags), _ => new Inspector(rootInspector));
+            
+            reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true) { multiSelect = true, };
+
+            reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, null, true);
+            reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, isInArray) ?? EditorGUIUtility.singleLineHeight;
             
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
@@ -69,7 +70,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 reorderableList.DoList(position);
         }
 
-        public override float GetHeight() => reorderableList?.GetHeight() ?? base.GetHeight();
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => reorderableList?.GetHeight() ?? base.GetHeight(label, flags, isInArray);
 
         public Inspector? GetElementInspector(int index, InspectorFlags flags)
         {
