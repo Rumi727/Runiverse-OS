@@ -16,10 +16,10 @@ namespace RuniOS.Inspectors.Csharp
             this.inspectable = inspectable;
             this.index = index;
             
-            _inspectableObjectElement = new InspectableObject(variableType, this);
+            _inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                _inspectableListElement = new InspectableList(variableType, nullabilityInfo?.genericTypeArguments.FirstOrDefault());
+                _inspectableListElement = new InspectableList(variableType, nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
         public string name { get; }

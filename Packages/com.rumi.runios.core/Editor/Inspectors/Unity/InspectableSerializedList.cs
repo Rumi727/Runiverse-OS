@@ -28,8 +28,12 @@ namespace RuniOS.Editor.Inspectors.Unity
             converter = PropertyConverter.FindConverter(inspectionElementType);
         }
         
-        IInspectorVariableElement? IInspectable.parentElement => null;
-        
+        IInspectorVariableElement? IInspectable.parentElement
+        {
+            get => null;
+            set { }
+        }
+
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
         
@@ -188,5 +192,9 @@ namespace RuniOS.Editor.Inspectors.Unity
         }
         
         IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
+        
+        public IInspectableList Clone() => new InspectableSerializedList(property);
+        IInspectable IInspectable.Clone() => Clone();
+        object ICloneable.Clone() => Clone();
     }
 }

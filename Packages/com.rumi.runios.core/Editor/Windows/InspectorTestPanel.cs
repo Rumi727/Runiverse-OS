@@ -41,7 +41,9 @@ namespace RuniOS.Editor.Windows
             public int intField = 42;
             public uint uintField = 42;
             public long longField = 42;
-            public Test2 test2 = new Test2();
+            public Test2 test2Field = new Test2();
+            public readonly Test2 readonlyTest2Field = new Test2();
+            public Test2 privateReadOnlyTest2Property { get; private set; } = new Test2();
             public ulong ulongField = 42;
             public float floatField = 42;
             public double doubleField = 42;
@@ -59,12 +61,14 @@ namespace RuniOS.Editor.Windows
             public Vector4 vector4;
             public Rect rect;
             public Color color;
+            public StructTest2? nullableStructTest2;
+            public SerializableNullable<StructTest2> serializableNullableStructTest2;
 
             public class Test2
             {
                 public float test2Field = 100;
                 public double doubleProperty { get; set; } = 32;
-                public double readOnlyProperty { get; private set; } = 64;
+                public double privateReadOnlyProperty { get; private set; } = 64;
                 public float test3Field = 100;
                 public double writeOnlyProperty { set => _writeOnlyProperty = value; }
                 // ReSharper disable once NotAccessedField.Local
@@ -82,7 +86,9 @@ namespace RuniOS.Editor.Windows
                 double _writeOnlyProperty;
                 public float test4Field;
 
-                public SerializableNullable<StructTest2> structTest2;
+                public StructTest2 structTest2;
+                public StructTest2? nullableStructTest2;
+                public SerializableNullable<StructTest2> serializableNullableStructTest2;
             }
             
             public struct StructTest2

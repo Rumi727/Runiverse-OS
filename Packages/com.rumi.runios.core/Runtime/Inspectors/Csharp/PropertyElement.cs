@@ -16,10 +16,10 @@ namespace RuniOS.Inspectors.Csharp
             this.property = property;
             nullabilityInfo = new NullabilityInfoContext().Create(property);
 
-            inspectableObjectElement = new InspectableObject(variableType, this);
+            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
         public Type variableType => property.PropertyType;

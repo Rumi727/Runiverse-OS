@@ -10,7 +10,7 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableObject : IInspectableObject
     {
-        public IInspectorVariableElement? parentElement { get; }
+        public IInspectorVariableElement? parentElement { get; set; }
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -42,7 +42,7 @@ namespace RuniOS.Inspectors.Csharp
         public bool instancesIsEmpty => instance == null;
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
-        public InspectableObject(Type inspectionType, IInspectorVariableElement? parentElement = null) : this(inspectionType, Enumerable.Empty<object>()) => this.parentElement = parentElement; 
+        public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
         public InspectableObject(Type inspectionType, params object?[] instances) : this(inspectionType, instances.WhereNotNull()) { }
         
         public InspectableObject(Type inspectionType, IEnumerable<object> instances)
@@ -86,5 +86,9 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
             }
         }
+
+        public IInspectableObject Clone() => new InspectableObject(inspectionType) { parentElement = parentElement, instances = instances };
+        IInspectable IInspectable.Clone() => Clone();
+        object ICloneable.Clone() => Clone();
     }
 }

@@ -12,7 +12,7 @@ namespace RuniOS.Inspectors.Csharp
     public class InspectableList : IInspectableList
     {
         public InspectableList(IList instance, RuniNullabilityInfo? nullabilityInfo = null) : this(instance.GetType(), nullabilityInfo, ImmutableArray.Create(instance)) { }
-        public InspectableList(Type inspectionType, RuniNullabilityInfo? nullabilityInfo, IInspectorVariableElement? parentElement = null) : this(inspectionType, Array.Empty<IList>(), nullabilityInfo) => this.parentElement = parentElement;
+        
         public InspectableList(Type inspectionType, RuniNullabilityInfo? nullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), nullabilityInfo) { }
         
         public InspectableList(Type inspectionType, IEnumerable<IList> instances, RuniNullabilityInfo? nullabilityInfo = null)
@@ -29,7 +29,7 @@ namespace RuniOS.Inspectors.Csharp
             this.nullabilityInfo = nullabilityInfo;
         }
         
-        public IInspectorVariableElement? parentElement { get; }
+        public IInspectorVariableElement? parentElement { get; set; }
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -304,5 +304,9 @@ namespace RuniOS.Inspectors.Csharp
         }
         
         IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
+        
+        public IInspectableList Clone() => new InspectableList(inspectionType, nullabilityInfo) { parentElement = parentElement, instances = instances };
+        IInspectable IInspectable.Clone() => Clone();
+        object ICloneable.Clone() => Clone();
     }
 }

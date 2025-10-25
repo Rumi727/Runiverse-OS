@@ -20,7 +20,7 @@ namespace RuniOS.Editor.Inspectors
         public Inspector rootInspector { get; }
         
         public IInspectable? inspectable { get; private set; }
-        public ImmutableArray<IInspectorElement> elements { get; private set; }
+        public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
         
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
         IEnumerable<InspectorDrawer?> IInspector.drawers => drawers;
@@ -125,10 +125,8 @@ namespace RuniOS.Editor.Inspectors
                 GUIContent elementLabel;
                 if (inspectable is IInspectableList)
                     elementLabel = label ?? GUIContent.none;
-                else if (drawers.Length > 1)
-                    elementLabel = new GUIContent(item.element?.displayName ?? string.Empty);
                 else
-                    elementLabel = label ?? new GUIContent(item.element?.displayName ?? string.Empty);
+                    elementLabel = (drawers.Length == 1 ? label : null) ?? new GUIContent(item.element?.displayName ?? string.Empty);
                 
                 try
                 {

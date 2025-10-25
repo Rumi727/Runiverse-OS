@@ -21,7 +21,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             set => animBool.target = value ? 1 : 0;
         }
 
-        static float foldoutYSize => GetYSize(EditorStyles.foldout);
+        static float foldoutYSize => EditorGUIUtility.singleLineHeight;
 
         readonly AnimFloat animBool = new AnimFloat(0);
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)

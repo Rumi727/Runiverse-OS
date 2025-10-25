@@ -12,7 +12,11 @@ namespace RuniOS.Editor.Inspectors.Unity
 {
     public class InspectableSerializedObject : IInspectableObject
     {
-        IInspectorVariableElement? IInspectable.parentElement => null;
+        IInspectorVariableElement? IInspectable.parentElement
+        {
+            get => null;
+            set { }
+        }
         
         public SerializedObject serializedObject { get; }
         public SerializedProperty targetProperty { get; }
@@ -60,6 +64,10 @@ namespace RuniOS.Editor.Inspectors.Unity
 
             return elements.WhereNotNull().Where(x => x.HasFlags(flags));
         }
+        
+        public IInspectableObject Clone() => new InspectableSerializedObject(serializedObject, targetProperty);
+        IInspectable IInspectable.Clone() => Clone();
+        object ICloneable.Clone() => Clone();
 
         public static implicit operator SerializedObject(InspectableSerializedObject inspectableObject) => inspectableObject.serializedObject;
         public static implicit operator InspectableSerializedObject(SerializedObject serializedObject) => new InspectableSerializedObject(serializedObject);

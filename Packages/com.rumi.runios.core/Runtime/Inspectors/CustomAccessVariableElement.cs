@@ -15,12 +15,27 @@ namespace RuniOS.Inspectors
         public delegate object? ReadFunc(IInspectorVariableElement element);
         public delegate void WriteAction(IInspectorVariableElement element, object? value);
         
-        public CustomAccessVariableElement(IInspectorVariableElement targetElement, ReadFunc? readEvent = null, WriteAction? writeEvent = null)
+        public delegate IEnumerable<object?> GetValuesFunc(IInspectorVariableElement element);
+        public delegate void SetValuesAction(IInspectorVariableElement element, IEnumerable<object?> values);
+        
+        CustomAccessVariableElement(IInspectorVariableElement targetElement, ReadFunc? readFunc = null, GetValuesFunc? getValuesFunc = null, WriteAction? writeAction = null, SetValuesAction? setValuesAction = null)
         {
             this.targetElement = targetElement;
 
-            this.readEvent = readEvent ?? (x => x.value);
-            this.writeEvent = writeEvent ?? ((element, value) => element.value = value);
+            this.readFunc = readFunc ?? (x => x.value);
+            this.getValuesFunc = getValuesFunc ?? (x => x.GetValues());
+            
+            this.writeAction = writeAction ?? ((element, value) => element.value = value);
+            this.setValuesAction = setValuesAction ?? ((element, values) => element.SetValues(values));
+
+            inspectableObjectElement = targetElement.inspectableObjectElement.Clone();
+            inspectableObjectElement.parentElement = this;
+
+            if (targetElement.inspectableListElement != null)
+            {
+                inspectableListElement = targetElement.inspectableListElement.Clone();
+                inspectableListElement.parentElement = this;
+            }
         }
         
         public IInspectorVariableElement targetElement { get; }
@@ -45,29 +60,62 @@ namespace RuniOS.Inspectors
         
         public object? value
         {
-            get => readEvent.Invoke(targetElement);
-            set => writeEvent.SafeInvoke(targetElement, value);
+            get => readFunc.Invoke(targetElement);
+            set => writeAction.SafeInvoke(targetElement, value);
         }
 
         public bool isMixedValue => targetElement.isMixedValue;
         
-        public IInspectableObject inspectableObjectElement => targetElement.inspectableObjectElement;
+        public IInspectableObject inspectableObjectElement { get; }
         
-        public IInspectableList? inspectableListElement => targetElement.inspectableListElement;
+        public IInspectableList? inspectableListElement { get; }
         
-        public event ReadFunc readEvent;
+        public event ReadFunc readFunc;
+        public event GetValuesFunc getValuesFunc;
         
-        public event WriteAction writeEvent;
+        public event WriteAction writeAction;
+        public event SetValuesAction setValuesAction;
 
-        public IEnumerable<object?> GetValues() => targetElement.GetValues();
-        public void SetValues(IEnumerable<object?> values) => targetElement.SetValues(values);
+        public IEnumerable<object?> GetValues() => getValuesFunc.Invoke(targetElement);
+        public void SetValues(IEnumerable<object?> values) => setValuesAction.Invoke(targetElement, values);
 
         public bool HasFlags(InspectorFlags flags) => targetElement.HasFlags(flags);
         
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => targetElement.IsReadable(flags);
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
         
         public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => true;
 
         public void UpdateChildInspectable() => targetElement.UpdateChildInspectable();
+
+        public sealed class Builder
+        {
+            readonly IInspectorVariableElement targetElement;
+            
+            ReadFunc? readFunc;
+            GetValuesFunc? getValuesFunc;
+            
+            WriteAction? writeAction;
+            SetValuesAction? setValuesAction;
+
+            public Builder(IInspectorVariableElement targetElement) => this.targetElement = targetElement;
+
+            public Builder SetReadFunc(ReadFunc readFunc, GetValuesFunc getValuesFunc)
+            {
+                this.readFunc = readFunc;
+                this.getValuesFunc = getValuesFunc;
+
+                return this;
+            }
+            
+            public Builder AddWriteAction(WriteAction writeAction, SetValuesAction setValuesAction)
+            {
+                this.writeAction += writeAction;
+                this.setValuesAction += setValuesAction;
+
+                return this;
+            }
+            
+            public CustomAccessVariableElement Build() => new CustomAccessVariableElement(targetElement, readFunc, getValuesFunc, writeAction, setValuesAction);
+        }
     }
 }

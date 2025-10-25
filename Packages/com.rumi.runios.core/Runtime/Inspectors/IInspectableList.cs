@@ -37,5 +37,7 @@ namespace RuniOS.Inspectors
 
             return true;
         }
+        
+        new IInspectableList Clone();
     }
 }

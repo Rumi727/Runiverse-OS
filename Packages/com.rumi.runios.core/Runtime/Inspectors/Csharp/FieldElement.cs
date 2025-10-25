@@ -36,10 +36,10 @@ namespace RuniOS.Inspectors.Csharp
             this.field = field;
             nullabilityInfo = new NullabilityInfoContext().Create(field);
 
-            inspectableObjectElement = new InspectableObject(variableType, this);
+            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
         /// <summary>
