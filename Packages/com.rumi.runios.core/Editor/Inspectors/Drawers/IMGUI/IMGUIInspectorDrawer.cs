@@ -17,6 +17,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             ReflectionUtility.onListUpdate += Update;
             Update();
 
+            foreach (var item in drawerTypes)
+            {
+                Debug.Log((item.attribute.targetType, item.type));
+            }
+
             static void Update()
             {
                 lock (drawerTypesLock)
@@ -24,24 +29,39 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     drawerTypes = ReflectionUtility.types
                         .Where
                         (
-                            static x =>
+                            x =>
                                 x.IsDefined(typeof(CustomInspectorDrawerAttribute)) &&
                                 x.IsSubclassOf(typeof(IMGUIInspectorDrawer))
                         )
-                        .Select(static x => (x, x.GetCustomAttribute<CustomInspectorDrawerAttribute>()))
+                        .SelectMany
+                        (
+                            type => type.GetCustomAttributes<CustomInspectorDrawerAttribute>()
+                                .Select(attribute => (type, attribute))
+                        )
                         .OrderByDescending
                         (
                             x =>
                             {
-                                if (x.Item2.priority == 0)
-                                {
-                                    if (x.Item2.targetType.IsInterface)
-                                        return 0;
+                                // 1. 1차 정렬 키: targetType이 인터페이스가 아닌지 여부 (bool)
+                                //    - 인터페이스가 아니면 (클래스/구조체): true (높은 값)
+                                //    - 인터페이스이면: false (낮은 값)
+                                //    -> OrderByDescending이므로 클래스/구조체가 인터페이스보다 앞에 위치
+                                bool isNotInterface = !x.attribute.targetType.IsInterface;
 
-                                    return x.Item2.targetType.GetHierarchy().Count() * 100;
-                                }
-                                else
-                                    return x.Item2.priority;
+                                // 2. 2차 정렬 키: 기존의 우선순위 로직 (int)
+                                int secondarySort = x.attribute.targetType.GetHierarchy().Count();
+
+                                // 튜플로 반환하여 1차 (bool), 2차 (int) 정렬 기준 적용
+                                return
+                                (
+                                    x.attribute.targetType != typeof(void),
+                                    x.attribute.targetType != typeof(object),
+                                    x.attribute.targetType != typeof(Array),
+                                    x.attribute.targetType != typeof(ValueType),
+                                    x.attribute.targetType != typeof(Enum),
+                                    isNotInterface,
+                                    secondarySort
+                                );
                             }
                         ).ToImmutableArray();
                 }
@@ -101,7 +121,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
-        protected IMGUIInspectorDrawer(IInspectorElement element, Inspector? rootInspector = null) : base(element) => this.rootInspector = rootInspector;
+        protected IMGUIInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element) => this.rootInspector = rootInspector;
         protected IMGUIInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList) => this.rootInspector = rootInspector;
     }
 }

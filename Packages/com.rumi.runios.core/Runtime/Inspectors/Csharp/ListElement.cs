@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -20,7 +19,7 @@ namespace RuniOS.Inspectors.Csharp
             _inspectableObjectElement = new InspectableObject(variableType, this);
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                _inspectableElementList = new InspectableList(variableType, nullabilityInfo?.GenericTypeArguments.FirstOrDefault());
+                _inspectableListElement = new InspectableList(variableType, nullabilityInfo?.genericTypeArguments.FirstOrDefault());
         }
 
         public string name { get; }
@@ -33,15 +32,12 @@ namespace RuniOS.Inspectors.Csharp
 
         public Type? elementType => inspectable.inspectionElementType;
         
-        public NullabilityInfo? nullabilityInfo => inspectable.nullabilityInfo;
+        public RuniNullabilityInfo? nullabilityInfo => inspectable.nullabilityInfo;
         
         public int index { get; }
 
         public bool isPublic => true;
         public bool isStatic => false;
-
-        public bool isReadable => true;
-        public bool isWritable => !inspectable.isReadOnly;
 
         public object? value
         {
@@ -97,19 +93,19 @@ namespace RuniOS.Inspectors.Csharp
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
         
 
-        public InspectableList? inspectableElementElementList
+        public InspectableList? inspectableListElement
         {
             get
             {
-                if (_inspectableElementList == null)
+                if (_inspectableListElement == null)
                     return null;
 
-                _inspectableElementList.instances = GetValues().OfType<IList>();
-                return _inspectableElementList;
+                _inspectableListElement.instances = GetValues().OfType<IList>();
+                return _inspectableListElement;
             }
         }
-        readonly InspectableList? _inspectableElementList;
-        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableElementElementList;
+        readonly InspectableList? _inspectableListElement;
+        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
 
         public IEnumerable<object?> GetValues()
         {
@@ -122,6 +118,25 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
         }
+        
+        public void SetValues(IEnumerable<object?> values)
+        {
+            try
+            {
+                using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
+                foreach (var instance in inspectable.instances)
+                {
+                    if (!valueEnumerator.MoveNext())
+                        return;
+                    
+                    instance[index] = valueEnumerator.Current;
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
+            }
+        }
 
         public bool HasFlags(InspectorFlags flags)
         {
@@ -131,10 +146,20 @@ namespace RuniOS.Inspectors.Csharp
             if (!flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
                 return false;
             
-            if (!isWritable && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
 
             return true;
+        }
+        
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.isReadOnly;
+        
+        public void UpdateChildInspectable()
+        {
+            inspectableObjectElement.instances = GetValues().WhereNotNull();
+            if (inspectableListElement != null)
+                inspectableListElement.instances = GetValues().OfType<IList>();
         }
     }
 }

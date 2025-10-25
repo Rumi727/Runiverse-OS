@@ -9,7 +9,7 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(object), priority = int.MinValue)]
+    [CustomInspectorDrawer(typeof(object))]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
         public ObjectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) => inspector = new Inspector(rootInspector);
@@ -17,19 +17,19 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public Inspector inspector { get; }
         public bool isExpanded
         {
-            get => animBool.target;
-            set => animBool.target = value;
+            get => animBool.target > 0;
+            set => animBool.target = value ? 1 : 0;
         }
 
         static float foldoutYSize => GetYSize(EditorStyles.foldout);
 
-        readonly AnimBool animBool = new AnimBool(false);
+        readonly AnimFloat animBool = new AnimFloat(0);
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
             CheckVariableElement();
 
             position.height = foldoutYSize;
-            animBool.target = EditorGUI.Foldout(position, animBool.target, label, true);
+            isExpanded = EditorGUI.Foldout(position, isExpanded, label, true);
             
             if (inspector.inspectable != variableElement.inspectableObjectElement || inspector.inspectorFlags != flags)
                 inspector.Rebuild(variableElement.inspectableObjectElement, flags);
@@ -44,7 +44,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 if (isExpanded || animBool.isAnimating)
                 {
                     if (animBool.isAnimating)
-                        GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + (position.height * animBool.faded)));
+                        GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + (position.height * animBool.value)));
 
                     inspector.Draw(position, label, isInArray);
 
@@ -64,8 +64,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
             float size = foldoutYSize;
-            if (!isInArray)
-                size += (inspector.GetHeight(label, flags, isInArray) * animBool.faded) + 2;
+            if (!isInArray && animBool.isAnimating)
+                size += ((inspector.GetHeight(label, flags, isInArray) + 2) * animBool.value);
             else
                 size += isExpanded ? inspector.GetHeight(label, flags, isInArray) + 2 : 0;
 

@@ -7,22 +7,10 @@ using UnityEngine;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
     [CustomInspectorDrawer(typeof(sbyte))]
-    public class SByteInspectorDrawer : IMGUIInspectorDrawer
+    public class SByteInspectorDrawer : PrimitiveInspectorDrawer
     {
         public SByteInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
-        {
-            CheckVariableElement();
-
-            using (new EditorGUI.MixedValueScope(variableElement.isMixedValue))
-            {
-                EditorGUI.BeginChangeCheck();
-                
-                int value = EditorGUI.IntField(position, label ?? GUIContent.none, (sbyte)variableElement.value!);
-                if (EditorGUI.EndChangeCheck())
-                    variableElement.value = value.ClampToSByte();
-            }
-        }
+        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.IntField(position, label, (sbyte)value!).ClampToSByte();
     }
 }

@@ -8,7 +8,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
 using UnityEditor;
 
 namespace RuniOS.Editor.Inspectors.Unity
@@ -29,6 +28,8 @@ namespace RuniOS.Editor.Inspectors.Unity
             converter = PropertyConverter.FindConverter(inspectionElementType);
         }
         
+        IInspectorVariableElement? IInspectable.parentElement => null;
+        
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
         
@@ -40,7 +41,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedProperty property { get; }
         public PropertyConverter? converter { get; }
 
-        NullabilityInfo? IInspectableList.nullabilityInfo => null;
+        RuniNullabilityInfo? IInspectableList.nullabilityInfo => null;
 
         bool IList.IsReadOnly => false;
         bool IList.IsFixedSize => false;
@@ -123,9 +124,9 @@ namespace RuniOS.Editor.Inspectors.Unity
             type = inspectionElementType;
             return true;
         }
-
-
-
+        
+        
+        
         List<IInspectorElement>? cachedElements;
         IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
         public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
@@ -183,7 +184,9 @@ namespace RuniOS.Editor.Inspectors.Unity
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return null;
             
-            return GetElements()[index] as IInspectorListElement;
+            return GetElements(flags)[index] as IInspectorListElement;
         }
+        
+        IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
     }
 }

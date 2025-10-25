@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 
 namespace RuniOS.Inspectors
 {
@@ -18,17 +17,7 @@ namespace RuniOS.Inspectors
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다.
         /// </summary>
-        NullabilityInfo? nullabilityInfo { get; }
-
-        /// <summary>
-        /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        bool isReadable { get; }
-
-        /// <summary>
-        /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        bool isWritable { get; }
+        RuniNullabilityInfo? nullabilityInfo { get; }
 
         /// <summary>
         /// 변수의 값을 가져오거나 설정합니다.
@@ -41,15 +30,15 @@ namespace RuniOS.Inspectors
         bool isMixedValue { get; }
 
         /// <summary>
-        /// 이 요소가 속한 <see cref="IInspectableObject"/>를 가져옵니다.
+        /// 이 변수의 값을 나타내는 <see cref="IInspectableObject"/>를 가져옵니다.<br/>
+        /// 변수의 값이 객체일 경우, 해당 객체를 검사할 수 있습니다.
         /// </summary>
-        /// <remarks>이 프로퍼티를 구현할 때 get 접근자는 내부적으로 인스턴스를 설정해야 합니다. (<see cref="Csharp.FieldElement.inspectableObjectElement"/> 참조) 따라서 이 프로퍼티를 사용하는 코드는 get 접근 시점에 인스턴스가 설정된다는 점을 참고해야 합니다.</remarks>
         IInspectableObject inspectableObjectElement { get; }
 
         /// <summary>
-        /// 이 요소가 리스트의 일부인 경우 <see cref="IInspectableList"/>를 가져옵니다.
+        /// 이 변수가 리스트인 경우, 리스트를 나타내는 <see cref="IInspectableList"/>를 가져옵니다.<br/>
+        /// 리스트가 아닌 경우 <see langword="null"/>을 반환합니다.
         /// </summary>
-        /// <remarks>이 프로퍼티를 구현할 때 get 접근자는 내부적으로 인스턴스를 설정해야 합니다. (<see cref="Csharp.FieldElement.inspectableElementList"/> 참조) 따라서 이 프로퍼티를 사용하는 코드는 get 접근 시점에 인스턴스가 설정된다는 점을 참고해야 합니다.</remarks>
         IInspectableList? inspectableListElement { get; }
 
         /// <summary>
@@ -57,5 +46,22 @@ namespace RuniOS.Inspectors
         /// </summary>
         /// <returns>각 객체의 변수 값 컬렉션입니다.</returns>
         IEnumerable<object?> GetValues();
+        
+        void SetValues(IEnumerable<object?> values);
+
+        /// <summary>
+        /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess);
+
+        /// <summary>
+        /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess);
+
+        /// <summary>
+        /// 자식 <see cref="IInspectableObject"/> 또는 <see cref="IInspectableList"/>에 포함된 인스턴스 목록을 업데이트합니다.
+        /// </summary>
+        public void UpdateChildInspectable();
     }
 }

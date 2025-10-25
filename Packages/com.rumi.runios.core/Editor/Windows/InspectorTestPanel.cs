@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using RuniOS.Editor.Inspectors;
+using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using UnityEditor;
 using UnityEngine;
 
 namespace RuniOS.Editor.Windows
@@ -19,7 +21,15 @@ namespace RuniOS.Editor.Windows
 
         void OnEnable() => inspector.Rebuild(new InspectableObject(test));
 
-        public void OnGUI() => inspector.DrawLayout();
+        public void OnGUI()
+        {
+            EditorGUI.BeginChangeCheck();
+            InspectorFlags flags = (InspectorFlags)EditorGUILayout.EnumFlagsField("Inspector Flags", inspector.inspectorFlags);
+            if (EditorGUI.EndChangeCheck())
+                inspector.Rebuild(inspector.inspectable ?? new InspectableObject(test), flags);
+            
+            inspector.DrawLayout();
+        }
 
         public class Test
         {
@@ -40,17 +50,50 @@ namespace RuniOS.Editor.Windows
             public nuint nuintField = 42;
             public char charField = 'a';
             public string stringField = "text";
+            public int? nullableInt = 42;
+            public SerializableNullable<int> serializableNullableInt = 42;
+            public SerializableNullable<SerializableNullable<float>> serializableNullableNullableFloat = new(42);
+            public StructTest structTest = new StructTest();
+            public Vector2 vector2;
+            public Vector3 vector3;
+            public Vector4 vector4;
+            public Rect rect;
+            public Color color;
 
             public class Test2
             {
                 public float test2Field = 100;
                 public double doubleProperty { get; set; } = 32;
-                public double readOnlyProperty { get; } = 64;
+                public double readOnlyProperty { get; private set; } = 64;
                 public float test3Field = 100;
                 public double writeOnlyProperty { set => _writeOnlyProperty = value; }
                 // ReSharper disable once NotAccessedField.Local
                 double _writeOnlyProperty = 64;
                 public float test4Field = 100;
+            }
+
+            public struct StructTest
+            {
+                public float test2Field;
+                public double doubleProperty { get; set; }
+                public float test3Field;
+                public double writeOnlyProperty { set => _writeOnlyProperty = value; }
+                // ReSharper disable once NotAccessedField.Local
+                double _writeOnlyProperty;
+                public float test4Field;
+
+                public SerializableNullable<StructTest2> structTest2;
+            }
+            
+            public struct StructTest2
+            {
+                public float test2Field;
+                public double doubleProperty { get; set; }
+                public float test3Field;
+                public double writeOnlyProperty { set => _writeOnlyProperty = value; }
+                // ReSharper disable once NotAccessedField.Local
+                double _writeOnlyProperty;
+                public float test4Field;
             }
         }
     }

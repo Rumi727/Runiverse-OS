@@ -58,14 +58,13 @@ namespace RuniOS.Inspectors.Csharp
             if (flags == InspectorFlags.None)
                 return false;
             
-            if (isPublic && !flags.HasFlagFast(InspectorFlags.Public))
-                return false;
-            if (!isPublic && !flags.HasFlagFast(InspectorFlags.NonPublic))
+            if (isPublic ? !flags.HasFlagFast(InspectorFlags.Public) : !flags.HasFlagFast(InspectorFlags.NonPublic))
                 return false;
             
-            if (isStatic && !flags.HasFlagFast(InspectorFlags.Static))
+            if (isStatic ? !flags.HasFlagFast(InspectorFlags.Static) : !flags.HasFlagFast(InspectorFlags.Instance))
                 return false;
-            if (!isStatic && !flags.HasFlagFast(InspectorFlags.Instance))
+
+            if (member.IsCompilerGenerated() && !flags.HasFlagFast(InspectorFlags.Hidden))
                 return false;
 
             return true;

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 using System.Collections;
-using System.Reflection;
+using System.Collections.Generic;
 
 namespace RuniOS.Inspectors
 {
@@ -12,8 +12,9 @@ namespace RuniOS.Inspectors
         /// </remarks>
         string? inspectionElementDisplayName { get; }
         
-        NullabilityInfo? nullabilityInfo { get; }
-        
+        RuniNullabilityInfo? nullabilityInfo { get; }
+
+        new IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
         IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
         
         /// <summary>

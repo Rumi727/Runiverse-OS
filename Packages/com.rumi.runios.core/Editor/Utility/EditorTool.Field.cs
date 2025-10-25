@@ -351,6 +351,7 @@ namespace RuniOS.Editor
             float fieldWidth = position.width;
             float toggleWidth = GetXSize(EditorStyles.toggle);
             Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
+            position.width -= toggleWidth + 4;
 
             nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
 
@@ -440,7 +441,7 @@ namespace RuniOS.Editor
             return value;
         }
 
-        public static T? InternalNullableToggleField<T>(T? value, Rect toggleRect)
+        public static T? InternalNullableToggleField<T>(T? value, Rect toggleRect, Func<T>? constructor = null) where T : struct
         {
             BeginIndentLevel(0);
 
@@ -449,9 +450,9 @@ namespace RuniOS.Editor
             if (EditorGUI.EndChangeCheck())
             {
                 if (toggleValue)
-                    value = (T?)typeof(T).GetDefaultValueNotNull();
+                    value = constructor?.Invoke() ?? (T)typeof(T).GetDefaultValueNotNull();
                 else
-                    value = default;
+                    value = null;
             }
 
             EndIndentLevel();

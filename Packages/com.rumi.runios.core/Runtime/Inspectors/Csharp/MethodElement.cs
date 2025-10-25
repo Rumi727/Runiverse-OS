@@ -16,7 +16,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         public Type returnType => method.ReturnType;
-        public NullabilityInfo? returnNullabilityInfo { get; }
+        public RuniNullabilityInfo? returnNullabilityInfo { get; }
         
         public MethodInfo method { get; }
 

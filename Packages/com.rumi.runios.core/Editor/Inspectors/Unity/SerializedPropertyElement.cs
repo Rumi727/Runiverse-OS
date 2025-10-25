@@ -4,7 +4,6 @@ using RuniOS.Editor.Serialization;
 using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using UnityEditor;
 
 namespace RuniOS.Editor.Inspectors.Unity
@@ -68,7 +67,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다. 직렬화된 프로퍼티의 경우 항상 null을 반환합니다.
         /// </summary>
-        public NullabilityInfo? nullabilityInfo => null;
+        public RuniNullabilityInfo? nullabilityInfo => null;
         
         /// <summary>
         /// 변수가 공개되어있는지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 true입니다.
@@ -79,16 +78,6 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// 변수가 정적인지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 false입니다.
         /// </summary>
         public bool isStatic => false;
-
-        /// <summary>
-        /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        public bool isReadable => true;
-        
-        /// <summary>
-        /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        public bool isWritable => true;
 
         /// <summary>
         /// 변수의 값을 가져오거나 설정합니다.
@@ -133,7 +122,21 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <returns></returns>
         /// <exception cref="NotSupportedException">직렬화된 프로퍼티에 대해 항상 발생합니다.</exception>
         public IEnumerable<object?> GetValues() => throw new NotSupportedException("Fetching values for all target objects is not supported for serialized properties.");
+        
+        public void SetValues(IEnumerable<object?> values) => throw new NotSupportedException("Writing values for all target objects is not supported for serialized properties.");
 
         public bool HasFlags(InspectorFlags flags) => flags != InspectorFlags.None && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.Field);
+        
+        /// <summary>
+        /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
+        
+        /// <summary>
+        /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => true;
+        
+        public void UpdateChildInspectable() { }
     }
 }

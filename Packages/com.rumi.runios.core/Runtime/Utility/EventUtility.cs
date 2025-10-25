@@ -26,7 +26,7 @@ namespace RuniOS
         }
 
         /// <summary>예외를 핸들링하여 이벤트 호출이 중지되지 않도록 합니다.</summary>
-        public static void SafeInvoke(this Delegate? e, params object[] args)
+        public static void SafeInvoke(this Delegate? e, params object?[] args)
         {
             if (e == null)
                 return;

@@ -85,6 +85,18 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
+        public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        {
+            lastException = null;
+            if (!element.HasFlags(flags))
+                return;
+
+            elements = ImmutableArray.Create(element);
+            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector));
+
+            inspectorFlags = flags;
+        }
+
         public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             lastException = null;
@@ -113,18 +125,19 @@ namespace RuniOS.Editor.Inspectors
                 GUIContent elementLabel;
                 if (inspectable is IInspectableList)
                     elementLabel = label ?? GUIContent.none;
-                else
+                else if (drawers.Length > 1)
                     elementLabel = new GUIContent(item.element?.displayName ?? string.Empty);
+                else
+                    elementLabel = label ?? new GUIContent(item.element?.displayName ?? string.Empty);
                 
-                elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
-
                 try
                 {
+                    elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
                     item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
                 }
                 catch (Exception e)
                 {
-                    EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent(e.Message));
+                    Debug.LogException(e);
                 }
                 
                 elementPosition.y += item.GetHeight(label, inspectorFlags, isInArray) + 2;

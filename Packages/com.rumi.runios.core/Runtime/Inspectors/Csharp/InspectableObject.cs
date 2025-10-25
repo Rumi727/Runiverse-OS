@@ -29,15 +29,17 @@ namespace RuniOS.Inspectors.Csharp
 
         public IEnumerable<object> instances
         {
-            get => _instances.Where(x => inspectionType.IsInstanceOfType(x));
+            get
+            {
+                parentElement?.UpdateChildInspectable();
+                return _instances.Where(x => inspectionType.IsInstanceOfType(x));
+            }
             set => _instances = value;
         }
         IEnumerable<object> _instances;
 
         [MemberNotNullWhen(false, nameof(instance))]
         public bool instancesIsEmpty => instance == null;
-
-        IEnumerable<object> IInspectableObject.instances => instances;
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
         public InspectableObject(Type inspectionType, IInspectorVariableElement? parentElement = null) : this(inspectionType, Enumerable.Empty<object>()) => this.parentElement = parentElement; 
@@ -57,33 +59,15 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
 
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        public IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (flags == InspectorFlags.None)
                 return ImmutableArray<IInspectorElement>.Empty;
             
-            MemberInfo[] members = inspectionType.GetMembers(flags.ToBindingFlags());
-            IInspectorElement?[] elements = new IInspectorElement[members.Length];
-
-            bool includeReadOnly = flags.HasFlagFast(InspectorFlags.ReadOnly);
-            bool includeWriteOnly = flags.HasFlagFast(InspectorFlags.WriteOnly);
-            
-            for (int i = 0; i < members.Length; i++)
-            {
-                MemberInfo member = members[i];
-                if (member.IsCompilerGenerated())
-                    continue;
-                
-                elements[i] = member switch
-                {
-                    PropertyInfo property when flags.HasFlagFast(InspectorFlags.Property) && (property.SetMethod != null || includeReadOnly) && (property.GetMethod != null || includeWriteOnly) => new PropertyElement(this, property),
-                    FieldInfo field when flags.HasFlagFast(InspectorFlags.Field) && ((!field.IsInitOnly && !field.IsLiteral) || includeReadOnly) => new FieldElement(this, field),
-                    MethodInfo method when flags.HasFlagFast(InspectorFlags.Method) => new MethodElement(this, method),
-                    _ => null
-                };
-            }
-
-            return elements.WhereNotNull().ToImmutableArray();
+            return inspectionType.GetRuntimeProperties().Where(x => x.GetIndexParameters().IsEmpty()).Select(x => (IInspectorElement)new PropertyElement(this, x))
+                .Concat(inspectionType.GetRuntimeFields().Select(x => (IInspectorElement)new FieldElement(this, x)))
+                .Concat(inspectionType.GetRuntimeMethods().Select(x => (IInspectorElement)new MethodElement(this, x)))
+                .WhereNotNull().Where(x => x.HasFlags(flags));
         }
 
         public void InstanceTypeCheck()

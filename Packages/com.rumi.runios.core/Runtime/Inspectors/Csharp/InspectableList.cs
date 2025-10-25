@@ -6,16 +6,16 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableList : IInspectableList
     {
-        public InspectableList(IList instance, NullabilityInfo? nullabilityInfo = null) : this(instance.GetType(), nullabilityInfo, ImmutableArray.Create(instance)) { }
-        public InspectableList(Type inspectionType, NullabilityInfo? nullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), nullabilityInfo) { }
+        public InspectableList(IList instance, RuniNullabilityInfo? nullabilityInfo = null) : this(instance.GetType(), nullabilityInfo, ImmutableArray.Create(instance)) { }
+        public InspectableList(Type inspectionType, RuniNullabilityInfo? nullabilityInfo, IInspectorVariableElement? parentElement = null) : this(inspectionType, Array.Empty<IList>(), nullabilityInfo) => this.parentElement = parentElement;
+        public InspectableList(Type inspectionType, RuniNullabilityInfo? nullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), nullabilityInfo) { }
         
-        public InspectableList(Type inspectionType, IEnumerable<IList> instances, NullabilityInfo? nullabilityInfo = null)
+        public InspectableList(Type inspectionType, IEnumerable<IList> instances, RuniNullabilityInfo? nullabilityInfo = null)
         {
             if (!typeof(IList).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a list type.", nameof(inspectionType));
@@ -28,6 +28,8 @@ namespace RuniOS.Inspectors.Csharp
 
             this.nullabilityInfo = nullabilityInfo;
         }
+        
+        public IInspectorVariableElement? parentElement { get; }
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -42,7 +44,7 @@ namespace RuniOS.Inspectors.Csharp
         /// </remarks>
         public string? inspectionElementDisplayName => inspectionElementType?.GetTypeDisplayName();
 
-        public NullabilityInfo? nullabilityInfo { get; }
+        public RuniNullabilityInfo? nullabilityInfo { get; }
 
         public bool isReadOnly => instances.All(static x => !x.IsReadOnly);
         bool IList.IsReadOnly => isReadOnly;
@@ -57,8 +59,10 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                if (instances.Any())
-                    return instances.MinBy(static x => x.Count);
+                parentElement?.UpdateChildInspectable();
+                
+                if (_instances.Any())
+                    return _instances.MinBy(static x => x.Count);
                 
                 return null;
             }
@@ -79,6 +83,8 @@ namespace RuniOS.Inspectors.Csharp
             get => _instances;
             set
             {
+                parentElement?.UpdateChildInspectable();
+                
                 if (value.Any(x => inspectionType != x.GetType()))
                 {
                     string invalidTypes = string.Join(", ", value.Where(x => x != null && !inspectionType.IsInstanceOfType(x))
@@ -141,7 +147,7 @@ namespace RuniOS.Inspectors.Csharp
                     {
                         if (add)
                         {
-                            if (nullabilityInfo?.WriteState == NullabilityState.NotNull)
+                            if (nullabilityInfo?.writeState == RuniNullabilityState.NotNull)
                                 list.Add((inspectionElementType ?? typeof(object)).GetDefaultValueNotNull());
                             else
                                 list.Add((inspectionElementType ?? typeof(object)).GetDefaultValue());
@@ -229,6 +235,8 @@ namespace RuniOS.Inspectors.Csharp
             type = inspectionElementType;
             return true;
         }
+        
+        
 
         List<IInspectorElement>? cachedElements;
         IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
@@ -286,8 +294,15 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return null;
-            
-            return GetElements()[index] as IInspectorListElement;
+
+            GetElements();
+            IInspectorListElement? element = cachedElements?[index] as IInspectorListElement;
+            if (!element?.HasFlags(flags) ?? false)
+                return null;
+
+            return element;
         }
+        
+        IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
     }
 }

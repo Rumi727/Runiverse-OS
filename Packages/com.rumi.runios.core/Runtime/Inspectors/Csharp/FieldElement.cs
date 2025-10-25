@@ -36,10 +36,10 @@ namespace RuniOS.Inspectors.Csharp
             this.field = field;
             nullabilityInfo = new NullabilityInfoContext().Create(field);
 
-            _inspectableObjectElement = new InspectableObject(variableType, this);
+            inspectableObjectElement = new InspectableObject(variableType, this);
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                _inspectableList = new InspectableList(variableType, nullabilityInfo.GenericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault());
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드의 null 허용 여부 정보를 가져옵니다.
         /// </summary>
-        public NullabilityInfo nullabilityInfo { get; }
+        public RuniNullabilityInfo nullabilityInfo { get; }
 
         /// <summary>
         /// 이 요소가 나타내는 <see cref="FieldInfo"/>를 가져옵니다.
@@ -66,16 +66,6 @@ namespace RuniOS.Inspectors.Csharp
         /// 필드가 정적인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         public override bool isStatic => field.IsStatic;
-
-        /// <summary>
-        /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다. (항상 true)
-        /// </summary>
-        public bool isReadable => true;
-
-        /// <summary>
-        /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
-        /// </summary>
-        public bool isWritable => !field.IsInitOnly && !field.IsLiteral;
 
         /// <summary>
         /// 필드의 값을 가져오거나 설정합니다.
@@ -104,8 +94,20 @@ namespace RuniOS.Inspectors.Csharp
                         return;
                     }
 
-                    foreach (var item in inspectable.instances)
-                        field.SetValue(item, value);
+                    if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
+                    {
+                        // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
+                        inspectable.parentElement.SetValues(inspectable.instances.Select(x =>
+                        {
+                            field.SetValue(x, value);
+                            return x;
+                        }));
+                    }
+                    else
+                    {
+                        foreach (var item in inspectable.instances)
+                            field.SetValue(item, value);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -124,8 +126,6 @@ namespace RuniOS.Inspectors.Csharp
             {
                 if (isStatic)
                     return false;
-                if (!isReadable)
-                    return true;
 
                 try
                 {
@@ -142,33 +142,14 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 이 필드의 값을 나타내는 <see cref="InspectableObject"/>를 가져옵니다. 필드의 값이 객체일 경우, 해당 객체를 검사할 수 있습니다.
         /// </summary>
-        public InspectableObject inspectableObjectElement
-        {
-            get
-            {
-                _inspectableObjectElement.instances = GetValues().WhereNotNull();
-                return _inspectableObjectElement;
-            }
-        }
-        readonly InspectableObject _inspectableObjectElement;
+        public InspectableObject inspectableObjectElement { get; }
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
 
         /// <summary>
         /// 이 필드가 리스트인 경우, 리스트를 나타내는 <see cref="InspectableList"/>를 가져옵니다.
         /// </summary>
-        public InspectableList? inspectableElementList
-        {
-            get
-            {
-                if (_inspectableList == null)
-                    return null;
-
-                _inspectableList.instances = GetValues().OfType<IList>();
-                return _inspectableList;
-            }
-        }
-        readonly InspectableList? _inspectableList;
-        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableElementList;
+        public InspectableList? inspectableListElement { get; }
+        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
 
         /// <summary>
         /// 검사 중인 모든 객체에서 이 필드의 값 목록을 가져옵니다.
@@ -183,7 +164,45 @@ namespace RuniOS.Inspectors.Csharp
             }
             catch (Exception e)
             {
-                throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
+                throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
+            }
+        }
+        
+        public void SetValues(IEnumerable<object?> values)
+        {
+            try
+            {
+                if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
+                {
+                    // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
+                    using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
+                    
+                    var instances = inspectable.instances.Select(x =>
+                    {
+                        if (!valueEnumerator.MoveNext())
+                            return x;
+                        
+                        field.SetValue(x, valueEnumerator.Current);
+                        return x;
+                    }).ToArray(); //ToArray로 열거하지 않으면 캡쳐된 valueEnumerator이 지연 실행되어 폐기될 가능성이 있음.
+                    
+                    inspectable.parentElement.SetValues(instances);
+                }
+                else
+                {
+                    using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
+                    foreach (var instance in inspectable.instances)
+                    {
+                        if (!valueEnumerator.MoveNext())
+                            return;
+                    
+                        field.SetValue(instance, valueEnumerator.Current);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
             }
         }
         
@@ -195,12 +214,35 @@ namespace RuniOS.Inspectors.Csharp
             if (!flags.HasFlagFast(InspectorFlags.Field))
                 return false;
             
-            if ((isReadable && !isWritable) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
-            if ((!isReadable && isWritable) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+            if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
 
             return true;
+        }
+        
+        /// <summary>
+        /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다. (항상 true)
+        /// </summary>
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
+
+        /// <summary>
+        /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
+        /// </summary>
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
+        {
+            if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
+                return false;
+            
+            return !field.IsInitOnly && !field.IsLiteral;
+        }
+
+        public void UpdateChildInspectable()
+        {
+            inspectableObjectElement.instances = GetValues().WhereNotNull();
+            if (inspectableListElement != null)
+                inspectableListElement.instances = GetValues().OfType<IList>();
         }
     }
 }

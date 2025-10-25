@@ -16,23 +16,20 @@ namespace RuniOS.Inspectors.Csharp
             this.property = property;
             nullabilityInfo = new NullabilityInfoContext().Create(property);
 
-            _inspectableObjectElement = new InspectableObject(variableType, this);
+            inspectableObjectElement = new InspectableObject(variableType, this);
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                _inspectableList = new InspectableList(variableType, nullabilityInfo.GenericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault());
         }
 
         public Type variableType => property.PropertyType;
-        public NullabilityInfo nullabilityInfo { get; }
+        public RuniNullabilityInfo nullabilityInfo { get; }
         
         public PropertyInfo property { get; }
         
         public override bool isPublic => property.GetMethod?.IsPublic ?? property.SetMethod?.IsPublic ?? false;
         
         public override bool isStatic => property.GetMethod?.IsStatic ?? property.SetMethod?.IsStatic ?? false;
-        
-        public bool isReadable => property.GetMethod != null;
-        public bool isWritable => property.SetMethod != null;
 
         public object? value
         {
@@ -57,8 +54,20 @@ namespace RuniOS.Inspectors.Csharp
                         return;
                     }
 
-                    foreach (var item in inspectable.instances)
-                        property.SetValue(item, value);
+                    if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
+                    {
+                        // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
+                        inspectable.parentElement.SetValues(inspectable.instances.Select(x =>
+                        {
+                            property.SetValue(x, value);
+                            return x;
+                        }));
+                    }
+                    else
+                    {
+                        foreach (var item in inspectable.instances)
+                            property.SetValue(item, value);
+                    }
                 }
                 catch (Exception e)
                 {
@@ -73,8 +82,6 @@ namespace RuniOS.Inspectors.Csharp
             {
                 if (isStatic)
                     return false;
-                if (!isReadable)
-                    return true;
                 
                 try
                 {
@@ -88,31 +95,11 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         
-        public InspectableObject inspectableObjectElement
-        {
-            get
-            {
-                _inspectableObjectElement.instances = GetValues().WhereNotNull();
-                return _inspectableObjectElement;
-            }
-        }
-        readonly InspectableObject _inspectableObjectElement;
+        public InspectableObject inspectableObjectElement { get; }
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
 
-
-        public InspectableList? inspectableElementList
-        {
-            get
-            {
-                if (_inspectableList == null)
-                    return null;
-
-                _inspectableList.instances = GetValues().OfType<IList>();
-                return _inspectableList;
-            }
-        }
-        readonly InspectableList? _inspectableList;
-        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableElementList;
+        public InspectableList? inspectableListElement { get; }
+        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
 
         public IEnumerable<object?> GetValues()
         {
@@ -126,6 +113,29 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         
+        public void SetValues(IEnumerable<object?> values)
+        {
+            try
+            {
+                using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
+                foreach (var instance in inspectable.instances)
+                {
+                    if (!valueEnumerator.MoveNext())
+                        return;
+                    
+                    property.SetValue(instance, valueEnumerator.Current);
+                }
+                
+                // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
+                if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
+                    inspectable.parentElement.SetValues(inspectable.instances);
+            }
+            catch (Exception e)
+            {
+                throw new InspectorElementException($"An exception occurred while writing a value to the {name} property.", name, e);
+            }
+        }
+        
         public override bool HasFlags(InspectorFlags flags)
         {
             if (!base.HasFlags(flags))
@@ -134,12 +144,29 @@ namespace RuniOS.Inspectors.Csharp
             if (!flags.HasFlagFast(InspectorFlags.Property))
                 return false;
             
-            if ((isReadable && !isWritable) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
-            if ((!isReadable && isWritable) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+            if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
 
             return true;
+        }
+        
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+        
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
+        {
+            if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
+                return false;
+            
+            return property.GetSetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+        }
+
+        public void UpdateChildInspectable()
+        {
+            inspectableObjectElement.instances = GetValues().WhereNotNull();
+            if (inspectableListElement != null)
+                inspectableListElement.instances = GetValues().OfType<IList>();
         }
     }
 }
