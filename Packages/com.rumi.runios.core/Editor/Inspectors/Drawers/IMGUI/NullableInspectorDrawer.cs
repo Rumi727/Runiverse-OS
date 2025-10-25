@@ -92,7 +92,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             label ??= GUIContent.none;
             
             if (valueInspector.elements.FirstOrDefault() != valueElement || valueInspector.inspectorFlags != flags)
-                valueInspector.Rebuild(valueElement, flags);
+                valueInspector.Rebuild(valueElement, flags, true);
             
             float fieldWidth = position.width;
             float toggleWidth = GetXSize(EditorStyles.toggle);

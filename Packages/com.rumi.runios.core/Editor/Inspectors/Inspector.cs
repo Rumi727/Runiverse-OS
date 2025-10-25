@@ -85,10 +85,10 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
-        public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
         {
             lastException = null;
-            if (!element.HasFlags(flags))
+            if (!element.HasFlags(flags) && !skipFlagCheck)
                 return;
 
             elements = ImmutableArray.Create(element);
@@ -97,11 +97,12 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
-        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
         {
             lastException = null;
 
-            elements = elements.Where(x => x.HasFlags(flags));
+            if (!skipFlagCheck)
+                elements = elements.Where(x => x.HasFlags(flags));
             
             this.elements = elements.ToImmutableArray();
             drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector)).ToImmutableArray();
