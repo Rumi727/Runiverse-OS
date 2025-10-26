@@ -13,11 +13,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
         {
             CheckVariableElement();
 
-            using (new EditorGUI.MixedValueScope(!variableElement.IsReadable(flags) || variableElement.isMixedValue))
+            bool isReadable = !variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags); 
+            using (new EditorGUI.MixedValueScope(!isReadable || variableElement.isMixedValue))
             {
-                EditorGUI.BeginDisabledGroup(!variableElement.IsWritable(flags));
+                EditorGUI.BeginDisabledGroup(variableElement.inspectable.instancesIsEmpty || !variableElement.IsWritable(flags));
                 EditorGUI.BeginChangeCheck();
-                object value = DrawField(position, label ?? GUIContent.none, variableElement.IsReadable(flags) ? variableElement.value : variableElement.variableType.GetDefaultValue());
+                object value = DrawField(position, label ?? GUIContent.none, isReadable ? variableElement.value : variableElement.variableType.GetDefaultValue());
                 if (EditorGUI.EndChangeCheck())
                     variableElement.value = value;
                 EditorGUI.EndDisabledGroup();

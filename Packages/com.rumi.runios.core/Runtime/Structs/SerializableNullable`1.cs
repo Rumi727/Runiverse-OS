@@ -120,8 +120,8 @@ namespace RuniOS
         public override readonly bool Equals(object? other)
         {
             if (!hasValue)
-                return other == null;
-            else if (other == null)
+                return other.IsNull();
+            else if (other.IsNull())
                 return false;
 
             return value.Equals(other);
@@ -148,8 +148,8 @@ namespace RuniOS
         public readonly bool Equals(T? other)
         {
             if (!hasValue)
-                return other == null;
-            else if (other == null)
+                return other.IsNull();
+            else if (other.IsNull())
                 return false;
 
             return value.Equals(other);

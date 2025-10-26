@@ -123,6 +123,8 @@ namespace RuniOS.Editor.Inspectors
                 return;
             }
             
+            GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + position.height));
+            
             Rect elementPosition = position;
             foreach (var item in drawers.WhereNotNull())
             {
@@ -135,7 +137,10 @@ namespace RuniOS.Editor.Inspectors
                 try
                 {
                     elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
+                    
+                    GUI.BeginClip(new Rect(0, 0, elementPosition.x + elementPosition.width, elementPosition.y + elementPosition.height));
                     item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
+                    GUI.EndClip();
                 }
                 catch (Exception e)
                 {
@@ -144,6 +149,8 @@ namespace RuniOS.Editor.Inspectors
                 
                 elementPosition.y += item.GetHeight(label, inspectorFlags, isInArray) + 2;
             }
+            
+            GUI.EndClip();
         }
 
         public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)

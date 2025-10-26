@@ -45,7 +45,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedProperty property { get; }
         public PropertyConverter? converter { get; }
 
-        RuniNullabilityInfo? IInspectableList.nullabilityInfo => null;
+        RuniNullabilityInfo? IInspectableList.elementNullabilityInfo => null;
 
         bool IList.IsReadOnly => false;
         bool IList.IsFixedSize => false;

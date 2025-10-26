@@ -12,7 +12,7 @@ namespace RuniOS.Inspectors
         /// </remarks>
         string? inspectionElementDisplayName { get; }
         
-        RuniNullabilityInfo? nullabilityInfo { get; }
+        RuniNullabilityInfo? elementNullabilityInfo { get; }
         
         /// <summary>
         /// 요소가 <b>삽입되었을 때</b> 호출됩니다.

@@ -11,11 +11,11 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableList : IInspectableList
     {
-        public InspectableList(IList instance, RuniNullabilityInfo? nullabilityInfo = null) : this(instance.GetType(), nullabilityInfo, ImmutableArray.Create(instance)) { }
+        public InspectableList(IList instance, RuniNullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), elementNullabilityInfo, ImmutableArray.Create(instance)) { }
         
-        public InspectableList(Type inspectionType, RuniNullabilityInfo? nullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), nullabilityInfo) { }
+        public InspectableList(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
         
-        public InspectableList(Type inspectionType, IEnumerable<IList> instances, RuniNullabilityInfo? nullabilityInfo = null)
+        public InspectableList(Type inspectionType, IEnumerable<IList> instances, RuniNullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IList).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a list type.", nameof(inspectionType));
@@ -26,7 +26,7 @@ namespace RuniOS.Inspectors.Csharp
             _instances = null!;
             this.instances = instances;
 
-            this.nullabilityInfo = nullabilityInfo;
+            this.elementNullabilityInfo = elementNullabilityInfo;
         }
         
         public IInspectorVariableElement? parentElement { get; set; }
@@ -44,9 +44,9 @@ namespace RuniOS.Inspectors.Csharp
         /// </remarks>
         public string? inspectionElementDisplayName => inspectionElementType?.GetTypeDisplayName();
 
-        public RuniNullabilityInfo? nullabilityInfo { get; }
+        public RuniNullabilityInfo? elementNullabilityInfo { get; }
 
-        public bool isReadOnly => instances.All(x => !x.IsReadOnly);
+        public bool isReadOnly => instances.All(x => x.IsReadOnly);
         bool IList.IsReadOnly => isReadOnly;
         
         public bool isFixedSize => instances.Any(x => (parentElement == null || !x.GetType().IsArray) && x.IsFixedSize);
@@ -149,7 +149,7 @@ namespace RuniOS.Inspectors.Csharp
                     {
                         if (add)
                         {
-                            if (nullabilityInfo?.writeState == RuniNullabilityState.NotNull)
+                            if (elementNullabilityInfo?.writeState == RuniNullabilityState.NotNull)
                                 list.Add((inspectionElementType ?? typeof(object)).GetDefaultValueNotNull());
                             else
                                 list.Add((inspectionElementType ?? typeof(object)).GetDefaultValue());
@@ -399,7 +399,7 @@ namespace RuniOS.Inspectors.Csharp
         
         IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
         
-        public IInspectableList Clone() => new InspectableList(inspectionType, nullabilityInfo) { parentElement = parentElement, instances = instances };
+        public IInspectableList Clone() => new InspectableList(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = instances };
         IInspectable IInspectable.Clone() => Clone();
         object ICloneable.Clone() => Clone();
     }

@@ -43,6 +43,7 @@ namespace RuniOS.Editor.Windows
             public uint uintField = 42;
             public long longField = 42;
             public Test2 test2Field = new Test2();
+            public Test2? nullableTest2Field = new Test2();
             public readonly Test2 readonlyTest2Field = new Test2();
             public Test2 privateReadOnlyTest2Property { get; private set; } = new Test2();
             public ulong ulongField = 42;
@@ -57,9 +58,16 @@ namespace RuniOS.Editor.Windows
             public List<Test2> test2List = new();
             public List<List<Test2>> test2ListList = new();
             public Test2[] test2Array = new Test2[] { new(), new(), new(), new() };
+            public List<Test2?> nullableTest2List = new();
+            public List<List<Test2>?> nullableTest2ListList = new();
+            public List<List<Test2?>?> nullableNullableTest2ListList = new();
+            public Test2?[] nullableTest2Array = new Test2?[] { new(), new(), new(), new() };
+            public List<List<Test2?>?>? nullableNullableTest2ListNullableList = new();
+            public Test2?[]? nullableTest2NullableArray = new Test2?[] { new(), new(), new(), new() };
             public SerializableNullable<int> serializableNullableInt = 42;
             public SerializableNullable<SerializableNullable<float>> serializableNullableNullableFloat = new(42);
             public StructTest structTest = new StructTest();
+            public StructTest? nullableStructTest = new StructTest();
             public Vector2 vector2;
             public Vector3 vector3;
             public Vector4 vector4;
@@ -78,6 +86,11 @@ namespace RuniOS.Editor.Windows
                 // ReSharper disable once NotAccessedField.Local
                 double _writeOnlyProperty = 64;
                 public float test4Field = 100;
+
+                public Test2? nullableTest2Property { get; set; }
+                public Test2? writeOnlyNullableTest2Property { set => _writeOnlyNullableTest2Property = value; }
+                // ReSharper disable once NotAccessedField.Local
+                Test2? _writeOnlyNullableTest2Property;
             }
 
             public struct StructTest

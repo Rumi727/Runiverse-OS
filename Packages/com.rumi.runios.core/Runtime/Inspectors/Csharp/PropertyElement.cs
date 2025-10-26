@@ -19,7 +19,7 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IList).IsAssignableFrom(variableType))
-                inspectableListElement = new InspectableList(variableType, nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
         public Type variableType => property.PropertyType;
@@ -164,6 +164,9 @@ namespace RuniOS.Inspectors.Csharp
 
         public void UpdateChildInspectable()
         {
+            if (!IsReadable(InspectorFlags.All))
+                return;
+            
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IList>();

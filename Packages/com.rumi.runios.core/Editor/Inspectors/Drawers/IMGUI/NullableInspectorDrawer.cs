@@ -4,6 +4,7 @@ using RuniOS.Inspectors.Drawers;
 using System;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.AnimatedValues;
 using UnityEngine;
 
 using static RuniOS.Editor.EditorTool;
@@ -18,7 +19,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         {
             CheckVariableElement();
             
-            valueElement = element.inspectableObjectElement.GetElements(InspectorFlags.All)
+            valueElement = element.inspectableObjectElement.GetElements(InspectorFlags.Public | InspectorFlags.NonPublic | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.Property)
                 .Where(x => x.name == nameof(Nullable<int>.Value))
                 .OfType<IInspectorVariableElement>()
                 .First();
@@ -30,7 +31,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     (_, values) => variableElement.SetValues(values.Select(x => Activator.CreateInstance(variableElement.variableType, x))))
                 .Build();
             
-            hasValueElement = element.inspectableObjectElement.GetElements(InspectorFlags.All)
+            hasValueElement = element.inspectableObjectElement.GetElements(InspectorFlags.Public | InspectorFlags.NonPublic | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.Property)
                 .Where(x => x.name == nameof(Nullable<int>.HasValue))
                 .OfType<IInspectorVariableElement>()
                 .First();
@@ -46,7 +47,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 (
                     (_, value) =>
                     {
-                        if (!Equals((bool)hasValueElement.value!, value))
+                        if (!Equals(hasValueElement.value, value))
                         {
                             if ((bool)value!)
                                 variableElement.value = Activator.CreateInstance(variableElement.variableType, valueElement.variableType.GetDefaultValueNotNull());
@@ -58,7 +59,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     {
                         variableElement.SetValues(values.Select(x =>
                         {
-                            if (!Equals((bool)hasValueElement.value!, x))
+                            if (!Equals(hasValueElement.value, x))
                             {
                                 if ((bool)x!)
                                     return Activator.CreateInstance(variableElement.variableType, valueElement.variableType.GetDefaultValueNotNull());
@@ -81,6 +82,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public IInspectorVariableElement valueElement { get; }
 
         readonly Inspector valueInspector;
+        readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.None | InspectorFlags.Public | InspectorFlags.Static | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.WriteOnly | InspectorFlags.PublicAccess | InspectorFlags.Property | InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Method | InspectorFlags.Variable | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
             CheckVariableElement();
@@ -94,9 +96,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (valueInspector.elements.FirstOrDefault() != valueElement || valueInspector.inspectorFlags != flags)
                 valueInspector.Rebuild(valueElement, flags, true);
             
-            float fieldWidth = position.width;
             float toggleWidth = GetXSize(EditorStyles.toggle);
-            Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
+            Rect toggleRect = new Rect(position.x + (position.width - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
             position.width -= toggleWidth + 4;
                 
             EditorGUI.BeginChangeCheck();
@@ -109,9 +110,26 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (hasValue)
                 valueInspector.Draw(position, label, isInArray);
             else
+            {
+                position.height = EditorGUIUtility.singleLineHeight;
                 EditorGUI.LabelField(position, label, new GUIContent(nullText ?? $"null ({valueElement.variableType.GetTypeDisplayName()})"));
+            }
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => (bool)hasValueElement.value! ? valueInspector.GetHeight(label, flags, isInArray) : EditorGUIUtility.singleLineHeight;
+        float lastInspectorHeight;
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        {
+            float height = valueInspector.GetHeight(label, flags, isInArray);
+            bool valueIsNull = !(bool)hasValueElement.value!;
+            nullableAnimFloat.target = valueIsNull ? 1 : 0;
+
+            if (!isInArray && nullableAnimFloat.isAnimating)
+            {
+                RepaintCurrentWindow();
+                return height.Lerp(EditorGUIUtility.singleLineHeight, nullableAnimFloat.value);
+            }
+
+            return !valueIsNull ? valueInspector.GetHeight(label, flags, isInArray) : EditorGUIUtility.singleLineHeight;
+        }
     }
 }

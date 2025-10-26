@@ -35,6 +35,18 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             label ??= GUIContent.none;
             
+            if (inspectableList.parentElement != null)
+            {
+                if (NullToggleField(inspectableList.parentElement, position, out _, label, flags))
+                    return;
+            }
+            
+            if (inspectableList.instancesIsEmpty)
+            {
+                EditorGUI.LabelField(position, label, new GUIContent(GetTextOrKey("inspector.no_instance")));   
+                return;
+            }
+            
             reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true) { multiSelect = true, };
 
             reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true);
@@ -43,9 +55,14 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             
             reorderableList.onAddCallback = x =>
             {
-                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1) : x.count;
-                inspectableList.Insert(index, elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic)));
+                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1).Min(x.count) : x.count;
+                object? value;
+                if (inspectableList.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+                    value = elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
+                else
+                    value = elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
                 
+                inspectableList.Insert(index, value);
                 x.Select(index);
             };
 
@@ -54,7 +71,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded);
+            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, isInArray);
             position.y += headHeight + 2;
 
             position.x += 15;
@@ -82,11 +99,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
-            float listHeight = reorderableList?.GetHeight() ?? 0;
-            animFloat.target = isExpanded ? listHeight + 2 : 0;
+            CheckInspectableList();
+            if (inspectableList.instancesIsEmpty)
+                return EditorGUIUtility.singleLineHeight;
             
+            float listHeight = reorderableList?.GetHeight() ?? 0;
             float headHeight = GetYSize(label ?? GUIContent.none, EditorStyles.foldoutHeader);
-            return headHeight + animFloat.value;
+
+            if (!isInArray)
+            {
+                animFloat.target = isExpanded ? listHeight + 2 : 0;
+                return headHeight + animFloat.value;
+            }
+            else
+                return headHeight + (isExpanded ? listHeight + 2 : 0);
         }
 
         public Inspector? GetElementInspector(int index, InspectorFlags flags)

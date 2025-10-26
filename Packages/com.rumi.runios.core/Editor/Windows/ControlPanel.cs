@@ -66,7 +66,7 @@ namespace RuniOS.Editor.Windows
             _ = SystemInfo.deviceModel; //이거 없으면 유니티 킬때 딱 한번 에러남 deviceModel 프로퍼티를 GUI 단계에서 처음 호출할 때 생기는 유니티 버그인듯
             
             // 도메인 재로드시에도 에디터 창의 데이터가 유지될 수 있게하기 위한 똥꼬쇼
-            if (_panels == null || _panels.WhereNotFakeNull().Count() != panelTypes.Length)
+            if (_panels == null || _panels.WhereNotNull().Count() != panelTypes.Length)
                 _panels = panelTypes.Select(CreateInstance).ToArray();
             panels = _panels.OfType<IControlPanel>().OrderBy(x => x.sort).ToImmutableArray();
             
