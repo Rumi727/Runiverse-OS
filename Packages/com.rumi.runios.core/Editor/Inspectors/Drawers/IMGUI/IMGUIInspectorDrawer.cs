@@ -17,11 +17,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             ReflectionUtility.onListUpdate += Update;
             Update();
 
-            foreach (var item in drawerTypes)
-            {
-                Debug.Log((item.attribute.targetType, item.type));
-            }
-
             static void Update()
             {
                 lock (drawerTypesLock)
