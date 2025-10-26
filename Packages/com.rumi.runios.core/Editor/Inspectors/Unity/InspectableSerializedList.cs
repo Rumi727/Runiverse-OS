@@ -84,6 +84,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         {
             int index = count;
             property.InsertArrayElementAtIndex(index);
+
+            OnInsert(index);
             return index;
         }
         
@@ -93,6 +95,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                 throw new ArgumentOutOfRangeException(nameof(index));
             
             property.InsertArrayElementAtIndex(index);
+            OnInsert(index);
         }
 
         public void Remove(object value) => throw new NotImplementedException();
@@ -103,9 +106,63 @@ namespace RuniOS.Editor.Inspectors.Unity
                 throw new ArgumentOutOfRangeException(nameof(index));
             
             property.DeleteArrayElementAtIndex(index);
+            OnRemoveAt(index);
         }
 
-        public void Clear() => property.arraySize = 0;
+        public void Clear()
+        {
+            property.arraySize = 0;
+            OnClear();
+        }
+
+        public void OnInsert(int index)
+        {
+            if (index < 0 || index > cachedElements.Count)
+                return;
+            
+            cachedElements.Insert(index, new SerializedListElement(this, property.GetArrayElementAtIndex(index), index));
+            
+            if (index < cachedElements.Count)
+            {
+                for (int i = 0; i < cachedElements.Count; i++)
+                    cachedElements[i].index = i;
+            }
+        }
+
+        public void OnRemoveAt(int index)
+        {
+            if (index < 0 || index >= cachedElements.Count)
+                return;
+            
+            cachedElements.RemoveAt(index);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnElementMoved(int oldIndex, int newIndex)
+        {
+            if (oldIndex < 0 || oldIndex >= cachedElements.Count)
+                return;
+            
+            if (newIndex < 0 || newIndex >= cachedElements.Count)
+                return;
+            
+            cachedElements.Move(oldIndex, newIndex);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnElementChanged(int oldIndex, int newIndex)
+        {
+            cachedElements.Change(oldIndex, newIndex);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnClear() => cachedElements.Clear();
 
         public bool Contains(object? value) => throw new NotImplementedException();
         
@@ -131,14 +188,13 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         
         
-        List<IInspectorElement>? cachedElements;
-        IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
+        readonly List<IInspectorListElement> cachedElements = new();
+        IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
         public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
-                return ImmutableArray<IInspectorElement>.Empty;
+                return ImmutableArray<IInspectorListElement>.Empty;
             
-            cachedElements ??= new List<IInspectorElement>();
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
             
             if (cachedElements.Count < count)
@@ -188,7 +244,12 @@ namespace RuniOS.Editor.Inspectors.Unity
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return null;
             
-            return GetElements(flags)[index] as IInspectorListElement;
+            GetElements();
+            IInspectorListElement element = cachedElements[index];
+            if (!element.HasFlags(flags))
+                return null;
+
+            return element;
         }
         
         IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);

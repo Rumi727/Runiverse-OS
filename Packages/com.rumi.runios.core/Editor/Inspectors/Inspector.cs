@@ -110,9 +110,12 @@ namespace RuniOS.Editor.Inspectors
             inspectorFlags = flags;
         }
 
-        public void DrawLayout(GUIContent? label = null, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray)), label, isInArray);
-        
-        public void Draw(Rect position, GUIContent? label = null, bool isInArray = false)
+
+        public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(label != null ? new GUIContent(label) : null, isInArray);
+        public void DrawLayout(GUIContent? label, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray)), label, isInArray);
+
+        public void Draw(Rect position, string? label = null, bool isInArray = false) => Draw(position, label != null ? new GUIContent(label) : null, isInArray);
+        public void Draw(Rect position, GUIContent? label, bool isInArray = false)
         {
             if (lastException != null)
             {

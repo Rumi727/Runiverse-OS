@@ -33,22 +33,32 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (!inspectableList.TryGetInspectionElementType(out Type? elementType) || elementType == null)
                 throw new InvalidOperationException($"Cannot get managed type of {nameof(inspectableList)}");
 
-            label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
-            
-            elementInspectors.SyncKeysWithList(inspectableList.GetElements(flags), _ => new Inspector(rootInspector));
+            label ??= GUIContent.none;
             
             reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true) { multiSelect = true, };
 
-            reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, null, true);
-            reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, isInArray) ?? EditorGUIUtility.singleLineHeight;
+            reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true);
+            reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, true) ?? EditorGUIUtility.singleLineHeight;
+            reorderableList.onCanAddCallback = _ => elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
+            
+            reorderableList.onAddCallback = x =>
+            {
+                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1) : x.count;
+                inspectableList.Insert(index, elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic)));
+                
+                x.Select(index);
+            };
+
+            reorderableList.onReorderCallbackWithDetails = (_, oldIndex, newIndex) => inspectableList.OnElementMoved(oldIndex, newIndex);
             
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
             isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded);
             position.y += headHeight + 2;
-            
-            isExpanded = EditorGUI.Foldout(position, isExpanded, label);
+
+            position.x += 15;
+            position.width -= 15;
             
             if (!isInArray)
             {
@@ -70,19 +80,33 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 reorderableList.DoList(position);
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => reorderableList?.GetHeight() ?? base.GetHeight(label, flags, isInArray);
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        {
+            float listHeight = reorderableList?.GetHeight() ?? 0;
+            animFloat.target = isExpanded ? listHeight + 2 : 0;
+            
+            float headHeight = GetYSize(label ?? GUIContent.none, EditorStyles.foldoutHeader);
+            return headHeight + animFloat.value;
+        }
 
         public Inspector? GetElementInspector(int index, InspectorFlags flags)
         {
-            IInspectorElement? element = inspectableList?.GetElement(index, flags);
+            CheckInspectableList();
+            
+            IInspectorElement? element = inspectableList.GetElement(index, flags);
             if (element is not IInspectorListElement listElement)
                 return null;
-                    
-            Inspector inspector = elementInspectors[element];
-            if (inspector.elements.Length != 1 || inspector.elements[0] == listElement || inspector.inspectorFlags != flags)
-                inspector.Rebuild(Enumerable.Repeat(listElement, 1));
 
-            return inspector;
+            elementInspectors.SyncKeysWithList(inspectableList.GetElements(flags), _ => new Inspector(rootInspector));
+            if (elementInspectors.TryGetValue(element, out Inspector inspector))
+            {
+                if (inspector.elements.FirstOrDefault() != listElement || inspector.inspectorFlags != flags)
+                    inspector.Rebuild(listElement, flags, true);
+                
+                return inspector;
+            }
+
+            return null;
         }
     }
 }

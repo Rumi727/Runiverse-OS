@@ -2228,6 +2228,8 @@ namespace RuniOS
             return array;
         }
         
+        public static Array RemoveAll(this Array array) => Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), 0);
+        
         public static Array Move(this Array list, int oldIndex, int newIndex)
         {
             if (list == null)

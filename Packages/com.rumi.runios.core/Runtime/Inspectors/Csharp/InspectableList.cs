@@ -21,7 +21,7 @@ namespace RuniOS.Inspectors.Csharp
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a list type.", nameof(inspectionType));
             
             this.inspectionType = inspectionType;
-            inspectionElementType = CollectionGenericUtility.GetListElementType(inspectionType);
+            inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetListElementType(inspectionType);
 
             _instances = null!;
             this.instances = instances;
@@ -46,10 +46,10 @@ namespace RuniOS.Inspectors.Csharp
 
         public RuniNullabilityInfo? nullabilityInfo { get; }
 
-        public bool isReadOnly => instances.All(static x => !x.IsReadOnly);
+        public bool isReadOnly => instances.All(x => !x.IsReadOnly);
         bool IList.IsReadOnly => isReadOnly;
         
-        public bool isFixedSize => instances.Any(static x => x.IsFixedSize);
+        public bool isFixedSize => instances.Any(x => (parentElement == null || !x.GetType().IsArray) && x.IsFixedSize);
         bool IList.IsFixedSize => isFixedSize;
         
         bool ICollection.IsSynchronized => false;
@@ -167,45 +167,138 @@ namespace RuniOS.Inspectors.Csharp
         public int Add(object? value)
         {
             int minCount = count;
-            foreach (IList list in instances.WhereNotNull())
+            foreach (IList list in instances)
             {
-                if (minCount <= list.Count)
+                if (minCount == list.Count && (parentElement == null || !list.GetType().IsArray))
                     list.Add(value);
             }
+            
+            parentElement?.SetValues(instances.Select(list =>
+            {
+                if (minCount == list.Count && list.GetType().IsArray)
+                    list = ((Array)list).Add(value);
 
-            return count;
+                return list;
+            }));
+            
+            OnInsert(minCount);
+            return minCount;
         }
         
         public void Insert(int index, object value)
         {
-            if (index < 0 || index >= count)
+            if (index < 0 || index > count)
                 throw new ArgumentOutOfRangeException(nameof(index));
             
-            foreach (IList list in instances.WhereNotNull())
-                list.Insert(index, value);
+            foreach (IList list in instances)
+            {
+                if (parentElement == null || !list.GetType().IsArray)
+                    list.Insert(index, value);
+            }
+
+            parentElement?.SetValues(instances.Select(list =>
+            {
+                if (list.GetType().IsArray)
+                    list = ((Array)list).Insert(index, value);
+
+                return list;
+            }));
+            
+            OnInsert(index);
         }
-        
-        public void Remove(object value)
-        {
-            foreach (IList list in instances.WhereNotNull())
-                list.Remove(value);
-        }
+
+        public void Remove(object value) => RemoveAt(IndexOf(value));
         
         public void RemoveAt(int index)
         {
             if (index < 0 || index >= count)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            
+
             foreach (IList list in instances.WhereNotNull())
-                list.RemoveAt(index);
+            {
+                if (parentElement == null || !list.GetType().IsArray)
+                    list.RemoveAt(index);
+            }
+
+            parentElement?.SetValues(instances.Select(list =>
+            {
+                if (list.GetType().IsArray)
+                    list = ((Array)list).RemoveAt(index);
+
+                return list;
+            }));
+            
+            OnRemoveAt(index);
         }
 
         public void Clear()
         {
-            foreach (IList list in instances.WhereNotNull())
-                list.Clear();
+            foreach (IList list in instances)
+            {
+                if (parentElement == null || !list.GetType().IsArray)
+                    list.Clear();
+            }
+
+            parentElement?.SetValues(instances.Select(list =>
+            {
+                if (list.GetType().IsArray)
+                    list = ((Array)list).RemoveAll();
+
+                return list;
+            }));
+            
+            OnClear();
         }
         
+        public void OnInsert(int index)
+        {
+            if (index < 0 || index > cachedElements.Count)
+                return;
+            
+            cachedElements.Insert(index, new ListElement(this, index));
+            
+            if (index < cachedElements.Count)
+            {
+                for (int i = 0; i < cachedElements.Count; i++)
+                    cachedElements[i].index = i;
+            }
+        }
+
+        public void OnRemoveAt(int index)
+        {
+            if (index < 0 || index >= cachedElements.Count)
+                return;
+            
+            cachedElements.RemoveAt(index);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnElementMoved(int oldIndex, int newIndex)
+        {
+            if (oldIndex < 0 || oldIndex >= cachedElements.Count)
+                return;
+            
+            if (newIndex < 0 || newIndex >= cachedElements.Count)
+                return;
+            
+            cachedElements.Move(oldIndex, newIndex);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnElementChanged(int oldIndex, int newIndex)
+        {
+            cachedElements.Change(oldIndex, newIndex);
+            
+            for (int i = 0; i < cachedElements.Count; i++)
+                cachedElements[i].index = i;
+        }
+
+        public void OnClear() => cachedElements.Clear();
+
         public bool Contains(object? value)
         {
             ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
@@ -240,14 +333,13 @@ namespace RuniOS.Inspectors.Csharp
         
         
 
-        List<IInspectorElement>? cachedElements;
-        IReadOnlyList<IInspectorElement>? readOnlyCachedElements;
+        readonly List<IInspectorListElement> cachedElements = new();
+        IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
         public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
                 return ImmutableArray<IInspectorElement>.Empty;
             
-            cachedElements ??= new List<IInspectorElement>();
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
             
             if (cachedElements.Count < count)
@@ -298,8 +390,8 @@ namespace RuniOS.Inspectors.Csharp
                 return null;
 
             GetElements();
-            IInspectorListElement? element = cachedElements?[index] as IInspectorListElement;
-            if (!element?.HasFlags(flags) ?? false)
+            IInspectorListElement element = cachedElements[index];
+            if (!element.HasFlags(flags))
                 return null;
 
             return element;

@@ -13,6 +13,31 @@ namespace RuniOS.Inspectors
         string? inspectionElementDisplayName { get; }
         
         RuniNullabilityInfo? nullabilityInfo { get; }
+        
+        /// <summary>
+        /// 요소가 <b>삽입되었을 때</b> 호출됩니다.
+        /// </summary>
+        void OnInsert(int index);
+        
+        /// <summary>
+        /// 요소가 <b>제거되었을 때</b> 호출됩니다.
+        /// </summary>
+        void OnRemoveAt(int index);
+
+        /// <summary>
+        /// 요소가 위치를 <b>이동했을 때</b> 호출됩니다.
+        /// </summary>
+        void OnElementMoved(int oldIndex, int newIndex);
+        
+        /// <summary>
+        /// 요소가 서로의 위치를 <b>바꿨을 때</b> 호출됩니다.
+        /// </summary>
+        void OnElementChanged(int oldIndex, int newIndex);
+        
+        /// <summary>
+        /// 모든 요소가 <b>제거되었을 때</b> 호출됩니다.
+        /// </summary>
+        void OnClear();
 
         new IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
         IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);

@@ -2,6 +2,7 @@
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -53,6 +54,9 @@ namespace RuniOS.Editor.Windows
             public char charField = 'a';
             public string stringField = "text";
             public int? nullableInt = 42;
+            public List<Test2> test2List = new();
+            public List<List<Test2>> test2ListList = new();
+            public Test2[] test2Array = new Test2[] { new(), new(), new(), new() };
             public SerializableNullable<int> serializableNullableInt = 42;
             public SerializableNullable<SerializableNullable<float>> serializableNullableNullableFloat = new(42);
             public StructTest structTest = new StructTest();

@@ -7,20 +7,20 @@ namespace RuniOS
 {
     public static class TypeUtility
     {
-        public static object? GetDefaultValue(this Type type)
+        public static object? GetDefaultValue(this Type type, bool nonPublic = false)
         {
             if (!type.IsValueType)
                 return null;
 
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(type, nonPublic);
         }
 
-        public static object GetDefaultValueNotNull(this Type type)
+        public static object GetDefaultValueNotNull(this Type type, bool nonPublic = false)
         {
             if (type == typeof(string))
                 return string.Empty;
 
-            return Activator.CreateInstance(type);
+            return Activator.CreateInstance(type, nonPublic);
         }
 
         /// <summary>

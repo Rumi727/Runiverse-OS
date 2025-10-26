@@ -70,7 +70,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 리스트에 있는 요소의 인덱스를 가져옵니다.
         /// </summary>
-        public int index { get; }
+        public int index { get; set; }
 
         /// <summary>
         /// 변수가 공개되어있는지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 true입니다.

@@ -10,8 +10,8 @@ namespace RuniOS.Inspectors.Csharp
     {
         public ListElement(InspectableList inspectable, int index)
         {
-            name = $"Element {index}";
-            displayName = name;
+            name = string.Empty;
+            displayName = string.Empty;
             
             this.inspectable = inspectable;
             this.index = index;
@@ -28,13 +28,11 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableList inspectable { get; }
         IInspectable IInspectorElement.inspectable => inspectable;
 
-        public Type variableType => inspectable.inspectionType;
-
-        public Type? elementType => inspectable.inspectionElementType;
+        public Type variableType => inspectable.inspectionElementType ?? typeof(object);
         
         public RuniNullabilityInfo? nullabilityInfo => inspectable.nullabilityInfo;
         
-        public int index { get; }
+        public int index { get; set; }
 
         public bool isPublic => true;
         public bool isStatic => false;
