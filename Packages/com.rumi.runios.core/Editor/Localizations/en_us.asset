@@ -245,3 +245,7 @@ MonoBehaviour:
 
         Please
         ensure that it inherits from IList.'
+    - key: inspector.not_readable
+      value: This element is not readable.
+    - key: inspector.no_instance
+      value: There are no instances.

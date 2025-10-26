@@ -34,6 +34,7 @@ namespace RuniOS.Editor.Windows
 
         public class Test
         {
+            public Test2? staticTest2Field;
             public bool boolField = false;
             public sbyte sbyteField = 42;
             public byte byteField = 42;
@@ -75,6 +76,8 @@ namespace RuniOS.Editor.Windows
             public Color color;
             public StructTest2? nullableStructTest2;
             public SerializableNullable<StructTest2> serializableNullableStructTest2;
+            public HashSet<Test2> hashSet = new() { new Test2() };
+            public Dictionary<Test2, int> dictionary = new() { { new Test2(), 1 } };
 
             public class Test2
             {

@@ -158,7 +158,18 @@ namespace RuniOS.Editor.Inspectors
             if (lastException != null)
                 return EditorGUIUtility.singleLineHeight;
             
-            return (drawers.WhereNotNull().Sum(item => item.GetHeight(label, flags, isInArray) + 2) - 2).Clamp(0);
+            return (drawers.WhereNotNull().Sum(item =>
+            {
+                try
+                {
+                    return item.GetHeight(label, flags, isInArray) + 2;
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    return EditorGUIUtility.singleLineHeight + 2;
+                }
+            }) - 2).Clamp(0);
         }
     }
 }
