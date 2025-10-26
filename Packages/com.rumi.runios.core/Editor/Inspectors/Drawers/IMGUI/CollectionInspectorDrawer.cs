@@ -21,7 +21,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             position.height = helpBoxYSize;
             EditorGUI.HelpBox(position, GetTextOrKey("inspector.invalid.collection"), MessageType.Warning);
             
-            position.y += 2;
+            position.y += helpBoxYSize + 2;
             position.height = base.GetHeight(label, flags, isInArray);
             
             base.OnGUI(position, label, flags, isInArray);
