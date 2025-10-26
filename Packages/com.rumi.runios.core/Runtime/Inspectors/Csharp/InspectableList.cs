@@ -80,11 +80,13 @@ namespace RuniOS.Inspectors.Csharp
 
         public IEnumerable<IList> instances
         {
-            get => _instances;
-            set
+            get
             {
                 parentElement?.UpdateChildInspectable();
-                
+                return _instances;
+            }
+            set
+            {
                 if (value.Any(x => inspectionType != x.GetType()))
                 {
                     string invalidTypes = string.Join(", ", value.Where(x => x != null && !inspectionType.IsInstanceOfType(x))
