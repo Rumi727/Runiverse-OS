@@ -16,9 +16,9 @@ namespace RuniOS
     /// <br/>
     /// 이 클래스는 <see cref="TAttribute"/>와 관련된 드로어 타입을 관리하는 <b>정적 유틸리티 클래스</b> 역할을 하며, 특정 드로어 구현을 위한 <b>기반 클래스</b> 역할도 수행합니다.
     /// </summary>
-    /// <typeparam name="TBaseDrawer">The base type of the specific drawer system. This type is used to filter reflection results, ensuring only classes that derive from <see cref="TBaseDrawer"/> (and have <see cref="TAttribute"/>) are managed.
+    /// <typeparam name="TBaseDrawer">The base type of the specific drawer system. This type is used to filter reflection results, ensuring only classes that derive from <see cref="TBaseDrawer"/> or are <see cref="TBaseDrawer"/> itself (if not abstract, and have <see cref="TAttribute"/>) are managed.
     /// <br/>
-    /// 특정 드로어 시스템의 기준이 되는 기반 타입입니다. 이 타입은 리플렉션 결과를 필터링하는 데 사용되며, <see cref="TBaseDrawer"/>를 상속하는 클래스(및 <see cref="TAttribute"/>가 있는 클래스)만이 관리되도록 합니다.
+    /// 특정 드로어 시스템의 기준이 되는 기반 타입입니다. 이 타입은 리플렉션 결과를 필터링하는 데 사용되며, <see cref="TBaseDrawer"/>를 상속하는 클래스 또는 <see cref="TBaseDrawer"/> 자신(추상 클래스가 아닐 경우, 그리고 <see cref="TAttribute"/>가 있을 경우)만이 관리되도록 합니다.
     /// </typeparam>
     /// <typeparam name="TAttribute">The specific attribute type that marks the classes this drawer should manage, which must inherit from <see cref="CustomAttributeDrawerAttribute"/>.
     /// <br/>
@@ -49,7 +49,7 @@ namespace RuniOS
                         (
                             x =>
                                 x.IsDefined(typeof(TAttribute)) &&
-                                x.IsSubclassOf(typeof(TBaseDrawer))
+                                ((!typeof(TBaseDrawer).IsAbstract && typeof(TBaseDrawer) == x) || x.IsSubclassOf(typeof(TBaseDrawer)))
                         )
                         .SelectMany
                         (
