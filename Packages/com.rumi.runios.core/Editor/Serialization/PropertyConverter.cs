@@ -1,9 +1,6 @@
 ﻿#nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using System;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
 using UnityEditor;
 
 namespace RuniOS.Editor.Serialization
@@ -17,59 +14,6 @@ namespace RuniOS.Editor.Serialization
     /// </summary>
     public abstract class PropertyConverter
     {
-        static PropertyConverter()
-        {
-            ReflectionUtility.onListUpdate += Update;
-            Update();
-
-            static void Update()
-            {
-                lock (propertyConverterTypesLock)
-                {
-                    propertyConverterTypes = ReflectionUtility.types
-                        .Where
-                        (
-                            x =>
-                            x.IsDefined(typeof(CustomPropertyConverterAttribute)) &&
-                            x.IsSubclassOf(typeof(PropertyConverter)) &&
-                            x.HasDefaultConstructor()
-                        )
-                        .Select(static x => (x, x.GetCustomAttribute<CustomPropertyConverterAttribute>()))
-                        .OrderByDescending
-                        (
-                            x =>
-                            {
-                                if (x.Item2.priority == 0)
-                                {
-                                    if (x.Item2.targetType.IsInterface)
-                                        return 0;
-
-                                    return x.Item2.targetType.GetHierarchy().Count() * 100;
-                                }
-                                else
-                                    return x.Item2.priority;
-                            }
-                        ).ToImmutableArray();
-                }
-            }
-        }
-        
-        /// <summary>
-        /// Gets a read-only list of all discovered <see cref="PropertyConverter"/> types and their associated <see cref="CustomPropertyConverterAttribute"/>.
-        /// <br/>
-        /// The list is ordered by the hierarchy depth of the target type in descending order, ensuring that more specific converters are prioritized.
-        /// <br/><br/>
-        /// 발견된 모든 <see cref="PropertyConverter"/> 타입과 관련 <see cref="CustomPropertyConverterAttribute"/>의 읽기 전용 목록을 가져옵니다.
-        /// <br/>
-        /// 이 목록은 대상 타입의 계층 깊이(내림차순)에 따라 정렬되어, 더 구체적인 컨버터가 우선적으로 처리되도록 합니다.
-        /// <br/><br/>
-        /// 이 속성은 <b>스레드에 안전</b>합니다. 내부적으로 잠금(<see langword="lock"/>)을 사용하여 <see cref="ReflectionUtility.onListUpdate"/> 이벤트 발생 시 데이터를 갱신합니다.
-        /// </summary>
-        public static ImmutableArray<(Type type, CustomPropertyConverterAttribute attribute)> propertyConverterTypes { get; private set; }
-        static readonly object propertyConverterTypesLock = new();
-
-
-
         public static PropertyConverter? FindConverter<T>() => FindConverter(typeof(T));
 
         public static PropertyConverter? FindConverter(SerializedProperty property)
@@ -82,21 +26,8 @@ namespace RuniOS.Editor.Serialization
         
         public static PropertyConverter? FindConverter(Type propertyType)
         {
-            // 해당 propertyType에 맞는 PropertyConverter를 찾습니다.
-            PropertyConverter? converter = null;
-            foreach ((Type type, CustomPropertyConverterAttribute attribute) in propertyConverterTypes)
-            {
-                // propertyType이 컨버터의 targetType과 정확히 일치하거나,
-                // 컨버터가 하위 타입 호환성을 지원하고 propertyType이 targetType에 할당 가능한 경우
-                if (propertyType == attribute.targetType || (attribute.isSubtypeCompatible && propertyType.IsAssignableToAny(attribute.targetType)))
-                {
-                    // 해당 PropertyConverter 인스턴스를 생성하고 루프를 종료합니다 (가장 적합한 컨버터 선택).
-                    converter = (PropertyConverter)Activator.CreateInstance(type);
-                    break;
-                }
-            }
-
-            return converter;
+            Type? drawerType = AttributeDrawer<PropertyConverter, CustomPropertyConverterAttribute>.FindDrawerType(propertyType);
+            return drawerType != null ? (PropertyConverter)Activator.CreateInstance(drawerType) : null;
         }
 
 

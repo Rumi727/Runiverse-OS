@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Serialization
     /// 이 속성은 <see cref="PropertyConverter"/>를 해당 컨버터가 처리하는 타입과 연결하는 데 사용됩니다.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class CustomPropertyConverterAttribute : Attribute
+    public class CustomPropertyConverterAttribute : CustomAttributeDrawerAttribute
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CustomPropertyConverterAttribute"/> class.
@@ -28,31 +28,12 @@ namespace RuniOS.Editor.Serialization
         /// <br/><see langword="true"/>인 경우, 컨버터는 <paramref name="targetType"/> 및 해당 파생 타입에 적용됩니다.
         /// <br/><see langword="false"/>인 경우, 컨버터는 정확히 <paramref name="targetType"/>에만 적용됩니다.
         /// </param>
-        public CustomPropertyConverterAttribute(Type targetType, bool isSubtypeCompatible = false)
-        {
-            this.targetType = targetType;
-            this.isSubtypeCompatible = isSubtypeCompatible;
-        }
+        public CustomPropertyConverterAttribute(Type targetType, bool isSubtypeCompatible = false) : base(targetType) => this.isSubtypeCompatible = isSubtypeCompatible;
 
         /// <summary>
-        /// Gets the target <see cref="Type"/> that this property converter is designed to handle.
-        /// <br/>이 컨버터가 처리하도록 설계된 대상 <see cref="Type"/>을 가져옵니다.
+        /// Gets a value indicating whether this property converter is compatible with subtypes of the <see cref="CustomAttributeDrawerAttribute.targetType"/>.
+        /// <br/>이 컨버터가 <see cref="CustomAttributeDrawerAttribute.targetType"/>의 서브타입과 호환되는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public Type targetType { get; }
-        
-        /// <summary>
-        /// Gets a value indicating whether this property converter is compatible with subtypes of the <see cref="targetType"/>.
-        /// <br/>이 컨버터가 <see cref="targetType"/>의 서브타입과 호환되는지 여부를 나타내는 값을 가져옵니다.
-        /// </summary>
-        public bool isSubtypeCompatible { get; }
-
-        /// <summary>
-        /// Overrides the priority of this converter.<br/>
-        /// If the value is 0, the priority according to the inheritance hierarchy is used.
-        /// <br/><br/>
-        /// 이 컨버터의 우선순위를 재정의 합니다.<br/>
-        /// 값이 0이면 상속 계층 구조에 따른 우선순위가 사용됩니다.
-        /// </summary>
-        public int priority { get; set; } = 0;
+        public override bool isSubtypeCompatible { get; }
     }
 }
