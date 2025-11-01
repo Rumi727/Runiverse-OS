@@ -61,8 +61,10 @@ namespace RuniOS
         /// <param name="genericTypeDefinition">찾으려는 제네릭 타입 정의입니다 (예: <c>typeof(List&lt;&gt;)</c>, <c>typeof(IDictionary&lt;,&gt;)</c>).</param>
         /// <param name="resolvedType">
         /// <paramref name="givenType"/>이 <paramref name="genericTypeDefinition"/>을 구현하거나 상속하는 경우,
-        /// 실제로 발견된 구체적인 제네릭 타입(예: <c>List&lt;int&gt;</c>)이 반환됩니다.
+        /// 실제로 발견된 구체적인 제네릭 타입(예: <c>IList&lt;int&gt;</c>)이 반환됩니다.<br/>
         /// 찾지 못한 경우 <see langword="null"/>이 반환됩니다.
+        /// <br/><br/>
+        /// 인터페이스일 경우엔 찾은 인터페이스 타입을 반환합니다.
         /// </param>
         /// <returns>
         /// <paramref name="givenType"/>이 <paramref name="genericTypeDefinition"/>을 구현하거나 상속하면

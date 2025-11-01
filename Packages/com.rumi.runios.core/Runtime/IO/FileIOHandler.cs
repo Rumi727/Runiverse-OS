@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Linq;
 using RuniOS.Spans;
 using System;
 using System.Collections.Generic;

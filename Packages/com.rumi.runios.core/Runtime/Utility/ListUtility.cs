@@ -3,7 +3,6 @@ using ExtendedNumerics;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Numerics;
 using System.Text.RegularExpressions;
@@ -28,6 +27,23 @@ namespace RuniOS
                 throw new ArgumentNullException(nameof(list));
             
             (list[oldIndex], list[newIndex]) = (list[newIndex], list[oldIndex]);
+        }
+        
+        public static void Resize(this IList list, int newSize, Func<int, object?>? activator = null)
+        {
+            if (list.Count == newSize)
+                return;
+            
+            bool add = list.Count < newSize;
+            int count = (list.Count - newSize).Abs();
+
+            for (int i = 0; i < count; i++)
+            {
+                if (add)
+                    list.Add(activator?.Invoke(list.Count));
+                else
+                    list.RemoveAt(list.Count - 1);
+            }
         }
 
         #region Close Value
@@ -2254,17 +2270,40 @@ namespace RuniOS
             return list;
         }
         
-        public static Array Resize(this Array array, int newSize)
+        public static Array Resize(this Array array, int newSize, Func<int, object?>? activator = null)
         {
-            if (array.Length != newSize)
-            {
-                Array newArray = Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), newSize);
-                Array.Copy(array, 0, newArray, 0, (array.Length > newSize) ? newSize : array.Length);
+            if (array.Length == newSize)
+                return array;
+            
+            Array newArray = Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), newSize);
+            Array.Copy(array, 0, newArray, 0, (array.Length > newSize) ? newSize : array.Length);
 
-                return newArray;
+            if (activator != null && array.Length < newSize)
+            {
+                int count = newSize - array.Length;
+                for (int i = 0; i < count; i++)
+                    array.SetValue(activator.Invoke(array.Length + i), array.Length + i);
             }
 
-            return array;
+            return newArray;
+        }
+        
+        public static T[] Resize<T>(this T[] array, int newSize, Func<int, T> activator)
+        {
+            if (array.Length == newSize)
+                return array;
+            
+            T[] newArray = new T[newSize];
+            Array.Copy(array, 0, newArray, 0, (array.Length > newSize) ? newSize : array.Length);
+
+            if (array.Length < newSize)
+            {
+                int count = newSize - array.Length;
+                for (int i = 0; i < count; i++)
+                    array[array.Length + i] = activator.Invoke(array.Length + i);
+            }
+
+            return newArray;
         }
 
         public static Array Copy(this Array array)
@@ -2283,92 +2322,6 @@ namespace RuniOS
             return result;
         }
         #endregion
-
-        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
-
-        public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
-        
-        public static bool IsEmpty(this ICollection collection) => collection.Count == 0;
-        public static bool Any(this ICollection collection) => collection.Count > 0;
-        
-        public static bool SequenceEqual(this IEnumerable first, IEnumerable second) =>
-            SequenceEqual(first, second, null);
- 
-        public static bool SequenceEqual(this IEnumerable first, IEnumerable second, IEqualityComparer? comparer)
-        {
-            ExceptionUtility.ThrowIfArgumentNull(first, nameof(first));
-            ExceptionUtility.ThrowIfArgumentNull(second, nameof(second));
- 
-            if (first is ICollection firstCol && second is ICollection secondCol)
-            {
-                if (firstCol.Count != secondCol.Count)
-                    return false;
- 
-                if (firstCol is IList firstList && secondCol is IList secondList)
-                {
-                    int count = firstCol.Count;
-                    for (int i = 0; i < count; i++)
-                    {
-                        if (comparer != null)
-                        {
-                            if (!comparer.Equals(firstList[i], secondList[i]))
-                                return false;
-                        }
-                        else
-                        {
-                            if (!Equals(firstList[i], secondList[i]))
-                                return false;
-                        }
-                    }
- 
-                    return true;
-                }
-            }
- 
-            IEnumerator e1 = first.GetEnumerator();
-            IEnumerator e2 = second.GetEnumerator();
-            
-            using var d1 = e1 as IDisposable;
-            using var d2 = e2 as IDisposable;
- 
-            while (e1.MoveNext())
-            {
-                if (!e2.MoveNext())
-                    return false;
-                
-                if (comparer != null)
-                {
-                    if (!comparer.Equals(e1.Current, e2.Current))
-                        return false;
-                }
-                else
-                {
-                    if (!Equals(e1.Current, e2.Current))
-                        return false;
-                }
-            }
- 
-            return !e2.MoveNext();
-        }
-        
-        /// <summary>
-        /// 지정된 열거형의 순서와 내용을 기반으로 해시코드를 생성합니다.<br/>
-        /// 열거형의 요소가 순서까지 같으면 동일한 해시코드를 반환합니다.
-        /// </summary>
-        /// <param name="list">해시코드를 계산할 리스트 또는 배열입니다.</param>
-        /// <typeparam name="T">리스트 또는 배열의 요소 타입입니다.</typeparam>
-        /// <returns>생성된 해시코드를 반환합니다.</returns>
-        public static int GetSequenceHashCode<T>(this IEnumerable<T>? list)
-        {
-            if (list == null)
-                return 0;
-            
-            var hash = new HashCode();
-            foreach (var item in list)
-                hash.Add(item);
-
-            return hash.ToHashCode();
-        }
         
         /// <summary>
         /// 대상 Dictionary의 키들을 주어진 List의 아이템들과 동기화합니다.<br/>
@@ -2378,13 +2331,13 @@ namespace RuniOS
         /// <typeparam name="TKey">키 타입입니다.</typeparam>
         /// <typeparam name="TValue">값 타입입니다.</typeparam>
         /// <param name="targetDictionary">키를 동기화할 대상 Dictionary입니다.</param>
-        /// <param name="sourceList">동기화의 기준이 되는 List입니다.</param>
+        /// <param name="source">동기화의 기준이 되는 List입니다.</param>
         /// <param name="valueFactory">새로운 키가 추가될 때 사용할 기본 값을 생성하는 함수입니다.</param>
-        public static void SyncKeysWithList<TKey, TValue>(this Dictionary<TKey, TValue> targetDictionary, IReadOnlyList<TKey> sourceList, Func<TKey, TValue>? valueFactory = null) where TKey : notnull
+        public static void SyncKeysWithEnumerable<TKey, TValue>(this IDictionary<TKey, TValue> targetDictionary, IEnumerable<TKey> source, Func<TKey, TValue>? valueFactory = null) where TKey : notnull
         {
             // 1. 제거: List에는 없지만 Dictionary에는 있는 키 제거
             // Dictionary의 Keys 컬렉션은 순회 중 수정할 수 없으므로, Except 결과를 List로 만듭니다.
-            IEnumerable<TKey> keysToRemoveEnumerable = targetDictionary.Keys.Except(sourceList);
+            IEnumerable<TKey> keysToRemoveEnumerable = targetDictionary.Keys.Except(source);
             if (keysToRemoveEnumerable.Any())
             {
                 TKey[] keysToRemove = keysToRemoveEnumerable.ToArray();
@@ -2393,13 +2346,30 @@ namespace RuniOS
             }
 
             // 2. 추가: List에는 있지만 Dictionary에는 없는 키 추가
-            IEnumerable<TKey> keysToAddEnumerable = sourceList.Except(targetDictionary.Keys);
+            IEnumerable<TKey> keysToAddEnumerable = source.Except(targetDictionary.Keys);
             if (keysToAddEnumerable.Any())
             {
                 TKey[] keysToAdd = keysToAddEnumerable.ToArray();
                 foreach (var key in keysToAdd)
                     targetDictionary.Add(key, valueFactory != null ? valueFactory.Invoke(key) : Activator.CreateInstance<TValue>());
             }
+        }
+
+        public static void SyncWithEnumerable(this IList target, IEnumerable source)
+        {
+            int index = 0;
+            foreach (var item in source)
+            {
+                if (index < target.Count)
+                    target[index] = item;
+                else
+                    target.Add(item);
+                
+                index++;
+            }
+            
+            while (index < target.Count)
+                target.RemoveAt(index);
         }
     }
 }

@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using RuniOS.IO;
+using RuniOS.Linq;
 using System.Collections.Generic;
 
 namespace RuniOS.Resource.Languages

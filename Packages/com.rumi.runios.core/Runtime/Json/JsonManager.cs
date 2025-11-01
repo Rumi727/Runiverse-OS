@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RuniOS.Booting;
 using RuniOS.Json.Converters;
+using RuniOS.Linq;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine.Scripting;

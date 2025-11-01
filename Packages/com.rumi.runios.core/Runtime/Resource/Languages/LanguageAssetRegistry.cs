@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.Booting;
 using RuniOS.IO;
+using RuniOS.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;

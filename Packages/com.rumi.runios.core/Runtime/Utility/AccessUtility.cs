@@ -1,6 +1,7 @@
 ﻿#nullable enable
 // https://github.com/pardeike/Harmony/blob/master/Harmony/Tools/AccessTools.cs/ 소스 코드의 일부분을 가져왔습니다!
 using System;
+using System.Linq;
 using System.Reflection;
 
 namespace RuniOS
@@ -87,7 +88,7 @@ namespace RuniOS
             
             FieldInfo? field = FindIncludingBaseTypes(type, t => t.GetField(name, all));
             if (field is null)
-                Debug.Log("Field: Could not find field for type {type} and name {name}");
+                Debug.Log($"Field: Could not find field for type {type} and name {name}");
             
             return field;
         }
@@ -112,7 +113,7 @@ namespace RuniOS
             
             PropertyInfo? property = type.GetProperty(name, allDeclared);
             if (property is null)
-                Debug.Log("DeclaredProperty: Could not find property for type {type} and name {name}");
+                Debug.Log($"DeclaredProperty: Could not find property for type {type} and name {name}");
             
             return property;
         }
@@ -149,7 +150,7 @@ namespace RuniOS
             
             PropertyInfo? property = FindIncludingBaseTypes(type, t => t.GetProperty(name, all));
             if (property is null)
-                Debug.Log("Property: Could not find property for type {type} and name {name}");
+                Debug.Log($"Property: Could not find property for type {type} and name {name}");
             
             return property;
         }
@@ -186,7 +187,7 @@ namespace RuniOS
             
             EventInfo? eventInfo = type.GetEvent(name, allDeclared);
             if (eventInfo is null)
-                Debug.Log("DeclaredEvent: Could not find event for type {type} and name {name}");
+                Debug.Log($"DeclaredEvent: Could not find event for type {type} and name {name}");
             
             return eventInfo;
         }
@@ -212,7 +213,7 @@ namespace RuniOS
             
             EventInfo? eventInfo = FindIncludingBaseTypes(type, t => t.GetEvent(name, all));
             if (eventInfo is null)
-                Debug.Log("Event: Could not find event for type {type} and name {name}");
+                Debug.Log($"Event: Could not find event for type {type} and name {name}");
             
             return eventInfo;
         }
@@ -270,7 +271,7 @@ namespace RuniOS
 
             if (result is null)
             {
-                Debug.Log("DeclaredMethod: Could not find method for type {type} and name {name} and parameters {parameters?.Description()}");
+                Debug.Log($"DeclaredMethod: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
                 return null;
             }
             else if (generics is not null)
@@ -319,7 +320,7 @@ namespace RuniOS
 
             if (result is null)
             {
-                Debug.Log("Method: Could not find method for type {type} and name {name} and parameters {parameters?.Description()}");
+                Debug.Log($"Method: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
                 return null;
             }
             else if (generics is not null)
