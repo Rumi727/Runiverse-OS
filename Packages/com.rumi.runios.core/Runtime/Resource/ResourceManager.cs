@@ -23,7 +23,7 @@ namespace RuniOS.Resource
          * 임시
         */
         internal static readonly HashSet<PackIdentifier> internalEnabledPackIdentifiers = new();
-        public static ReadOnlyHashSet<PackIdentifier> enabledPackIdentifiers { get; } = new(internalEnabledPackIdentifiers);
+        public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = new(internalEnabledPackIdentifiers);
         
         static readonly AssetRegistryList _assetRegistries = new();
         public static ReadOnlyAssetRegistryList assetRegistries { get; } = new ReadOnlyAssetRegistryList(_assetRegistries);
