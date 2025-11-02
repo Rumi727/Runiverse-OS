@@ -53,7 +53,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 label,
                 (!variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags)) ? !variableElement.value.IsNull() : null,
                 (!variableElement.inspectable.instancesIsEmpty && variableElement.IsWritable(flags)) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
-                variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
+                variableElement.variableType.IsArray || variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
                 variableElement.nullabilityInfo?.writeState,
                 nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"
             );
@@ -89,6 +89,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
                     if (!hasValue.Value)
                     {
+                        GUI.enabled = true;
+                        
                         position.height = EditorGUIUtility.singleLineHeight;
                         EditorGUI.LabelField(position, label ?? GUIContent.none, new GUIContent(nullText));
                         

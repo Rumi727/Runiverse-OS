@@ -170,7 +170,7 @@ namespace RuniOS.Inspectors.Csharp
             
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().Cast<IEnumerable>();
+                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
         }
     }
 }

@@ -17,7 +17,7 @@ namespace RuniOS.Inspectors.Csharp
             this.inspectable = inspectable;
             this.index = index;
 
-            variableType = currentElementType;
+            variableType = inspectable.inspectionElementType ?? typeof(object);
             
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
             
@@ -32,7 +32,7 @@ namespace RuniOS.Inspectors.Csharp
         IInspectable IInspectorElement.inspectable => inspectable;
 
         public Type variableType { get; }
-        public Type currentElementType => value?.GetType() ?? typeof(object);
+        public Type currentElementType => value?.GetType() ?? variableType;
 
         public RuniNullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
         
@@ -145,7 +145,7 @@ namespace RuniOS.Inspectors.Csharp
             
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().Cast<IEnumerable>();
+                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
         }
     }
 }

@@ -5,6 +5,7 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers
 {
     [CustomCollectionHandler(typeof(IList))]
+    [CustomCollectionHandler(typeof(Array))]
     public class ListHandler : CollectionHandler
     {
         public ListHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }

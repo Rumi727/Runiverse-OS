@@ -19,6 +19,8 @@ namespace RuniOS
         {
             if (type == typeof(string))
                 return string.Empty;
+            if (type.IsArray)
+                return Array.CreateInstance(type.GetElementType() ?? typeof(object), 0);
 
             return Activator.CreateInstance(type, nonPublic);
         }
