@@ -9,7 +9,7 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(object))]
+    [CustomInspectorDrawer(typeof(object), allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
         public ObjectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) => inspector = new Inspector(rootInspector);

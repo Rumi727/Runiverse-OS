@@ -3,7 +3,6 @@ using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using UnityEditor;
@@ -15,8 +14,8 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(ICollection))]
-    [CustomInspectorDrawer(typeof(ICollection<>))]
+    [CustomInspectorDrawer(typeof(IEnumerable))]
+    [CustomInspectorDrawer(typeof(Array), allowInDebug = true)]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
         public ListInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }

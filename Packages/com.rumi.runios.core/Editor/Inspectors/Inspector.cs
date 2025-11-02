@@ -50,6 +50,10 @@ namespace RuniOS.Editor.Inspectors
 
         public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+            
             if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
             {
                 try
@@ -81,7 +85,7 @@ namespace RuniOS.Editor.Inspectors
                     return;
                 }
 
-                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector)).ToImmutableArray();
+                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
             }
             
             this.inspectable = inspectable;
@@ -93,9 +97,13 @@ namespace RuniOS.Editor.Inspectors
             lastException = null;
             if (!element.HasFlags(flags) && !skipFlagCheck)
                 return;
+            
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
 
             elements = ImmutableArray.Create(element);
-            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector));
+            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector, predicate));
 
             inspectorFlags = flags;
         }
@@ -106,9 +114,13 @@ namespace RuniOS.Editor.Inspectors
 
             if (!skipFlagCheck)
                 elements = elements.Where(x => x.HasFlags(flags));
+
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
             
             this.elements = elements.ToImmutableArray();
-            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector)).ToImmutableArray();
+            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
             
             inspectorFlags = flags;
         }

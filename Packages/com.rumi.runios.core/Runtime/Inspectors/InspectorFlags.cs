@@ -92,8 +92,13 @@ namespace RuniOS.Inspectors
         Hidden = 1 << 30,
         
         /// <summary>
+        /// 인스펙터를 디버깅 모드로 표시합니다.
+        /// </summary>
+        Debug = 1 << 31,
+        
+        /// <summary>
         /// 모든 메소드를 포함한 멤버를 표시합니다.
         /// </summary>
-        All = -1
+        All = -1 & ~Debug
     }
 }

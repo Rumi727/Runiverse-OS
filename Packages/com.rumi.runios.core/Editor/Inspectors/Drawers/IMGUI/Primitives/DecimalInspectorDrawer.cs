@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
-    [CustomInspectorDrawer(typeof(decimal))]
+    [CustomInspectorDrawer(typeof(decimal), allowInDebug = true)]
     public class DecimalInspectorDrawer : PrimitiveInspectorDrawer
     {
         public DecimalInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }

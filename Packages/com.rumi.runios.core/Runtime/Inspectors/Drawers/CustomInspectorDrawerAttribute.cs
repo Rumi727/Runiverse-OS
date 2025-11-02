@@ -5,6 +5,8 @@ namespace RuniOS.Inspectors.Drawers
 {
     public sealed class CustomInspectorDrawerAttribute : CustomAttributeDrawerAttribute
     {
+        public bool allowInDebug { get; set; }
+        
         public override bool isSubtypeCompatible => true;
         
         public CustomInspectorDrawerAttribute(Type targetType) : base(targetType) { }

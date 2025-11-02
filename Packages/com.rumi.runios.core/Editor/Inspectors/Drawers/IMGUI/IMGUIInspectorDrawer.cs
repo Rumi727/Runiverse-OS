@@ -12,12 +12,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class IMGUIInspectorDrawer : InspectorDrawer
     {
-        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, Inspector? rootInspector = null)
+        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, Inspector? rootInspector = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
         {
             if (element == null)
                 return null;
             
-            Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType);
+            Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
                 return null;
             
@@ -81,9 +81,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                         EditorGUI.EndDisabledGroup();
                         if (EditorGUI.EndChangeCheck())
                             writeAction?.Invoke(toggleValue);
+                        
+                        position.width -= toggleRect.width + 4;
                     }
-
-                    position.width -= toggleRect.width + 4;
+                    
                     resultPosition = position;
 
                     if (!hasValue.Value)
@@ -104,10 +105,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                         EditorGUI.Toggle(toggleRect, false);
                         if (EditorGUI.EndChangeCheck())
                             writeAction?.Invoke(false);
+                        
+                        toggleRect.x -= toggleRect.width + 2;
+                        position.width -= toggleRect.width + 2;
                     }
-                    
-                    toggleRect.x -= toggleRect.width + 2;
-                    position.width -= toggleRect.width + 2;
 
                     {
                         EditorGUI.BeginChangeCheck();
