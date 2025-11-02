@@ -59,15 +59,17 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 return;
             }
 
+            bool isFixedSize =
+                inspectableList.IsFixedSize ||
+                (inspectableList.isArray && (inspectableList.parentElement == null || !inspectableList.parentElement.IsWritable(flags)));
+
+            bool canAdd = !isFixedSize && elementType != null && elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
             reorderableList ??= new ReorderableList(inspectableList, elementType ?? typeof(object), true, false, true, true) { multiSelect = true, };
 
             reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true);
             reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, true) ?? EditorGUIUtility.singleLineHeight;
-            reorderableList.onCanAddCallback = _ =>
-                (!inspectableList.isArray || (inspectableList.parentElement != null && inspectableList.parentElement.IsWritable(flags))) &&
-                !inspectableList.IsFixedSize &&
-                elementType != null && elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
-            reorderableList.onCanRemoveCallback = _ => !inspectableList.IsFixedSize;
+            reorderableList.onCanAddCallback = _ => canAdd;
+            reorderableList.onCanRemoveCallback = _ => !isFixedSize;
             
             reorderableList.onAddCallback = x =>
             {
@@ -85,7 +87,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             position.height = headHeight;
 
             EditorGUI.BeginChangeCheck();
-            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, elementType != null ? (_ => CreateElementItem(flags, elementType)) : null, isInArray);
+            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, canAdd ? (_ => CreateElementItem(flags, elementType)) : null, isInArray);
             position.y += headHeight + 2;
             if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
                 inspectableList.UpdateSourceCollections();
