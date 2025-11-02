@@ -1,5 +1,4 @@
 #nullable enable
-// ReSharper disable All
 // ReSharper disable InvalidXmlDocComment
 /*
  * Created by C.J. Kimberlin
@@ -51,11 +50,11 @@
  * EasingFunction.Ease ease = EasingFunction.Ease.EaseInOutQuad;
  * EasingFunction.EasingFunc func = GetEasingFunction(ease;
  * 
- * double value = func(0, 10, 0.67f);
+ * double value = func(0, 10, 0.67);
  * 
  * EasingFunction.EaseingFunc derivativeFunc = GetEasingFunctionDerivative(ease);
  * 
- * double derivativeValue = derivativeFunc(0, 10, 0.67f);
+ * double derivativeValue = derivativeFunc(0, 10, 0.67);
  */
 
 using System;
@@ -101,7 +100,7 @@ namespace RuniOS
             Curve,
         }
 
-        private const double NATURAL_LOG_OF_2 = 0.693147181f;
+        const double NATURAL_LOG_OF_2 = 0.6931471805599453094;
 
         //
         // Easing functions
@@ -273,39 +272,34 @@ namespace RuniOS
         public static double EaseInBounce(double start, double end, double value)
         {
             end -= start;
-            double d = 1f;
-            return end - EaseOutBounce(0, end, d - value) + start;
+            return end - EaseOutBounce(0, end, 1 - value) + start;
         }
 
         public static double EaseOutBounce(double start, double end, double value)
         {
             value /= 1;
             end -= start;
-            if (value < (1 / 2.75))
+            
+            switch (value)
             {
-                return (end * (7.5625 * value * value)) + start;
-            }
-            else if (value < (2 / 2.75))
-            {
-                value -= (1.5 / 2.75);
-                return (end * ((7.5625 * value * value) + .75)) + start;
-            }
-            else if (value < (2.5 / 2.75))
-            {
-                value -= (2.25 / 2.75);
-                return (end * ((7.5625 * value * value) + .9375)) + start;
-            }
-            else
-            {
-                value -= (2.625 / 2.75);
-                return (end * ((7.5625 * value * value) + .984375)) + start;
+                case < 1 / 2.75:
+                    return (end * (7.5625 * value * value)) + start;
+                case < 2 / 2.75:
+                    value -= (1.5 / 2.75);
+                    return (end * ((7.5625 * value * value) + .75)) + start;
+                case < 2.5 / 2.75:
+                    value -= (2.25 / 2.75);
+                    return (end * ((7.5625 * value * value) + .9375)) + start;
+                default:
+                    value -= (2.625 / 2.75);
+                    return (end * ((7.5625 * value * value) + .984375)) + start;
             }
         }
 
         public static double EaseInOutBounce(double start, double end, double value)
         {
             end -= start;
-            double d = 1;
+            const double d = 1;
             if (value < d * 0.5)
                 return (EaseInBounce(0, end, value * 2) * 0.5) + start;
             else
@@ -316,13 +310,13 @@ namespace RuniOS
         {
             end -= start;
             value /= 1;
-            double s = 1.70158;
+            const double s = 1.70158;
             return (end * value * value * (((s + 1) * value) - s)) + start;
         }
 
         public static double EaseOutBack(double start, double end, double value)
         {
-            double s = 1.70158;
+            const double s = 1.70158;
             end -= start;
             value--;
             return (end * ((value * value * (((s + 1) * value) + s)) + 1)) + start;
@@ -347,15 +341,15 @@ namespace RuniOS
         {
             end -= start;
 
-            double d = 1;
-            double p = d * .3;
+            const double d = 1;
+            const double p = d * .3;
             double s;
             double a = 0;
 
             if (value == 0)
                 return start;
 
-            if ((value /= d) == 1)
+            if ((value /= d).Approximately(1))
                 return start + end;
 
             if (a == 0 || a < end.Abs())
@@ -364,9 +358,7 @@ namespace RuniOS
                 s = p / 4;
             }
             else
-            {
                 s = p / (2 * Math.PI) * (end / a).Asin();
-            }
 
             return -(a * 2d.Pow(10 * (value -= 1)) * (((value * d) - s) * (2 * Math.PI) / p).Sin()) + start;
         }
@@ -375,15 +367,15 @@ namespace RuniOS
         {
             end -= start;
 
-            double d = 1;
-            double p = d * .3;
+            const double d = 1;
+            const double p = d * .3;
             double s;
             double a = 0;
 
             if (value == 0)
                 return start;
 
-            if ((value /= d) == 1)
+            if ((value /= d).Approximately(1))
                 return start + end;
 
             if (a == 0 || a < end.Abs())
@@ -392,9 +384,7 @@ namespace RuniOS
                 s = p * 0.25;
             }
             else
-            {
                 s = p / (2 * Math.PI) * (end / a).Asin();
-            }
 
             return ((a * 2d.Pow(-10 * value) * (((value * d) - s) * (2 * Math.PI) / p).Sin()) + end + start);
         }
@@ -403,26 +393,24 @@ namespace RuniOS
         {
             end -= start;
 
-            double d = 1f;
-            double p = d * .3f;
+            const double d = 1;
+            const double p = d * .3;
             double s;
             double a = 0;
 
             if (value == 0)
                 return start;
 
-            if ((value /= d * 0.5d) == 2)
+            if ((value /= d * 0.5).Approximately(2))
                 return start + end;
 
-            if (a == 0f || a < end.Abs())
+            if (a == 0 || a < end.Abs())
             {
                 a = end;
                 s = p / 4;
             }
             else
-            {
                 s = p / (2 * Math.PI) * (end / a).Asin();
-            }
 
             if (value < 1)
                 return (-0.5 * (a * 2d.Pow(10 * (value -= 1)) * (((value * d) - s) * (2 * Math.PI) / p).Sin())) + start;
@@ -476,9 +464,7 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-            {
                 return 3d / 2d * end * value * value;
-            }
 
             value -= 2;
 
@@ -500,9 +486,7 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-            {
                 return 2 * end * value * value * value;
-            }
 
             value -= 2;
 
@@ -524,9 +508,7 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-            {
                 return 5d / 2d * end * value * value * value * value;
-            }
 
             value -= 2;
 
@@ -582,9 +564,7 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-            {
                 return end * value / (2 * (1 - (value * value)).Sqrt());
-            }
 
             value -= 2;
 
@@ -604,23 +584,22 @@ namespace RuniOS
             value /= 1;
             end -= start;
 
-            if (value < (1 / 2.75))
-                return 2 * end * 7.5625 * value;
-            else if (value < (2 / 2.75))
+            switch (value)
             {
-                value -= (1.5 / 2.75);
-                return 2 * end * 7.5625 * value;
+                case < 1 / 2.75:
+                    break;
+                case < 2 / 2.75:
+                    value -= (1.5 / 2.75);
+                    break;
+                case < 2.5 / 2.75:
+                    value -= (2.25 / 2.75);
+                    break;
+                default:
+                    value -= (2.625 / 2.75);
+                    break;
             }
-            else if (value < (2.5 / 2.75))
-            {
-                value -= (2.25 / 2.75);
-                return 2 * end * 7.5625 * value;
-            }
-            else
-            {
-                value -= (2.625 / 2.75);
-                return 2 * end * 7.5625 * value;
-            }
+            
+            return 2 * end * 7.5625 * value;
         }
 
         public static double EaseInOutBounceD(double start, double end, double value)
@@ -663,7 +642,7 @@ namespace RuniOS
 
             value -= 2;
             s *= (1.525);
-            return 0.5 * end * (((s + 1) * value * value) + (2 * value * (((s + 1f) * value) + s)));
+            return 0.5 * end * (((s + 1) * value * value) + (2 * value * (((s + 1) * value) + s)));
         }
 
         public static double EaseInElasticD(double start, double end, double value) => EaseOutElasticD(start, end, 1d - value);
@@ -672,8 +651,8 @@ namespace RuniOS
         {
             end -= start;
 
-            double d = 1;
-            double p = d * .3;
+            const double d = 1;
+            const double p = d * .3;
             double s;
             double a = 0;
 
@@ -694,12 +673,12 @@ namespace RuniOS
         {
             end -= start;
 
-            double d = 1;
-            double p = d * .3;
+            const double d = 1;
+            const double p = d * .3;
             double s;
             double a = 0;
 
-            if (a == 0f || a < end.Abs())
+            if (a == 0 || a < end.Abs())
             {
                 a = end;
                 s = p / 4;
