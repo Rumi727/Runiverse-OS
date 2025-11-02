@@ -25,7 +25,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         {
             CheckVariableElement();
 
-            if (NullToggleField(variableElement, position, out Rect foldoutPosition, label, flags))
+            if (NullToggleField(variableElement, position, out Rect foldoutPosition, label, flags, nullText))
                 return;
 
             foldoutPosition.height = foldoutYSize;

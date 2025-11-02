@@ -1,7 +1,9 @@
 ﻿#nullable enable
+using RuniOS.Collections.Generic;
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -34,7 +36,7 @@ namespace RuniOS.Editor.Windows
 
         public class Test
         {
-            public Test2? staticTest2Field;
+            public static Test2? staticTest2Field;
             public bool boolField = false;
             public sbyte sbyteField = 42;
             public byte byteField = 42;
@@ -46,7 +48,8 @@ namespace RuniOS.Editor.Windows
             public Test2 test2Field = new Test2();
             public Test2? nullableTest2Field = new Test2();
             public readonly Test2 readonlyTest2Field = new Test2();
-            public Test2 privateReadOnlyTest2Property { get; private set; } = new Test2();
+            public Test2? readonlyNullableTest2Property { get; } = new Test2();
+            public Test2? privateReadOnlyNullableTest2Property { get; private set; } = new Test2();
             public ulong ulongField = 42;
             public float floatField = 42;
             public double doubleField = 42;
@@ -69,6 +72,10 @@ namespace RuniOS.Editor.Windows
             public SerializableNullable<SerializableNullable<float>> serializableNullableNullableFloat = new(42);
             public StructTest structTest = new StructTest();
             public StructTest? nullableStructTest = new StructTest();
+            public StructTest? readOnlyNullableStructTest { get; } = new StructTest();
+            public StructTest? writeOnlyNullableStructTest { set => _writeOnlyNullableStructTest = value; }
+            // ReSharper disable once NotAccessedField.Local
+            StructTest? _writeOnlyNullableStructTest;
             public Vector2 vector2;
             public Vector3 vector3;
             public Vector4 vector4;
@@ -76,8 +83,33 @@ namespace RuniOS.Editor.Windows
             public Color color;
             public StructTest2? nullableStructTest2;
             public SerializableNullable<StructTest2> serializableNullableStructTest2;
-            public HashSet<Test2> hashSet = new() { new Test2() };
-            public Dictionary<Test2, int> dictionary = new() { { new Test2(), 1 } };
+            public Dictionary<string, Test2> dictionary = new() { { "wa sans", new Test2() } };
+            public SerializableDictionary<string, int> serializableDictionary = new() { { "wa sans", 0 } };
+            public readonly HashSet<Test2> hashSet = new() { new Test2() };
+            public readonly Queue<Test2> queue = new();
+            public readonly Stack<Test2> stack = new();
+            public ReadOnlySet<Test2> readOnlySet;
+            public ReadOnlyQueue<Test2> readOnlyQueue;
+            public ReadOnlyStack<Test2> readOnlyStack;
+            public readonly HashSet<Vector2> hashSetVector2 = new() { new Vector2() };
+            public readonly Queue<Vector2> queueVector2 = new();
+            public readonly Stack<Vector2> stackVector2 = new();
+            public ReadOnlySet<Vector2> readOnlySetVector2;
+            public ReadOnlyQueue<Vector2> readOnlyQueueVector2;
+            public ReadOnlyStack<Vector2> readOnlyStackVector2;
+            public IList iList = new List<Test2> { new Test2() };
+            public IList<Test2> iList2 = new List<Test2> { new Test2() };
+
+            public Test()
+            {
+                readOnlySet = new ReadOnlySet<Test2>(hashSet);
+                readOnlyQueue = new ReadOnlyQueue<Test2>(queue);
+                readOnlyStack = new ReadOnlyStack<Test2>(stack);
+                
+                readOnlySetVector2 = new ReadOnlySet<Vector2>(hashSetVector2);
+                readOnlyQueueVector2 = new ReadOnlyQueue<Vector2>(queueVector2);
+                readOnlyStackVector2 = new ReadOnlyStack<Vector2>(stackVector2);
+            }
 
             public class Test2
             {

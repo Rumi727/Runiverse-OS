@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using RuniOS.Inspectors;
+using RuniOS.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,6 +23,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedProperty targetProperty { get; }
         
         public bool instancesIsEmpty => serializedObject.targetObject == null;
+        
+        public bool instanceIsMultiple => serializedObject.isEditingMultipleObjects;
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();

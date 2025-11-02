@@ -39,6 +39,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public bool instancesIsEmpty => false;
         
+        public bool instanceIsMultiple => property.serializedObject.isEditingMultipleObjects;
+        
         public Type inspectionElementType { get; }
         public string inspectionElementDisplayName => inspectionElementType.GetTypeDisplayName();
 
@@ -49,6 +51,8 @@ namespace RuniOS.Editor.Inspectors.Unity
 
         bool IList.IsReadOnly => false;
         bool IList.IsFixedSize => false;
+
+        bool IInspectableList.isArray => false;
         
         bool ICollection.IsSynchronized => false;
         object ICollection.SyncRoot => this;
@@ -257,5 +261,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         public IInspectableList Clone() => new InspectableSerializedList(property);
         IInspectable IInspectable.Clone() => Clone();
         object ICloneable.Clone() => Clone();
+        
+        void IInspectableList.SynchronizeCollections() { }
+        void IInspectableList.UpdateSourceCollections() { }
     }
 }

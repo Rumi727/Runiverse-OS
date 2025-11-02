@@ -15,6 +15,13 @@ namespace RuniOS.Inspectors
         RuniNullabilityInfo? elementNullabilityInfo { get; }
         
         /// <summary>
+        /// 쓰기 가능 상태인 상속된 부모 요소가 있을 때만 크기를 바꿀 수 있는 리스트인지 여부를 나타냅니다.
+        /// <br/><br/>
+        /// 예: 배열은 그 자채로는 크기를 바꾸지 못하며, 변수에 새로 할당해야 크기를 간접적으로 바꿀 수 있습니다.
+        /// </summary>
+        bool isArray { get; }
+        
+        /// <summary>
         /// 요소가 <b>삽입되었을 때</b> 호출됩니다.
         /// </summary>
         void OnInsert(int index);
@@ -64,5 +71,8 @@ namespace RuniOS.Inspectors
         }
         
         new IInspectableList Clone();
+
+        void SynchronizeCollections();
+        void UpdateSourceCollections();
     }
 }

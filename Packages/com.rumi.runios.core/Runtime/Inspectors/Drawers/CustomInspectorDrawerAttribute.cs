@@ -3,11 +3,10 @@ using System;
 
 namespace RuniOS.Inspectors.Drawers
 {
-    [AttributeUsage(AttributeTargets.All, Inherited = false, AllowMultiple = true)]
-    public class CustomInspectorDrawerAttribute : Attribute
+    public sealed class CustomInspectorDrawerAttribute : CustomAttributeDrawerAttribute
     {
-        public Type targetType { get; }
+        public override bool isSubtypeCompatible => true;
         
-        public CustomInspectorDrawerAttribute(Type targetType) => this.targetType = targetType;
+        public CustomInspectorDrawerAttribute(Type targetType) : base(targetType) { }
     }
 }

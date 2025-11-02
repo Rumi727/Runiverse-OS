@@ -16,6 +16,8 @@ namespace RuniOS.Inspectors
 
         bool instancesIsEmpty { get; }
         
+        bool instanceIsMultiple { get; }
+        
         IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
         /// <summary>

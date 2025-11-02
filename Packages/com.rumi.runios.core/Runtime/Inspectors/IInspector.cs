@@ -7,6 +7,8 @@ namespace RuniOS.Inspectors
     public interface IInspector
     {
         IInspectable? inspectable { get; }
+        
+        IInspectorElement? element { get; }
         ImmutableArray<IInspectorElement> elements { get; }
         
         IEnumerable<InspectorDrawer?> drawers { get; }

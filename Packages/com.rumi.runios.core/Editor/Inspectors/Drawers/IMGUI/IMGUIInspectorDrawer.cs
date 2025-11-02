@@ -29,6 +29,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         /// </summary>
         public Inspector? rootInspector { get; }
         
+        public string? nullText { get; set; } = null;
+        
         /// <summary>
         /// UI 요소를 렌더링합니다.
         /// </summary>
@@ -36,41 +38,58 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
-        protected static bool NullToggleField(IInspectorVariableElement variableElement, Rect position, out Rect resultPosition, GUIContent? label, InspectorFlags flags)
+        /// <returns>변수가 null 값인지 여부를 반환합니다</returns>
+        protected static bool NullToggleField(IInspectorVariableElement variableElement, Rect position, out Rect resultPosition, GUIContent? label, InspectorFlags flags, string? nullText = null)
         {
             resultPosition = position;
+            
             if (variableElement.variableType.IsValueType)
                 return false;
-            
+
+            return NullToggleField
+            (
+                position,
+                out resultPosition,
+                label,
+                (!variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags)) ? !variableElement.value.IsNull() : null,
+                (!variableElement.inspectable.instancesIsEmpty && variableElement.IsWritable(flags)) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
+                variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
+                variableElement.nullabilityInfo?.writeState,
+                nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"
+            );
+        }
+        
+        /// <returns>변수가 null 값인지 여부를 반환합니다</returns>
+        protected static bool NullToggleField(Rect position, out Rect resultPosition, GUIContent? label, bool? hasValue, Action<bool>? writeAction, bool isInstanceCreatable, RuniNullabilityState? nullabilityState, string nullText)
+        {
             float toggleWidth = GetXSize(EditorStyles.toggle);
             Rect toggleRect = new Rect(position.x + (position.width - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
 
-            using (new EditorGUI.DisabledScope(!variableElement.IsWritable(flags)))
+            using (new EditorGUI.DisabledScope(writeAction == null))
             {
-                if (!variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags))
+                if (hasValue != null)
                 {
-                    bool valueIsNull = variableElement.value.IsNull();
-                    if (valueIsNull || variableElement.nullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+                    if (!hasValue.Value || nullabilityState == RuniNullabilityState.Nullable)
                     {
                         EditorGUI.BeginChangeCheck();
-                        EditorGUI.BeginDisabledGroup(valueIsNull && !variableElement.variableType.HasDefaultConstructor());
+                        EditorGUI.BeginDisabledGroup(!hasValue.Value && !isInstanceCreatable);
                         
                         BeginIndentLevel(0);
-                        bool toggleValue = EditorGUI.Toggle(toggleRect, !valueIsNull);
+                        bool toggleValue = EditorGUI.Toggle(toggleRect, hasValue.Value);
                         EndIndentLevel();
                         
                         EditorGUI.EndDisabledGroup();
                         if (EditorGUI.EndChangeCheck())
-                            variableElement.value = toggleValue ? variableElement.variableType.GetDefaultValueNotNull() : null;
+                            writeAction?.Invoke(toggleValue);
                     }
 
                     position.width -= toggleRect.width + 4;
                     resultPosition = position;
 
-                    if (valueIsNull)
+                    if (!hasValue.Value)
                     {
                         position.height = EditorGUIUtility.singleLineHeight;
-                        EditorGUI.LabelField(position, label ?? GUIContent.none, new GUIContent($"null ({variableElement.variableType.GetTypeDisplayName()})"));
+                        EditorGUI.LabelField(position, label ?? GUIContent.none, new GUIContent(nullText));
                         
                         return true;
                     }
@@ -79,12 +98,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 {
                     BeginIndentLevel(0);
                     
-                    if (variableElement.nullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+                    if (nullabilityState == RuniNullabilityState.Nullable)
                     {
                         EditorGUI.BeginChangeCheck();
                         EditorGUI.Toggle(toggleRect, false);
                         if (EditorGUI.EndChangeCheck())
-                            variableElement.value = null;
+                            writeAction?.Invoke(false);
                     }
                     
                     toggleRect.x -= toggleRect.width + 2;
@@ -92,13 +111,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
                     {
                         EditorGUI.BeginChangeCheck();
-                        EditorGUI.BeginDisabledGroup(!variableElement.variableType.HasDefaultConstructor());
+                        EditorGUI.BeginDisabledGroup(!isInstanceCreatable);
                         
                         EditorGUI.Toggle(toggleRect, true);
                         
                         EditorGUI.EndDisabledGroup();
                         if (EditorGUI.EndChangeCheck())
-                            variableElement.value = variableElement.variableType.GetDefaultValueNotNull();
+                            writeAction?.Invoke(true);
 
                         position.width -= toggleRect.width + 2;
                     }

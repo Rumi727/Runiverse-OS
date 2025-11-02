@@ -118,17 +118,60 @@ namespace RuniOS
             return property;
         }
         
+        /// <summary>Gets the reflection information for a directly declared indexer property</summary>
+        /// <param name="type">The class/type where the indexer property is declared</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>An indexer property or null when type is null or when it cannot be found</returns>
+        public static PropertyInfo? DeclaredIndexer(Type type, Type[]? parameters = null)
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (type is null)
+            {
+                Debug.Log("AccessTools.DeclaredIndexer: type is null");
+                return null;
+            }
+
+            try
+            {
+                // Can find multiple indexers without specified parameters, but only one with specified ones
+                var indexer = parameters is null ?
+                    type.GetProperties(allDeclared).SingleOrDefault(property => property.GetIndexParameters().Length > 0)
+                    : type.GetProperties(allDeclared).FirstOrDefault(property => property.GetIndexParameters().Select(param => param.ParameterType).SequenceEqual(parameters));
+
+                if (indexer is null)
+                    Debug.Log($"AccessTools.DeclaredIndexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+
+                return indexer;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new AmbiguousMatchException("Multiple possible indexers were found.", ex);
+            }
+        }
+        
         /// <summary>Gets the reflection information for the getter method of a directly declared property</summary>
         /// <param name="type">The class/type where the property is declared</param>
         /// <param name="name">The name of the property (case sensitive)</param>
         /// <returns>A method or null when type/name is null or when the property cannot be found</returns>
         public static MethodInfo? DeclaredPropertyGetter(Type type, string name) => DeclaredProperty(type, name)?.GetGetMethod(true);
         
+        /// <summary>Gets the reflection information for the getter method of a directly declared indexer property</summary>
+        /// <param name="type">The class/type where the indexer property is declared</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>A method or null when type is null or when indexer property cannot be found</returns>
+        public static MethodInfo? DeclaredIndexerGetter(Type type, Type[]? parameters = null) => DeclaredIndexer(type, parameters)?.GetGetMethod(true);
+        
         /// <summary>Gets the reflection information for the setter method of a directly declared property</summary>
         /// <param name="type">The class/type where the property is declared</param>
         /// <param name="name">The name of the property (case sensitive)</param>
         /// <returns>A method or null when type/name is null or when the property cannot be found</returns>
         public static MethodInfo? DeclaredPropertySetter(Type type, string name) => DeclaredProperty(type, name)?.GetSetMethod(true);
+        
+        /// <summary>Gets the reflection information for the setter method of a directly declared indexer property</summary>
+        /// <param name="type">The class/type where the indexer property is declared</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>A method or null when type is null or when indexer property cannot be found</returns>
+        public static MethodInfo? DeclaredIndexerSetter(Type type, Type[]? parameters) => DeclaredIndexer(type, parameters)?.GetSetMethod(true);
         
         /// <summary>Gets the reflection information for a property by searching the type and all its super types</summary>
         /// <param name="type">The class/type</param>
@@ -155,17 +198,62 @@ namespace RuniOS
             return property;
         }
         
+        /// <summary>Gets the reflection information for an indexer property by searching the type and all its super types</summary>
+        /// <param name="type">The class/type</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>An indexer property or null when type is null or when it cannot be found</returns>
+        public static PropertyInfo? Indexer(Type type, Type[]? parameters = null)
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (type is null)
+            {
+                Debug.Log("AccessTools.Indexer: type is null");
+                return null;
+            }
+
+            // Can find multiple indexers without specified parameters, but only one with specified ones
+            Func<Type, PropertyInfo> func = parameters is null ?
+                t => t.GetProperties(all).SingleOrDefault(property => property.GetIndexParameters().Length > 0)
+                : t => t.GetProperties(all).FirstOrDefault(property => property.GetIndexParameters().Select(param => param.ParameterType).SequenceEqual(parameters));
+
+            try
+            {
+                var indexer = FindIncludingBaseTypes(type, func);
+
+                if (indexer is null)
+                    Debug.Log($"AccessTools.Indexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+
+                return indexer;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new AmbiguousMatchException("Multiple possible indexers were found.", ex);
+            }
+        }
+        
         /// <summary>Gets the reflection information for the getter method of a property by searching the type and all its super types</summary>
         /// <param name="type">The class/type</param>
         /// <param name="name">The name</param>
         /// <returns>A method or null when type/name is null or when the property cannot be found</returns>
         public static MethodInfo? PropertyGetter(Type type, string name) => Property(type, name)?.GetGetMethod(true);
         
+        /// <summary>Gets the reflection information for the getter method of an indexer property by searching the type and all its super types</summary>
+        /// <param name="type">The class/type</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>A method or null when type is null or when the indexer property cannot be found</returns>
+        public static MethodInfo? IndexerGetter(Type type, Type[]? parameters = null) => Indexer(type, parameters)?.GetGetMethod(true);
+        
         /// <summary>Gets the reflection information for the setter method of a property by searching the type and all its super types</summary>
         /// <param name="type">The class/type</param>
         /// <param name="name">The name</param>
         /// <returns>A method or null when type/name is null or when the property cannot be found</returns>
         public static MethodInfo? PropertySetter(Type type, string name) => Property(type, name)?.GetSetMethod(true);
+        
+        /// <summary>Gets the reflection information for the setter method of an indexer property by searching the type and all its super types</summary>
+        /// <param name="type">The class/type</param>
+        /// <param name="parameters">Optional parameters to target a specific overload of multiple indexers</param>
+        /// <returns>A method or null when type is null or when the indexer property cannot be found</returns>
+        public static MethodInfo? IndexerSetter(Type type, Type[]? parameters = null) => Indexer(type, parameters)?.GetSetMethod(true);
         
         /// <summary>Gets the reflection information for a directly declared event</summary>
         /// <param name="type">The class/type where the event is declared</param>

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
@@ -14,24 +15,36 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(IList))]
+    [CustomInspectorDrawer(typeof(ICollection))]
+    [CustomInspectorDrawer(typeof(ICollection<>))]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
         public ListInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
         public ListInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList, rootInspector) { }
 
         public ReorderableList? reorderableList { get; private set; }
+        
         public bool isExpanded { get; set; } = false;
 
         readonly AnimFloat animFloat = new AnimFloat(0);
+        readonly ConditionalWeakTable<IInspectorListElement, Inspector> elementInspectors = new();
+        
+        object? CreateElementItem(InspectorFlags flags, Type? elementType)
+        {
+            if (elementType == null)
+                throw new NullReferenceException($"{nameof(elementType)} is null");
+            
+            CheckInspectableList();
+            if (inspectableList.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+                return elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
+            else
+                return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
+        }
 
-        readonly Dictionary<IInspectorElement, Inspector> elementInspectors = new();
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
             CheckInspectableList();
-            
-            if (!inspectableList.TryGetInspectionElementType(out Type? elementType) || elementType == null)
-                throw new InvalidOperationException($"Cannot get managed type of {nameof(inspectableList)}");
+            inspectableList.TryGetInspectionElementType(out Type? elementType);
 
             label ??= GUIContent.none;
             
@@ -46,36 +59,42 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 EditorGUI.LabelField(position, label, new GUIContent(GetTextOrKey("inspector.no_instance")));   
                 return;
             }
-            
-            reorderableList ??= new ReorderableList(inspectableList, elementType, true, false, true, true) { multiSelect = true, };
+
+            reorderableList ??= new ReorderableList(inspectableList, elementType ?? typeof(object), true, false, true, true) { multiSelect = true, };
 
             reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true);
             reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, true) ?? EditorGUIUtility.singleLineHeight;
-            reorderableList.onCanAddCallback = _ => elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
+            reorderableList.onCanAddCallback = _ =>
+                (!inspectableList.isArray || (inspectableList.parentElement != null && inspectableList.parentElement.IsWritable(flags))) &&
+                !inspectableList.IsFixedSize &&
+                elementType != null && elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
+            reorderableList.onCanRemoveCallback = _ => !inspectableList.IsFixedSize;
             
             reorderableList.onAddCallback = x =>
             {
-                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1).Min(x.count) : x.count;
-                object? value;
-                if (inspectableList.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
-                    value = elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
-                else
-                    value = elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
-                
-                inspectableList.Insert(index, value);
+                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1).Min(x.count) : x.count;   
+                inspectableList.Insert(index, CreateElementItem(flags, elementType));
                 x.Select(index);
             };
 
             reorderableList.onReorderCallbackWithDetails = (_, oldIndex, newIndex) => inspectableList.OnElementMoved(oldIndex, newIndex);
+            reorderableList.onChangedCallback = _ => inspectableList.UpdateSourceCollections();
+            
+            inspectableList.SynchronizeCollections();
             
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, isInArray);
+            EditorGUI.BeginChangeCheck();
+            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, elementType != null ? (_ => CreateElementItem(flags, elementType)) : null, isInArray);
             position.y += headHeight + 2;
+            if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
+                inspectableList.UpdateSourceCollections();
+            
+            BeginIndentLevel();
 
-            position.x += 15;
-            position.width -= 15;
+            position.x += 15 * EditorGUI.indentLevel;
+            position.width -= 15 * EditorGUI.indentLevel;
             
             if (!isInArray)
             {
@@ -84,7 +103,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     if (animFloat.isAnimating)
                         GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + animFloat.value));
 
+                    EditorGUI.BeginChangeCheck();
                     reorderableList.DoList(position);
+                    if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
+                        inspectableList.UpdateSourceCollections();
 
                     if (animFloat.isAnimating)
                         GUI.EndClip();
@@ -95,11 +117,14 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             }
             else if (isExpanded)
                 reorderableList.DoList(position);
+            
+            EndIndentLevel();
         }
 
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
             CheckInspectableList();
+            
             if (inspectableList.instancesIsEmpty)
                 return EditorGUIUtility.singleLineHeight;
             
@@ -119,20 +144,15 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         {
             CheckInspectableList();
             
-            IInspectorElement? element = inspectableList.GetElement(index, flags);
-            if (element is not IInspectorListElement listElement)
+            IInspectorListElement? element = inspectableList.GetElement(index, flags);
+            if (element == null)
                 return null;
 
-            elementInspectors.SyncKeysWithList(inspectableList.GetElements(flags), _ => new Inspector(rootInspector));
-            if (elementInspectors.TryGetValue(element, out Inspector inspector))
-            {
-                if (inspector.elements.FirstOrDefault() != listElement || inspector.inspectorFlags != flags)
-                    inspector.Rebuild(listElement, flags, true);
+            Inspector inspector = elementInspectors.GetOrCreateValue(element);
+            if (inspector.element != element || inspector.inspectorFlags != flags)
+                inspector.Rebuild(element, flags, true);
                 
-                return inspector;
-            }
-
-            return null;
+            return inspector;
         }
     }
 }

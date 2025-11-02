@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,7 +19,7 @@ namespace RuniOS.Inspectors.Csharp
 
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
-            if (typeof(IList).IsAssignableFrom(variableType))
+            if (typeof(IEnumerable).IsAssignableFrom(variableType))
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
@@ -169,7 +170,7 @@ namespace RuniOS.Inspectors.Csharp
             
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IList>();
+                inspectableListElement.instances = GetValues().Cast<IEnumerable>();
         }
     }
 }

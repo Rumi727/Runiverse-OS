@@ -14,16 +14,18 @@ namespace RuniOS.Editor
         public delegate void ListHeaderAddAction(IList list, int index);
         public delegate void ListHeaderRemoveAction(IList list, int index);
 
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, null, null, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, label, isExpanded, null, null, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, addAction, removeAction, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), lists, label, isExpanded, addAction, removeAction, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, null, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, label, isExpanded, null, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, activator, isInArray);
+        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), lists, label, isExpanded, activator, isInArray);
 
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, null, null, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, label, isExpanded, null, null, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, addAction, removeAction, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, ListHeaderAddAction? addAction, ListHeaderRemoveAction? removeAction, bool isInArray = false)
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, null, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, label, isExpanded, null, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, activator, isInArray);
+        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false)
         {
+            position.x += EditorGUI.indentLevel * 15;
+            
             {
                 Rect headerPosition = position;
                 headerPosition.width -= 48;
@@ -39,50 +41,30 @@ namespace RuniOS.Editor
 
             {
                 Rect countPosition = position;
-                countPosition.x += countPosition.width - 48;
+                countPosition.x += countPosition.width - 48 - (EditorGUI.indentLevel * 15);
                 countPosition.width = 48;
 
                 if (lists == null)
                     return isExpanded;
+
+                bool isAllGeneric = activator != null || lists.All(x => CollectionGenericUtility.GetEnumerableElementType(x.GetType()) != null);
+                bool isFixedSize = lists.Any(x => x.IsFixedSize) || !isAllGeneric;
 
                 EditorGUI.BeginChangeCheck();
 
                 int firstCount = lists.FirstOrDefault()?.Count ?? 0;
                 EditorGUI.showMixedValue = lists.Any(x => firstCount != x.Count);
 
+                EditorGUI.BeginDisabledGroup(isFixedSize);
                 int count = EditorGUI.DelayedIntField(countPosition, firstCount);
+                EditorGUI.EndDisabledGroup();
 
                 EditorGUI.showMixedValue = false;
 
                 if (EditorGUI.EndChangeCheck())
                 {
                     foreach (var list in lists)
-                    {
-                        int addCount = count - list.Count;
-                        if (addCount > 0)
-                        {
-                            for (int j = 0; j < addCount; j++)
-                            {
-                                int index = list.Count;
-                                if (addAction != null)
-                                    addAction(list, index);
-                                else
-                                    list.Add(list.GetElementType().GetDefaultValue());
-                            }
-                        }
-                        else
-                        {
-                            addCount = -addCount;
-                            for (int j = 0; j < addCount; j++)
-                            {
-                                int index = list.Count - 1;
-                                if (removeAction != null)
-                                    removeAction(list, index);
-                                else
-                                    list.RemoveAt(index);
-                            }
-                        }
-                    }
+                        list.Resize(count, activator);
                 }
             }
 

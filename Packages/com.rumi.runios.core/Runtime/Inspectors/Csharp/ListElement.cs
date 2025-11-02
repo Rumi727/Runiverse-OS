@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -15,11 +16,13 @@ namespace RuniOS.Inspectors.Csharp
             
             this.inspectable = inspectable;
             this.index = index;
-            
-            _inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
-            if (typeof(IList).IsAssignableFrom(variableType))
-                _inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+            variableType = currentElementType;
+            
+            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
+            
+            if (typeof(IEnumerable).IsAssignableFrom(variableType))
+                inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
         public string name { get; }
@@ -28,8 +31,9 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableList inspectable { get; }
         IInspectable IInspectorElement.inspectable => inspectable;
 
-        public Type variableType => inspectable.inspectionElementType ?? typeof(object);
-        
+        public Type variableType { get; }
+        public Type currentElementType => value?.GetType() ?? typeof(object);
+
         public RuniNullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
         
         public int index { get; set; }
@@ -70,7 +74,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    return inspectable.instances.Any(x => !Equals(x[index], value));
+                    return inspectable.collectionHandlers.Any(x => !Equals(x[index], value));
                 }
                 catch (Exception e)
                 {
@@ -79,37 +83,18 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         
-        public InspectableObject inspectableObjectElement
-        {
-            get
-            {
-                _inspectableObjectElement.instances = GetValues().WhereNotNull();
-                return _inspectableObjectElement;
-            }
-        }
-        readonly InspectableObject _inspectableObjectElement;
+        public InspectableObject inspectableObjectElement { get; }
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
         
 
-        public InspectableList? inspectableListElement
-        {
-            get
-            {
-                if (_inspectableListElement == null)
-                    return null;
-
-                _inspectableListElement.instances = GetValues().OfType<IList>();
-                return _inspectableListElement;
-            }
-        }
-        readonly InspectableList? _inspectableListElement;
+        public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
 
         public IEnumerable<object?> GetValues()
         {
             try
             {
-                return inspectable.instances.Select(x => x[index]);
+                return inspectable.collectionHandlers.Select(x => x[index]);
             }
             catch (Exception e)
             {
@@ -122,7 +107,7 @@ namespace RuniOS.Inspectors.Csharp
             try
             {
                 using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                foreach (var instance in inspectable.instances)
+                foreach (var instance in inspectable.collectionHandlers)
                 {
                     if (!valueEnumerator.MoveNext())
                         return;
@@ -150,9 +135,9 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
         
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.isReadOnly;
-        
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
+
         public void UpdateChildInspectable()
         {
             if (!IsReadable(InspectorFlags.All))
@@ -160,7 +145,7 @@ namespace RuniOS.Inspectors.Csharp
             
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IList>();
+                inspectableListElement.instances = GetValues().Cast<IEnumerable>();
         }
     }
 }

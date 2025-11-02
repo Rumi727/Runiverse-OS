@@ -100,7 +100,7 @@ namespace RuniOS.Editor.Windows
             {
                 Space();
                 GUILayout.Label(GetTextOrKey("control_panel.development.driven_property"), ControlPanel.bigLabelStyle);
-                drivenPropertyDatas.SyncKeysWithList(DrivenPropertyManager.drivenProperties, x => new DrivenPropertyDataExtension(x));
+                drivenPropertyDatas.SyncKeysWithEnumerable(DrivenPropertyManager.drivenProperties, x => new DrivenPropertyDataExtension(x));
                 if (DrivenPropertyManager.drivenProperties.Count <= 0)
                     GUILayout.Label(GetTextOrKey("control_panel.development.driven_property.zero_count"));
 

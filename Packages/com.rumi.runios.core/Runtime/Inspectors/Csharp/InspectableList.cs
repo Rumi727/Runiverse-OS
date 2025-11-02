@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
+using RuniOS.Collections.Handlers;
+using RuniOS.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,23 +13,33 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableList : IInspectableList
     {
-        public InspectableList(IList instance, RuniNullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), elementNullabilityInfo, ImmutableArray.Create(instance)) { }
+        public InspectableList(IEnumerable instance, RuniNullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
+
+        public InspectableList(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
         
-        public InspectableList(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo, params IList[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
         
-        public InspectableList(Type inspectionType, IEnumerable<IList> instances, RuniNullabilityInfo? elementNullabilityInfo = null)
+        public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, RuniNullabilityInfo? elementNullabilityInfo = null)
         {
-            if (!typeof(IList).IsAssignableFrom(inspectionType))
-                throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a list type.", nameof(inspectionType));
+            if (!typeof(IEnumerable).IsAssignableFrom(inspectionType) || !CollectionHandler.FindDrawerType(inspectionType, out Type? resolvedDrawerTargetType, out Type? drawerType))
+                throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
+
+            this.resolvedDrawerTargetType = resolvedDrawerTargetType;
+            this.drawerType = drawerType;
             
             this.inspectionType = inspectionType;
-            inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetListElementType(inspectionType);
-
+            inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetEnumerableElementType(inspectionType);
+            
             _instances = null!;
             this.instances = instances;
-
+            
             this.elementNullabilityInfo = elementNullabilityInfo;
+
+            readonlyCollectionHandlerTable = _collectionHandlerTable.AsReadOnly();
         }
+        
+        readonly Type resolvedDrawerTargetType;
+        readonly Type drawerType;
         
         public IInspectorVariableElement? parentElement { get; set; }
         
@@ -46,29 +58,30 @@ namespace RuniOS.Inspectors.Csharp
 
         public RuniNullabilityInfo? elementNullabilityInfo { get; }
 
-        public bool isReadOnly => instances.All(x => x.IsReadOnly);
+        public bool isReadOnly => collectionHandlers.Any(x => x.isReadOnly);
         bool IList.IsReadOnly => isReadOnly;
         
-        public bool isFixedSize => instances.Any(x => (parentElement == null || !x.GetType().IsArray) && x.IsFixedSize);
+        public bool isFixedSize => collectionHandlers.Any(x => (parentElement == null || !isArray) && x.isFixedSize);
         bool IList.IsFixedSize => isFixedSize;
+        
+        public bool isArray => inspectionType.IsArray;
         
         bool ICollection.IsSynchronized => false;
         object ICollection.SyncRoot => this;
 
-        public IList? instance
+        public IEnumerable? instance
         {
             get
             {
-                parentElement?.UpdateChildInspectable();
-                
-                if (_instances.Any())
-                    return _instances.MinBy(static x => x.Count);
+                var instances = collectionHandlerTable;
+                if (instances.Any())
+                    return instances.MinBy(static x => x.Value.count).Key;
                 
                 return null;
             }
             set
             {
-                if (value != null && inspectionType != value.GetType())
+                if (value != null && !inspectionType.IsInstanceOfType(value))
                     throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
                 
                 if (value != null)
@@ -78,7 +91,18 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public IEnumerable<IList> instances
+        public CollectionHandler? collectionHandler
+        {
+            get
+            {
+                if (instance == null)
+                    return null;
+                
+                return collectionHandlerTable[instance];
+            }
+        }
+
+        public IEnumerable<IEnumerable> instances
         {
             get
             {
@@ -87,42 +111,72 @@ namespace RuniOS.Inspectors.Csharp
             }
             set
             {
-                if (value.Any(x => inspectionType != x.GetType()))
+                if (value.Any(x => x != null && !inspectionType.IsInstanceOfType(x)))
                 {
                     string invalidTypes = string.Join(", ", value.Where(x => x != null && !inspectionType.IsInstanceOfType(x))
-                        .Select(static x => $"'{x!.GetType().FullName}'")
+                        .Select(x => $"'{x!.GetType().FullName}'")
                         .Distinct());
-                                            
+                    
                     throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
                 }
 
                 _instances = value;
             }
         }
-        IEnumerable<IList> _instances;
+        IEnumerable<IEnumerable> _instances;
+        
+        public IEnumerable<CollectionHandler> collectionHandlers => instances.Select(x => collectionHandlerTable[x]);
+
+        // 이 InspectableCollection이 관리하는 모든 원본 컬렉션에 매핑되는 CollectionHandler 맵
+        public IReadOnlyDictionary<IEnumerable, CollectionHandler> collectionHandlerTable
+        {
+            get
+            {
+                _collectionHandlerTable.SyncKeysWithEnumerable(instances, x => (CollectionHandler)Activator.CreateInstance(drawerType, resolvedDrawerTargetType, x));
+                return readonlyCollectionHandlerTable;
+            }
+        }
+        readonly IReadOnlyDictionary<IEnumerable, CollectionHandler> readonlyCollectionHandlerTable;
+        readonly Dictionary<IEnumerable, CollectionHandler> _collectionHandlerTable = new();
 
         [MemberNotNullWhen(false, nameof(instance))]
         public bool instancesIsEmpty => instance == null;
+        
+        public bool instanceIsMultiple
+        {
+            get
+            {
+                int count = 0;
+                foreach (var _ in instances)
+                {
+                    count++;
+                    if (count > 1)
+                        return true;
+                }
+
+                return false;
+            }
+        }
 
         public object? this[int index]
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
+                ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
                 
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
-
-                return instance[index];
+                
+                return collectionHandler[index];
             }
             set
             {
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
                 
-                foreach (var list in instances.WhereNotNull())
+                foreach (var list in collectionHandlers)
                 {
-                    if (list.Count > index)
+                    if (list.count > index)
                         list[index] = value;
                 }
             }
@@ -132,55 +186,77 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
-                return instance.Count;
+                ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
+                return collectionHandler.count;
             }
             set
             {
-                foreach (var list in instances)
+                if (parentElement == null || !isArray)
                 {
-                    if (list == null)
-                        continue;
-
-                    bool add = list.Count < value;
-                    int count = (list.Count - value).Abs();
-                    
-                    for (int i = 0; i < count; i++)
+                    foreach (var list in collectionHandlers)
+                        list.Resize(value, Activator);
+                }
+                else
+                {
+                    parentElement.SetValues(instances.Select(list =>
                     {
-                        if (add)
-                        {
-                            if (elementNullabilityInfo?.writeState == RuniNullabilityState.NotNull)
-                                list.Add((inspectionElementType ?? typeof(object)).GetDefaultValueNotNull());
-                            else
-                                list.Add((inspectionElementType ?? typeof(object)).GetDefaultValue());
-                        }
-                        else
-                            list.RemoveAt(list.Count - 1);
-                    }
+                        if (list is Array array)
+                            list = array.Resize(value, Activator);
+
+                        return list;
+                    }));
+                }
+
+                object? Activator(int _)
+                {
+                    if (elementNullabilityInfo?.writeState == RuniNullabilityState.NotNull)
+                        return (inspectionElementType ?? typeof(object)).GetDefaultValueNotNull();
+                    else
+                        return (inspectionElementType ?? typeof(object)).GetDefaultValue();
                 }
             }
         }
         int ICollection.Count => count;
         
         
+        
+        public void SynchronizeCollections()
+        {
+            foreach (var item in collectionHandlers)
+                item.SynchronizeCollections();
+        }
+        
+        public void UpdateSourceCollections()
+        {
+            foreach (var item in collectionHandlers)
+                item.UpdateSourceCollections();
+        }
 
         public int Add(object? value)
         {
             int minCount = count;
-            foreach (IList list in instances)
+            if (parentElement == null || !isArray)
             {
-                if (minCount == list.Count && (parentElement == null || !list.GetType().IsArray))
-                    list.Add(value);
+                foreach (IList list in collectionHandlers)
+                {
+                    if (minCount == list.Count)
+                        list.Add(value);
+                }
             }
-            
-            parentElement?.SetValues(instances.Select(list =>
+            else
             {
-                if (minCount == list.Count && list.GetType().IsArray)
-                    list = ((Array)list).Add(value);
+                parentElement.SetValues(instances.Select(list =>
+                {
+                    if (list is Array array)
+                    {
+                        if (minCount == array.Length)
+                            list = array.Add(value);
+                    }
 
-                return list;
-            }));
-            
+                    return list;
+                }));
+            }
+
             OnInsert(minCount);
             return minCount;
         }
@@ -189,21 +265,23 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (index < 0 || index > count)
                 throw new ArgumentOutOfRangeException(nameof(index));
-            
-            foreach (IList list in instances)
+
+            if (parentElement == null || !isArray)
             {
-                if (parentElement == null || !list.GetType().IsArray)
+                foreach (var list in collectionHandlers)
                     list.Insert(index, value);
             }
-
-            parentElement?.SetValues(instances.Select(list =>
+            else
             {
-                if (list.GetType().IsArray)
-                    list = ((Array)list).Insert(index, value);
+                parentElement.SetValues(instances.Select(list =>
+                {
+                    if (list is Array array)
+                        list = array.Insert(index, value);
 
-                return list;
-            }));
-            
+                    return list;
+                }));
+            }
+
             OnInsert(index);
         }
 
@@ -214,38 +292,43 @@ namespace RuniOS.Inspectors.Csharp
             if (index < 0 || index >= count)
                 throw new ArgumentOutOfRangeException(nameof(index));
 
-            foreach (IList list in instances.WhereNotNull())
+            if (parentElement == null || !isArray)
             {
-                if (parentElement == null || !list.GetType().IsArray)
+                foreach (var list in collectionHandlers)
                     list.RemoveAt(index);
+       
+            }
+            else
+            {
+                parentElement.SetValues(instances.Select(list =>
+                {
+                    if (list is Array array)
+                        list = array.RemoveAt(index);
+
+                    return list;
+                }));
             }
 
-            parentElement?.SetValues(instances.Select(list =>
-            {
-                if (list.GetType().IsArray)
-                    list = ((Array)list).RemoveAt(index);
-
-                return list;
-            }));
-            
             OnRemoveAt(index);
         }
 
         public void Clear()
         {
-            foreach (IList list in instances)
+            if (parentElement == null || !isArray)
             {
-                if (parentElement == null || !list.GetType().IsArray)
+                foreach (IList list in collectionHandlers)
                     list.Clear();
             }
-
-            parentElement?.SetValues(instances.Select(list =>
+            else
             {
-                if (list.GetType().IsArray)
-                    list = ((Array)list).RemoveAll();
+                parentElement.SetValues(instances.Select(list =>
+                {
+                    if (list is Array array)
+                        list = array.RemoveAll();
 
-                return list;
-            }));
+                    return list;
+                }));
+            }
             
             OnClear();
         }
@@ -301,14 +384,14 @@ namespace RuniOS.Inspectors.Csharp
 
         public bool Contains(object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
-            return instance.Contains(value);
+            ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
+            return collectionHandler.Contains(value);
         }
 
         public int IndexOf(object value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
-            return instance.IndexOf(value);
+            ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
+            return collectionHandler.IndexOf(value);
         }
 
         public IEnumerator GetEnumerator()
@@ -333,54 +416,23 @@ namespace RuniOS.Inspectors.Csharp
         
         
 
-        readonly List<IInspectorListElement> cachedElements = new();
+        readonly List<ListElement> cachedElements = new();
         IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
         public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
-                return ImmutableArray<IInspectorElement>.Empty;
+                return Array.Empty<IInspectorElement>();
             
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
-            
-            if (cachedElements.Count < count)
-            {
-                // 0, 1, 2 : 3
-                // 0 : 1
-                
-                // i = 1
-                // 1 < 3 : true
-                // 0, 1 : 1
-                
-                // i = 2
-                // 2 < 3 : true
-                // 0, 1, 2 : 2
-                
-                // i = 3
-                // 3 < 3 : false
-                
-                for (int i = cachedElements.Count; i < count; i++)
-                    cachedElements.Add(new ListElement(this, i));
-            }
-            else if (cachedElements.Count > count)
-            {
-                // 0 : 1
-                // 0, 1, 2 : 3
-                
-                // i = 2
-                // 2 >= 1 : true
-                // 0, 1 : 2
-                
-                // i = 1
-                // 1 >= 1 : true
-                // 0 : 1
-                
-                // i = 0
-                // 0 >= 1 : false
-                
-                for (int i = cachedElements.Count - 1; i >= count; i--)
-                    cachedElements.RemoveAt(i);
-            }
+            cachedElements.Resize(count, x => new ListElement(this, x));
 
+            for (int i = 0; i < cachedElements.Count; i++)
+            {
+                ListElement element = cachedElements[i];
+                if (element.variableType != element.currentElementType)
+                    cachedElements[i] = new ListElement(this, i);
+            }
+            
             return readOnlyCachedElements;
         }
 

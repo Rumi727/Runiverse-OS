@@ -50,12 +50,9 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수의 타입을 가져옵니다.
         /// </summary>
-        public Type variableType => inspectable.inspectionType;
-
-        /// <summary>
-        /// 요소의 타입을 가져옵니다.
-        /// </summary>
-        public Type elementType => inspectable.inspectionElementType;
+        public Type variableType => inspectable.inspectionElementType;
+        
+        public Type currentElementType => variableType;
 
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다. 직렬화된 프로퍼티의 경우 null을 반환합니다.

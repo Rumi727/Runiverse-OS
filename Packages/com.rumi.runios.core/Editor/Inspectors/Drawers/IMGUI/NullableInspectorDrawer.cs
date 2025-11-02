@@ -25,6 +25,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             valueElement = new CustomAccessVariableElement.Builder(valueElement)
                 .AddWriteAction((_, value) => element.value = Activator.CreateInstance(element.variableType, value))
                 .AddSetValuesAction((_, values) => element.SetValues(values.Select(x => Activator.CreateInstance(element.variableType, x))))
+                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
                 .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
                 .Build();
             
@@ -59,13 +60,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                             return null;
                     }));
                 })
+                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
                 .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
                 .Build();
             
             valueInspector = new Inspector();
         }
-
-        public string? nullText { get; set; } = null;
         
         public IInspectorVariableElement hasValueElement { get; }
         public IInspectorVariableElement valueElement { get; }
@@ -74,43 +74,41 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.None | InspectorFlags.Public | InspectorFlags.Static | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.WriteOnly | InspectorFlags.PublicAccess | InspectorFlags.Property | InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Method | InspectorFlags.Variable | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
-            // TODO : NullToggleField로 통합해서 Read-Only, Write-Only 버그 고쳐라
             CheckVariableElement();
-
+            
             Type? underlyingType = variableElement.variableType.GetNullableUnderlyingType();
             if (underlyingType == null)
                 throw new InvalidOperationException("It is not a nullable type.");
             
             label ??= GUIContent.none;
             
-            if (valueInspector.elements.FirstOrDefault() != valueElement || valueInspector.inspectorFlags != flags)
+            if (NullToggleField
+                    (
+                        position,
+                        out position,
+                        label,
+                        (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) ? (bool)hasValueElement.value! : null,
+                        (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsWritable(flags)) ? (x => hasValueElement.value = x) : null,
+                        valueElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
+                        RuniNullabilityState.Nullable,
+                        nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"
+                    )
+                )
+                return;
+            
+            if (valueInspector.element != valueElement || valueInspector.inspectorFlags != flags)
                 valueInspector.Rebuild(valueElement, flags, true);
             
-            float toggleWidth = GetXSize(EditorStyles.toggle);
-            Rect toggleRect = new Rect(position.x + (position.width - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
-            position.width -= toggleWidth + 4;
-                
-            EditorGUI.BeginChangeCheck();
-            BeginIndentLevel(0);
-            bool hasValue = EditorGUI.Toggle(toggleRect, (bool)hasValueElement.value!);
-            EndIndentLevel();
-            if (EditorGUI.EndChangeCheck())
-                hasValueElement.value = hasValue;
-                
-            if (hasValue)
-                valueInspector.Draw(position, label, isInArray);
-            else
-            {
-                position.height = EditorGUIUtility.singleLineHeight;
-                EditorGUI.LabelField(position, label, new GUIContent(nullText ?? $"null ({valueElement.variableType.GetTypeDisplayName()})"));
-            }
+            valueInspector.Draw(position, label, isInArray);
         }
 
         float lastInspectorHeight;
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
+            CheckVariableElement();
+            
             float height = valueInspector.GetHeight(label, flags, isInArray);
-            bool valueIsNull = !(bool)hasValueElement.value!;
+            bool valueIsNull = (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) && !(bool)hasValueElement.value!;
             nullableAnimFloat.target = valueIsNull ? 1 : 0;
 
             if (!isInArray && nullableAnimFloat.isAnimating)

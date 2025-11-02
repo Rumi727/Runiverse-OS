@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Linq;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,7 +39,7 @@ namespace RuniOS.Inspectors.Csharp
 
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
-            if (typeof(IList).IsAssignableFrom(variableType))
+            if (typeof(IEnumerable).IsAssignableFrom(variableType))
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
         }
 
@@ -223,15 +224,18 @@ namespace RuniOS.Inspectors.Csharp
         }
         
         /// <summary>
-        /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다. (항상 true)
+        /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
 
         /// <summary>
         /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
         /// </summary>
         public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
         {
+            if (!flags.HasFlagFast(InspectorFlags.Public))
+                return false;
+            
             if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
                 return false;
             
@@ -245,7 +249,7 @@ namespace RuniOS.Inspectors.Csharp
             
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IList>();
+                inspectableListElement.instances = GetValues().Cast<IEnumerable>();
         }
     }
 }

@@ -3,6 +3,7 @@ using RuniOS.Editor.Inspectors.Drawers.IMGUI;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Linq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -20,6 +21,8 @@ namespace RuniOS.Editor.Inspectors
         public Inspector rootInspector { get; }
         
         public IInspectable? inspectable { get; private set; }
+
+        public IInspectorElement? element => elements.Length == 1 ? elements[0] : null;
         public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
         
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
@@ -133,21 +136,32 @@ namespace RuniOS.Editor.Inspectors
                     elementLabel = label ?? GUIContent.none;
                 else
                     elementLabel = (drawers.Length == 1 ? label : null) ?? new GUIContent(item.element?.displayName ?? string.Empty);
-                
+
                 try
                 {
                     elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
-                    
-                    GUI.BeginClip(new Rect(0, 0, elementPosition.x + elementPosition.width, elementPosition.y + elementPosition.height));
-                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
-                    GUI.EndClip();
                 }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
+                    elementPosition.height = EditorGUIUtility.singleLineHeight;
                 }
                 
-                elementPosition.y += item.GetHeight(label, inspectorFlags, isInArray) + 2;
+                GUI.BeginClip(new Rect(0, 0, elementPosition.x + elementPosition.width, elementPosition.y + elementPosition.height));
+                
+                try
+                {
+                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
+                }
+                catch (Exception e)
+                {
+                    EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent($"{e.GetType().Name}: {e.Message}"));
+                    Debug.LogException(e);
+                }
+                
+                GUI.EndClip();
+                
+                elementPosition.y += elementPosition.height + 2;
             }
             
             GUI.EndClip();
@@ -166,7 +180,11 @@ namespace RuniOS.Editor.Inspectors
                 }
                 catch (Exception e)
                 {
-                    Debug.LogException(e);
+                    if (item.element != null)
+                        Debug.LogException(new InspectorElementException($"Exception occurred while getting height of {item.element.name}", item.element.name, e));
+                    else
+                        Debug.LogException(e);
+                    
                     return EditorGUIUtility.singleLineHeight + 2;
                 }
             }) - 2).Clamp(0);
