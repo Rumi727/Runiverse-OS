@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 // ReSharper disable StaticMemberInGenericType
@@ -92,9 +94,7 @@ namespace RuniOS
                                     // 1. 특정 기본 타입 예외 처리 (높은 우선순위)
                                     targetType != typeof(void),
                                     targetType != typeof(object),
-                                    targetType != typeof(Array),
                                     targetType != typeof(ValueType),
-                                    targetType != typeof(Enum),
                                     // 2. 클래스 우선
                                     isNotInterface,
                                     // 3. 깊이 가중치 (높을수록 구체적이고 우선순위 높음)
@@ -119,8 +119,31 @@ namespace RuniOS
         /// </summary>
         public static ImmutableArray<(Type type, TAttribute attribute)> drawerTypes { get; private set; }
         static readonly object drawerTypesLock = new();
-        
-        
+
+
+        /// <summary>
+        /// Finds the most specific drawer <see cref="Type"/> registered for the given target <see cref="Type"/>.
+        /// <br/>
+        /// This is a simplified overload that only returns the <see cref="Type"/> of the found drawer.
+        /// <br/><br/>
+        /// 주어진 대상 <see cref="Type"/>에 등록된 가장 구체적인 드로어 <see cref="Type"/>을 찾습니다.
+        /// <br/>
+        /// 이는 발견된 드로어의 <see cref="Type"/>만을 반환하는 간소화된 오버로드입니다.
+        /// </summary>
+        /// <param name="targetType">The type for which to find an associated drawer.</param>
+        /// <param name="predicate">An optional filter to apply to the sorted list of drawer types before searching.
+        /// <br/>
+        /// 검색 전에 정렬된 드로어 타입 목록에 적용할 수 있는 선택적 필터입니다.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Type"/> of the most specific drawer found, or <see langword="null"/> if no matching drawer is registered.
+        /// </returns>
+        public static Type? FindDrawerType(Type targetType, Func<(Type type, TAttribute attribute), bool>? predicate = null)
+        {
+            FindDrawerType(targetType, out _, out Type? type, predicate);
+            return type;
+        }
+
         /// <summary>
         /// Finds the most specific drawer <see cref="Type"/> registered for the given target <see cref="Type"/>.
         /// <br/>
@@ -131,18 +154,47 @@ namespace RuniOS
         /// 검색은 정확히 일치하는 타입에 등록된 드로어를 우선하며, 이후 <see cref="CustomAttributeDrawerAttribute.isSubtypeCompatible"/>이 <see langword="true"/>로 설정된 드로어에 대해서 할당 가능한 타입인지 확인하여 적용합니다.
         /// </summary>
         /// <param name="targetType">The type for which to find an associated drawer.</param>
+        /// <param name="resolvedTargetType">
+        /// When the method returns <see langword="true"/>, contains the **closest resolved assignable type** that matches the drawer's target.
+        /// <br/><br/>
+        /// For example, if <paramref name="targetType"/> is <c>List&lt;int&gt;</c> and the drawer targets <c>IList&lt;&gt;</c>, this will return <c>IList&lt;int&gt;</c>.
+        /// <br/><br/>
+        /// 메서드가 <see langword="true"/>를 반환할 때, 드로어의 대상과 일치하는 **가장 가까운 해결된 할당 가능 타입**을 포함합니다.
+        /// <br/><br/>
+        /// 예를 들어, <paramref name="targetType"/>이 <c>List&lt;int&gt;</c>이고 드로어가 <c>IList&lt;&gt;</c>를 대상으로 할 경우, 이 값은 <c>IList&lt;int&gt;</c>가 반환됩니다.
+        /// </param>
+        /// <param name="drawerType">When the method returns <see langword="true"/>, contains the <see cref="Type"/> of the most specific drawer found.
+        /// <br/><br/>
+        /// 메서드가 <see langword="true"/>를 반환할 때, 발견된 가장 구체적인 드로어의 <see cref="Type"/>을 포함합니다.
+        /// </param>
+        /// <param name="predicate">An optional filter to apply to the sorted list of drawer types before searching.
+        /// <br/>
+        /// 검색 전에 정렬된 드로어 타입 목록에 적용할 수 있는 선택적 필터입니다.
+        /// </param>
         /// <returns>
-        /// The <see cref="Type"/> of the most specific drawer found, or <see langword="null"/> if no matching drawer is registered.
+        /// <see langword="true"/> if a matching drawer is found; otherwise, <see langword="false"/>.
         /// </returns>
-        public static Type? FindDrawerType(Type targetType)
+        public static bool FindDrawerType(Type targetType, [MaybeNullWhen(false)] out Type resolvedTargetType, [MaybeNullWhen(false)] out Type drawerType, Func<(Type type, TAttribute attribute), bool>? predicate = null)
         {
-            foreach ((Type type, TAttribute attribute) in drawerTypes)
+            IEnumerable<(Type type, TAttribute attribute)> enumerable = drawerTypes;
+            if (predicate != null)
+                enumerable = enumerable.Where(predicate);
+            
+            foreach ((Type type, TAttribute attribute) in enumerable)
             {
-                if (targetType == attribute.targetType || (attribute.isSubtypeCompatible && targetType.IsAssignableToAny(attribute.targetType)))
-                    return type;
+                resolvedTargetType = targetType;
+                
+                if (targetType == attribute.targetType || (attribute.isSubtypeCompatible && targetType.IsAssignableToAny(attribute.targetType, out resolvedTargetType)))
+                {
+                    drawerType = type;
+                    return true;
+                }
             }
 
-            return null;
+            resolvedTargetType = null;
+            drawerType = null;
+            
+            return false;
         }
     }
 }
