@@ -179,7 +179,7 @@ namespace RuniOS
 
         #region Approximately
         public static bool Approximately(this float a, float b) => (b - a).Abs() < Max(1E-06f * Max(a.Abs(), b.Abs()), float.Epsilon * 8f);
-        public static bool Approximately(this double a, double b) => (b - a).Abs() < Max(1E-06d * Max(a.Abs(), b.Abs()), double.Epsilon * 8f);
+        public static bool Approximately(this double a, double b) => (b - a).Abs() < Max(1E-14d * Max(a.Abs(), b.Abs()), double.Epsilon * 8f);
         #endregion
 
         #region Asin
