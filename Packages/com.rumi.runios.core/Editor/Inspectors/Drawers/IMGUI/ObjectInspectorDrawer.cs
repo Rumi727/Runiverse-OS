@@ -54,7 +54,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         {
             CheckVariableElement();
 
-            bool valueIsNull = !variableElement.variableType.IsValueType && (variableElement.inspectable.instancesIsEmpty || !variableElement.IsReadable(flags) || variableElement.value.IsNull());
+            bool valueIsNull =
+                !variableElement.variableType.IsValueType &&
+                !variableElement.inspectable.instancesIsEmpty &&
+                variableElement.IsReadable(flags) &&
+                variableElement.value.IsNull();
             bool isExpanded = this.isExpanded && !valueIsNull;
             
             animFloat.target = isExpanded ? 1 : 0;

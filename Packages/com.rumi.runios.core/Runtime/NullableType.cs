@@ -38,22 +38,12 @@ namespace RuniOS
             .FirstOrDefault(x => x != null);
         
         /// <summary>
-        /// A delegate that determines whether a given object is null.
-        /// <br/>
-        /// 주어진 오브젝트가 null 값인지 여부를 결정하는 델리게이트입니다.
-        /// </summary>
-        // ReSharper disable once FieldCanBeMadeReadOnly.Global
-        public static event Func<object?, bool> isNull;
-        
-        /// <summary>
         /// 주어진 오브젝트가 null 값인지 여부를 반환합니다.<br/>
         /// <see cref="Object.Equals(object)"/> 메소드를 사용하여 <see cref="SerializableNullable{T}"/> 및 <see cref="UnityEngine.Object"/> 등을 지원합니다.
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static bool IsNull(this object? value) => isNull.GetInvocationList()
-            .OfType<Func<object?, bool>>()
-            .Any(x => x.Invoke(value));
+        public static bool IsNull(this object? value) => value == null || value.Equals(null);
 
         /// <summary>
         /// Initializes the <see cref="NullableType"/> class.
@@ -70,8 +60,6 @@ namespace RuniOS
             
             getNullableUnderlyingType += Nullable.GetUnderlyingType;
             getNullableUnderlyingType += SerializableNullable.GetUnderlyingType;
-
-            isNull += x => x == null || x.Equals(null);
         }
     }
 }

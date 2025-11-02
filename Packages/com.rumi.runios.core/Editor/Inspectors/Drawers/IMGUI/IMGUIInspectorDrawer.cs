@@ -53,9 +53,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     if (valueIsNull || variableElement.nullabilityInfo?.writeState == RuniNullabilityState.Nullable)
                     {
                         EditorGUI.BeginChangeCheck();
+                        EditorGUI.BeginDisabledGroup(valueIsNull && !variableElement.variableType.HasDefaultConstructor());
+                        
                         BeginIndentLevel(0);
                         bool toggleValue = EditorGUI.Toggle(toggleRect, !valueIsNull);
                         EndIndentLevel();
+                        
+                        EditorGUI.EndDisabledGroup();
                         if (EditorGUI.EndChangeCheck())
                             variableElement.value = toggleValue ? variableElement.variableType.GetDefaultValueNotNull() : null;
                     }
@@ -88,7 +92,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
                     {
                         EditorGUI.BeginChangeCheck();
+                        EditorGUI.BeginDisabledGroup(!variableElement.variableType.HasDefaultConstructor());
+                        
                         EditorGUI.Toggle(toggleRect, true);
+                        
+                        EditorGUI.EndDisabledGroup();
                         if (EditorGUI.EndChangeCheck())
                             variableElement.value = variableElement.variableType.GetDefaultValueNotNull();
 
