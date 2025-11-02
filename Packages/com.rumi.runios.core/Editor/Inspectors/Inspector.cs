@@ -153,6 +153,10 @@ namespace RuniOS.Editor.Inspectors
                 {
                     elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
                 }
+                catch (ExitGUIException) 
+                {
+                    throw;
+                }
                 catch (Exception e)
                 {
                     Debug.LogException(e);
@@ -164,6 +168,10 @@ namespace RuniOS.Editor.Inspectors
                 try
                 {
                     item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
+                }
+                catch (ExitGUIException) 
+                {
+                    throw;
                 }
                 catch (Exception e)
                 {
@@ -189,6 +197,10 @@ namespace RuniOS.Editor.Inspectors
                 try
                 {
                     return item.GetHeight(label, flags, isInArray) + 2;
+                }
+                catch (ExitGUIException) 
+                {
+                    throw;
                 }
                 catch (Exception e)
                 {
