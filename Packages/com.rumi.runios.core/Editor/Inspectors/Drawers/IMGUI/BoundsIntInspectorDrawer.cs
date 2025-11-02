@@ -1,0 +1,16 @@
+﻿#nullable enable
+using RuniOS.Inspectors;
+using RuniOS.Inspectors.Drawers;
+using UnityEditor;
+using UnityEngine;
+
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
+{
+    [CustomInspectorDrawer(typeof(BoundsInt))]
+    public class BoundsIntInspectorDrawer : GenericInspectorDrawer
+    {
+        public BoundsIntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+
+        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.BoundsIntField(position, label, (BoundsInt)value!);
+    }
+}

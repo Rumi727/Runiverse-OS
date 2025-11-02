@@ -81,6 +81,7 @@ namespace RuniOS.Editor.Windows
             public Vector4 vector4;
             public Rect rect;
             public Color color;
+            public Color32 color32;
             public StructTest2? nullableStructTest2;
             public SerializableNullable<StructTest2> serializableNullableStructTest2;
             public Dictionary<string, Test2> dictionary = new() { { "wa sans", new Test2() } };

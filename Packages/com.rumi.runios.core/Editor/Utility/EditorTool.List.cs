@@ -2,8 +2,6 @@
 using RuniOS.Collections.Generic;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,15 +12,15 @@ namespace RuniOS.Editor
         public delegate void ListHeaderAddAction(IList list, int index);
         public delegate void ListHeaderRemoveAction(IList list, int index);
 
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, null, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(lists, label, isExpanded, null, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeaderLayout(lists, new GUIContent(label), isExpanded, activator, isInArray);
-        public static bool DrawListHeaderLayout(IEnumerable<IList>? lists, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), lists, label, isExpanded, activator, isInArray);
+        public static bool DrawListHeaderLayout(IList? list, string label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(list, new GUIContent(label), isExpanded, null, isInArray);
+        public static bool DrawListHeaderLayout(IList? list, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeaderLayout(list, label, isExpanded, null, isInArray);
+        public static bool DrawListHeaderLayout(IList? list, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeaderLayout(list, new GUIContent(label), isExpanded, activator, isInArray);
+        public static bool DrawListHeaderLayout(IList? list, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(EditorGUILayout.GetControlRect(false, GetYSize(EditorStyles.foldoutHeader)), list, label, isExpanded, activator, isInArray);
 
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, null, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, lists, label, isExpanded, null, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(position, lists, new GUIContent(label), isExpanded, activator, isInArray);
-        public static bool DrawListHeader(Rect position, IEnumerable<IList>? lists, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false)
+        public static bool DrawListHeader(Rect position, IList? list, string label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, list, new GUIContent(label), isExpanded, null, isInArray);
+        public static bool DrawListHeader(Rect position, IList? list, GUIContent label, bool isExpanded, bool isInArray = false) => DrawListHeader(position, list, label, isExpanded, null, isInArray);
+        public static bool DrawListHeader(Rect position, IList? list, string label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false) => DrawListHeader(position, list, new GUIContent(label), isExpanded, activator, isInArray);
+        public static bool DrawListHeader(Rect position, IList? list, GUIContent label, bool isExpanded, Func<int, object?>? activator, bool isInArray = false)
         {
             position.x += EditorGUI.indentLevel * 15;
             
@@ -44,28 +42,22 @@ namespace RuniOS.Editor
                 countPosition.x += countPosition.width - 48 - (EditorGUI.indentLevel * 15);
                 countPosition.width = 48;
 
-                if (lists == null)
+                if (list == null)
                     return isExpanded;
 
-                bool isAllGeneric = activator != null || lists.All(x => CollectionGenericUtility.GetEnumerableElementType(x.GetType()) != null);
-                bool isFixedSize = lists.Any(x => x.IsFixedSize) || !isAllGeneric;
+                bool isAllGeneric = activator != null || CollectionGenericUtility.GetEnumerableElementType(list.GetType()) != null;
+                bool isFixedSize = list.IsFixedSize || !isAllGeneric;
 
                 EditorGUI.BeginChangeCheck();
 
-                int firstCount = lists.FirstOrDefault()?.Count ?? 0;
-                EditorGUI.showMixedValue = lists.Any(x => firstCount != x.Count);
-
+                int firstCount = list.Count;
+                
                 EditorGUI.BeginDisabledGroup(isFixedSize);
                 int count = EditorGUI.DelayedIntField(countPosition, firstCount);
                 EditorGUI.EndDisabledGroup();
 
-                EditorGUI.showMixedValue = false;
-
                 if (EditorGUI.EndChangeCheck())
-                {
-                    foreach (var list in lists)
-                        list.Resize(count, activator);
-                }
+                    list.Resize(count, activator);
             }
 
             return isExpanded;

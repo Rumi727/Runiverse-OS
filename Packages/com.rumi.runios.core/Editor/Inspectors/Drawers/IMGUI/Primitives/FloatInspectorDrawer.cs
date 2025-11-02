@@ -7,7 +7,7 @@ using UnityEngine;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
     [CustomInspectorDrawer(typeof(float), allowInDebug = true)]
-    public class FloatInspectorDrawer : PrimitiveInspectorDrawer
+    public class FloatInspectorDrawer : GenericInspectorDrawer
     {
         public FloatInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 

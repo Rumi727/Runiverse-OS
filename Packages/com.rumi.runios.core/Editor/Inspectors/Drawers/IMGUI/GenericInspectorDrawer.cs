@@ -3,15 +3,19 @@ using RuniOS.Inspectors;
 using UnityEditor;
 using UnityEngine;
 
-namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
+using static RuniOS.Editor.EditorTool;
+
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    public abstract class PrimitiveInspectorDrawer : IMGUIInspectorDrawer
+    public abstract class GenericInspectorDrawer : IMGUIInspectorDrawer
     {
-        protected PrimitiveInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        protected GenericInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
         public sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
         {
             CheckVariableElement();
+            
+            BeginWideMode(true);
 
             bool isReadable = !variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags); 
             using (new EditorGUI.MixedValueScope(!isReadable || variableElement.isMixedValue))
@@ -23,6 +27,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
                     variableElement.value = value;
                 EditorGUI.EndDisabledGroup();
             }
+            
+            EndWideMode();
         }
 
         protected abstract object DrawField(Rect position, GUIContent label, object? value);

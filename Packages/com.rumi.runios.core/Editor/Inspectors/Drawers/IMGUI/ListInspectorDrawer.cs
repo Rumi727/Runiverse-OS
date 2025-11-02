@@ -47,6 +47,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             label ??= GUIContent.none;
             
+            inspectableList.SynchronizeCollections();
+            
             if (inspectableList.parentElement != null)
             {
                 if (NullToggleField(inspectableList.parentElement, position, out position, label, flags))
@@ -81,13 +83,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             reorderableList.onReorderCallbackWithDetails = (_, oldIndex, newIndex) => inspectableList.OnElementMoved(oldIndex, newIndex);
             reorderableList.onChangedCallback = _ => inspectableList.UpdateSourceCollections();
             
-            inspectableList.SynchronizeCollections();
-            
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
             EditorGUI.BeginChangeCheck();
-            isExpanded = DrawListHeader(position, Enumerable.Repeat(inspectableList, 1), label, isExpanded, canAdd ? (_ => CreateElementItem(flags, elementType)) : null, isInArray);
+            isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canAdd ? (_ => CreateElementItem(flags, elementType)) : null, isInArray);
             position.y += headHeight + 2;
             if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
                 inspectableList.UpdateSourceCollections();
