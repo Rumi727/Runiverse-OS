@@ -87,6 +87,9 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
+                    if (variableType.IsPointer)
+                        return inspectable.instances.Any(x => ((Pointer)property.GetValue(x)).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    
                     return inspectable.instances.Any(x => !Equals(property.GetValue(x), value));
                 }
                 catch (Exception e)

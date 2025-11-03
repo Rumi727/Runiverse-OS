@@ -8,6 +8,8 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+using static RuniOS.Editor.EditorTool;
+
 namespace RuniOS.Editor.Windows
 {
     public sealed class InspectorTestPanel : ScriptableObject, IControlPanel
@@ -26,14 +28,18 @@ namespace RuniOS.Editor.Windows
 
         public void OnGUI()
         {
+            BeginWideMode();
+            BeginHierarchyMode();
             EditorGUI.BeginChangeCheck();
             InspectorFlags flags = (InspectorFlags)EditorGUILayout.EnumFlagsField("Inspector Flags", inspector.inspectorFlags);
             if (EditorGUI.EndChangeCheck())
                 inspector.Rebuild(inspector.inspectable ?? new InspectableObject(test), flags);
             
             inspector.DrawLayout();
+            EndHierarchyMode();
+            EndWideMode();
         }
-
+        
         public class Test
         {
             /*public unsafe int* pointer = (int*)new IntPtr(15335321);

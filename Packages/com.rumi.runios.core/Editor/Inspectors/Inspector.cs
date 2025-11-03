@@ -26,7 +26,6 @@ namespace RuniOS.Editor.Inspectors
         public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
         
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
-        IEnumerable<InspectorDrawer?> IInspector.drawers => drawers;
         
         public InspectorFlags inspectorFlags { get; private set; }
         
@@ -129,16 +128,25 @@ namespace RuniOS.Editor.Inspectors
         public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(label != null ? new GUIContent(label) : null, isInArray);
         public void DrawLayout(GUIContent? label, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray)), label, isInArray);
 
-        public void Draw(Rect position, string? label = null, bool isInArray = false) => Draw(position, label != null ? new GUIContent(label) : null, isInArray);
-        public void Draw(Rect position, GUIContent? label, bool isInArray = false)
+        public void Draw(Rect position, string? label = null, bool isInArray = false, Rect? clipping = null) => Draw(position, label != null ? new GUIContent(label) : null, isInArray, clipping);
+        public void Draw(Rect position, GUIContent? label, bool isInArray = false, Rect? clipping = null)
         {
             if (lastException != null)
             {
                 EditorGUI.LabelField(position, label ?? new GUIContent(lastException.Value.label), new GUIContent(lastException.Value.message));
                 return;
             }
-            
-            GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + position.height));
+
+            clipping ??= position;
+
+            if (EditorGUIUtility.hierarchyMode && rootInspector == this)
+            {
+                position.x += 15;
+                position.width -= 15;
+            }
+
+            if (drawers.Length > 1)
+                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
             
             Rect elementPosition = position;
             foreach (var item in drawers.WhereNotNull())
@@ -147,27 +155,31 @@ namespace RuniOS.Editor.Inspectors
                 if (inspectable is IInspectableList)
                     elementLabel = label ?? GUIContent.none;
                 else
-                    elementLabel = (drawers.Length == 1 ? label : null) ?? new GUIContent(item.element?.displayName ?? string.Empty);
+                    elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
 
+                if (drawers.Length > 1)
+                {
+                    try
+                    {
+                        elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
+                    }
+                    catch (ExitGUIException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                        elementPosition.height = EditorGUIUtility.singleLineHeight;
+                    }
+                }
+
+                if (drawers.Length > 1)
+                    GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
+                
                 try
                 {
-                    elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
-                }
-                catch (ExitGUIException) 
-                {
-                    throw;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                    elementPosition.height = EditorGUIUtility.singleLineHeight;
-                }
-                
-                GUI.BeginClip(new Rect(0, 0, elementPosition.x + elementPosition.width, elementPosition.y + elementPosition.height));
-                
-                try
-                {
-                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray);
+                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray, clipping);
                 }
                 catch (ExitGUIException) 
                 {
@@ -179,12 +191,14 @@ namespace RuniOS.Editor.Inspectors
                     Debug.LogException(e);
                 }
                 
-                GUI.EndClip();
+                if (drawers.Length > 1)
+                    GUI.EndClip();
                 
                 elementPosition.y += elementPosition.height + 2;
             }
             
-            GUI.EndClip();
+            if (drawers.Length > 1)
+                GUI.EndClip();
         }
 
         public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)

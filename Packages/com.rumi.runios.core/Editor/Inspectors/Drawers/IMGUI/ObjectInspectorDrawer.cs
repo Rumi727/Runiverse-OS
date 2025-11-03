@@ -21,10 +21,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly AnimFloat animFloat = new AnimFloat(0);
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
+        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
-
+            
             if (NullToggleField(variableElement, position, out Rect foldoutPosition, label, flags, nullText))
                 return;
 
@@ -42,10 +42,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (!isInArray)
             {
                 if (isExpanded || animFloat.isAnimating)
-                    inspector.Draw(position, label, isInArray);
+                    inspector.Draw(position, label, isInArray, clipping);
             }
             else if (isExpanded)
-                inspector.Draw(position, label, isInArray);
+                inspector.Draw(position, label, isInArray, clipping);
 
             EndIndentLevel();
         }

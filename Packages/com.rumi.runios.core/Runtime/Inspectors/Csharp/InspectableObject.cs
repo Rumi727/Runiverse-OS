@@ -28,6 +28,10 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
+        /// <summary>
+        /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
+        /// 값이 유효한지 검사하지 않습니다!
+        /// </summary>
         public IEnumerable<object> instances
         {
             get

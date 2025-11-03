@@ -102,6 +102,10 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
+        /// <summary>
+        /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
+        /// 값이 유효한지 검사하지 않습니다!
+        /// </summary>
         public IEnumerable<IEnumerable> instances
         {
             get
@@ -109,19 +113,7 @@ namespace RuniOS.Inspectors.Csharp
                 parentElement?.UpdateChildInspectable();
                 return _instances;
             }
-            set
-            {
-                if (value.Any(x => x != null && !inspectionType.IsInstanceOfType(x)))
-                {
-                    string invalidTypes = string.Join(", ", value.Where(x => x != null && !inspectionType.IsInstanceOfType(x))
-                        .Select(x => $"'{x!.GetType().FullName}'")
-                        .Distinct());
-                    
-                    throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
-                }
-
-                _instances = value;
-            }
+            set => _instances = value;
         }
         IEnumerable<IEnumerable> _instances;
         

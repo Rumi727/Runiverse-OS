@@ -40,7 +40,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
         }
 
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
+        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Instance | InspectorFlags.List | InspectorFlags.Member | InspectorFlags.Method | InspectorFlags.None | InspectorFlags.Property | InspectorFlags.Public | InspectorFlags.PublicAccess | InspectorFlags.ReadOnly | InspectorFlags.Static | InspectorFlags.Variable | InspectorFlags.WriteOnly,
+            bool isInArray = false, Rect? clipping = null)
         {
             CheckInspectableList();
             inspectableList.TryGetInspectionElementType(out Type? elementType);
@@ -68,7 +69,15 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             bool canAdd = !isFixedSize && elementType != null && elementType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic));
             reorderableList ??= new ReorderableList(inspectableList, elementType ?? typeof(object), true, false, true, true) { multiSelect = true, };
 
-            reorderableList.drawElementCallback = (rect, index, _, _) => GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true);
+            reorderableList.drawElementCallback = (rect, index, _, _) =>
+            {
+                rect.x += 10;
+                rect.width -= 10;
+                
+                BeginMinLabelWidth(120, -45.5f);
+                GetElementInspector(index, flags)?.Draw(rect, new GUIContent($"Element {index}"), true, clipping);
+                EndLabelWidth();
+            };
             reorderableList.elementHeightCallback = index => GetElementInspector(index, flags)?.GetHeight(label, flags, true) ?? EditorGUIUtility.singleLineHeight;
             reorderableList.onCanAddCallback = _ => canAdd;
             reorderableList.onCanRemoveCallback = _ => !isFixedSize;
@@ -101,16 +110,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             {
                 if (isExpanded || animFloat.isAnimating)
                 {
-                    if (animFloat.isAnimating)
-                        GUI.BeginClip(new Rect(0, 0, position.x + position.width, position.y + animFloat.value));
-
                     EditorGUI.BeginChangeCheck();
                     reorderableList.DoList(position);
                     if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
                         inspectableList.UpdateSourceCollections();
-
-                    if (animFloat.isAnimating)
-                        GUI.EndClip();
                 }
 
                 if (animFloat.isAnimating)
@@ -149,7 +152,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (element == null)
                 return null;
 
-            Inspector inspector = elementInspectors.GetOrCreateValue(element);
+            Inspector inspector = elementInspectors.GetValue(element, _ => new Inspector(rootInspector));
             if (inspector.element != element || inspector.inspectorFlags != flags)
                 inspector.Rebuild(element, flags, true);
                 

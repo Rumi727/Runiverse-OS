@@ -1,5 +1,4 @@
-﻿using RuniOS.Inspectors.Drawers;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace RuniOS.Inspectors
@@ -10,8 +9,6 @@ namespace RuniOS.Inspectors
         
         IInspectorElement? element { get; }
         ImmutableArray<IInspectorElement> elements { get; }
-        
-        IEnumerable<InspectorDrawer?> drawers { get; }
         
         InspectorFlags inspectorFlags { get; }
 

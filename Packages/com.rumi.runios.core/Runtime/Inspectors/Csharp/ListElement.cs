@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -74,6 +75,9 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
+                    if (variableType.IsPointer)
+                        return inspectable.collectionHandlers.Any(x => ((Pointer)x[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    
                     return inspectable.collectionHandlers.Any(x => !Equals(x[index], value));
                 }
                 catch (Exception e)

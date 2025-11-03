@@ -67,7 +67,13 @@ namespace RuniOS.Editor
 
 
         public static void BeginMinLabelWidth(float min = 120, float offset = 0) => BeginMinLabelWidth(min, EditorGUIUtilityBridge.contextWidth, offset);
-        public static void BeginMinLabelWidth(float min, float contextWidth, float offset) => BeginLabelWidth(Mathf.Max((contextWidth * 0.45f) - 40f, min) + offset);
+        public static void BeginMinLabelWidth(float min, float contextWidth, float offset)
+        {
+            if (EditorGUIUtility.hierarchyMode)
+                BeginLabelWidth(Mathf.Max((contextWidth * 0.45f) - 40f, min) + offset);
+            else
+                BeginLabelWidth(EditorGUIUtilityBridge.s_LabelWidth);
+        }
 
         public static void BeginLabelWidth(string label) => BeginLabelWidth(new GUIContent(label));
         public static void BeginLabelWidth(GUIContent label) => BeginLabelWidth(label, editorLabelStyle);
@@ -214,7 +220,7 @@ namespace RuniOS.Editor
 
 
         static readonly Stack<bool> wideModeStack = new Stack<bool>();
-        public static void BeginWideMode(bool width)
+        public static void BeginWideMode(bool width = true)
         {
             wideModeStack.Push(EditorGUIUtility.wideMode);
             EditorGUIUtility.wideMode = width;
@@ -249,6 +255,23 @@ namespace RuniOS.Editor
                 EditorGUI.indentLevel = result;
             else
                 EditorGUI.indentLevel = 0;
+        }
+        
+        
+        
+        static readonly Stack<bool> hierarchyModeStack = new Stack<bool>();
+        public static void BeginHierarchyMode(bool hierarchyMode = true)
+        {
+            hierarchyModeStack.Push(EditorGUIUtility.hierarchyMode);
+            EditorGUIUtility.hierarchyMode = hierarchyMode;
+        }
+
+        public static void EndHierarchyMode()
+        {
+            if (hierarchyModeStack.TryPop(out bool result))
+                EditorGUIUtility.hierarchyMode = result;
+            else
+                EditorGUIUtility.hierarchyMode = false;
         }
 
 

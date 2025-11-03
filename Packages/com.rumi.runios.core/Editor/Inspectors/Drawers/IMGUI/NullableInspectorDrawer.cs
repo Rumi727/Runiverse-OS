@@ -65,7 +65,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
                 .Build();
             
-            valueInspector = new Inspector();
+            valueInspector = new Inspector(rootInspector);
         }
         
         public IInspectorVariableElement hasValueElement { get; }
@@ -73,7 +73,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly Inspector valueInspector;
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.None | InspectorFlags.Public | InspectorFlags.Static | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.WriteOnly | InspectorFlags.PublicAccess | InspectorFlags.Property | InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Method | InspectorFlags.Variable | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false)
+        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Instance | InspectorFlags.List | InspectorFlags.Member | InspectorFlags.Method | InspectorFlags.None | InspectorFlags.Property | InspectorFlags.Public | InspectorFlags.PublicAccess | InspectorFlags.ReadOnly | InspectorFlags.Static | InspectorFlags.Variable | InspectorFlags.WriteOnly,
+            bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
             
@@ -100,7 +101,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (valueInspector.element != valueElement || valueInspector.inspectorFlags != flags)
                 valueInspector.Rebuild(valueElement, flags, true);
             
-            valueInspector.Draw(position, label, isInArray);
+            valueInspector.Draw(position, label, isInArray, clipping);
         }
 
         float lastInspectorHeight;
@@ -118,7 +119,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 return height.Lerp(EditorGUIUtility.singleLineHeight, nullableAnimFloat.value);
             }
 
-            return !valueIsNull ? valueInspector.GetHeight(label, flags, isInArray) : EditorGUIUtility.singleLineHeight;
+            return !valueIsNull ? height : EditorGUIUtility.singleLineHeight;
         }
     }
 }
