@@ -119,9 +119,47 @@ namespace RuniOS
         }
 
         /// <summary>
+        /// 주어진 포인터 타입(<paramref name="givenType"/>)이 다른 포인터 타입(<paramref name="pointerType"/>)에 할당 가능한지 확인합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이 메서드는 다음과 같은 경우 <see langword="true"/>를 반환합니다:<br/>
+        /// <list type="bullet">
+        ///     <item><description><paramref name="givenType"/>이 <paramref name="pointerType"/>과 동일한 포인터 타입인 경우 (예: <c>int*</c>가 <c>int*</c>에 할당).</description></item>
+        ///     <item><description><paramref name="givenType"/>이 포인터 타입이고, <paramref name="pointerType"/>이 <c>void*</c>인 경우 (예: <c>int*</c>가 <c>void*</c>에 할당).</description></item>
+        /// </list>
+        /// 두 타입 모두 반드시 포인터 타입이어야 합니다.
+        /// </remarks>
+        /// <param name="givenType">할당될 대상 포인터의 <see cref="Type"/>입니다 (예: <c>typeof(int*)</c>).</param>
+        /// <param name="pointerType">할당받을 변수의 포인터 <see cref="Type"/>입니다 (예: <c>typeof(void*)</c>).</param>
+        /// <returns>
+        /// <paramref name="givenType"/>이 <paramref name="pointerType"/>에 할당 가능하면
+        /// <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="givenType"/> 또는 <paramref name="pointerType"/>이 <see langword="null"/>인 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="pointerType"/>이 유효한 포인터 타입이 아닌 경우 발생할 수 있습니다.
+        /// </exception>
+        public static bool IsAssignableToPointer(this Type givenType, Type pointerType)
+        {
+            // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (givenType == null)
+                throw new ArgumentNullException(nameof(givenType), "The given type cannot be null.");
+            if (pointerType == null)
+                throw new ArgumentNullException(nameof(pointerType), "The target pointer type cannot be null.");
+            else if (!pointerType.IsPointer)
+                throw new ArgumentException("The provided type must be a valid pointer type (e.g., typeof(int*) or typeof(void*)).", nameof(pointerType));
+            // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+
+            return givenType.IsPointer && (pointerType == typeof(void*) || givenType == pointerType);
+        }
+
+        /// <summary>
         /// 주어진 <paramref name="givenType"/>의 인스턴스가 <paramref name="targetType"/>의 변수에 할당 가능한지 확인합니다.
         /// <paramref name="targetType"/>이 제네릭 타입 정의(<c>List&lt;&gt;</c> 등)인 경우,
-        /// <paramref name="givenType"/>이 해당 제네릭 정의를 구현하거나 상속하는지도 함께 검사합니다.
+        /// <paramref name="givenType"/>이 해당 제네릭 정의를 구현하거나 상속하는지도 함께 검사합니다.<br/>
+        /// 또한, 포인터 타입(<c>int*</c> 등) 간의 할당 가능성도 확인합니다.
         /// </summary>
         /// <remarks>
         /// 이 메서드는 다음과 같은 경우 <see langword="true"/>를 반환합니다:<br/>
@@ -130,12 +168,15 @@ namespace RuniOS
         ///     <item><description><paramref name="givenType"/>이 <paramref name="targetType"/>의 서브클래스인 경우.</description></item>
         ///     <item><description><paramref name="givenType"/>이 <paramref name="targetType"/> 인터페이스를 구현하는 경우.</description></item>
         ///     <item><description><paramref name="targetType"/>이 제네릭 타입 정의이고, <paramref name="givenType"/>이 해당 정의를 구현하거나 상속하는 경우.</description></item>
+        ///     <item><description>
+        ///         <paramref name="targetType"/>이 포인터 타입(<c>T*</c>)이며, <paramref name="givenType"/>이 동일한 포인터 타입이거나 <c>void*</c>로 할당 가능한 포인터 타입인 경우.
+        ///     </description></item>
         /// </list>
         /// 이 메서드는 <paramref name="targetType"/>이 제네릭 타입 정의인 경우
         /// <paramref name="givenType"/>의 인터페이스 및 상속 계층 구조를 탐색하여 일치 여부를 검사합니다.
         /// </remarks>
         /// <param name="givenType">할당될 대상 인스턴스의 <see cref="Type"/>입니다.</param>
-        /// <param name="targetType">할당받을 변수의 <see cref="Type"/>입니다. 제네릭 타입 정의일 수 있습니다.</param>
+        /// <param name="targetType">할당받을 변수의 <see cref="Type"/>입니다. 제네릭 타입 정의이거나 포인터 타입일 수 있습니다.</param>
         /// <returns>
         /// <paramref name="givenType"/>이 <paramref name="targetType"/>에 할당 가능하면 <see langword="true"/>를 반환하고,
         /// 그렇지 않으면 <see langword="false"/>를 반환합니다.
@@ -148,7 +189,8 @@ namespace RuniOS
         /// <summary>
         /// 주어진 <paramref name="givenType"/>의 인스턴스가 <paramref name="targetType"/>의 변수에 할당 가능한지 확인합니다.
         /// <paramref name="targetType"/>이 제네릭 타입 정의(<c>List&lt;&gt;</c> 등)인 경우,
-        /// <paramref name="givenType"/>이 해당 제네릭 정의를 구현하거나 상속하는지도 함께 검사합니다.
+        /// <paramref name="givenType"/>이 해당 제네릭 정의를 구현하거나 상속하는지도 함께 검사합니다.<br/>
+        /// 또한, 포인터 타입(<c>int*</c> 등) 간의 할당 가능성도 확인합니다.
         /// </summary>
         /// <remarks>
         /// 이 메서드는 다음과 같은 경우 <see langword="true"/>를 반환합니다:<br/>
@@ -157,15 +199,21 @@ namespace RuniOS
         ///     <item><description><paramref name="givenType"/>이 <paramref name="targetType"/>의 서브클래스인 경우.</description></item>
         ///     <item><description><paramref name="givenType"/>이 <paramref name="targetType"/> 인터페이스를 구현하는 경우.</description></item>
         ///     <item><description><paramref name="targetType"/>이 제네릭 타입 정의이고, <paramref name="givenType"/>이 해당 정의를 구현하거나 상속하는 경우.</description></item>
+        ///     <item><description>
+        ///         <paramref name="targetType"/>이 포인터 타입(<c>T*</c>)이며, <paramref name="givenType"/>이 동일한 포인터 타입이거나 <c>void*</c>로 할당 가능한 포인터 타입인 경우.
+        ///     </description></item>
         /// </list>
         /// 이 메서드는 <paramref name="targetType"/>이 제네릭 타입 정의인 경우
         /// <paramref name="givenType"/>의 인터페이스 및 상속 계층 구조를 탐색하여 일치 여부를 검사합니다.
         /// </remarks>
         /// <param name="givenType">할당될 대상 인스턴스의 <see cref="Type"/>입니다.</param>
-        /// <param name="targetType">할당받을 변수의 <see cref="Type"/>입니다. 제네릭 타입 정의일 수 있습니다.</param>
+        /// <param name="targetType">할당받을 변수의 <see cref="Type"/>입니다. 제네릭 타입 정의이거나 포인터 타입일 수 있습니다.</param>
         /// <param name="resolvedType">
         /// 할당이 가능한 경우, 발견된 구체적인 <see cref="Type"/> (예: <c>List&lt;int&gt;</c>) 또는
         /// <paramref name="targetType"/>이 제네릭 정의가 아닌 경우 <paramref name="targetType"/> 자체가 반환됩니다.
+        /// <br/>
+        /// <paramref name="targetType"/>이 포인터 타입으로 할당 가능할 때, <paramref name="givenType"/>이 반환됩니다.
+        /// <br/>
         /// 할당이 불가능한 경우 <see langword="null"/>이 반환됩니다.
         /// </param>
         /// <returns>
@@ -183,6 +231,12 @@ namespace RuniOS
             else if (targetType == null)
                 throw new ArgumentNullException(nameof(targetType), "The target type cannot be null.");
             // ReSharper restore ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+
+            if (targetType.IsPointer && givenType.IsAssignableToPointer(targetType))
+            {
+                resolvedType = givenType;
+                return true;
+            }
 
             if (targetType == typeof(object))
             {
@@ -217,7 +271,18 @@ namespace RuniOS
                 yield return type;
         }
 
-        public static string GetTypeDisplayName(this Type type) => Unity.Properties.TypeUtility.GetTypeDisplayName(type);
+        public static string GetTypeDisplayName(this Type type)
+        {
+            if (type == typeof(void))
+                return "void";
+            
+            if (type.IsArray)
+                return (type.GetElementType() ?? typeof(object)).GetTypeDisplayName() + "[]";
+            if (type.IsPointer)
+                return (type.GetElementType() ?? typeof(void)).GetTypeDisplayName() + "*";
+            
+            return Unity.Properties.TypeUtility.GetTypeDisplayName(type);
+        }
 
         public static string SerializeToString(this Type type) => type.FullName + ", " + type.Assembly.GetName().Name;
         public static Type? DeserializeFromString(string typeName) => Type.GetType(typeName);

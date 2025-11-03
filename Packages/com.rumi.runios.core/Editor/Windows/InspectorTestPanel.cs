@@ -36,6 +36,8 @@ namespace RuniOS.Editor.Windows
 
         public class Test
         {
+            /*public unsafe int* pointer = (int*)new IntPtr(15335321);
+            public unsafe int* nullPointer = null;*/
             public static Test2? staticTest2Field;
             public bool boolField = false;
             public sbyte sbyteField = 42;
