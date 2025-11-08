@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -120,6 +121,8 @@ namespace RuniOS
         public static ImmutableArray<(Type type, TAttribute attribute)> drawerTypes { get; private set; }
         static readonly object drawerTypesLock = new();
 
+        static readonly ConcurrentDictionary<Type, (Type resolvedTargetType, Type drawerType)> cachedDrawerTypes = new();
+
 
         /// <summary>
         /// Finds the most specific drawer <see cref="Type"/> registered for the given target <see cref="Type"/>.
@@ -179,6 +182,13 @@ namespace RuniOS
             IEnumerable<(Type type, TAttribute attribute)> enumerable = drawerTypes;
             if (predicate != null)
                 enumerable = enumerable.Where(predicate);
+            else if (cachedDrawerTypes.TryGetValue(targetType, out (Type resolvedTargetType, Type drawerType) value))
+            {
+                resolvedTargetType = value.resolvedTargetType;
+                drawerType = value.drawerType;
+                
+                return true;
+            }
             
             foreach ((Type type, TAttribute attribute) in enumerable)
             {
@@ -187,6 +197,8 @@ namespace RuniOS
                 if (targetType == attribute.targetType || (attribute.isSubtypeCompatible && targetType.IsAssignableToAny(attribute.targetType, out resolvedTargetType)))
                 {
                     drawerType = type;
+                    cachedDrawerTypes.TryAdd(drawerType, (resolvedTargetType, drawerType));
+                    
                     return true;
                 }
             }
