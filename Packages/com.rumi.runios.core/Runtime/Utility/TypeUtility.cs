@@ -25,6 +25,8 @@ namespace RuniOS
             return Activator.CreateInstance(type, nonPublic);
         }
 
+        public static bool CanGetDefaultValueNotNull(this Type type, bool nonPublic = false) => type == typeof(string) || type.IsArray || type.HasDefaultConstructor(nonPublic);
+
         /// <summary>
         /// 주어진 <paramref name="givenType"/>이 특정 제네릭 타입 정의(<paramref name="genericTypeDefinition"/>)를
         /// 구현하거나 상속하는지 확인합니다.
