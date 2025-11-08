@@ -7,10 +7,11 @@ namespace RuniOS.Inspectors
 {
     public interface IInspectableList : IInspectable, IList
     {
-        /// <remarks>
+        /// <summary>
+        /// 리스트의 요소 타입을 가져옵니다.<br/>
         /// null을 반환하는 경우, 리스트가 모든 타입 형식을 허용한다는 의미입니다.
-        /// </remarks>
-        string? inspectionElementDisplayName { get; }
+        /// </summary>
+        Type? inspectionElementType { get; }
         
         RuniNullabilityInfo? elementNullabilityInfo { get; }
         
@@ -20,6 +21,8 @@ namespace RuniOS.Inspectors
         /// 예: 배열은 그 자채로는 크기를 바꾸지 못하며, 변수에 새로 할당해야 크기를 간접적으로 바꿀 수 있습니다.
         /// </summary>
         bool isArray { get; }
+
+        void Move(int oldIndex, int newIndex);
         
         /// <summary>
         /// 요소가 <b>삽입되었을 때</b> 호출됩니다.
@@ -46,15 +49,10 @@ namespace RuniOS.Inspectors
         /// </summary>
         void OnClear();
 
-        new IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
-        IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
+        new IReadOnlyList<IInspectorListElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
+        IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
         
-        /// <summary>
-        /// 리스트의 요소 타입을 가져옵니다.
-        /// </summary>
-        /// <param name="type">가져온 타입입니다. null 값일 경우, 리스트가 모든 타입 형식을 허용한다는 의미입니다.</param>
-        /// <returns>타입을 성공적으로 가져올 시 true를 반환합니다.</returns>
-        bool TryGetInspectionElementType(out Type? type);
+        IInspectorListElement? GetElement(int index, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
         bool HasFlags(InspectorFlags flags)
         {
@@ -71,6 +69,7 @@ namespace RuniOS.Inspectors
         }
         
         new IInspectableList Clone();
+        IInspectable IInspectable.Clone() => Clone();
 
         void SynchronizeCollections();
         void UpdateSourceCollections();

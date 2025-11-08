@@ -12,8 +12,8 @@ using static RuniOS.Editor.EditorTool;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     // 이쪽은 원래의 UI가 따로 있어서 allowInDebug = true 안했습니다.
-    [CustomInspectorDrawer(typeof(Nullable<>))]
-    [CustomInspectorDrawer(typeof(ISerializableNullable<>))]
+    [CustomInspectorDrawer(typeof(Nullable<>), true)]
+    [CustomInspectorDrawer(typeof(ISerializableNullable<>), true)]
     public class NullableInspectorDrawer : IMGUIInspectorDrawer
     {
         public NullableInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector)

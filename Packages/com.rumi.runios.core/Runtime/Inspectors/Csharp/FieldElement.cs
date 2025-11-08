@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
 using System;
 using System.Collections;
@@ -40,7 +41,11 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
+            {
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
+                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
+            }
         }
 
         /// <summary>
@@ -154,6 +159,12 @@ namespace RuniOS.Inspectors.Csharp
         /// </summary>
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
+        
+        /// <summary>
+        /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
+        /// </summary>
+        public InspectableDictionary? inspectableDictionaryElement { get; }
+        IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
         /// <summary>
         /// 검사 중인 모든 객체에서 이 필드의 값 목록을 가져옵니다.
@@ -179,29 +190,20 @@ namespace RuniOS.Inspectors.Csharp
                 if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
                 {
                     // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
-                    using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                    
-                    var instances = inspectable.instances.Select(x =>
-                    {
-                        if (!valueEnumerator.MoveNext())
-                            return x;
-                        
-                        field.SetValue(x, valueEnumerator.Current);
-                        return x;
-                    }).ToArray(); //ToArray로 열거하지 않으면 캡쳐된 valueEnumerator이 지연 실행되어 폐기될 가능성이 있음.
-                    
-                    inspectable.parentElement.SetValues(instances);
+                    inspectable.parentElement.SetValues
+                    (
+                        inspectable.instances.Zip(values, (instance, value) => (instance, value))
+                            .Select(x =>
+                            {
+                                field.SetValue(x.instance, x.value);
+                                return x.instance;
+                            })
+                    );
                 }
                 else
                 {
-                    using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                    foreach (var instance in inspectable.instances)
-                    {
-                        if (!valueEnumerator.MoveNext())
-                            return;
-                    
-                        field.SetValue(instance, valueEnumerator.Current);
-                    }
+                    foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
+                        field.SetValue(instance, value);
                 }
             }
             catch (Exception e)
@@ -253,6 +255,8 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();
+            if (inspectableDictionaryElement != null)
+                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
         }
     }
 }

@@ -28,6 +28,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
+        
+        public int instanceCount => serializedObject.targetObjects.Length;
 
         public InspectableSerializedObject(SerializedObject serializedObject, SerializedProperty? targetProperty = null)
         {

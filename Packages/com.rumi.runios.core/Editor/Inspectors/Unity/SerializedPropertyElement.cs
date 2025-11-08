@@ -117,6 +117,11 @@ namespace RuniOS.Editor.Inspectors.Unity
         public IInspectableList? inspectableListElement { get; }
 
         /// <summary>
+        /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="IInspectableDictionary"/>를 가져옵니다.
+        /// </summary>
+        public IInspectableDictionary? inspectableDictionaryElement => null;
+
+        /// <summary>
         /// 모든 대상 객체에서 값을 가져옵니다. 직렬화된 프로퍼티에 대해서는 지원되지 않습니다.
         /// </summary>
         /// <returns></returns>

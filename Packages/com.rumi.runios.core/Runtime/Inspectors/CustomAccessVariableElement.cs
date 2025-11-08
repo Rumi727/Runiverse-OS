@@ -42,6 +42,12 @@ namespace RuniOS.Inspectors
                 inspectableListElement = targetElement.inspectableListElement.Clone();
                 inspectableListElement.parentElement = this;
             }
+            
+            if (targetElement.inspectableDictionaryElement != null)
+            {
+                inspectableDictionaryElement = targetElement.inspectableDictionaryElement.Clone();
+                inspectableDictionaryElement.parentElement = this;
+            }
         }
         
         public IInspectorVariableElement targetElement { get; }
@@ -76,6 +82,8 @@ namespace RuniOS.Inspectors
         
         public IInspectableList? inspectableListElement { get; }
         
+        public IInspectableDictionary? inspectableDictionaryElement { get; }
+
         public event ReadFunc readFunc;
         public event GetValuesFunc getValuesFunc;
         

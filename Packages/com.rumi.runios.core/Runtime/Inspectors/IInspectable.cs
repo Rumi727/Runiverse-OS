@@ -18,6 +18,8 @@ namespace RuniOS.Inspectors
         
         bool instanceIsMultiple { get; }
         
+        int instanceCount { get; }
+        
         IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
         /// <summary>
@@ -28,5 +30,6 @@ namespace RuniOS.Inspectors
         bool TryGetInspectionType([NotNullWhen(true)] out Type? type);
 
         new IInspectable Clone();
+        object ICloneable.Clone() => Clone();
     }
 }

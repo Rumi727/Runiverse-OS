@@ -52,5 +52,14 @@ namespace RuniOS.Editor.Localizations
                 throw new InvalidCastException();
             }
         }
+        
+        readonly ISerializableKeyValuePair<string?, string?> ISerializableKeyValuePair<string?, string?>.CreateInstance(string? key, string? value) => new SerializableKeyValuePair<string?, string?>(key, value);
+        readonly ISerializableKeyValuePair ISerializableKeyValuePair.CreateInstance(object? key, object? value)
+        {
+            ISerializableKeyValuePair copyed = this;
+            copyed.Key = key;
+            copyed.Value = value;
+            return copyed;
+        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿#nullable enable
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -128,7 +129,7 @@ namespace RuniOS.Collections.Generic
         /// <paramref name="type"/>이 <see cref="IDictionary{TKey,TValue}"/>의 인스턴스이면 해당 T 타입이고,
         /// 그렇지 않으면 <see langword="null"/>입니다.
         /// </returns>
-        public static (Type? key, Type? value) GetDictionaryElementType(Type type)
+        public static KeyValuePair<Type, Type>? GetDictionaryElementType(Type type)
         {
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
@@ -139,11 +140,11 @@ namespace RuniOS.Collections.Generic
                     Type key = resolvedType.GetGenericArguments()[0];
                     Type value = resolvedType.GetGenericArguments()[1];
                     
-                    return (key, value);
+                    return new KeyValuePair<Type, Type>(key, value);
                 }
             }
 
-            return default;
+            return null;
         }
         
         /// <summary>
@@ -154,7 +155,7 @@ namespace RuniOS.Collections.Generic
         /// <paramref name="type"/>이 <see cref="KeyValuePair{TKey,TValue}"/>의 인스턴스이면 해당 T 타입이고,
         /// 그렇지 않으면 <see langword="null"/>입니다.
         /// </returns>
-        public static (Type? key, Type? value) GetKeyValuePairUnderlyingType(Type type)
+        public static KeyValuePair<Type, Type>? GetKeyValuePairUnderlyingType(Type type)
         {
             // 제네릭 타입이고 제네릭 정의가 아닌 경우에만 처리합니다.
             if (type.IsGenericType && !type.IsGenericTypeDefinition)
@@ -165,11 +166,11 @@ namespace RuniOS.Collections.Generic
                     Type key = resolvedType.GetGenericArguments()[0];
                     Type value = resolvedType.GetGenericArguments()[1];
                     
-                    return (key, value);
+                    return new KeyValuePair<Type, Type>(key, value);
                 }
             }
 
-            return default;
+            return null;
         }
     }
 }

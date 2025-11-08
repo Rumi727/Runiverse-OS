@@ -9,6 +9,9 @@ namespace RuniOS.Collections.Generic
     /// </summary>
     public interface ISerializableDictionary<TKey, TValue, TPair> : IDictionary<TKey, TValue>, ISerializationCallbackReceiver where TPair : ISerializableKeyValuePair<TKey?, TValue?>, new()
     {
+        // 필드랑 프로퍼티 이름 바꾸지 마세요.
+        // 직렬화에 사용합니다.
+        
         IList<TPair> pairs { get; }
 
         void ISerializationCallbackReceiver.OnBeforeSerialize()

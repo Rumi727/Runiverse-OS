@@ -9,7 +9,9 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         protected GenericInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-        public sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.Event | InspectorFlags.Field | InspectorFlags.Instance | InspectorFlags.List | InspectorFlags.Member | InspectorFlags.Method | InspectorFlags.None | InspectorFlags.Property | InspectorFlags.Public | InspectorFlags.PublicAccess | InspectorFlags.ReadOnly | InspectorFlags.Static | InspectorFlags.Variable | InspectorFlags.WriteOnly,
+        public override bool isField => true;
+
+        public sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List,
             bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();

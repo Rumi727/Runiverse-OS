@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
 using System;
 using System.Collections;
@@ -23,7 +24,11 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
             
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
+            {
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
+                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo?.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
+            }
         }
 
         public string name { get; }
@@ -76,9 +81,9 @@ namespace RuniOS.Inspectors.Csharp
                 {
                     object? value = this.value;
                     if (variableType.IsPointer)
-                        return inspectable.collectionHandlers.Any(x => ((Pointer)x[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                        return inspectable.listHandlers.Any(x => ((Pointer)x[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
                     
-                    return inspectable.collectionHandlers.Any(x => !Equals(x[index], value));
+                    return inspectable.listHandlers.Any(x => !Equals(x[index], value));
                 }
                 catch (Exception e)
                 {
@@ -93,12 +98,18 @@ namespace RuniOS.Inspectors.Csharp
 
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
+        
+        /// <summary>
+        /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
+        /// </summary>
+        public InspectableDictionary? inspectableDictionaryElement { get; }
+        IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
         public IEnumerable<object?> GetValues()
         {
             try
             {
-                return inspectable.collectionHandlers.Select(x => x[index]);
+                return inspectable.listHandlers.Select(x => x[index]);
             }
             catch (Exception e)
             {
@@ -110,14 +121,8 @@ namespace RuniOS.Inspectors.Csharp
         {
             try
             {
-                using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                foreach (var instance in inspectable.collectionHandlers)
-                {
-                    if (!valueEnumerator.MoveNext())
-                        return;
-                    
-                    instance[index] = valueEnumerator.Current;
-                }
+                foreach ((ListHandlerBase instance, object? value) in inspectable.listHandlers.Zip(values, (instance, value) => (instance, value)))
+                    instance[index] = value;
             }
             catch (Exception e)
             {
@@ -150,6 +155,8 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();
+            if (inspectableDictionaryElement != null)
+                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
         }
     }
 }

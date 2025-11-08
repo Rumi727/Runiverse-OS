@@ -1,13 +1,12 @@
 ﻿#nullable enable
-using System;
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers
+namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(Stack))]
-    public class StackHandler : IEnumerableHandler
+    public class StackHandler : VirtualListHandler
     {
-        public StackHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }
+        public StackHandler(IEnumerable targetCollection) : base(targetCollection) { }
         
         public override bool isReadOnly => false;
         

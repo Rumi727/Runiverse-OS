@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Editor.Inspectors.Drawers.IMGUI;
+using RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
 using RuniOS.Inspectors.Drawers;
@@ -125,8 +126,20 @@ namespace RuniOS.Editor.Inspectors
         }
 
 
-        public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(label != null ? new GUIContent(label) : null, isInArray);
-        public void DrawLayout(GUIContent? label, bool isInArray = false) => Draw(EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray)), label, isInArray);
+        public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(Vector2.zero, label != null ? new GUIContent(label) : null, isInArray);
+        public void DrawLayout(GUIContent? label, bool isInArray = false) => DrawLayout(Vector2.zero, label, isInArray);
+        public void DrawLayout(Vector2 offset, string? label = null, bool isInArray = false) => DrawLayout(offset, label != null ? new GUIContent(label) : null, isInArray);
+        public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
+        {
+            Rect rect = EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray));
+            rect.x += offset.x;
+            rect.width -= offset.x;
+            
+            rect.y += offset.y;
+            rect.height -= offset.y;
+            
+            Draw(rect, label, isInArray);
+        }
 
         public void Draw(Rect position, string? label = null, bool isInArray = false, Rect? clipping = null) => Draw(position, label != null ? new GUIContent(label) : null, isInArray, clipping);
         public void Draw(Rect position, GUIContent? label, bool isInArray = false, Rect? clipping = null)
@@ -138,12 +151,6 @@ namespace RuniOS.Editor.Inspectors
             }
 
             clipping ??= position;
-
-            if (EditorGUIUtility.hierarchyMode && rootInspector == this)
-            {
-                position.x += 15;
-                position.width -= 15;
-            }
 
             if (drawers.Length > 1)
                 GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));

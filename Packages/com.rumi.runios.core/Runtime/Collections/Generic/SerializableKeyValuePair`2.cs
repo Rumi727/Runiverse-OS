@@ -110,7 +110,16 @@ namespace RuniOS.Collections.Generic
             key = Key;
             value = Value;
         }
-        
+
+        readonly ISerializableKeyValuePair<TKey, TValue> ISerializableKeyValuePair<TKey, TValue>.CreateInstance(TKey key, TValue value) => new SerializableKeyValuePair<TKey, TValue>(key, value);
+        readonly ISerializableKeyValuePair ISerializableKeyValuePair.CreateInstance(object? key, object? value)
+        {
+            ISerializableKeyValuePair copyed = this;
+            copyed.Key = key;
+            copyed.Value = value;
+            return copyed;
+        }
+
         /// <summary>
         /// <see cref="SerializableKeyValuePair{TKey, TValue}"/>를 <see cref="KeyValuePair{TKey, TValue}"/>로 암시적으로 변환합니다.
         /// </summary>

@@ -5,19 +5,18 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers
 {
     [CustomCollectionHandler(typeof(IList))]
-    [CustomCollectionHandler(typeof(Array))]
-    public class ListHandler : CollectionHandler
+    public class IListHandler : ListHandlerBase
     {
-        public ListHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }
+        public IListHandler(IEnumerable targetCollection) : base(targetCollection) { }
 
         public override object? this[int index]
         {
             get => ((IList)targetCollection)[index];
             set => ((IList)targetCollection)[index] = value;
         }
-
+        
         public override int count => ((ICollection)targetCollection).Count;
-
+        
         public override bool isReadOnly => ((IList)targetCollection).IsReadOnly;
 
         public override bool isFixedSize => ((IList)targetCollection).IsFixedSize;
@@ -34,7 +33,7 @@ namespace RuniOS.Collections.Handlers
 
         public override bool Contains(object? value) => ((IList)targetCollection).Contains(value);
         public override int IndexOf(object value) => ((IList)targetCollection).IndexOf(value);
-
+        
         public override void CopyTo(Array array, int index) => ((ICollection)targetCollection).CopyTo(array, index);
     }
 }

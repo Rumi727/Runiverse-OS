@@ -43,6 +43,12 @@ namespace RuniOS.Inspectors
         /// 리스트가 아닌 경우 <see langword="null"/>을 반환합니다.
         /// </summary>
         IInspectableList? inspectableListElement { get; }
+        
+        /// <summary>
+        /// 이 변수가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="IInspectableDictionary"/>를 가져옵니다.<br/>
+        /// 딕셔너리가 아닌 경우 <see langword="null"/>을 반환합니다.
+        /// </summary>
+        IInspectableDictionary? inspectableDictionaryElement { get; }
 
         /// <summary>
         /// 검사 중인 모든 객체에서 이 변수의 값 목록을 가져옵니다.

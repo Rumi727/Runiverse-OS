@@ -12,14 +12,14 @@ namespace RuniOS.Collections.Generic
         /// <br/>
         /// 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
-        public const string nameOfKey = "key";
+        public const string nameOfKey = "Key";
         
         /// <summary>
         /// <see cref="SerializableKeyValuePair{TKey, TValue}"/> 구조체의 값 필드 이름입니다.
         /// <br/>
         /// 리플렉션 접근 시 사용될 수 있습니다.
         /// </summary>
-        public const string nameOfValue = "value";
+        public const string nameOfValue = "Value";
         
         /// <summary>
         /// <see cref="SerializableKeyValuePair{TKey, TValue}"/> 구조체의 내부 키 필드 이름입니다.

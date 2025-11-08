@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
 using System;
 using System.Collections;
@@ -20,7 +21,11 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
+            {
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
+                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
+            }
         }
 
         public Type variableType => property.PropertyType;
@@ -104,6 +109,12 @@ namespace RuniOS.Inspectors.Csharp
 
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
+        
+        /// <summary>
+        /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
+        /// </summary>
+        public InspectableDictionary? inspectableDictionaryElement { get; }
+        IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
         public IEnumerable<object?> GetValues()
         {
@@ -121,14 +132,8 @@ namespace RuniOS.Inspectors.Csharp
         {
             try
             {
-                using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                foreach (var instance in inspectable.instances)
-                {
-                    if (!valueEnumerator.MoveNext())
-                        return;
-                    
-                    property.SetValue(instance, valueEnumerator.Current);
-                }
+                foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
+                    property.SetValue(instance, value);
                 
                 // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
                 if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
@@ -152,6 +157,9 @@ namespace RuniOS.Inspectors.Csharp
                 return false;
             if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
+            
+            if ((property.IsSpecialName || name.Contains('.')) && !flags.HasFlagFast(InspectorFlags.Hidden))
+                return false;
 
             return true;
         }
@@ -174,6 +182,8 @@ namespace RuniOS.Inspectors.Csharp
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();
+            if (inspectableDictionaryElement != null)
+                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
         }
     }
 }

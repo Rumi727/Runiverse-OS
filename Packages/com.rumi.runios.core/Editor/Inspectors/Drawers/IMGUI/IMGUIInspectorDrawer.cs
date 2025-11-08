@@ -2,6 +2,7 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -12,6 +13,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class IMGUIInspectorDrawer : InspectorDrawer
     {
+        [return: NotNullIfNotNull("element")]
         public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, Inspector? rootInspector = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
         {
             if (element == null)
@@ -19,7 +21,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             
             Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
-                return null;
+                return new ObjectInspectorDrawer(element, rootInspector);
             
             return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element, rootInspector }, null);
         }
@@ -28,6 +30,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         /// 루트 인스펙터를 가져옵니다.
         /// </summary>
         public Inspector? rootInspector { get; }
+
+        public abstract bool isField { get; }
         
         public string? nullText { get; set; } = null;
         
@@ -53,7 +57,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 label,
                 (!variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags)) ? !variableElement.value.IsNull() : null,
                 (!variableElement.inspectable.instancesIsEmpty && variableElement.IsWritable(flags)) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
-                variableElement.variableType.IsArray || variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
+                variableElement.variableType.IsArray || variableElement.variableType == typeof(string) || variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
                 variableElement.nullabilityInfo?.writeState,
                 nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"
             );
@@ -135,5 +139,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         protected IMGUIInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element) => this.rootInspector = rootInspector;
         protected IMGUIInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList) => this.rootInspector = rootInspector;
+        protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary, Inspector? rootInspector = null) : base(inspectableDictionary) => this.rootInspector = rootInspector;
     }
 }

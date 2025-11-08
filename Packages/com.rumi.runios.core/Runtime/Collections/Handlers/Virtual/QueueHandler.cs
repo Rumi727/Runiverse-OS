@@ -1,13 +1,12 @@
 ﻿#nullable enable
-using System;
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers
+namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(Queue))]
-    public class QueueHandler : IEnumerableHandler
+    public class QueueHandler : VirtualListHandler
     {
-        public QueueHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }
+        public QueueHandler(IEnumerable targetCollection) : base(targetCollection) { }
         
         public override bool isReadOnly => false;
         

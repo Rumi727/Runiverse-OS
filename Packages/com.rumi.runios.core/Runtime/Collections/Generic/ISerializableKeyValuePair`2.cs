@@ -13,6 +13,9 @@ namespace RuniOS.Collections.Generic
     /// <typeparam name="TValue">값의 타입입니다.</typeparam>
     public interface ISerializableKeyValuePair<TKey, TValue>
     {
+        // 필드랑 프로퍼티 이름 바꾸지 마세요.
+        // 직렬화에 사용합니다.
+        
         /// <summary>
         /// 키를 가져오거나 설정합니다.
         /// </summary>
@@ -21,6 +24,8 @@ namespace RuniOS.Collections.Generic
         /// 값을 가져오거나 설정합니다.
         /// </summary>
         TValue Value { get; set; }
+
+        ISerializableKeyValuePair<TKey, TValue> CreateInstance(TKey key, TValue value);
     }
 }
 #pragma warning restore IDE1006 // 명명 스타일

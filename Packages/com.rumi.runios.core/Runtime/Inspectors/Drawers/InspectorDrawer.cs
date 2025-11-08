@@ -8,6 +8,7 @@ namespace RuniOS.Inspectors.Drawers
     {
         public IInspectable inspectable { get; }
         public IInspectableList? inspectableList { get; }
+        public IInspectableDictionary? inspectableDictionary { get; }
         
         public IInspectorElement? element { get; }
         public IInspectorVariableElement? variableElement { get; }
@@ -22,6 +23,7 @@ namespace RuniOS.Inspectors.Drawers
             actionElement = element as IInspectorActionElement;
 
             inspectableList = variableElement?.inspectableListElement;
+            inspectableDictionary = variableElement?.inspectableDictionaryElement;
         }
         
         protected InspectorDrawer(IInspectableList inspectableList)
@@ -30,11 +32,24 @@ namespace RuniOS.Inspectors.Drawers
             this.inspectableList = inspectableList;
         }
         
+        protected InspectorDrawer(IInspectableDictionary inspectableDictionary)
+        {
+            inspectable = inspectableDictionary;
+            this.inspectableDictionary = inspectableDictionary;
+        }
+        
         [MemberNotNull(nameof(inspectableList))]
         protected void CheckInspectableList()
         {
             if (inspectableList == null)
                 throw new InvalidOperationException($"{nameof(inspectableList)} is null");
+        }
+        
+        [MemberNotNull(nameof(inspectableDictionary))]
+        protected void CheckInspectableDictionary()
+        {
+            if (inspectableDictionary == null)
+                throw new InvalidOperationException($"{nameof(inspectableDictionary)} is null");
         }
         
         [MemberNotNull(nameof(element))]

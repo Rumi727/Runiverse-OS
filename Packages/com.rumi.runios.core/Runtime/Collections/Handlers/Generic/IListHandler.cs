@@ -4,12 +4,19 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace RuniOS.Collections.Handlers
+namespace RuniOS.Collections.Handlers.Generic
 {
     [CustomCollectionHandler(typeof(IList<>))]
-    public class GenericIListHandler : CollectionHandler
+    public class IListHandler : ListHandlerBase
     {
-        public GenericIListHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }
+        public IListHandler(IEnumerable targetCollection) : base(targetCollection)
+        {
+            targetCollection.GetType().IsAssignableToGenericDefinition(typeof(IList<>), out resolvedTargetType!);
+            targetCollection.GetType().IsAssignableToGenericDefinition(typeof(ICollection<>), out resolvedTargetCollectionType!);
+        }
+
+        readonly Type resolvedTargetType;
+        readonly Type resolvedTargetCollectionType;
 
         public override object? this[int index]
         {
@@ -30,17 +37,12 @@ namespace RuniOS.Collections.Handlers
         }
         readonly object?[] indexInfoIndex = new object?[1];
         PropertyInfo? indexerInfo;
-
+        
         public override int count
         {
             get
             {
-                if (countInfo == null)
-                {
-                    resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                    countInfo = AccessUtility.DeclaredProperty(type!, nameof(ICollection<int>.Count));
-                }
-
+                countInfo ??= AccessUtility.DeclaredProperty(resolvedTargetCollectionType, nameof(ICollection<int>.Count));
                 return (int)countInfo!.GetValue(targetCollection);
             }
         }
@@ -50,12 +52,7 @@ namespace RuniOS.Collections.Handlers
         {
             get
             {
-                if (isReadOnlyInfo == null)
-                {
-                    resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                    isReadOnlyInfo = AccessUtility.DeclaredProperty(type!, nameof(ICollection<int>.IsReadOnly));
-                }
-
+                isReadOnlyInfo ??= AccessUtility.DeclaredProperty(resolvedTargetCollectionType, nameof(ICollection<int>.IsReadOnly));
                 return (bool)isReadOnlyInfo!.GetValue(targetCollection);
             }
         }
@@ -66,11 +63,7 @@ namespace RuniOS.Collections.Handlers
         public override int Add(object? value)
         {
             int result = count;
-            if (addInfo == null)
-            {
-                resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                addInfo = AccessUtility.DeclaredMethod(type!, nameof(ICollection<int>.Add));
-            }
+            addInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Add));
             addInfoParameters[0] = value;
             
             addInfo!.Invoke(targetCollection, addInfoParameters);
@@ -79,7 +72,7 @@ namespace RuniOS.Collections.Handlers
         readonly object?[] addInfoParameters = new object?[1];
         MethodInfo? addInfo;
 
-        public override void Insert(int index, object value)
+        public override void Insert(int index, object? value)
         {
             insertInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(IList<int>.Insert));
             insertInfoParameters[0] = index;
@@ -89,14 +82,10 @@ namespace RuniOS.Collections.Handlers
         }
         readonly object?[] insertInfoParameters = new object?[2];
         MethodInfo? insertInfo;
-
-        public override void Remove(object value)
+        
+        public override void Remove(object? value)
         {
-            if (removeInfo == null)
-            {
-                resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                removeInfo = AccessUtility.DeclaredMethod(type!, nameof(ICollection<int>.Remove));
-            }
+            removeInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Remove));
             removeInfoParameters[0] = value;
             
             removeInfo!.Invoke(targetCollection, removeInfoParameters);
@@ -111,27 +100,19 @@ namespace RuniOS.Collections.Handlers
             
             removeAtInfo!.Invoke(targetCollection, removeAtInfoParameters);
         }
-        readonly object?[] removeAtInfoParameters = new object?[1];
+        readonly object[] removeAtInfoParameters = new object[1];
         MethodInfo? removeAtInfo;
-
+        
         public override void Clear()
         {
-            if (clearInfo == null)
-            {
-                resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                clearInfo = AccessUtility.DeclaredMethod(type!, nameof(ICollection<int>.Clear));
-            }
+            clearInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Clear));
             clearInfo!.Invoke(targetCollection, null);
         }
         MethodInfo? clearInfo;
 
         public override bool Contains(object? value)
         {
-            if (containsInfo == null)
-            {
-                resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                containsInfo = AccessUtility.DeclaredMethod(type!, nameof(ICollection<int>.Contains));
-            }
+            containsInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Contains));
             containsInfoParameters[0] = value;
             
             return (bool)containsInfo!.Invoke(targetCollection, containsInfoParameters);
@@ -139,7 +120,7 @@ namespace RuniOS.Collections.Handlers
         readonly object?[] containsInfoParameters = new object?[1];
         MethodInfo? containsInfo;
         
-        public override int IndexOf(object value)
+        public override int IndexOf(object? value)
         {
             indexOfInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(IList<int>.IndexOf));
             indexOfInfoParameters[0] = value;
@@ -148,21 +129,17 @@ namespace RuniOS.Collections.Handlers
         }
         readonly object?[] indexOfInfoParameters = new object?[1];
         MethodInfo? indexOfInfo;
-
+        
         public override void CopyTo(Array array, int index)
         {
-            if (copyToInfo == null)
-            {
-                resolvedTargetType.IsAssignableToGenericDefinition(typeof(ICollection<>), out Type? type);
-                copyToInfo = AccessUtility.DeclaredMethod(type!, nameof(ICollection<int>.CopyTo));
-            }
+            copyToInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.CopyTo));
             
             copyToInfoParameters[0] = array;
             copyToInfoParameters[1] = index;
             
             copyToInfo!.Invoke(targetCollection, copyToInfoParameters);
         }
-        readonly object?[] copyToInfoParameters = new object?[2];
+        readonly object[] copyToInfoParameters = new object[2];
         MethodInfo? copyToInfo;
     }
 }

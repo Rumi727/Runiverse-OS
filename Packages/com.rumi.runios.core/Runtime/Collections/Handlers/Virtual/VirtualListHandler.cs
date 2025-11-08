@@ -2,12 +2,12 @@
 using System;
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers
+namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(IEnumerable))]
-    public class IEnumerableHandler : CollectionHandler
+    public class VirtualListHandler : ListHandlerBase
     {
-        public IEnumerableHandler(Type resolvedTargetType, IEnumerable targetCollection) : base(resolvedTargetType, targetCollection) { }
+        public VirtualListHandler(IEnumerable targetCollection) : base(targetCollection) { }
 
         protected ArrayList synchronizedList { get; } = new();
 
@@ -25,18 +25,20 @@ namespace RuniOS.Collections.Handlers
 
         public override int Add(object? value) => synchronizedList.Add(value);
 
-        public override void Insert(int index, object value) => synchronizedList.Insert(index, value);
+        public override void Insert(int index, object? value) => synchronizedList.Insert(index, value);
 
-        public override void Remove(object value) => synchronizedList.Remove(value);
+        public override void Remove(object? value) => synchronizedList.Remove(value);
 
         public override void RemoveAt(int index) => synchronizedList.RemoveAt(index);
 
         public override void Clear() => synchronizedList.Clear();
 
         public override bool Contains(object? value) => synchronizedList.Contains(value);
-        public override int IndexOf(object value) => synchronizedList.IndexOf(value);
+        public override int IndexOf(object? value) => synchronizedList.IndexOf(value);
 
         public override void CopyTo(Array array, int index) => synchronizedList.CopyTo(array, index);
+
+        public override IEnumerator GetEnumerator() => synchronizedList.GetEnumerator();
 
         public override void SynchronizeCollections() => synchronizedList.SyncWithEnumerable(targetCollection);
     }

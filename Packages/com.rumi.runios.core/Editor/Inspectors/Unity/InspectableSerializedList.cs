@@ -37,9 +37,11 @@ namespace RuniOS.Editor.Inspectors.Unity
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
         
-        public bool instancesIsEmpty => false;
+        public bool instancesIsEmpty => property.serializedObject.targetObject != null;
         
         public bool instanceIsMultiple => property.serializedObject.isEditingMultipleObjects;
+        
+        public int instanceCount => property.serializedObject.targetObjects.Length;
         
         public Type inspectionElementType { get; }
         public string inspectionElementDisplayName => inspectionElementType.GetTypeDisplayName();
@@ -119,6 +121,12 @@ namespace RuniOS.Editor.Inspectors.Unity
             OnClear();
         }
 
+        public void Move(int oldIndex, int newIndex)
+        {
+            property.MoveArrayElement(oldIndex, newIndex);
+            OnElementMoved(oldIndex, newIndex);
+        }
+
         public void OnInsert(int index)
         {
             if (index < 0 || index > cachedElements.Count)
@@ -194,7 +202,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         readonly List<IInspectorListElement> cachedElements = new();
         IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        public IReadOnlyList<IInspectorListElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List))
                 return ImmutableArray<IInspectorListElement>.Empty;

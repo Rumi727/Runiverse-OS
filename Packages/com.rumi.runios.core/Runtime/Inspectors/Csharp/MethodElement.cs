@@ -52,6 +52,9 @@ namespace RuniOS.Inspectors.Csharp
 
             if (!flags.HasFlagFast(InspectorFlags.Method))
                 return false;
+            
+            if ((method.IsSpecialName || name.Contains('.')) && !flags.HasFlagFast(InspectorFlags.Hidden))
+                return false;
 
             return true;
         }

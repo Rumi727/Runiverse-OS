@@ -21,11 +21,8 @@ namespace RuniOS.Inspectors.Csharp
         
         public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, RuniNullabilityInfo? elementNullabilityInfo = null)
         {
-            if (!typeof(IEnumerable).IsAssignableFrom(inspectionType) || !CollectionHandler.FindDrawerType(inspectionType, out Type? resolvedDrawerTargetType, out Type? drawerType))
+            if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
-
-            this.resolvedDrawerTargetType = resolvedDrawerTargetType;
-            this.drawerType = drawerType;
             
             this.inspectionType = inspectionType;
             inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetEnumerableElementType(inspectionType);
@@ -35,11 +32,8 @@ namespace RuniOS.Inspectors.Csharp
             
             this.elementNullabilityInfo = elementNullabilityInfo;
 
-            readonlyCollectionHandlerTable = _collectionHandlerTable.AsReadOnly();
+            readonlyListHandlerTable = _listHandlerTable.AsReadOnly();
         }
-        
-        readonly Type resolvedDrawerTargetType;
-        readonly Type drawerType;
         
         public IInspectorVariableElement? parentElement { get; set; }
         
@@ -50,18 +44,13 @@ namespace RuniOS.Inspectors.Csharp
         /// null을 반환하는 경우, 리스트가 모든 타입 형식을 허용한다는 의미입니다.
         /// </remarks>
         public Type? inspectionElementType { get; }
-        
-        /// <remarks>
-        /// null을 반환하는 경우, 리스트가 모든 타입 형식을 허용한다는 의미입니다.
-        /// </remarks>
-        public string? inspectionElementDisplayName => inspectionElementType?.GetTypeDisplayName();
 
         public RuniNullabilityInfo? elementNullabilityInfo { get; }
 
-        public bool isReadOnly => collectionHandlers.Any(x => x.isReadOnly);
+        public bool isReadOnly => listHandlers.Any(x => x.isReadOnly);
         bool IList.IsReadOnly => isReadOnly;
         
-        public bool isFixedSize => collectionHandlers.Any(x => (parentElement == null || !isArray) && x.isFixedSize);
+        public bool isFixedSize => listHandlers.Any(x => (parentElement == null || !isArray) && x.isFixedSize);
         bool IList.IsFixedSize => isFixedSize;
         
         public bool isArray => inspectionType.IsArray;
@@ -73,7 +62,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                var instances = collectionHandlerTable;
+                var instances = listHandlerTable;
                 if (instances.Any())
                     return instances.MinBy(static x => x.Value.count).Key;
                 
@@ -91,14 +80,14 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public CollectionHandler? collectionHandler
+        public ListHandlerBase? listHandler
         {
             get
             {
                 if (instance == null)
                     return null;
                 
-                return collectionHandlerTable[instance];
+                return listHandlerTable[instance];
             }
         }
 
@@ -117,60 +106,46 @@ namespace RuniOS.Inspectors.Csharp
         }
         IEnumerable<IEnumerable> _instances;
         
-        public IEnumerable<CollectionHandler> collectionHandlers => instances.Select(x => collectionHandlerTable[x]);
+        public IEnumerable<ListHandlerBase> listHandlers => instances.Select(x => listHandlerTable[x]);
 
         // 이 InspectableCollection이 관리하는 모든 원본 컬렉션에 매핑되는 CollectionHandler 맵
-        public IReadOnlyDictionary<IEnumerable, CollectionHandler> collectionHandlerTable
+        public IReadOnlyDictionary<IEnumerable, ListHandlerBase> listHandlerTable
         {
             get
             {
-                _collectionHandlerTable.SyncKeysWithEnumerable(instances, x => (CollectionHandler)Activator.CreateInstance(drawerType, resolvedDrawerTargetType, x));
-                return readonlyCollectionHandlerTable;
+                _listHandlerTable.SyncKeysWithEnumerable(instances, ListHandlerBase.FindListHandler);
+                return readonlyListHandlerTable;
             }
         }
-        readonly IReadOnlyDictionary<IEnumerable, CollectionHandler> readonlyCollectionHandlerTable;
-        readonly Dictionary<IEnumerable, CollectionHandler> _collectionHandlerTable = new();
+        readonly IReadOnlyDictionary<IEnumerable, ListHandlerBase> readonlyListHandlerTable;
+        readonly Dictionary<IEnumerable, ListHandlerBase> _listHandlerTable = new();
 
-        [MemberNotNullWhen(false, nameof(instance))]
+        [MemberNotNullWhen(false, nameof(instance), nameof(listHandler))]
         public bool instancesIsEmpty => instance == null;
-        
-        public bool instanceIsMultiple
-        {
-            get
-            {
-                int count = 0;
-                foreach (var _ in instances)
-                {
-                    count++;
-                    if (count > 1)
-                        return true;
-                }
 
-                return false;
-            }
-        }
+        [MemberNotNullWhen(true, nameof(instance), nameof(listHandler))]
+        public bool instanceIsMultiple => instances.TwoOrMore();
+        
+        public int instanceCount => instances.Count();
 
         public object? this[int index]
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
+                ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
                 
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
                 
-                return collectionHandler[index];
+                return listHandler[index];
             }
             set
             {
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
                 
-                foreach (var list in collectionHandlers)
-                {
-                    if (list.count > index)
-                        list[index] = value;
-                }
+                foreach (var list in listHandlers)
+                    list[index] = value;
             }
         }
         
@@ -178,49 +153,21 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
-                return collectionHandler.count;
-            }
-            set
-            {
-                if (parentElement == null || !isArray)
-                {
-                    foreach (var list in collectionHandlers)
-                        list.Resize(value, Activator);
-                }
-                else
-                {
-                    parentElement.SetValues(instances.Select(list =>
-                    {
-                        if (list is Array array)
-                            list = array.Resize(value, Activator);
-
-                        return list;
-                    }));
-                }
-
-                object? Activator(int _)
-                {
-                    if (elementNullabilityInfo?.writeState == RuniNullabilityState.NotNull)
-                        return (inspectionElementType ?? typeof(object)).GetDefaultValueNotNull();
-                    else
-                        return (inspectionElementType ?? typeof(object)).GetDefaultValue();
-                }
+                ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
+                return listHandler.count;
             }
         }
         int ICollection.Count => count;
         
-        
-        
         public void SynchronizeCollections()
         {
-            foreach (var item in collectionHandlers)
+            foreach (var item in listHandlers)
                 item.SynchronizeCollections();
         }
         
         public void UpdateSourceCollections()
         {
-            foreach (var item in collectionHandlers)
+            foreach (var item in listHandlers)
                 item.UpdateSourceCollections();
         }
 
@@ -229,21 +176,15 @@ namespace RuniOS.Inspectors.Csharp
             int minCount = count;
             if (parentElement == null || !isArray)
             {
-                foreach (IList list in collectionHandlers)
-                {
-                    if (minCount == list.Count)
-                        list.Add(value);
-                }
+                foreach (var list in listHandlers)
+                    list.Add(value);
             }
             else
             {
                 parentElement.SetValues(instances.Select(list =>
                 {
                     if (list is Array array)
-                    {
-                        if (minCount == array.Length)
-                            list = array.Add(value);
-                    }
+                        list = array.Add(value);
 
                     return list;
                 }));
@@ -260,7 +201,7 @@ namespace RuniOS.Inspectors.Csharp
 
             if (parentElement == null || !isArray)
             {
-                foreach (var list in collectionHandlers)
+                foreach (var list in listHandlers)
                     list.Insert(index, value);
             }
             else
@@ -277,8 +218,45 @@ namespace RuniOS.Inspectors.Csharp
             OnInsert(index);
         }
 
-        public void Remove(object value) => RemoveAt(IndexOf(value));
-        
+        public void Remove(object value)
+        {
+            if (parentElement == null || !isArray)
+            {
+                var minCollectionHandler = listHandler;
+                foreach (var list in listHandlers)
+                {
+                    if (list == minCollectionHandler)
+                    {
+                        int index = list.IndexOf(value);
+                        list.RemoveAt(index);
+                        OnRemoveAt(index);
+                    }
+                    else
+                        list.Remove(value);
+                }
+            }
+            else
+            {
+                var minInstance = instance;
+                parentElement.SetValues(instances.Select(list =>
+                {
+                    if (list is Array array)
+                    {
+                        if (Equals(list, minInstance))
+                        {
+                            int index = Array.IndexOf(array, value);
+                            list = array.RemoveAt(index);
+                            OnRemoveAt(index);
+                        }
+                        else
+                            list = array.Remove(value);
+                    }
+
+                    return list;
+                }));
+            }
+        }
+
         public void RemoveAt(int index)
         {
             if (index < 0 || index >= count)
@@ -286,9 +264,8 @@ namespace RuniOS.Inspectors.Csharp
 
             if (parentElement == null || !isArray)
             {
-                foreach (var list in collectionHandlers)
+                foreach (var list in listHandlers)
                     list.RemoveAt(index);
-       
             }
             else
             {
@@ -308,7 +285,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (parentElement == null || !isArray)
             {
-                foreach (IList list in collectionHandlers)
+                foreach (IList list in listHandlers)
                     list.Clear();
             }
             else
@@ -324,8 +301,21 @@ namespace RuniOS.Inspectors.Csharp
             
             OnClear();
         }
-        
-        public void OnInsert(int index)
+
+        public void Move(int oldIndex, int newIndex)
+        {
+            if (oldIndex < 0 || oldIndex >= count)
+                throw new ArgumentOutOfRangeException(nameof(oldIndex));
+            if (newIndex < 0 || newIndex >= count)
+                throw new ArgumentOutOfRangeException(nameof(newIndex));
+            
+            foreach (var list in listHandlers)
+                list.Move(oldIndex, newIndex);
+            
+            OnElementMoved(oldIndex, newIndex);
+        }
+
+        public virtual void OnInsert(int index)
         {
             if (index < 0 || index > cachedElements.Count)
                 return;
@@ -339,7 +329,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public void OnRemoveAt(int index)
+        public virtual void OnRemoveAt(int index)
         {
             if (index < 0 || index >= cachedElements.Count)
                 return;
@@ -350,7 +340,7 @@ namespace RuniOS.Inspectors.Csharp
                 cachedElements[i].index = i;
         }
 
-        public void OnElementMoved(int oldIndex, int newIndex)
+        public virtual void OnElementMoved(int oldIndex, int newIndex)
         {
             if (oldIndex < 0 || oldIndex >= cachedElements.Count)
                 return;
@@ -364,7 +354,7 @@ namespace RuniOS.Inspectors.Csharp
                 cachedElements[i].index = i;
         }
 
-        public void OnElementChanged(int oldIndex, int newIndex)
+        public virtual void OnElementChanged(int oldIndex, int newIndex)
         {
             cachedElements.Change(oldIndex, newIndex);
             
@@ -372,24 +362,24 @@ namespace RuniOS.Inspectors.Csharp
                 cachedElements[i].index = i;
         }
 
-        public void OnClear() => cachedElements.Clear();
+        public virtual void OnClear() => cachedElements.Clear();
 
         public bool Contains(object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
-            return collectionHandler.Contains(value);
+            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
+            return listHandlers.Any(x => x.Contains(value));
         }
 
         public int IndexOf(object value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(collectionHandler, nameof(collectionHandler));
-            return collectionHandler.IndexOf(value);
+            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
+            return listHandler.IndexOf(value);
         }
 
         public IEnumerator GetEnumerator()
         {
-            ExceptionUtility.ThrowIfArgumentNull(instance, nameof(instance));
-            return instance.GetEnumerator();
+            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
+            return listHandler.GetEnumerator();
         }
 
         public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
@@ -399,30 +389,24 @@ namespace RuniOS.Inspectors.Csharp
             type = inspectionType;
             return true;
         }
-
-        public bool TryGetInspectionElementType(out Type? type)
-        {
-            type = inspectionElementType;
-            return true;
-        }
         
         
 
         readonly List<ListElement> cachedElements = new();
         IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
-        public IReadOnlyList<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        public IReadOnlyList<IInspectorListElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
-                return Array.Empty<IInspectorElement>();
+                return Array.Empty<IInspectorListElement>();
             
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
-            cachedElements.Resize(count, x => new ListElement(this, x));
+            cachedElements.Resize(count, CreateElement);
 
             for (int i = 0; i < cachedElements.Count; i++)
             {
                 ListElement element = cachedElements[i];
                 if (element.variableType != element.currentElementType)
-                    cachedElements[i] = new ListElement(this, i);
+                    cachedElements[i] = CreateElement(i);
             }
             
             return readOnlyCachedElements;
@@ -440,11 +424,9 @@ namespace RuniOS.Inspectors.Csharp
 
             return element;
         }
+
+        protected virtual ListElement CreateElement(int index) => new ListElement(this, index);
         
-        IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
-        
-        public IInspectableList Clone() => new InspectableList(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = instances };
-        IInspectable IInspectable.Clone() => Clone();
-        object ICloneable.Clone() => Clone();
+        IInspectableList IInspectableList.Clone() => new InspectableList(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = instances };
     }
 }

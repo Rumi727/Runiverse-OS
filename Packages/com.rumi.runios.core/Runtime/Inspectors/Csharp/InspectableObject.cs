@@ -45,22 +45,10 @@ namespace RuniOS.Inspectors.Csharp
 
         [MemberNotNullWhen(false, nameof(instance))]
         public bool instancesIsEmpty => instance == null;
-        
-        public bool instanceIsMultiple
-        {
-            get
-            {
-                int count = 0;
-                foreach (var _ in instances)
-                {
-                    count++;
-                    if (count > 1)
-                        return true;
-                }
 
-                return false;
-            }
-        }
+        public bool instanceIsMultiple => instances.TwoOrMore();
+        
+        public int instanceCount => instances.Count();
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
