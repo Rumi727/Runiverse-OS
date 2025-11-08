@@ -186,5 +186,7 @@ namespace RuniOS
             
             return t.IsValueType || t.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
         }
+        
+        public static bool IsFlags(this Enum value) => value.GetType().IsDefined(typeof(FlagsAttribute));
     }
 }
