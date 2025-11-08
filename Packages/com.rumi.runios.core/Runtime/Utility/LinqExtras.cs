@@ -85,8 +85,23 @@ namespace RuniOS.Linq
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
 
-        public static bool IsEmpty(this ICollection collection) => collection.Count == 0;
-        public static bool Any(this ICollection collection) => collection.Count > 0;
+        public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
+        
+        public static bool TwoOrMore<T>(this IEnumerable<T> source)
+        {
+            if (source is ICollection<T> collection)
+                return collection.Count > 1;
+
+            int count = 0;
+            foreach (var _ in source)
+            {
+                count++;
+                if (count > 1)
+                    return true;
+            }
+
+            return false;
+        }
 
         public static bool SequenceEqual(this IEnumerable first, IEnumerable second) =>
             SequenceEqual(first, second, null);
@@ -166,22 +181,19 @@ namespace RuniOS.Linq
 
             return hash.ToHashCode();
         }
+
+        public static IEnumerable<(T item, int index)> GetDuplicatedItemIndices<T>(this IEnumerable<T> source) => source
+            .Select((item, index) => (item, index))
+            .GroupBy(x => x.item)
+            .Where(x => x.TwoOrMore())
+            .SelectMany(x => x);
         
-        public static int Count(this IEnumerable source)
+        public static IEnumerable<DictionaryEntry> AsEntrys(this IDictionary source)
         {
-            if (source is ICollection collection)
-                return collection.Count;
- 
-            int count = 0;
-            IEnumerator e = source.GetEnumerator();
-            using var disposable = e as IDisposable;
-            checked
-            {
-                while (e.MoveNext())
-                    count++;
-            }
- 
-            return count;
+            IDictionaryEnumerator enumerator = source.GetEnumerator();
+            while (enumerator.MoveNext())
+                yield return enumerator.Entry;
+            (enumerator as IDisposable)?.Dispose();
         }
     }
 }
