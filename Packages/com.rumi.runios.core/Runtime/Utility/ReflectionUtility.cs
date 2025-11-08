@@ -178,10 +178,13 @@ namespace RuniOS
         
         public static MethodInfo GetMethodInfo(Delegate method) => method.Method;
         
-        public static bool HasDefaultConstructor(this Type t, bool nonPublic = false)
+        /// <summary>
+        /// 문자열과 배열은 포함되지 않습니다!
+        /// </summary>
+        public static bool HasDefaultConstructor(this Type t, bool includeNonPublic = false)
         {
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-            if (nonPublic)
+            if (includeNonPublic)
                 flags |= BindingFlags.NonPublic; 
             
             return t.IsValueType || t.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
