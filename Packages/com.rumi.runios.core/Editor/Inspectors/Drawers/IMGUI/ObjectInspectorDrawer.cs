@@ -9,11 +9,13 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(object), allowInDebug = true)]
+    [CustomInspectorDrawer(typeof(object), true, allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
         public ObjectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) => inspector = new Inspector(rootInspector);
-        
+
+        public override bool isField => false;
+
         public Inspector inspector { get; }
         public bool isExpanded { get; set; }
 

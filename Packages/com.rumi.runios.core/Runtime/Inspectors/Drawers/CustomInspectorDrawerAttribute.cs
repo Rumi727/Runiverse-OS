@@ -7,8 +7,8 @@ namespace RuniOS.Inspectors.Drawers
     {
         public bool allowInDebug { get; set; }
         
-        public override bool isSubtypeCompatible => true;
-        
-        public CustomInspectorDrawerAttribute(Type targetType) : base(targetType) { }
+        public override bool isSubtypeCompatible { get; }
+
+        public CustomInspectorDrawerAttribute(Type targetType, bool useForChildren = false) : base(targetType) => isSubtypeCompatible = useForChildren;
     }
 }
