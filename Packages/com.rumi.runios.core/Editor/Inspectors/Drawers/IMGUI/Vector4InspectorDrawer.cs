@@ -15,7 +15,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
-            if (EditorGUIUtility.wideMode)
+            if (EditorGUIUtility.wideMode || !EditorTool.LabelHasContent(label))
                 return EditorGUIUtility.singleLineHeight;
             else
                 return (EditorGUIUtility.singleLineHeight * 2) + 2;

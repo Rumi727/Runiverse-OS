@@ -104,7 +104,7 @@ namespace RuniOS.Editor.Drawers
             else
                 height = EditorGUI.GetPropertyHeight(key).Max(EditorGUI.GetPropertyHeight(value));
 
-            if (EditorGUIUtility.wideMode)
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
                 return height;
             else
                 return height + EditorGUIUtility.singleLineHeight + 4;

@@ -59,7 +59,7 @@ namespace RuniOS.Editor.Drawers.Resource
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            if (EditorGUIUtility.wideMode)
+            if (EditorGUIUtility.wideMode || !EditorTool.LabelHasContent(label))
                 return EditorGUIUtility.singleLineHeight;
             else
                 return (EditorGUIUtility.singleLineHeight * 2) + 2;

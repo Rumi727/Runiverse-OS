@@ -35,7 +35,7 @@ namespace RuniOS.Editor.Windows
             if (EditorGUI.EndChangeCheck())
                 inspector.Rebuild(inspector.inspectable ?? new InspectableObject(test), flags);
             
-            inspector.DrawLayout();
+            inspector.DrawLayout(new Vector2(15, 0));
             EndHierarchyMode();
             EndWideMode();
         }
@@ -67,6 +67,8 @@ namespace RuniOS.Editor.Windows
             public char charField = 'a';
             public string stringField = "text";
             public int? nullableInt = 42;
+            public TextAnchor textAnchor = TextAnchor.UpperLeft;
+            public InspectorFlags inspectorFlags = InspectorFlags.None;
             public List<Test2> test2List = new();
             public List<List<Test2>> test2ListList = new();
             public Test2[] test2Array = new Test2[] { new(), new(), new(), new() };
@@ -85,11 +87,16 @@ namespace RuniOS.Editor.Windows
             // ReSharper disable once NotAccessedField.Local
             StructTest? _writeOnlyNullableStructTest;
             public Vector2 vector2;
+            public Vector2Int vector2Int;
             public Vector3 vector3;
+            public Vector3Int vector3Int;
             public Vector4 vector4;
             public Rect rect;
+            public RectInt rectInt;
             public Color color;
             public Color32 color32;
+            public Bounds bounds;
+            public BoundsInt boundsInt;
             public StructTest2? nullableStructTest2;
             public SerializableNullable<StructTest2> serializableNullableStructTest2;
             public Dictionary<string, Test2> dictionary = new() { { "wa sans", new Test2() } };

@@ -304,5 +304,7 @@ namespace RuniOS.Editor
         public static string RichNumberMSpace(object value) => value.ToString();
         public static string RichNumberMSpace(object value, string width) => value.ToString();
 #endif
+
+        public static bool LabelHasContent(GUIContent? label) => label != null && (!string.IsNullOrEmpty(label.text) || label.image != null);
     }
 }
