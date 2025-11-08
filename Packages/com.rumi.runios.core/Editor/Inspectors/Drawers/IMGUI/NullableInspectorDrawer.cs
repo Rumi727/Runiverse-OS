@@ -18,23 +18,17 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public NullableInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector)
         {
-            valueElement = element.inspectableObjectElement.GetElements(InspectorFlags.Public | InspectorFlags.NonPublic | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.Property)
-                .Where(x => x.name == nameof(Nullable<int>.Value))
-                .OfType<IInspectorVariableElement>()
-                .First();
+            // 가독성 꼬라지ㅋㅋ
             
+            valueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.Value));
             valueElement = new CustomAccessVariableElement.Builder(valueElement)
                 .AddWriteAction((_, value) => element.value = Activator.CreateInstance(element.variableType, value))
                 .AddSetValuesAction((_, values) => element.SetValues(values.Select(x => Activator.CreateInstance(element.variableType, x))))
                 .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
                 .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
                 .Build();
-            
-            hasValueElement = element.inspectableObjectElement.GetElements(InspectorFlags.Public | InspectorFlags.NonPublic | InspectorFlags.Instance | InspectorFlags.ReadOnly | InspectorFlags.Property)
-                .Where(x => x.name == nameof(Nullable<int>.HasValue))
-                .OfType<IInspectorVariableElement>()
-                .First();
-            
+
+            hasValueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.HasValue));
             hasValueElement = new CustomAccessVariableElement.Builder(hasValueElement)
                 // 닷넷의 Nullable<T>를 null로 만들면 구조체이지만 Nullable<T>의 Equals(null)가 true가 되면서 Nullable<T> 인스턴스를 가져오지 못하는 현상이 있습니다.
                 .SetReadFunc(x => !x.inspectable.instancesIsEmpty && (bool)x.value!)
