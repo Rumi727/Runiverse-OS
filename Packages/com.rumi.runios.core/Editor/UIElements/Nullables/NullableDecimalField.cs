@@ -2,12 +2,9 @@
 using RuniOS.UIElements.Primitives;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Nullables
+namespace RuniOS.Editor.UIElements.Nullables
 {
     [UxmlElement]
-#if !UNITY_EDITOR && ENABLE_IL2CPP
-    [System.Obsolete("IL2CPP environment is not supported.", true)]
-#endif
     public partial class NullableDecimalField : NullableField<decimal>
     {
         public NullableDecimalField() : this(string.Empty) { }

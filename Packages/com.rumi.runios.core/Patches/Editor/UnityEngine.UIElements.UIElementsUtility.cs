@@ -1,11 +1,12 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
 using HarmonyLib;
+using RuniOS.Editor.UIElements;
 using System;
 using System.Reflection;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Patches
+namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
     {
@@ -22,7 +23,7 @@ namespace RuniOS.Patches
                     {
                         public static MethodBase TargetMethod() => AccessTools.Method(targetType, "BeginContainerGUI");
                 
-                        public static void Postfix(IMGUIContainer container) => IMGUIUtility.currentIMGUIContainer = container;
+                        public static void Postfix(IMGUIContainer container) => EditorUIToolkitUtility.currentIMGUIContainer = container;
                     }
             
                     [HarmonyPatch]
@@ -30,7 +31,7 @@ namespace RuniOS.Patches
                     {
                         public static MethodBase TargetMethod() => AccessTools.Method(targetType, "EndContainerGUI");
                 
-                        public static void Postfix() => IMGUIUtility.currentIMGUIContainer = null;
+                        public static void Postfix() => EditorUIToolkitUtility.currentIMGUIContainer = null;
                     }
                 }
             }

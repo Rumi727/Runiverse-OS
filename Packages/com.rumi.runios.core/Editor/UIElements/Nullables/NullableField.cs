@@ -1,17 +1,15 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEngine.UIElements;
+using RuniOS.UIElements;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Nullables
+namespace RuniOS.Editor.UIElements.Nullables
 {
     /// <summary>
     /// Nullable 쌍을 나타내는 복합 필드입니다.
     /// </summary>
     /// <typeparam name="TValueType">Nullable 타입이 나타내는 타입입니다.</typeparam>
-#if !UNITY_EDITOR && ENABLE_IL2CPP
-    [System.Obsolete("IL2CPP environment is not supported.", true)]
-#endif
     public class NullableField<TValueType> : RuniBaseCompositeField<SerializableNullable<TValueType>> where TValueType : struct
     {
         public new const string ussClassName = "runios-nullable-field";
@@ -76,7 +74,7 @@ namespace RuniOS.UIElements.Nullables
         /// <summary>
         /// <see cref="NullableField{TNullable}"/>의 새 인스턴스를 초기화합니다.
         /// </summary>
-        /// /// <param name="label">필드의 라벨입니다.</param>
+        /// <param name="label">필드의 라벨입니다.</param>
         /// <param name="description">필드에 대한 설명 데이터입니다.</param>
         /// <param name="nullText">null 값일 때 텍스트 필드에 표시할 텍스트를 결정합니다. null 값이면 기본 값을 사용합니다.</param>
         public NullableField(string label, IElementDescription description, string? nullText = null) : base(string.Empty, CompositeConfig.compositedField)

@@ -4,7 +4,6 @@ using RuniOS.UIElements;
 using System;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -168,33 +167,6 @@ namespace RuniOS
             }
 
             return false;
-        }
-
-        // Patches/Editor/UnityEngine.UIElements.TextElement.cs를 참고해주세요
-#if !UNITY_EDITOR && ENABLE_IL2CPP
-        [Obsolete("IL2CPP environment is not supported.", true)]
-#endif
-        internal static readonly ConditionalWeakTable<TextElement, Action<string>> labelChangedCallbacks = new();
-        
-        /// <summary>
-        /// 필드의 라벨 변경 된 후에 즉시 호출되는 이벤트를 등록합니다.<br/>
-        /// 무한 루프에 주의하세요!
-        /// </summary>
-        /// <remarks>
-        /// 모딩으로 프로퍼티에 코드를 주입한 것이기 때문에 훨씬 정확합니다. (기본 이벤트는 패널에 부착되어야 실행 됨)
-        /// </remarks>
-#if !UNITY_EDITOR && ENABLE_IL2CPP
-        [Obsolete("IL2CPP environment is not supported.", true)]
-#endif
-        public static void RegisterLabelChangedCallback<TValueType>(this BaseField<TValueType> field, Action<string> callback)
-        {
-            if (labelChangedCallbacks.TryGetValue(field.labelElement, out Action<string> result))
-            {
-                result += callback;
-                labelChangedCallbacks.AddOrUpdate(field.labelElement, result);
-            }
-            else
-                labelChangedCallbacks.Add(field.labelElement, callback);
         }
     }
 }

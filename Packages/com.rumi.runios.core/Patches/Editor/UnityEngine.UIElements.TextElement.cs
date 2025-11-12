@@ -1,10 +1,11 @@
 #nullable enable
 #pragma warning disable IDE1006 // 명명 스타일
 using HarmonyLib;
+using RuniOS.Editor.UIElements;
 using System;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Patches
+namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
     {
@@ -19,7 +20,7 @@ namespace RuniOS.Patches
                     [HarmonyPatch(nameof(TextElement.text), MethodType.Setter)]
                     public static void LabelSetter(TextElement __instance, string value)
                     {
-                        if (UIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
+                        if (EditorUIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
                             callback.Invoke(value);
                     }
                 }

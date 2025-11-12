@@ -1,9 +1,10 @@
 ﻿#nullable enable
-using RuniOS.UIElements.Nullables;
+using RuniOS.UIElements;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
+using NullableIntegerField = RuniOS.Editor.UIElements.Nullables.NullableIntegerField;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     [UxmlElement]
 #if !UNITY_EDITOR && ENABLE_IL2CPP

@@ -1,5 +1,4 @@
 #nullable enable
-#if UNITY_EDITOR || !ENABLE_IL2CPP
 using HarmonyLib;
 using RuniOS.Booting;
 using RuniOS.Modding;
@@ -19,4 +18,3 @@ namespace RuniOS.Patches
         static void Awaken() => HarmonyUtility.PatchInEditor(harmony);
     }
 }
-#endif

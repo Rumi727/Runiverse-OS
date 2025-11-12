@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.Collections;
 using RuniOS.Collections.Generic;
+using RuniOS.Editor.UIElements;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
@@ -100,7 +101,7 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
                 height = animFloat.value + headerHeight;
                 
                 if (animFloat.isAnimating)
-                    IMGUIUtility.UpdateContainerHeight(height);
+                    EditorUIToolkitUtility.UpdateContainerHeight(height);
                 
                 return height;
             }

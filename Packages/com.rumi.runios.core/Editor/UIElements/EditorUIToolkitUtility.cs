@@ -1,5 +1,4 @@
-﻿#nullable enable
-using RuniOS.APIBridge.UnityEditor;
+﻿using RuniOS.APIBridge.UnityEditor;
 using RuniOS.APIBridge.UnityEngine.UIElements;
 using RuniOS.Collections.Generic;
 using System;
@@ -11,13 +10,24 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.UIElements
 {
-    /// <summary>
-    /// Provides utility methods for PropertyField related operations.
-    /// <br/>
-    /// PropertyField 관련 작업을 위한 유틸리티 메서드를 제공합니다.
-    /// </summary>
-    public static class PropertyFieldUtility
+    public static class EditorUIToolkitUtility
     {
+        // Patches/Runtime/UnityEngine.UIElements.UIElementsUtility.cs를 참고해주세요
+        /// <summary>
+        /// 현재 호출 스택에서 UI Toolkit의 <see cref="IMGUIContainer"/>를 통해 IMGUI 렌더링을 시작한 <see cref="IMGUIContainer"/>를 가져옵니다.<br/>
+        /// 현재 스택에 해당 <see cref="IMGUIContainer"/>를 통한 IMGUI 호출이 없거나, IMGUI를 렌더링하게 한 <see cref="IMGUIContainer"/>가 없을 경우 <see langword="null"/>을 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 이 프로퍼티는 UI Toolkit의 <see cref="IMGUIContainer"/>를 통해 IMGUI 렌더링이 발생하는 특정 상황을 추적하고, 해당 컨테이너 인스턴스를 참조하기 위해 사용됩니다.<br/>
+        /// 이는 IMGUI 기반의 레거시 코드가 UI Toolkit 환경과 상호작용할 때, 해당 IMGUI를 감싸고 있는 컨테이너에 접근하여 추가적인 로직을 적용하거나 상태를 관리하는 데 활용될 수 있습니다.
+        /// <br/><br/>
+        /// 이 프로퍼티는 Unity UI Toolkit의 `UIElementsUtility` 클래스에 대한 패치(Patches.UnityEngine.UIElements.UIElementsUtility.cs)를 통해 추가되었습니다.
+        /// </remarks>
+        public static IMGUIContainer? currentIMGUIContainer { get; internal set; }
+        
+        // Patches/Editor/UnityEngine.UIElements.TextElement.cs를 참고해주세요
+        internal static readonly ConditionalWeakTable<TextElement, Action<string>> labelChangedCallbacks = new();
+        
         // Patches/Editor/UnityEditor.UIElements.PropertyField.cs를 참고해주세요
         internal static Stack<PropertyField> _currentPropertyField { get; } = new Stack<PropertyField>();
         
@@ -56,7 +66,35 @@ namespace RuniOS.Editor.UIElements
         public static ReadOnlyStack<PropertyField> currentPropertyFieldStack { get; } = new ReadOnlyStack<PropertyField>(_currentPropertyField);
 
         // Patches/Editor/UnityEngine.UIElements.VisualElement.cs를 참고해주세요
-        internal static ConditionalWeakTable<PropertyField, PropertyFieldExtensionData> propertyExtensionDatas { get; } = new();  
+        internal static ConditionalWeakTable<PropertyField, PropertyFieldExtensionData> propertyExtensionDatas { get; } = new();
+        
+        public static void UpdateContainerHeight(float height)
+        {
+            if (currentIMGUIContainer != null)
+            {
+                StyleLength lastHeight = currentIMGUIContainer.style.height;
+                currentIMGUIContainer.style.height = new Length(height);
+                currentIMGUIContainer.style.height = lastHeight;
+            }
+        }
+        
+        /// <summary>
+        /// 필드의 라벨 변경 된 후에 즉시 호출되는 이벤트를 등록합니다.<br/>
+        /// 무한 루프에 주의하세요!
+        /// </summary>
+        /// <remarks>
+        /// 모딩으로 프로퍼티에 코드를 주입한 것이기 때문에 훨씬 정확합니다. (기본 이벤트는 패널에 부착되어야 실행 됨)
+        /// </remarks>
+        public static void RegisterLabelChangedCallback<TValueType>(this BaseField<TValueType> field, Action<string> callback)
+        {
+            if (labelChangedCallbacks.TryGetValue(field.labelElement, out Action<string> result))
+            {
+                result += callback;
+                labelChangedCallbacks.AddOrUpdate(field.labelElement, result);
+            }
+            else
+                labelChangedCallbacks.Add(field.labelElement, callback);
+        }
 
         /// <summary>
         /// <see cref="SerializedProperty"/>의 표시 이름(Display Name)을 가져옵니다.

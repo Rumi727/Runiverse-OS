@@ -25,7 +25,7 @@ namespace RuniOS.Editor.Patches
                     {
                         public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(typeof(PropertyField), nameof(Reset), new Type[] { typeof(SerializedProperty) });
 
-                        public static void Prefix(PropertyField __instance) => PropertyFieldUtility.propertyExtensionDatas.Remove(__instance);
+                        public static void Prefix(PropertyField __instance) => EditorUIToolkitUtility.propertyExtensionDatas.Remove(__instance);
 
                         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
                         {
@@ -97,11 +97,11 @@ namespace RuniOS.Editor.Patches
 
                     [HarmonyPostfix]
                     [HarmonyPatch("CreateFoldout")]
-                    public static void PostfixCreateFoldout(PropertyField __instance, VisualElement __result) => PropertyFieldUtility.propertyExtensionDatas.GetOrCreateValue(__instance).foldout = (Foldout)__result;
+                    public static void PostfixCreateFoldout(PropertyField __instance, VisualElement __result) => EditorUIToolkitUtility.propertyExtensionDatas.GetOrCreateValue(__instance).foldout = (Foldout)__result;
 
-                    public static void PreCreatePropertyGUI(PropertyField propertyField) => PropertyFieldUtility._currentPropertyField.Push(propertyField);
+                    public static void PreCreatePropertyGUI(PropertyField propertyField) => EditorUIToolkitUtility._currentPropertyField.Push(propertyField);
 
-                    public static void PostCreatePropertyGUI(PropertyField propertyField) => PropertyFieldUtility._currentPropertyField.Pop();
+                    public static void PostCreatePropertyGUI(PropertyField propertyField) => EditorUIToolkitUtility._currentPropertyField.Pop();
                 }
             }
         }
