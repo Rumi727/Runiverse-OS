@@ -1,0 +1,2845 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RuniOS.Editor.APIBridge.UnityEngine.UIElementsModule</name>
+    </assembly>
+    <members>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseFieldBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseFieldBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseFieldBridge`1.__GetInstanceFrom(UnityEngine.UIElements.BaseField{`0})">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseFieldBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge.SetLabel(System.String)">
+            <summary>
+            지정된 문자열 값으로 레이블 속성을 설정합니다.
+            </summary>
+            <remarks>
+            이 메서드는 Unity 내부 코드로의 <b>브릿지가 아니며</b>, 편의를 위해 직접 작성되었습니다.<br/>
+            This method is <b>not a bridge</b> to Unity's internal code, and is written directly for convenience.
+            <br/><br/>
+            내부적으로는 `__instance` 객체의 `label` 속성을 직접 설정하려고 시도합니다. 만약 `label` 속성을 찾거나 설정할 수 없는 경우, `INotifyValueChanged&lt;string&gt;` 인터페이스를 통해 `labelElement`의 값을 알림 없이 설정합니다.
+            </remarks>
+            <param name="value">설정할 레이블의 새로운 값입니다. null일 경우 빈 문자열로 처리됩니다.</param>
+            <exception cref="T:System.Reflection.TargetInvocationException">`propertyInfo.SetValue` 호출 시 예외가 발생하면 이 예외가 발생할 수 있습니다.</exception>
+            <exception cref="T:System.ArgumentException">`propertyInfo.SetValue` 호출 시 예외가 발생하면 이 예외가 발생할 수 있습니다.</exception>
+            <exception cref="T:System.MethodAccessException">`propertyInfo.SetValue` 호출 시 예외가 발생하면 이 예외가 발생할 수 있습니다.</exception>
+            <exception cref="T:System.NullReferenceException">`__instance` 또는 `labelElement`가 null일 경우 발생할 수 있습니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPrefixLabelBridge.__IPrefixLabelBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.ChangesFromUIBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.ChangesFromUIBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.ChangesFromUIBridge.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.ChangesFromUIBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.ChangesFromUIBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DataBindingManagerBridge.BindingDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.__GetInstanceFrom(UnityEngine.UIElements.VisualElement)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.RenderTargetModeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.CustomStyleAccessBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.CustomStyleAccessBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.CustomStyleAccessBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.CustomStyleAccessBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.CustomStyleAccessBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.TypeDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.TypeDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.TypeDataBridge.__CreateInstanceNonPublic(System.Type)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.TypeDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementBridge.TypeDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.TextureInfoBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.TextureInfoBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.TextureInfoBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.TextureInfoBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.TextureInfoBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.StatisticsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.StatisticsBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.StatisticsBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.StatisticsBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureRegistryBridge.StatisticsBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.__GetInstanceFrom(UnityEngine.UIElements.BaseVerticalCollectionView)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.SelectionBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.SelectionBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.SelectionBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.SelectionBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVerticalCollectionViewBridge.SelectionBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ReusableCollectionItemBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ReusableCollectionItemBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ReusableCollectionItemBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ReusableCollectionItemBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ReusableCollectionItemBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleComplexSelectorBridge.PseudoStateDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleComplexSelectorBridge.PseudoStateDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleComplexSelectorBridge.PseudoStateDataBridge.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.PseudoStatesBridge,System.Boolean)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleComplexSelectorBridge.PseudoStateDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleComplexSelectorBridge.PseudoStateDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVisualElementPanelBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVisualElementPanelBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVisualElementPanelBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVisualElementPanelBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.TextureEntryBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.TextureEntryBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.TextureEntryBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.TextureEntryBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.TextureEntryBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferBridge`1.__CreateInstanceNonPublic(System.Int32,RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferTypeBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferBridge`1.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferTypeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.DataSetBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.DataSetBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.DataSetBridge`1.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.UtilityBridge.GPUBufferTypeBridge,System.UInt32,System.UInt32,System.UInt32,System.Boolean)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.DataSetBridge`1.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.DataSetBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.__CreateInstanceNonPublic(System.UInt32,System.UInt32,System.UInt32,System.Boolean)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.PageBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainVEDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainVEDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainVEDataBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainVEDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainVEDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.GPUBufferAllocatorBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.GPUBufferAllocatorBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.GPUBufferAllocatorBridge.__CreateInstanceNonPublic(System.UInt32)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.GPUBufferAllocatorBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.GPUBufferAllocatorBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderDataFlagsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderDataDirtyTypesBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainCommandBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainCommandBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainCommandBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainCommandBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.RenderChainCommandBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.ClipMethodBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.MeshHandleBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.MeshHandleBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.MeshHandleBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.MeshHandleBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.MeshHandleBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BMPAllocBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BMPAllocBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BMPAllocBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BMPAllocBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BMPAllocBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BasicNodeBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BasicNodeBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BasicNodeBridge`1.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BasicNodeBridge`1.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BasicNodeBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.__CreateInstanceNonPublic(System.UInt32)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockPoolBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockPoolBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockPoolBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockPoolBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.BestFitAllocatorBridge.BlockPoolBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.AllocBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.AllocBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.AllocBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.AllocBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.AllocBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.HeapStatisticsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.HeapStatisticsBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.HeapStatisticsBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.HeapStatisticsBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.HeapStatisticsBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.CommandTypeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.StateBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.StateBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.StateBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.StateBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.StateBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.DrawParamsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.DrawParamsBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.DrawParamsBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.DrawParamsBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.DrawParamsBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIR.OwnedStateBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StylePropertyBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StylePropertyBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StylePropertyBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StylePropertyBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StylePropertyBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.__GetInstanceFrom(UnityEngine.UIElements.TextInputBaseField{`0})">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.TextInputBaseBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.TextInputBaseBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.TextInputBaseBridge.__GetInstanceFrom(UnityEngine.UIElements.VisualElement)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextInputBaseFieldBridge`1.TextInputBaseBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.__CreateInstanceNonPublic(UnityEngine.ScriptableObject,UnityEngine.UIElements.ContextType,UnityEngine.UIElements.EventDispatcher,UnityEngine.UIElements.InitEditorUpdaterFunction)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelBridge.UIFrameStateBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.BaseVisualElementPanelBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.UpdaterArrayBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.UpdaterArrayBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.UpdaterArrayBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.UpdaterArrayBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdaterBridge.UpdaterArrayBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementFlagsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RenderHintsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PseudoStatesBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge.__CreateInstanceNonPublic(RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableContextBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ResolvedStyleAccessBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ResolvedStyleAccessBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ResolvedStyleAccessBridge.__CreateInstanceNonPublic(UnityEngine.UIElements.VisualElement)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ResolvedStyleAccessBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ResolvedStyleAccessBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyIdBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyValueBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyValueBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyValueBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyValueBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleSheets.StylePropertyValueBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DispatchModeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.HierarchyChangeTypeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleRuleBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleRuleBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleRuleBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleRuleBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleRuleBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementAnimationSystemBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementAnimationSystemBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementAnimationSystemBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementAnimationSystemBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualElementAnimationSystemBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.Experimental.IValueAnimationUpdateBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.Experimental.IValueAnimationUpdateBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.Experimental.IValueAnimationUpdateBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.Experimental.IValueAnimationUpdateBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.Experimental.IValueAnimationUpdateBridge.__IValueAnimationUpdateBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.EventCategoryBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.CollectionVirtualizationControllerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.CollectionVirtualizationControllerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.CollectionVirtualizationControllerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.CollectionVirtualizationControllerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.SerializedVirtualizationDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.SerializedVirtualizationDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.SerializedVirtualizationDataBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.SerializedVirtualizationDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.SerializedVirtualizationDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.__CreateInstanceNonPublic(UnityEngine.UIElements.BaseVerticalCollectionView)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.DragPositionBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.DragPositionBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.DragPositionBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.DragPositionBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ListViewDraggerBridge.DragPositionBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DragAndDropArgsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DragAndDropArgsBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DragAndDropArgsBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DragAndDropArgsBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.DragAndDropArgsBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICollectionDragAndDropControllerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICollectionDragAndDropControllerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICollectionDragAndDropControllerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICollectionDragAndDropControllerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICollectionDragAndDropControllerBridge.__ICollectionDragAndDropControllerBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIElementsBridgeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIElementsBridgeBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIElementsBridgeBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.UIElementsBridgeBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelRendererBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelRendererBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelRendererBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelRendererBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelRendererBridge.__IPanelRendererBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ElementUnderPointerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ElementUnderPointerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ElementUnderPointerBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ElementUnderPointerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ElementUnderPointerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeUpdaterBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeUpdaterBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeUpdaterBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeUpdaterBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeUpdaterBridge.__IVisualTreeUpdaterBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeUpdatePhaseBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.VisualTreeEditorUpdatePhaseBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IGenericMenuBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IGenericMenuBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IGenericMenuBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IGenericMenuBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IGenericMenuBridge.__IGenericMenuBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelClearSettingsBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelClearSettingsBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelClearSettingsBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelClearSettingsBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.PanelClearSettingsBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RepaintDataBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RepaintDataBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RepaintDataBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RepaintDataBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.RepaintDataBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICursorManagerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICursorManagerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICursorManagerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICursorManagerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ICursorManagerBridge.__ICursorManagerBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ISchedulerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ISchedulerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ISchedulerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ISchedulerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ISchedulerBridge.__ISchedulerBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.AtlasBaseBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.AtlasBaseBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.AtlasBaseBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.AtlasBaseBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebugBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebugBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebugBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebugBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebugBridge.__IPanelDebugBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadSystemBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadSystemBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadSystemBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadSystemBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadSystemBridge.__ILiveReloadSystemBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge.__CreateInstanceNonPublic(System.Int32)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TextureIdBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge.__CreateInstanceNonPublic(System.Int32,RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueTypeBridge)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IStylePropertyAnimationSystemBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IStylePropertyAnimationSystemBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IStylePropertyAnimationSystemBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IStylePropertyAnimationSystemBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IStylePropertyAnimationSystemBridge.__IStylePropertyAnimationSystemBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TimerEventSchedulerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TimerEventSchedulerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TimerEventSchedulerBridge.__CreateInstanceNonPublic">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TimerEventSchedulerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.TimerEventSchedulerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeEditorUpdaterBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeEditorUpdaterBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeEditorUpdaterBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeEditorUpdaterBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IVisualTreeEditorUpdaterBridge.__IVisualTreeEditorUpdaterBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BindingTargetBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BindingTargetBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BindingTargetBridge.__CreateInstanceNonPublic(UnityEngine.UIElements.VisualElement,UnityEngine.UIElements.BindingId@)">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BindingTargetBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.BindingTargetBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableBridge.__CreateInstanceNonPublic(System.String,UnityEngine.UIElements.StyleSheet,RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueHandleBridge[])">
+            <summary>
+            타겟 타입을 만들고 브릿지로 생성합니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <param name="instance">타겟 타입의 인스턴스입니다.</param>
+            <exception cref="T:System.ArgumentNullException">인스턴스가 null일 경우 발생합니다.</exception>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleVariableBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.StyleValueTypeBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPointerOrMouseEventBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPointerOrMouseEventBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPointerOrMouseEventBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPointerOrMouseEventBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPointerOrMouseEventBridge.__IPointerOrMouseEventBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ScheduledItemBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ScheduledItemBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ScheduledItemBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ScheduledItemBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebuggerBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebuggerBridge.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebuggerBridge.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebuggerBridge.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.IPanelDebuggerBridge.__IPanelDebuggerBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadAssetTrackerBridge`1">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadAssetTrackerBridge`1.__targetType">
+            <summary>
+            이 브릿지의 타겟 타입입니다.
+            </summary>
+        </member>
+        <member name="M:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadAssetTrackerBridge`1.__GetInstanceFrom(System.Object)">
+            <summary>
+            타겟 타입의 인스턴스로 브릿지를 생성합니다.
+            </summary>
+            <exception cref="T:System.ArgumentException">인스턴스의 타입이 유효하지 않을 경우 발생합니다.</exception>
+        </member>
+        <member name="P:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadAssetTrackerBridge`1.__instance">
+            <summary>
+            타겟 타입의 인스턴스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.ILiveReloadAssetTrackerBridge`1.__ILiveReloadAssetTrackerBridge">
+            <summary>
+            브릿지 인터페이스의 내부 구현 클래스입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.Editor.APIBridge.UnityEngine.UIElements.LiveReloadTrackersBridge">
+            <summary>
+            이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
+            이 API 사용 시 발생할 수 있는 모든 문제에 대한 책임은 사용자 본인에게 있습니다.<br/>
+            <br/>
+            This bridge is an API wrapper designed to provide easy access to the private types and members of another library.<br/>
+            The user is solely responsible for any issues that may arise from using this API.<br/>
+            <br/>
+            このブリッジは、他のライブラリの非公開タイプやメンバーに簡単にアクセスできるようにラップされたAPIです。<br/>
+            本APIのご利用により発生する可能性のある全ての問題について、使用者はご自身の責任において対処するものとします。
+            </summary>
+        </member>
+        <member name="M:RuniOS.APIBridge.UnityEngine.UIElements.TypeUtility.IsAssignableToGenericDefinition(System.Type,System.Type)">
+            <summary>
+            주어진 <paramref name="givenType"/>이 특정 제네릭 타입 정의(<paramref name="genericTypeDefinition"/>)를
+            구현하거나 상속하는지 확인합니다.
+            </summary>
+            <remarks>
+            이 메서드는 <paramref name="givenType"/>의 인터페이스 및 상속 계층 구조를 탐색하여
+            <paramref name="genericTypeDefinition"/>과 일치하는 제네릭 타입 정의가 있는지 검사합니다.<br/>
+            예를 들어, <c>List&lt;int&gt;</c>가 <c>IEnumerable&lt;&gt;</c>를 구현하는지,
+            또는 <c>MyDerivedClass&lt;T&gt;</c>가 <c>BaseClass&lt;&gt;</c>로부터 파생되었는지 등을 확인할 수 있습니다.
+            </remarks>
+            <param name="givenType">확인할 대상 <see cref="T:System.Type"/>입니다.</param>
+            <param name="genericTypeDefinition">찾으려는 제네릭 타입 정의입니다 (예: <c>typeof(List&lt;&gt;)</c>, <c>typeof(IDictionary&lt;,&gt;)</c>).</param>
+            <returns>
+            <paramref name="givenType"/>이 <paramref name="genericTypeDefinition"/>을 구현하거나 상속하면
+            <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="givenType"/> 또는 <paramref name="genericTypeDefinition"/>이 <see langword="null"/>인 경우 발생합니다.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="genericTypeDefinition"/>이 유효한 제네릭 타입 정의가 아닌 경우 발생할 수 있습니다.
+            </exception>
+        </member>
+        <member name="M:RuniOS.APIBridge.UnityEngine.UIElements.TypeUtility.IsAssignableToGenericDefinition(System.Type,System.Type,System.Type@)">
+            <summary>
+            주어진 <paramref name="givenType"/>이 특정 제네릭 타입 정의(<paramref name="genericTypeDefinition"/>)를
+            구현하거나 상속하는지 확인합니다.
+            </summary>
+            <remarks>
+            이 메서드는 <paramref name="givenType"/>의 인터페이스 및 상속 계층 구조를 탐색하여
+            <paramref name="genericTypeDefinition"/>과 일치하는 제네릭 타입 정의가 있는지 검사합니다.<br/>
+            예를 들어, <c>List&lt;int&gt;</c>가 <c>IEnumerable&lt;&gt;</c>를 구현하는지,
+            또는 <c>MyDerivedClass&lt;T&gt;</c>가 <c>BaseClass&lt;&gt;</c>로부터 파생되었는지 등을 확인할 수 있습니다.
+            </remarks>
+            <param name="givenType">확인할 대상 <see cref="T:System.Type"/>입니다.</param>
+            <param name="genericTypeDefinition">찾으려는 제네릭 타입 정의입니다 (예: <c>typeof(List&lt;&gt;)</c>, <c>typeof(IDictionary&lt;,&gt;)</c>).</param>
+            <param name="resolvedType">
+            <paramref name="givenType"/>이 <paramref name="genericTypeDefinition"/>을 구현하거나 상속하는 경우,
+            실제로 발견된 구체적인 제네릭 타입(예: <c>List&lt;int&gt;</c>)이 반환됩니다.
+            찾지 못한 경우 <see langword="null"/>이 반환됩니다.
+            </param>
+            <returns>
+            <paramref name="givenType"/>이 <paramref name="genericTypeDefinition"/>을 구현하거나 상속하면
+            <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+            </returns>
+            <exception cref="T:System.ArgumentNullException">
+            <paramref name="givenType"/> 또는 <paramref name="genericTypeDefinition"/>이 <see langword="null"/>인 경우 발생합니다.
+            </exception>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="genericTypeDefinition"/>이 유효한 제네릭 타입 정의가 아닌 경우 발생할 수 있습니다.
+            </exception>
+        </member>
+        <member name="T:RuniOS.APIBridge.GenerateAPIBridgeForAssemblyAttribute">
+            <summary>
+            특정 어셈블리에 대해 재귀적 브릿지 코드 생성을 활성화합니다.
+            </summary>
+            <param name="targetAssemblies">브릿지 코드를 생성할 대상 어셈블리들의 이름입니다.</param>
+            <remarks>
+            <para>
+            어셈블리에 이 어트리뷰트가 하나라도 존재하면,<br/>
+            브릿지 코드 생성은 이 어트리뷰트에 명시된 어셈블리로 제한됩니다.
+            </para>
+            <para>
+            명시되지 않은 어셈블리에 포함된 타입은<br/>
+            <see cref="T:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute"/>에 명시되어 있어도 브릿지 코드가 생성되지 않습니다.<br/>
+            또한, 해당 어셈블리 내에서의 재귀적 브릿지 코드 생성도 무시됩니다.
+            </para>
+            <para>
+            그러나, 명시된 어셈블리의 타입이 명시되지 않은 어셈블리의 비공개 멤버를 참조하는 경우,<br/>
+            해당 비공개 멤버에 대한 브릿지 코드는 여전히 생성됩니다.
+            </para>
+            <para>
+            이 어트리뷰트가 전혀 지정되지 않은 경우, 모든 어셈블리에 대해 브릿지 코드 생성이 허용됩니다.
+            </para>
+            </remarks>
+        </member>
+        <member name="M:RuniOS.APIBridge.GenerateAPIBridgeForAssemblyAttribute.#ctor(System.String[])">
+            <summary>
+            특정 어셈블리에 대해 재귀적 브릿지 코드 생성을 활성화합니다.
+            </summary>
+            <param name="targetAssemblies">브릿지 코드를 생성할 대상 어셈블리들의 이름입니다.</param>
+            <remarks>
+            <para>
+            어셈블리에 이 어트리뷰트가 하나라도 존재하면,<br/>
+            브릿지 코드 생성은 이 어트리뷰트에 명시된 어셈블리로 제한됩니다.
+            </para>
+            <para>
+            명시되지 않은 어셈블리에 포함된 타입은<br/>
+            <see cref="T:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute"/>에 명시되어 있어도 브릿지 코드가 생성되지 않습니다.<br/>
+            또한, 해당 어셈블리 내에서의 재귀적 브릿지 코드 생성도 무시됩니다.
+            </para>
+            <para>
+            그러나, 명시된 어셈블리의 타입이 명시되지 않은 어셈블리의 비공개 멤버를 참조하는 경우,<br/>
+            해당 비공개 멤버에 대한 브릿지 코드는 여전히 생성됩니다.
+            </para>
+            <para>
+            이 어트리뷰트가 전혀 지정되지 않은 경우, 모든 어셈블리에 대해 브릿지 코드 생성이 허용됩니다.
+            </para>
+            </remarks>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForAssemblyAttribute.targetAssemblies">
+            <summary>
+            브릿지 코드를 생성할 대상 어셈블리들입니다.
+            </summary>
+        </member>
+        <member name="T:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute">
+            <summary>
+            지정된 타입들의 브릿지 코드를 생성하도록 지시합니다.
+            </summary>
+            <param name="types">브릿지 코드를 생성할 대상 타입들입니다.</param>
+            <remarks>
+            이 어트리뷰트는 <see cref="T:RuniOS.APIBridge.GenerateAPIBridgeForAssemblyAttribute"/>가 지정되지 않았거나, <br/>
+            해당 어트리뷰트에 명시된 어셈블리에 속한 타입에 대해서만 유효합니다.
+            </remarks>
+        </member>
+        <member name="M:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.#ctor(System.Type[])">
+            <summary>
+            지정된 타입들의 브릿지 코드를 생성하도록 지시합니다.
+            </summary>
+            <param name="types">브릿지 코드를 생성할 대상 타입들입니다.</param>
+            <remarks>
+            이 어트리뷰트는 <see cref="T:RuniOS.APIBridge.GenerateAPIBridgeForAssemblyAttribute"/>가 지정되지 않았거나, <br/>
+            해당 어트리뷰트에 명시된 어셈블리에 속한 타입에 대해서만 유효합니다.
+            </remarks>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.types">
+            <summary>
+            브릿지 코드를 생성할 대상 타입들입니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.includeMember">
+            <summary>
+            포함할 멤버 이름들입니다.<br/>
+            비어있을 경우, 제외된 멤버를 제외한 모두를 포함시킵니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.excludeMember">
+            <summary>
+            제외할 멤버 이름들입니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.forceStatic">
+            <summary>
+            타겟 타입을 강제로 정적 클래스처럼 처리할지 여부를 설정합니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.skipConstructors">
+            <summary>
+            인스턴스 생성 팩토리(<c>__CreateInstance</c>, <c>__CreateInstanceNonPublic</c>) 메서드의 생성을 건너뛸지 여부를 결정합니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.excludeConstructors">
+            <summary>
+            제외할 생성자 인덱스들입니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.includePublicMember">
+            <summary>
+            퍼블릭인 멤버도 포함시킬지 여부를 결정합니다.
+            </summary>
+        </member>
+    </members>
+</doc>

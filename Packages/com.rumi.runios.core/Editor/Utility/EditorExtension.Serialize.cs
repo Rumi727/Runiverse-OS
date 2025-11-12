@@ -1,6 +1,6 @@
 #nullable enable
-using RuniOS.APIBridge.UnityEditor;
-using RuniOS.APIBridge.UnityEditorInternal;
+using RuniOS.Editor.APIBridge.UnityEditor;
+using RuniOS.Editor.APIBridge.UnityEditorInternal;
 using RuniOS.Collections.Generic;
 using System;
 using System.Reflection;
