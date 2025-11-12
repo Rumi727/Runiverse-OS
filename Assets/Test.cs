@@ -56,6 +56,7 @@ public sealed class Test : MonoBehaviour
     public TextAlignment textAlignment;
     public SerializableNullable<SerializableNullable<float>> nullableNullableFloat;
     [TypeField(typeof(TMP_Text))] public SerializableType type = typeof(Object);
+    public SerializableType type2 = typeof(Object);
     [ReadOnlyField, TypeField(typeof(TMP_Text))] public SerializableType readOnlyType = typeof(TMP_Text);
     public SerializableNullable<RuniOS.RectOffset> nullableRectOffset;
     public float test;
