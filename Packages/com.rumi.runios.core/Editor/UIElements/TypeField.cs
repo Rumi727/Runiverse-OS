@@ -1,5 +1,5 @@
 #nullable enable
-using RuniOS.Localizations;
+using RuniOS.Editor.Localizations;
 using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
@@ -104,11 +104,11 @@ namespace RuniOS.Editor.UIElements
             this.baseType = baseType;
             
 #if UNITY_EDITOR
-            RegisterCallback<DetachFromPanelEvent>(_ => EditorLocalizationBridge.onLanguageUpdate -= UpdateButtonText);
+            RegisterCallback<DetachFromPanelEvent>(_ => EditorLocalization.onLanguageUpdate -= UpdateButtonText);
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
                 if (this.IsEditorPanel())
-                    EditorLocalizationBridge.onLanguageUpdate += UpdateButtonText;
+                    EditorLocalization.onLanguageUpdate += UpdateButtonText;
                 
                 UpdateLabel();
                 UpdateButtonText();
@@ -169,7 +169,7 @@ namespace RuniOS.Editor.UIElements
             {
 #if UNITY_EDITOR
                 if (this.IsEditorPanel())
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(EditorLocalizationBridge.GetTextOrKey("gui.none"));
+                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(EditorTool.GetTextOrKey("gui.none"));
                 else
 #endif
                     ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
@@ -187,7 +187,7 @@ namespace RuniOS.Editor.UIElements
         {
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
-                buttonElement.text = EditorLocalizationBridge.GetTextOrKey("gui.type_field.select_type");
+                buttonElement.text = EditorTool.GetTextOrKey("gui.type_field.select_type");
             else
 #endif
                 buttonElement.text = "Select Type...";

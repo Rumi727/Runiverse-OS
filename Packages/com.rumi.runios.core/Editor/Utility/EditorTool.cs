@@ -1,15 +1,9 @@
 #nullable enable
-using RuniOS.Editor.Localizations;
-using RuniOS.Localizations;
-using System;
-using UnityEditor;
-
 namespace RuniOS.Editor
 {
-    [InitializeOnLoad]
     public static partial class EditorTool
     {
-        struct EditorLocalizationBridge : IEditorLocalizationBridge
+        /*struct EditorLocalizationBridge : IEditorLocalizationBridge
         {
             public Action? onLanguageUpdate
             {
@@ -20,7 +14,7 @@ namespace RuniOS.Editor
             public string? GetText(string key, string language = "") => EditorTool.GetText(key, language);
         }
         
-        static EditorTool() => RuniOS.Localizations.EditorLocalizationBridge.bridge = new EditorLocalizationBridge();
+        static EditorTool() => RuniOS.Localizations.EditorLocalizationBridge.bridge = new EditorLocalizationBridge();*/
 
         /*static EditorTool() => Selection.selectionChanged += ClearCache;
 
