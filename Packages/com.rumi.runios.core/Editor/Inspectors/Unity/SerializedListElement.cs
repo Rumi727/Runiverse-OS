@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Editor.UIElements;
 using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <param name="index">리스트에서 이 요소의 인덱스입니다.</param>
         public SerializedListElement(InspectableSerializedList inspectable, SerializedProperty property, int index)
         {
-            displayName = name;
+            displayName = property.GetFieldLabel();
             
             this.inspectable = inspectable;
 

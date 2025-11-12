@@ -1,0 +1,27 @@
+﻿#nullable enable
+using RuniOS.UIElements.Primitives;
+using UnityEngine.UIElements;
+
+namespace RuniOS.UIElements.Nullables
+{
+    [UxmlElement]
+#if !UNITY_EDITOR && ENABLE_IL2CPP
+    [System.Obsolete("IL2CPP environment is not supported.", true)]
+#endif
+    public partial class NullableDecimalField : NullableField<decimal>
+    {
+        public NullableDecimalField() : this(string.Empty) { }
+        public NullableDecimalField(string label, string? nullText = null) : base
+        (
+            label,
+            new FieldDescription<DecimalField, decimal>
+            (
+                SerializableNullable.nameOfInternalValue,
+                static x => x.HasValue ? x.Value : 0,
+                static (ref SerializableNullable<decimal> nullable, decimal fieldValue) => nullable = fieldValue
+            ),
+            nullText
+        )
+        { }
+    }
+}

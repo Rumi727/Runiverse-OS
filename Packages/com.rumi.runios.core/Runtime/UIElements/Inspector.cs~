@@ -1,0 +1,345 @@
+﻿#nullable enable
+using RuniOS.APIBridge.UnityEngine.UIElements;
+using RuniOS.Inspectors;
+using RuniOS.Inspectors.Csharp;
+using RuniOS.Inspectors.Drawers;
+using RuniOS.Inspectors.Drawers.UIElements;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Runtime.CompilerServices;
+using Unity.Properties;
+using UnityEngine.UIElements;
+
+namespace RuniOS.UIElements
+{
+    /// <remarks>
+    /// 생성 후 Rebuild 메소드를 호출하여 빌드해야합니다
+    /// </remarks>
+    [UxmlElement]
+    public partial class Inspector : BindableElement, IInspector
+    {
+        public const string ussClassName = "runios-inspector";
+        public const string elementUssClassName = "runios-inspector-element";
+
+        public static readonly BindingId inspectorFlagsProperty = nameof(inspectorFlags);
+        public static readonly BindingId alignFieldsProperty = nameof(alignFields);
+        public static readonly BindingId updateDelayMSProperty = nameof(updateDelayMS);
+
+        /// <summary>
+        /// 루트 인스펙터를 가져옵니다.
+        /// </summary>
+        public Inspector rootInspector { get; }
+
+        public IInspectable? inspectable { get; private set; }
+
+        public IInspectorElement? element => elements.Length == 1 ? elements[0] : null;
+        public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
+        
+        public ImmutableArray<UIElementInspectorDrawer?> drawers { get; private set; } = ImmutableArray<UIElementInspectorDrawer?>.Empty;
+        
+        public ImmutableArray<VisualElement?> visualElements { get; private set; } = ImmutableArray<VisualElement?>.Empty;
+
+        public InspectorFlags inspectorFlags { get; private set; }
+
+        /// <remarks>
+        /// 변경 사항을 적용하려면 Rebuild 메소드를 호출하여 빌드해야합니다
+        /// </remarks>
+        [UxmlAttribute]
+        [CreateProperty]
+        public bool alignFields
+        {
+            get => _alignFields;
+            set
+            {
+                if (_alignFields == value)
+                    return;
+
+                _alignFields = value;
+                NotifyPropertyChanged(in alignFieldsProperty);
+            }
+        }
+        bool _alignFields = false;
+
+        [UxmlAttribute]
+        [CreateProperty]
+        public int updateDelayMS
+        {
+            get => _updateDelayMS;
+            set
+            {
+                if (_updateDelayMS == value)
+                    return;
+
+                _updateDelayMS = value;
+                NotifyPropertyChanged(in updateDelayMSProperty);
+
+                if (updateDelayMS >= 0)
+                {
+                    updateSchedule.Resume();
+                    updateSchedule.Every(updateDelayMS);
+                }
+                else
+                    updateSchedule.Pause();
+            }
+        }
+        int _updateDelayMS = 100;
+        
+        public IVisualElementScheduledItem updateSchedule { get; }
+
+        public Inspector()
+        {
+            AddToClassList(ussClassName);
+            this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
+
+            rootInspector = this;
+            updateSchedule = schedule.Execute(Update).Every(updateDelayMS);
+        }
+        
+        public Inspector(Inspector? rootInspector) : this()
+        {
+            if (rootInspector != null)
+                this.rootInspector = rootInspector;
+        }
+
+        public Inspector(object instance) : this(new InspectableObject(instance)) { }
+        public Inspector(Type type) : this(new InspectableObject(type)) { }
+        public Inspector(Type type, params object[] instances) : this(new InspectableObject(type, instances)) { }
+        public Inspector(Type type, IEnumerable<object> instances) : this(new InspectableObject(type, instances)) { }
+
+        public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(inspectable, flags);
+        public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(elements, flags);
+
+        Action? readAction;
+        readonly ConditionalWeakTable<VisualElement, AlginLabelInfo> alginLabelInfos = new();
+
+        public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        {
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+            
+            if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
+            {
+                VisualElement visualElement;
+                
+                try
+                {
+                    ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList, rootInspector);
+                    visualElement = drawer.Build(flags: flags);
+
+                    DrawerToVisualElement(inspectableList.inspectionDisplayName, drawer, flags, predicate);
+                    
+                    hierarchy.Add(visualElement);
+                
+                    elements = ImmutableArray<IInspectorElement>.Empty;
+                    drawers = ImmutableArray.Create<UIElementInspectorDrawer?>(drawer);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    hierarchy.Add(new LabelField(inspectable.inspectionDisplayName, e.ToString()));
+
+                    return;
+                }
+                
+                visualElements = ImmutableArray.Create<VisualElement?>(visualElement);
+            }
+            else
+            {
+                try
+                {
+                    elements = inspectable.GetElements(inspectorFlags).ToImmutableArray();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    hierarchy.Add(new LabelField(inspectable.inspectionDisplayName, e.ToString()));
+
+                    return;
+                }
+
+                UIElementInspectorDrawer?[] drawers = new UIElementInspectorDrawer[elements.Length];
+                VisualElement?[] visualElements = new VisualElement[elements.Length];
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    VisualElement? visualElement = ElementToVisualElement(elements[i], flags, out UIElementInspectorDrawer? drawer, predicate);
+                    hierarchy.Add(visualElement);
+                    
+                    drawers[i] = drawer;
+                    visualElements[i] = visualElement;
+                }
+                
+                this.drawers = drawers.ToImmutableArray();
+                this.visualElements = visualElements.ToImmutableArray();
+            }
+
+            this.inspectable = inspectable;
+            inspectorFlags = flags;
+        }
+
+        public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
+        {
+            if (!element.HasFlags(flags) && !skipFlagCheck)
+                return;
+            
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+
+            VisualElement? visualElement = ElementToVisualElement(element, flags, out UIElementInspectorDrawer? drawer, predicate);
+            if (visualElement != null)
+                hierarchy.Add(visualElement);
+            
+            elements = ImmutableArray.Create(element);
+            drawers = ImmutableArray.Create(drawer);
+            visualElements = ImmutableArray.Create(visualElement);
+
+            inspectable = null;
+            inspectorFlags = flags;
+        }
+
+        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
+        {
+            if (!skipFlagCheck)
+                elements = elements.Where(x => x.HasFlags(flags));
+            
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+
+            IInspectorElement[] elementArray = elements.ToArray();
+            UIElementInspectorDrawer?[] drawers = new UIElementInspectorDrawer[elementArray.Length];
+            VisualElement?[] visualElements = new VisualElement[elementArray.Length];
+            
+            for (int i = 0; i < elementArray.Length; i++)
+            {
+                VisualElement? visualElement = ElementToVisualElement(elementArray[i], flags, out UIElementInspectorDrawer? drawer, predicate);
+                if (visualElement != null)
+                    hierarchy.Add(visualElement);
+                    
+                drawers[i] = drawer;
+                visualElements[i] = visualElement;
+            }
+            
+            this.elements = elements.ToImmutableArray();
+            this.drawers = drawers.ToImmutableArray();
+            this.visualElements = visualElements.ToImmutableArray();
+            
+            inspectable = null;
+            inspectorFlags = flags;
+        }
+
+        VisualElement? ElementToVisualElement(IInspectorElement element, InspectorFlags flags, out UIElementInspectorDrawer? drawer, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
+        {
+            drawer = null;
+            if (element is not IInspectorVariableElement variableElement)
+                return null;
+            
+            drawer = UIElementInspectorDrawer.FindDrawer(variableElement);
+            return DrawerToVisualElement(element.displayName, drawer, flags, predicate);
+        }
+        
+        VisualElement DrawerToVisualElement(string label, UIElementInspectorDrawer drawer, InspectorFlags flags, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
+        {
+            try
+            {
+                VisualElement visualElement = drawer.Build(label, inspectorFlags);
+#if UNITY_EDITOR
+                if (drawer is not ObjectInspectorDrawer && drawer.element is IInspectorSerializedPropertyElement serializedPropertyElement && visualElement is IBindable bindable)
+                {
+                    bindable.bindingPath = serializedPropertyElement.property.propertyPath;
+                    UnityEditor.UIElements.BindingExtensions.BindProperty(bindable, serializedPropertyElement.property);
+                    
+                    visualElement.Q<VisualElement>(BaseField<int>.inputUssClassName)?.AddToClassList(UnityEditor.UIElements.PropertyField.inputUssClassName);
+                }
+                else
+#endif
+                {
+                    drawer.Bind(visualElement, flags, out Action? readAction);
+                    rootInspector.readAction += readAction;
+                }
+                
+                if (alignFields)
+                {
+                    visualElement.Query<VisualElement>(null, BaseField<int>.ussClassName)
+                        .ForEach(static x => x.AddToClassList(BaseField<int>.alignedFieldUssClassName));
+
+                    visualElement.RegisterCallback<GeometryChangedEvent>(OnInspectorFieldGeometryChanged);
+                    visualElement.RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyleResolved);
+                }
+
+                return visualElement;
+            }
+            catch (Exception e)
+            {
+                return new LabelField(drawer.element?.displayName ?? drawer.inspectable.inspectionDisplayName, e.ToString());
+            }
+        }
+        
+        void OnInspectorFieldGeometryChanged(GeometryChangedEvent e)
+        {
+            if (e.target is VisualElement element)
+                AlignLabel(element);
+        }
+
+        public void Update() => readAction?.Invoke();
+        
+        void AlignLabel(VisualElement element)
+        {
+            if (!IPrefixLabelBridge.__targetType.IsInstanceOfType(element))
+                return;
+            
+            IPrefixLabelBridge prefixLabel = IPrefixLabelBridge.__GetInstanceFrom(element);
+            AlginLabelInfo alginLabelInfo = alginLabelInfos.GetOrCreateValue(element);
+            
+            float labelExtraPadding = alginLabelInfo.labelExtraPadding;
+            float labelBaseMinWidth = alginLabelInfo.labelBaseMinWidth;
+            float labelWidthRatio = alginLabelInfo.labelWidthRatio;
+            
+            float num1 = (element.worldBound.x - rootInspector.worldBound.x) - rootInspector.resolvedStyle.paddingLeft;
+            
+            float minWidth = labelBaseMinWidth - num1 - resolvedStyle.paddingLeft;
+            prefixLabel.labelElement.style.minWidth = minWidth.Clamp(0);
+            
+            float num2 = labelExtraPadding + num1 + resolvedStyle.paddingLeft;
+            float width = (rootInspector.resolvedStyle.width * labelWidthRatio).Ceil() - num2;
+            
+            prefixLabel.labelElement.style.width = width.Clamp(0);
+        }
+        
+        void OnCustomStyleResolved(CustomStyleResolvedEvent evt)
+        {
+            if (evt.target is not VisualElement element)
+                return;
+
+            AlginLabelInfo alginLabelInfo = alginLabelInfos.GetOrCreateValue(element);
+            
+            {
+                if (evt.customStyle.TryGetValue(new CustomStyleProperty<float>("--unity-property-field-label-width-ratio"), out float value))
+                    alginLabelInfo.labelWidthRatio = value;
+            }
+
+            {
+                if (evt.customStyle.TryGetValue(new CustomStyleProperty<float>("--unity-property-field-label-extra-padding"), out float value))
+                    alginLabelInfo.labelExtraPadding = value;
+            }
+
+            {
+                if (evt.customStyle.TryGetValue(new CustomStyleProperty<float>("--unity-property-field-label-base-min-width"), out float value))
+                    alginLabelInfo.labelBaseMinWidth = value;
+            }
+
+            AlignLabel(element);
+        }
+
+        // ReSharper disable once ClassNeverInstantiated.Local
+        class AlginLabelInfo
+        {
+            public float labelWidthRatio = 0.45f;
+            public float labelExtraPadding = 37;
+            public float labelBaseMinWidth = 123;
+        }
+    }
+}

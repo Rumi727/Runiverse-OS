@@ -105,6 +105,7 @@ namespace RuniOS.Editor.Inspectors
             elements = ImmutableArray.Create(element);
             drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector, predicate));
 
+            inspectable = null;
             inspectorFlags = flags;
         }
 
@@ -122,6 +123,7 @@ namespace RuniOS.Editor.Inspectors
             this.elements = elements.ToImmutableArray();
             drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
             
+            inspectable = null;
             inspectorFlags = flags;
         }
 

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<linker>
+  <assembly fullname="RuniOS">
+    <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all" />
+    <type fullname="RuniOS.MathUtility" preserve="all" />
+  </assembly>
+  <assembly fullname="RuniOS.Modding" preserve="all" />
+  <assembly fullname="RuniOS.Patches" preserve="all" />
+  <assembly fullname="0Harmony" preserve="all" />
+  <assembly fullname="RuniOS.Patches.UI" preserve="all" />
+  <assembly fullname="RuniOS">
+    <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all" />
+    <type fullname="RuniOS.MathUtility" preserve="all" />
+  </assembly>
+  <assembly fullname="RuniOS.Modding" preserve="all" />
+  <assembly fullname="RuniOS.Patches" preserve="all" />
+  <assembly fullname="0Harmony" preserve="all" />
+  <assembly fullname="RuniOS.Patches.UI" preserve="all" />
+  <assembly fullname="RuniOS">
+    <type fullname="RuniOS.Booting.AwakenAttribute" preserve="all" />
+    <type fullname="RuniOS.MathUtility" preserve="all" />
+  </assembly>
+  <assembly fullname="RuniOS.Modding" preserve="all" />
+  <assembly fullname="RuniOS.Patches" preserve="all" />
+  <assembly fullname="0Harmony" preserve="all" />
+  <assembly fullname="RuniOS.Patches.UI" preserve="all" />
+</linker>
