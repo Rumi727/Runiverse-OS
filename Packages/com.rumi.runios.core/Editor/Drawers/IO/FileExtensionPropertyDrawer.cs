@@ -1,7 +1,11 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
+using RuniOS.Editor.UIElements.IO;
 using RuniOS.IO;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers.IO
@@ -9,6 +13,8 @@ namespace RuniOS.Editor.Drawers.IO
     [CustomPropertyDrawer(typeof(FileExtension))]
     public class FileExtensionPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FileExtensionField().SetProperty(property);
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);

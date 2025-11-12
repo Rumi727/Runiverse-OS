@@ -1,15 +1,14 @@
 #nullable enable
 using RuniOS.Collections;
 using RuniOS.Collections.Generic;
+using RuniOS.Editor.UIElements;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
-using static RuniOS.Editor.EditorTool;
 
-using EditorGUI = UnityEditor.EditorGUI;
-using EditorGUIUtility = UnityEditor.EditorGUIUtility;
+using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers.Collections.Generic
 {
@@ -98,6 +97,9 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
                 
                 animFloat.target = height;
                 height = animFloat.value + headerHeight;
+                
+                if (animFloat.isAnimating)
+                    UIToolkitUtility.UpdateContainerHeight(height);
                 
                 return height;
             }

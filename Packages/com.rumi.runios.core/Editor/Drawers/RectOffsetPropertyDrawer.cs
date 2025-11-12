@@ -1,12 +1,16 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Drawers
 {
     [CustomPropertyDrawer(typeof(RectOffset))]
     public class RectOffsetPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new RectOffsetField().SetProperty(property);
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);

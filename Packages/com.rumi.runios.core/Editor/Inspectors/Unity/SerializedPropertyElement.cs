@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.APIBridge.UnityEditor;
 using RuniOS.Editor.Serialization;
+using RuniOS.Editor.UIElements;
 using RuniOS.Inspectors;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <param name="property">이 요소가 나타내는 직렬화된 프로퍼티입니다.</param>
         public SerializedPropertyElement(SerializedProperty property)
         {
-            displayName = name;
+            displayName = property.GetFieldLabel();
             
             ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type elementType);
 

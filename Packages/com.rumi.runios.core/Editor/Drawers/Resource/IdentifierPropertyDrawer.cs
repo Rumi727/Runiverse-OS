@@ -1,8 +1,12 @@
 #nullable enable
 using RuniOS.Editor.Drawers.IO;
+using RuniOS.Editor.UIElements;
+using RuniOS.Editor.UIElements.Resource;
 using RuniOS.Resource;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
+
 using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers.Resource
@@ -10,6 +14,8 @@ namespace RuniOS.Editor.Drawers.Resource
     [CustomPropertyDrawer(typeof(Identifier))]
     public class IdentifierPropertyDrawer : PropertyDrawer
     {
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
+
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property.Copy());
