@@ -1,5 +1,5 @@
 ﻿#nullable enable
-using RuniOS.UIElements.Primitives;
+using RuniOS.Editor.UIElements.Primitives;
 using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.UIElements.Nullables

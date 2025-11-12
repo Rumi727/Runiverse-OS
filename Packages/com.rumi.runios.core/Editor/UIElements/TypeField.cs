@@ -4,7 +4,7 @@ using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     [UxmlElement]
     public partial class TypeField : BaseField<SerializableType>

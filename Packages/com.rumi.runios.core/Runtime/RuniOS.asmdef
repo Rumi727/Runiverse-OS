@@ -11,9 +11,6 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "RuniOS.APIBridge.UnityEngine.CoreModule.dll",
-        "RuniOS.APIBridge.UnityEngine.UIElementsModule.dll",
-        "RuniOS.APIBridge.UnityEditor.UIBuilderModule.dll",
-        "RuniOS.APIMarshal.UnityEngine.UIElementsModule.dll",
         "System.Collections.Immutable.dll",
         "ExtendedNumerics.BigDecimal.dll",
         "Newtonsoft.Json.dll",

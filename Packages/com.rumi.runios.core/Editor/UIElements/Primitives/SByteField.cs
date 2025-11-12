@@ -7,7 +7,7 @@ using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Primitives
+namespace RuniOS.Editor.UIElements.Primitives
 {
     [UxmlElement]
     public partial class SByteField : TextValueFieldMarshal<sbyte>

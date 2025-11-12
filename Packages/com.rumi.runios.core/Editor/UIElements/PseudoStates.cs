@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using System;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     [Flags]
     public enum PseudoStates

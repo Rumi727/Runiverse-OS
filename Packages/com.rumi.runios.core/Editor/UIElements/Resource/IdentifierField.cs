@@ -1,11 +1,11 @@
 ﻿#nullable enable
+using RuniOS.Editor.UIElements.IO;
 using RuniOS.IO;
 using RuniOS.Resource;
-using RuniOS.UIElements.IO;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Resource
+namespace RuniOS.Editor.UIElements.Resource
 {
     [UxmlElement]
     public partial class IdentifierField : RuniBaseCompositeField<Identifier>

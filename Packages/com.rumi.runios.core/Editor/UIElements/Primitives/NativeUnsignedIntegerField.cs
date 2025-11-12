@@ -7,7 +7,7 @@ using System.Globalization;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Primitives
+namespace RuniOS.Editor.UIElements.Primitives
 {
     public partial class NativeUnsignedIntegerField : TextValueFieldMarshal<UIntPtr>
     {

@@ -7,7 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     /// <summary>
     /// 여러 개의 자식 <see cref="VisualElement"/>를 조합하여 하나의 복합 필드처럼 동작하는 추상 클래스입니다.

@@ -4,7 +4,7 @@ using System;
 using System.Globalization;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.Primitives
+namespace RuniOS.Editor.UIElements.Primitives
 {
     [UxmlElement]
     public partial class CharField : TextInputBaseFieldMarshal<char>

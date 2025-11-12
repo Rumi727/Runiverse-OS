@@ -1,7 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     /// <summary>
     /// 키-값 쌍을 나타내는 복합 필드입니다.

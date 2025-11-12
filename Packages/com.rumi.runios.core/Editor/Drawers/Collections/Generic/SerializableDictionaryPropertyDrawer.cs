@@ -7,10 +7,8 @@ using UnityEditor;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
 using UnityEngine;
-using static RuniOS.Editor.EditorTool;
 
-using EditorGUI = UnityEditor.EditorGUI;
-using EditorGUIUtility = UnityEditor.EditorGUIUtility;
+using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers.Collections.Generic
 {
@@ -101,7 +99,7 @@ namespace RuniOS.Editor.Drawers.Collections.Generic
                 height = animFloat.value + headerHeight;
                 
                 if (animFloat.isAnimating)
-                    EditorUIToolkitUtility.UpdateContainerHeight(height);
+                    UIToolkitUtility.UpdateContainerHeight(height);
                 
                 return height;
             }

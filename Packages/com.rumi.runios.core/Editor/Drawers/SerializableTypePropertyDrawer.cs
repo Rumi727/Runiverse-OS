@@ -6,7 +6,6 @@ using UnityEditor;
 using UnityEngine.UIElements;
 
 using static RuniOS.Editor.EditorTool;
-using TypeField = RuniOS.UIElements.TypeField;
 
 namespace RuniOS.Editor.Drawers
 {

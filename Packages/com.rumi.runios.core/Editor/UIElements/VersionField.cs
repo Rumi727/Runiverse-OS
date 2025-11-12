@@ -1,8 +1,7 @@
 ﻿#nullable enable
-using RuniOS.UIElements;
+using RuniOS.Editor.UIElements.Nullables;
 using System.Collections.Generic;
 using UnityEngine.UIElements;
-using NullableIntegerField = RuniOS.Editor.UIElements.Nullables.NullableIntegerField;
 
 namespace RuniOS.Editor.UIElements
 {

@@ -20,7 +20,7 @@ namespace RuniOS.Editor.Patches
                     [HarmonyPatch(nameof(TextElement.text), MethodType.Setter)]
                     public static void LabelSetter(TextElement __instance, string value)
                     {
-                        if (EditorUIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
+                        if (UIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
                             callback.Invoke(value);
                     }
                 }

@@ -1,6 +1,6 @@
 ﻿using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements
+namespace RuniOS.Editor.UIElements
 {
     [UxmlElement]
     public partial class LabelField : BaseField<string>

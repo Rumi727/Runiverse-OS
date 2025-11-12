@@ -23,7 +23,7 @@ namespace RuniOS.Editor.Patches
                     {
                         public static MethodBase TargetMethod() => AccessTools.Method(targetType, "BeginContainerGUI");
                 
-                        public static void Postfix(IMGUIContainer container) => EditorUIToolkitUtility.currentIMGUIContainer = container;
+                        public static void Postfix(IMGUIContainer container) => UIToolkitUtility.currentIMGUIContainer = container;
                     }
             
                     [HarmonyPatch]
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Patches
                     {
                         public static MethodBase TargetMethod() => AccessTools.Method(targetType, "EndContainerGUI");
                 
-                        public static void Postfix() => EditorUIToolkitUtility.currentIMGUIContainer = null;
+                        public static void Postfix() => UIToolkitUtility.currentIMGUIContainer = null;
                     }
                 }
             }

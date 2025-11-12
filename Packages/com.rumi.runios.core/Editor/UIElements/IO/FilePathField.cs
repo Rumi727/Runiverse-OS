@@ -3,7 +3,7 @@ using RuniOS.APIMarshal.UnityEngine.UIElements;
 using RuniOS.IO;
 using UnityEngine.UIElements;
 
-namespace RuniOS.UIElements.IO
+namespace RuniOS.Editor.UIElements.IO
 {
     [UxmlElement]
     public partial class FilePathField : TextInputBaseFieldMarshal<FilePath>
