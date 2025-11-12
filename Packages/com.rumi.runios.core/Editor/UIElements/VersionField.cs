@@ -7,9 +7,6 @@ using NullableIntegerField = RuniOS.Editor.UIElements.Nullables.NullableIntegerF
 namespace RuniOS.Editor.UIElements
 {
     [UxmlElement]
-#if !UNITY_EDITOR && ENABLE_IL2CPP
-    [System.Obsolete("IL2CPP environment is not supported.", true)]
-#endif
     public partial class VersionField : RuniBaseCompositeField<Version>
     {
         public new const string ussClassName = "runios-version-field";
