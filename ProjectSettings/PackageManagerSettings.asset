@@ -35,7 +35,6 @@ MonoBehaviour:
     m_Url: https://package.openupm.com
     m_Scopes:
     - com.cysharp.unitask
-    - com.quickeye.ui-toolkit-plus
     - com.realitystop.linkmerge
     - com.coffee.softmask-for-ugui
     m_IsDefault: 0

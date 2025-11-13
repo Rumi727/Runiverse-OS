@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "com.unity.modules.ui": "1.0.0",
+    "com.unity.modules.uielements": "1.0.0",
     "com.unity.ui": "1.0.0",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
@@ -15,5 +16,5 @@
     "com.realitystop.linkmerge": "1.0.0",
     "com.marijnzwemmer.unity-toolbar-extender": "1.4.2"
   },
-  "unity": "6000.1"
+  "unity": "6000.0"
 }

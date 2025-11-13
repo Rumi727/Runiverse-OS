@@ -17,6 +17,5 @@ MonoBehaviour:
   url: https://package.openupm.com
   scopes:
   - com.cysharp.unitask
-  - com.quickeye.ui-toolkit-plus
   - com.realitystop.linkmerge
   - com.coffee.softmask-for-ugui
