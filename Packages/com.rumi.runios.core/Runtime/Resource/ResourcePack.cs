@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using RuniOS.IO;
 using System;
+using System.Collections.Immutable;
 
 namespace RuniOS.Resource
 {
@@ -99,6 +100,9 @@ namespace RuniOS.Resource
 
             if (!resourcePack.isValid)
                 return null;
+            
+            if (await resourcePack.assetFolder.DirectoryExists())
+                resourcePack.nameSpaces = (await resourcePack.assetFolder.GetDirectories()).ToImmutableArray();
 
             ResourceManager.internalLoadedResourcePacks.Add(packIdentifier, resourcePack);
             return resourcePack;
@@ -133,6 +137,8 @@ namespace RuniOS.Resource
         /// 이 리소스 팩이 성공적으로 로드되고 유효한지 여부를 가져옵니다.
         /// </summary>
         public bool isValid { get; private set; }
+
+        public ImmutableArray<string> nameSpaces { get; private set; } = ImmutableArray<string>.Empty;
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.

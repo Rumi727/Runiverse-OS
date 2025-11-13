@@ -62,7 +62,7 @@ MonoBehaviour:
     - key: gui.bottom_right
       value: Bottom Right
     - key: gui.namespace
-      value: Namespace
+      value: Namesapce
     - key: gui.extension
       value: Extension
     - key: gui.color
@@ -77,8 +77,16 @@ MonoBehaviour:
       value: Patch
     - key: gui.none
       value: None
+    - key: gui.root
+      value: Root
     - key: gui.type_field.select_type
       value: Select Type...
+    - key: gui.type
+      value: Type
+    - key: gui.assembly
+      value: Assembly
+    - key: gui.name
+      value: Name
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -249,3 +257,17 @@ MonoBehaviour:
       value: This element is not readable.
     - key: inspector.no_instance
       value: There are no instances.
+    - key: type_search_provider.name
+      value: Name
+    - key: type_search_provider.name.help
+      value: Filter by type name.
+    - key: type_search_provider.namespace
+      value: Namespace
+    - key: type_search_provider.namespace.help
+      value: Filter by namespace.
+    - key: type_search_provider.assembly
+      value: Assembly
+    - key: type_search_provider.assembly.help
+      value: Filter by assembly name.
+    - key: pack_identifier.open_folder.title
+      value: Select resource pack

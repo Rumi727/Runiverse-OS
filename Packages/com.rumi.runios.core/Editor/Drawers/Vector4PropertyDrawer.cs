@@ -29,7 +29,7 @@ namespace RuniOS.Editor.Drawers
             if (EditorGUIUtility.wideMode || !EditorTool.LabelHasContent(label))
                 return EditorGUIUtility.singleLineHeight;
             else
-                return EditorGUIUtility.singleLineHeight * 2;
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
         }
     }
 }

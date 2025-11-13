@@ -411,6 +411,10 @@ namespace RuniOS.IO
 
 
 
+        public readonly string[] SeparatorSplit() => value.Split(directorySeparatorChar);
+
+
+
         /// <summary>
         /// 두 <see cref="FilePath"/> 객체를 하나의 경로로 결합합니다.<br/>
         /// 두 경로 사이에 표준 디렉터리 구분자(<see cref="directorySeparatorChar"/>)가 자동으로 삽입됩니다.<br/>

@@ -69,9 +69,101 @@ namespace RuniOS.Editor.Windows
                                 }
                                 case 2:
                                 {
-                                    foreach (var item in dictionary.Where(item => !selectedLanguageDataAsset._languages.ContainsKey(item.Key)))
-                                        selectedLanguageDataAsset._languages[item.Key] = item.Value;
-                                
+                                    // 이게 대체 뭔 코드지...
+
+                                    // 1. 순서를 제어하기 위해 기존 딕셔너리를 리스트로 변환합니다.
+                                    var languageList = selectedLanguageDataAsset._languages.ToList();
+
+                                    // 2. 새롭게 추가/업데이트 될 항목들을 순회합니다.
+                                    foreach (var newItem in dictionary)
+                                    {
+                                        string newKey = newItem.Key;
+
+                                        // 2-1. 기존 리스트에서 키가 이미 존재하는지 확인합니다 (업데이트).
+                                        int existingIndex = languageList.FindIndex(item => item.Key == newKey);
+                                        if (existingIndex >= 0)
+                                        {
+                                            languageList[existingIndex] = newItem;
+                                            continue;
+                                        }
+
+                                        // 2-2. 새 항목인 경우, 삽입할 적절한 위치를 찾습니다.
+                                        int insertIndex = languageList.Count; // 기본값은 맨 뒤
+                                        int maxCommonPathLength = 0; // 최대 공통 경로 길이
+                                        string[] newParts = newKey.Split('.');
+
+                                        // *******************************************************************
+                                        // * 1단계: 가장 긴 공통 경로(최적 그룹)를 가진 항목을 찾습니다.
+                                        // *******************************************************************
+                                        for (int i = 0; i < languageList.Count; i++)
+                                        {
+                                            string existingKey = languageList[i].Key;
+                                            string[] existingParts = existingKey.Split('.');
+
+                                            // 현재 항목과 새 항목 간의 공통 접두사 경로 길이 계산
+                                            int commonLength = 0;
+                                            int minLen = newParts.Length.Min(existingParts.Length);
+                                            for (int j = 0; j < minLen; j++)
+                                            {
+                                                if (newParts[j] == existingParts[j])
+                                                    commonLength++;
+                                                else
+                                                    break;
+                                            }
+
+                                            // 새로운 더 긴 공통 경로를 가진 항목을 발견했다면 업데이트합니다.
+                                            if (commonLength > maxCommonPathLength)
+                                                maxCommonPathLength = commonLength;
+                                        }
+
+                                        // *******************************************************************
+                                        // * 2단계: 최적 그룹의 마지막 위치(경계)를 찾아 삽입 인덱스를 확정합니다.
+                                        // *******************************************************************
+
+                                        if (maxCommonPathLength > 0)
+                                        {
+                                            int lastMatchingIndex = -1; // 공통 경로를 가진 마지막 항목의 인덱스
+
+                                            // 1단계에서 찾은 maxCommonPathLength를 기준으로 그룹의 마지막 요소를 찾습니다.
+                                            for (int i = 0; i < languageList.Count; i++)
+                                            {
+                                                string existingKey = languageList[i].Key;
+                                                string[] existingParts = existingKey.Split('.');
+
+                                                // 현재 항목이 maxCommonPathLength 길이의 공통 경로를 갖는지 확인합니다.
+                                                bool isSameGroup = false;
+                                                if (existingParts.Length >= maxCommonPathLength)
+                                                {
+                                                    isSameGroup = true;
+                                                    for (int j = 0; j < maxCommonPathLength; j++)
+                                                    {
+                                                        // newParts[j]가 그룹의 기준이 되는 경로입니다.
+                                                        if (existingParts[j] != newParts[j])
+                                                        {
+                                                            isSameGroup = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+
+                                                if (isSameGroup) // 그룹에 속하는 항목을 발견하면 인덱스를 계속 업데이트합니다.
+                                                    lastMatchingIndex = i;
+                                            }
+
+                                            // 그룹을 찾았다면, 그 다음 위치에 삽입합니다.
+                                            if (lastMatchingIndex != -1)
+                                                insertIndex = lastMatchingIndex + 1;
+                                        }
+
+                                        // 2-3. 최종 확정된 리스트의 위치에 새 항목을 삽입합니다.
+                                        languageList.Insert(insertIndex, newItem);
+                                    }
+
+                                    // 3. 순서가 정렬된 리스트를 다시 새 딕셔너리 타입으로 변환하여 할당합니다.
+                                    selectedLanguageDataAsset._languages.Clear();
+                                    foreach (var item in languageList)
+                                        selectedLanguageDataAsset._languages.Add(item.Key, item.Value);
+
                                     EditorUtility.SetDirty(selectedLanguageDataAsset);
                                     break;
                                 }
@@ -181,9 +273,9 @@ namespace RuniOS.Editor.Windows
             drivenPropertyDatas.Clear();
         }
 
-        struct DrivenPropertyDataExtension : IDisposable
+        readonly struct DrivenPropertyDataExtension : IDisposable
         {
-            public AnimBool animBool;
+            public readonly AnimBool animBool;
             
             public readonly UnityEditor.Editor? driverEditor;
             public readonly UnityEditor.Editor? targetEditor;
@@ -217,7 +309,7 @@ namespace RuniOS.Editor.Windows
                 property = new SerializedObject(data.target).FindProperty(data.propertyPath);
             }
             
-            public readonly void Dispose()
+            public void Dispose()
             {
                 DestroyImmediate(driverEditor);
                 DestroyImmediate(targetEditor);

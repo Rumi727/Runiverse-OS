@@ -8,6 +8,7 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.Drawers
 {
+    [CustomPropertyDrawer(typeof(ISerializableKeyValuePair), true)]
     [CustomPropertyDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyDrawer : PropertyDrawer
     {

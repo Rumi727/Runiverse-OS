@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.Editor.Localizations;
 using System;
 using Unity.Properties;
 using UnityEngine.UIElements;
@@ -104,11 +103,11 @@ namespace RuniOS.Editor.UIElements
             this.baseType = baseType;
             
 #if UNITY_EDITOR
-            RegisterCallback<DetachFromPanelEvent>(_ => EditorLocalization.onLanguageUpdate -= UpdateButtonText);
+            RegisterCallback<DetachFromPanelEvent>(_ => Localizations.EditorLocalization.onLanguageUpdate -= UpdateButtonText);
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
                 if (this.IsEditorPanel())
-                    EditorLocalization.onLanguageUpdate += UpdateButtonText;
+                    Localizations.EditorLocalization.onLanguageUpdate += UpdateButtonText;
                 
                 UpdateLabel();
                 UpdateButtonText();
@@ -122,32 +121,11 @@ namespace RuniOS.Editor.UIElements
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
             {
-                var provider = APIBridge.UnityEditor.UIElements.TypeSearchProviderBridge.__CreateInstanceNonPublic(baseType ?? typeof(object));
-                var context = UnityEditor.Search.SearchService.CreateContext(provider.__instance, "type:");
-                var viewState = new UnityEditor.Search.SearchViewState(context)
-                {
-                    title = "Type",
-                    queryBuilderEnabled = true,
-                    hideTabs = true,
-                    selectHandler = Select,
-                    flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
-                };
-                UnityEditor.Search.SearchService.ShowPicker(viewState);
-
+                EditorTool.ShowTypePicker(x => value = x, baseType);
                 return;
             }
 #endif
         }
-
-#if UNITY_EDITOR
-        void Select(UnityEditor.Search.SearchItem? item, bool cancelled)
-        {
-            if (item?.data is Type type)
-                value = type;
-            else
-                value = null;
-        }
-#endif
 
         public override void SetValueWithoutNotify(SerializableType newValue)
         {

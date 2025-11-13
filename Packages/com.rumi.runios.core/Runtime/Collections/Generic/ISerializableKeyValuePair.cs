@@ -4,9 +4,11 @@
 namespace RuniOS.Collections.Generic
 {
     /// <summary>
-    /// 키와 값을 일반 <see cref="object"/> 타입으로 노출하는 직렬화 가능한 키-값 쌍의 비제네릭 인터페이스입니다.
-    /// <br/>
+    /// 키와 값을 일반 <see cref="object"/> 타입으로 노출하는 직렬화 가능한 키-값 쌍의 비제네릭 인터페이스입니다.<br/>
     /// 이는 제네릭 <see cref="ISerializableKeyValuePair{TKey, TValue}"/>의 기본 인터페이스 역할을 합니다.
+    /// <br/><br/>
+    /// 이 인터페이스를 구현하는 타입은 유니티 인스펙터상에 올바르게 표시되려면
+    /// 'key'와 'value'라는 이름의 직렬화 가능한 필드를 가져야 합니다.
     /// </summary>
     public interface ISerializableKeyValuePair
     {

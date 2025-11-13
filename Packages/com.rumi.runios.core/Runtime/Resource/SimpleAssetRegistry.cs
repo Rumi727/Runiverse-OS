@@ -89,10 +89,9 @@ namespace RuniOS.Resource
                     }
                 }
 
-                await OnEndAssetLoop();
-
                 // 모든 에셋 등록 작업을 병렬로 대기
                 await UniTask.WhenAll(uniTasks);
+                await OnEndAssetLoop();
             }
             finally
             {

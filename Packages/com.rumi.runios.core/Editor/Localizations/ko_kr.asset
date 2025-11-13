@@ -77,8 +77,16 @@ MonoBehaviour:
       value: "\uD328\uCE58"
     - key: gui.none
       value: "\uC5C6\uC74C"
+    - key: gui.root
+      value: "\uB8E8\uD2B8"
     - key: gui.type_field.select_type
       value: "\uD0C0\uC785 \uC120\uD0DD..."
+    - key: gui.type
+      value: "\uD0C0\uC785"
+    - key: gui.assembly
+      value: "\uC5B4\uC148\uBE14\uB9AC"
+    - key: gui.name
+      value: "\uC774\uB984"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
         \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
@@ -256,3 +264,17 @@ MonoBehaviour:
       value: "\uC774 \uC694\uC18C\uB294 \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: inspector.no_instance
       value: "\uC778\uC2A4\uD134\uC2A4\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+    - key: type_search_provider.name
+      value: "\uC774\uB984"
+    - key: type_search_provider.name.help
+      value: "\uD0C0\uC785 \uC774\uB984\uC73C\uB85C \uD544\uD130\uB9C1\uD569\uB2C8\uB2E4."
+    - key: type_search_provider.namespace
+      value: "\uB124\uC784\uC2A4\uD398\uC774\uC2A4"
+    - key: type_search_provider.namespace.help
+      value: "\uB124\uC784\uC2A4\uD398\uC774\uC2A4\uC5D0\uC11C \uD544\uD130\uB9C1\uD569\uB2C8\uB2E4."
+    - key: type_search_provider.assembly
+      value: "\uC5B4\uC148\uBE14\uB9AC"
+    - key: type_search_provider.assembly.help
+      value: "\uC5B4\uC148\uBE14\uB9AC \uC774\uB984\uC73C\uB85C \uD544\uD130\uB9C1\uD569\uB2C8\uB2E4."
+    - key: pack_identifier.open_folder.title
+      value: "\uB9AC\uC18C\uC2A4\uD329 \uC120\uD0DD"

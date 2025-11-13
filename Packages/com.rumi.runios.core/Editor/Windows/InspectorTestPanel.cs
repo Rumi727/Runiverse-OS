@@ -3,6 +3,7 @@ using RuniOS.Collections.Generic;
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using RuniOS.Resource;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -24,12 +25,17 @@ namespace RuniOS.Editor.Windows
         readonly Test test = new Test();
         readonly Inspector inspector = new Inspector();
 
+        PackIdentifier packIdentifier = PackIdentifier.CreateByID(Identifier.empty);
+
         void OnEnable() => inspector.Rebuild(new InspectableObject(test));
 
         public void OnGUI()
         {
             BeginWideMode();
             BeginHierarchyMode();
+
+            packIdentifier = PackIdentifierFieldLayout("Pack Identifier", packIdentifier);
+            
             EditorGUI.BeginChangeCheck();
             InspectorFlags flags = (InspectorFlags)EditorGUILayout.EnumFlagsField("Inspector Flags", inspector.inspectorFlags);
             if (EditorGUI.EndChangeCheck())

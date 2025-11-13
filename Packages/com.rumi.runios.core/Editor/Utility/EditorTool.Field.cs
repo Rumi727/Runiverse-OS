@@ -5,8 +5,11 @@ using RuniOS.Resource;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using UnityEditor;
+using UnityEditor.Search;
 using UnityEngine;
+using UnityEngine.Search;
 
 namespace RuniOS.Editor
 {
@@ -241,29 +244,56 @@ namespace RuniOS.Editor
 
 
 
-        public static Identifier IdentifierFieldLayout(Identifier value) => IdentifierField(EditorGUILayout.GetControlRect(), value);
-        public static Identifier IdentifierFieldLayout(string label, Identifier value) => IdentifierField(EditorGUILayout.GetControlRect(), label, value);
-        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value) => IdentifierField(EditorGUILayout.GetControlRect(), label, value);
+        public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
 
-        public static Identifier IdentifierField(Rect position, Identifier value) => DoIdentifierField(position, value);
-        public static Identifier IdentifierField(Rect position, string label, Identifier value) => IdentifierField(position, new GUIContent(label), value);
-        public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value)
+        public static Identifier IdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction = null) => DoIdentifierField(position, value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(position, new GUIContent(label), value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value, Action<Rect>? dropdownAction = null)
         {
             int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
             position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
 
-            return DoIdentifierField(position, value);
+            return DoIdentifierField(position, value, dropdownAction);
         }
-
-        // ReSharper disable Unity.PerformanceAnalysis
-        static Identifier DoIdentifierField(Rect position, Identifier value)
+        
+        static int? identifierFieldLastControlID;
+        static string identifierFieldSelectedNamespace = string.Empty;
+        static Identifier DoIdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction)
         {
+            position.height = EditorGUIUtility.singleLineHeight;
+            
             BeginIndentLevel(0);
             float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
 
             {
                 position.width = fieldWidth;
-                string nameSpace = EditorGUI.TextField(position, value.nameSpace);
+
+                TextDropdown nameSpaceDropdown = new TextDropdown();
+                nameSpaceDropdown.Rebuild(ResourceManager.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
+                
+                string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
+                if (isPressed)
+                    nameSpaceDropdown.Show(position);
+                
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                nameSpaceDropdown.onSelectedItem += x =>
+                {
+                    identifierFieldLastControlID = lastControlID;
+                    identifierFieldSelectedNamespace = x.value;
+                };
+                
+                if (identifierFieldLastControlID == lastControlID)
+                {
+                    nameSpace = identifierFieldSelectedNamespace;
+                
+                    identifierFieldSelectedNamespace = string.Empty;
+                    identifierFieldLastControlID = null;
+                    
+                    GUI.changed = true;
+                }
+                
                 if (Identifier.IsNamespaceValid(nameSpace))
                     value.nameSpace = nameSpace;
                 else
@@ -283,8 +313,17 @@ namespace RuniOS.Editor
             
             {
                 position.width = (fieldWidth * 2) + 8;
+
+                string path;
+                if (dropdownAction != null)
+                {
+                    path = TextFieldDropDown(position, value.path, out bool isPressed);
+                    if (isPressed)
+                        dropdownAction.Invoke(position);
+                }
+                else
+                    path = EditorGUI.TextField(position, value.path);
                 
-                string path = EditorGUI.TextField(position, value.path);
                 if (Identifier.IsPathValid(path))
                     value.path = path;
                 else
@@ -294,12 +333,106 @@ namespace RuniOS.Editor
             EndIndentLevel();
             return value;
         }
+        
+        
+        
+        public static PackIdentifier PackIdentifierFieldLayout(PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), value);
+        public static PackIdentifier PackIdentifierFieldLayout(string label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
+        public static PackIdentifier PackIdentifierFieldLayout(GUIContent label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
+
+        public static PackIdentifier PackIdentifierField(Rect position, PackIdentifier value) => DoPackIdentifierField(position, value);
+        public static PackIdentifier PackIdentifierField(Rect position, string label, PackIdentifier value) => PackIdentifierField(position, new GUIContent(label), value);
+        public static PackIdentifier PackIdentifierField(Rect position, GUIContent label, PackIdentifier value)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
+
+            return DoPackIdentifierField(position, value);
+        }
+        
+        static int? packIdentifierFieldLastControlID;
+        static string packIdentifierFieldSelectedValue = string.Empty;
+        static PackIdentifier DoPackIdentifierField(Rect position, PackIdentifier value)
+        {
+            if (!value.isValid)
+                return value;
+            
+            position.width -= 54;
+            if (value.identifier != null)
+            {
+                TextDropdown valueDropdown = new TextDropdown();
+                valueDropdown.Rebuild
+                (
+                    ResourceManager.loadedResourcePacks.Keys
+                    .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
+                    .Select(x => x.identifier!.Value.path.ToString())
+                );
+                
+                value.identifier = IdentifierField(position, value.identifier.Value, x => valueDropdown.Show(x));
+                
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                valueDropdown.onSelectedItem += x =>
+                {
+                    packIdentifierFieldLastControlID = lastControlID;
+                    packIdentifierFieldSelectedValue = x.value;
+                };
+                
+                if (packIdentifierFieldLastControlID == lastControlID)
+                {
+                    value.identifier = new Identifier(value.identifier.Value.nameSpace, packIdentifierFieldSelectedValue);
+                
+                    packIdentifierFieldSelectedValue = string.Empty;
+                    packIdentifierFieldLastControlID = null;
+                    
+                    GUI.changed = true;
+                }
+            }
+            else if (value.path != null)
+            {
+                string path = TextFieldDropDown(position, value.path.Value, out bool isPressed);
+                if (isPressed)
+                    path = EditorUtility.OpenFolderPanel(GetTextOrKey("pack_identifier.open_folder.title"), string.Empty, string.Empty);
+
+                value.path = path;
+            }
+
+            if (!EditorGUIUtility.wideMode)
+                position.y += EditorGUIUtility.singleLineHeight + 2;
+
+            position.x += position.width + 4;
+            position.width = 50;
+            position.height = EditorGUIUtility.singleLineHeight;
+            
+            UIElements.Resource.PackIdentifierField.PackIdentifierMode mode = value.identifier != null ? UIElements.Resource.PackIdentifierField.PackIdentifierMode.id : UIElements.Resource.PackIdentifierField.PackIdentifierMode.path;
+            EditorGUI.BeginChangeCheck();
+            mode = (UIElements.Resource.PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
+            if (EditorGUI.EndChangeCheck())
+            {
+                switch (mode)
+                {
+                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.id:
+                    {
+                        value.identifier ??= Identifier.empty;
+                        break;
+                    }
+                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
+                    {
+                        value.path ??= FilePath.empty;
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+            }
+
+            return value;
+        }
 
 
 
-        public static RectOffset RectOffsetFieldLayout(RectOffset value) => RectOffsetField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value);
-        public static RectOffset RectOffsetFieldLayout(string label, RectOffset value) => RectOffsetField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
-        public static RectOffset RectOffsetFieldLayout(GUIContent label, RectOffset value) => RectOffsetField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
+        public static RectOffset RectOffsetFieldLayout(RectOffset value) => RectOffsetField(GetMultiControlRect(), value);
+        public static RectOffset RectOffsetFieldLayout(string label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
+        public static RectOffset RectOffsetFieldLayout(GUIContent label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
 
         public static RectOffset RectOffsetField(Rect position, RectOffset value) => DoRectOffsetField(position, value);
         public static RectOffset RectOffsetField(Rect position, string label, RectOffset value) => RectOffsetField(position, new GUIContent(label), value);
@@ -461,9 +594,9 @@ namespace RuniOS.Editor
 
 
 
-        public static Vector4 Vector4FieldLayout(Vector4 value) => Vector4Field(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value);
-        public static Vector4 Vector4FieldLayout(string label, Vector4 value) => Vector4Field(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
-        public static Vector4 Vector4FieldLayout(GUIContent label, Vector4 value) => Vector4Field(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
+        public static Vector4 Vector4FieldLayout(Vector4 value) => Vector4Field(GetMultiControlRect(), value);
+        public static Vector4 Vector4FieldLayout(string label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
+        public static Vector4 Vector4FieldLayout(GUIContent label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
 
         public static Vector4 Vector4Field(Rect position, Vector4 value) => DoVector4Field(position, value);
         public static Vector4 Vector4Field(Rect position, string label, Vector4 value) => Vector4Field(position, new GUIContent(label), value);
@@ -496,9 +629,9 @@ namespace RuniOS.Editor
 
 
 
-        public static Version VersionFieldLayout(Version value) => VersionField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value);
-        public static Version VersionFieldLayout(string label, Version value) => VersionField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
-        public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value);
+        public static Version VersionFieldLayout(Version value) => VersionField(GetMultiControlRect(), value);
+        public static Version VersionFieldLayout(string label, Version value) => VersionField(GetMultiControlRect(), label, value);
+        public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(GetMultiControlRect(), label, value);
 
         public static Version VersionField(Rect position, Version value) => DoVersionField(position, value);
         public static Version VersionField(Rect position, string label, Version value) => VersionField(position, new GUIContent(label), value);
@@ -559,9 +692,9 @@ namespace RuniOS.Editor
 
 
 
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value, drawKeyAction, drawValueAction);
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawKeyAction, drawValueAction);
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
 
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(position, new GUIContent(label), value, drawKeyAction, drawValueAction);
@@ -659,13 +792,13 @@ namespace RuniOS.Editor
         public static void ShowTypePicker(Action<Type?> selectHandler, Type? baseType = null)
         {
             var provider = new TypeSearchProvider(baseType ?? typeof(object));
-            var context = UnityEditor.Search.SearchService.CreateContext(provider, "type:");
-            var viewState = new UnityEditor.Search.SearchViewState(context)
+            var context = SearchService.CreateContext(provider, "type:");
+            var viewState = new SearchViewState(context)
             {
-                title = "Type",
+                title = GetTextOrKey("gui.type"),
                 queryBuilderEnabled = true,
                 hideTabs = true,
-                selectHandler = (UnityEditor.Search.SearchItem item, bool cancelled) =>
+                selectHandler = (SearchItem item, bool cancelled) =>
                 {
                     if (cancelled)
                         return;
@@ -675,17 +808,17 @@ namespace RuniOS.Editor
                     else
                         selectHandler.Invoke(null);
                 },
-                flags = (UnityEngine.Search.SearchViewFlags.TableView | UnityEngine.Search.SearchViewFlags.DisableInspectorPreview | UnityEngine.Search.SearchViewFlags.DisableBuilderModeToggle)
+                flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle)
             };
-            UnityEditor.Search.SearchService.ShowPicker(viewState);
+            SearchService.ShowPicker(viewState);
         }
 
         public static void ObjectPingFieldLayout(UnityEngine.Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), GUIContent.none, obj);
-        public static void ObjectPingFieldLayout(string? label, UnityEngine.Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
+        public static void ObjectPingFieldLayout(string label, UnityEngine.Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
         public static void ObjectPingFieldLayout(GUIContent label, UnityEngine.Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
         
         public static void ObjectPingField(Rect position, UnityEngine.Object? obj) => ObjectPingField(position, GUIContent.none, obj);
-        public static void ObjectPingField(Rect position, string? label, UnityEngine.Object? obj) => ObjectPingField(position, new GUIContent(label), obj);
+        public static void ObjectPingField(Rect position, string label, UnityEngine.Object? obj) => ObjectPingField(position, new GUIContent(label), obj);
         public static void ObjectPingField(Rect position, GUIContent label, UnityEngine.Object? obj)
         {
             GUIContent content = EditorGUIUtility.ObjectContent(obj, typeof(UnityEngine.Object));
@@ -703,6 +836,34 @@ namespace RuniOS.Editor
 
                 Event.current.Use(); 
             }
+        }
+
+
+
+        public static string TextFieldDropDownLayout(string value, out bool isPressed) => TextFieldDropDownLayout(GUIContent.none, value, out isPressed);
+        public static string TextFieldDropDownLayout(string label, string value, out bool isPressed) => TextFieldDropDownLayout(new GUIContent(label), value, out isPressed);
+        public static string TextFieldDropDownLayout(GUIContent label, string value, out bool isPressed) => TextFieldDropDown(EditorGUILayout.GetControlRect(), label, value, out isPressed);
+        
+        public static string TextFieldDropDown(Rect position, string value, out bool isPressed) => TextFieldDropDown(position, GUIContent.none, value, out isPressed);
+        public static string TextFieldDropDown(Rect position, string label, string value, out bool isPressed) => TextFieldDropDown(position, new GUIContent(label), value, out isPressed);
+        public static string TextFieldDropDown(Rect position, GUIContent label, string value, out bool isPressed)
+        {
+            position.height = EditorGUIUtility.singleLineHeight;
+            isPressed = false;
+            
+            Rect fieldRect = position;
+            fieldRect.width -= EditorStylesBridge.textFieldDropDown.fixedWidth;
+
+            value = EditorGUI.TextField(fieldRect, label, value, EditorStylesBridge.textFieldDropDownText);
+            
+            Rect dropdownRect = position;
+            dropdownRect.x += fieldRect.width;
+            dropdownRect.width = EditorStylesBridge.textFieldDropDown.fixedWidth;
+
+            if (GUI.Button(dropdownRect, GUIContent.none, EditorStylesBridge.textFieldDropDown))
+                isPressed = true;
+
+            return value;
         }
     }
 }

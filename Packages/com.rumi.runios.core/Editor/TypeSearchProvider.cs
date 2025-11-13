@@ -1,10 +1,13 @@
-﻿using RuniOS.Editor.APIBridge.UnityEditor.Search;
+﻿#nullable enable
+using RuniOS.Editor.APIBridge.UnityEditor.Search;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using UnityEditor.Search;
+
+using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor
 {
@@ -18,7 +21,7 @@ namespace RuniOS.Editor
         readonly HashSet<Assembly> assemblies = new();
         readonly QueryEngine<Type> queryEngine = new();
 
-        public TypeSearchProvider(Type baseType) : base("type", "Type")
+        public TypeSearchProvider(Type baseType) : base("type", GetTextOrKey("gui.type"))
         {
             this.baseType = baseType;
 
@@ -27,7 +30,7 @@ namespace RuniOS.Editor
             fetchColumns = FetchColumns;
             
             SearchProviderBridge.__GetInstanceFrom(this).tableConfig = GetDefaultTableConfig;
-
+            
             queryEngine.SetSearchDataCallback(GetSearchableData, StringComparison.OrdinalIgnoreCase);
             queryEngine.AddFilter(assemblyToken, o => o.Assembly.GetName().Name);
             queryEngine.AddFilter(nameToken, o => o.Name);
@@ -36,12 +39,12 @@ namespace RuniOS.Editor
 
         IEnumerable<SearchProposition> FetchPropositions(SearchContext context, SearchPropositionOptions options)
         {
-            yield return new SearchProposition(null, "Name", $"{nameToken}:", "Filter by type name.");
-            yield return new SearchProposition(null, "Namespace", $"{namespaceToken}:", "Filter by type namespace.");
+            yield return new SearchProposition(null, GetTextOrKey("type_search_provider.name"), $"{nameToken}:", GetTextOrKey("type_search_provider.name.help"));
+            yield return new SearchProposition(null, GetTextOrKey("type_search_provider.namespace"), $"{namespaceToken}:", GetTextOrKey("type_search_provider.namespace.help"));
 
             // We want to provide a list of all the assemblies that contain types derived from the base type.
             foreach (string? assemblyName in assemblies.Select(x => x.GetName().Name))
-                yield return new SearchProposition("Assembly", assemblyName, $"{assemblyToken}={assemblyName}", "Filter by assembly name.");
+                yield return new SearchProposition(GetTextOrKey("type_search_provider.assembly"), assemblyName, $"{assemblyToken}={assemblyName}", GetTextOrKey("type_search_provider.assembly.help"));
         }
 
         IEnumerator FetchItems(SearchContext context, List<SearchItem> items, SearchProvider provider)
@@ -71,7 +74,7 @@ namespace RuniOS.Editor
 
         static SearchTable GetDefaultTableConfig(SearchContext context)
         {
-            List<SearchColumn> defaultColumns = new List<SearchColumn> { new SearchColumn("Name", "label") { width = 400 } };
+            List<SearchColumn> defaultColumns = new List<SearchColumn> { new SearchColumn(GetTextOrKey("gui.name"), "label") { width = 400 } };
             defaultColumns.AddRange(FetchColumns(context, null));
             
             return new SearchTable("type", defaultColumns);
@@ -79,8 +82,8 @@ namespace RuniOS.Editor
 
         static IEnumerable<SearchColumn> FetchColumns(SearchContext context, IEnumerable<SearchItem>? searchDatas)
         {
-            yield return new SearchColumn("Namespace") { getter = GetNamespace, width = 250 };
-            yield return new SearchColumn("Assembly") { getter = GetAssemblyName, width = 250 };
+            yield return new SearchColumn(GetTextOrKey("type_search_provider.namespace")) { getter = GetNamespace, width = 250 };
+            yield return new SearchColumn(GetTextOrKey("type_search_provider.assembly")) { getter = GetAssemblyName, width = 250 };
         }
 
         static object? GetNamespace(SearchColumnEventArgs args)

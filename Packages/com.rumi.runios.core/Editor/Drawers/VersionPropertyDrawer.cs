@@ -66,7 +66,7 @@ namespace RuniOS.Editor.Drawers
             if (EditorGUIUtility.wideMode || !LabelHasContent(label))
                 return EditorGUIUtility.singleLineHeight;
             else
-                return EditorGUIUtility.singleLineHeight * 2;
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
         }
         
         public static (SerializedProperty major, SerializedProperty minor, SerializedProperty patch) GetChildProperty(SerializedProperty property)

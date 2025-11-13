@@ -1,8 +1,9 @@
 #nullable enable
-using RuniOS.Editor.Drawers.IO;
+using RuniOS.Editor.Serialization;
 using RuniOS.Editor.UIElements;
 using RuniOS.Editor.UIElements.Resource;
 using RuniOS.Resource;
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -18,48 +19,27 @@ namespace RuniOS.Editor.Drawers.Resource
         {
             EditorGUI.BeginProperty(position, label, property);
             Draw(position, property, label);
-            EditorGUI.EndProperty();
+            try
+            {
+                EditorGUI.EndProperty();
+            }
+            catch (InvalidOperationException)
+            {
+                
+            }
         }
+        
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
-            (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) = GetChildProperty(property);
-            (SerializedProperty? internalIDField, SerializedProperty? internalIDToggle) = SerializableNullablePropertyDrawer.GetChildProperty(nullableInternalID);
-            (SerializedProperty? localPathField, SerializedProperty? localPathToggle) = SerializableNullablePropertyDrawer.GetChildProperty(nullableLocalPath);
-
-            if (internalIDField != null && internalIDToggle != null && localPathField != null && localPathToggle != null)
+            PropertyConverter? converter = PropertyConverter.FindConverter(property);
+            if (converter?.Read(property, typeof(PackIdentifier)) is not PackIdentifier packIdentifier)
             {
-                position.width -= 54;
-                if (internalIDToggle.boolValue)
-                    IdentifierPropertyDrawer.Draw(position, internalIDField, label);
-                else
-                    FilePathPropertyDrawer.Draw(position, localPathField, label);
-                
-                if (!EditorGUIUtility.wideMode)
-                    position.y += EditorGUIUtility.singleLineHeight + 2;
-
-                position.x += position.width + 4;
-                position.width = 50;
-                
-                PackIdentifierField.PackIdentifierMode mode = internalIDToggle.boolValue ? PackIdentifierField.PackIdentifierMode.id : PackIdentifierField.PackIdentifierMode.path;
-                EditorGUI.BeginChangeCheck();
-                mode = (PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    internalIDToggle.boolValue = mode switch
-                    {
-                        PackIdentifierField.PackIdentifierMode.id => true,
-                        PackIdentifierField.PackIdentifierMode.path => false,
-                        _ => internalIDToggle.boolValue
-                    };
-                    
-                    localPathToggle.boolValue = mode switch
-                    {
-                        PackIdentifierField.PackIdentifierMode.id => false,
-                        PackIdentifierField.PackIdentifierMode.path => true,
-                        _ => localPathToggle.boolValue
-                    };
-                }
+                EditorGUI.LabelField(position, label, GUIContent.none);
+                return;
             }
+
+            packIdentifier = EditorTool.PackIdentifierField(position, label, packIdentifier);
+            converter.Write(property, typeof(PackIdentifier), packIdentifier);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)

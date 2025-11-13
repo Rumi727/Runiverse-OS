@@ -24,6 +24,10 @@ namespace RuniOS.Resource
         */
         internal static readonly HashSet<PackIdentifier> internalEnabledPackIdentifiers = new();
         public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = new(internalEnabledPackIdentifiers);
+
+        public static IEnumerable<ResourcePack> enabledPacks => loadedResourcePacks
+            .Where(x => enabledPackIdentifiers.Contains(x.Key))
+            .Select(x => x.Value);
         
         static readonly AssetRegistryList _assetRegistries = new();
         public static ReadOnlyAssetRegistryList assetRegistries { get; } = new ReadOnlyAssetRegistryList(_assetRegistries);
@@ -79,9 +83,7 @@ namespace RuniOS.Resource
                         {
                             await assetRegistry.Reload
                             (
-                                loadedResourcePacks
-                                    .Where(x => enabledPackIdentifiers.Contains(x.Key))
-                                    .Select(x => x.Value),
+                                enabledPacks,
                                 Progress.Create<float>(x =>
                                 {
                                     assetRegistryProgresses[targetIndex] = x;

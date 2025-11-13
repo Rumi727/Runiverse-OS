@@ -2165,11 +2165,18 @@ namespace RuniOS
 
             return min;
         }
+        
+        public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector) => sources.OrderByAlphaNumeric(selector, StringComparer.CurrentCulture);
 
-        public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> source, Func<T, string> selector)
+        public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector, StringComparer comparer)
         {
-            int max = source.SelectMany(i => Regex.Matches(selector(i), @"\d+").Select(static m => (int?)m.Value.Length)).Max() ?? 0;
-            return source.OrderBy(i => Regex.Replace(selector(i), @"\d+", m => m.Value.PadLeft(max, '0')));
+            var regex = new Regex(@"\d+", RegexOptions.Compiled);
+
+            int maxDigits = sources
+                .SelectMany(x => regex.Matches(selector(x)).Select(digitChunk => (int?)digitChunk.Value.Length))
+                .Max() ?? 0;
+
+            return sources.OrderBy(x => regex.Replace(selector(x), match => match.Value.PadLeft(maxDigits, '0')), comparer);
         }
 
         public static void RenameKey<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey fromKey, TKey toKey)
