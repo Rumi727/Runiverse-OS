@@ -9,7 +9,7 @@ using static RuniOS.Editor.EditorTool;
 
 namespace RuniOS.Editor.IMGUI
 {
-    public abstract class ExtendedAdvancedDropdown<T> : AdvancedDropdown, IShowableDropdown, ISelectableDropdown<T> where T : AdvancedDropdownItem
+    public abstract class ExtendedAdvancedDropdown<T> : AdvancedDropdown, ISelectableDropdown<T> where T : AdvancedDropdownItem
     {
         protected ExtendedAdvancedDropdown() : base(new AdvancedDropdownState()) => minimumSize = new Vector2(0, 300);
 
