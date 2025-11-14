@@ -1,6 +1,7 @@
 ﻿using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Editor.APIBridge.UnityEngine.UIElements;
 using RuniOS.Collections.Generic;
+using RuniOS.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -78,7 +79,7 @@ namespace RuniOS.Editor.UIElements
         /// - <see cref="PropertyDrawer"/>에서 <see cref="PropertyField"/>의 커스텀 라벨을 인식하고 UI를 설정하는 등, 기본적인 Unity API로는 구현하기 어려운 기능을 지원합니다.<br/>
         /// - 현재 처리 중인 <see cref="PropertyField"/> 인스턴스에 대한 참조를 제공하여, Drawer 구현 시 추가적인 컨텍스트 정보를 활용할 수 있도록 합니다.<br/>
         /// </remarks>
-        public static ReadOnlyStack<PropertyField> currentPropertyFieldStack { get; } = new ReadOnlyStack<PropertyField>(_currentPropertyField);
+        public static ReadOnlyStack<PropertyField> currentPropertyFieldStack { get; } = _currentPropertyField.AsReadOnly();
         
         public static void UpdateContainerHeight(float height)
         {
