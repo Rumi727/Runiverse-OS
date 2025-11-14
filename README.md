@@ -9,6 +9,10 @@ When this library is completed, it will replace the existing [SC KRM 1.0](https:
 한창 개발 중입니다!!!!\
 기초 시스템 구현 조차 안됐어요!!!!!!
 
+## 참고 사항
+
+* 추후 System.Text.Json으로의 전환을 고려해야합니다.
+  * 항상 퍼블릭 프로퍼티를 사용해야하며, 정적 멤버는 허용되지 않습니다.
 
 ## TODO
 
