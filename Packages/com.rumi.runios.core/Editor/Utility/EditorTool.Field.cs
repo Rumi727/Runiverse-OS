@@ -272,7 +272,7 @@ namespace RuniOS.Editor
                 position.width = fieldWidth;
 
                 TextDropdown nameSpaceDropdown = new TextDropdown();
-                nameSpaceDropdown.Rebuild(ResourceManager.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
+                nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
                 
                 string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
                 if (isPressed)
@@ -364,7 +364,7 @@ namespace RuniOS.Editor
                 TextDropdown valueDropdown = new TextDropdown();
                 valueDropdown.Rebuild
                 (
-                    ResourceManager.loadedResourcePacks.Keys
+                    ResourcePack.loadedResourcePacks.Keys
                     .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
                     .Select(x => x.identifier!.Value.path.ToString())
                 );

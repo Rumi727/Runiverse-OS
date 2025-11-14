@@ -1,7 +1,5 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Collections.Generic;
-using RuniOS.Linq;
 using RuniOS.Tasks;
 using System;
 using System.Collections.Generic;
@@ -11,24 +9,6 @@ namespace RuniOS.Resource
 {
     public static class ResourceManager
     {
-        /*
-         * TODO
-         * 임시
-         */
-        internal static readonly Dictionary<PackIdentifier, ResourcePack> internalLoadedResourcePacks = new();
-        public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; } = internalLoadedResourcePacks.AsReadOnly();
-
-        /*
-         * TODO
-         * 임시
-        */
-        internal static readonly HashSet<PackIdentifier> internalEnabledPackIdentifiers = new();
-        public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = new(internalEnabledPackIdentifiers);
-
-        public static IEnumerable<ResourcePack> enabledPacks => loadedResourcePacks
-            .Where(x => enabledPackIdentifiers.Contains(x.Key))
-            .Select(x => x.Value);
-        
         static readonly AssetRegistryList _assetRegistries = new();
         public static ReadOnlyAssetRegistryList assetRegistries { get; } = new ReadOnlyAssetRegistryList(_assetRegistries);
 
@@ -55,17 +35,13 @@ namespace RuniOS.Resource
                 await UniTask.WaitWhile(() => isLoading);
                 return;
             }
-
-            Debug.RuntimeLog("Initiate resource registry reload", nameof(ResourceManager));
-            currentTask = new AsyncTask("runios:resource.loading.title", "runios:resource.loading.description");
             
+            currentTask = new AsyncTask("runios:resource.loading.title", "runios:resource.loading.description");
             reloadStartEvent?.SafeInvoke(currentTask);
             
             try
             {
                 await ResourcePack.GetDefaultPack();
-                
-                EnablePack(ResourcePack.defaultPackIdentifier);
 
                 UniTask[] uniTasks = new UniTask[assetRegistries.Count];
                 float[] assetRegistryProgresses = new float[assetRegistries.Count];
@@ -83,7 +59,7 @@ namespace RuniOS.Resource
                         {
                             await assetRegistry.Reload
                             (
-                                enabledPacks,
+                                ResourcePack.enabledPacks,
                                 Progress.Create<float>(x =>
                                 {
                                     assetRegistryProgresses[targetIndex] = x;
@@ -125,8 +101,6 @@ namespace RuniOS.Resource
                 }
                 
                 isPreloaded = true;
-                
-                Debug.RuntimeLog("Resource registry reload complete!", nameof(ResourceManager));
                 reloadCompletionEvent.SafeInvoke();
             }
         }
@@ -200,8 +174,5 @@ namespace RuniOS.Resource
 
             return UniTask.FromResult<AssetScope?>(null);
         }
-        
-        public static void EnablePack(PackIdentifier identifier) => internalEnabledPackIdentifiers.Add(identifier);
-        public static void DisablePack(PackIdentifier identifier) => internalEnabledPackIdentifiers.Remove(identifier);
     }
 }

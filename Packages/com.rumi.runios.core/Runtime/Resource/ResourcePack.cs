@@ -1,9 +1,13 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
+using RuniOS.Collections.Generic;
 using RuniOS.IO;
+using RuniOS.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace RuniOS.Resource
 {
@@ -30,7 +34,68 @@ namespace RuniOS.Resource
         static ResourcePack? defaultPack;
 
         public static readonly PackIdentifier defaultPackIdentifier = PackIdentifier.CreateByID("vanilla");
+        
+        
+        static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks = new();
+        public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; } = _loadedResourcePacks.AsReadOnly();
+        
+        /*
+         * TODO
+         * 임시
+         */
+        internal static readonly HashSet<PackIdentifier> _enabledPackIdentifiers = new();
+        public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = _enabledPackIdentifiers.AsReadOnly();
 
+        public static IEnumerable<ResourcePack> enabledPacks => loadedResourcePacks
+            .Where(x => enabledPackIdentifiers.Contains(x.Key))
+            .Select(x => x.Value);
+
+        /// <summary>
+        /// 시스템의 기본 리소스 팩을 비동기적으로 가져옵니다.
+        /// <br/>기본 팩이 아직 생성되지 않은 경우 <c>"vanilla"</c> 식별자를 사용하여 생성됩니다.
+        /// </summary>
+        /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 입니다.</returns>
+        public static async UniTask<ResourcePack> GetDefaultPack()
+        {
+            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOHandler.instance);
+            EnablePack(defaultPackIdentifier);
+
+            return defaultPack;
+        }
+
+        /// <summary>
+        /// 지정된 <see cref="FileIOHandler"/>를 사용하여 리소스 팩을 생성합니다.
+        /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
+        /// </summary>
+        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="FileIOHandler"/>입니다.</param>
+        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
+        public static UniTask<ResourcePack> Create(FileIOHandler handler) => Create(PackIdentifier.CreateByPath(handler.targetPath), handler);
+        
+        /// <summary>
+        /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성하고 메타데이터를 로드합니다.
+        /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
+        /// </summary>
+        /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
+        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="IOHandler"/>입니다.</param>
+        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
+        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IOHandler handler)
+        {
+            if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
+                return loadedPack;
+            
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, handler.Recreate());
+            
+
+            await resourcePack.Reload();
+
+            _loadedResourcePacks.Add(packIdentifier, resourcePack);
+            return resourcePack;
+        }
+        
+        public static void EnablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Add(identifier);
+        
+        public static void DisablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Remove(identifier);
+        
         /// <summary>
         /// 빈 <see cref="ResourcePack"/> 인스턴스를 초기화합니다.
         /// </summary>
@@ -57,55 +122,6 @@ namespace RuniOS.Resource
             rootFolder = folder.Recreate();
             assetFolder = folder.CreateChild(assetsFolderName);
             infoFile = folder.CreateChild(infoPath);
-        }
-
-        /// <summary>
-        /// 시스템의 기본 리소스 팩을 비동기적으로 가져옵니다.
-        /// <br/>기본 팩이 아직 생성되지 않은 경우 <c>"vanilla"</c> 식별자를 사용하여 생성됩니다.
-        /// </summary>
-        /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 또는 실패 시 <see cref="emptyPack"/>을 반환하는 <see cref="ResourcePack"/>입니다.</returns>
-        public static async UniTask<ResourcePack> GetDefaultPack() => (defaultPack ??= await Create(PackIdentifier.CreateByID("vanilla"), StreamingIOHandler.instance)) ?? emptyPack;
-
-        /// <summary>
-        /// 지정된 <see cref="FileIOHandler"/>를 사용하여 리소스 팩을 생성합니다.
-        /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
-        /// </summary>
-        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="FileIOHandler"/>입니다.</param>
-        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환하는 <see cref="ResourcePack"/>입니다.</returns>
-        public static UniTask<ResourcePack?> Create(FileIOHandler handler) => Create(PackIdentifier.CreateByPath(handler.targetPath), handler);
-        
-        /// <summary>
-        /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성하고 메타데이터를 로드합니다.
-        /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
-        /// </summary>
-        /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
-        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="IOHandler"/>입니다.</param>
-        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환하는 <see cref="ResourcePack"/>입니다.</returns>
-        public static async UniTask<ResourcePack?> Create(PackIdentifier packIdentifier, IOHandler handler)
-        {
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, handler.Recreate());
-            if (!await resourcePack.infoFile.FileExists())
-                return null;
-            
-            try
-            {
-                resourcePack.metaData = JsonConvert.DeserializeObject<PackMetaData>(await resourcePack.infoFile.ReadAllText());
-                resourcePack.isValid = true;
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                resourcePack.isValid = false;
-            }
-
-            if (!resourcePack.isValid)
-                return null;
-            
-            if (await resourcePack.assetFolder.DirectoryExists())
-                resourcePack.nameSpaces = (await resourcePack.assetFolder.GetDirectories()).ToImmutableArray();
-
-            ResourceManager.internalLoadedResourcePacks.Add(packIdentifier, resourcePack);
-            return resourcePack;
         }
         
         /// <summary>
@@ -139,14 +155,47 @@ namespace RuniOS.Resource
         public bool isValid { get; private set; }
 
         public ImmutableArray<string> nameSpaces { get; private set; } = ImmutableArray<string>.Empty;
+        
+        public bool isDisposed { get; private set; }
+
+        public async UniTask Reload()
+        {
+            metaData = new PackMetaData();
+            nameSpaces = ImmutableArray<string>.Empty;
+            
+            if (!await infoFile.FileExists())
+                return;
+            
+            try
+            {
+                metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.ReadAllText());
+                isValid = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                isValid = false;
+            }
+            
+            if (!isValid)
+                return;
+            else if (await assetFolder.DirectoryExists())
+                nameSpaces = (await assetFolder.GetDirectories()).ToImmutableArray();
+        }
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.
         /// </summary>
         public void Dispose()
         {
+            if (isDisposed)
+                throw new ObjectDisposedException(identifier.ToString());
+            
+            isDisposed = true;
             isValid = false;
-            ResourceManager.internalLoadedResourcePacks.Remove(identifier);
+            
+            DisablePack(identifier);
+            _loadedResourcePacks.Remove(identifier);
         }
     }
 }

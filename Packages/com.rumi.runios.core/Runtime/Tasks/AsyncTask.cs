@@ -11,7 +11,6 @@ namespace RuniOS.Tasks
     public sealed class AsyncTask : ProgressTask
     {
         public static event Action? asyncTaskAdd = null;
-        public static event Action? asyncTaskChange = null;
         public static event Action? asyncTaskRemove = null;
 
 
@@ -32,13 +31,9 @@ namespace RuniOS.Tasks
             this.cancellable = cancellable;
 
             _asyncTasks.Add(this);
-
             asyncTaskAdd.SafeInvoke();
-            asyncTaskChange.SafeInvoke();
 
             runningTimeWatch.Start();
-
-            Debug.Log($"{name} async task created");
         }
 
 
@@ -73,13 +68,9 @@ namespace RuniOS.Tasks
             cancelEvent = null;
 
             _asyncTasks.Remove(this);
-
-            asyncTaskChange.SafeInvoke();
             asyncTaskRemove.SafeInvoke();
 
             cancelTokenSource.Cancel();
-
-            Debug.Log($"{name} async task ended");
 
             isDisposed = true;
             runningTimeWatch.Stop();

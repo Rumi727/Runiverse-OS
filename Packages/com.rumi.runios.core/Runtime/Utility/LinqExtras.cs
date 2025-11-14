@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Collections.Generic;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -81,7 +82,10 @@ namespace RuniOS.Linq
 
         public static IEnumerable<KeyValuePair<TKey, TElement>> AsDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) => source.Select(item => new KeyValuePair<TKey, TElement>(keySelector(item), elementSelector(item)));
 
-        public static ReadOnlyCollection<T> AsReadOnly<T>(this IList<T> list) => new ReadOnlyCollection<T>(list);
+        public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] list) => new ReadOnlyCollection<T>(list);
+        public static ReadOnlyQueue<T> AsReadOnly<T>(this Queue<T> list) => new ReadOnlyQueue<T>(list);
+        public static ReadOnlyStack<T> AsReadOnly<T>(this Stack<T> list) => new ReadOnlyStack<T>(list);
+        public static ReadOnlySet<T> AsReadOnly<T>(this ISet<T> list) => new ReadOnlySet<T>(list);
 
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
 
