@@ -2,6 +2,7 @@
 using RuniOS.Editor.UIElements;
 using RuniOS.Editor.UIElements.IO;
 using RuniOS.IO;
+using System;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -17,7 +18,14 @@ namespace RuniOS.Editor.Drawers.IO
         {
             EditorGUI.BeginProperty(position, label, property);
             Draw(position, property, label);
-            EditorGUI.EndProperty();
+            try
+            {
+                EditorGUI.EndProperty();
+            }
+            catch (InvalidOperationException)
+            {
+                
+            }
         }
         
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
@@ -25,7 +33,7 @@ namespace RuniOS.Editor.Drawers.IO
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            string value = EditorGUI.TextField(position, label, property.stringValue);
+            string value = EditorTool.FilePathField(position, label, property.stringValue);
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = value;
         }
