@@ -1,6 +1,6 @@
 ﻿#nullable enable
-using RuniOS.Editor.Drawers;
-using RuniOS.Editor.Drawers.Resource;
+using RuniOS.Editor.IMGUI.Drawers;
+using RuniOS.Editor.IMGUI.Drawers.Resource;
 using RuniOS.Editor.Serialization.Converters.IO;
 using RuniOS.IO;
 using RuniOS.Resource;
