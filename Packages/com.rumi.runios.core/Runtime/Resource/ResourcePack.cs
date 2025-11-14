@@ -84,14 +84,14 @@ namespace RuniOS.Resource
                 return loadedPack;
             
             ResourcePack resourcePack = new ResourcePack(packIdentifier, handler.Recreate());
-            
-
             await resourcePack.Reload();
 
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
             return resourcePack;
         }
-        
+
+        public static UniTask ReloadAll() => UniTask.WhenAll(loadedResourcePacks.Select(x => UniTask.Defer(x.Value.Reload)));
+
         public static void EnablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Add(identifier);
         
         public static void DisablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Remove(identifier);

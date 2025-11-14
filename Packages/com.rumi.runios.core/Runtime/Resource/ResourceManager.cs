@@ -42,6 +42,7 @@ namespace RuniOS.Resource
             try
             {
                 await ResourcePack.GetDefaultPack();
+                await ResourcePack.ReloadAll();
 
                 UniTask[] uniTasks = new UniTask[assetRegistries.Count];
                 float[] assetRegistryProgresses = new float[assetRegistries.Count];
