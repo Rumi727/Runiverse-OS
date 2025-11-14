@@ -388,13 +388,7 @@ namespace RuniOS.Editor
                 }
             }
             else if (value.path != null)
-            {
-                string path = TextFieldDropDown(position, value.path.Value, out bool isPressed);
-                if (isPressed)
-                    path = EditorUtility.OpenFolderPanel(GetTextOrKey("pack_identifier.open_folder.title"), string.Empty, string.Empty);
-
-                value.path = path;
-            }
+                value.path = FilePathField(position, value.path.Value);
 
             if (!EditorGUIUtility.wideMode)
                 position.y += EditorGUIUtility.singleLineHeight + 2;
@@ -864,6 +858,27 @@ namespace RuniOS.Editor
                 isPressed = true;
 
             return value;
+        }
+        
+        public static FilePath FilePathFieldLayout(FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), value);
+        public static FilePath FilePathFieldLayout(string label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
+        public static FilePath FilePathFieldLayout(GUIContent label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
+
+        public static FilePath FilePathField(Rect position, FilePath value) => DoFilePathField(position, value);
+        public static FilePath FilePathField(Rect position, string label, FilePath value) => FilePathField(position, new GUIContent(label), value);
+        public static FilePath FilePathField(Rect position, GUIContent label, FilePath value) => DoFilePathField(EditorGUI.PrefixLabel(position, label), value);
+
+        static FilePath DoFilePathField(Rect position, FilePath value)
+        {
+            FilePath path = TextFieldDropDown(position, value.value, out bool isPressed);
+            if (isPressed)
+            {
+                string panelValue = EditorUtility.OpenFolderPanel(GetTextOrKey("pack_identifier.open_folder.title"), string.Empty, string.Empty);
+                if (!string.IsNullOrEmpty(panelValue))
+                    path = panelValue;
+            }
+
+            return path;
         }
     }
 }
