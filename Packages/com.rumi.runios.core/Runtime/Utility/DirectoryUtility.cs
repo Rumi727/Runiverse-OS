@@ -41,7 +41,7 @@ namespace RuniOS
         public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
         public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption)
         {
-            if (extensionFilter.patterns.Count == 1)
+            if (extensionFilter.patterns.Length == 1)
                 return Directory.EnumerateFiles(path, extensionFilter.patterns[0], searchOption);
 
             return Directory.EnumerateFiles(path, "*", searchOption)

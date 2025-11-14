@@ -37,7 +37,7 @@ namespace RuniOS.IO
         /// <returns>문자열이 패턴과 일치하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>.</returns>
         public static bool IsMatch(string text, WildcardPatterns patterns, bool ignoreCase = false)
         {
-            for (int i = 0; i < patterns.patterns.Count; i++)
+            for (int i = 0; i < patterns.patterns.Length; i++)
             {
                 if (IsMatch(text, patterns[i], ignoreCase))
                     return true;

@@ -1,6 +1,4 @@
 #nullable enable
-using RuniOS.Linq;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace RuniOS.IO
@@ -19,9 +17,9 @@ namespace RuniOS.IO
 
 
 
-        public IReadOnlyList<string> patterns { get; }
+        public ImmutableArray<string> patterns { get; }
 
-        public WildcardPatterns(string pattern) => patterns = (ImmutableArray.Create(pattern)).AsReadOnly();
+        public WildcardPatterns(string pattern) => patterns = ImmutableArray.Create(pattern);
         public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToImmutableArray();
 
         public string this[int index] => patterns[index];
@@ -31,9 +29,9 @@ namespace RuniOS.IO
         public override string ToString()
         {
             string result = "";
-            for (int i = 0; i < patterns.Count; i++)
+            for (int i = 0; i < patterns.Length; i++)
             {
-                if (i < patterns.Count - 1)
+                if (i < patterns.Length - 1)
                     result += patterns[i] + "|";
                 else
                     result += patterns[i];
