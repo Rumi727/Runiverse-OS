@@ -81,7 +81,7 @@ namespace RuniOS
 #endif
 
         static readonly Stopwatch deltaTimeStopwatch = Stopwatch.StartNew();
-        public static void Update() => TimeUpdate();
+        static void Update() => TimeUpdate();
 
 #pragma warning disable IDE0022 // 메서드에 식 본문 사용
         public static void Quit()
