@@ -3,6 +3,7 @@ using RuniOS.Collections.Generic;
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using RuniOS.Linq;
 using RuniOS.Resource;
 using System.Collections;
 using System.Collections.Generic;
@@ -124,13 +125,13 @@ namespace RuniOS.Editor.Windows
 
             public Test()
             {
-                readOnlySet = new ReadOnlySet<Test2>(hashSet);
-                readOnlyQueue = new ReadOnlyQueue<Test2>(queue);
-                readOnlyStack = new ReadOnlyStack<Test2>(stack);
+                readOnlySet = hashSet.AsReadOnly();
+                readOnlyQueue = queue.AsReadOnly();
+                readOnlyStack = stack.AsReadOnly();
                 
-                readOnlySetVector2 = new ReadOnlySet<Vector2>(hashSetVector2);
-                readOnlyQueueVector2 = new ReadOnlyQueue<Vector2>(queueVector2);
-                readOnlyStackVector2 = new ReadOnlyStack<Vector2>(stackVector2);
+                readOnlySetVector2 = hashSetVector2.AsReadOnly();
+                readOnlyQueueVector2 = queueVector2.AsReadOnly();
+                readOnlyStackVector2 = stackVector2.AsReadOnly();
             }
 
             public class Test2
