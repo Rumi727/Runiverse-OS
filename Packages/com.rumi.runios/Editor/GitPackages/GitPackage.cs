@@ -1,7 +1,4 @@
-﻿using System;
-using UnityEngine;
-
-namespace RuniOS.Installer.GitPackages
+﻿namespace RuniOS.Installer.GitPackages
 {
     //[CreateAssetMenu(fileName = "RuniPackage", menuName = "Scriptable Objects/RuniPackage")]
     class GitPackage : ScriptableObject

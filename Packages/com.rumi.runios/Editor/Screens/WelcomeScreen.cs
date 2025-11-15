@@ -1,7 +1,4 @@
 #nullable enable
-using UnityEditor;
-using UnityEngine;
-
 namespace RuniOS.Installer.Screens
 {
     sealed class WelcomeScreen : IInstallerScreen

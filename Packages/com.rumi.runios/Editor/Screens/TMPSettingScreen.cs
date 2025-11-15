@@ -1,7 +1,5 @@
 #nullable enable
 using TMPro;
-using UnityEditor;
-using UnityEngine;
 
 namespace RuniOS.Installer.Screens
 {

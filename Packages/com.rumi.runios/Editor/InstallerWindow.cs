@@ -3,11 +3,8 @@ using RuniOS.Installer.GitPackages;
 using RuniOS.Installer.Languages;
 using RuniOS.Installer.ScopedRegistrys;
 using RuniOS.Installer.Screens;
-using System.Collections.Generic;
 using System.IO;
-using UnityEditor;
 using UnityEditor.AnimatedValues;
-using UnityEngine;
 
 namespace RuniOS.Installer
 {
