@@ -20,7 +20,7 @@ public static partial class Patches
                 [HarmonyPatch]
                 public static class BeginContainerGUI
                 {
-                    public static MethodBase TargetMethod() => AccessTools.Method(targetType, "BeginContainerGUI");
+                    public static MethodBase TargetMethod() => AccessTools.Method(targetType, nameof(BeginContainerGUI));
                 
                     public static void Postfix(IMGUIContainer container) => UIToolkitUtility.currentIMGUIContainer = container;
                 }
@@ -28,7 +28,7 @@ public static partial class Patches
                 [HarmonyPatch]
                 public static class EndContainerGUI
                 {
-                    public static MethodBase TargetMethod() => AccessTools.Method(targetType, "EndContainerGUI");
+                    public static MethodBase TargetMethod() => AccessTools.Method(targetType, nameof(EndContainerGUI));
                 
                     public static void Postfix() => UIToolkitUtility.currentIMGUIContainer = null;
                 }

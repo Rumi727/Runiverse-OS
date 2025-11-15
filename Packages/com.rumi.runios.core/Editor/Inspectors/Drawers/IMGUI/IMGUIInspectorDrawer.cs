@@ -8,7 +8,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI;
 
 public abstract class IMGUIInspectorDrawer : InspectorDrawer
 {
-    [return: NotNullIfNotNull("element")]
+    [return: NotNullIfNotNull(nameof(element))]
     public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, Inspector? rootInspector = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
     {
         if (element == null)

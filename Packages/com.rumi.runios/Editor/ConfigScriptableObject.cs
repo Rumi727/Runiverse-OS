@@ -28,7 +28,7 @@ namespace RuniOS.Installer
                     AssetDatabase.CreateFolder("Assets", "Runiverse OS");
 
                 if (!AssetDatabase.AssetPathExists("Assets/Runiverse OS/Installer"))
-                    AssetDatabase.CreateFolder("Assets/Runiverse OS", "Installer");
+                    AssetDatabase.CreateFolder("Assets/Runiverse OS", nameof(Installer));
 
                 if (!AssetDatabase.AssetPathExists(path))
                     AssetDatabase.CreateAsset(scriptableObject, path);

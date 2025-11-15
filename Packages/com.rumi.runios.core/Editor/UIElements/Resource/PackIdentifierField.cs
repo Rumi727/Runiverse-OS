@@ -69,7 +69,7 @@ public partial class PackIdentifierField : RuniBaseCompositeField<PackIdentifier
             
         yield return new FieldDescription<EnumField, Enum>
         (
-            "mode",
+            nameof(mode),
             modeField,
             static x => x.path != null ? PackIdentifierMode.path : PackIdentifierMode.id,
             static (ref PackIdentifier packIdentifier, Enum fieldValue) =>

@@ -82,7 +82,7 @@ public static class ReflectionUtility
                 Debug.LogException(e);
             }
 
-            types = assemblys.Where(x => /* 병신; */ !x.FullName.StartsWith("JetBrains", StringComparison.Ordinal))
+            types = assemblys.Where(x => /* 병신; */ !x.FullName.StartsWith(nameof(JetBrains), StringComparison.Ordinal))
                 .SelectMany(static x =>
                 {
                     try

@@ -28,7 +28,7 @@ public static partial class Patches
                     [HarmonyPatch]
                     public static class CreateBindingObjectForProperty
                     {
-                        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(targetType, "CreateBindingObjectForProperty");
+                        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(targetType, nameof(CreateBindingObjectForProperty));
 
 #if UNITY_6000_0_OR_NEWER
                         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
@@ -317,7 +317,7 @@ public static partial class Patches
                                     // Expression Tree 생성을 위한 매개변수 표현식을 정의합니다.
                                     ParameterExpression valueParam = Expression.Parameter(propertyType, "valueToCompare");
                                     ParameterExpression propertyParam = Expression.Parameter(typeof(SerializedProperty), "property");
-                                    ParameterExpression readFuncParam = Expression.Parameter(readFuncType, "readFunc");
+                                    ParameterExpression readFuncParam = Expression.Parameter(readFuncType, nameof(readFunc));
 
                                     // 매개변수들을 object? 또는 Delegate 타입으로 캐스팅하는 표현식을 생성합니다.
                                     Expression castValue = Expression.Convert(valueParam, typeof(object));
