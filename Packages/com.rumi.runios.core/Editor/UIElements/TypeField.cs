@@ -120,7 +120,7 @@ public partial class TypeField : BaseField<SerializableType>
 #if UNITY_EDITOR
         if (this.IsEditorPanel())
         {
-            EditorTool.ShowTypePicker(x => value = x, baseType);
+            ShowTypePicker(x => value = x, baseType);
             return;
         }
 #endif
@@ -146,7 +146,7 @@ public partial class TypeField : BaseField<SerializableType>
         {
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
-                ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(EditorTool.GetTextOrKey("gui.none"));
+                ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(GetTextOrKey("gui.none"));
             else
 #endif
                 ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
@@ -164,7 +164,7 @@ public partial class TypeField : BaseField<SerializableType>
     {
 #if UNITY_EDITOR
         if (this.IsEditorPanel())
-            buttonElement.text = EditorTool.GetTextOrKey("gui.type_field.select_type");
+            buttonElement.text = GetTextOrKey("gui.type_field.select_type");
         else
 #endif
             buttonElement.text = "Select Type...";

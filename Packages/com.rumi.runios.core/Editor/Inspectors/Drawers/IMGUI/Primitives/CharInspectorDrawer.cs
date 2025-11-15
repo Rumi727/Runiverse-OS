@@ -9,5 +9,5 @@ public class CharInspectorDrawer : GenericInspectorDrawer
 {
     public CharInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-    protected override object DrawField(Rect position, GUIContent label, object? value) => EditorTool.CharField(position, label, (char)value!);
+    protected override object DrawField(Rect position, GUIContent label, object? value) => CharField(position, label, (char)value!);
 }

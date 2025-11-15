@@ -9,7 +9,7 @@ public class TooltipAttributeAttributeDrawer : PropertyDrawer
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         TooltipAttribute attribute = (TooltipAttribute)this.attribute;
-        label.tooltip = EditorTool.GetTextOrKey(attribute.text);
+        label.tooltip = GetTextOrKey(attribute.text);
 
         EditorGUI.PropertyField(position, property, label, property.IsGeneric());
     }

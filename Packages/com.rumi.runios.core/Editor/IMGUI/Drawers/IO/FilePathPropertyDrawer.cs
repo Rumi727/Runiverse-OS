@@ -30,7 +30,7 @@ public class FilePathPropertyDrawer : PropertyDrawer
         property = GetChildProperty(property);
             
         EditorGUI.BeginChangeCheck();
-        string value = EditorTool.FilePathField(position, label, property.stringValue);
+        string value = FilePathField(position, label, property.stringValue);
         if (EditorGUI.EndChangeCheck())
             property.stringValue = value;
     }

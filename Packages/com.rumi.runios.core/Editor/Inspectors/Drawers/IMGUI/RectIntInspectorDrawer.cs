@@ -13,7 +13,7 @@ public class RectIntInspectorDrawer : GenericInspectorDrawer
         
     public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
     {
-        if (EditorGUIUtility.wideMode || !EditorTool.LabelHasContent(label))
+        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
             return EditorGUIUtility.singleLineHeight;
         else
             return (EditorGUIUtility.singleLineHeight * 3) + 4;

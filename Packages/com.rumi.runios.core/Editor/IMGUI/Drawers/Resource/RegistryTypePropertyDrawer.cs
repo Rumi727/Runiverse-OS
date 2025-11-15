@@ -4,8 +4,8 @@ using RuniOS.Resource;
 
 namespace RuniOS.Editor.IMGUI.Drawers.Resource;
 
-[CustomPropertyDrawer(typeof(PackIdentifier))]
-public class PackIdentifierPropertyDrawer : PropertyDrawer
+[CustomPropertyDrawer(typeof(RegistryType))]
+public class RegistryTypePropertyDrawer : PropertyDrawer
 {
     //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
 
@@ -26,23 +26,17 @@ public class PackIdentifierPropertyDrawer : PropertyDrawer
     public static void Draw(Rect position, SerializedProperty property, GUIContent label)
     {
         PropertyConverter? converter = PropertyConverter.FindConverter(property);
-        if (converter?.Read(property, typeof(PackIdentifier)) is not PackIdentifier packIdentifier)
+        if (converter?.Read(property, typeof(RegistryType)) is not RegistryType registryType)
         {
             EditorGUI.LabelField(position, label, GUIContent.none);
             return;
         }
 
-        packIdentifier = PackIdentifierField(position, label, packIdentifier);
-        converter.Write(property, typeof(PackIdentifier), packIdentifier);
+        registryType = RegistryTypeField(position, label, registryType);
+        converter.Write(property, typeof(RegistryType), registryType);
     }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 2) + 2;
-    }
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight;
 
     public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
     {

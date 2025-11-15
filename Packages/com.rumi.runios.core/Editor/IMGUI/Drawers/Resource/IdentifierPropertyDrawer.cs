@@ -1,17 +1,14 @@
 #nullable enable
 
 using RuniOS.Editor.IMGUI.Drawers.IO;
-using RuniOS.Editor.UIElements;
-using RuniOS.Editor.UIElements.Resource;
 using RuniOS.Resource;
-using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.IMGUI.Drawers.Resource;
 
 [CustomPropertyDrawer(typeof(Identifier))]
 public class IdentifierPropertyDrawer : PropertyDrawer
 {
-    public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
+    //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
