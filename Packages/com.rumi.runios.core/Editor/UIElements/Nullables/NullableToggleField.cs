@@ -1,23 +1,22 @@
 ﻿#nullable enable
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Nullables
+namespace RuniOS.Editor.UIElements.Nullables;
+
+[UxmlElement]
+public partial class NullableToggleField : NullableField<bool>
 {
-    [UxmlElement]
-    public partial class NullableToggleField : NullableField<bool>
-    {
-        public NullableToggleField() : this(string.Empty) { }
-        public NullableToggleField(string label, string? nullText = null) : base
+    public NullableToggleField() : this(string.Empty) { }
+    public NullableToggleField(string label, string? nullText = null) : base
+    (
+        label,
+        new FieldDescription<Toggle, bool>
         (
-            label,
-            new FieldDescription<Toggle, bool>
-            (
-                SerializableNullable.nameOfInternalValue,
-                static x => x.HasValue && x.Value,
-                static (ref SerializableNullable<bool> nullable, bool fieldValue) => nullable = fieldValue
-            ),
-            nullText
-        )
-        { }
-    }
+            SerializableNullable.nameOfInternalValue,
+            static x => x.HasValue && x.Value,
+            static (ref SerializableNullable<bool> nullable, bool fieldValue) => nullable = fieldValue
+        ),
+        nullText
+    )
+    { }
 }

@@ -2,11 +2,10 @@
 using RuniOS.Collections.Generic;
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers.Virtual.Generic
+namespace RuniOS.Collections.Handlers.Virtual.Generic;
+
+[CustomCollectionHandler(typeof(ReadOnlySet<>))]
+public class ReadOnlySetHandler : VirtualListHandler
 {
-    [CustomCollectionHandler(typeof(ReadOnlySet<>))]
-    public class ReadOnlySetHandler : VirtualListHandler
-    {
-        public ReadOnlySetHandler(IEnumerable targetCollection) : base(targetCollection) { }
-    }
+    public ReadOnlySetHandler(IEnumerable targetCollection) : base(targetCollection) { }
 }

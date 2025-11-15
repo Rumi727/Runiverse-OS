@@ -1,26 +1,21 @@
 #nullable enable
-using System.Collections.Generic;
+namespace RuniOS.Utility;
 
-using Object = UnityEngine.Object;
-
-namespace RuniOS
+public static class ConverterUtility
 {
-    public static class ConverterUtility
+    public static T[]? ConvertObjects<T>(this IList<Object?>? rawObjects) where T : Object
     {
-        public static T[]? ConvertObjects<T>(this IList<Object?>? rawObjects) where T : Object
+        if (rawObjects == null)
+            return null;
+
+        T[] array = new T[rawObjects.Count];
+        for (int i = 0; i < array.Length; i++)
         {
-            if (rawObjects == null)
-                return null;
-
-            T[] array = new T[rawObjects.Count];
-            for (int i = 0; i < array.Length; i++)
-            {
-                object? rawObject = rawObjects[i];
-                if (rawObject != null)
-                    array[i] = (T)rawObject;
-            }
-
-            return array;
+            object? rawObject = rawObjects[i];
+            if (rawObject != null)
+                array[i] = (T)rawObject;
         }
+
+        return array;
     }
 }

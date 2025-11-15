@@ -1,20 +1,18 @@
-﻿using System.Collections.Generic;
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 
-namespace RuniOS.Inspectors
+namespace RuniOS.Inspectors;
+
+public interface IInspector
 {
-    public interface IInspector
-    {
-        IInspectable? inspectable { get; }
+    IInspectable? inspectable { get; }
         
-        IInspectorElement? element { get; }
-        ImmutableArray<IInspectorElement> elements { get; }
+    IInspectorElement? element { get; }
+    ImmutableArray<IInspectorElement> elements { get; }
         
-        InspectorFlags inspectorFlags { get; }
+    InspectorFlags inspectorFlags { get; }
 
-        void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
+    void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
         
-        void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false);
-        void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false);
-    }
+    void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false);
+    void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false);
 }

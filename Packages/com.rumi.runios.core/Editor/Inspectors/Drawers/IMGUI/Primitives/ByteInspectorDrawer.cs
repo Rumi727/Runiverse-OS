@@ -1,16 +1,13 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
-using UnityEditor;
-using UnityEngine;
 
-namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives;
+
+[CustomInspectorDrawer(typeof(byte), allowInDebug = true)]
+public class ByteInspectorDrawer : GenericInspectorDrawer
 {
-    [CustomInspectorDrawer(typeof(byte), allowInDebug = true)]
-    public class ByteInspectorDrawer : GenericInspectorDrawer
-    {
-        public ByteInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+    public ByteInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.IntField(position, label, (byte)value!).ClampToByte();
-    }
+    protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.IntField(position, label, (byte)value!).ClampToByte();
 }

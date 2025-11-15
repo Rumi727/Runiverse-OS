@@ -1,8 +1,5 @@
 ﻿#nullable enable
 #if UNITY_2022_1_OR_NEWER
-using System;
-using UnityEditor;
-
 namespace RuniOS.Editor.Serialization.Converters
 {
     /// <summary>

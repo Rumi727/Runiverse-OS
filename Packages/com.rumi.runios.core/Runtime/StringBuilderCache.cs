@@ -2,43 +2,42 @@
 using System.Collections.Concurrent;
 using System.Text;
 
-namespace RuniOS
+namespace RuniOS;
+
+public static class StringBuilderCache
 {
-    public static class StringBuilderCache
+    static readonly ConcurrentBag<StringBuilder> cachedStringBuilders = new ConcurrentBag<StringBuilder>();
+
+    public static StringBuilder Acquire() => Acquire(string.Empty);
+        
+    public static StringBuilder Acquire(int capacity)
     {
-        static readonly ConcurrentBag<StringBuilder> cachedStringBuilders = new ConcurrentBag<StringBuilder>();
-
-        public static StringBuilder Acquire() => Acquire(string.Empty);
-        
-        public static StringBuilder Acquire(int capacity)
-        {
-            if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
-                return result;
-
-            return new StringBuilder(capacity);
-        }
-        
-        public static StringBuilder Acquire(string value)
-        {
-            if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
-            {
-                result.Clear();
-                return result.Append(value);
-            }
-
-            return new StringBuilder(value);
-        }
-
-        public static string Release(StringBuilder builder)
-        {
-            string result = builder.ToString();
-
-            builder.Clear();
-            cachedStringBuilders.Add(builder);
-
+        if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
             return result;
+
+        return new StringBuilder(capacity);
+    }
+        
+    public static StringBuilder Acquire(string value)
+    {
+        if (cachedStringBuilders.TryTake(out StringBuilder? result) && result != null)
+        {
+            result.Clear();
+            return result.Append(value);
         }
 
-        public static void Clear() => cachedStringBuilders.Clear();
+        return new StringBuilder(value);
     }
+
+    public static string Release(StringBuilder builder)
+    {
+        string result = builder.ToString();
+
+        builder.Clear();
+        cachedStringBuilders.Add(builder);
+
+        return result;
+    }
+
+    public static void Clear() => cachedStringBuilders.Clear();
 }

@@ -1,10 +1,7 @@
 ﻿#nullable enable
-using UnityEngine;
+namespace RuniOS.Editor.IMGUI;
 
-namespace RuniOS.Editor.IMGUI
+public interface IShowableDropdown
 {
-    public interface IShowableDropdown
-    {
-        void Show(Rect position);
-    }
+    void Show(Rect position);
 }

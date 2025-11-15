@@ -1,11 +1,9 @@
 #nullable enable
-using System;
 using System.Reflection;
 
-namespace RuniOS
+namespace RuniOS.Utility;
+
+public static class PointerUtility
 {
-    public static class PointerUtility
-    {
-        public static IntPtr ToIntPtr(this Pointer pointer) => Unsafe.PointerUtility.ToIntPtr(pointer);
-    }
+    public static IntPtr ToIntPtr(this Pointer pointer) => Unsafe.PointerUtility.ToIntPtr(pointer);
 }

@@ -1,18 +1,15 @@
 #nullable enable
-using UnityEngine;
+namespace RuniOS.Editor.Localizations;
 
-namespace RuniOS.Editor.Localizations
+sealed class EditorLocalizationRegister : ScriptableObject, IEditorLocalizationRegister
 {
-    sealed class EditorLocalizationRegister : ScriptableObject, IEditorLocalizationRegister
-    {
-        [SerializeField] EditorLanguageDataAsset? en_us;
-        [SerializeField] EditorLanguageDataAsset? ko_kr;
-        [SerializeField] EditorLanguageDataAsset? ja_jp;
+    [SerializeField] EditorLanguageDataAsset? en_us;
+    [SerializeField] EditorLanguageDataAsset? ko_kr;
+    [SerializeField] EditorLanguageDataAsset? ja_jp;
 
-        void Awake()
-        {
-            EditorLocalization.RegisterLanguage(en_us, ko_kr, ja_jp);
-            DestroyImmediate(this);
-        }
+    void Awake()
+    {
+        EditorLocalization.RegisterLanguage(en_us, ko_kr, ja_jp);
+        DestroyImmediate(this);
     }
 }

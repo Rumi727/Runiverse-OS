@@ -2,57 +2,55 @@
 using RuniOS.Editor.UIElements.IO;
 using RuniOS.IO;
 using RuniOS.Resource;
-using System.Collections.Generic;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Resource
+namespace RuniOS.Editor.UIElements.Resource;
+
+[UxmlElement]
+public partial class IdentifierField : RuniBaseCompositeField<Identifier>
 {
-    [UxmlElement]
-    public partial class IdentifierField : RuniBaseCompositeField<Identifier>
-    {
-        public new const string ussClassName = "runios-identifier-field";
-        public new const string labelUssClassName = ussClassName + "__label";
-        public new const string inputUssClassName = ussClassName + "__input";
+    public new const string ussClassName = "runios-identifier-field";
+    public new const string labelUssClassName = ussClassName + "__label";
+    public new const string inputUssClassName = ussClassName + "__input";
         
-        public IdentifierField() : this(string.Empty) { }
-        public IdentifierField(string label) : base(label)
-        {
-            labelElement.AddToClassList(labelUssClassName);
-            visualInput.AddToClassList(inputUssClassName);
+    public IdentifierField() : this(string.Empty) { }
+    public IdentifierField(string label) : base(label)
+    {
+        labelElement.AddToClassList(labelUssClassName);
+        visualInput.AddToClassList(inputUssClassName);
             
-            AddToClassList(ussClassName);
-            SetFieldsByHorizontal();
-        }
+        AddToClassList(ussClassName);
+        SetFieldsByHorizontal();
+    }
 
-        protected override IEnumerable<IElementDescription> GetElementDescriptions()
-        {
-            yield return new FieldDescription<TextField, string>
-            (
-                "_nameSpace",
-                static x => x.nameSpace,
-                static (ref Identifier identifier, string fieldValue) =>
-                {
-                    if (Identifier.IsNamespaceValid(fieldValue))
-                        identifier.nameSpace = fieldValue;
-                    else
-                        Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(fieldValue));
-                }
-            );
+    protected override IEnumerable<IElementDescription> GetElementDescriptions()
+    {
+        yield return new FieldDescription<TextField, string>
+        (
+            "_nameSpace",
+            static x => x.nameSpace,
+            static (ref Identifier identifier, string fieldValue) =>
+            {
+                if (Identifier.IsNamespaceValid(fieldValue))
+                    identifier.nameSpace = fieldValue;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(fieldValue));
+            }
+        );
 
-            yield return new ElementDescription<TextElement>(nameof(Identifier.separator), new TextElement { text = Identifier.separator.ToString() });
+        yield return new ElementDescription<TextElement>(nameof(Identifier.separator), new TextElement { text = Identifier.separator.ToString() });
             
-            yield return new FieldDescription<FilePathField, FilePath>
-            (
-                "_path",
-                static x => x.path,
-                static (ref Identifier identifier, FilePath fieldValue) =>
-                {
-                    if (Identifier.IsPathValid(fieldValue))
-                        identifier.path = fieldValue;
-                    else
-                        Debug.LogWarning(Identifier.GetInvalidPathMessage(fieldValue));
-                }
-            );
-        }
+        yield return new FieldDescription<FilePathField, FilePath>
+        (
+            "_path",
+            static x => x.path,
+            static (ref Identifier identifier, FilePath fieldValue) =>
+            {
+                if (Identifier.IsPathValid(fieldValue))
+                    identifier.path = fieldValue;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidPathMessage(fieldValue));
+            }
+        );
     }
 }

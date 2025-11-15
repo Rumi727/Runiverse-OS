@@ -1,19 +1,18 @@
 #nullable enable
 using System.IO;
 
-namespace RuniOS
+namespace RuniOS.Utility;
+
+public static class StreamUtility
 {
-    public static class StreamUtility
+    public static byte[] ReadFully(this Stream stream)
     {
-        public static byte[] ReadFully(this Stream stream)
-        {
-            if (stream is MemoryStream memoryStream)
-                return memoryStream.ToArray();
+        if (stream is MemoryStream memoryStream)
+            return memoryStream.ToArray();
 
-            using MemoryStream result = new MemoryStream();
+        using MemoryStream result = new MemoryStream();
 
-            stream.CopyTo(result);
-            return result.ToArray();
-        }
+        stream.CopyTo(result);
+        return result.ToArray();
     }
 }

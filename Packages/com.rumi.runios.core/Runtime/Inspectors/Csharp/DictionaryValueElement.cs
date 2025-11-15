@@ -1,168 +1,164 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
-using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
-namespace RuniOS.Inspectors.Csharp
+namespace RuniOS.Inspectors.Csharp;
+
+public class DictionaryValueElement : IInspectorDictionaryElement
 {
-    public class DictionaryValueElement : IInspectorDictionaryElement
+    public DictionaryValueElement(InspectableDictionary inspectable, object targetKey)
     {
-        public DictionaryValueElement(InspectableDictionary inspectable, object targetKey)
-        {
-            name = string.Empty;
-            displayName = string.Empty;
+        name = string.Empty;
+        displayName = string.Empty;
             
-            this.inspectable = inspectable;
-            this.targetKey = targetKey;
+        this.inspectable = inspectable;
+        this.targetKey = targetKey;
 
-            variableType = inspectable.inspectionElementType?.Value ?? typeof(object);
+        variableType = inspectable.inspectionElementType?.Value ?? typeof(object);
             
-            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
+        inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
             
-            if (typeof(IEnumerable).IsAssignableFrom(variableType))
-            {
-                inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
-                if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo?.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
-            }
-        }
-
-        public string name { get; }
-        public string displayName { get; set; }
-
-        public InspectableDictionary inspectable { get; }
-        IInspectable IInspectorElement.inspectable => inspectable;
-
-        public Type variableType { get; }
-        public Type currentElementType => value?.GetType() ?? variableType;
-
-        public RuniNullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
-        
-        public object targetKey { get; set; }
-
-        public bool isPublic => true;
-        public bool isStatic => false;
-
-        public object? value
+        if (typeof(IEnumerable).IsAssignableFrom(variableType))
         {
-            get
-            {
-                try
-                {
-                    return inspectable[targetKey];
-                }
-                catch (Exception e)
-                {
-                    throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
-                }
-            }
-            set
-            {
-                try
-                {
-                    inspectable[targetKey] = value;
-                }
-                catch (Exception e)
-                {
-                    throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
-                }
-            }
+            inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+            if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
+                inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo?.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
         }
+    }
 
-        public bool isMixedValue
-        {
-            get
-            {
-                try
-                {
-                    object? value = this.value;
-                    if (variableType.IsPointer)
-                        return inspectable.dictionaryHandlers.Any(x => ((Pointer)x[targetKey]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
-                    
-                    return inspectable.dictionaryHandlers.Any(x => !Equals(x[targetKey], value));
-                }
-                catch (Exception e)
-                {
-                    throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
-                }
-            }
-        }
-        
-        public InspectableObject inspectableObjectElement { get; }
-        IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
-        
+    public string name { get; }
+    public string displayName { get; set; }
 
-        public InspectableList? inspectableListElement { get; }
-        IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
-        
-        /// <summary>
-        /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
-        /// </summary>
-        public InspectableDictionary? inspectableDictionaryElement { get; }
-        IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
+    public InspectableDictionary inspectable { get; }
+    IInspectable IInspectorElement.inspectable => inspectable;
 
-        public IEnumerable<object?> GetValues()
+    public Type variableType { get; }
+    public Type currentElementType => value?.GetType() ?? variableType;
+
+    public RuniNullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
+        
+    public object targetKey { get; set; }
+
+    public bool isPublic => true;
+    public bool isStatic => false;
+
+    public object? value
+    {
+        get
         {
             try
             {
-                return inspectable.dictionaryHandlers.Select(x => x[targetKey]);
+                return inspectable[targetKey];
             }
             catch (Exception e)
             {
-                throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
+                throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
             }
         }
-        
-        public void SetValues(IEnumerable<object?> values)
+        set
         {
             try
             {
-                using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
-                foreach (var instance in inspectable.dictionaryHandlers)
-                {
-                    if (!valueEnumerator.MoveNext())
-                        return;
-                    
-                    instance[targetKey] = valueEnumerator.Current;
-                }
+                inspectable[targetKey] = value;
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
             }
         }
+    }
 
-        public bool HasFlags(InspectorFlags flags)
+    public bool isMixedValue
+    {
+        get
         {
-            if (flags == InspectorFlags.None)
-                return false;
-            
-            if (!flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
-                return false;
-            
-            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
-                return false;
-
-            return true;
+            try
+            {
+                object? value = this.value;
+                if (variableType.IsPointer)
+                    return inspectable.dictionaryHandlers.Any(x => ((Pointer)x[targetKey]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    
+                return inspectable.dictionaryHandlers.Any(x => !Equals(x[targetKey], value));
+            }
+            catch (Exception e)
+            {
+                throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
+            }
         }
+    }
         
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
+    public InspectableObject inspectableObjectElement { get; }
+    IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
+        
 
-        public void UpdateChildInspectable()
+    public InspectableList? inspectableListElement { get; }
+    IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
+        
+    /// <summary>
+    /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
+    /// </summary>
+    public InspectableDictionary? inspectableDictionaryElement { get; }
+    IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
+
+    public IEnumerable<object?> GetValues()
+    {
+        try
         {
-            if (!IsReadable(InspectorFlags.All))
-                return;
-            
-            inspectableObjectElement.instances = GetValues().WhereNotNull();
-            if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
-            if (inspectableDictionaryElement != null)
-                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
+            return inspectable.dictionaryHandlers.Select(x => x[targetKey]);
         }
+        catch (Exception e)
+        {
+            throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
+        }
+    }
+        
+    public void SetValues(IEnumerable<object?> values)
+    {
+        try
+        {
+            using IEnumerator<object?> valueEnumerator = values.GetEnumerator();
+            foreach (var instance in inspectable.dictionaryHandlers)
+            {
+                if (!valueEnumerator.MoveNext())
+                    return;
+                    
+                instance[targetKey] = valueEnumerator.Current;
+            }
+        }
+        catch (Exception e)
+        {
+            throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
+        }
+    }
+
+    public bool HasFlags(InspectorFlags flags)
+    {
+        if (flags == InspectorFlags.None)
+            return false;
+            
+        if (!flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
+            return false;
+            
+        if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            return false;
+
+        return true;
+    }
+        
+    public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
+    public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
+
+    public void UpdateChildInspectable()
+    {
+        if (!IsReadable(InspectorFlags.All))
+            return;
+            
+        inspectableObjectElement.instances = GetValues().WhereNotNull();
+        if (inspectableListElement != null)
+            inspectableListElement.instances = GetValues().OfType<IEnumerable>();
+        if (inspectableDictionaryElement != null)
+            inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
     }
 }

@@ -3,15 +3,14 @@
 using System.ComponentModel;
 
 // ReSharper disable once CheckNamespace
-namespace System.Runtime.CompilerServices
-{
-    /// <summary>
-    /// Reserved to be used by the compiler for tracking metadata.
-    /// This class should not be used by developers in source code.
-    /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
+namespace System.Runtime.CompilerServices;
+
+/// <summary>
+/// Reserved to be used by the compiler for tracking metadata.
+/// This class should not be used by developers in source code.
+/// </summary>
+[EditorBrowsable(EditorBrowsableState.Never)]
 #if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT 
-    public 
+public 
 #endif
-    static class IsExternalInit { }
-}
+static class IsExternalInit { }

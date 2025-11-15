@@ -2,11 +2,10 @@
 using RuniOS.IO;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization.IO
+namespace RuniOS.Editor.UIElements.Serialization.IO;
+
+public sealed class FilePathConverter : UxmlAttributeConverter<FilePath>
 {
-    public sealed class FilePathConverter : UxmlAttributeConverter<FilePath>
-    {
-        public override FilePath FromString(string value) => value;
-        public override string ToString(FilePath value) => value;
-    }
+    public override FilePath FromString(string value) => value;
+    public override string ToString(FilePath value) => value;
 }

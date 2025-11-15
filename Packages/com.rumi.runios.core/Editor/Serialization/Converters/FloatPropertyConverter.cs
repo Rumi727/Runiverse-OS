@@ -1,13 +1,9 @@
 ﻿#nullable enable
-using System;
-using UnityEditor;
+namespace RuniOS.Editor.Serialization.Converters;
 
-namespace RuniOS.Editor.Serialization.Converters
+[CustomPropertyConverter(typeof(float))]
+public class FloatPropertyConverter : PropertyConverter
 {
-    [CustomPropertyConverter(typeof(float))]
-    public class FloatPropertyConverter : PropertyConverter
-    {
-        public override object Read(SerializedProperty property, Type propertyType) => property.floatValue;
-        public override void Write(SerializedProperty property, Type propertyType, object? value) => property.floatValue = (float)(value ?? 0f);
-    }
+    public override object Read(SerializedProperty property, Type propertyType) => property.floatValue;
+    public override void Write(SerializedProperty property, Type propertyType, object? value) => property.floatValue = (float)(value ?? 0f);
 }

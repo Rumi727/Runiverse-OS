@@ -1,44 +1,41 @@
 #nullable enable
-using System;
 using System.Diagnostics.CodeAnalysis;
-using UnityEditor;
 using UnityEditor.AnimatedValues;
 
-namespace RuniOS.Editor
+namespace RuniOS.Editor;
+
+public partial class EditorTool
 {
-    public partial class EditorTool
+    public static bool FadeGroup(AnimBool animBool, Action action)
     {
-        public static bool FadeGroup(AnimBool animBool, Action action)
+        if (EditorGUILayout.BeginFadeGroup(animBool.faded))
         {
-            if (EditorGUILayout.BeginFadeGroup(animBool.faded))
+            try
             {
-                try
-                {
-                    if (animBool.isAnimating)
-                        RepaintCurrentWindow();
+                if (animBool.isAnimating)
+                    RepaintCurrentWindow();
 
-                    action.Invoke();
-                }
-                finally
-                {
-                    EditorGUILayout.EndFadeGroup();
-                    Space(-2f.Lerp(0, animBool.faded).RoundToInt());
-                }
-
-                return true;
+                action.Invoke();
+            }
+            finally
+            {
+                EditorGUILayout.EndFadeGroup();
+                Space(-2f.Lerp(0, animBool.faded).RoundToInt());
             }
 
-            EditorGUILayout.EndFadeGroup();
-
-            return false;
+            return true;
         }
 
-        public static bool FadeGroup([AllowNull] ref AnimBool animBool, bool target, Action action)
-        {
-            animBool ??= new AnimBool(target);
-            animBool.target = target;
+        EditorGUILayout.EndFadeGroup();
 
-            return FadeGroup(animBool, action);
-        }
+        return false;
+    }
+
+    public static bool FadeGroup([AllowNull] ref AnimBool animBool, bool target, Action action)
+    {
+        animBool ??= new AnimBool(target);
+        animBool.target = target;
+
+        return FadeGroup(animBool, action);
     }
 }

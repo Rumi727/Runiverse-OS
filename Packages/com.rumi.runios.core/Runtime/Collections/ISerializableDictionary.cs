@@ -1,11 +1,9 @@
 #nullable enable
 using System.Collections;
-using UnityEngine;
 
-namespace RuniOS.Collections
+namespace RuniOS.Collections;
+
+public interface ISerializableDictionary : IDictionary, ISerializationCallbackReceiver
 {
-    public interface ISerializableDictionary : IDictionary, ISerializationCallbackReceiver
-    {
-        IList pairs { get; }
-    }
+    IList pairs { get; }
 }

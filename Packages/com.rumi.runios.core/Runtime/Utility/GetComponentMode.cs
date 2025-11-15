@@ -1,10 +1,9 @@
 #nullable enable
-namespace RuniOS
+namespace RuniOS.Utility;
+
+public enum GetComponentMode
 {
-    public enum GetComponentMode
-    {
-        none,
-        addIfNull,
-        destroyIfNull
-    }
+    none,
+    addIfNull,
+    destroyIfNull
 }

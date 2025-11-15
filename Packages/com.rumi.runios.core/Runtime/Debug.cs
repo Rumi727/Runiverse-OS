@@ -1,11 +1,10 @@
 #nullable enable
-using RuniOS;
-using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
-// ReSharper disable once CheckNamespace
+namespace RuniOS;
+
 public static class Debug
 {
     [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]

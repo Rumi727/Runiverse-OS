@@ -1,74 +1,69 @@
 #nullable enable
 using RuniOS.APIBridge.UnityEngine;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 
-using Object = UnityEngine.Object;
+namespace RuniOS;
 
-namespace RuniOS
+public static class DrivenPropertyManager
 {
-    public static class DrivenPropertyManager
+    static readonly List<DrivenPropertyData> _drivenProperties = new List<DrivenPropertyData>();
+    public static IReadOnlyList<DrivenPropertyData> drivenProperties { get; } = _drivenProperties.AsReadOnly();
+
+
+
+    [Conditional("UNITY_EDITOR")]
+    public static void RegisterProperty(Object driver, Object target, string propertyPath)
     {
-        static readonly List<DrivenPropertyData> _drivenProperties = new List<DrivenPropertyData>();
-        public static IReadOnlyList<DrivenPropertyData> drivenProperties { get; } = _drivenProperties.AsReadOnly();
-
-
-
-        [Conditional("UNITY_EDITOR")]
-        public static void RegisterProperty(Object driver, Object target, string propertyPath)
+        try
         {
-            try
-            {
-                DrivenPropertyManagerBridge.RegisterProperty(driver, target, propertyPath);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return;
-            }
+            DrivenPropertyManagerBridge.RegisterProperty(driver, target, propertyPath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            return;
+        }
             
-            _drivenProperties.Add(new DrivenPropertyData(driver, target, propertyPath));
-        }
+        _drivenProperties.Add(new DrivenPropertyData(driver, target, propertyPath));
+    }
         
-        [Conditional("UNITY_EDITOR")]
-        public static void UnregisterProperty(Object driver, Object target, string propertyPath)
+    [Conditional("UNITY_EDITOR")]
+    public static void UnregisterProperty(Object driver, Object target, string propertyPath)
+    {
+        try
         {
-            try
-            {
-                DrivenPropertyManagerBridge.UnregisterProperty(driver, target, propertyPath);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                return;
-            }
-
-            _drivenProperties.Remove(new DrivenPropertyData(driver, target, propertyPath));
+            DrivenPropertyManagerBridge.UnregisterProperty(driver, target, propertyPath);
+        }
+        catch (Exception e)
+        {
+            Debug.LogException(e);
+            return;
         }
 
-        public readonly struct DrivenPropertyData : IEquatable<DrivenPropertyData>
+        _drivenProperties.Remove(new DrivenPropertyData(driver, target, propertyPath));
+    }
+
+    public readonly struct DrivenPropertyData : IEquatable<DrivenPropertyData>
+    {
+        public readonly Object driver;
+        public readonly Object target;
+
+        public readonly string propertyPath;
+
+        public DrivenPropertyData(Object driver, Object target, string propertyPath)
         {
-            public readonly Object driver;
-            public readonly Object target;
+            this.driver = driver;
+            this.target = target;
 
-            public readonly string propertyPath;
-
-            public DrivenPropertyData(Object driver, Object target, string propertyPath)
-            {
-                this.driver = driver;
-                this.target = target;
-
-                this.propertyPath = propertyPath;
-            }
-
-            public bool Equals(DrivenPropertyData other) => driver == other.driver && target == other.target && propertyPath == other.propertyPath;
-
-            public override bool Equals(object? obj) => obj is DrivenPropertyData data && Equals(data);
-            public override int GetHashCode() => HashCode.Combine(driver, target, propertyPath);
-
-            public static bool operator ==(DrivenPropertyData left, DrivenPropertyData right) => left.Equals(right);
-            public static bool operator !=(DrivenPropertyData left, DrivenPropertyData right) => !(left == right);
+            this.propertyPath = propertyPath;
         }
+
+        public bool Equals(DrivenPropertyData other) => driver == other.driver && target == other.target && propertyPath == other.propertyPath;
+
+        public override bool Equals(object? obj) => obj is DrivenPropertyData data && Equals(data);
+        public override int GetHashCode() => HashCode.Combine(driver, target, propertyPath);
+
+        public static bool operator ==(DrivenPropertyData left, DrivenPropertyData right) => left.Equals(right);
+        public static bool operator !=(DrivenPropertyData left, DrivenPropertyData right) => !(left == right);
     }
 }

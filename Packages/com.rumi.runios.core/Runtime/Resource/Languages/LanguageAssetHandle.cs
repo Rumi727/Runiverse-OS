@@ -3,27 +3,25 @@ using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
 using RuniOS.IO;
 using RuniOS.Linq;
-using System.Collections.Generic;
 
-namespace RuniOS.Resource.Languages
+namespace RuniOS.Resource.Languages;
+
+public sealed class LanguageAssetHandle : AssetHandle
 {
-    public sealed class LanguageAssetHandle : AssetHandle
+    public LanguageAssetHandle(IOHandler ioHandler, string md5Hash) : base(ioHandler, md5Hash) { }
+
+    protected override async UniTask<object?> Load()
     {
-        public LanguageAssetHandle(IOHandler ioHandler, string md5Hash) : base(ioHandler, md5Hash) { }
-
-        protected override async UniTask<object?> Load()
+        if (await ioHandler.FileExists())
         {
-            if (await ioHandler.FileExists())
-            {
-                string json = await ioHandler.ReadAllText();
-                return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json);
-            }
-            
-            return false;
+            string json = await ioHandler.ReadAllText();
+            return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json);
         }
-
-        protected override void Unload() { }
-        
-        protected override AssetScope CreateScope(object asset) => new LanguageAssetScope(this, ((Dictionary<string, string>)asset).AsReadOnly());
+            
+        return false;
     }
+
+    protected override void Unload() { }
+        
+    protected override AssetScope CreateScope(object asset) => new LanguageAssetScope(this, ((Dictionary<string, string>)asset).AsReadOnly());
 }
