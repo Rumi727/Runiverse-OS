@@ -14,7 +14,7 @@ namespace RuniOS.Installer
                 if (_config != null)
                     return _config;
 
-                string path = "Assets/Runiverse OS/Installer/Config.asset";
+                const string path = "Assets/Runiverse OS/Installer/Config.asset";
                 ConfigScriptableObject? scriptableObject = AssetDatabase.LoadAssetAtPath<ConfigScriptableObject>(path);
                 if (scriptableObject != null)
                     return _config = scriptableObject;
