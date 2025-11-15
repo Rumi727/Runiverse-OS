@@ -4,26 +4,27 @@ using HarmonyLib;
 using RuniOS.Editor.UIElements;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.Patches;
-
-public static partial class Patches
+namespace RuniOS.Editor.Patches
 {
-    public static partial class UnityEnginePatch
+    public static partial class Patches
     {
-        public static partial class UIElementsPatch
+        public static partial class UnityEnginePatch
         {
-            [HarmonyPatch(typeof(TextElement))]
-            public static class TextElementPatch
+            public static partial class UIElementsPatch
             {
-                [HarmonyPostfix]
-                [HarmonyPatch(nameof(TextElement.text), MethodType.Setter)]
-                public static void LabelSetter(TextElement __instance, string value)
+                [HarmonyPatch(typeof(TextElement))]
+                public static class TextElementPatch
                 {
-                    if (UIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
-                        callback.Invoke(value);
+                    [HarmonyPostfix]
+                    [HarmonyPatch(nameof(TextElement.text), MethodType.Setter)]
+                    public static void LabelSetter(TextElement __instance, string value)
+                    {
+                        if (UIToolkitUtility.labelChangedCallbacks.TryGetValue(__instance, out Action<string> callback))
+                            callback.Invoke(value);
+                    }
                 }
             }
         }
     }
-}
 #pragma warning restore IDE1006 // 명명 스타일
+}

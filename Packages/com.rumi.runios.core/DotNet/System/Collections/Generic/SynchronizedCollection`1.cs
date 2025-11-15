@@ -2,245 +2,246 @@
 // Source: https://referencesource.microsoft.com/#System.ServiceModel/System/ServiceModel/SynchronizedCollection.cs
 // ReSharper disable InconsistentNaming
 // ReSharper disable once CheckNamespace
-namespace System.Collections.Generic;
-
-[Runtime.InteropServices.ComVisible(false)]
-#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_SYNCHRONIZED_COLLECTION_1 
-public 
-#endif
-class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyList<T>
+namespace System.Collections.Generic
 {
-    public readonly List<T> internalList;
-    public readonly object internalSync = new();
-
-    public SynchronizedCollection() => internalList = new List<T>();
-
-    public SynchronizedCollection(IEnumerable<T> list)
+    [Runtime.InteropServices.ComVisible(false)]
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_SYNCHRONIZED_COLLECTION_1 
+    public 
+#endif
+        class SynchronizedCollection<T> : IList<T>, IList, IReadOnlyList<T>
     {
-        if (list == null)
-            throw new ArgumentNullException(nameof(list));
+        public readonly List<T> internalList;
+        public readonly object internalSync = new();
 
-        internalList = new List<T>(list);
-    }
+        public SynchronizedCollection() => internalList = new List<T>();
 
-    public SynchronizedCollection(params T[] list)
-    {
-        if (list == null)
-            throw new ArgumentNullException(nameof(list));
-
-        internalList = new List<T>(list);
-    }
-
-    public int Count
-    {
-        get
+        public SynchronizedCollection(IEnumerable<T> list)
         {
-            lock (internalSync)
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            internalList = new List<T>(list);
+        }
+
+        public SynchronizedCollection(params T[] list)
+        {
+            if (list == null)
+                throw new ArgumentNullException(nameof(list));
+
+            internalList = new List<T>(list);
+        }
+
+        public int Count
+        {
+            get
             {
-                return internalList.Count;
+                lock (internalSync)
+                {
+                    return internalList.Count;
+                }
             }
         }
-    }
 
 #pragma warning disable IDE1006 // 명명 스타일
-    protected List<T> Items => internalList;
+        protected List<T> Items => internalList;
 #pragma warning restore IDE1006 // 명명 스타일
 
-    public T this[int index]
-    {
-        get
+        public T this[int index]
+        {
+            get
+            {
+                lock (internalSync)
+                {
+                    return internalList[index];
+                }
+            }
+            set
+            {
+                lock (internalSync)
+                {
+                    SetItem(index, value);
+                }
+            }
+        }
+
+        public void Add(T item)
         {
             lock (internalSync)
             {
-                return internalList[index];
+                int index = internalList.Count;
+                InsertItem(index, item);
             }
         }
-        set
+
+        public void Clear()
         {
             lock (internalSync)
             {
-                SetItem(index, value);
+                ClearItems();
             }
         }
-    }
 
-    public void Add(T item)
-    {
-        lock (internalSync)
+        public void CopyTo(T[] array, int index)
         {
-            int index = internalList.Count;
-            InsertItem(index, item);
+            lock (internalSync)
+            {
+                internalList.CopyTo(array, index);
+            }
         }
-    }
 
-    public void Clear()
-    {
-        lock (internalSync)
+        public bool Contains(T item)
         {
-            ClearItems();
+            lock (internalSync)
+            {
+                return internalList.Contains(item);
+            }
         }
-    }
 
-    public void CopyTo(T[] array, int index)
-    {
-        lock (internalSync)
+        public IEnumerator<T> GetEnumerator()
         {
-            internalList.CopyTo(array, index);
+            lock (internalSync)
+            {
+                return internalList.GetEnumerator();
+            }
         }
-    }
 
-    public bool Contains(T item)
-    {
-        lock (internalSync)
+        public int IndexOf(T item)
         {
-            return internalList.Contains(item);
+            lock (internalSync)
+            {
+                return InternalIndexOf(item);
+            }
         }
-    }
 
-    public IEnumerator<T> GetEnumerator()
-    {
-        lock (internalSync)
+        public void Insert(int index, T item)
         {
-            return internalList.GetEnumerator();
-        }
-    }
+            lock (internalSync)
+            {
+                if (index < 0 || index > internalList.Count)
+                    throw new ArgumentOutOfRangeException();
 
-    public int IndexOf(T item)
-    {
-        lock (internalSync)
+                InsertItem(index, item);
+            }
+        }
+
+        int InternalIndexOf(T item)
         {
-            return InternalIndexOf(item);
-        }
-    }
+            int count = internalList.Count;
 
-    public void Insert(int index, T item)
-    {
-        lock (internalSync)
+            for (int i = 0; i < count; i++)
+            {
+                if (Equals(internalList[i], item))
+                    return i;
+            }
+            return -1;
+        }
+
+        public bool Remove(T item)
         {
-            if (index < 0 || index > internalList.Count)
-                throw new ArgumentOutOfRangeException();
+            lock (internalSync)
+            {
+                int index = InternalIndexOf(item);
+                if (index < 0)
+                    return false;
 
-            InsertItem(index, item);
+                RemoveItem(index);
+                return true;
+            }
         }
-    }
 
-    int InternalIndexOf(T item)
-    {
-        int count = internalList.Count;
-
-        for (int i = 0; i < count; i++)
+        public void RemoveAt(int index)
         {
-            if (Equals(internalList[i], item))
-                return i;
-        }
-        return -1;
-    }
+            lock (internalSync)
+            {
+                if (index < 0 || index >= internalList.Count)
+                    throw new ArgumentOutOfRangeException();
 
-    public bool Remove(T item)
-    {
-        lock (internalSync)
+                RemoveItem(index);
+            }
+        }
+
+        protected virtual void ClearItems() => internalList.Clear();
+
+        protected virtual void InsertItem(int index, T item) => internalList.Insert(index, item);
+
+        protected virtual void RemoveItem(int index) => internalList.RemoveAt(index);
+
+        protected virtual void SetItem(int index, T item) => internalList[index] = item;
+
+        bool ICollection<T>.IsReadOnly => false;
+
+        IEnumerator IEnumerable.GetEnumerator() => ((IList)internalList).GetEnumerator();
+
+        bool ICollection.IsSynchronized => true;
+
+        object ICollection.SyncRoot => internalSync;
+
+        void ICollection.CopyTo(Array array, int index)
         {
-            int index = InternalIndexOf(item);
-            if (index < 0)
-                return false;
-
-            RemoveItem(index);
-            return true;
+            lock (internalSync)
+            {
+                ((IList)internalList).CopyTo(array, index);
+            }
         }
-    }
 
-    public void RemoveAt(int index)
-    {
-        lock (internalSync)
+        object? IList.this[int index]
         {
-            if (index < 0 || index >= internalList.Count)
-                throw new ArgumentOutOfRangeException();
-
-            RemoveItem(index);
+            get => this[index];
+            set
+            {
+                VerifyValueType(value);
+                this[index] = (T)value!;
+            }
         }
-    }
 
-    protected virtual void ClearItems() => internalList.Clear();
+        bool IList.IsReadOnly => false;
 
-    protected virtual void InsertItem(int index, T item) => internalList.Insert(index, item);
+        bool IList.IsFixedSize => false;
 
-    protected virtual void RemoveItem(int index) => internalList.RemoveAt(index);
-
-    protected virtual void SetItem(int index, T item) => internalList[index] = item;
-
-    bool ICollection<T>.IsReadOnly => false;
-
-    IEnumerator IEnumerable.GetEnumerator() => ((IList)internalList).GetEnumerator();
-
-    bool ICollection.IsSynchronized => true;
-
-    object ICollection.SyncRoot => internalSync;
-
-    void ICollection.CopyTo(Array array, int index)
-    {
-        lock (internalSync)
-        {
-            ((IList)internalList).CopyTo(array, index);
-        }
-    }
-
-    object? IList.this[int index]
-    {
-        get => this[index];
-        set
+        int IList.Add(object? value)
         {
             VerifyValueType(value);
-            this[index] = (T)value!;
+
+            lock (internalSync)
+            {
+                Add((T)value!);
+                return Count - 1;
+            }
         }
-    }
 
-    bool IList.IsReadOnly => false;
-
-    bool IList.IsFixedSize => false;
-
-    int IList.Add(object? value)
-    {
-        VerifyValueType(value);
-
-        lock (internalSync)
+        bool IList.Contains(object? value)
         {
-            Add((T)value!);
-            return Count - 1;
+            VerifyValueType(value);
+            return Contains((T)value!);
         }
-    }
 
-    bool IList.Contains(object? value)
-    {
-        VerifyValueType(value);
-        return Contains((T)value!);
-    }
-
-    int IList.IndexOf(object? value)
-    {
-        VerifyValueType(value);
-        return IndexOf((T)value!);
-    }
-
-    void IList.Insert(int index, object? value)
-    {
-        VerifyValueType(value);
-        Insert(index, (T)value!);
-    }
-
-    void IList.Remove(object? value)
-    {
-        VerifyValueType(value);
-        Remove((T)value!);
-    }
-
-    static void VerifyValueType(object? value)
-    {
-        if (value == null)
+        int IList.IndexOf(object? value)
         {
-            if (typeof(T).IsValueType)
+            VerifyValueType(value);
+            return IndexOf((T)value!);
+        }
+
+        void IList.Insert(int index, object? value)
+        {
+            VerifyValueType(value);
+            Insert(index, (T)value!);
+        }
+
+        void IList.Remove(object? value)
+        {
+            VerifyValueType(value);
+            Remove((T)value!);
+        }
+
+        static void VerifyValueType(object? value)
+        {
+            if (value == null)
+            {
+                if (typeof(T).IsValueType)
+                    throw new ArgumentException();
+            }
+            else if (value is not T)
                 throw new ArgumentException();
         }
-        else if (value is not T)
-            throw new ArgumentException();
     }
 }

@@ -1,9 +1,10 @@
 ﻿#nullable enable
-namespace RuniOS.Editor.Serialization.Converters;
-
-[CustomPropertyConverter(typeof(Color32))]
-public class Color32PropertyConverter : PropertyConverter
+namespace RuniOS.Editor.Serialization.Converters
 {
-    public override object Read(SerializedProperty property, Type propertyType) => (Color32)property.colorValue;
-    public override void Write(SerializedProperty property, Type propertyType, object? value) => property.colorValue = (Color32)(value ?? new Color32());
+    [CustomPropertyConverter(typeof(Color32))]
+    public class Color32PropertyConverter : PropertyConverter
+    {
+        public override object Read(SerializedProperty property, Type propertyType) => (Color32)property.colorValue;
+        public override void Write(SerializedProperty property, Type propertyType, object? value) => property.colorValue = (Color32)(value ?? new Color32());
+    }
 }

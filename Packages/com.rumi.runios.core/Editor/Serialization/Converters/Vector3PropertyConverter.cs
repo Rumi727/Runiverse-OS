@@ -1,9 +1,10 @@
 ﻿#nullable enable
-namespace RuniOS.Editor.Serialization.Converters;
-
-[CustomPropertyConverter(typeof(Vector3))]
-public class Vector3PropertyConverter : PropertyConverter
+namespace RuniOS.Editor.Serialization.Converters
 {
-    public override object Read(SerializedProperty property, Type propertyType) => property.vector3Value;
-    public override void Write(SerializedProperty property, Type propertyType, object? value) => property.vector3Value = (Vector3)(value ?? new Vector3());
+    [CustomPropertyConverter(typeof(Vector3))]
+    public class Vector3PropertyConverter : PropertyConverter
+    {
+        public override object Read(SerializedProperty property, Type propertyType) => property.vector3Value;
+        public override void Write(SerializedProperty property, Type propertyType, object? value) => property.vector3Value = (Vector3)(value ?? new Vector3());
+    }
 }

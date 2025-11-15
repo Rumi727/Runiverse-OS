@@ -7,948 +7,949 @@ using System.Globalization;
 using UnityEditor.Search;
 using UnityEngine.Search;
 
-namespace RuniOS.Editor;
-
-public partial class EditorTool
+namespace RuniOS.Editor
 {
-    public static char CharFieldLayout(char value) => CharField(EditorGUILayout.GetControlRect(), value);
-    public static char CharFieldLayout(string label, char value) => CharField(EditorGUILayout.GetControlRect(), label, value);
-    public static char CharFieldLayout(GUIContent label, char value) => CharField(EditorGUILayout.GetControlRect(), label, value);
-
-    public static char CharField(Rect position, char value) => DoCharField(position, value);
-    public static char CharField(Rect position, string label, char value) => CharField(position, new GUIContent(label), value);
-    public static char CharField(Rect position, GUIContent label, char value) => DoCharField(EditorGUI.PrefixLabel(position, label), value);
-
-    static char DoCharField(Rect position, char value)
+    public partial class EditorTool
     {
-        string stringValue;
-        switch (value)
-        {
-            case '\n':
-                stringValue = "\\n";
-                break;
-            case '\r':
-                stringValue = "\\r";
-                break;
-            case '\t':
-                stringValue = "\\t";
-                break;
-            case '\v':
-                stringValue = "\\v";
-                break;
-            case '\0':
-                stringValue = "\\0";
-                break;
-            case '\a':
-                stringValue = "\\a";
-                break;
-            case '\b':
-                stringValue = "\\b";
-                break;
-            case '\f':
-                stringValue = "\\f";
-                break;
-            default:
-            {
-                if (char.IsControl(value))
-                    stringValue = $"\\u{(int)value:X4}";
-                else
-                    stringValue = value.ToString();
-                break;
-            }
-        }
+        public static char CharFieldLayout(char value) => CharField(EditorGUILayout.GetControlRect(), value);
+        public static char CharFieldLayout(string label, char value) => CharField(EditorGUILayout.GetControlRect(), label, value);
+        public static char CharFieldLayout(GUIContent label, char value) => CharField(EditorGUILayout.GetControlRect(), label, value);
 
-        BeginIndentLevel(0);
+        public static char CharField(Rect position, char value) => DoCharField(position, value);
+        public static char CharField(Rect position, string label, char value) => CharField(position, new GUIContent(label), value);
+        public static char CharField(Rect position, GUIContent label, char value) => DoCharField(EditorGUI.PrefixLabel(position, label), value);
 
-        EditorGUI.BeginChangeCheck();
-        stringValue = EditorGUI.TextField(position, stringValue);
-        if (EditorGUI.EndChangeCheck())
+        static char DoCharField(Rect position, char value)
         {
-            if (stringValue.StartsWith("\\u", StringComparison.Ordinal))
+            string stringValue;
+            switch (value)
             {
-                if (stringValue.Length == 6 && uint.TryParse(stringValue.Substring(2), NumberStyles.HexNumber, null, out uint result))
-                    return (char)result;
-            }
-            else switch (stringValue)
-            {
-                case "\\n":
-                    return '\n';
-                case "\\r":
-                    return '\r';
-                case "\\t":
-                    return '\t';
-                case "\\v":
-                    return '\v';
-                case "\\0":
-                    return '\0';
-                case "\\a":
-                    return '\a';
-                case "\\b":
-                    return '\b';
-                case "\\f":
-                    return '\f';
+                case '\n':
+                    stringValue = "\\n";
+                    break;
+                case '\r':
+                    stringValue = "\\r";
+                    break;
+                case '\t':
+                    stringValue = "\\t";
+                    break;
+                case '\v':
+                    stringValue = "\\v";
+                    break;
+                case '\0':
+                    stringValue = "\\0";
+                    break;
+                case '\a':
+                    stringValue = "\\a";
+                    break;
+                case '\b':
+                    stringValue = "\\b";
+                    break;
+                case '\f':
+                    stringValue = "\\f";
+                    break;
                 default:
                 {
-                    if (char.TryParse(stringValue, out char result))
-                        return result;
+                    if (char.IsControl(value))
+                        stringValue = $"\\u{(int)value:X4}";
+                    else
+                        stringValue = value.ToString();
                     break;
                 }
             }
+
+            BeginIndentLevel(0);
+
+            EditorGUI.BeginChangeCheck();
+            stringValue = EditorGUI.TextField(position, stringValue);
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (stringValue.StartsWith("\\u", StringComparison.Ordinal))
+                {
+                    if (stringValue.Length == 6 && uint.TryParse(stringValue.Substring(2), NumberStyles.HexNumber, null, out uint result))
+                        return (char)result;
+                }
+                else switch (stringValue)
+                {
+                    case "\\n":
+                        return '\n';
+                    case "\\r":
+                        return '\r';
+                    case "\\t":
+                        return '\t';
+                    case "\\v":
+                        return '\v';
+                    case "\\0":
+                        return '\0';
+                    case "\\a":
+                        return '\a';
+                    case "\\b":
+                        return '\b';
+                    case "\\f":
+                        return '\f';
+                    default:
+                    {
+                        if (char.TryParse(stringValue, out char result))
+                            return result;
+                        break;
+                    }
+                }
+            }
+
+            EndIndentLevel();
+
+            return value;
         }
 
-        EndIndentLevel();
-
-        return value;
-    }
 
 
+        public static T PrimitiveFieldLayout<T>(T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), value);
+        public static T PrimitiveFieldLayout<T>(string label, T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
+        public static T PrimitiveFieldLayout<T>(GUIContent label, T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
 
-    public static T PrimitiveFieldLayout<T>(T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), value);
-    public static T PrimitiveFieldLayout<T>(string label, T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
-    public static T PrimitiveFieldLayout<T>(GUIContent label, T value) where T : struct => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
+        public static T PrimitiveField<T>(Rect position, T value) where T : struct => (T)DoPrimitiveField(position, value);
+        public static T PrimitiveField<T>(Rect position, string label, T value) where T : struct => PrimitiveField(position, new GUIContent(label), value);
+        public static T PrimitiveField<T>(Rect position, GUIContent label, T value) where T : struct => (T)DoPrimitiveField(EditorGUI.PrefixLabel(position, label), value);
 
-    public static T PrimitiveField<T>(Rect position, T value) where T : struct => (T)DoPrimitiveField(position, value);
-    public static T PrimitiveField<T>(Rect position, string label, T value) where T : struct => PrimitiveField(position, new GUIContent(label), value);
-    public static T PrimitiveField<T>(Rect position, GUIContent label, T value) where T : struct => (T)DoPrimitiveField(EditorGUI.PrefixLabel(position, label), value);
+        public static object PrimitiveFieldLayout(object value) => PrimitiveField(EditorGUILayout.GetControlRect(), value);
+        public static object PrimitiveFieldLayout(string label, object value) => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
+        public static object PrimitiveFieldLayout(GUIContent label, object value) => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
 
-    public static object PrimitiveFieldLayout(object value) => PrimitiveField(EditorGUILayout.GetControlRect(), value);
-    public static object PrimitiveFieldLayout(string label, object value) => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
-    public static object PrimitiveFieldLayout(GUIContent label, object value) => PrimitiveField(EditorGUILayout.GetControlRect(), label, value);
+        public static object PrimitiveField(Rect position, object value) => DoPrimitiveField(position, value);
+        public static object PrimitiveField(Rect position, string label, object value) => PrimitiveField(position, new GUIContent(label), value);
+        public static object PrimitiveField(Rect position, GUIContent label, object value) => DoPrimitiveField(EditorGUI.PrefixLabel(position, label), value);
 
-    public static object PrimitiveField(Rect position, object value) => DoPrimitiveField(position, value);
-    public static object PrimitiveField(Rect position, string label, object value) => PrimitiveField(position, new GUIContent(label), value);
-    public static object PrimitiveField(Rect position, GUIContent label, object value) => DoPrimitiveField(EditorGUI.PrefixLabel(position, label), value);
-
-    static object DoPrimitiveField(Rect position, object value)
-    {
-        Type type = value.GetType();
-        if (type == typeof(bool))
-            return EditorGUI.Toggle(position, (bool)value);
-        else if (type.IsNumeric())
+        static object DoPrimitiveField(Rect position, object value)
         {
-            if (type.IsAssignableToInt())
+            Type type = value.GetType();
+            if (type == typeof(bool))
+                return EditorGUI.Toggle(position, (bool)value);
+            else if (type.IsNumeric())
             {
-                EditorGUI.BeginChangeCheck();
+                if (type.IsAssignableToInt())
+                {
+                    EditorGUI.BeginChangeCheck();
 
-                int intValue = EditorGUI.IntField(position, Convert.ToInt32(value));
+                    int intValue = EditorGUI.IntField(position, Convert.ToInt32(value));
 
-                int minValue = Convert.ToInt32(type.GetMinValue());
-                int maxValue = Convert.ToInt32(type.GetMaxValue());
+                    int minValue = Convert.ToInt32(type.GetMinValue());
+                    int maxValue = Convert.ToInt32(type.GetMaxValue());
 
-                intValue = intValue.Repeat(minValue, maxValue);
+                    intValue = intValue.Repeat(minValue, maxValue);
 
-                if (EditorGUI.EndChangeCheck())
-                    value = Convert.ChangeType(intValue, type);
+                    if (EditorGUI.EndChangeCheck())
+                        value = Convert.ChangeType(intValue, type);
 
-                return value;
+                    return value;
+                }
+                else if (type.IsAssignableToLong())
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    long longValue = EditorGUI.LongField(position, Convert.ToInt64(value));
+
+                    long minValue = Convert.ToInt64(type.GetMinValue());
+                    long maxValue = Convert.ToInt64(type.GetMaxValue());
+
+                    longValue = longValue.Repeat(minValue, maxValue);
+
+                    if (EditorGUI.EndChangeCheck())
+                        value = Convert.ChangeType(longValue, type);
+
+                    return value;
+                }
+                else if (type.IsAssignableToFloat())
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    float floatValue = EditorGUI.FloatField(position, Convert.ToInt32(value));
+
+                    float minValue = Convert.ToSingle(type.GetMinValue());
+                    float maxValue = Convert.ToSingle(type.GetMaxValue());
+
+                    floatValue = floatValue.Repeat(minValue, maxValue);
+
+                    if (EditorGUI.EndChangeCheck())
+                        value = Convert.ChangeType(floatValue, type);
+
+                    return value;
+                }
+                else if (type.IsAssignableToDouble())
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    double doubleValue = EditorGUI.DoubleField(position, Convert.ToInt32(value));
+
+                    double minValue = Convert.ToDouble(type.GetMinValue());
+                    double maxValue = Convert.ToDouble(type.GetMaxValue());
+
+                    doubleValue = doubleValue.Repeat(minValue, maxValue);
+
+                    if (EditorGUI.EndChangeCheck())
+                        value = Convert.ChangeType(doubleValue, type);
+
+                    return value;
+                }
             }
-            else if (type.IsAssignableToLong())
-            {
-                EditorGUI.BeginChangeCheck();
+            else if (type == typeof(char))
+                return CharField(position, (char)value);
+            else if (type == typeof(string))
+                return EditorGUI.TextField(position, (string)value);
 
-                long longValue = EditorGUI.LongField(position, Convert.ToInt64(value));
-
-                long minValue = Convert.ToInt64(type.GetMinValue());
-                long maxValue = Convert.ToInt64(type.GetMaxValue());
-
-                longValue = longValue.Repeat(minValue, maxValue);
-
-                if (EditorGUI.EndChangeCheck())
-                    value = Convert.ChangeType(longValue, type);
-
-                return value;
-            }
-            else if (type.IsAssignableToFloat())
-            {
-                EditorGUI.BeginChangeCheck();
-
-                float floatValue = EditorGUI.FloatField(position, Convert.ToInt32(value));
-
-                float minValue = Convert.ToSingle(type.GetMinValue());
-                float maxValue = Convert.ToSingle(type.GetMaxValue());
-
-                floatValue = floatValue.Repeat(minValue, maxValue);
-
-                if (EditorGUI.EndChangeCheck())
-                    value = Convert.ChangeType(floatValue, type);
-
-                return value;
-            }
-            else if (type.IsAssignableToDouble())
-            {
-                EditorGUI.BeginChangeCheck();
-
-                double doubleValue = EditorGUI.DoubleField(position, Convert.ToInt32(value));
-
-                double minValue = Convert.ToDouble(type.GetMinValue());
-                double maxValue = Convert.ToDouble(type.GetMaxValue());
-
-                doubleValue = doubleValue.Repeat(minValue, maxValue);
-
-                if (EditorGUI.EndChangeCheck())
-                    value = Convert.ChangeType(doubleValue, type);
-
-                return value;
-            }
-        }
-        else if (type == typeof(char))
-            return CharField(position, (char)value);
-        else if (type == typeof(string))
-            return EditorGUI.TextField(position, (string)value);
-
-        EditorGUI.LabelField(position, GetTextOrKey("gui.invalid_type"));
-        return value;
-    }
-
-
-
-    public static FileExtension FileExtensionFieldLayout(FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), value);
-    public static FileExtension FileExtensionFieldLayout(string label, FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), label, value);
-    public static FileExtension FileExtensionFieldLayout(GUIContent label, FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), label, value);
-
-    public static FileExtension FileExtensionField(Rect position, FileExtension value) => DoFileExtensionField(position, value);
-    public static FileExtension FileExtensionField(Rect position, string label, FileExtension value) => FileExtensionField(position, new GUIContent(label), value);
-    public static FileExtension FileExtensionField(Rect position, GUIContent label, FileExtension value) => DoFileExtensionField(EditorGUI.PrefixLabel(position, label), value);
-
-    static FileExtension DoFileExtensionField(Rect position, FileExtension value)
-    {
-        BeginIndentLevel(0);
-
-        {
-            int leftPadding = EditorStyles.textField.padding.left;
-            EditorStyles.textField.padding.left = 6;
-
-            string textValue = EditorGUI.TextField(position, value.value.Length > 0 ? value.value.Substring(1) : string.Empty);
-            if (textValue.Length > 0)
-                textValue = FileExtension.extensionSeparatorChar + textValue;
-
-            value = textValue;
-
-            EditorStyles.textField.padding.left = leftPadding;
+            EditorGUI.LabelField(position, GetTextOrKey("gui.invalid_type"));
+            return value;
         }
 
-        EndIndentLevel();
-
-        position.x += 2;
-        position.y += 1;
-
-        if (value.value.Length > 0 || EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
-            GUI.Label(position, FileExtension.extensionSeparatorChar.ToString(), EditorStyles.label);
-
-        return value;
-    }
 
 
+        public static FileExtension FileExtensionFieldLayout(FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), value);
+        public static FileExtension FileExtensionFieldLayout(string label, FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), label, value);
+        public static FileExtension FileExtensionFieldLayout(GUIContent label, FileExtension value) => FileExtensionField(EditorGUILayout.GetControlRect(), label, value);
 
-    public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), value, dropdownAction);
-    public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
-    public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+        public static FileExtension FileExtensionField(Rect position, FileExtension value) => DoFileExtensionField(position, value);
+        public static FileExtension FileExtensionField(Rect position, string label, FileExtension value) => FileExtensionField(position, new GUIContent(label), value);
+        public static FileExtension FileExtensionField(Rect position, GUIContent label, FileExtension value) => DoFileExtensionField(EditorGUI.PrefixLabel(position, label), value);
 
-    public static Identifier IdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction = null) => DoIdentifierField(position, value, dropdownAction);
-    public static Identifier IdentifierField(Rect position, string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(position, new GUIContent(label), value, dropdownAction);
-    public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value, Action<Rect>? dropdownAction = null)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
-
-        return DoIdentifierField(position, value, dropdownAction);
-    }
-
-    static int? identifierFieldLastControlID;
-    static string identifierFieldSelectedNamespace = string.Empty;
-    static Identifier DoIdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction)
-    {
-        position.height = EditorGUIUtility.singleLineHeight;
-
-        BeginIndentLevel(0);
-        float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
-
+        static FileExtension DoFileExtensionField(Rect position, FileExtension value)
         {
-            position.width = fieldWidth;
+            BeginIndentLevel(0);
 
-            TextDropdown nameSpaceDropdown = new TextDropdown();
-            nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
-
-            string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
-            if (isPressed)
-                nameSpaceDropdown.Show(position);
-
-            int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-            nameSpaceDropdown.onSelectedItem += x =>
             {
-                identifierFieldLastControlID = lastControlID;
-                identifierFieldSelectedNamespace = x.value;
-            };
+                int leftPadding = EditorStyles.textField.padding.left;
+                EditorStyles.textField.padding.left = 6;
 
-            if (identifierFieldLastControlID == lastControlID)
-            {
-                nameSpace = identifierFieldSelectedNamespace;
+                string textValue = EditorGUI.TextField(position, value.value.Length > 0 ? value.value.Substring(1) : string.Empty);
+                if (textValue.Length > 0)
+                    textValue = FileExtension.extensionSeparatorChar + textValue;
 
-                identifierFieldSelectedNamespace = string.Empty;
-                identifierFieldLastControlID = null;
+                value = textValue;
 
-                GUI.changed = true;
+                EditorStyles.textField.padding.left = leftPadding;
             }
 
-            if (Identifier.IsNamespaceValid(nameSpace))
-                value.nameSpace = nameSpace;
-            else
-                Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(nameSpace));
+            EndIndentLevel();
+
+            position.x += 2;
+            position.y += 1;
+
+            if (value.value.Length > 0 || EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
+                GUI.Label(position, FileExtension.extensionSeparatorChar.ToString(), EditorStyles.label);
+
+            return value;
+        }
+
+
+
+        public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+
+        public static Identifier IdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction = null) => DoIdentifierField(position, value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(position, new GUIContent(label), value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value, Action<Rect>? dropdownAction = null)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
+
+            return DoIdentifierField(position, value, dropdownAction);
+        }
+
+        static int? identifierFieldLastControlID;
+        static string identifierFieldSelectedNamespace = string.Empty;
+        static Identifier DoIdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction)
+        {
+            position.height = EditorGUIUtility.singleLineHeight;
+
+            BeginIndentLevel(0);
+            float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
+
+            {
+                position.width = fieldWidth;
+
+                TextDropdown nameSpaceDropdown = new TextDropdown();
+                nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
+
+                string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
+                if (isPressed)
+                    nameSpaceDropdown.Show(position);
+
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                nameSpaceDropdown.onSelectedItem += x =>
+                {
+                    identifierFieldLastControlID = lastControlID;
+                    identifierFieldSelectedNamespace = x.value;
+                };
+
+                if (identifierFieldLastControlID == lastControlID)
+                {
+                    nameSpace = identifierFieldSelectedNamespace;
+
+                    identifierFieldSelectedNamespace = string.Empty;
+                    identifierFieldLastControlID = null;
+
+                    GUI.changed = true;
+                }
+
+                if (Identifier.IsNamespaceValid(nameSpace))
+                    value.nameSpace = nameSpace;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(nameSpace));
+
+                position.x += position.width + 4;
+            }
+
+            {
+                position.width = 8;
+                position.x -= 4;
+
+                GUI.Label(position, Identifier.separator.ToString());
+
+                position.x += position.width;
+            }
+
+            {
+                position.width = (fieldWidth * 2) + 8;
+
+                string path;
+                if (dropdownAction != null)
+                {
+                    path = TextFieldDropDown(position, value.path, out bool isPressed);
+                    if (isPressed)
+                        dropdownAction.Invoke(position);
+                }
+                else
+                    path = EditorGUI.TextField(position, value.path);
+
+                if (Identifier.IsPathValid(path))
+                    value.path = path;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidPathMessage(path));
+            }
+
+            EndIndentLevel();
+            return value;
+        }
+
+
+
+        public static PackIdentifier PackIdentifierFieldLayout(PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), value);
+        public static PackIdentifier PackIdentifierFieldLayout(string label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
+        public static PackIdentifier PackIdentifierFieldLayout(GUIContent label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
+
+        public static PackIdentifier PackIdentifierField(Rect position, PackIdentifier value) => DoPackIdentifierField(position, value);
+        public static PackIdentifier PackIdentifierField(Rect position, string label, PackIdentifier value) => PackIdentifierField(position, new GUIContent(label), value);
+        public static PackIdentifier PackIdentifierField(Rect position, GUIContent label, PackIdentifier value)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
+
+            return DoPackIdentifierField(position, value);
+        }
+
+        static int? packIdentifierFieldLastControlID;
+        static string packIdentifierFieldSelectedValue = string.Empty;
+        static PackIdentifier DoPackIdentifierField(Rect position, PackIdentifier value)
+        {
+            if (!value.isValid)
+                return value;
+
+            position.width -= 54;
+            if (value.identifier != null)
+            {
+                TextDropdown valueDropdown = new TextDropdown();
+                valueDropdown.Rebuild
+                (
+                    ResourcePack.loadedResourcePacks.Keys
+                        .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
+                        .Select(x => x.identifier!.Value.path.ToString())
+                );
+
+                value.identifier = IdentifierField(position, value.identifier.Value, x => valueDropdown.Show(x));
+
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                valueDropdown.onSelectedItem += x =>
+                {
+                    packIdentifierFieldLastControlID = lastControlID;
+                    packIdentifierFieldSelectedValue = x.value;
+                };
+
+                if (packIdentifierFieldLastControlID == lastControlID)
+                {
+                    value.identifier = new Identifier(value.identifier.Value.nameSpace, packIdentifierFieldSelectedValue);
+
+                    packIdentifierFieldSelectedValue = string.Empty;
+                    packIdentifierFieldLastControlID = null;
+
+                    GUI.changed = true;
+                }
+            }
+            else if (value.path != null)
+                value.path = FilePathField(position, value.path.Value);
+
+            if (!EditorGUIUtility.wideMode)
+                position.y += EditorGUIUtility.singleLineHeight + 2;
 
             position.x += position.width + 4;
-        }
+            position.width = 50;
+            position.height = EditorGUIUtility.singleLineHeight;
 
-        {
-            position.width = 8;
-            position.x -= 4;
-
-            GUI.Label(position, Identifier.separator.ToString());
-
-            position.x += position.width;
-        }
-
-        {
-            position.width = (fieldWidth * 2) + 8;
-
-            string path;
-            if (dropdownAction != null)
+            UIElements.Resource.PackIdentifierField.PackIdentifierMode mode = value.identifier != null ? UIElements.Resource.PackIdentifierField.PackIdentifierMode.id : UIElements.Resource.PackIdentifierField.PackIdentifierMode.path;
+            EditorGUI.BeginChangeCheck();
+            mode = (UIElements.Resource.PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
+            if (EditorGUI.EndChangeCheck())
             {
-                path = TextFieldDropDown(position, value.path, out bool isPressed);
-                if (isPressed)
-                    dropdownAction.Invoke(position);
-            }
-            else
-                path = EditorGUI.TextField(position, value.path);
-
-            if (Identifier.IsPathValid(path))
-                value.path = path;
-            else
-                Debug.LogWarning(Identifier.GetInvalidPathMessage(path));
-        }
-
-        EndIndentLevel();
-        return value;
-    }
-
-
-
-    public static PackIdentifier PackIdentifierFieldLayout(PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), value);
-    public static PackIdentifier PackIdentifierFieldLayout(string label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
-    public static PackIdentifier PackIdentifierFieldLayout(GUIContent label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
-
-    public static PackIdentifier PackIdentifierField(Rect position, PackIdentifier value) => DoPackIdentifierField(position, value);
-    public static PackIdentifier PackIdentifierField(Rect position, string label, PackIdentifier value) => PackIdentifierField(position, new GUIContent(label), value);
-    public static PackIdentifier PackIdentifierField(Rect position, GUIContent label, PackIdentifier value)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
-
-        return DoPackIdentifierField(position, value);
-    }
-
-    static int? packIdentifierFieldLastControlID;
-    static string packIdentifierFieldSelectedValue = string.Empty;
-    static PackIdentifier DoPackIdentifierField(Rect position, PackIdentifier value)
-    {
-        if (!value.isValid)
-            return value;
-
-        position.width -= 54;
-        if (value.identifier != null)
-        {
-            TextDropdown valueDropdown = new TextDropdown();
-            valueDropdown.Rebuild
-            (
-                ResourcePack.loadedResourcePacks.Keys
-                    .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
-                    .Select(x => x.identifier!.Value.path.ToString())
-            );
-
-            value.identifier = IdentifierField(position, value.identifier.Value, x => valueDropdown.Show(x));
-
-            int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-            valueDropdown.onSelectedItem += x =>
-            {
-                packIdentifierFieldLastControlID = lastControlID;
-                packIdentifierFieldSelectedValue = x.value;
-            };
-
-            if (packIdentifierFieldLastControlID == lastControlID)
-            {
-                value.identifier = new Identifier(value.identifier.Value.nameSpace, packIdentifierFieldSelectedValue);
-
-                packIdentifierFieldSelectedValue = string.Empty;
-                packIdentifierFieldLastControlID = null;
-
-                GUI.changed = true;
-            }
-        }
-        else if (value.path != null)
-            value.path = FilePathField(position, value.path.Value);
-
-        if (!EditorGUIUtility.wideMode)
-            position.y += EditorGUIUtility.singleLineHeight + 2;
-
-        position.x += position.width + 4;
-        position.width = 50;
-        position.height = EditorGUIUtility.singleLineHeight;
-
-        UIElements.Resource.PackIdentifierField.PackIdentifierMode mode = value.identifier != null ? UIElements.Resource.PackIdentifierField.PackIdentifierMode.id : UIElements.Resource.PackIdentifierField.PackIdentifierMode.path;
-        EditorGUI.BeginChangeCheck();
-        mode = (UIElements.Resource.PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
-        if (EditorGUI.EndChangeCheck())
-        {
-            switch (mode)
-            {
-                case UIElements.Resource.PackIdentifierField.PackIdentifierMode.id:
+                switch (mode)
                 {
-                    value.identifier ??= Identifier.empty;
-                    break;
+                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.id:
+                    {
+                        value.identifier ??= Identifier.empty;
+                        break;
+                    }
+                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
+                    {
+                        value.path ??= FilePath.empty;
+                        break;
+                    }
+                    default:
+                        throw new ArgumentOutOfRangeException();
                 }
-                case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
-                {
-                    value.path ??= FilePath.empty;
-                    break;
-                }
-                default:
-                    throw new ArgumentOutOfRangeException();
             }
-        }
 
-        return value;
-    }
-
-
-
-    public static RectOffset RectOffsetFieldLayout(RectOffset value) => RectOffsetField(GetMultiControlRect(), value);
-    public static RectOffset RectOffsetFieldLayout(string label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
-    public static RectOffset RectOffsetFieldLayout(GUIContent label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
-
-    public static RectOffset RectOffsetField(Rect position, RectOffset value) => DoRectOffsetField(position, value);
-    public static RectOffset RectOffsetField(Rect position, string label, RectOffset value) => RectOffsetField(position, new GUIContent(label), value);
-    public static RectOffset RectOffsetField(Rect position, GUIContent label, RectOffset value)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
-
-        return DoRectOffsetField(position, value);
-    }
-
-    static readonly GUIContent[] rectOffsetLabels = new GUIContent[]
-    {
-        new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B")
-    };
-    static readonly float[] rectOffsetValues = new float[4];
-    static RectOffset DoRectOffsetField(Rect position, RectOffset value)
-    {
-        rectOffsetValues[0] = value.left;
-        rectOffsetValues[1] = value.right;
-        rectOffsetValues[2] = value.top;
-        rectOffsetValues[3] = value.bottom;
-
-        EditorGUI.MultiFloatField(position, rectOffsetLabels, rectOffsetValues);
-
-        value.left = rectOffsetValues[0];
-        value.right = rectOffsetValues[1];
-        value.top = rectOffsetValues[2];
-        value.bottom = rectOffsetValues[3];
-
-        return value;
-    }
-
-
-
-    public static T? NullableFieldLayout<T>(T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value, drawAction, nullText);
-    public static T? NullableFieldLayout<T>(string label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawAction, nullText);
-    public static T? NullableFieldLayout<T>(GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawAction, nullText);
-
-    public static T? NullableField<T>(Rect position, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => DoNullableField(position, GUIContent.none, value, drawAction, nullText);
-    public static T? NullableField<T>(Rect position, string label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(position, new GUIContent(label), value, drawAction, nullText);
-    public static T? NullableField<T>(Rect position, GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
-
-        return DoNullableField(position, label, value, drawAction, nullText);
-    }
-
-    static T? DoNullableField<T>(Rect position, GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct
-    {
-        float fieldWidth = position.width;
-        float toggleWidth = GetXSize(EditorStyles.toggle);
-        Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
-        position.width -= toggleWidth + 4;
-
-        nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
-
-        InternalNullableToggleField(value, toggleRect);
-
-        if (value != null)
-            return drawAction.Invoke(position, value.Value);
-        else
-        {
-            EditorGUI.LabelField(position, label, new GUIContent(nullText));
             return value;
         }
-    }
 
 
 
-    public static T? NullablePrimitiveFieldLayout<T>(T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value, nullText);
-    public static T? NullablePrimitiveFieldLayout<T>(string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, nullText);
-    public static T? NullablePrimitiveFieldLayout<T>(GUIContent label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, nullText);
+        public static RectOffset RectOffsetFieldLayout(RectOffset value) => RectOffsetField(GetMultiControlRect(), value);
+        public static RectOffset RectOffsetFieldLayout(string label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
+        public static RectOffset RectOffsetFieldLayout(GUIContent label, RectOffset value) => RectOffsetField(GetMultiControlRect(), label, value);
 
-    public static T? NullablePrimitiveField<T>(Rect position, T? value, string? nullText = null) where T : struct => DoNullablePrimitiveField(position, GUIContent.none, value, nullText);
-    public static T? NullablePrimitiveField<T>(Rect position, string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(position, new GUIContent(label), value, nullText);
-    public static T? NullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
-        
-        return DoNullablePrimitiveField(position, label, value, nullText);
-    }
-
-    static T? DoNullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
-    {
-        float fieldWidth = position.width;
-        float toggleWidth = GetXSize(EditorStyles.toggle);
-        Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
-
-        nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
-
-        if (typeof(T).IsTextField())
+        public static RectOffset RectOffsetField(Rect position, RectOffset value) => DoRectOffsetField(position, value);
+        public static RectOffset RectOffsetField(Rect position, string label, RectOffset value) => RectOffsetField(position, new GUIContent(label), value);
+        public static RectOffset RectOffsetField(Rect position, GUIContent label, RectOffset value)
         {
-            Rect fieldRect = new Rect(position.x, position.y, fieldWidth, position.height);
-            if (toggleRect.Contains(Event.current.mousePosition))
-            {
-                fieldRect = GetPrefixLabelRect(fieldRect, label, out Rect? labelPosition);
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
-                if (labelPosition != null)
-                {
-                    BeginIndentLevel(0);
-                    EditorGUI.LabelField(labelPosition.Value, label);
-                    EndIndentLevel();
-                }
-
-                if (value != null)
-                    GUI.Box(fieldRect, value.ToString(), EditorStyles.textField);
-                else
-                    GUI.Box(fieldRect, nullText, EditorStyles.textField);
-            }
-            else if (value == null)
-            {
-                if (typeof(T).IsText())
-                    value = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, label, nullText), typeof(T));
-                else
-                {
-                    value = PrimitiveField(fieldRect, label, default(T));
-
-                    if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
-                        GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
-                    else
-                        GUI.Box(Rect.zero, GUIContent.none);
-                }
-            }
-            else
-                value = (T)PrimitiveField(fieldRect, label, value);
-
-            value = InternalNullableToggleField(value, toggleRect);
+            return DoRectOffsetField(position, value);
         }
-        else
+
+        static readonly GUIContent[] rectOffsetLabels = new GUIContent[]
         {
-            value = InternalNullableToggleField(value, toggleRect);
+            new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B")
+        };
+        static readonly float[] rectOffsetValues = new float[4];
+        static RectOffset DoRectOffsetField(Rect position, RectOffset value)
+        {
+            rectOffsetValues[0] = value.left;
+            rectOffsetValues[1] = value.right;
+            rectOffsetValues[2] = value.top;
+            rectOffsetValues[3] = value.bottom;
+
+            EditorGUI.MultiFloatField(position, rectOffsetLabels, rectOffsetValues);
+
+            value.left = rectOffsetValues[0];
+            value.right = rectOffsetValues[1];
+            value.top = rectOffsetValues[2];
+            value.bottom = rectOffsetValues[3];
+
+            return value;
+        }
+
+
+
+        public static T? NullableFieldLayout<T>(T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value, drawAction, nullText);
+        public static T? NullableFieldLayout<T>(string label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawAction, nullText);
+        public static T? NullableFieldLayout<T>(GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, drawAction, nullText);
+
+        public static T? NullableField<T>(Rect position, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => DoNullableField(position, GUIContent.none, value, drawAction, nullText);
+        public static T? NullableField<T>(Rect position, string label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct => NullableField(position, new GUIContent(label), value, drawAction, nullText);
+        public static T? NullableField<T>(Rect position, GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
+
+            return DoNullableField(position, label, value, drawAction, nullText);
+        }
+
+        static T? DoNullableField<T>(Rect position, GUIContent label, T? value, Func<Rect, T, T?> drawAction, string? nullText = null) where T : struct
+        {
+            float fieldWidth = position.width;
+            float toggleWidth = GetXSize(EditorStyles.toggle);
+            Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
+            position.width -= toggleWidth + 4;
+
+            nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
+
+            InternalNullableToggleField(value, toggleRect);
 
             if (value != null)
-                value = (T)PrimitiveField(position, label, value);
+                return drawAction.Invoke(position, value.Value);
             else
+            {
                 EditorGUI.LabelField(position, label, new GUIContent(nullText));
+                return value;
+            }
         }
 
-        return value;
-    }
 
-    public static T? InternalNullableToggleField<T>(T? value, Rect toggleRect, Func<T>? constructor = null) where T : struct
-    {
-        BeginIndentLevel(0);
 
-        EditorGUI.BeginChangeCheck();
-        bool toggleValue = EditorGUI.Toggle(toggleRect, value != null);
-        if (EditorGUI.EndChangeCheck())
+        public static T? NullablePrimitiveFieldLayout<T>(T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), value, nullText);
+        public static T? NullablePrimitiveFieldLayout<T>(string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, nullText);
+        public static T? NullablePrimitiveFieldLayout<T>(GUIContent label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight * 2 : EditorGUIUtility.singleLineHeight), label, value, nullText);
+
+        public static T? NullablePrimitiveField<T>(Rect position, T? value, string? nullText = null) where T : struct => DoNullablePrimitiveField(position, GUIContent.none, value, nullText);
+        public static T? NullablePrimitiveField<T>(Rect position, string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(position, new GUIContent(label), value, nullText);
+        public static T? NullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
         {
-            if (toggleValue)
-                value = constructor?.Invoke() ?? (T)typeof(T).GetDefaultValueNotNull();
-            else
-                value = null;
-        }
-
-        EndIndentLevel();
-        return value;
-    }
-
-
-
-    public static Vector4 Vector4FieldLayout(Vector4 value) => Vector4Field(GetMultiControlRect(), value);
-    public static Vector4 Vector4FieldLayout(string label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
-    public static Vector4 Vector4FieldLayout(GUIContent label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
-
-    public static Vector4 Vector4Field(Rect position, Vector4 value) => DoVector4Field(position, value);
-    public static Vector4 Vector4Field(Rect position, string label, Vector4 value) => Vector4Field(position, new GUIContent(label), value);
-    public static Vector4 Vector4Field(Rect position, GUIContent label, Vector4 value)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4); // 2로 하면 크기 절반 줄어듬
-
-        BeginIndentLevel(0);
-        value = DoVector4Field(position, value);
-        EndIndentLevel();
-        return value;
-    }
-
-    static readonly GUIContent[] vector4Labels = new GUIContent[]
-    {
-        new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z"), new GUIContent("W")
-    };
-    static readonly float[] vector4Values = new float[4];
-    static Vector4 DoVector4Field(Rect position, Vector4 value)
-    {
-        vector4Values[0] = value.x;
-        vector4Values[1] = value.y;
-        vector4Values[2] = value.z;
-        vector4Values[3] = value.w;
-
-        EditorGUI.MultiFloatField(position, vector4Labels, vector4Values);
-
-        value.x = vector4Values[0];
-        value.y = vector4Values[1];
-        value.z = vector4Values[2];
-        value.w = vector4Values[3];
-
-        return value;
-    }
-
-
-
-    public static Version VersionFieldLayout(Version value) => VersionField(GetMultiControlRect(), value);
-    public static Version VersionFieldLayout(string label, Version value) => VersionField(GetMultiControlRect(), label, value);
-    public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(GetMultiControlRect(), label, value);
-
-    public static Version VersionField(Rect position, Version value) => DoVersionField(position, value);
-    public static Version VersionField(Rect position, string label, Version value) => VersionField(position, new GUIContent(label), value);
-    public static Version VersionField(Rect position, GUIContent label, Version value)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
-
-        BeginIndentLevel(0);
-        value = DoVersionField(position, value);
-        EndIndentLevel();
-        return value;
-    }
-
-    static Version DoVersionField(Rect position, Version value)
-    {
-        float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
-
-        {
-            position.width = fieldWidth;
-            value.major = NullablePrimitiveField(position, value.major, "*");
-            position.x += position.width + 4;
-        }
-
-        {
-            position.width = 8;
-            position.x -= 4;
-
-            GUI.Label(position, ".");
-
-            position.x += position.width;
-            position.width += 4;
-        }
-
-        {
-            position.width = fieldWidth.Floor();
-            value.minor = NullablePrimitiveField(position, value.minor, "*");
-            position.x += position.width + 4;
-        }
-
-        {
-            position.width = 8;
-            position.x -= 4;
-
-            GUI.Label(position, ".");
-
-            position.x += position.width;
-            position.width += 4;
-        }
-
-        {
-            position.width = fieldWidth.Ceil();
-            value.patch = NullablePrimitiveField(position, value.patch, "*");
-            position.x += position.width + 4;
-        }
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
         
-        return value;
-    }
-
-
-
-    public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), value, drawKeyAction, drawValueAction);
-    public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
-    public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
-
-    public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
-    public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(position, new GUIContent(label), value, drawKeyAction, drawValueAction);
-    public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
-    {
-        int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-        position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
-
-        BeginIndentLevel(0);
-        value = DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
-        EndIndentLevel();
-        return value;
-    }
-
-    static KeyValuePair<TKey, TValue> DoKeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
-    {
-        float fieldWidth = (position.width - 15) / 2f;
-
-        TKey valueKey = value.Key;
-        TValue valueValue = value.Value;
-
-        {
-            position.width = fieldWidth;
-
-            string keyLabel = GetTextOrKey("gui.key");
-
-            BeginLabelWidth(keyLabel);
-            EditorGUI.PrefixLabel(position, new GUIContent(keyLabel));
-            valueKey = drawKeyAction.Invoke(position, valueKey);
-            EndLabelWidth();
-
-            position.x += position.width + 15;
+            return DoNullablePrimitiveField(position, label, value, nullText);
         }
 
+        static T? DoNullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
         {
-            position.width = fieldWidth.Ceil();
+            float fieldWidth = position.width;
+            float toggleWidth = GetXSize(EditorStyles.toggle);
+            Rect toggleRect = new Rect(position.x + (fieldWidth - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
 
-            string valueLabel = GetTextOrKey("gui.value");
+            nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
 
-            BeginLabelWidth(valueLabel);
-            EditorGUI.PrefixLabel(position, new GUIContent(valueLabel));
-            valueValue = drawValueAction.Invoke(position, valueValue);
-            EndLabelWidth();
-        }
-        
-        return KeyValuePair.Create(valueKey, valueValue);
-    }
-
-
-
-    public static Type? TypeFieldLayout(Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), value, baseType);
-    public static Type? TypeFieldLayout(string label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
-    public static Type? TypeFieldLayout(GUIContent label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
-
-    public static Type? TypeField(Rect position, Type? value, Type? baseType = null) => DoTypeField(position, value, baseType);
-    public static Type? TypeField(Rect position, string label, Type? value, Type? baseType = null) => TypeField(position, new GUIContent(label), value, baseType);
-    public static Type? TypeField(Rect position, GUIContent label, Type? value, Type? baseType = null)
-    {
-        position = EditorGUI.PrefixLabel(position, label);
-        BeginIndentLevel(0);
-        value = DoTypeField(position, value, baseType);
-        EndIndentLevel();
-        return value;
-    }
-
-    static int? typeFieldLastControlID;
-    static Type? typeFieldSelectedType;
-    static Type? DoTypeField(Rect position, Type? value, Type? baseType)
-    {
-        string buttonText = GetTextOrKey("gui.type_field.select_type");
-        float buttonWidth = GetXSize(buttonText, GUI.skin.button);
-
-        position.width -= buttonWidth + 3;
-
-        EditorGUI.LabelField(position, value?.SerializeToString() ?? GetTextOrKey("gui.none"));
-
-        position.x += position.width + 3;
-        position.width = buttonWidth;
-
-        if (GUI.Button(position, buttonText))
-        {
-            int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-            ShowTypePicker(x =>
+            if (typeof(T).IsTextField())
             {
-                typeFieldLastControlID = lastControlID;
-                typeFieldSelectedType = x;
-            }, baseType);
-        }
+                Rect fieldRect = new Rect(position.x, position.y, fieldWidth, position.height);
+                if (toggleRect.Contains(Event.current.mousePosition))
+                {
+                    fieldRect = GetPrefixLabelRect(fieldRect, label, out Rect? labelPosition);
 
-        if (typeFieldLastControlID != null && typeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
-        {
-            value = typeFieldSelectedType;
+                    if (labelPosition != null)
+                    {
+                        BeginIndentLevel(0);
+                        EditorGUI.LabelField(labelPosition.Value, label);
+                        EndIndentLevel();
+                    }
 
-            typeFieldSelectedType = null;
-            typeFieldLastControlID = null;
+                    if (value != null)
+                        GUI.Box(fieldRect, value.ToString(), EditorStyles.textField);
+                    else
+                        GUI.Box(fieldRect, nullText, EditorStyles.textField);
+                }
+                else if (value == null)
+                {
+                    if (typeof(T).IsText())
+                        value = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, label, nullText), typeof(T));
+                    else
+                    {
+                        value = PrimitiveField(fieldRect, label, default(T));
 
-            GUI.changed = true;
-        }
-
-        return value;
-    }
-
-    public static void ShowTypePicker(Action<Type?> selectHandler, Type? baseType = null)
-    {
-        var provider = new TypeSearchProvider(baseType ?? typeof(object));
-        var context = SearchService.CreateContext(provider, "type:");
-        var viewState = new SearchViewState(context)
-        {
-            title = GetTextOrKey("gui.type"),
-            queryBuilderEnabled = true,
-            hideTabs = true,
-            selectHandler = (SearchItem item, bool cancelled) =>
-            {
-                if (cancelled)
-                    return;
-
-                if (item.data is Type type)
-                    selectHandler.Invoke(type);
+                        if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
+                            GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
+                        else
+                            GUI.Box(Rect.zero, GUIContent.none);
+                    }
+                }
                 else
-                    selectHandler.Invoke(null);
-            },
-            flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle)
+                    value = (T)PrimitiveField(fieldRect, label, value);
+
+                value = InternalNullableToggleField(value, toggleRect);
+            }
+            else
+            {
+                value = InternalNullableToggleField(value, toggleRect);
+
+                if (value != null)
+                    value = (T)PrimitiveField(position, label, value);
+                else
+                    EditorGUI.LabelField(position, label, new GUIContent(nullText));
+            }
+
+            return value;
+        }
+
+        public static T? InternalNullableToggleField<T>(T? value, Rect toggleRect, Func<T>? constructor = null) where T : struct
+        {
+            BeginIndentLevel(0);
+
+            EditorGUI.BeginChangeCheck();
+            bool toggleValue = EditorGUI.Toggle(toggleRect, value != null);
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (toggleValue)
+                    value = constructor?.Invoke() ?? (T)typeof(T).GetDefaultValueNotNull();
+                else
+                    value = null;
+            }
+
+            EndIndentLevel();
+            return value;
+        }
+
+
+
+        public static Vector4 Vector4FieldLayout(Vector4 value) => Vector4Field(GetMultiControlRect(), value);
+        public static Vector4 Vector4FieldLayout(string label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
+        public static Vector4 Vector4FieldLayout(GUIContent label, Vector4 value) => Vector4Field(GetMultiControlRect(), label, value);
+
+        public static Vector4 Vector4Field(Rect position, Vector4 value) => DoVector4Field(position, value);
+        public static Vector4 Vector4Field(Rect position, string label, Vector4 value) => Vector4Field(position, new GUIContent(label), value);
+        public static Vector4 Vector4Field(Rect position, GUIContent label, Vector4 value)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4); // 2로 하면 크기 절반 줄어듬
+
+            BeginIndentLevel(0);
+            value = DoVector4Field(position, value);
+            EndIndentLevel();
+            return value;
+        }
+
+        static readonly GUIContent[] vector4Labels = new GUIContent[]
+        {
+            new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z"), new GUIContent("W")
         };
-        SearchService.ShowPicker(viewState);
-    }
-
-    public static void ObjectPingFieldLayout(Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), GUIContent.none, obj);
-    public static void ObjectPingFieldLayout(string label, Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
-    public static void ObjectPingFieldLayout(GUIContent label, Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
-
-    public static void ObjectPingField(Rect position, Object? obj) => ObjectPingField(position, GUIContent.none, obj);
-    public static void ObjectPingField(Rect position, string label, Object? obj) => ObjectPingField(position, new GUIContent(label), obj);
-    public static void ObjectPingField(Rect position, GUIContent label, Object? obj)
-    {
-        GUIContent content = EditorGUIUtility.ObjectContent(obj, typeof(Object));
-
-        position = EditorGUI.PrefixLabel(position, label);
-
-        BeginIndentLevel(0);
-        EditorGUI.LabelField(position, content, EditorStyles.objectField);
-        EndIndentLevel();
-
-        if (position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+        static readonly float[] vector4Values = new float[4];
+        static Vector4 DoVector4Field(Rect position, Vector4 value)
         {
-            if (obj != null)
-                EditorGUIUtility.PingObject(obj);
+            vector4Values[0] = value.x;
+            vector4Values[1] = value.y;
+            vector4Values[2] = value.z;
+            vector4Values[3] = value.w;
 
-            Event.current.Use();
-        }
-    }
+            EditorGUI.MultiFloatField(position, vector4Labels, vector4Values);
 
+            value.x = vector4Values[0];
+            value.y = vector4Values[1];
+            value.z = vector4Values[2];
+            value.w = vector4Values[3];
 
-
-    public static string TextFieldDropDownLayout(string value, out bool isPressed) => TextFieldDropDownLayout(GUIContent.none, value, out isPressed);
-    public static string TextFieldDropDownLayout(string label, string value, out bool isPressed) => TextFieldDropDownLayout(new GUIContent(label), value, out isPressed);
-    public static string TextFieldDropDownLayout(GUIContent label, string value, out bool isPressed) => TextFieldDropDown(EditorGUILayout.GetControlRect(), label, value, out isPressed);
-
-    public static string TextFieldDropDown(Rect position, string value, out bool isPressed) => TextFieldDropDown(position, GUIContent.none, value, out isPressed);
-    public static string TextFieldDropDown(Rect position, string label, string value, out bool isPressed) => TextFieldDropDown(position, new GUIContent(label), value, out isPressed);
-    public static string TextFieldDropDown(Rect position, GUIContent label, string value, out bool isPressed)
-    {
-        position.height = EditorGUIUtility.singleLineHeight;
-        isPressed = false;
-
-        Rect fieldRect = position;
-        fieldRect.width -= EditorStylesBridge.textFieldDropDown.fixedWidth;
-
-        value = EditorGUI.TextField(fieldRect, label, value, EditorStylesBridge.textFieldDropDownText);
-
-        Rect dropdownRect = position;
-        dropdownRect.x += fieldRect.width;
-        dropdownRect.width = EditorStylesBridge.textFieldDropDown.fixedWidth;
-
-        if (GUI.Button(dropdownRect, GUIContent.none, EditorStylesBridge.textFieldDropDown))
-            isPressed = true;
-
-        return value;
-    }
-
-    public static FilePath FilePathFieldLayout(FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), value);
-    public static FilePath FilePathFieldLayout(string label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
-    public static FilePath FilePathFieldLayout(GUIContent label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
-
-    public static FilePath FilePathField(Rect position, FilePath value) => DoFilePathField(position, value);
-    public static FilePath FilePathField(Rect position, string label, FilePath value) => FilePathField(position, new GUIContent(label), value);
-    public static FilePath FilePathField(Rect position, GUIContent label, FilePath value)
-    {
-        position = EditorGUI.PrefixLabel(position, label);
-        BeginIndentLevel(0);
-        value = DoFilePathField(position, value);
-        EndIndentLevel();
-        return value;
-    }
-
-    static FilePath DoFilePathField(Rect position, FilePath value)
-    {
-        FilePath path = TextFieldDropDown(position, value.value, out bool isPressed);
-        if (isPressed)
-        {
-            string panelValue = EditorUtility.OpenFolderPanel(GetTextOrKey("pack_identifier.open_folder.title"), string.Empty, string.Empty);
-            if (!string.IsNullOrEmpty(panelValue))
-                path = panelValue;
+            return value;
         }
 
-        return path;
-    }
 
 
+        public static Version VersionFieldLayout(Version value) => VersionField(GetMultiControlRect(), value);
+        public static Version VersionFieldLayout(string label, Version value) => VersionField(GetMultiControlRect(), label, value);
+        public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(GetMultiControlRect(), label, value);
 
-    public static RegistryType RegistryTypeFieldLayout(RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), value);
-    public static RegistryType RegistryTypeFieldLayout(string label, RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), label, value);
-    public static RegistryType RegistryTypeFieldLayout(GUIContent label, RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), label, value);
+        public static Version VersionField(Rect position, Version value) => DoVersionField(position, value);
+        public static Version VersionField(Rect position, string label, Version value) => VersionField(position, new GUIContent(label), value);
+        public static Version VersionField(Rect position, GUIContent label, Version value)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
 
-    public static RegistryType RegistryTypeField(Rect position, RegistryType value) => DoRegistryTypeField(position, value);
-    public static RegistryType RegistryTypeField(Rect position, string label, RegistryType value) => RegistryTypeField(position, new GUIContent(label), value);
-    public static RegistryType RegistryTypeField(Rect position, GUIContent label, RegistryType value)
-    {
-        position = EditorGUI.PrefixLabel(position, label);
-        BeginIndentLevel(0);
-        value = DoRegistryTypeField(position, value);
-        EndIndentLevel();
-        return value;
-    }
+            BeginIndentLevel(0);
+            value = DoVersionField(position, value);
+            EndIndentLevel();
+            return value;
+        }
 
-    static int? registryTypeFieldLastControlID;
-    static string registryTypeFieldSelectedNamespace = string.Empty;
-    static RegistryType DoRegistryTypeField(Rect position, RegistryType value)
-    {
-        position.height = EditorGUIUtility.singleLineHeight;
+        static Version DoVersionField(Rect position, Version value)
+        {
+            float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
+
+            {
+                position.width = fieldWidth;
+                value.major = NullablePrimitiveField(position, value.major, "*");
+                position.x += position.width + 4;
+            }
+
+            {
+                position.width = 8;
+                position.x -= 4;
+
+                GUI.Label(position, ".");
+
+                position.x += position.width;
+                position.width += 4;
+            }
+
+            {
+                position.width = fieldWidth.Floor();
+                value.minor = NullablePrimitiveField(position, value.minor, "*");
+                position.x += position.width + 4;
+            }
+
+            {
+                position.width = 8;
+                position.x -= 4;
+
+                GUI.Label(position, ".");
+
+                position.x += position.width;
+                position.width += 4;
+            }
+
+            {
+                position.width = fieldWidth.Ceil();
+                value.patch = NullablePrimitiveField(position, value.patch, "*");
+                position.x += position.width + 4;
+            }
         
-        TextDropdown dropdown = new TextDropdown();
-        dropdown.Rebuild(ResourceManager.assetRegistries.Select(x => x.registryName));
-
-        value = TextFieldDropDown(position, value, out bool isPressed);
-        if (isPressed)
-            dropdown.Show(position);
-
-        int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-        dropdown.onSelectedItem += x =>
-        {
-            registryTypeFieldLastControlID = lastControlID;
-            registryTypeFieldSelectedNamespace = x.value;
-        };
-
-        if (registryTypeFieldLastControlID == lastControlID)
-        {
-            value = registryTypeFieldSelectedNamespace;
-
-            registryTypeFieldSelectedNamespace = string.Empty;
-            registryTypeFieldLastControlID = null;
-
-            GUI.changed = true;
+            return value;
         }
+
+
+
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
+
+        public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(position, new GUIContent(label), value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
+
+            BeginIndentLevel(0);
+            value = DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
+            EndIndentLevel();
+            return value;
+        }
+
+        static KeyValuePair<TKey, TValue> DoKeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
+        {
+            float fieldWidth = (position.width - 15) / 2f;
+
+            TKey valueKey = value.Key;
+            TValue valueValue = value.Value;
+
+            {
+                position.width = fieldWidth;
+
+                string keyLabel = GetTextOrKey("gui.key");
+
+                BeginLabelWidth(keyLabel);
+                EditorGUI.PrefixLabel(position, new GUIContent(keyLabel));
+                valueKey = drawKeyAction.Invoke(position, valueKey);
+                EndLabelWidth();
+
+                position.x += position.width + 15;
+            }
+
+            {
+                position.width = fieldWidth.Ceil();
+
+                string valueLabel = GetTextOrKey("gui.value");
+
+                BeginLabelWidth(valueLabel);
+                EditorGUI.PrefixLabel(position, new GUIContent(valueLabel));
+                valueValue = drawValueAction.Invoke(position, valueValue);
+                EndLabelWidth();
+            }
         
-        return value;
+            return KeyValuePair.Create(valueKey, valueValue);
+        }
+
+
+
+        public static Type? TypeFieldLayout(Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), value, baseType);
+        public static Type? TypeFieldLayout(string label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
+        public static Type? TypeFieldLayout(GUIContent label, Type? value, Type? baseType = null) => TypeField(EditorGUILayout.GetControlRect(), label, value, baseType);
+
+        public static Type? TypeField(Rect position, Type? value, Type? baseType = null) => DoTypeField(position, value, baseType);
+        public static Type? TypeField(Rect position, string label, Type? value, Type? baseType = null) => TypeField(position, new GUIContent(label), value, baseType);
+        public static Type? TypeField(Rect position, GUIContent label, Type? value, Type? baseType = null)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+            BeginIndentLevel(0);
+            value = DoTypeField(position, value, baseType);
+            EndIndentLevel();
+            return value;
+        }
+
+        static int? typeFieldLastControlID;
+        static Type? typeFieldSelectedType;
+        static Type? DoTypeField(Rect position, Type? value, Type? baseType)
+        {
+            string buttonText = GetTextOrKey("gui.type_field.select_type");
+            float buttonWidth = GetXSize(buttonText, GUI.skin.button);
+
+            position.width -= buttonWidth + 3;
+
+            EditorGUI.LabelField(position, value?.SerializeToString() ?? GetTextOrKey("gui.none"));
+
+            position.x += position.width + 3;
+            position.width = buttonWidth;
+
+            if (GUI.Button(position, buttonText))
+            {
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                ShowTypePicker(x =>
+                {
+                    typeFieldLastControlID = lastControlID;
+                    typeFieldSelectedType = x;
+                }, baseType);
+            }
+
+            if (typeFieldLastControlID != null && typeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
+            {
+                value = typeFieldSelectedType;
+
+                typeFieldSelectedType = null;
+                typeFieldLastControlID = null;
+
+                GUI.changed = true;
+            }
+
+            return value;
+        }
+
+        public static void ShowTypePicker(Action<Type?> selectHandler, Type? baseType = null)
+        {
+            var provider = new TypeSearchProvider(baseType ?? typeof(object));
+            var context = SearchService.CreateContext(provider, "type:");
+            var viewState = new SearchViewState(context)
+            {
+                title = GetTextOrKey("gui.type"),
+                queryBuilderEnabled = true,
+                hideTabs = true,
+                selectHandler = (SearchItem item, bool cancelled) =>
+                {
+                    if (cancelled)
+                        return;
+
+                    if (item.data is Type type)
+                        selectHandler.Invoke(type);
+                    else
+                        selectHandler.Invoke(null);
+                },
+                flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle)
+            };
+            SearchService.ShowPicker(viewState);
+        }
+
+        public static void ObjectPingFieldLayout(Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), GUIContent.none, obj);
+        public static void ObjectPingFieldLayout(string label, Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
+        public static void ObjectPingFieldLayout(GUIContent label, Object? obj) => ObjectPingField(EditorGUILayout.GetControlRect(), label, obj);
+
+        public static void ObjectPingField(Rect position, Object? obj) => ObjectPingField(position, GUIContent.none, obj);
+        public static void ObjectPingField(Rect position, string label, Object? obj) => ObjectPingField(position, new GUIContent(label), obj);
+        public static void ObjectPingField(Rect position, GUIContent label, Object? obj)
+        {
+            GUIContent content = EditorGUIUtility.ObjectContent(obj, typeof(Object));
+
+            position = EditorGUI.PrefixLabel(position, label);
+
+            BeginIndentLevel(0);
+            EditorGUI.LabelField(position, content, EditorStyles.objectField);
+            EndIndentLevel();
+
+            if (position.Contains(Event.current.mousePosition) && Event.current.type == EventType.MouseDown && Event.current.button == 0)
+            {
+                if (obj != null)
+                    EditorGUIUtility.PingObject(obj);
+
+                Event.current.Use();
+            }
+        }
+
+
+
+        public static string TextFieldDropDownLayout(string value, out bool isPressed) => TextFieldDropDownLayout(GUIContent.none, value, out isPressed);
+        public static string TextFieldDropDownLayout(string label, string value, out bool isPressed) => TextFieldDropDownLayout(new GUIContent(label), value, out isPressed);
+        public static string TextFieldDropDownLayout(GUIContent label, string value, out bool isPressed) => TextFieldDropDown(EditorGUILayout.GetControlRect(), label, value, out isPressed);
+
+        public static string TextFieldDropDown(Rect position, string value, out bool isPressed) => TextFieldDropDown(position, GUIContent.none, value, out isPressed);
+        public static string TextFieldDropDown(Rect position, string label, string value, out bool isPressed) => TextFieldDropDown(position, new GUIContent(label), value, out isPressed);
+        public static string TextFieldDropDown(Rect position, GUIContent label, string value, out bool isPressed)
+        {
+            position.height = EditorGUIUtility.singleLineHeight;
+            isPressed = false;
+
+            Rect fieldRect = position;
+            fieldRect.width -= EditorStylesBridge.textFieldDropDown.fixedWidth;
+
+            value = EditorGUI.TextField(fieldRect, label, value, EditorStylesBridge.textFieldDropDownText);
+
+            Rect dropdownRect = position;
+            dropdownRect.x += fieldRect.width;
+            dropdownRect.width = EditorStylesBridge.textFieldDropDown.fixedWidth;
+
+            if (GUI.Button(dropdownRect, GUIContent.none, EditorStylesBridge.textFieldDropDown))
+                isPressed = true;
+
+            return value;
+        }
+
+        public static FilePath FilePathFieldLayout(FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), value);
+        public static FilePath FilePathFieldLayout(string label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
+        public static FilePath FilePathFieldLayout(GUIContent label, FilePath value) => FilePathField(EditorGUILayout.GetControlRect(), label, value);
+
+        public static FilePath FilePathField(Rect position, FilePath value) => DoFilePathField(position, value);
+        public static FilePath FilePathField(Rect position, string label, FilePath value) => FilePathField(position, new GUIContent(label), value);
+        public static FilePath FilePathField(Rect position, GUIContent label, FilePath value)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+            BeginIndentLevel(0);
+            value = DoFilePathField(position, value);
+            EndIndentLevel();
+            return value;
+        }
+
+        static FilePath DoFilePathField(Rect position, FilePath value)
+        {
+            FilePath path = TextFieldDropDown(position, value.value, out bool isPressed);
+            if (isPressed)
+            {
+                string panelValue = EditorUtility.OpenFolderPanel(GetTextOrKey("pack_identifier.open_folder.title"), string.Empty, string.Empty);
+                if (!string.IsNullOrEmpty(panelValue))
+                    path = panelValue;
+            }
+
+            return path;
+        }
+
+
+
+        public static RegistryType RegistryTypeFieldLayout(RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), value);
+        public static RegistryType RegistryTypeFieldLayout(string label, RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), label, value);
+        public static RegistryType RegistryTypeFieldLayout(GUIContent label, RegistryType value) => RegistryTypeField(EditorGUILayout.GetControlRect(), label, value);
+
+        public static RegistryType RegistryTypeField(Rect position, RegistryType value) => DoRegistryTypeField(position, value);
+        public static RegistryType RegistryTypeField(Rect position, string label, RegistryType value) => RegistryTypeField(position, new GUIContent(label), value);
+        public static RegistryType RegistryTypeField(Rect position, GUIContent label, RegistryType value)
+        {
+            position = EditorGUI.PrefixLabel(position, label);
+            BeginIndentLevel(0);
+            value = DoRegistryTypeField(position, value);
+            EndIndentLevel();
+            return value;
+        }
+
+        static int? registryTypeFieldLastControlID;
+        static string registryTypeFieldSelectedNamespace = string.Empty;
+        static RegistryType DoRegistryTypeField(Rect position, RegistryType value)
+        {
+            position.height = EditorGUIUtility.singleLineHeight;
+        
+            TextDropdown dropdown = new TextDropdown();
+            dropdown.Rebuild(ResourceManager.assetRegistries.Select(x => x.registryName));
+
+            value = TextFieldDropDown(position, value, out bool isPressed);
+            if (isPressed)
+                dropdown.Show(position);
+
+            int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+            dropdown.onSelectedItem += x =>
+            {
+                registryTypeFieldLastControlID = lastControlID;
+                registryTypeFieldSelectedNamespace = x.value;
+            };
+
+            if (registryTypeFieldLastControlID == lastControlID)
+            {
+                value = registryTypeFieldSelectedNamespace;
+
+                registryTypeFieldSelectedNamespace = string.Empty;
+                registryTypeFieldLastControlID = null;
+
+                GUI.changed = true;
+            }
+        
+            return value;
+        }
     }
 }

@@ -2,42 +2,43 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
-namespace RuniOS;
-
-public static class InfiniteLoopDetector
+namespace RuniOS
 {
-    static int detectionCount;
-    public const int detectionThreshold = 1000000;
-
-    [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
-    public static void Run([CallerFilePath] string fp = "", [CallerLineNumber] int ln = 0, [CallerMemberName] string mn = "")
+    public static class InfiniteLoopDetector
     {
-        string currentPoint = $"{fp}:{ln}, {mn}()";
-        if (isLoopDetected)
-            throw new Exception($"Infinite Loop Detected: {currentPoint}");
-    }
+        static int detectionCount;
+        public const int detectionThreshold = 1000000;
+
+        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        public static void Run([CallerFilePath] string fp = "", [CallerLineNumber] int ln = 0, [CallerMemberName] string mn = "")
+        {
+            string currentPoint = $"{fp}:{ln}, {mn}()";
+            if (isLoopDetected)
+                throw new Exception($"Infinite Loop Detected: {currentPoint}");
+        }
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
-    public static bool isLoopDetected
-    {
-        get
+        public static bool isLoopDetected
         {
-            if (++detectionCount > detectionThreshold)
-                return true;
+            get
+            {
+                if (++detectionCount > detectionThreshold)
+                    return true;
 
-            return false;
+                return false;
+            }
         }
-    }
 #else
         public const bool isLoopDetected = false;
 #endif
 
 #if UNITY_EDITOR
-    [UnityEditor.InitializeOnLoadMethod]
-    static void Init() => UnityEditor.EditorApplication.update += Update;
+        [UnityEditor.InitializeOnLoadMethod]
+        static void Init() => UnityEditor.EditorApplication.update += Update;
 #elif DEVELOPMENT_BUILD
         static void Awaken() => Booting.CustomPlayerLoopSetter.initEvent += Update;
 #endif
 
-    static void Update() => detectionCount = 0;
+        static void Update() => detectionCount = 0;
+    }
 }

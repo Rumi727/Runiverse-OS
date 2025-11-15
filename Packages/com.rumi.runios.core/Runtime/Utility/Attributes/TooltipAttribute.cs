@@ -1,9 +1,10 @@
 #nullable enable
-namespace RuniOS.Utility.Attributes;
-
-public sealed class TooltipAttribute : PropertyAttribute
+namespace RuniOS.Utility.Attributes
 {
-    public TooltipAttribute(string text) => this.text = text;
+    public sealed class TooltipAttribute : PropertyAttribute
+    {
+        public TooltipAttribute(string text) => this.text = text;
 
-    public string text { get; } = "";
+        public string text { get; } = "";
+    }
 }

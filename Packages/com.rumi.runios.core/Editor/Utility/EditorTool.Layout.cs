@@ -1,23 +1,24 @@
 #nullable enable
-namespace RuniOS.Editor;
-
-public partial class EditorTool
+namespace RuniOS.Editor
 {
-    public static Rect GetPrefixLabelRect(Rect totalPosition, GUIContent? label, out Rect? labelPosition)
+    public partial class EditorTool
     {
-        if (label != null && label.text == string.Empty && label.image == null)
+        public static Rect GetPrefixLabelRect(Rect totalPosition, GUIContent? label, out Rect? labelPosition)
         {
-            labelPosition = null;
-            return EditorGUI.IndentedRect(totalPosition);
+            if (label != null && label.text == string.Empty && label.image == null)
+            {
+                labelPosition = null;
+                return EditorGUI.IndentedRect(totalPosition);
+            }
+
+            float labelWidth = EditorGUIUtility.labelWidth;
+            int indentLevel = EditorGUI.indentLevel * 15;
+
+            labelPosition = new Rect(totalPosition.x + indentLevel, totalPosition.y, labelWidth - indentLevel, EditorGUIUtility.singleLineHeight);
+
+            return new Rect(totalPosition.x + labelWidth + 2f, totalPosition.y, totalPosition.width - labelWidth - 2f, totalPosition.height);
         }
 
-        float labelWidth = EditorGUIUtility.labelWidth;
-        int indentLevel = EditorGUI.indentLevel * 15;
-
-        labelPosition = new Rect(totalPosition.x + indentLevel, totalPosition.y, labelWidth - indentLevel, EditorGUIUtility.singleLineHeight);
-
-        return new Rect(totalPosition.x + labelWidth + 2f, totalPosition.y, totalPosition.width - labelWidth - 2f, totalPosition.height);
+        public static Rect GetMultiControlRect(int yCount = 1) => EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight : (EditorGUIUtility.singleLineHeight * 2) + (yCount * 2));
     }
-
-    public static Rect GetMultiControlRect(int yCount = 1) => EditorGUILayout.GetControlRect(true, EditorGUIUtility.wideMode ? EditorGUIUtility.singleLineHeight : (EditorGUIUtility.singleLineHeight * 2) + (yCount * 2));
 }

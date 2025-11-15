@@ -1,22 +1,23 @@
 #nullable enable
-namespace RuniOS.Editor;
-
-public static partial class EditorTool
+namespace RuniOS.Editor
 {
-    /*struct EditorLocalizationBridge : IEditorLocalizationBridge
+    public static partial class EditorTool
     {
-        public Action? onLanguageUpdate
+        /*struct EditorLocalizationBridge : IEditorLocalizationBridge
         {
-            get => EditorLocalization._onLanguageUpdate;
-            set => EditorLocalization._onLanguageUpdate = value;
+            public Action? onLanguageUpdate
+            {
+                get => EditorLocalization._onLanguageUpdate;
+                set => EditorLocalization._onLanguageUpdate = value;
+            }
+
+            public string? GetText(string key, string language = "") => EditorTool.GetText(key, language);
         }
 
-        public string? GetText(string key, string language = "") => EditorTool.GetText(key, language);
+        static EditorTool() => RuniOS.Localizations.EditorLocalizationBridge.bridge = new EditorLocalizationBridge();*/
+
+        /*static EditorTool() => Selection.selectionChanged += ClearCache;
+
+        static void ClearCache() => usePropertyAnimArraySerializedProperty.Clear();*/
     }
-
-    static EditorTool() => RuniOS.Localizations.EditorLocalizationBridge.bridge = new EditorLocalizationBridge();*/
-
-    /*static EditorTool() => Selection.selectionChanged += ClearCache;
-
-    static void ClearCache() => usePropertyAnimArraySerializedProperty.Clear();*/
 }

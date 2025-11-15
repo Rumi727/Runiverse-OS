@@ -1,15 +1,16 @@
 #nullable enable
-namespace RuniOS.Editor.Modding;
-
-public sealed class ModdingConfigAsset : RuniOSConfigObject<ModdingConfigAsset>
+namespace RuniOS.Editor.Modding
 {
-    /// <summary>
-    /// 에디터에서 패치 로그를 표시할지 여부를 결정합니다.
-    /// </summary>
-    public bool logInEditor
+    public sealed class ModdingConfigAsset : RuniOSConfigObject<ModdingConfigAsset>
     {
-        get => _logInEditor;
-        set => _logInEditor = value;
+        /// <summary>
+        /// 에디터에서 패치 로그를 표시할지 여부를 결정합니다.
+        /// </summary>
+        public bool logInEditor
+        {
+            get => _logInEditor;
+            set => _logInEditor = value;
+        }
+        [SerializeField] bool _logInEditor;
     }
-    [SerializeField] bool _logInEditor;
 }

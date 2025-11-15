@@ -1,11 +1,12 @@
 ﻿#nullable enable
-namespace RuniOS.Inspectors.Drawers;
-
-public sealed class CustomInspectorDrawerAttribute : CustomAttributeDrawerAttribute
+namespace RuniOS.Inspectors.Drawers
 {
-    public bool allowInDebug { get; set; }
+    public sealed class CustomInspectorDrawerAttribute : CustomAttributeDrawerAttribute
+    {
+        public bool allowInDebug { get; set; }
         
-    public override bool isSubtypeCompatible { get; }
+        public override bool isSubtypeCompatible { get; }
 
-    public CustomInspectorDrawerAttribute(Type targetType, bool useForChildren = false) : base(targetType) => isSubtypeCompatible = useForChildren;
+        public CustomInspectorDrawerAttribute(Type targetType, bool useForChildren = false) : base(targetType) => isSubtypeCompatible = useForChildren;
+    }
 }

@@ -1,17 +1,18 @@
 #nullable enable
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization;
-
-public sealed class SerializableTypeConverter : UxmlAttributeConverter<SerializableType>
+namespace RuniOS.Editor.UIElements.Serialization
 {
-    public override SerializableType FromString(string value)
+    public sealed class SerializableTypeConverter : UxmlAttributeConverter<SerializableType>
     {
-        if (string.IsNullOrEmpty(value))
-            return null;
+        public override SerializableType FromString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return null;
             
-        return new SerializableType(TypeUtility.DeserializeFromString(value));
-    }
+            return new SerializableType(TypeUtility.DeserializeFromString(value));
+        }
         
-    public override string ToString(SerializableType value) => value.value?.SerializeToString() ?? string.Empty;
+        public override string ToString(SerializableType value) => value.value?.SerializeToString() ?? string.Empty;
+    }
 }

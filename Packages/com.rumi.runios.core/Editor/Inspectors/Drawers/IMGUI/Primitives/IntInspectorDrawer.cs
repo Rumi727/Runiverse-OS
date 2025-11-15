@@ -2,12 +2,13 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 
-namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives;
-
-[CustomInspectorDrawer(typeof(int), allowInDebug = true)]
-public class IntInspectorDrawer : GenericInspectorDrawer
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
-    public IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+    [CustomInspectorDrawer(typeof(int), allowInDebug = true)]
+    public class IntInspectorDrawer : GenericInspectorDrawer
+    {
+        public IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-    protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.IntField(position, label, (int)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.IntField(position, label, (int)value!);
+    }
 }

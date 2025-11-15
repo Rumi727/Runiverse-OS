@@ -1,21 +1,22 @@
 #nullable enable
-namespace RuniOS.Utility;
-
-public static class ConverterUtility
+namespace RuniOS.Utility
 {
-    public static T[]? ConvertObjects<T>(this IList<Object?>? rawObjects) where T : Object
+    public static class ConverterUtility
     {
-        if (rawObjects == null)
-            return null;
-
-        T[] array = new T[rawObjects.Count];
-        for (int i = 0; i < array.Length; i++)
+        public static T[]? ConvertObjects<T>(this IList<Object?>? rawObjects) where T : Object
         {
-            object? rawObject = rawObjects[i];
-            if (rawObject != null)
-                array[i] = (T)rawObject;
-        }
+            if (rawObjects == null)
+                return null;
 
-        return array;
+            T[] array = new T[rawObjects.Count];
+            for (int i = 0; i < array.Length; i++)
+            {
+                object? rawObject = rawObjects[i];
+                if (rawObject != null)
+                    array[i] = (T)rawObject;
+            }
+
+            return array;
+        }
     }
 }

@@ -2,76 +2,77 @@
 using RuniOS.Collections.Generic;
 using System.Collections;
 
-namespace RuniOS;
-
-[Serializable]
-public sealed class ConditionalUniObjectTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> where TKey : Object 
+namespace RuniOS
 {
-    [SerializeField] SerializableDictionary<TKey, TValue> uniObjects = new();
-
-    public void Add(TKey key, TValue value)
+    [Serializable]
+    public sealed class ConditionalUniObjectTable<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>> where TKey : Object 
     {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        [SerializeField] SerializableDictionary<TKey, TValue> uniObjects = new();
+
+        public void Add(TKey key, TValue value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        uniObjects.Add(key, value);
-    }
+            uniObjects.Add(key, value);
+        }
         
-    public void AddOrUpdate(TKey key, TValue value)
-    {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        public void AddOrUpdate(TKey key, TValue value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        uniObjects[key] = value;
-    }
+            uniObjects[key] = value;
+        }
 
-    public bool TryAdd(TKey key, TValue value)
-    {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        public bool TryAdd(TKey key, TValue value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        return uniObjects.TryAdd(key, value);
-    }
+            return uniObjects.TryAdd(key, value);
+        }
         
-    public bool TryGetValue(TKey key, out TValue value)
-    {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        public bool TryGetValue(TKey key, out TValue value)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        return uniObjects.TryGetValue(key, out value);
-    }
+            return uniObjects.TryGetValue(key, out value);
+        }
 
-    public void Remove(TKey key)
-    {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        public void Remove(TKey key)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        uniObjects.Remove(key);
-    }
+            uniObjects.Remove(key);
+        }
 
-    public TValue GetOrCreateValue(TKey key)
-    {
-        ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
-        Clean();
+        public TValue GetOrCreateValue(TKey key)
+        {
+            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            Clean();
             
-        if (uniObjects.TryGetValue(key, out TValue value))
-            return value;
+            if (uniObjects.TryGetValue(key, out TValue value))
+                return value;
 
-        return uniObjects[key] = Activator.CreateInstance<TValue>();
-    }
+            return uniObjects[key] = Activator.CreateInstance<TValue>();
+        }
 
-    List<TKey> cleanCache = new();
-    void Clean()
-    {
-        foreach (var item in uniObjects.Select(x => x.Key).Where(x => !x))
-            cleanCache.Add(item);
+        List<TKey> cleanCache = new();
+        void Clean()
+        {
+            foreach (var item in uniObjects.Select(x => x.Key).Where(x => !x))
+                cleanCache.Add(item);
 
-        for (int i = 0; i < cleanCache.Count; i++)
-            uniObjects.Remove(cleanCache[i]);
+            for (int i = 0; i < cleanCache.Count; i++)
+                uniObjects.Remove(cleanCache[i]);
 
-        cleanCache.Clear();
-    }
+            cleanCache.Clear();
+        }
         
-    public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => uniObjects.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator() => uniObjects.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+    }
 }

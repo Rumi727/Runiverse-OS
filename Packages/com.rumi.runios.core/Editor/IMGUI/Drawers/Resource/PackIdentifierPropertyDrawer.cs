@@ -2,58 +2,59 @@
 using RuniOS.Editor.Serialization;
 using RuniOS.Resource;
 
-namespace RuniOS.Editor.IMGUI.Drawers.Resource;
-
-[CustomPropertyDrawer(typeof(PackIdentifier))]
-public class PackIdentifierPropertyDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers.Resource
 {
-    //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(PackIdentifier))]
+    public class PackIdentifierPropertyDrawer : PropertyDrawer
     {
-        EditorGUI.BeginProperty(position, label, property);
-        Draw(position, property, label);
-        try
+        //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.EndProperty();
-        }
-        catch (InvalidOperationException)
-        {
+            EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label);
+            try
+            {
+                EditorGUI.EndProperty();
+            }
+            catch (InvalidOperationException)
+            {
                 
+            }
         }
-    }
         
-    public static void Draw(Rect position, SerializedProperty property, GUIContent label)
-    {
-        PropertyConverter? converter = PropertyConverter.FindConverter(property);
-        if (converter?.Read(property, typeof(PackIdentifier)) is not PackIdentifier packIdentifier)
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
-            EditorGUI.LabelField(position, label, GUIContent.none);
-            return;
+            PropertyConverter? converter = PropertyConverter.FindConverter(property);
+            if (converter?.Read(property, typeof(PackIdentifier)) is not PackIdentifier packIdentifier)
+            {
+                EditorGUI.LabelField(position, label, GUIContent.none);
+                return;
+            }
+
+            packIdentifier = PackIdentifierField(position, label, packIdentifier);
+            converter.Write(property, typeof(PackIdentifier), packIdentifier);
         }
 
-        packIdentifier = PackIdentifierField(position, label, packIdentifier);
-        converter.Write(property, typeof(PackIdentifier), packIdentifier);
-    }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 2) + 2;
-    }
-
-    public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
-    {
-        property = property.Copy();
+        public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
             
-        property.Next(true);
-        SerializedProperty internalID = property.Copy();
+            property.Next(true);
+            SerializedProperty internalID = property.Copy();
 
-        property.Next(false);
-        SerializedProperty localPath = property;
+            property.Next(false);
+            SerializedProperty localPath = property;
 
-        return (internalID, localPath);
+            return (internalID, localPath);
+        }
     }
 }

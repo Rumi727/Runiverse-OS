@@ -1,9 +1,10 @@
 #nullable enable
-namespace RuniOS.Utility.Attributes;
-
-public sealed class TypeFieldAttribute : PropertyAttribute
+namespace RuniOS.Utility.Attributes
 {
-    public TypeFieldAttribute(Type baseType) => this.baseType = baseType;
+    public sealed class TypeFieldAttribute : PropertyAttribute
+    {
+        public TypeFieldAttribute(Type baseType) => this.baseType = baseType;
         
-    public Type baseType { get; }
+        public Type baseType { get; }
+    }
 }

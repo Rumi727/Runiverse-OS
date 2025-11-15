@@ -3,22 +3,23 @@ using Newtonsoft.Json;
 using RuniOS.Resource;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization.Resource;
-
-public sealed class PackIdentifierConverter : UxmlAttributeConverter<PackIdentifier>
+namespace RuniOS.Editor.UIElements.Serialization.Resource
 {
-    public override PackIdentifier FromString(string? value)
+    public sealed class PackIdentifierConverter : UxmlAttributeConverter<PackIdentifier>
     {
-        try
+        public override PackIdentifier FromString(string? value)
         {
-            return JsonConvert.DeserializeObject<PackIdentifier>(value ?? string.Empty);
+            try
+            {
+                return JsonConvert.DeserializeObject<PackIdentifier>(value ?? string.Empty);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return PackIdentifier.empty;
+            }
         }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-            return PackIdentifier.empty;
-        }
-    }
         
-    public override string ToString(PackIdentifier value) => JsonConvert.SerializeObject(value);
+        public override string ToString(PackIdentifier value) => JsonConvert.SerializeObject(value);
+    }
 }

@@ -1,22 +1,23 @@
 ﻿#nullable enable
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.UIElements.Nullables;
-
-[UxmlElement]
-public partial class NullableUnsignedLongFieldField : NullableField<ulong>
+namespace RuniOS.Editor.UIElements.Nullables
 {
-    public NullableUnsignedLongFieldField() : this(string.Empty) { }
-    public NullableUnsignedLongFieldField(string label, string? nullText = null) : base
-    (
-        label,
-        new FieldDescription<UnsignedLongField, ulong>
+    [UxmlElement]
+    public partial class NullableUnsignedLongFieldField : NullableField<ulong>
+    {
+        public NullableUnsignedLongFieldField() : this(string.Empty) { }
+        public NullableUnsignedLongFieldField(string label, string? nullText = null) : base
         (
-            SerializableNullable.nameOfInternalValue,
-            static x => x.HasValue ? x.Value : 0,
-            static (ref SerializableNullable<ulong> nullable, ulong fieldValue) => nullable = fieldValue
-        ),
-        nullText
-    )
-    { }
+            label,
+            new FieldDescription<UnsignedLongField, ulong>
+            (
+                SerializableNullable.nameOfInternalValue,
+                static x => x.HasValue ? x.Value : 0,
+                static (ref SerializableNullable<ulong> nullable, ulong fieldValue) => nullable = fieldValue
+            ),
+            nullText
+        )
+        { }
+    }
 }

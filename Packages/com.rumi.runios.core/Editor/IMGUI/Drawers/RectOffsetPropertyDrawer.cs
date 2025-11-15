@@ -2,34 +2,35 @@
 using RuniOS.Editor.UIElements;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.IMGUI.Drawers;
-
-[CustomPropertyDrawer(typeof(RectOffset))]
-public class RectOffsetPropertyDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers
 {
-    public override VisualElement CreatePropertyGUI(SerializedProperty property) => new RectOffsetField().SetProperty(property);
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(RectOffset))]
+    public class RectOffsetPropertyDrawer : PropertyDrawer
     {
-        EditorGUI.BeginProperty(position, label, property);
-        Draw(position, property, label);
-        EditorGUI.EndProperty();
-    }
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new RectOffsetField().SetProperty(property);
 
-    static readonly GUIContent[] labels = new GUIContent[] { new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B") };
-    public static void Draw(Rect position, SerializedProperty property, GUIContent label)
-    {
-        property = property.Copy();
-        property.Next(true);
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label);
+            EditorGUI.EndProperty();
+        }
+
+        static readonly GUIContent[] labels = new GUIContent[] { new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B") };
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            property = property.Copy();
+            property.Next(true);
             
-        EditorGUI.MultiPropertyField(position, labels, property, label);
-    }
+            EditorGUI.MultiPropertyField(position, labels, property, label);
+        }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        }
     }
 }

@@ -3,61 +3,62 @@
 using RuniOS.Editor.IMGUI.Drawers.IO;
 using RuniOS.Resource;
 
-namespace RuniOS.Editor.IMGUI.Drawers.Resource;
-
-[CustomPropertyDrawer(typeof(Identifier))]
-public class IdentifierPropertyDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers.Resource
 {
-    //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(Identifier))]
+    public class IdentifierPropertyDrawer : PropertyDrawer
     {
-        EditorGUI.BeginProperty(position, label, property.Copy());
-        Draw(position, property, label);
-        EditorGUI.EndProperty();
-    }
+        //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new IdentifierField().SetProperty(property);
 
-    public static void Draw(Rect position, SerializedProperty property, GUIContent label)
-    {
-        (SerializedProperty nameSpace, SerializedProperty path) = GetChildProperty(property);
-        path = FilePathPropertyDrawer.GetChildProperty(path);
-
-        Identifier value = Identifier.empty;
-        EditorGUI.BeginChangeCheck();
-
-        string nameSpaceValue = nameSpace.stringValue;
-        string pathValue = path.stringValue;
-            
-        if (Identifier.IsNamespaceValid(nameSpaceValue) && Identifier.IsPathValid(pathValue))
-            value = new Identifier(nameSpace.stringValue, path.stringValue);
-            
-        value = IdentifierField(position, label, value);
-            
-        if (EditorGUI.EndChangeCheck())
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            nameSpace.stringValue = value.nameSpace;
-            path.stringValue = value.path;
+            EditorGUI.BeginProperty(position, label, property.Copy());
+            Draw(position, property, label);
+            EditorGUI.EndProperty();
         }
-    }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-    {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 2) + 2;
-    }
-        
-    public static (SerializedProperty nameSpace, SerializedProperty path) GetChildProperty(SerializedProperty property)
-    {
-        property = property.Copy();
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            (SerializedProperty nameSpace, SerializedProperty path) = GetChildProperty(property);
+            path = FilePathPropertyDrawer.GetChildProperty(path);
+
+            Identifier value = Identifier.empty;
+            EditorGUI.BeginChangeCheck();
+
+            string nameSpaceValue = nameSpace.stringValue;
+            string pathValue = path.stringValue;
             
-        property.Next(true);
-        SerializedProperty nameSpace = property.Copy();
+            if (Identifier.IsNamespaceValid(nameSpaceValue) && Identifier.IsPathValid(pathValue))
+                value = new Identifier(nameSpace.stringValue, path.stringValue);
+            
+            value = IdentifierField(position, label, value);
+            
+            if (EditorGUI.EndChangeCheck())
+            {
+                nameSpace.stringValue = value.nameSpace;
+                path.stringValue = value.path;
+            }
+        }
 
-        property.Next(false);
-        SerializedProperty path = property;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+        {
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        }
+        
+        public static (SerializedProperty nameSpace, SerializedProperty path) GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            
+            property.Next(true);
+            SerializedProperty nameSpace = property.Copy();
 
-        return (nameSpace, path);
+            property.Next(false);
+            SerializedProperty path = property;
+
+            return (nameSpace, path);
+        }
     }
 }

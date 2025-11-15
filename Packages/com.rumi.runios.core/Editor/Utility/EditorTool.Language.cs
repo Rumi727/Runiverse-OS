@@ -1,27 +1,28 @@
 #nullable enable
 using RuniOS.Editor.Localizations;
 
-namespace RuniOS.Editor;
-
-public partial class EditorTool
+namespace RuniOS.Editor
 {
-    public static string GetTextOrKey(string key, string lauguage = "")
+    public partial class EditorTool
     {
-        string? result = GetText(key, lauguage);
-        if (result == null)
-            return key;
-
-        return result;
-    }
-
-    public static string? GetText(string key, string language = "")
-    {
-        foreach (var item in EditorLocalization.GetLanguageDictionarys(language))
+        public static string GetTextOrKey(string key, string lauguage = "")
         {
-            if (item.TryGetValue(key, out string value))
-                return value;
+            string? result = GetText(key, lauguage);
+            if (result == null)
+                return key;
+
+            return result;
         }
 
-        return null;
+        public static string? GetText(string key, string language = "")
+        {
+            foreach (var item in EditorLocalization.GetLanguageDictionarys(language))
+            {
+                if (item.TryGetValue(key, out string value))
+                    return value;
+            }
+
+            return null;
+        }
     }
 }

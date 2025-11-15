@@ -1,10 +1,11 @@
 #nullable enable
-namespace RuniOS.Utility;
-
-public enum AlwayShowTimeUnit
+namespace RuniOS.Utility
 {
-    none,
-    minute,
-    hour,
-    day
+    public enum AlwayShowTimeUnit
+    {
+        none,
+        minute,
+        hour,
+        day
+    }
 }

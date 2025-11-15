@@ -2,26 +2,27 @@
 using RuniOS.Collections.Handlers.Entrys;
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers.Virtual;
-
-[CustomCollectionHandler(typeof(IDictionary))]
-public class IDictionaryFromListHandler : VirtualListHandler
+namespace RuniOS.Collections.Handlers.Virtual
 {
-    public IDictionaryFromListHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
-    public override bool isReadOnly => ((IDictionary)targetCollection).IsReadOnly;
-        
-    public override bool isFixedSize => ((IDictionary)targetCollection).IsFixedSize;
-
-    public override void UpdateSourceCollections()
+    [CustomCollectionHandler(typeof(IDictionary))]
+    public class IDictionaryFromListHandler : VirtualListHandler
     {
-        IDictionary dictionary = (IDictionary)targetCollection;
-            
-        dictionary.Clear();
-        for (int i = 0; i < synchronizedList.Count; i++)
+        public IDictionaryFromListHandler(IEnumerable targetCollection) : base(targetCollection) { }
+
+        public override bool isReadOnly => ((IDictionary)targetCollection).IsReadOnly;
+        
+        public override bool isFixedSize => ((IDictionary)targetCollection).IsFixedSize;
+
+        public override void UpdateSourceCollections()
         {
-            KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
-            dictionary.Add(entry.Key!, entry.Value);
+            IDictionary dictionary = (IDictionary)targetCollection;
+            
+            dictionary.Clear();
+            for (int i = 0; i < synchronizedList.Count; i++)
+            {
+                KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
+                dictionary.Add(entry.Key!, entry.Value);
+            }
         }
     }
 }

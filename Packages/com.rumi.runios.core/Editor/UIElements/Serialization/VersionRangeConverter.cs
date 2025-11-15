@@ -1,17 +1,18 @@
 #nullable enable
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization;
-
-public sealed class VersionRangeConverter : UxmlAttributeConverter<VersionRange>
+namespace RuniOS.Editor.UIElements.Serialization
 {
-    public override VersionRange FromString(string value)
+    public sealed class VersionRangeConverter : UxmlAttributeConverter<VersionRange>
     {
-        if (string.IsNullOrEmpty(value))
-            return new VersionRange();
+        public override VersionRange FromString(string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return new VersionRange();
             
-        return new VersionRange(value);
-    }
+            return new VersionRange(value);
+        }
         
-    public override string ToString(VersionRange value) => value.ToString();
+        public override string ToString(VersionRange value) => value.ToString();
+    }
 }

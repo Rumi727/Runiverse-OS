@@ -1,16 +1,17 @@
 ﻿#nullable enable
 using RuniOS.Editor.IMGUI.Drawers;
 
-namespace RuniOS.Editor.Serialization.Converters;
-
-[CustomPropertyConverter(typeof(HexColor))]
-public class HexColorPropertyConverter : PropertyConverter
+namespace RuniOS.Editor.Serialization.Converters
 {
-    public override object Read(SerializedProperty property, Type propertyType) => new HexColor(HexColorPropertyDrawer.GetChildProperty(property).stringValue);
-        
-    public override void Write(SerializedProperty property, Type propertyType, object? value)
+    [CustomPropertyConverter(typeof(HexColor))]
+    public class HexColorPropertyConverter : PropertyConverter
     {
-        if (value is HexColor hexColor)
-            HexColorPropertyDrawer.GetChildProperty(property).stringValue = hexColor.value;
+        public override object Read(SerializedProperty property, Type propertyType) => new HexColor(HexColorPropertyDrawer.GetChildProperty(property).stringValue);
+        
+        public override void Write(SerializedProperty property, Type propertyType, object? value)
+        {
+            if (value is HexColor hexColor)
+                HexColorPropertyDrawer.GetChildProperty(property).stringValue = hexColor.value;
+        }
     }
 }

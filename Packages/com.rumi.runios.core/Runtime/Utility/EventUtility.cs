@@ -1,44 +1,45 @@
 #nullable enable
-namespace RuniOS.Utility;
-
-public static class EventUtility
+namespace RuniOS.Utility
 {
-    /// <summary>예외를 핸들링하여 이벤트 호출이 중지되지 않도록 합니다.</summary>
-    public static void SafeInvoke(this Delegate? e)
+    public static class EventUtility
     {
-        if (e == null)
-            return;
-
-        Delegate[] delegates = e.GetInvocationList();
-        for (int i = 0; i < delegates.Length; i++)
+        /// <summary>예외를 핸들링하여 이벤트 호출이 중지되지 않도록 합니다.</summary>
+        public static void SafeInvoke(this Delegate? e)
         {
-            try
+            if (e == null)
+                return;
+
+            Delegate[] delegates = e.GetInvocationList();
+            for (int i = 0; i < delegates.Length; i++)
             {
-                delegates[i].DynamicInvoke();
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
+                try
+                {
+                    delegates[i].DynamicInvoke();
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
             }
         }
-    }
 
-    /// <summary>예외를 핸들링하여 이벤트 호출이 중지되지 않도록 합니다.</summary>
-    public static void SafeInvoke(this Delegate? e, params object?[] args)
-    {
-        if (e == null)
-            return;
-
-        Delegate[] delegates = e.GetInvocationList();
-        for (int i = 0; i < delegates.Length; i++)
+        /// <summary>예외를 핸들링하여 이벤트 호출이 중지되지 않도록 합니다.</summary>
+        public static void SafeInvoke(this Delegate? e, params object?[] args)
         {
-            try
+            if (e == null)
+                return;
+
+            Delegate[] delegates = e.GetInvocationList();
+            for (int i = 0; i < delegates.Length; i++)
             {
-                delegates[i].DynamicInvoke(args);
-            }
-            catch (Exception ex)
-            {
-                Debug.LogException(ex);
+                try
+                {
+                    delegates[i].DynamicInvoke(args);
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogException(ex);
+                }
             }
         }
     }

@@ -1,14 +1,15 @@
 ﻿#nullable enable
-namespace RuniOS.Editor.Windows;
-
-public interface IControlPanel
+namespace RuniOS.Editor.Windows
 {
-    string label { get; }
+    public interface IControlPanel
+    {
+        string label { get; }
         
-    int sort { get; }
+        int sort { get; }
 
-    bool allowUpdate { get; }
-    bool allowUpdateInEditor { get; }
+        bool allowUpdate { get; }
+        bool allowUpdateInEditor { get; }
 
-    void OnGUI();
+        void OnGUI();
+    }
 }

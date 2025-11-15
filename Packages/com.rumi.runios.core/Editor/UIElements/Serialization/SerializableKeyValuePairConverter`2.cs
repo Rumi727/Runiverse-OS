@@ -3,22 +3,23 @@ using Newtonsoft.Json;
 using RuniOS.Collections.Generic;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization;
-
-public sealed class SerializableKeyValuePairConverter<TKey, TValue> : UxmlAttributeConverter<SerializableKeyValuePair<TKey, TValue>>
+namespace RuniOS.Editor.UIElements.Serialization
 {
-    public override SerializableKeyValuePair<TKey, TValue> FromString(string? value)
+    public sealed class SerializableKeyValuePairConverter<TKey, TValue> : UxmlAttributeConverter<SerializableKeyValuePair<TKey, TValue>>
     {
-        try
+        public override SerializableKeyValuePair<TKey, TValue> FromString(string? value)
         {
-            return JsonConvert.DeserializeObject<SerializableKeyValuePair<TKey, TValue>>(value ?? string.Empty);
+            try
+            {
+                return JsonConvert.DeserializeObject<SerializableKeyValuePair<TKey, TValue>>(value ?? string.Empty);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return default;
+            }
         }
-        catch (Exception e)
-        {
-            Debug.LogException(e);
-            return default;
-        }
-    }
         
-    public override string ToString(SerializableKeyValuePair<TKey, TValue> value) => JsonConvert.SerializeObject(value);
+        public override string ToString(SerializableKeyValuePair<TKey, TValue> value) => JsonConvert.SerializeObject(value);
+    }
 }

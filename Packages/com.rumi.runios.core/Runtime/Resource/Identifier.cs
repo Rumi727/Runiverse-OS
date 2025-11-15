@@ -5,239 +5,240 @@ using RuniOS.IO;
 using RuniOS.Json.Converters.Resource;
 using System.Diagnostics.CodeAnalysis;
 
-namespace RuniOS.Resource;
-
-/// <summary>
-/// 네임스페이스와 경로로 구성된 리소스에 대한 고유 식별자를 나타냅니다.
-/// </summary>
-[Serializable]
-[JsonConverter(typeof(IdentifierConverter))]
-public struct Identifier : IEquatable<Identifier>, ISerializationCallbackReceiver
+namespace RuniOS.Resource
 {
-    public static readonly Identifier empty = new Identifier();
-        
     /// <summary>
-    /// 네임스페이스가 지정되지 않았을 때 사용되는 기본 네임스페이스입니다.
+    /// 네임스페이스와 경로로 구성된 리소스에 대한 고유 식별자를 나타냅니다.
     /// </summary>
-    public const string defaultNamespace = "runios";
-
-    /// <summary>
-    /// 네임스페이스와 경로를 구분하는 데 사용되는 문자입니다.
-    /// </summary>
-    public const char separator = ':';
-
-    /// <summary>
-    /// 지정된 경로와 기본 네임스페이스로 <see cref="Identifier"/> 구조체의 새 인스턴스를 초기화합니다.
-    /// </summary>
-    /// <param name="path">식별자의 경로 구성 요소입니다.</param>
-    /// <exception cref="InvalidIdentifierException">제공된 경로가 유효하지 않은 경우 발생합니다.</exception>
-    public Identifier(FilePath path)
+    [Serializable]
+    [JsonConverter(typeof(IdentifierConverter))]
+    public struct Identifier : IEquatable<Identifier>, ISerializationCallbackReceiver
     {
-        if (!IsPathValid(path))
-            throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
-
-        _nameSpace = defaultNamespace;
-        _path = path;
-    }
-
-    /// <summary>
-    /// 지정된 네임스페이스와 경로로 <see cref="Identifier"/> 구조체의 새 인스턴스를 초기화합니다.
-    /// </summary>
-    /// <param name="nameSpace">식별자의 네임스페이스 구성 요소입니다. null 또는 비어 있는 경우, <see cref="defaultNamespace"/>가 사용됩니다.</param>
-    /// <param name="path">식별자의 경로 구성 요소입니다.</param>
-    /// <exception cref="InvalidIdentifierException">제공된 네임스페이스 또는 경로가 유효하지 않은 경우 발생합니다.</exception>
-    public Identifier(string nameSpace, FilePath path)
-    {
-        if (!IsNamespaceValid(nameSpace))
-            throw new InvalidIdentifierException(GetInvalidNamespaceMessage(nameSpace));
-
-        if (!IsPathValid(path))
-            throw new InvalidIdentifierException(GetInvalidPathMessage(path));
-
-        _nameSpace = string.IsNullOrEmpty(nameSpace) ? defaultNamespace : nameSpace;
-        _path = path;
-    }
+        public static readonly Identifier empty = new Identifier();
         
-        
+        /// <summary>
+        /// 네임스페이스가 지정되지 않았을 때 사용되는 기본 네임스페이스입니다.
+        /// </summary>
+        public const string defaultNamespace = "runios";
 
-    /// <summary>
-    /// 식별자의 네임스페이스 구성 요소를 가져오거나 설정합니다.
-    /// </summary>
-    [AllowNull]
-    public string nameSpace
-    {
-        readonly get => string.IsNullOrEmpty(_nameSpace) ? defaultNamespace : _nameSpace;
-        set
+        /// <summary>
+        /// 네임스페이스와 경로를 구분하는 데 사용되는 문자입니다.
+        /// </summary>
+        public const char separator = ':';
+
+        /// <summary>
+        /// 지정된 경로와 기본 네임스페이스로 <see cref="Identifier"/> 구조체의 새 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="path">식별자의 경로 구성 요소입니다.</param>
+        /// <exception cref="InvalidIdentifierException">제공된 경로가 유효하지 않은 경우 발생합니다.</exception>
+        public Identifier(FilePath path)
         {
-            if (string.IsNullOrEmpty(value))
-                _nameSpace = defaultNamespace;
-            else if (IsNamespaceValid(value))
-                _nameSpace = value;
-            else
-                throw new InvalidIdentifierException(GetInvalidNamespaceMessage(value));
+            if (!IsPathValid(path))
+                throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
+
+            _nameSpace = defaultNamespace;
+            _path = path;
         }
-    }
-    [SerializeField, FieldName("gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
 
-    /// <summary>
-    /// 식별자의 경로 구성 요소를 가져오거나 설정합니다.
-    /// </summary>
-    public FilePath path
-    {
-        readonly get => _path;
-        set
+        /// <summary>
+        /// 지정된 네임스페이스와 경로로 <see cref="Identifier"/> 구조체의 새 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="nameSpace">식별자의 네임스페이스 구성 요소입니다. null 또는 비어 있는 경우, <see cref="defaultNamespace"/>가 사용됩니다.</param>
+        /// <param name="path">식별자의 경로 구성 요소입니다.</param>
+        /// <exception cref="InvalidIdentifierException">제공된 네임스페이스 또는 경로가 유효하지 않은 경우 발생합니다.</exception>
+        public Identifier(string nameSpace, FilePath path)
         {
-            if (IsPathValid(value))
-                _path = value;
-            else
-                throw new InvalidIdentifierException(GetInvalidPathMessage(value));
+            if (!IsNamespaceValid(nameSpace))
+                throw new InvalidIdentifierException(GetInvalidNamespaceMessage(nameSpace));
+
+            if (!IsPathValid(path))
+                throw new InvalidIdentifierException(GetInvalidPathMessage(path));
+
+            _nameSpace = string.IsNullOrEmpty(nameSpace) ? defaultNamespace : nameSpace;
+            _path = path;
         }
-    }
-    [SerializeField, FieldName("gui.path"), JsonIgnore] FilePath _path;
-
-
-
-    void ISerializationCallbackReceiver.OnBeforeSerialize()
-    {
-        if (nameSpace == defaultNamespace)
-            nameSpace = null;
-        else if (!IsNamespaceValid(nameSpace))
-            nameSpace = defaultNamespace;
-            
-        if (!IsPathValid(path))
-            path = FilePath.empty;
-    }
-    void ISerializationCallbackReceiver.OnAfterDeserialize()
-    {
-        if (nameSpace == defaultNamespace)
-            nameSpace = null;
-        else if (!IsNamespaceValid(nameSpace))
-            nameSpace = defaultNamespace;
-            
-        if (!IsPathValid(path))
-            path = FilePath.empty;
-    }
         
         
-        
-    /// <summary>
-    /// 이 식별자의 문자열 표현을 반환합니다.
-    /// </summary>
-    /// <returns>"namespace:path" 형식의 문자열입니다.</returns>
-    public override readonly string ToString() => nameSpace + separator + path.ToString();
 
-
-
-    public static bool operator ==(Identifier lhs, Identifier rhs) => lhs.nameSpace == rhs.nameSpace && lhs.path == rhs.path;
-    public static bool operator !=(Identifier lhs, Identifier rhs) => !(lhs == rhs);
-        
-        
-        
-    /// <summary>
-    /// 이 <see cref="Identifier"/> 인스턴스와 다른 지정된 <see cref="Identifier"/> 인스턴스의 값이 같은지 여부를 결정합니다.
-    /// </summary>
-    /// <param name="other">현재 인스턴스와 비교할 <see cref="Identifier"/>입니다.</param>
-    /// <returns>지정된 <see cref="Identifier"/>가 현재 인스턴스와 같은 값을 가지면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-    public readonly bool Equals(Identifier other) => this == other;
-
-    /// <summary>
-    /// 이 <see cref="Identifier"/> 인스턴스와 지정된 <see cref="object"/>의 값이 같은지 여부를 결정합니다.
-    /// </summary>
-    /// <param name="obj">현재 인스턴스와 비교할 <see cref="object"/>입니다.</param>
-    /// <returns>지정된 <see cref="object"/>가 <see cref="Identifier"/>이고 현재 인스턴스와 같은 값을 가지면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
-    public override readonly bool Equals(object? obj)
-    {
-        if (obj is Identifier otherIdentifier)
-            return Equals(otherIdentifier);
-
-        return false;
-    }
-
-    /// <summary>
-    /// 이 <see cref="Identifier"/> 인스턴스의 해시 코드를 반환합니다.
-    /// </summary>
-    /// <returns>32비트 부호 있는 정수 해시 코드입니다.</returns>
-    public override readonly int GetHashCode() => nameSpace.GetHashCode() * path.GetHashCode();
-
-
-
-    public static implicit operator string(Identifier identifier) => identifier.ToString();
-    public static implicit operator Identifier(string identifier) => Parse(identifier);
-        
-
-        
-    /// <summary>
-    /// 식별자의 문자열 표현을 <see cref="Identifier"/> 구조체로 구문 분석합니다.
-    /// 문자열은 "namespace:path" 또는 "path" 형식일 수 있습니다 (후자의 경우 기본 네임스페이스가 사용됨).
-    /// </summary>
-    /// <param name="identifier">구문 분석할 문자열입니다.</param>
-    /// <returns>구문 분석된 문자열을 나타내는 <see cref="Identifier"/> 구조체입니다.</returns>
-    /// <exception cref="InvalidIdentifierException">식별자 문자열 형식이 유효하지 않은 경우 발생합니다.</exception>
-    public static Identifier Parse(string identifier)
-    {
-        // 식별자 문자열을 구분자 (':')를 기준으로 분리합니다.
-        var splittedSpan = identifier.AsSpan().Split(separator);
-
-        string nameSpace = string.Empty;
-        string path = string.Empty;
-
-        // 분리된 각 부분을 순회하여 네임스페이스와 경로를 할당합니다.
-        int splitCount = 0;
-        foreach (var item in splittedSpan)
+        /// <summary>
+        /// 식별자의 네임스페이스 구성 요소를 가져오거나 설정합니다.
+        /// </summary>
+        [AllowNull]
+        public string nameSpace
         {
-            if (splitCount == 0)
-                nameSpace = new string(item); // 첫 번째 부분은 네임스페이스로 간주합니다.
+            readonly get => string.IsNullOrEmpty(_nameSpace) ? defaultNamespace : _nameSpace;
+            set
+            {
+                if (string.IsNullOrEmpty(value))
+                    _nameSpace = defaultNamespace;
+                else if (IsNamespaceValid(value))
+                    _nameSpace = value;
+                else
+                    throw new InvalidIdentifierException(GetInvalidNamespaceMessage(value));
+            }
+        }
+        [SerializeField, FieldName("gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
+
+        /// <summary>
+        /// 식별자의 경로 구성 요소를 가져오거나 설정합니다.
+        /// </summary>
+        public FilePath path
+        {
+            readonly get => _path;
+            set
+            {
+                if (IsPathValid(value))
+                    _path = value;
+                else
+                    throw new InvalidIdentifierException(GetInvalidPathMessage(value));
+            }
+        }
+        [SerializeField, FieldName("gui.path"), JsonIgnore] FilePath _path;
+
+
+
+        void ISerializationCallbackReceiver.OnBeforeSerialize()
+        {
+            if (nameSpace == defaultNamespace)
+                nameSpace = null;
+            else if (!IsNamespaceValid(nameSpace))
+                nameSpace = defaultNamespace;
+            
+            if (!IsPathValid(path))
+                path = FilePath.empty;
+        }
+        void ISerializationCallbackReceiver.OnAfterDeserialize()
+        {
+            if (nameSpace == defaultNamespace)
+                nameSpace = null;
+            else if (!IsNamespaceValid(nameSpace))
+                nameSpace = defaultNamespace;
+            
+            if (!IsPathValid(path))
+                path = FilePath.empty;
+        }
+        
+        
+        
+        /// <summary>
+        /// 이 식별자의 문자열 표현을 반환합니다.
+        /// </summary>
+        /// <returns>"namespace:path" 형식의 문자열입니다.</returns>
+        public override readonly string ToString() => nameSpace + separator + path.ToString();
+
+
+
+        public static bool operator ==(Identifier lhs, Identifier rhs) => lhs.nameSpace == rhs.nameSpace && lhs.path == rhs.path;
+        public static bool operator !=(Identifier lhs, Identifier rhs) => !(lhs == rhs);
+        
+        
+        
+        /// <summary>
+        /// 이 <see cref="Identifier"/> 인스턴스와 다른 지정된 <see cref="Identifier"/> 인스턴스의 값이 같은지 여부를 결정합니다.
+        /// </summary>
+        /// <param name="other">현재 인스턴스와 비교할 <see cref="Identifier"/>입니다.</param>
+        /// <returns>지정된 <see cref="Identifier"/>가 현재 인스턴스와 같은 값을 가지면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
+        public readonly bool Equals(Identifier other) => this == other;
+
+        /// <summary>
+        /// 이 <see cref="Identifier"/> 인스턴스와 지정된 <see cref="object"/>의 값이 같은지 여부를 결정합니다.
+        /// </summary>
+        /// <param name="obj">현재 인스턴스와 비교할 <see cref="object"/>입니다.</param>
+        /// <returns>지정된 <see cref="object"/>가 <see cref="Identifier"/>이고 현재 인스턴스와 같은 값을 가지면 <see langword="true"/>이고, 그렇지 않으면 <see langword="false"/>입니다.</returns>
+        public override readonly bool Equals(object? obj)
+        {
+            if (obj is Identifier otherIdentifier)
+                return Equals(otherIdentifier);
+
+            return false;
+        }
+
+        /// <summary>
+        /// 이 <see cref="Identifier"/> 인스턴스의 해시 코드를 반환합니다.
+        /// </summary>
+        /// <returns>32비트 부호 있는 정수 해시 코드입니다.</returns>
+        public override readonly int GetHashCode() => nameSpace.GetHashCode() * path.GetHashCode();
+
+
+
+        public static implicit operator string(Identifier identifier) => identifier.ToString();
+        public static implicit operator Identifier(string identifier) => Parse(identifier);
+        
+
+        
+        /// <summary>
+        /// 식별자의 문자열 표현을 <see cref="Identifier"/> 구조체로 구문 분석합니다.
+        /// 문자열은 "namespace:path" 또는 "path" 형식일 수 있습니다 (후자의 경우 기본 네임스페이스가 사용됨).
+        /// </summary>
+        /// <param name="identifier">구문 분석할 문자열입니다.</param>
+        /// <returns>구문 분석된 문자열을 나타내는 <see cref="Identifier"/> 구조체입니다.</returns>
+        /// <exception cref="InvalidIdentifierException">식별자 문자열 형식이 유효하지 않은 경우 발생합니다.</exception>
+        public static Identifier Parse(string identifier)
+        {
+            // 식별자 문자열을 구분자 (':')를 기준으로 분리합니다.
+            var splittedSpan = identifier.AsSpan().Split(separator);
+
+            string nameSpace = string.Empty;
+            string path = string.Empty;
+
+            // 분리된 각 부분을 순회하여 네임스페이스와 경로를 할당합니다.
+            int splitCount = 0;
+            foreach (var item in splittedSpan)
+            {
+                if (splitCount == 0)
+                    nameSpace = new string(item); // 첫 번째 부분은 네임스페이스로 간주합니다.
+                else if (splitCount == 1)
+                    path = new string(item); // 두 번째 부분은 경로로 간주합니다.
+
+                splitCount++;
+            }
+
+            // 분리된 부분의 개수에 따라 유효성을 검사하고 값을 조정합니다.
+            if (splitCount <= 0)
+                return empty;
             else if (splitCount == 1)
-                path = new string(item); // 두 번째 부분은 경로로 간주합니다.
+            {
+                // 구분자가 없는 경우, 전체 문자열을 경로로 간주하고 네임스페이스는 기본값으로 설정합니다.
+                path = nameSpace;
+                nameSpace = defaultNamespace;
+            }
+            else if (splitCount > 2)
+                throw new InvalidIdentifierException($"Invalid identifier format: '{identifier}'. Contains too many '{separator}' separators."); // 구분자가 너무 많은 경우 예외를 발생시킵니다.
 
-            splitCount++;
+            // 구문 분석된 네임스페이스와 경로로 새 Identifier 인스턴스를 생성하여 반환합니다.
+            return new Identifier(nameSpace, path);
         }
 
-        // 분리된 부분의 개수에 따라 유효성을 검사하고 값을 조정합니다.
-        if (splitCount <= 0)
-            return empty;
-        else if (splitCount == 1)
+        /// <summary>
+        /// 네임스페이스의 유효성을 검사합니다.
+        /// 허용되는 문자: 'a-z', '0-9', '.', '-', '_'
+        /// </summary>
+        public static bool IsNamespaceValid([NotNullWhen(false)] string? nameSpace)
         {
-            // 구분자가 없는 경우, 전체 문자열을 경로로 간주하고 네임스페이스는 기본값으로 설정합니다.
-            path = nameSpace;
-            nameSpace = defaultNamespace;
+            if (string.IsNullOrEmpty(nameSpace))
+                return true; // 빈 문자열 또는 null은 유효한 네임스페이스로 간주 (기본값을 사용하거나 생략 가능)
+
+            return nameSpace.All(static item =>
+                (item >= 'a' && item <= 'z') || (item >= '0' && item <= '9') || item == '.' || item == '-' || item == '_');
         }
-        else if (splitCount > 2)
-            throw new InvalidIdentifierException($"Invalid identifier format: '{identifier}'. Contains too many '{separator}' separators."); // 구분자가 너무 많은 경우 예외를 발생시킵니다.
 
-        // 구문 분석된 네임스페이스와 경로로 새 Identifier 인스턴스를 생성하여 반환합니다.
-        return new Identifier(nameSpace, path);
+        /// <summary>
+        /// 경로의 유효성을 검사합니다.
+        /// 허용되는 문자: 'a-z', '0-9', '.', '/', '-', '_'
+        /// </summary>
+        public static bool IsPathValid(FilePath path)
+        {
+            if (path.IsEmpty())
+                return true; // 비어있는 경로는 유효한 경로로 간주
+
+            return path.value.All(static item =>
+                (item >= 'a' && item <= 'z') || (item >= '0' && item <= '9') || item == '.' || item == '/' || item == '-' || item == '_');
+        }
+        
+        
+        
+        public static string GetInvalidNamespaceMessage(string? nameSpace) => $"Invalid namespace: '{nameSpace}'. Allowed characters are 'a-z', '0-9', '.', '-', and '_'.";
+        
+        public static string GetInvalidPathMessage(FilePath path) => $"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.";
     }
-
-    /// <summary>
-    /// 네임스페이스의 유효성을 검사합니다.
-    /// 허용되는 문자: 'a-z', '0-9', '.', '-', '_'
-    /// </summary>
-    public static bool IsNamespaceValid([NotNullWhen(false)] string? nameSpace)
-    {
-        if (string.IsNullOrEmpty(nameSpace))
-            return true; // 빈 문자열 또는 null은 유효한 네임스페이스로 간주 (기본값을 사용하거나 생략 가능)
-
-        return nameSpace.All(static item =>
-            (item >= 'a' && item <= 'z') || (item >= '0' && item <= '9') || item == '.' || item == '-' || item == '_');
-    }
-
-    /// <summary>
-    /// 경로의 유효성을 검사합니다.
-    /// 허용되는 문자: 'a-z', '0-9', '.', '/', '-', '_'
-    /// </summary>
-    public static bool IsPathValid(FilePath path)
-    {
-        if (path.IsEmpty())
-            return true; // 비어있는 경로는 유효한 경로로 간주
-
-        return path.value.All(static item =>
-            (item >= 'a' && item <= 'z') || (item >= '0' && item <= '9') || item == '.' || item == '/' || item == '-' || item == '_');
-    }
-        
-        
-        
-    public static string GetInvalidNamespaceMessage(string? nameSpace) => $"Invalid namespace: '{nameSpace}'. Allowed characters are 'a-z', '0-9', '.', '-', and '_'.";
-        
-    public static string GetInvalidPathMessage(FilePath path) => $"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.";
 }

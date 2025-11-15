@@ -2,37 +2,38 @@
 using RuniOS.Editor.UIElements;
 using UnityEngine.UIElements;
 
-namespace RuniOS.Editor.IMGUI.Drawers;
-
-[CustomPropertyDrawer(typeof(HexColor))]
-public class HexColorPropertyDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers
 {
-    public override VisualElement CreatePropertyGUI(SerializedProperty property) => new HexColorField().SetProperty(property);
-
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(HexColor))]
+    public class HexColorPropertyDrawer : PropertyDrawer
     {
-        EditorGUI.BeginProperty(position, label, property);
-        Draw(position, property, label);
-        EditorGUI.EndProperty();
-    }
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new HexColorField().SetProperty(property);
 
-    public static void Draw(Rect position, SerializedProperty property, GUIContent label)
-    {
-        property = GetChildProperty(property);
-        EditorGUI.BeginChangeCheck();
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            EditorGUI.BeginProperty(position, label, property);
+            Draw(position, property, label);
+            EditorGUI.EndProperty();
+        }
 
-        HexColor.TryParse(property.stringValue, out Color color);
-        color = EditorGUI.ColorField(position, label, color);
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        {
+            property = GetChildProperty(property);
+            EditorGUI.BeginChangeCheck();
 
-        if (EditorGUI.EndChangeCheck())
-            property.stringValue = HexColor.ToHex(color);
-    }
+            HexColor.TryParse(property.stringValue, out Color color);
+            color = EditorGUI.ColorField(position, label, color);
+
+            if (EditorGUI.EndChangeCheck())
+                property.stringValue = HexColor.ToHex(color);
+        }
         
-    public static SerializedProperty GetChildProperty(SerializedProperty property)
-    {
-        property = property.Copy();
-        property.Next(true);
+        public static SerializedProperty GetChildProperty(SerializedProperty property)
+        {
+            property = property.Copy();
+            property.Next(true);
 
-        return property;
+            return property;
+        }
     }
 }

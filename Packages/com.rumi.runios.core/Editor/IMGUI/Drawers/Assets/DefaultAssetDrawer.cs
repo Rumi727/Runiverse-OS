@@ -1,11 +1,12 @@
 #nullable enable
-namespace RuniOS.Editor.IMGUI.Drawers.Assets;
-
-[CustomEditor(typeof(DefaultAsset))]
-public class DefaultAssetDrawer : UnityEditor.Editor
+namespace RuniOS.Editor.IMGUI.Drawers.Assets
 {
-    public override void OnInspectorGUI()
+    [CustomEditor(typeof(DefaultAsset))]
+    public class DefaultAssetDrawer : UnityEditor.Editor
     {
+        public override void OnInspectorGUI()
+        {
             
+        }
     }
 }

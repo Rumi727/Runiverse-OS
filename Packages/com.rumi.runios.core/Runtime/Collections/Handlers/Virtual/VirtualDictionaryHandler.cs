@@ -1,46 +1,47 @@
 ﻿#nullable enable
 using System.Collections;
 
-namespace RuniOS.Collections.Handlers.Virtual;
-
-public abstract class VirtualDictionaryHandler : DictionaryHandlerBase
+namespace RuniOS.Collections.Handlers.Virtual
 {
-    protected VirtualDictionaryHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
-    protected Hashtable synchronizedTable { get; } = new();
-
-    public override object? this[object key]
+    public abstract class VirtualDictionaryHandler : DictionaryHandlerBase
     {
-        get => synchronizedTable[key];
-        set => synchronizedTable[key] = value;
-    }
+        protected VirtualDictionaryHandler(IEnumerable targetCollection) : base(targetCollection) { }
 
-    public override int count => synchronizedTable.Count;
+        protected Hashtable synchronizedTable { get; } = new();
 
-    public override bool isReadOnly => true;
+        public override object? this[object key]
+        {
+            get => synchronizedTable[key];
+            set => synchronizedTable[key] = value;
+        }
 
-    public override bool isFixedSize => true;
+        public override int count => synchronizedTable.Count;
 
-    public override ICollection keys => synchronizedTable.Keys;
-    public override ICollection values => synchronizedTable.Values;
+        public override bool isReadOnly => true;
 
-    public override void Add(object key, object? value) => synchronizedTable.Add(key, value);
-    public override void Remove(object key) => synchronizedTable.Remove(key);
+        public override bool isFixedSize => true;
 
-    public override void Clear() => synchronizedTable.Clear();
+        public override ICollection keys => synchronizedTable.Keys;
+        public override ICollection values => synchronizedTable.Values;
 
-    public override bool Contains(object key) => synchronizedTable.Contains(key);
+        public override void Add(object key, object? value) => synchronizedTable.Add(key, value);
+        public override void Remove(object key) => synchronizedTable.Remove(key);
 
-    public override void CopyTo(Array array, int index) => synchronizedTable.CopyTo(array, index);
+        public override void Clear() => synchronizedTable.Clear();
 
-    public override IDictionaryEnumerator GetEnumerator() => synchronizedTable.GetEnumerator();
+        public override bool Contains(object key) => synchronizedTable.Contains(key);
 
-    public override void SynchronizeCollections()
-    {
-        synchronizedTable.Clear();
+        public override void CopyTo(Array array, int index) => synchronizedTable.CopyTo(array, index);
+
+        public override IDictionaryEnumerator GetEnumerator() => synchronizedTable.GetEnumerator();
+
+        public override void SynchronizeCollections()
+        {
+            synchronizedTable.Clear();
             
-        using Enumerator enumerator = new Enumerator(targetCollection);
-        while (enumerator.MoveNext())
-            synchronizedTable.Add(enumerator.Key, enumerator.Value);
+            using Enumerator enumerator = new Enumerator(targetCollection);
+            while (enumerator.MoveNext())
+                synchronizedTable.Add(enumerator.Key, enumerator.Value);
+        }
     }
 }

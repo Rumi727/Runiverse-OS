@@ -1,22 +1,23 @@
 #nullable enable
 using System.IO;
 
-namespace RuniOS.Editor;
-
-public partial class EditorTool
+namespace RuniOS.Editor
 {
-    public static string AbsolutePathToRelativePath(string path) => path.Remove(Directory.GetCurrentDirectory().Length + 1);
-
-    public static bool PathIsProjectPath(string path)
+    public partial class EditorTool
     {
-        path = path.Replace("\\", "/");
-        string projectPath = Directory.GetCurrentDirectory();
+        public static string AbsolutePathToRelativePath(string path) => path.Remove(Directory.GetCurrentDirectory().Length + 1);
 
-        if (path.StartsWith(Path.Combine(projectPath, "Assets").Replace("\\", "/"), StringComparison.Ordinal))
-            return true;
-        else if (path.StartsWith(Path.Combine(projectPath, "Packages").Replace("\\", "/"), StringComparison.Ordinal))
-            return true;
+        public static bool PathIsProjectPath(string path)
+        {
+            path = path.Replace("\\", "/");
+            string projectPath = Directory.GetCurrentDirectory();
 
-        return false;
+            if (path.StartsWith(Path.Combine(projectPath, "Assets").Replace("\\", "/"), StringComparison.Ordinal))
+                return true;
+            else if (path.StartsWith(Path.Combine(projectPath, "Packages").Replace("\\", "/"), StringComparison.Ordinal))
+                return true;
+
+            return false;
+        }
     }
 }

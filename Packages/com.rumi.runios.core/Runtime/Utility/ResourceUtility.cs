@@ -1,82 +1,83 @@
 #nullable enable
-namespace RuniOS.Utility;
-
-public static class ResourceUtility
+namespace RuniOS.Utility
 {
-    /// <summary>
-    /// 빈 게임 오브젝트
-    /// </summary>
-    public static Transform emptyTransform
+    public static class ResourceUtility
     {
-        get
+        /// <summary>
+        /// 빈 게임 오브젝트
+        /// </summary>
+        public static Transform emptyTransform
         {
-            if (_emptyTransform == null)
-                _emptyTransform = Resources.Load<Transform>("RuniOS/Empty Transform");
-
-            return _emptyTransform;
-        }
-    }
-    static Transform? _emptyTransform;
-
-    /// <summary>
-    /// 사각 트랜스폼이 추가된 빈 게임 오브젝트
-    /// </summary>
-    public static RectTransform emptyRectTransform
-    {
-        get
-        {
-            if (_emptyRectTransform == null)
-                _emptyRectTransform = Resources.Load<RectTransform>("RuniOS/Empty Rect Transform");
-
-            return _emptyRectTransform;
-        }
-    }
-    static RectTransform? _emptyRectTransform;
-
-
-
-    /// <summary>
-    /// 기본 메테리얼
-    /// </summary>
-    public static Material defaultMaterial
-    {
-        get
-        {
-            if (_defaultMaterial == null)
-                _defaultMaterial = Resources.Load<Material>("RuniOS/Default Material");
-
-            return _defaultMaterial;
-        }
-    }
-    static Material? _defaultMaterial;
-
-    /// <summary>
-    /// 단색 메테리얼
-    /// </summary>
-    public static Material coloredMaterial
-    {
-        get
-        {
-            if (_coloredMaterial == null)
+            get
             {
-                Shader shader = Shader.Find("Hidden/Internal-Colored");
-                _coloredMaterial = new Material(shader)
-                {
-                    hideFlags = HideFlags.HideAndDontSave
-                };
+                if (_emptyTransform == null)
+                    _emptyTransform = Resources.Load<Transform>("RuniOS/Empty Transform");
 
-                _coloredMaterial.SetInt(srcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                _coloredMaterial.SetInt(dstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                _coloredMaterial.SetInt(cull, (int)UnityEngine.Rendering.CullMode.Off);
-                _coloredMaterial.SetInt(zWrite, 0);
+                return _emptyTransform;
             }
-
-            return _coloredMaterial;
         }
+        static Transform? _emptyTransform;
+
+        /// <summary>
+        /// 사각 트랜스폼이 추가된 빈 게임 오브젝트
+        /// </summary>
+        public static RectTransform emptyRectTransform
+        {
+            get
+            {
+                if (_emptyRectTransform == null)
+                    _emptyRectTransform = Resources.Load<RectTransform>("RuniOS/Empty Rect Transform");
+
+                return _emptyRectTransform;
+            }
+        }
+        static RectTransform? _emptyRectTransform;
+
+
+
+        /// <summary>
+        /// 기본 메테리얼
+        /// </summary>
+        public static Material defaultMaterial
+        {
+            get
+            {
+                if (_defaultMaterial == null)
+                    _defaultMaterial = Resources.Load<Material>("RuniOS/Default Material");
+
+                return _defaultMaterial;
+            }
+        }
+        static Material? _defaultMaterial;
+
+        /// <summary>
+        /// 단색 메테리얼
+        /// </summary>
+        public static Material coloredMaterial
+        {
+            get
+            {
+                if (_coloredMaterial == null)
+                {
+                    Shader shader = Shader.Find("Hidden/Internal-Colored");
+                    _coloredMaterial = new Material(shader)
+                    {
+                        hideFlags = HideFlags.HideAndDontSave
+                    };
+
+                    _coloredMaterial.SetInt(srcBlend, (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    _coloredMaterial.SetInt(dstBlend, (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    _coloredMaterial.SetInt(cull, (int)UnityEngine.Rendering.CullMode.Off);
+                    _coloredMaterial.SetInt(zWrite, 0);
+                }
+
+                return _coloredMaterial;
+            }
+        }
+        static Material? _coloredMaterial;
+        static readonly int srcBlend = Shader.PropertyToID("_SrcBlend");
+        static readonly int dstBlend = Shader.PropertyToID("_DstBlend");
+        static readonly int cull = Shader.PropertyToID("_Cull");
+        static readonly int zWrite = Shader.PropertyToID("_ZWrite");
     }
-    static Material? _coloredMaterial;
-    static readonly int srcBlend = Shader.PropertyToID("_SrcBlend");
-    static readonly int dstBlend = Shader.PropertyToID("_DstBlend");
-    static readonly int cull = Shader.PropertyToID("_Cull");
-    static readonly int zWrite = Shader.PropertyToID("_ZWrite");
 }

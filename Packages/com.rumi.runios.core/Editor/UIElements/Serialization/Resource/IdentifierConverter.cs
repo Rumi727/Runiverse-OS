@@ -2,23 +2,24 @@
 using RuniOS.Resource;
 using UnityEditor.UIElements;
 
-namespace RuniOS.Editor.UIElements.Serialization.Resource;
-
-public sealed class IdentifierConverter : UxmlAttributeConverter<Identifier>
+namespace RuniOS.Editor.UIElements.Serialization.Resource
 {
-    public override Identifier FromString(string value)
+    public sealed class IdentifierConverter : UxmlAttributeConverter<Identifier>
     {
-        try
+        public override Identifier FromString(string value)
         {
-            return value;
-        }
-        catch (InvalidIdentifierException e)
-        {
-            Debug.LogException(e);
-        }
+            try
+            {
+                return value;
+            }
+            catch (InvalidIdentifierException e)
+            {
+                Debug.LogException(e);
+            }
 
-        return Identifier.empty;
-    }
+            return Identifier.empty;
+        }
         
-    public override string ToString(Identifier value) => value;
+        public override string ToString(Identifier value) => value;
+    }
 }

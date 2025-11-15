@@ -2,16 +2,17 @@
 using RuniOS.Editor.IMGUI.Drawers.IO;
 using RuniOS.IO;
 
-namespace RuniOS.Editor.Serialization.Converters.IO;
-
-[CustomPropertyConverter(typeof(FilePath))]
-public class FilePathPropertyConverter : PropertyConverter
+namespace RuniOS.Editor.Serialization.Converters.IO
 {
-    public override object Read(SerializedProperty property, Type propertyType) => new FilePath(FilePathPropertyDrawer.GetChildProperty(property).stringValue);
-        
-    public override void Write(SerializedProperty property, Type propertyType, object? value)
+    [CustomPropertyConverter(typeof(FilePath))]
+    public class FilePathPropertyConverter : PropertyConverter
     {
-        if (value is FilePath filePath)
-            FilePathPropertyDrawer.GetChildProperty(property).stringValue = filePath.value;
+        public override object Read(SerializedProperty property, Type propertyType) => new FilePath(FilePathPropertyDrawer.GetChildProperty(property).stringValue);
+        
+        public override void Write(SerializedProperty property, Type propertyType, object? value)
+        {
+            if (value is FilePath filePath)
+                FilePathPropertyDrawer.GetChildProperty(property).stringValue = filePath.value;
+        }
     }
 }

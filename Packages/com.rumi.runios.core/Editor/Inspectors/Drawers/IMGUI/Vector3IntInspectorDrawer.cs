@@ -2,20 +2,21 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 
-namespace RuniOS.Editor.Inspectors.Drawers.IMGUI;
-
-[CustomInspectorDrawer(typeof(Vector3Int))]
-public class Vector3IntInspectorDrawer : GenericInspectorDrawer
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    public Vector3IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
-
-    protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.Vector3IntField(position, label, (Vector3Int)value!);
-        
-    public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+    [CustomInspectorDrawer(typeof(Vector3Int))]
+    public class Vector3IntInspectorDrawer : GenericInspectorDrawer
     {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        public Vector3IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+
+        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.Vector3IntField(position, label, (Vector3Int)value!);
+        
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        {
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 2) + 2;
+        }
     }
 }

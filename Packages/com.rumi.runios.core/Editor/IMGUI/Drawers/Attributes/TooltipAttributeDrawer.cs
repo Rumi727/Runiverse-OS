@@ -1,18 +1,19 @@
 #nullable enable
 using TooltipAttribute = RuniOS.Utility.Attributes.TooltipAttribute;
 
-namespace RuniOS.Editor.IMGUI.Drawers.Attributes;
-
-[CustomPropertyDrawer(typeof(TooltipAttribute))]
-public class TooltipAttributeAttributeDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers.Attributes
 {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(TooltipAttribute))]
+    public class TooltipAttributeAttributeDrawer : PropertyDrawer
     {
-        TooltipAttribute attribute = (TooltipAttribute)this.attribute;
-        label.tooltip = GetTextOrKey(attribute.text);
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+        {
+            TooltipAttribute attribute = (TooltipAttribute)this.attribute;
+            label.tooltip = GetTextOrKey(attribute.text);
 
-        EditorGUI.PropertyField(position, property, label, property.IsGeneric());
+            EditorGUI.PropertyField(position, property, label, property.IsGeneric());
+        }
+
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
     }
-
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
 }

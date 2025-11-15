@@ -1,20 +1,21 @@
 #nullable enable
-namespace RuniOS.Editor.Localizations;
-
-public sealed class EditorLanguageConfigAsset : RuniOSConfigObject<EditorLanguageConfigAsset>
+namespace RuniOS.Editor.Localizations
 {
-    public static string currentLanguage
+    public sealed class EditorLanguageConfigAsset : RuniOSConfigObject<EditorLanguageConfigAsset>
     {
-        get => instance._currentLanguage;
-        set
+        public static string currentLanguage
         {
-            instance._currentLanguage = value;
-            instance.SetDirty();
+            get => instance._currentLanguage;
+            set
+            {
+                instance._currentLanguage = value;
+                instance.SetDirty();
 
-            EditorLocalization._onLanguageUpdate?.Invoke();
+                EditorLocalization._onLanguageUpdate?.Invoke();
+            }
         }
-    }
-    [SerializeField] string _currentLanguage = "en_us";
+        [SerializeField] string _currentLanguage = "en_us";
         
-    void OnValidate() => EditorLocalization._onLanguageUpdate?.Invoke();
+        void OnValidate() => EditorLocalization._onLanguageUpdate?.Invoke();
+    }
 }

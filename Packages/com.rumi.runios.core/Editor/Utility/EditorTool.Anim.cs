@@ -2,40 +2,41 @@
 using System.Diagnostics.CodeAnalysis;
 using UnityEditor.AnimatedValues;
 
-namespace RuniOS.Editor;
-
-public partial class EditorTool
+namespace RuniOS.Editor
 {
-    public static bool FadeGroup(AnimBool animBool, Action action)
+    public partial class EditorTool
     {
-        if (EditorGUILayout.BeginFadeGroup(animBool.faded))
+        public static bool FadeGroup(AnimBool animBool, Action action)
         {
-            try
+            if (EditorGUILayout.BeginFadeGroup(animBool.faded))
             {
-                if (animBool.isAnimating)
-                    RepaintCurrentWindow();
+                try
+                {
+                    if (animBool.isAnimating)
+                        RepaintCurrentWindow();
 
-                action.Invoke();
-            }
-            finally
-            {
-                EditorGUILayout.EndFadeGroup();
-                Space(-2f.Lerp(0, animBool.faded).RoundToInt());
+                    action.Invoke();
+                }
+                finally
+                {
+                    EditorGUILayout.EndFadeGroup();
+                    Space(-2f.Lerp(0, animBool.faded).RoundToInt());
+                }
+
+                return true;
             }
 
-            return true;
+            EditorGUILayout.EndFadeGroup();
+
+            return false;
         }
 
-        EditorGUILayout.EndFadeGroup();
+        public static bool FadeGroup([AllowNull] ref AnimBool animBool, bool target, Action action)
+        {
+            animBool ??= new AnimBool(target);
+            animBool.target = target;
 
-        return false;
-    }
-
-    public static bool FadeGroup([AllowNull] ref AnimBool animBool, bool target, Action action)
-    {
-        animBool ??= new AnimBool(target);
-        animBool.target = target;
-
-        return FadeGroup(animBool, action);
+            return FadeGroup(animBool, action);
+        }
     }
 }

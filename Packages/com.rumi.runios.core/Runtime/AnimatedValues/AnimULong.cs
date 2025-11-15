@@ -1,12 +1,13 @@
 ﻿#nullable enable
-namespace RuniOS.AnimatedValues;
-
-[Serializable]
-public class AnimULong : BaseAnimValue<ulong>
+namespace RuniOS.AnimatedValues
 {
-    public AnimULong(ulong value) : base(value) { }
+    [Serializable]
+    public class AnimULong : BaseAnimValue<ulong>
+    {
+        public AnimULong(ulong value) : base(value) { }
         
-    public AnimULong(ulong value, EasingFunction.Ease easing, double duration) : base(value, easing, duration) { }
+        public AnimULong(ulong value, EasingFunction.Ease easing, double duration) : base(value, easing, duration) { }
 
-    public override ulong value => MathUtility.Lerp(start, target, progress);
+        public override ulong value => MathUtility.Lerp(start, target, progress);
+    }
 }

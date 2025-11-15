@@ -1,29 +1,30 @@
 #nullable enable
 
-namespace RuniOS.Editor.IMGUI.Drawers.Attributes;
-
-[CustomPropertyDrawer(typeof(NotNullFieldAttribute))]
-public class NotNullFieldAttributeDrawer : PropertyDrawer
+namespace RuniOS.Editor.IMGUI.Drawers.Attributes
 {
-    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    [CustomPropertyDrawer(typeof(NotNullFieldAttribute))]
+    public class NotNullFieldAttributeDrawer : PropertyDrawer
     {
-        if (property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            float labelWidth = EditorGUIUtility.labelWidth;
-            float fieldWidth = position.width - EditorGUIUtility.labelWidth;
+            if (property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == null)
+            {
+                float labelWidth = EditorGUIUtility.labelWidth;
+                float fieldWidth = position.width - EditorGUIUtility.labelWidth;
                 
-            position.width = labelWidth + (fieldWidth * 0.6f);
-            EditorGUI.PropertyField(position, property, label);
+                position.width = labelWidth + (fieldWidth * 0.6f);
+                EditorGUI.PropertyField(position, property, label);
 
-            position.x += position.width + 4;
-            position.width = fieldWidth * 0.4f;
-            position.width -= 4;
+                position.x += position.width + 4;
+                position.width = fieldWidth * 0.4f;
+                position.width -= 4;
 
-            EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
+                EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
+            }
+            else
+                EditorGUI.PropertyField(position, property, label, property.IsGeneric());
         }
-        else
-            EditorGUI.PropertyField(position, property, label, property.IsGeneric());
-    }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUI.GetPropertyHeight(property, label);
+    }
 }

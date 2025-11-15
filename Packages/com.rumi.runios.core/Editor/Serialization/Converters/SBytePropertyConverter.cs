@@ -1,9 +1,10 @@
 ﻿#nullable enable
-namespace RuniOS.Editor.Serialization.Converters;
-
-[CustomPropertyConverter(typeof(sbyte))]
-public class SBytePropertyConverter : PropertyConverter
+namespace RuniOS.Editor.Serialization.Converters
 {
-    public override object Read(SerializedProperty property, Type propertyType) => (sbyte)property.intValue;
-    public override void Write(SerializedProperty property, Type propertyType, object? value) => property.intValue = (int)(value ?? 0);
+    [CustomPropertyConverter(typeof(sbyte))]
+    public class SBytePropertyConverter : PropertyConverter
+    {
+        public override object Read(SerializedProperty property, Type propertyType) => (sbyte)property.intValue;
+        public override void Write(SerializedProperty property, Type propertyType, object? value) => property.intValue = (int)(value ?? 0);
+    }
 }

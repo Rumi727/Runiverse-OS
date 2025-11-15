@@ -1,10 +1,11 @@
 ﻿#nullable enable
-namespace RuniOS.Inspectors;
-
-public interface IInspectorActionElement : IInspectorElement
+namespace RuniOS.Inspectors
 {
-    Type? returnType { get; }
-    RuniNullabilityInfo? returnNullabilityInfo { get; }
+    public interface IInspectorActionElement : IInspectorElement
+    {
+        Type? returnType { get; }
+        RuniNullabilityInfo? returnNullabilityInfo { get; }
 
-    void Execute(object?[] parameters);
+        void Execute(object?[] parameters);
+    }
 }

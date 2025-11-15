@@ -7,228 +7,229 @@ using RuniOS.Inspectors.Drawers;
 using RuniOS.Linq;
 using System.Collections.Immutable;
 
-namespace RuniOS.Editor.Inspectors;
-
-public sealed class Inspector : IInspector
+namespace RuniOS.Editor.Inspectors
 {
-    /// <summary>
-    /// 루트 인스펙터를 가져옵니다.
-    /// </summary>
-    public Inspector rootInspector { get; }
-        
-    public IInspectable? inspectable { get; private set; }
-
-    public IInspectorElement? element => elements.Length == 1 ? elements[0] : null;
-    public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
-        
-    public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
-        
-    public InspectorFlags inspectorFlags { get; private set; }
-        
-    (string label, string message)? lastException = null;
-
-    public Inspector() => rootInspector = this;
-        
-    public Inspector(Inspector? rootInspector) : this()
+    public sealed class Inspector : IInspector
     {
-        if (rootInspector != null)
-            this.rootInspector = rootInspector;
-    }
+        /// <summary>
+        /// 루트 인스펙터를 가져옵니다.
+        /// </summary>
+        public Inspector rootInspector { get; }
         
-    public Inspector(object instance) : this(new InspectableObject(instance)) { }
-    public Inspector(Type type) : this(new InspectableObject(type)) { }
-    public Inspector(Type type, params object[] instances) : this(new InspectableObject(type, instances)) { }
-    public Inspector(Type type, IEnumerable<object> instances) : this(new InspectableObject(type, instances)) { }
+        public IInspectable? inspectable { get; private set; }
 
-    public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(inspectable, flags);
-    public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(elements, flags);
+        public IInspectorElement? element => elements.Length == 1 ? elements[0] : null;
+        public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
+        
+        public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
+        
+        public InspectorFlags inspectorFlags { get; private set; }
+        
+        (string label, string message)? lastException = null;
 
-    public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
-    {
-        Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
-        if (flags.HasFlagFast(InspectorFlags.Debug))
-            predicate = x => x.attribute.allowInDebug;
-            
-        if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
+        public Inspector() => rootInspector = this;
+        
+        public Inspector(Inspector? rootInspector) : this()
         {
-            try
-            {
-                ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList, rootInspector);
-                    
-                elements = ImmutableArray<IInspectorElement>.Empty;
-                drawers = ImmutableArray.Create<IMGUIInspectorDrawer?>(drawer);
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                lastException = (inspectable.inspectionDisplayName, e.ToString());
-
-                return;
-            }
+            if (rootInspector != null)
+                this.rootInspector = rootInspector;
         }
-        else
+        
+        public Inspector(object instance) : this(new InspectableObject(instance)) { }
+        public Inspector(Type type) : this(new InspectableObject(type)) { }
+        public Inspector(Type type, params object[] instances) : this(new InspectableObject(type, instances)) { }
+        public Inspector(Type type, IEnumerable<object> instances) : this(new InspectableObject(type, instances)) { }
+
+        public Inspector(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(inspectable, flags);
+        public Inspector(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List) : this() => Rebuild(elements, flags);
+
+        public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
-            try
-            {
-                elements = inspectable.GetElements(flags).ToImmutableArray();
-            }
-            catch (Exception e)
-            {
-                Debug.LogException(e);
-                lastException = (inspectable.inspectionDisplayName, e.ToString());
-
-                return;
-            }
-
-            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
-        }
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
             
-        this.inspectable = inspectable;
-        inspectorFlags = flags;
-    }
-
-    public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
-    {
-        lastException = null;
-        if (!element.HasFlags(flags) && !skipFlagCheck)
-            return;
-            
-        Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
-        if (flags.HasFlagFast(InspectorFlags.Debug))
-            predicate = x => x.attribute.allowInDebug;
-
-        elements = ImmutableArray.Create(element);
-        drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector, predicate));
-
-        inspectable = null;
-        inspectorFlags = flags;
-    }
-
-    public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
-    {
-        lastException = null;
-
-        if (!skipFlagCheck)
-            elements = elements.Where(x => x.HasFlags(flags));
-
-        Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
-        if (flags.HasFlagFast(InspectorFlags.Debug))
-            predicate = x => x.attribute.allowInDebug;
-            
-        this.elements = elements.ToImmutableArray();
-        drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
-            
-        inspectable = null;
-        inspectorFlags = flags;
-    }
-
-
-    public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(Vector2.zero, label != null ? new GUIContent(label) : null, isInArray);
-    public void DrawLayout(GUIContent? label, bool isInArray = false) => DrawLayout(Vector2.zero, label, isInArray);
-    public void DrawLayout(Vector2 offset, string? label = null, bool isInArray = false) => DrawLayout(offset, label != null ? new GUIContent(label) : null, isInArray);
-    public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
-    {
-        Rect rect = EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray));
-        rect.x += offset.x;
-        rect.width -= offset.x;
-            
-        rect.y += offset.y;
-        rect.height -= offset.y;
-            
-        Draw(rect, label, isInArray);
-    }
-
-    public void Draw(Rect position, string? label = null, bool isInArray = false, Rect? clipping = null) => Draw(position, label != null ? new GUIContent(label) : null, isInArray, clipping);
-    public void Draw(Rect position, GUIContent? label, bool isInArray = false, Rect? clipping = null)
-    {
-        if (lastException != null)
-        {
-            EditorGUI.LabelField(position, label ?? new GUIContent(lastException.Value.label), new GUIContent(lastException.Value.message));
-            return;
-        }
-
-        clipping ??= position;
-
-        if (drawers.Length > 1)
-            GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
-            
-        Rect elementPosition = position;
-        foreach (var item in drawers.WhereNotNull())
-        {
-            GUIContent elementLabel;
-            if (inspectable is IInspectableList)
-                elementLabel = label ?? GUIContent.none;
-            else
-                elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
-
-            if (drawers.Length > 1)
+            if (inspectable is IInspectableList inspectableList && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
             {
                 try
                 {
-                    elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
+                    ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList, rootInspector);
+                    
+                    elements = ImmutableArray<IInspectorElement>.Empty;
+                    drawers = ImmutableArray.Create<IMGUIInspectorDrawer?>(drawer);
                 }
-                catch (ExitGUIException)
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    lastException = (inspectable.inspectionDisplayName, e.ToString());
+
+                    return;
+                }
+            }
+            else
+            {
+                try
+                {
+                    elements = inspectable.GetElements(flags).ToImmutableArray();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                    lastException = (inspectable.inspectionDisplayName, e.ToString());
+
+                    return;
+                }
+
+                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
+            }
+            
+            this.inspectable = inspectable;
+            inspectorFlags = flags;
+        }
+
+        public void Rebuild(IInspectorElement element, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
+        {
+            lastException = null;
+            if (!element.HasFlags(flags) && !skipFlagCheck)
+                return;
+            
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+
+            elements = ImmutableArray.Create(element);
+            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, rootInspector, predicate));
+
+            inspectable = null;
+            inspectorFlags = flags;
+        }
+
+        public void Rebuild(IEnumerable<IInspectorElement> elements, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool skipFlagCheck = false)
+        {
+            lastException = null;
+
+            if (!skipFlagCheck)
+                elements = elements.Where(x => x.HasFlags(flags));
+
+            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            if (flags.HasFlagFast(InspectorFlags.Debug))
+                predicate = x => x.attribute.allowInDebug;
+            
+            this.elements = elements.ToImmutableArray();
+            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, rootInspector, predicate)).ToImmutableArray();
+            
+            inspectable = null;
+            inspectorFlags = flags;
+        }
+
+
+        public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(Vector2.zero, label != null ? new GUIContent(label) : null, isInArray);
+        public void DrawLayout(GUIContent? label, bool isInArray = false) => DrawLayout(Vector2.zero, label, isInArray);
+        public void DrawLayout(Vector2 offset, string? label = null, bool isInArray = false) => DrawLayout(offset, label != null ? new GUIContent(label) : null, isInArray);
+        public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
+        {
+            Rect rect = EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray));
+            rect.x += offset.x;
+            rect.width -= offset.x;
+            
+            rect.y += offset.y;
+            rect.height -= offset.y;
+            
+            Draw(rect, label, isInArray);
+        }
+
+        public void Draw(Rect position, string? label = null, bool isInArray = false, Rect? clipping = null) => Draw(position, label != null ? new GUIContent(label) : null, isInArray, clipping);
+        public void Draw(Rect position, GUIContent? label, bool isInArray = false, Rect? clipping = null)
+        {
+            if (lastException != null)
+            {
+                EditorGUI.LabelField(position, label ?? new GUIContent(lastException.Value.label), new GUIContent(lastException.Value.message));
+                return;
+            }
+
+            clipping ??= position;
+
+            if (drawers.Length > 1)
+                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
+            
+            Rect elementPosition = position;
+            foreach (var item in drawers.WhereNotNull())
+            {
+                GUIContent elementLabel;
+                if (inspectable is IInspectableList)
+                    elementLabel = label ?? GUIContent.none;
+                else
+                    elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
+
+                if (drawers.Length > 1)
+                {
+                    try
+                    {
+                        elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
+                    }
+                    catch (ExitGUIException)
+                    {
+                        throw;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                        elementPosition.height = EditorGUIUtility.singleLineHeight;
+                    }
+                }
+
+                if (drawers.Length > 1)
+                    GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
+                
+                try
+                {
+                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray, clipping);
+                }
+                catch (ExitGUIException) 
                 {
                     throw;
                 }
                 catch (Exception e)
                 {
+                    EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent($"{e.GetType().Name}: {e.Message}"));
                     Debug.LogException(e);
-                    elementPosition.height = EditorGUIUtility.singleLineHeight;
                 }
-            }
-
-            if (drawers.Length > 1)
-                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
                 
-            try
-            {
-                item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray, clipping);
-            }
-            catch (ExitGUIException) 
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent($"{e.GetType().Name}: {e.Message}"));
-                Debug.LogException(e);
-            }
+                if (drawers.Length > 1)
+                    GUI.EndClip();
                 
+                elementPosition.y += elementPosition.height + 2;
+            }
+            
             if (drawers.Length > 1)
                 GUI.EndClip();
-                
-            elementPosition.y += elementPosition.height + 2;
         }
-            
-        if (drawers.Length > 1)
-            GUI.EndClip();
-    }
 
-    public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
-    {
-        if (lastException != null)
-            return EditorGUIUtility.singleLineHeight;
-            
-        return (drawers.WhereNotNull().Sum(item =>
+        public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
-            try
+            if (lastException != null)
+                return EditorGUIUtility.singleLineHeight;
+            
+            return (drawers.WhereNotNull().Sum(item =>
             {
-                return item.GetHeight(label, flags, isInArray) + 2;
-            }
-            catch (ExitGUIException) 
-            {
-                throw;
-            }
-            catch (Exception e)
-            {
-                if (item.element != null)
-                    Debug.LogException(new InspectorElementException($"Exception occurred while getting height of {item.element.name}", item.element.name, e));
-                else
-                    Debug.LogException(e);
+                try
+                {
+                    return item.GetHeight(label, flags, isInArray) + 2;
+                }
+                catch (ExitGUIException) 
+                {
+                    throw;
+                }
+                catch (Exception e)
+                {
+                    if (item.element != null)
+                        Debug.LogException(new InspectorElementException($"Exception occurred while getting height of {item.element.name}", item.element.name, e));
+                    else
+                        Debug.LogException(e);
                     
-                return EditorGUIUtility.singleLineHeight + 2;
-            }
-        }) - 2).Clamp(0);
+                    return EditorGUIUtility.singleLineHeight + 2;
+                }
+            }) - 2).Clamp(0);
+        }
     }
 }

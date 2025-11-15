@@ -2,20 +2,21 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 
-namespace RuniOS.Editor.Inspectors.Drawers.IMGUI;
-
-[CustomInspectorDrawer(typeof(Rect))]
-public class RectInspectorDrawer : GenericInspectorDrawer
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    public RectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
-
-    protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.RectField(position, label, (Rect)value!);
-        
-    public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+    [CustomInspectorDrawer(typeof(Rect))]
+    public class RectInspectorDrawer : GenericInspectorDrawer
     {
-        if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-            return EditorGUIUtility.singleLineHeight;
-        else
-            return (EditorGUIUtility.singleLineHeight * 3) + 4;
+        public RectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+
+        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.RectField(position, label, (Rect)value!);
+        
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        {
+            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return (EditorGUIUtility.singleLineHeight * 3) + 4;
+        }
     }
 }
