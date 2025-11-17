@@ -15,6 +15,8 @@ When this library is completed, it will replace the existing [SC KRM 1.0](https:
   * 항상 퍼블릭 프로퍼티를 사용해야하며, 정적 멤버는 허용되지 않습니다.
 * 추후 유니티가 CoreCLR로 전환될 가능성도 고려해야합니다.
   * 현재 이 프로젝트가 사용중인 C# 언어 버전은 10 입니다. (global using 사랑해요)
+  * 아 맞다 파일 스코프 네임스페이스 절대엄금
+    * 미친 유니티가 올바른 MonoBehaviour나 ScriptableObject, Editor등으로 인식 못함 (= 직렬화가 안됨)
 * 유니티 에디터 자채를 패치하여 Roslyn 버전을 올려 C# 버전을 올릴 수 있지만, 이 프로젝트는 모두가 사용할 수 있게끔 의도하였기에 (실제로 쓰는 사람은 없겠지만...) 가능한 유니티 순정과의 호환성을 염두에 두고 제작 중입니다.
 
 ## TODO
