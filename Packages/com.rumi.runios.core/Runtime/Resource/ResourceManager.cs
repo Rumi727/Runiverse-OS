@@ -57,7 +57,7 @@ namespace RuniOS.Resource
                         {
                             await assetRegistry.Reload
                             (
-                                ResourcePack.enabledPacks,
+                                ResourcePack.enabledPacks.Where(x => x.isValid),
                                 Progress.Create<float>(x =>
                                 {
                                     assetRegistryProgresses[targetIndex] = x;
