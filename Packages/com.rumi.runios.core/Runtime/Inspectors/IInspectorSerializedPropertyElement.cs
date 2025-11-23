@@ -15,5 +15,5 @@ namespace RuniOS.Inspectors
         /// </summary>
         UnityEditor.SerializedProperty property { get; }
     }
-#endif
 }
+#endif
