@@ -173,10 +173,10 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public UniTask<IEnumerable<string>> ReadLines()
+        public IAsyncEnumerable<string> ReadLines()
         {
             ThrowIfDeletedException();
-            return ioHandler?.ReadLines() ?? UniTask.FromResult(Encoding.UTF8.GetString(content).GetLines());
+            return ioHandler?.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToAsyncEnumerable();
         }
 
         /// <summary>

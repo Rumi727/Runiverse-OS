@@ -186,7 +186,7 @@ namespace RuniOS.Resource
             if (!isValid)
                 return;
             else if (await assetFolder.DirectoryExists())
-                nameSpaces = (await assetFolder.GetDirectories()).ToImmutableArray();
+                nameSpaces = (await assetFolder.GetDirectories().ToArrayAsync()).ToImmutableArray();
         }
 
         /// <summary>

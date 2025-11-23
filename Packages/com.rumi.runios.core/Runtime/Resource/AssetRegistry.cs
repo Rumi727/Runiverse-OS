@@ -103,7 +103,7 @@ namespace RuniOS.Resource
             if (!await resourcePack.assetFolder.DirectoryExists())
                 yield break;
 
-            foreach (var nameSpaceHandler in await resourcePack.assetFolder.GetDirectoryHandlers())
+            await foreach (var nameSpaceHandler in resourcePack.assetFolder.GetDirectoryHandlers())
             {
                 IOHandler registryHandler = nameSpaceHandler.CreateChild(registryName);
                 if (!await registryHandler.DirectoryExists())

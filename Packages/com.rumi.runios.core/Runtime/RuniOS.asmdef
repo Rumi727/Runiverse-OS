@@ -12,6 +12,7 @@
     "precompiledReferences": [
         "RuniOS.APIBridge.UnityEngine.CoreModule.dll",
         "System.Collections.Immutable.dll",
+        "System.Linq.Async.dll",
         "ExtendedNumerics.BigDecimal.dll",
         "Newtonsoft.Json.dll",
         "R3.dll"
