@@ -1,0 +1,100 @@
+#nullable enable
+using RuniOS.Editor.APIBridge.UnityEditor;
+using RuniOS.Editor.IMGUI;
+using RuniOS.Resource;
+
+namespace RuniOS.Editor
+{
+    public partial class EditorTool
+    {
+        public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+
+        public static Identifier IdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction = null) => DoIdentifierField(position, value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(position, new GUIContent(label), value, dropdownAction);
+        public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value, Action<Rect>? dropdownAction = null)
+        {
+            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
+
+            return DoIdentifierField(position, value, dropdownAction);
+        }
+
+        static int? identifierFieldLastControlID;
+        static string identifierFieldSelectedNamespace = string.Empty;
+        static Identifier DoIdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction)
+        {
+            position.height = EditorGUIUtility.singleLineHeight;
+
+            BeginIndentLevel(0);
+            float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
+
+            {
+                position.width = fieldWidth;
+
+                TextDropdown nameSpaceDropdown = new TextDropdown();
+                nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
+
+                string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
+                if (isPressed)
+                    nameSpaceDropdown.Show(position);
+
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                nameSpaceDropdown.onSelectedItem += x =>
+                {
+                    identifierFieldLastControlID = lastControlID;
+                    identifierFieldSelectedNamespace = x.value;
+                };
+
+                if (identifierFieldLastControlID == lastControlID)
+                {
+                    nameSpace = identifierFieldSelectedNamespace;
+
+                    identifierFieldSelectedNamespace = string.Empty;
+                    identifierFieldLastControlID = null;
+
+                    GUI.changed = true;
+                }
+
+                if (Identifier.IsNamespaceValid(nameSpace))
+                    value.nameSpace = nameSpace;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidNamespaceMessage(nameSpace));
+
+                position.x += position.width + 4;
+            }
+
+            {
+                position.width = 8;
+                position.x -= 4;
+
+                GUI.Label(position, Identifier.separator.ToString());
+
+                position.x += position.width;
+            }
+
+            {
+                position.width = (fieldWidth * 2) + 8;
+
+                string path;
+                if (dropdownAction != null)
+                {
+                    path = TextFieldDropDown(position, value.path, out bool isPressed);
+                    if (isPressed)
+                        dropdownAction.Invoke(position);
+                }
+                else
+                    path = EditorGUI.TextField(position, value.path);
+
+                if (Identifier.IsPathValid(path))
+                    value.path = path;
+                else
+                    Debug.LogWarning(Identifier.GetInvalidPathMessage(path));
+            }
+
+            EndIndentLevel();
+            return value;
+        }
+    }
+}
