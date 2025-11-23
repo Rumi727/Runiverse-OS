@@ -64,7 +64,7 @@ namespace RuniOS.Resource
                 {
                     await foreach ((string nameSpace, IOHandler registryHandler) in GetRegistryFolder(resourcePack))
                     {
-                        foreach (var ioHandler in await registryHandler.GetFileHandlers(assetFilter))
+                        await foreach (var ioHandler in registryHandler.GetAllFileHandlers(assetFilter))
                         {
                             uniTasks.Add(UniTask.Defer(Method));
 
@@ -72,8 +72,8 @@ namespace RuniOS.Resource
                             {
                                 try
                                 {
-                                    string name = ioHandler.fullPath.GetFileNameWithoutExtension();
-                                    await OnAssetLoop(new Identifier(nameSpace, name), ioHandler, CreateHandle(ioHandler, BitConverter.ToString(await ioHandler.GetMD5Hash())));
+                                    FilePath path = ioHandler.fullPath.TrimStartPath(registryHandler.fullPath).GetPathWithoutExtension();
+                                    await OnAssetLoop(new Identifier(nameSpace, path), ioHandler, CreateHandle(ioHandler, BitConverter.ToString(await ioHandler.GetMD5Hash())));
                                 }
                                 catch (Exception e)
                                 {
