@@ -74,7 +74,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
         /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="IOHandler"/>입니다.</param>
-        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
+        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
         public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IOHandler handler)
         {
             if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
@@ -159,6 +159,8 @@ namespace RuniOS.Resource
         {
             metaData = new PackMetaData();
             nameSpaces = ImmutableArray<string>.Empty;
+            
+            isValid = false;
             
             if (!await infoFile.FileExists())
                 return;
