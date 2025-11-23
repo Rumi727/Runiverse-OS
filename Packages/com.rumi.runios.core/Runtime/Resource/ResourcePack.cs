@@ -17,12 +17,12 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋이 저장되는 기본 폴더 이름("assets")을 가져옵니다.
         /// </summary>
-        public static readonly FilePath assetsFolderName = "assets";
-        
+        public const string assetsFolderName = "assets";
+
         /// <summary>
         /// 팩의 메타데이터 파일 이름("pack.json")을 가져옵니다.
         /// </summary>
-        public static readonly FilePath infoPath = "pack.json";
+        public const string infoPath = "pack.json";
 
         /// <summary>
         /// 식별자가 비어 있고 데이터에 접근할 수 없는 빈 <see cref="ResourcePack"/> 인스턴스를 가져옵니다.
