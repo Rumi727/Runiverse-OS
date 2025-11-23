@@ -1,8 +1,10 @@
 #nullable enable
 using RuniOS;
 using RuniOS.Collections.Generic;
+using RuniOS.Inspectors;
 using RuniOS.IO;
 using RuniOS.Resource;
+using RuniOS.Utility.Attributes;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -61,10 +63,11 @@ public sealed class Test : MonoBehaviour
     public SerializableNullable<RuniOS.RectOffset> nullableRectOffset;
     public float test;
     [NotNullField] public Object? uniObject;
+    public InspectorFlags flags;
     
-    void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, "_a");
+    void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, nameof(_a));
 
-    void OnDisable() => DrivenPropertyManager.UnregisterProperty(this, this, "_a");
+    void OnDisable() => DrivenPropertyManager.UnregisterProperty(this, this, nameof(_a));
 
     [System.Serializable]
     public class Test2
