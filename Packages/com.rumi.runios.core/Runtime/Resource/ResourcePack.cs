@@ -61,6 +61,13 @@ namespace RuniOS.Resource
         }
 
         /// <summary>
+        /// 시스템의 기본 리소스팩을 가져오려고 시도합니다.
+        /// <br/>기본 팩이 아직 생성되지 않은 경우, <see langword="null"/>을 반환합니다.
+        /// </summary>
+        /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
+        public static ResourcePack? TryGetDefaultPack() => defaultPack;
+
+        /// <summary>
         /// 지정된 <see cref="FileIOHandler"/>를 사용하여 리소스 팩을 생성합니다.
         /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
         /// </summary>
