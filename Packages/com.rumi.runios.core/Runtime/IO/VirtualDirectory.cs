@@ -373,7 +373,9 @@ namespace RuniOS.IO
                 // 이는 파일을 기대했지만 대상 경로에 디렉토리가 있을 때 발생하는 예외입니다.
                 ThrowPathIsDirectoryException(path, fileName);
             }
-            
+
+            InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
+
             existingNode.Delete();
             return true;
         }
