@@ -183,8 +183,7 @@ namespace RuniOS.IO
                 {
                     VirtualDirectory directory = new VirtualDirectory(childDirectory, directoryName);
 
-                    if (isCreated)
-                        InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
+                    InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
 
                     childDirectory.children[directoryName] = directory;
                     childDirectory = directory;
