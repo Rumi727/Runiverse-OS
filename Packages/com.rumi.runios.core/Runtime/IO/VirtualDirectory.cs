@@ -374,8 +374,6 @@ namespace RuniOS.IO
                 ThrowPathIsDirectoryException(path, fileName);
             }
 
-            InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
-
             existingNode.Delete();
             return true;
         }
