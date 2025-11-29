@@ -64,6 +64,16 @@
         "com.marijnzwemmer.unity-toolbar-extender": "1.4.2"
       }
     },
+    "com.rumi.runios.effects": {
+      "version": "file:com.rumi.runios.effects",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "1.0.0",
+        "com.unity.modules.ui": "1.0.0",
+        "com.unity.ui": "1.0.0"
+      }
+    },
     "com.rumi.runios.ui": {
       "version": "file:com.rumi.runios.ui",
       "depth": 0,
@@ -74,8 +84,7 @@
         "com.unity.ui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",
         "com.cysharp.unitask": "2.5.10",
-        "com.coffee.softmask-for-ugui": "3.4.0",
-        "com.nobi.roundedcorners": "3.5.0"
+        "com.coffee.softmask-for-ugui": "3.4.0"
       }
     },
     "com.singularitygroup.hotreload": {
