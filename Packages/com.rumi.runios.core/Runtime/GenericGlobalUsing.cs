@@ -9,5 +9,7 @@ global using UnityEngine;
 global using RuniOS.Utility;
 global using RuniOS.Utility.Attributes;
 
+global using static RuniOS.Utility.MathUtility;
+
 global using Object = UnityEngine.Object;
 global using Debug = RuniOS.Debug;
