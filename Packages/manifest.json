@@ -2,7 +2,6 @@
   "dependencies": {
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
     "com.marijnzwemmer.unity-toolbar-extender": "https://github.com/marijnz/unity-toolbar-extender.git",
-    "com.nobi.roundedcorners": "https://github.com/kirevdokimov/Unity-UI-Rounded-Corners.git",
     "com.rumi.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.singularitygroup.hotreload": "git+https://gitlab.hotreload.net/root/hot-reload-releases.git#1.13.11",
