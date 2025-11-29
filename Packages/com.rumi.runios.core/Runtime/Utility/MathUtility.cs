@@ -1835,10 +1835,10 @@ namespace RuniOS.Utility
             t = t.Clamp01();
             return new Rect(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t), current.width + ((target.width - current.width) * t), current.height + ((target.height - current.height) * t));
         }
-        public static RectCorner Lerp(this RectCorner current, RectCorner target, float t)
+        public static RectVertices Lerp(this RectVertices current, RectVertices target, float t)
         {
             t = t.Clamp01();
-            return new RectCorner(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
+            return new RectVertices(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
         }
 
         public static Color Lerp(this Color current, Color target, float t)
@@ -1963,7 +1963,7 @@ namespace RuniOS.Utility
         public static Quaternion LerpUnclamped(this Quaternion current, Quaternion target, float t) => Quaternion.Lerp(current, target, t);
 
         public static Rect LerpUnclamped(this Rect current, Rect target, float t) => new Rect(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t), current.width + ((target.width - current.width) * t), current.height + ((target.height - current.height) * t));
-        public static RectCorner LerpUnclamped(this RectCorner current, RectCorner target, float t) => new RectCorner(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
+        public static RectVertices LerpUnclamped(this RectVertices current, RectVertices target, float t) => new RectVertices(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
 
         public static Color LerpUnclamped(this Color current, Color target, float t) => new Color(current.r + ((target.r - current.r) * t), current.g + ((target.g - current.g) * t), current.b + ((target.b - current.b) * t), current.a + ((target.a - current.a) * t));
         public static Color LerpNoAlphaUnclamped(this Color current, Color target, float t) => new Color(current.r + ((target.r - current.r) * t), current.g + ((target.g - current.g) * t), current.b + ((target.b - current.b) * t), current.a);
