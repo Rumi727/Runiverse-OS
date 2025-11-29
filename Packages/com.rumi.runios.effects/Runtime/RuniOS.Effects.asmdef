@@ -1,0 +1,19 @@
+{
+    "name": "RuniOS.Effects",
+    "rootNamespace": "RuniOS",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "ExtendedNumerics.BigDecimal.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -139,7 +139,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         {
             float height;
             if (isField)
-                height = keyDrawer.GetHeight(label, flags, isInArray).Max(valueDrawer.GetHeight(label, flags, isInArray));
+                height = Max(keyDrawer.GetHeight(label, flags, isInArray), valueDrawer.GetHeight(label, flags, isInArray));
             else
                 height = keyDrawer.GetHeight(label, flags, isInArray) + 2 + valueDrawer.GetHeight(label, flags, isInArray);
             

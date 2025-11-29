@@ -120,7 +120,7 @@ namespace RuniOS.Editor
         {
             float width = 0;
             for (int i = 0; i < label.Length; i++)
-                width = width.Max(style.CalcSize(new GUIContent(label[i])).x);
+                width = Max(width, style.CalcSize(new GUIContent(label[i])).x);
 
             return width;
         }
@@ -129,7 +129,7 @@ namespace RuniOS.Editor
         {
             float width = 0;
             for (int i = 0; i < label.Length; i++)
-                width = width.Max(style.CalcSize(label[i]).x);
+                width = Max(width, style.CalcSize(label[i]).x);
 
             return width;
         }

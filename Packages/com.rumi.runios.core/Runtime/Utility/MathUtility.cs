@@ -1852,6 +1852,12 @@ namespace RuniOS.Utility
             t = t.Clamp01();
             return new Color(current.r + ((target.r - current.r) * t), current.g + ((target.g - current.g) * t), current.b + ((target.b - current.b) * t), current.a);
         }
+        
+        public static CornerRadius Lerp(this CornerRadius current, CornerRadius target, float t)
+        {
+            t = t.Clamp01();
+            return new CornerRadius(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
+        }
         #endregion
 
         #region Lerp Angle
@@ -1967,6 +1973,8 @@ namespace RuniOS.Utility
 
         public static Color LerpUnclamped(this Color current, Color target, float t) => new Color(current.r + ((target.r - current.r) * t), current.g + ((target.g - current.g) * t), current.b + ((target.b - current.b) * t), current.a + ((target.a - current.a) * t));
         public static Color LerpNoAlphaUnclamped(this Color current, Color target, float t) => new Color(current.r + ((target.r - current.r) * t), current.g + ((target.g - current.g) * t), current.b + ((target.b - current.b) * t), current.a);
+        
+        public static CornerRadius LerpUnclamped(this CornerRadius current, CornerRadius target, float t) => new CornerRadius(current.bottomLeft + ((target.bottomLeft - current.bottomLeft) * t), current.topLeft + ((target.topRight - current.topLeft) * t), current.topRight + ((target.topRight - current.topRight) * t), current.bottomRight + ((target.bottomRight - current.bottomRight) * t));
         #endregion
 
         public static float LinearToGammaSpace(this float value) => Mathf.LinearToGammaSpace(value);
@@ -2106,7 +2114,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Max Array
-        public static sbyte Max(this sbyte value, params sbyte[] values)
+        public static sbyte Max(sbyte value, params sbyte[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2125,7 +2133,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static byte Max(this byte value, params byte[] values)
+        public static byte Max(byte value, params byte[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2144,7 +2152,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static short Max(this short value, params short[] values)
+        public static short Max(short value, params short[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2163,7 +2171,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static ushort Max(this ushort value, params ushort[] values)
+        public static ushort Max(ushort value, params ushort[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2182,7 +2190,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static int Max(this int value, params int[] values)
+        public static int Max(int value, params int[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2201,7 +2209,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static uint Max(this uint value, params uint[] values)
+        public static uint Max(uint value, params uint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2220,7 +2228,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static long Max(this long value, params long[] values)
+        public static long Max(long value, params long[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2239,7 +2247,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static ulong Max(this ulong value, params ulong[] values)
+        public static ulong Max(ulong value, params ulong[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2258,7 +2266,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static float Max(this float value, params float[] values)
+        public static float Max(float value, params float[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2277,7 +2285,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static double Max(this double value, params double[] values)
+        public static double Max(double value, params double[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2296,7 +2304,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static decimal Max(this decimal value, params decimal[] values)
+        public static decimal Max(decimal value, params decimal[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2315,7 +2323,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static BigInteger Max(this BigInteger value, params BigInteger[] values)
+        public static BigInteger Max(BigInteger value, params BigInteger[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2334,7 +2342,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static BigDecimal Max(this BigDecimal value, params BigDecimal[] values)
+        public static BigDecimal Max(BigDecimal value, params BigDecimal[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2353,7 +2361,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nint Max(this nint value, params nint[] values)
+        public static nint Max(nint value, params nint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2372,7 +2380,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nuint Max(this nuint value, params nuint[] values)
+        public static nuint Max(nuint value, params nuint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2515,7 +2523,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Min Array
-        public static sbyte Min(this sbyte value, params sbyte[] values)
+        public static sbyte Min(sbyte value, params sbyte[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2534,7 +2542,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static byte Min(this byte value, params byte[] values)
+        public static byte Min(byte value, params byte[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2553,7 +2561,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static short Min(this short value, params short[] values)
+        public static short Min(short value, params short[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2572,7 +2580,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static ushort Min(this ushort value, params ushort[] values)
+        public static ushort Min(ushort value, params ushort[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2591,7 +2599,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static int Min(this int value, params int[] values)
+        public static int Min(int value, params int[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2610,7 +2618,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static uint Min(this uint value, params uint[] values)
+        public static uint Min(uint value, params uint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2629,7 +2637,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static long Min(this long value, params long[] values)
+        public static long Min(long value, params long[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2648,7 +2656,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static ulong Min(this ulong value, params ulong[] values)
+        public static ulong Min(ulong value, params ulong[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2667,7 +2675,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static float Min(this float value, params float[] values)
+        public static float Min(float value, params float[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2686,7 +2694,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static double Min(this double value, params double[] values)
+        public static double Min(double value, params double[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2705,7 +2713,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static decimal Min(this decimal value, params decimal[] values)
+        public static decimal Min(decimal value, params decimal[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2724,7 +2732,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static BigInteger Min(this BigInteger value, params BigInteger[] values)
+        public static BigInteger Min(BigInteger value, params BigInteger[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2743,7 +2751,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static BigDecimal Min(this BigDecimal value, params BigDecimal[] values)
+        public static BigDecimal Min(BigDecimal value, params BigDecimal[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2762,7 +2770,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nint Min(this nint value, params nint[] values)
+        public static nint Min(nint value, params nint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();
@@ -2781,7 +2789,7 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nuint Min(this nuint value, params nuint[] values)
+        public static nuint Min(nuint value, params nuint[] values)
         {
             if (values == null)
                 throw new ArgumentNullException();

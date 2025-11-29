@@ -131,7 +131,7 @@ namespace RuniOS.Editor.UIElements
                 }
 
                 bool isFirst = true;
-                int lastIndex = ((i * fieldsByLine) + fieldsByLine).Min(descriptions.Count);
+                int lastIndex = Min((i * fieldsByLine) + fieldsByLine, descriptions.Count);
                 VisualElement? lastElement = null;
                 for (int j = i * fieldsByLine; j < lastIndex; j++)
                 {

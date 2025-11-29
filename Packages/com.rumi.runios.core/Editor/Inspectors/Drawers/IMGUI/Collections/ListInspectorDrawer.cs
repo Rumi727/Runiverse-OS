@@ -98,7 +98,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             reorderableList.onAddCallback = x =>
             {
-                int index = x.selectedIndices.Any() ? (x.selectedIndices.Max() + 1).Min(x.count) : x.count;   
+                int index = x.selectedIndices.Any() ? Min(x.selectedIndices.Max() + 1, x.count) : x.count;   
                 OnAddCallback(index, elementType, flags);
                 x.Select(index);
             };

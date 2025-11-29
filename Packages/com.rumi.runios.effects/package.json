@@ -1,0 +1,15 @@
+{
+  "name": "com.rumi.runios.effects",
+  "version": "0.0.0",
+  "displayName": "Runiverse OS Effects",
+  "description": "User-friendly game engine library for Unity Engine",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "com.rumi.runios.core": "1.0.0",
+    "com.unity.modules.ui": "1.0.0",
+    "com.unity.ui": "1.0.0"
+  },
+  "unity": "6000.1"
+}

@@ -87,6 +87,10 @@ MonoBehaviour:
       value: "\u30A2\u30BB\u30F3\u30D6\u30EA"
     - key: gui.name
       value: "\u540D\u524D"
+    - key: gui.radius
+      value: "\u534A\u5F84"
+    - key: gui.softness
+      value: "\u30BD\u30D5\u30C8\u30CD\u30B9"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\u30B7\u30EA\u30A2\u30E9\u30A4\u30BA\u53EF\u80FD\u306A\u30D5\u30A3\u30FC\u30EB\u30C9\u300CserializableKeys\u300D\u304C\u5B58\u5728\u3057\u307E\u305B\u3093\u3002\nGUI
         \u306B\u81EA\u52D5\u7684\u306B\u8868\u793A\u3059\u308B\u306B\u306F\u3001\u30D5\u30A3\u30FC\u30EB\u30C9\u540D\u304C\u6B63\u78BA\u306B\u300CserializableKeys\u300D\u3067\u3042\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002"
@@ -242,6 +246,28 @@ MonoBehaviour:
       value: "\u3053\u306E\u8981\u7D20\u306F\u8AAD\u307F\u53D6\u308C\u307E\u305B\u3093\u3002"
     - key: inspector.no_instance
       value: "\u30A4\u30F3\u30B9\u30BF\u30F3\u30B9\u306F\u3042\u308A\u307E\u305B\u3093\u3002"
+    - key: inspector.rounded_corners.corner.header
+      value: "\u30B3\u30FC\u30CA\u30FC\u8A2D\u5B9A"
+    - key: inspector.rounded_corners.corner.radius
+      value: "\u534A\u5F84"
+    - key: inspector.rounded_corners.render.header
+      value: "\u63CF\u753B\u8A2D\u5B9A"
+    - key: inspector.rounded_corners.render.softness
+      value: "\u30BD\u30D5\u30C8\u30CD\u30B9"
+    - key: inspector.rounded_corners.render.softness.tooltip
+      value: "\u30A2\u30F3\u30C1\u30A8\u30A4\u30EA\u30A2\u30B9\u306E\u5F37\u5EA6\u3067\u3059\u30021.0\u304C\u6A19\u6E96\uFF081\u30D4\u30AF\u30BB\u30EB\uFF09\u3067\u3001\u4F4E\u3044\u307B\u3069\u92ED\u304F\u3001\u9AD8\u3044\u307B\u3069\u307C\u3084\u3051\u307E\u3059\u3002"
+    - key: inspector.rounded_corners.render.useAntiAliasing
+      value: "\u30A2\u30F3\u30C1\u30A8\u30A4\u30EA\u30A2\u30B9\u3092\u4F7F\u7528"
+    - key: inspector.rounded_corners.update.header
+      value: "\u66F4\u65B0\u30AA\u30D7\u30B7\u30E7\u30F3"
+    - key: inspector.rounded_corners.update.autoRebuildWithMask
+      value: "\u30DE\u30B9\u30AF\u5373\u6642\u66F4\u65B0"
+    - key: inspector.rounded_corners.update.autoRebuildWithMask.tooltip
+      value: "\u6709\u52B9\u306B\u3059\u308B\u3068\u3001Mask\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u304C\u691C\u51FA\u3055\u308C\u305F\u5834\u5408\u3001\u30D7\u30ED\u30D1\u30C6\u30A3\u5909\u66F4\u306E\u305F\u3073\u306B\u30DE\u30C6\u30EA\u30A2\u30EB\u3092\u5F37\u5236\u7684\u306B\u518D\u751F\u6210\u3057\u3066\u5373\u5EA7\u306B\u53CD\u6620\u3057\u307E\u3059\u3002"
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial
+      value: "\u30DE\u30C6\u30EA\u30A2\u30EB\u5F37\u5236\u518D\u751F\u6210"
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial.tooltip
+      value: "\u6709\u52B9\u306B\u3059\u308B\u3068\u3001Mask\u306E\u6709\u7121\u306B\u95A2\u308F\u3089\u305A\u3001\u30D7\u30ED\u30D1\u30C6\u30A3\u304C\u5909\u66F4\u3055\u308C\u308B\u305F\u3073\u306B\u7121\u6761\u4EF6\u3067\u30DE\u30C6\u30EA\u30A2\u30EB\u3092\u518D\u751F\u6210\u3057\u307E\u3059\u3002\n\uFF08\u30C7\u30D0\u30C3\u30B0\u3084\u3001\u7279\u6B8A\u306A\u66F4\u65B0\u306E\u554F\u984C\u304C\u3042\u308B\u5834\u5408\u306E\u307F\u4F7F\u7528\u3057\u3066\u304F\u3060\u3055\u3044\u3002\uFF09"
     - key: type_search_provider.name
       value: "\u540D\u524D"
     - key: type_search_provider.name.help

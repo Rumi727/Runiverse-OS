@@ -95,7 +95,7 @@ namespace RuniOS.Editor.Windows
 
                                             // 현재 항목과 새 항목 간의 공통 접두사 경로 길이 계산
                                             int commonLength = 0;
-                                            int minLen = newParts.Length.Min(existingParts.Length);
+                                            int minLen = Min(newParts.Length, existingParts.Length);
                                             for (int j = 0; j < minLen; j++)
                                             {
                                                 if (newParts[j] == existingParts[j])

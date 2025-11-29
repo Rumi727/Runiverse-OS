@@ -87,6 +87,10 @@ MonoBehaviour:
       value: "\uC5B4\uC148\uBE14\uB9AC"
     - key: gui.name
       value: "\uC774\uB984"
+    - key: gui.radius
+      value: "\uBC18\uC9C0\uB984"
+    - key: gui.softness
+      value: "\uBD80\uB4DC\uB7EC\uC6C0"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
         \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
@@ -264,6 +268,36 @@ MonoBehaviour:
       value: "\uC774 \uC694\uC18C\uB294 \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: inspector.no_instance
       value: "\uC778\uC2A4\uD134\uC2A4\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4."
+    - key: inspector.rounded_corners.corner.header
+      value: "\uBAA8\uC11C\uB9AC \uC124\uC815"
+    - key: inspector.rounded_corners.corner.radius
+      value: "\uBC18\uC9C0\uB984"
+    - key: inspector.rounded_corners.render.header
+      value: "\uB80C\uB354 \uC124\uC815"
+    - key: inspector.rounded_corners.render.softness
+      value: "\uBD80\uB4DC\uB7EC\uC6C0"
+    - key: inspector.rounded_corners.render.softness.tooltip
+      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uAC15\uB3C4\uC785\uB2C8\uB2E4.
+        1.0\uC774 \uD45C\uC900(1\uD53D\uC140)\uC774\uBA70, \uB0AE\uC744\uC218\uB85D
+        \uB0A0\uCE74\uB86D\uACE0 \uB192\uC744\uC218\uB85D \uD750\uB824\uC9D1\uB2C8\uB2E4."
+    - key: inspector.rounded_corners.render.useAntiAliasing
+      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uC0AC\uC6A9"
+    - key: inspector.rounded_corners.update.header
+      value: "\uC5C5\uB370\uC774\uD2B8 \uC635\uC158"
+    - key: inspector.rounded_corners.update.autoRebuildWithMask
+      value: "\uB9C8\uC2A4\uD06C \uC989\uC2DC \uAC31\uC2E0"
+    - key: inspector.rounded_corners.update.autoRebuildWithMask.tooltip
+      value: "\uCCB4\uD06C \uC2DC, Mask \uCEF4\uD3EC\uB10C\uD2B8\uAC00 \uAC10\uC9C0\uB418\uBA74
+        \uC18D\uC131 \uBCC0\uACBD \uC2DC\uB9C8\uB2E4 \uC7AC\uC9C8\uC744 \uAC15\uC81C\uB85C
+        \uC7AC\uC0DD\uC131\uD558\uC5EC \uC989\uC2DC \uBC18\uC601\uD569\uB2C8\uB2E4."
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial
+      value: "\uAC15\uC81C \uBA54\uD14C\uB9AC\uC5BC \uC7AC\uBE4C\uB4DC"
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial.tooltip
+      value: "\uCCB4\uD06C \uC2DC, Mask \uC720\uBB34\uC640 \uC0C1\uAD00\uC5C6\uC774
+        \uC18D\uC131\uC774 \uBCC0\uACBD\uB420 \uB54C\uB9C8\uB2E4 \uBB34\uC870\uAC74
+        \uC7AC\uC9C8\uC744 \uC7AC\uC0DD\uC131\uD569\uB2C8\uB2E4.\n(\uB514\uBC84\uAE45
+        \uC6A9\uB3C4\uB098 \uD2B9\uC218\uD55C \uAC31\uC2E0 \uBB38\uC81C\uAC00 \uC788\uC744
+        \uB54C\uB9CC \uC0AC\uC6A9\uD558\uC138\uC694.)"
     - key: type_search_provider.name
       value: "\uC774\uB984"
     - key: type_search_provider.name.help

@@ -36,7 +36,7 @@ namespace RuniOS
         [UnityEditor.InitializeOnLoadMethod]
         static void Init() => UnityEditor.EditorApplication.update += Update;
 #elif DEVELOPMENT_BUILD
-        static void Awaken() => Booting.CustomPlayerLoopSetter.initEvent += Update;
+        static void Awaken() => RuniOS.LowLevel.RuniPlayerLoop.onInit += Update;
 #endif
 
         static void Update() => detectionCount = 0;

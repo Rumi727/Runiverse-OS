@@ -87,6 +87,10 @@ MonoBehaviour:
       value: Assembly
     - key: gui.name
       value: Name
+    - key: gui.radius
+      value: Radius
+    - key: gui.softness
+      value: Softness
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -257,6 +261,31 @@ MonoBehaviour:
       value: This element is not readable.
     - key: inspector.no_instance
       value: There are no instances.
+    - key: inspector.rounded_corners.corner.header
+      value: Corner Settings
+    - key: inspector.rounded_corners.corner.radius
+      value: Radius
+    - key: inspector.rounded_corners.render.header
+      value: Render Settings
+    - key: inspector.rounded_corners.render.softness
+      value: Softness
+    - key: inspector.rounded_corners.render.softness.tooltip
+      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare
+        sharper, higher values \u200B\u200Bare blurrier."
+    - key: inspector.rounded_corners.render.useAntiAliasing
+      value: Use Anti Aliasing
+    - key: inspector.rounded_corners.update.header
+      value: Update Options
+    - key: inspector.rounded_corners.update.autoRebuildWithMask
+      value: Auto Rebuild With Mask
+    - key: inspector.rounded_corners.update.autoRebuildWithMask.tooltip
+      value: If the Mask component is on the same object, changing properties forces
+        the material to be regenerated immediately
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial
+      value: Always Rebuild Material
+    - key: inspector.rounded_corners.update.alwaysRebuildMaterial.tooltip
+      value: Regenerates the material whenever its properties change, regardless
+        of whether or not it is masked.
     - key: type_search_provider.name
       value: Name
     - key: type_search_provider.name.help

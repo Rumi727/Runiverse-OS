@@ -1,0 +1,20 @@
+{
+    "name": "RuniOS.Editor.Effects",
+    "rootNamespace": "RuniOS.Editor.Effects",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:539740484accacd4292d8460e00aac39",
+        "GUID:0a4be72771f2cad46929418565a0c378"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

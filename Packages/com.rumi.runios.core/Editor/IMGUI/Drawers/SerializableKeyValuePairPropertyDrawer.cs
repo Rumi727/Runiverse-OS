@@ -101,7 +101,7 @@ namespace RuniOS.Editor.IMGUI.Drawers
             if (key == null || value == null)
                 height = base.GetPropertyHeight(property, label);
             else
-                height = EditorGUI.GetPropertyHeight(key).Max(EditorGUI.GetPropertyHeight(value));
+                height = Max(EditorGUI.GetPropertyHeight(key), EditorGUI.GetPropertyHeight(value));
 
             if (EditorGUIUtility.wideMode || !LabelHasContent(label))
                 return height;

@@ -1,32 +1,75 @@
 #nullable enable
 using UnityEngine.UI;
 
-namespace RuniOS.UI
+namespace RuniOS.UI.Effects
 {
+    /// <summary>
+    /// 연결된 그래픽의 모서리를 둥글게 처리하고 안티에일리어싱을 적용하는 컴포넌트입니다.
+    /// </summary>
     [ExecuteInEditMode]
     [RequireComponent(typeof(Graphic))]
     [AddComponentMenu("UI/Effects/Rounded Corners")]
     public class RoundedCorners : MonoBehaviour, IMaterialModifier
     {
-        [Header("Corner Settings")]
-        public CornerRadius radius = 20f;
+        public CornerRadius radius
+        {
+            get => _radius;
+            set
+            {
+                _radius = value;
+                Refresh();
+            }
+        }
+        [SerializeField] CornerRadius _radius = 20;
+        
+        public bool useAntiAliasing
+        {
+            get => _useAntiAliasing;
+            set
+            {
+                _useAntiAliasing = value;
+                Refresh();
+            }
+        }
+        [SerializeField] bool _useAntiAliasing = true;
+        
+        public float softness
+        {
+            get => _softness;
+            set
+            {
+                _softness = value;
+                Refresh();
+            }
+        }
+        [SerializeField, Range(0, 3)] float _softness = 1.0f;
+        
+        public bool autoRebuildWithMask
+        {
+            get => _autoRebuildWithMask;
+            set
+            {
+                _autoRebuildWithMask = value;
+                Refresh();
+            }
+        }
+        [SerializeField] bool _autoRebuildWithMask = true;
+        public bool alwaysRebuildMaterial
 
-        [Header("Render Settings")]
-        [Tooltip("안티에일리어싱 강도입니다. 1.0이 표준(1픽셀)이며, 낮을수록 날카롭고 높을수록 흐려집니다.")]
-        [Range(0f, 3f)] public float softness = 1.0f; // 셰이더 수정으로 1.0이 기준점이 됨
-
-        public bool useAntiAliasing = true;
-
-        [Header("Update Options")]
-        [Tooltip("Mask 컴포넌트가 같은 오브젝트에 있을 경우, 속성 변경 시 강제로 재질을 재생성하여 즉시 반영합니다. (인스펙터 끊김 발생 가능)")]
-        public bool autoRebuildWithMask = true;
-
-        [Tooltip("Mask 유무와 상관없이 속성이 변경될 때마다 재질을 재생성합니다.")]
-        public bool alwaysRebuildMaterial = false;
+        {
+            get => _alwaysRebuildMaterial;
+            set
+            {
+                _alwaysRebuildMaterial = value;
+                Refresh();
+            }
+        }
+        [SerializeField] bool _alwaysRebuildMaterial = false;
 
         RectTransform? _rectTransform;
         Graphic? _graphic;
         Material? _material;
+        [SerializeField, HideInInspector] Shader? _shader;
     
         Mask? _mask; // Mask 존재 여부 확인용
     
@@ -62,15 +105,8 @@ namespace RuniOS.UI
                 _graphic.SetMaterialDirty();
         }
 
-        void LateUpdate()
-        {
-            if (_rectTransform == null || !_rectTransform.hasChanged)
-                return;
-            
-            Refresh();
-            _rectTransform.hasChanged = false;
-        }
-        
+        void OnRectTransformDimensionsChange() => Refresh();
+
 #if UNITY_EDITOR
         void OnValidate() => Refresh();
 #endif
@@ -104,13 +140,13 @@ namespace RuniOS.UI
             if (!isActiveAndEnabled || _graphic == null)
                 return baseMaterial;
 
-            Shader shader = Shader.Find("UI/RoundedCorners");
-            if (shader == null)
+            _shader = Shader.Find("UI/RoundedCorners");
+            if (_shader == null)
                 return baseMaterial;
 
             // 재질 생성 (없거나 셰이더가 다르면)
-            if (_material == null || _material.shader != shader)
-                _material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+            if (_material == null || _material.shader != _shader)
+                _material = new Material(_shader) { hideFlags = HideFlags.HideAndDontSave };
 
             // 1. Mask 속성 복사 (스텐실 연결)
             CopyMaskProperties(baseMaterial, _material);

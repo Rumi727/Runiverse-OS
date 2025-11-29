@@ -266,14 +266,18 @@ namespace RuniOS.Editor.UIElements
             if (panel == null || float.IsNaN(contentContainer.resolvedStyle.width) || float.IsNaN(contentContainer.resolvedStyle.height))
                 return;
             
-            float width = (size ?? contentContainer.resolvedStyle.width)
-                .Min(maxSize ?? float.MaxValue)
-                .Min((contentParent?.resolvedStyle.maxWidth == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxWidth.value : null) ?? float.MaxValue)
+            float width = Min(
+                    size ?? contentContainer.resolvedStyle.width,
+                    maxSize ?? float.MaxValue,
+                    (contentParent?.resolvedStyle.maxWidth == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxWidth.value : null) ?? float.MaxValue
+                )
                 * animBool.value;
             
-            float height = (size ?? contentContainer.resolvedStyle.height)
-                .Min(maxSize ?? float.MaxValue)
-                .Min((contentParent?.resolvedStyle.maxHeight == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxHeight.value : null) ?? float.MaxValue)
+            float height = Min(
+                size ?? contentContainer.resolvedStyle.height,
+                maxSize ?? float.MaxValue,
+                (contentParent?.resolvedStyle.maxHeight == StyleKeyword.Undefined ? (float?)contentParent.resolvedStyle.maxHeight.value : null) ?? float.MaxValue
+                )
                 * animBool.value;
             
             if (value)
