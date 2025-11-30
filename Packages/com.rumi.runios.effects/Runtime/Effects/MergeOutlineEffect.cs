@@ -4,8 +4,14 @@ using UnityEngine.Rendering;
 
 namespace RuniOS.Effects
 {
-    public enum OutlineShape { Square, Octagon, CircleJFA }
-    public enum OutlineVisibility { Normal, AlwaysOnTop, OccludedOnly }
+    public enum OutlineShape { Square, Octagon, CircleJFA, SoftBlur }
+
+    public enum OutlineVisibility
+    {
+        Normal = CompareFunction.LessEqual,
+        AlwaysOnTop = CompareFunction.Always,
+        OccludedOnly = CompareFunction.Greater
+    }
 
     [ExecuteAlways]
     [RequireComponent(typeof(Camera))]
@@ -18,18 +24,18 @@ namespace RuniOS.Effects
             public string name = "New Profile";
             public Color color = Color.white;
             [Range(0, 100)] public float width = 5f;
-            [Range(0, 1)] public float softness = 0.5f;
+            
+            [Header("Shape Settings")]
             public OutlineShape shape = OutlineShape.CircleJFA;
+            [Range(0, 1)] [Tooltip("CircleJFA 전용")] public float softness = 0.5f;
+            [Range(1, 10)] [Tooltip("SoftBlur 전용 (선명도)")] public float hardness = 3f;
+            [Range(1, 4)] [Tooltip("SoftBlur 전용 (반복횟수)")] public int iterations = 1;
+            
             public OutlineVisibility visibility = OutlineVisibility.AlwaysOnTop;
+            
+            [Header("Optimization")]
+            [Range(1, 8)] public int downsample = 1;
         }
-        
-        [Header("Optimization")]
-        public int downsample
-        {
-            get => _downsample;
-            set => _downsample = value;
-        }
-        [Range(1, 8)] [SerializeField] int _downsample = 1;
 
         [Header("Settings List")]
         public List<OutlineProfile> profiles => _profiles;
@@ -38,7 +44,12 @@ namespace RuniOS.Effects
         // --- Resources ---
         [SerializeField, HideInInspector] Shader? maskS, dilateS, compS, minS;
         [SerializeField, HideInInspector] Shader? jfaInitS, jfaFloodS, jfaCompS;
-        Material? maskM, dilateM, compM, minM, jfaInitM, jfaFloodM, jfaCompM;
+        [SerializeField, HideInInspector] Shader? blurS, compBlurS;
+        
+        // Materials
+        Material? maskM, dilateM, compM, minM;
+        Material? jfaInitM, jfaFloodM, jfaCompM;
+        Material? blurM, compBlurM;
 
         CommandBuffer? cmd;
         RenderTexture? _maskRT;
@@ -49,6 +60,7 @@ namespace RuniOS.Effects
         static readonly int _Color = Shader.PropertyToID("_Color");
         static readonly int _Width = Shader.PropertyToID("_Width");
         static readonly int _Softness = Shader.PropertyToID("_Softness");
+        static readonly int _Hardness = Shader.PropertyToID("_Hardness");
         static readonly int _OriginalMask = Shader.PropertyToID("_OriginalMask");
         static readonly int _MainTex = Shader.PropertyToID("_MainTex");
         static readonly int _SubTex = Shader.PropertyToID("_SubTex");
@@ -75,20 +87,32 @@ namespace RuniOS.Effects
             if(compM) DestroyImmediate(compM); if(minM) DestroyImmediate(minM);
             if(jfaInitM) DestroyImmediate(jfaInitM); if(jfaFloodM) DestroyImmediate(jfaFloodM);
             if(jfaCompM) DestroyImmediate(jfaCompM);
+            if(blurM) DestroyImmediate(blurM); if(compBlurM) DestroyImmediate(compBlurM);
         }
 
-        [MemberNotNullWhen(true, nameof(maskS), nameof(dilateS), nameof(compS), nameof(minS), nameof(jfaInitS), nameof(jfaFloodS), nameof(jfaCompS), nameof(maskM), nameof(dilateM), nameof(compM), nameof(minM), nameof(jfaInitM), nameof(jfaFloodM), nameof(jfaCompM), nameof(cmd))]
+        [MemberNotNullWhen(true, nameof(maskS), nameof(dilateS), nameof(compS), nameof(minS))]
+        [MemberNotNullWhen(true, nameof(jfaInitS), nameof(jfaFloodS), nameof(jfaCompS))]
+        [MemberNotNullWhen(true, nameof(blurS), nameof(compBlurS))]
+        [MemberNotNullWhen(true, nameof(maskM), nameof(dilateM), nameof(compM), nameof(minM))]
+        [MemberNotNullWhen(true, nameof(jfaInitM), nameof(jfaFloodM), nameof(jfaCompM))]
+        [MemberNotNullWhen(true, nameof(blurM), nameof(compBlurM))]
+        [MemberNotNullWhen(true, nameof(cmd))]
         bool CheckResources()
         {
+            // Standard
             if (!maskS) maskS = Shader.Find("Hidden/RuniOS/MergeOutline/Mask");
             if (!dilateS) dilateS = Shader.Find("Hidden/RuniOS/MergeOutline/Dilate");
             if (!compS) compS = Shader.Find("Hidden/RuniOS/MergeOutline/Composite");
             if (!minS) minS = Shader.Find("Hidden/RuniOS/MergeOutline/Min");
+            // JFA
             if (!jfaInitS) jfaInitS = Shader.Find("Hidden/RuniOS/MergeOutline/JFA_Init");
             if (!jfaFloodS) jfaFloodS = Shader.Find("Hidden/RuniOS/MergeOutline/JFA_Flood");
             if (!jfaCompS) jfaCompS = Shader.Find("Hidden/RuniOS/MergeOutline/JFA_Composite");
+            // Blur
+            if (!blurS) blurS = Shader.Find("Hidden/RuniOS/MergeOutline/Blur");
+            if (!compBlurS) compBlurS = Shader.Find("Hidden/RuniOS/MergeOutline/CompositeBlur");
 
-            if (!maskS || !dilateS || !compS || !minS || !jfaInitS || !jfaFloodS || !jfaCompS)
+            if (!maskS || !dilateS || !compS || !minS || !jfaInitS || !jfaFloodS || !jfaCompS || !blurS || !compBlurS)
                 return false;
 
             if (!maskM) maskM = new Material(maskS);
@@ -98,6 +122,8 @@ namespace RuniOS.Effects
             if (!jfaInitM) jfaInitM = new Material(jfaInitS);
             if (!jfaFloodM) jfaFloodM = new Material(jfaFloodS);
             if (!jfaCompM) jfaCompM = new Material(jfaCompS);
+            if (!blurM) blurM = new Material(blurS);
+            if (!compBlurM) compBlurM = new Material(compBlurS);
 
             cmd ??= new CommandBuffer { name = "MergeOutlineRender" };
             return true;
@@ -122,9 +148,8 @@ namespace RuniOS.Effects
 
             int fullW = src.width;
             int fullH = src.height;
-            int lowW = fullW / downsample;
-            int lowH = fullH / downsample;
 
+            // 마스크 생성 (ARGBHalf, Point Filter)
             if (_maskRT == null || _maskRT.width != fullW || _maskRT.height != fullH)
             {
                 if (_maskRT)
@@ -137,6 +162,7 @@ namespace RuniOS.Effects
             RenderTexture accumRT = RenderTexture.GetTemporary(src.width, src.height, 0, src.format);
             Graphics.Blit(src, accumRT);
 
+            // 임시 RT 선언
             RenderTexture? jfa1 = null, jfa2 = null;
             RenderTexture? rt1 = null, rt2 = null, diaRT = null;
 
@@ -148,6 +174,9 @@ namespace RuniOS.Effects
 
                 if (targets == null || targets.Count == 0)
                     continue;
+                
+                int lowW = fullW / profile.downsample;
+                int lowH = fullH / profile.downsample;
 
                 // 1. 마스크 그리기
                 cmd.Clear();
@@ -172,8 +201,36 @@ namespace RuniOS.Effects
                 // 2. 셰이더 설정
                 SetKeywords(jfaCompM, profile.visibility);
                 SetKeywords(compM, profile.visibility);
+                SetKeywords(compBlurM, profile.visibility); 
 
-                if (profile.shape == OutlineShape.CircleJFA)
+                if (profile.shape == OutlineShape.SoftBlur)
+                {
+                    // === Soft Blur ===
+                    if (rt1 == null) {
+                        rt1 = RenderTexture.GetTemporary(lowW, lowH, 0, RenderTextureFormat.ARGBHalf);
+                        rt1.filterMode = FilterMode.Bilinear;
+                    }
+                    if (rt2 == null) {
+                        rt2 = RenderTexture.GetTemporary(lowW, lowH, 0, RenderTextureFormat.ARGBHalf);
+                        rt2.filterMode = FilterMode.Bilinear;
+                    }
+                    
+                    blurM.SetFloat(_Width, profile.width / profile.downsample);
+                    Graphics.Blit(_maskRT, rt1); // Copy Mask to LowRes
+
+                    for (int k = 0; k < profile.iterations; k++)
+                    {
+                        Graphics.Blit(rt1, rt2, blurM, 0); // Horiz
+                        Graphics.Blit(rt2, rt1, blurM, 1); // Vert
+                    }
+                    
+                    compBlurM.SetTexture(_OriginalMask, _maskRT); // High-Res Mask
+                    compBlurM.SetColor(_Color, profile.color);
+                    compBlurM.SetFloat(_Hardness, profile.hardness);
+                    
+                    Graphics.Blit(rt1, accumRT, compBlurM);
+                }
+                else if (profile.shape == OutlineShape.CircleJFA)
                 {
                     if (jfa1 == null) {
                         jfa1 = RenderTexture.GetTemporary(lowW, lowH, 0, RenderTextureFormat.ARGBHalf);
@@ -213,7 +270,7 @@ namespace RuniOS.Effects
                         rt2.filterMode = FilterMode.Point;
                     }
 
-                    float scaledWidth = profile.width / downsample;
+                    float scaledWidth = profile.width / profile.downsample;
                     
                     dilateM.SetVector(_Direction, new Vector2(1, 0));
                     dilateM.SetFloat(_Width, scaledWidth);
