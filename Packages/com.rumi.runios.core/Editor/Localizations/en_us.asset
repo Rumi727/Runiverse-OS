@@ -91,6 +91,10 @@ MonoBehaviour:
       value: Radius
     - key: gui.softness
       value: Softness
+    - key: gui.width
+      value: Width
+    - key: gui.gap
+      value: Gap
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -286,6 +290,36 @@ MonoBehaviour:
     - key: inspector.rounded_corners.update.alwaysRebuildMaterial.tooltip
       value: Regenerates the material whenever its properties change, regardless
         of whether or not it is masked.
+    - key: inspector.simple_mesh_outline.appearance.header
+      value: Appearance
+    - key: inspector.simple_mesh_outline.appearance.color
+      value: Color
+    - key: inspector.simple_mesh_outline.appearance.width
+      value: Width
+    - key: inspector.simple_mesh_outline.appearance.useFixedWidth
+      value: Use Fixed Width
+    - key: inspector.simple_mesh_outline.appearance.useFixedWidth.tooltip
+      value: Fixes the width based on screen pixels.
+    - key: inspector.simple_mesh_outline.appearance.gap
+      value: Gap
+    - key: inspector.simple_mesh_outline.appearance.useFixedGap
+      value: Use Fixed Gap
+    - key: inspector.simple_mesh_outline.appearance.useFixedGap.tooltip
+      value: Fixes the gap based on screen pixels.
+    - key: inspector.simple_mesh_outline.settings.header
+      value: Settings
+    - key: inspector.simple_mesh_outline.settings.outlineVisibility
+      value: Visibility
+    - key: inspector.simple_mesh_outline.settings.outlineVisibility.tooltip
+      value: 'Determines how the outline is displayed.
+
+        - Normal: Not visible
+        when occluded
+
+        - AlwaysOnTop: Always visible on top
+
+        - OccludedOnly:
+        Visible only when occluded'
     - key: type_search_provider.name
       value: Name
     - key: type_search_provider.name.help

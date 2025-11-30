@@ -1,5 +1,5 @@
 #nullable enable
-using System.Diagnostics.CodeAnalysis;
+using UnityEngine.Serialization;
 
 namespace RuniOS.Effects
 {
@@ -7,84 +7,100 @@ namespace RuniOS.Effects
     [RequireComponent(typeof(Renderer))]
     public class SimpleMeshOutline : MonoBehaviour
     {
-        [Header("Appearance")]
-        public Color color = Color.white;
+        public Color color
+        {
+            get => _color;
+            set => _color = value;
+        }
+        [SerializeField] Color _color = Color.white;
         
-        [Range(0, 5)] 
-        [Tooltip("두께")]
-        public float width = 0.05f;
+        public float width
+        {
+            get => _width;
+            set => _width = value;
+        }
+        [SerializeField, Range(0, 5)] float _width = 0.05f;
         
-        [Tooltip("두께를 화면 픽셀 기준으로 고정합니다.")]
-        public bool widthUseScreen = false;
+        public bool useFixedWidth
+        {
+            get => _useFixedWidth;
+            set => _useFixedWidth = value;
+        }
+        [SerializeField] bool _useFixedWidth = false;
 
-        [Space(10)]
-        [Range(0, 5)] 
-        [Tooltip("오프셋 (빈 공간)")]
-        public float gap = 0f;
+        public float gap
+        {
+            get => _gap;
+            set => _gap = value;
+        }
+        [SerializeField, Range(0, 5)] float _gap = 0f;
 
-        [Tooltip("오프셋을 화면 픽셀 기준으로 고정합니다.")]
-        public bool gapUseScreen = false;
+        public bool useFixedGap
+        {
+            get => _useFixedGap;
+            set => _useFixedGap = value;
+        }
+        [SerializeField] bool _useFixedGap = false;
 
-        [Header("Settings")]
-        [Tooltip("윤곽선이 보여지는 방식을 결정합니다.\n- Normal: 가려지면 안 보임\n- AlwaysOnTop: 항상 위에 보임\n- OccludedOnly: 가려졌을 때만 보임")]
-        public OutlineVisibility outlineVisibility = OutlineVisibility.Normal;
+        public OutlineVisibility outlineVisibility
+        {
+            get => _outlineVisibility;
+            set => _outlineVisibility = value;
+        }
+        [SerializeField] OutlineVisibility _outlineVisibility = OutlineVisibility.Normal;
 
         // Internal
-        Renderer? _renderer;
-        MeshFilter? _meshFilter;
-        Mesh? _bakedMesh;
-        Material? _material;
-        MaterialPropertyBlock? _mpb;
-        [SerializeField, HideInInspector] Shader? _shader;
+        MeshFilter? meshFilter;
+        SkinnedMeshRenderer? skinnedMeshRenderer;
+        Mesh? lastMesh;
+        Mesh? bakedMesh;
+        Material? material;
+        MaterialPropertyBlock? mpb;
+        [FormerlySerializedAs("_shader"),SerializeField, HideInInspector] Shader? shader;
 
         // Property IDs
-        static readonly int _ColorID = Shader.PropertyToID("_Color");
-        static readonly int _WidthID = Shader.PropertyToID("_Width");
-        static readonly int _OffsetID = Shader.PropertyToID("_Offset");
-        static readonly int _ZTestID = Shader.PropertyToID("_ZTest");
+        static readonly int propColor = Shader.PropertyToID("_Color");
+        static readonly int propWidth = Shader.PropertyToID("_Width");
+        static readonly int propOffset = Shader.PropertyToID("_Offset");
+        static readonly int propZTest = Shader.PropertyToID("_ZTest");
         
-        static readonly int _WidthScreenID = Shader.PropertyToID("_WidthUseScreen");
-        static readonly int _OffsetScreenID = Shader.PropertyToID("_OffsetUseScreen");
+        static readonly int propWidthScreen = Shader.PropertyToID("_WidthUseScreen");
+        static readonly int propOffsetScreen = Shader.PropertyToID("_OffsetUseScreen");
 
         void OnEnable()
         {
-            _renderer = GetComponent<Renderer>();
-            _meshFilter = GetComponent<MeshFilter>();
-
-            BakeSmoothMesh();
+            meshFilter = GetComponent<MeshFilter>();
+            skinnedMeshRenderer = GetComponent<SkinnedMeshRenderer>();
         }
 
         void OnDisable()
         {
-            if (_material)
-                DestroyImmediate(_material);
+            if (material)
+                DestroyImmediate(material);
         }
 
-        void OnValidate()
+        Mesh? GetSharedMesh()
         {
-            if (_bakedMesh == null)
-                BakeSmoothMesh();
+            if (meshFilter != null && meshFilter.sharedMesh != null)
+                return meshFilter.sharedMesh;
+            else if (skinnedMeshRenderer != null && skinnedMeshRenderer.sharedMesh != null)
+                return skinnedMeshRenderer.sharedMesh;
+            else
+                return null;
         }
-
-        [MemberNotNullWhen(true, nameof(_bakedMesh))]
-        bool BakeSmoothMesh()
+        
+        Mesh? GetBakeSmoothMesh()
         {
-            if (_meshFilter == null || _meshFilter.sharedMesh == null)
-                return false;
+            Mesh? source = GetSharedMesh();
+            if (source == null)
+                return null;
             
-            Mesh source = _meshFilter.sharedMesh;
-            if (_bakedMesh != null && _bakedMesh.vertexCount == source.vertexCount)
-                return true;
-            
-            if (_bakedMesh != null)
-                DestroyImmediate(_bakedMesh);
+            Mesh bakedMesh = Instantiate(source);
+            bakedMesh.name = source.name + "_OutlineBaked";
+            bakedMesh.hideFlags = HideFlags.HideAndDontSave;
 
-            _bakedMesh = Instantiate(source);
-            _bakedMesh.name = source.name + "_OutlineBaked";
-            _bakedMesh.hideFlags = HideFlags.HideAndDontSave;
-
-            var vertices = _bakedMesh.vertices;
-            var normals = _bakedMesh.normals;
+            var vertices = bakedMesh.vertices;
+            var normals = bakedMesh.normals;
             var smoothNormals = new List<Vector3>(vertices.Length);
             var smoothNormalsDict = new Dictionary<Vector3, Vector3>();
 
@@ -99,39 +115,54 @@ namespace RuniOS.Effects
 
             smoothNormals.AddRange(vertices.Select(x => smoothNormalsDict[x].normalized));
 
-            _bakedMesh.SetUVs(1, smoothNormals);
-            _bakedMesh.UploadMeshData(false);
-            return true;
+            bakedMesh.SetUVs(1, smoothNormals);
+            bakedMesh.UploadMeshData(false);
+            
+            return bakedMesh;
         }
 
         void LateUpdate()
         {
-            if (_shader == null)
-                _shader = Shader.Find("Custom/SimpleMeshOutline");
+            if (shader == null)
+            {
+                shader = Shader.Find("Custom/SimpleMeshOutline");
+                if (shader == null)
+                    return;
+            }
             
-            if (_shader != null)
-                _material = new Material(_shader);
+            if (material == null)
+                material = new Material(shader);
             
-            if (_renderer == null || _material == null || !BakeSmoothMesh())
+            Mesh? shardedMesh = GetSharedMesh();
+            if (shardedMesh != lastMesh || bakedMesh == null)
+            {
+                if (bakedMesh != null)
+                    DestroyImmediate(bakedMesh);
+                
+                bakedMesh = GetBakeSmoothMesh();
+                lastMesh = shardedMesh;
+            }
+
+            if (bakedMesh == null)
                 return;
 
             // [수정] Enum 값을 int로 변환하여 셰이더에 전달
-            _material.SetInt(_ZTestID, (int)outlineVisibility);
+            material.SetInt(propZTest, (int)outlineVisibility);
 
-            _mpb ??= new MaterialPropertyBlock();
+            mpb ??= new MaterialPropertyBlock();
             
-            _mpb.SetColor(_ColorID, color);
-            _mpb.SetFloat(_WidthID, width);
-            _mpb.SetFloat(_OffsetID, gap);
+            mpb.SetColor(propColor, color);
+            mpb.SetFloat(propWidth, width);
+            mpb.SetFloat(propOffset, gap);
             
-            _mpb.SetFloat(_WidthScreenID, widthUseScreen ? 1.0f : 0.0f);
-            _mpb.SetFloat(_OffsetScreenID, gapUseScreen ? 1.0f : 0.0f);
+            mpb.SetFloat(propWidthScreen, useFixedWidth ? 1.0f : 0.0f);
+            mpb.SetFloat(propOffsetScreen, useFixedGap ? 1.0f : 0.0f);
 
             Matrix4x4 matrix = transform.localToWorldMatrix;
-            int subMeshCount = _bakedMesh.subMeshCount;
+            int subMeshCount = bakedMesh.subMeshCount;
 
             for (int i = 0; i < subMeshCount; i++)
-                Graphics.DrawMesh(_bakedMesh, matrix, _material, gameObject.layer, null, i, _mpb);
+                Graphics.DrawMesh(bakedMesh, matrix, material, gameObject.layer, null, i, mpb);
         }
     }
 }

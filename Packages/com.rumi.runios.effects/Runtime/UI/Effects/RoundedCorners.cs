@@ -1,4 +1,5 @@
 #nullable enable
+using UnityEngine.Serialization;
 using UnityEngine.UI;
 
 namespace RuniOS.UI.Effects
@@ -66,12 +67,12 @@ namespace RuniOS.UI.Effects
         }
         [SerializeField] bool _alwaysRebuildMaterial = false;
 
-        RectTransform? _rectTransform;
-        Graphic? _graphic;
-        Material? _material;
-        [SerializeField, HideInInspector] Shader? _shader;
+        RectTransform? rectTransform;
+        Graphic? graphic;
+        Material? material;
+        [FormerlySerializedAs("_shader"),SerializeField, HideInInspector] Shader? shader;
     
-        Mask? _mask; // Mask 존재 여부 확인용
+        Mask? mask; // Mask 존재 여부 확인용
     
         // 셰이더 프로퍼티 ID
         static readonly int propWidth = Shader.PropertyToID("_Width");
@@ -90,9 +91,9 @@ namespace RuniOS.UI.Effects
 
         void OnEnable()
         {
-            _rectTransform = transform as RectTransform;
-            _graphic = GetComponent<Graphic>();
-            _mask = GetComponent<Mask>(); // 활성화 시 Mask 체크
+            rectTransform = transform as RectTransform;
+            graphic = GetComponent<Graphic>();
+            mask = GetComponent<Mask>(); // 활성화 시 Mask 체크
         
             Refresh();
         }
@@ -101,8 +102,8 @@ namespace RuniOS.UI.Effects
         {
             DestroyMaterial();
 
-            if (_graphic != null)
-                _graphic.SetMaterialDirty();
+            if (graphic != null)
+                graphic.SetMaterialDirty();
         }
 
         void OnRectTransformDimensionsChange() => Refresh();
@@ -117,11 +118,11 @@ namespace RuniOS.UI.Effects
         /// </summary>
         public void Refresh()
         {
-            if (_graphic == null) return;
+            if (graphic == null) return;
 
             // Mask가 있는지 다시 확인 (런타임에 추가/제거될 수 있으므로)
-            if (_mask == null) _mask = GetComponent<Mask>();
-            bool hasMask = _mask != null && _mask.enabled;
+            if (mask == null) mask = GetComponent<Mask>();
+            bool hasMask = mask != null && mask.enabled;
 
             // 강제 재생성 조건: 설정이 켜져있거나, Mask가 있고 auto 옵션이 켜진 경우
             bool shouldRebuild = alwaysRebuildMaterial || (hasMask && autoRebuildWithMask);
@@ -129,7 +130,7 @@ namespace RuniOS.UI.Effects
             if (shouldRebuild)
                 DestroyMaterial(); // 재질을 파괴하면 GetModifiedMaterial에서 새로 생성됨
 
-            _graphic.SetMaterialDirty();
+            graphic.SetMaterialDirty();
         }
 
         /// <summary>
@@ -137,24 +138,24 @@ namespace RuniOS.UI.Effects
         /// </summary>
         Material IMaterialModifier.GetModifiedMaterial(Material baseMaterial)
         {
-            if (!isActiveAndEnabled || _graphic == null)
+            if (!isActiveAndEnabled || graphic == null)
                 return baseMaterial;
 
-            _shader = Shader.Find("UI/RoundedCorners");
-            if (_shader == null)
+            shader = Shader.Find("UI/RoundedCorners");
+            if (shader == null)
                 return baseMaterial;
 
             // 재질 생성 (없거나 셰이더가 다르면)
-            if (_material == null || _material.shader != _shader)
-                _material = new Material(_shader) { hideFlags = HideFlags.HideAndDontSave };
+            if (material == null || material.shader != shader)
+                material = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
 
             // 1. Mask 속성 복사 (스텐실 연결)
-            CopyMaskProperties(baseMaterial, _material);
+            CopyMaskProperties(baseMaterial, material);
 
             // 2. 둥근 모서리 속성 업데이트 (public 메서드 호출)
-            UpdateMaterialProperties(_material);
+            UpdateMaterialProperties(material);
 
-            return _material;
+            return material;
         }
 
         /// <summary>
@@ -164,9 +165,9 @@ namespace RuniOS.UI.Effects
         /// <param name="targetMaterial">적용할 대상 재질</param>
         void UpdateMaterialProperties(Material targetMaterial)
         {
-            if (targetMaterial == null || _rectTransform == null) return;
+            if (targetMaterial == null || rectTransform == null) return;
 
-            var rect = _rectTransform.rect;
+            var rect = rectTransform.rect;
         
             targetMaterial.SetFloat(propWidth, rect.width);
             targetMaterial.SetFloat(propHeight, rect.height);
@@ -208,11 +209,11 @@ namespace RuniOS.UI.Effects
         
         void DestroyMaterial()
         {
-            if (_material == null)
+            if (material == null)
                 return;
             
-            DestroyImmediate(_material);
-            _material = null;
+            DestroyImmediate(material);
+            material = null;
         }
     }
 }

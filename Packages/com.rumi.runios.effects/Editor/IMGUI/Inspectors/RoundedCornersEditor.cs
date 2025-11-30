@@ -2,7 +2,7 @@
 using RuniOS.Editor.IMGUI.Inspectors;
 using RuniOS.UI.Effects;
 
-namespace RuniOS.Editor.UI.Editor.IMGUI.Inspectors
+namespace RuniOS.Editor.Effects.IMGUI.Inspectors
 {
     [CustomEditor(typeof(RoundedCorners))]
     public class RoundedCornersEditor : CustomInspectorBase<RoundedCorners>
