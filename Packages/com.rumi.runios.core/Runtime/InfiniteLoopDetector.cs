@@ -6,7 +6,6 @@ namespace RuniOS
 {
     public static class InfiniteLoopDetector
     {
-        static int detectionCount;
         public const int detectionThreshold = 1000000;
 
         [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
@@ -28,6 +27,7 @@ namespace RuniOS
                 return false;
             }
         }
+        static int detectionCount;
 #else
         public const bool isLoopDetected = false;
 #endif
@@ -39,6 +39,8 @@ namespace RuniOS
         static void Awaken() => RuniOS.LowLevel.RuniPlayerLoop.onInit += Update;
 #endif
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         static void Update() => detectionCount = 0;
+#endif
     }
 }
