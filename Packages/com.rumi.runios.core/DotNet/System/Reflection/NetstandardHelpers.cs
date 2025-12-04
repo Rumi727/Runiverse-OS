@@ -13,8 +13,6 @@ namespace System.Reflection
     {
         public static MemberInfo GetMemberWithSameMetadataDefinitionAs(this Type type, MemberInfo member)
         {
-            ExceptionUtility.ThrowIfArgumentNull(member);
- 
             const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
             foreach (MemberInfo myMemberInfo in type.GetMembers(all))
             {
