@@ -5,6 +5,7 @@ using RuniOS.UI.Effects;
 
 namespace RuniOS.Editor.Effects.IMGUI.Inspectors
 {
+    [CanEditMultipleObjects]
     [CustomEditor(typeof(SimpleMeshOutline))]
     public class SimpleMeshOutlineEditor : CustomInspectorBase<RoundedCorners>
     {

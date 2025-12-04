@@ -1,9 +1,8 @@
-Shader "UI/RoundedCorners"
+Shader "Hidden/RuniOS/RoundedCorners"
 {
     Properties
     {
         [PerRendererData] _MainTex ("Sprite Texture", 2D) = "white" {}
-        _Color ("Tint", Color) = (1,1,1,1)
         
         _StencilComp ("Stencil Comparison", Float) = 8
         _Stencil ("Stencil ID", Float) = 0
@@ -11,13 +10,7 @@ Shader "UI/RoundedCorners"
         _StencilWriteMask ("Stencil Write Mask", Float) = 255
         _StencilReadMask ("Stencil Read Mask", Float) = 255
         _ColorMask ("Color Mask", Float) = 15
-
         [Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip ("Use Alpha Clip", Float) = 0
-        
-        _Width("Width", Float) = 100
-        _Height("Height", Float) = 100
-        _Radius("Radius", Vector) = (0,0,0,0)
-        _Softness("Softness", Float) = 1.0
     }
 
     SubShader
@@ -61,11 +54,16 @@ Shader "UI/RoundedCorners"
             #pragma multi_compile_local _ UNITY_UI_CLIP_RECT
             #pragma multi_compile_local _ UNITY_UI_ALPHACLIP
 
-            struct appdata_t
+            struct appdata_ui
             {
                 float4 vertex   : POSITION;
                 float4 color    : COLOR;
-                float2 texcoord : TEXCOORD0;
+                float2 texcoord : TEXCOORD0; 
+                float2 uv1      : TEXCOORD1; // Local Pos
+                float2 uv2      : TEXCOORD2; // Rect Size
+                float2 uv3      : TEXCOORD3; // x:Width, y:Softness
+                float4 tangent  : TANGENT;   // Radii
+                float3 normal   : NORMAL;    // x:IsOutline, y:BodySoft
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -74,72 +72,94 @@ Shader "UI/RoundedCorners"
                 float4 vertex   : SV_POSITION;
                 fixed4 color    : COLOR;
                 float2 texcoord : TEXCOORD0;
-                float4 worldPosition : TEXCOORD1;
+                float2 uiPos    : TEXCOORD1;
+                float4 rectInfo : TEXCOORD4; 
+                float4 outlineInfo : TEXCOORD5; 
+                float4 radii    : TEXCOORD6; 
+                float4 worldPosition : TEXCOORD7;
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
             sampler2D _MainTex;
-            fixed4 _Color;
             fixed4 _TextureSampleAdd;
             float4 _ClipRect;
             float4 _MainTex_ST;
             
-            float _Width;
-            float _Height;
-            float4 _Radius; 
-            float _Softness;
-
-            v2f vert(appdata_t v)
+            v2f vert(appdata_ui v)
             {
                 v2f IN;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(IN);
+                
                 IN.worldPosition = v.vertex;
-                IN.vertex = UnityObjectToClipPos(IN.worldPosition);
+                IN.vertex = UnityObjectToClipPos(v.vertex);
                 IN.texcoord = TRANSFORM_TEX(v.texcoord, _MainTex);
-                IN.color = v.color * _Color;
+                IN.color = v.color;
+                
+                IN.uiPos = v.uv1;
+                IN.rectInfo = float4(v.uv2.x, v.uv2.y, 0, 0);
+                // Unpack: x=Width, y=OutSoft, z=IsOutline, w=BodySoft
+                IN.outlineInfo = float4(v.uv3.x, v.uv3.y, v.normal.x, v.normal.y);
+                IN.radii = v.tangent;
+
                 return IN;
+            }
+
+            float CalcRoundedBox(float2 p, float2 size, float4 radius)
+            {
+                float2 r = (p.x > 0.0) ? radius.yw : radius.xz; 
+                float rad = (p.y > 0.0) ? r.x : r.y;
+                float2 q = abs(p) - size + rad;
+                return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - rad;
             }
 
             fixed4 frag(v2f IN) : SV_Target
             {
-                half4 color = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
-
-                // 픽셀 좌표 계산
-                float2 pixelPos = (IN.texcoord - 0.5) * float2(_Width, _Height);
-                float2 halfSize = float2(_Width, _Height) * 0.5;
-
-                // 사분면별 반경 선택
-                float2 r = (pixelPos.x > 0.0) ? _Radius.yw : _Radius.xz; 
-                float radius = (pixelPos.y > 0.0) ? r.x : r.y;
-
-                // SDF 거리 계산
-                float2 q = abs(pixelPos) - halfSize + radius;
-                float dist = min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
-
-                // [수정 핵심] dist를 미분하지 않고, 좌표계 자체의 변화량을 측정합니다.
-                // pixelPos는 화면 픽셀에 따라 선형적으로 변하므로 값이 튀지 않고 매우 안정적입니다.
-                // fwidth(pixelPos.x)는 "현재 화면 1픽셀이 UI 단위로 얼마만큼의 크기인가"를 나타냅니다.
+                float2 pixelPos = IN.uiPos;
+                float2 halfSize = IN.rectInfo.xy;
+                float dist = CalcRoundedBox(pixelPos, halfSize, IN.radii);
                 float delta = fwidth(pixelPos.x); 
                 
-                // Softness 1.0 = 화면상 1픽셀만큼 부드럽게 처리
-                float range = delta * _Softness * 0.625;
-                
-                float smoothedAlpha = 1.0 - smoothstep(-range, range, dist);
+                float outlineWidth = IN.outlineInfo.x;
+                float outlineSoftness = IN.outlineInfo.y;
+                float isOutline = IN.outlineInfo.z;
+                float bodySoftness = IN.outlineInfo.w;
 
-                color.a *= smoothedAlpha;
+                half4 finalColor;
+
+                // Branching (Coherent)
+                if (isOutline < 0.5) 
+                {
+                    // Body
+                    half4 texColor = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
+                    
+                    float softRange = delta * outlineSoftness; // Body uses its own softness
+                    float alpha = 1.0 - smoothstep(-softRange, softRange, dist);
+                    
+                    texColor.a *= alpha;
+                    finalColor = texColor;
+                }
+                else
+                {
+                    // Outline
+                    float innerSoftRange = delta * bodySoftness;
+                    float overlap = innerSoftRange * 0.5; // Gap fix
+                    
+                    float innerHole = smoothstep(-innerSoftRange - overlap, innerSoftRange - overlap, dist); 
+                    float outerSoftRange = delta * outlineSoftness; 
+                    float outerBorder = 1.0 - smoothstep(outlineWidth - outerSoftRange, outlineWidth + outerSoftRange, dist);
+
+                    finalColor = IN.color;
+                    finalColor.a *= (innerHole * outerBorder);
+                }
 
                 #ifdef UNITY_UI_CLIP_RECT
-                color.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
+                finalColor.a *= UnityGet2DClipping(IN.worldPosition.xy, _ClipRect);
                 #endif
 
-                #ifdef UNITY_UI_ALPHACLIP
-                clip (color.a - 0.001);
-                #endif
+                clip(finalColor.a - 0.001);
 
-                clip(color.a - 0.01);
-
-                return color;
+                return finalColor;
             }
             ENDCG
         }

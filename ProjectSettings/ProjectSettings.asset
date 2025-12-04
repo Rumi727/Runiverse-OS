@@ -146,6 +146,7 @@ PlayerSettings:
   bundleVersion: 0.1
   preloadedAssets:
   - {fileID: 11400000, guid: 36bd0519cd6632b4281fec6e36cb97d1, type: 2}
+  - {fileID: 4800000, guid: 9439497249b87fb4ba1e6cce943182fb, type: 3}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
@@ -390,7 +391,7 @@ PlayerSettings:
   m_BuildTargetBatching:
   - m_BuildTarget: Standalone
     m_StaticBatching: 1
-    m_DynamicBatching: 0
+    m_DynamicBatching: 1
   - m_BuildTarget: tvOS
     m_StaticBatching: 1
     m_DynamicBatching: 0
@@ -422,7 +423,7 @@ PlayerSettings:
   - m_BuildTarget: iOSSupport
     m_GraphicsJobs: 0
   - m_BuildTarget: WindowsStandaloneSupport
-    m_GraphicsJobs: 0
+    m_GraphicsJobs: 1
   - m_BuildTarget: XboxOnePlayer
     m_GraphicsJobs: 1
   - m_BuildTarget: LuminSupport
@@ -766,7 +767,7 @@ PlayerSettings:
     PS5: RUNI_ENGINE
     QNX: RUNI_ENGINE
     Server: RUNI_ENGINE
-    Standalone: RUNI_ENGINE;RUNI_ENGINE_DOTNET_INTERNAL
+    Standalone: RUNI_ENGINE
     WebGL: RUNI_ENGINE
     Windows Store Apps: RUNI_ENGINE
     XboxOne: RUNI_ENGINE

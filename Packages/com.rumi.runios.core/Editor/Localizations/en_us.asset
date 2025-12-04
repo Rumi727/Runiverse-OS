@@ -269,27 +269,24 @@ MonoBehaviour:
       value: Corner Settings
     - key: inspector.rounded_corners.corner.radius
       value: Radius
-    - key: inspector.rounded_corners.render.header
-      value: Render Settings
-    - key: inspector.rounded_corners.render.softness
+    - key: inspector.rounded_corners.corner.softness
       value: Softness
-    - key: inspector.rounded_corners.render.softness.tooltip
+    - key: inspector.rounded_corners.corner.softness.tooltip
       value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare
         sharper, higher values \u200B\u200Bare blurrier."
-    - key: inspector.rounded_corners.render.useAntiAliasing
-      value: Use Anti Aliasing
-    - key: inspector.rounded_corners.update.header
-      value: Update Options
-    - key: inspector.rounded_corners.update.autoRebuildWithMask
-      value: Auto Rebuild With Mask
-    - key: inspector.rounded_corners.update.autoRebuildWithMask.tooltip
-      value: If the Mask component is on the same object, changing properties forces
-        the material to be regenerated immediately
-    - key: inspector.rounded_corners.update.alwaysRebuildMaterial
-      value: Always Rebuild Material
-    - key: inspector.rounded_corners.update.alwaysRebuildMaterial.tooltip
-      value: Regenerates the material whenever its properties change, regardless
-        of whether or not it is masked.
+    - key: inspector.rounded_corners.outline.header
+      value: Outline Settings
+    - key: inspector.rounded_corners.outline.outlineColor
+      value: Color
+    - key: inspector.rounded_corners.outline.outlineWidth
+      value: Width
+    - key: inspector.rounded_corners.outline.outlineSoftness
+      value: Softness
+    - key: inspector.rounded_corners.outline.outlineSoftness.tooltip
+      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare
+        sharper, higher values \u200B\u200Bare blurrier."
+    - key: inspector.rounded_corners.outline.insideOutline
+      value: Inside Outline
     - key: inspector.simple_mesh_outline.appearance.header
       value: Appearance
     - key: inspector.simple_mesh_outline.appearance.color
