@@ -766,7 +766,7 @@ PlayerSettings:
     PS5: RUNI_ENGINE
     QNX: RUNI_ENGINE
     Server: RUNI_ENGINE
-    Standalone: RUNI_ENGINE
+    Standalone: RUNI_ENGINE;RUNI_ENGINE_DOTNET_INTERNAL
     WebGL: RUNI_ENGINE
     Windows Store Apps: RUNI_ENGINE
     XboxOne: RUNI_ENGINE
