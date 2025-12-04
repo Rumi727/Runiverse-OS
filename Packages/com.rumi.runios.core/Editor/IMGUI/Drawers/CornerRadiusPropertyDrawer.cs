@@ -1,12 +1,15 @@
 #nullable enable
+using RuniOS.Editor.UIElements;
+using UnityEditor.AnimatedValues;
+
 namespace RuniOS.Editor.IMGUI.Drawers
 {
     [CustomPropertyDrawer(typeof(CornerRadius))]
     public class CornerRadiusPropertyDrawer : PropertyDrawer
     {
-        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
-        
-        public static void Draw(Rect position, SerializedProperty property, GUIContent label)
+        readonly Dictionary<string, AnimBool> cachedAnimBool = new();
+
+        public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             position.height = EditorGUIUtility.singleLineHeight;
             
@@ -36,13 +39,25 @@ namespace RuniOS.Editor.IMGUI.Drawers
 
                 EditorGUI.showMixedValue = false;
             }
+            
+            AnimBool animBool = GetAnimBool(property);
+            bool isAnimating = !property.IsInArray() && animBool.isAnimating;
 
-            if (property.isExpanded)
+            animBool.target = property.isExpanded;
+            
+            if (property.isExpanded || isAnimating)
             {
+                BeginIndentLevel();
+                
+                if (isAnimating)
+                {
+                    float childHeight = GetChildHeight(property) * animBool.faded;
+                    GUI.BeginClip(new Rect(0, 0, position.x + position.width + (EditorGUI.indentLevel * 15) + 2, position.y + position.height + childHeight));
+                }
+
                 position.y += EditorGUIUtility.singleLineHeight + 2;
                 property.Next(true);
                 
-                BeginIndentLevel();
                 EditorGUI.BeginChangeCheck();
                 
                 Field(GetTextOrKey("gui.top_left"), ref cornerRadius.topLeft);
@@ -52,8 +67,6 @@ namespace RuniOS.Editor.IMGUI.Drawers
 
                 if (EditorGUI.EndChangeCheck())
                     WriteProperty();
-                
-                EndIndentLevel();
 
                 void Field(string label, ref float value)
                 {
@@ -64,8 +77,18 @@ namespace RuniOS.Editor.IMGUI.Drawers
                     position.y += EditorGUIUtility.singleLineHeight + 2;
                     property.Next(false);
                 }
+                
+                if (isAnimating)
+                    GUI.EndClip();
+                
+                EndIndentLevel();
             }
 
+            if (isAnimating)
+                RepaintCurrentWindow();
+
+            EditorGUI.EndProperty();
+            
             void WriteProperty()
             {
                 topLeftProperty.floatValue = cornerRadius.topLeft;
@@ -73,26 +96,47 @@ namespace RuniOS.Editor.IMGUI.Drawers
                 bottomRightProperty.floatValue = cornerRadius.bottomRight;
                 bottomLeftProperty.floatValue = cornerRadius.bottomLeft;
             }
-
-            EditorGUI.EndProperty();
         }
-
+        
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            float height = EditorGUIUtility.singleLineHeight + 2;
-
-            if (property.isExpanded)
+            AnimBool animBool = GetAnimBool(property);
+            bool isAnimating = !property.IsInArray() && animBool.isAnimating;
+            
+            float height = EditorGUIUtility.singleLineHeight;
+            float childHeight = (property.isExpanded || isAnimating) ? GetChildHeight(property) : 0;
+            
+            height += (isAnimating ? childHeight * animBool.faded : childHeight);
+            if (isAnimating)
+                UIToolkitUtility.UpdateContainerHeight(height);
+            
+            return height;
+        }
+        
+        AnimBool GetAnimBool(SerializedProperty property)
+        {
+            if (!cachedAnimBool.TryGetValue(property.propertyPath, out AnimBool animBool))
             {
-                property.Next(true);
-
-                for (int i = 0; i < 4; i++)
-                {
-                    height += EditorGUI.GetPropertyHeight(property, label) + 2;
-                    property.Next(false);
-                }
+                animBool = new AnimBool(property.isExpanded);
+                cachedAnimBool[property.propertyPath] = animBool;
             }
 
-            return height - 2;
+            return animBool;
+        }
+
+        static float GetChildHeight(SerializedProperty property)
+        {
+            property = property.Copy();
+            property.Next(true);
+
+            float height = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                height += EditorGUI.GetPropertyHeight(property) + 2;
+                property.Next(false);
+            }
+
+            return height;
         }
         
         public static (SerializedProperty topLeft, SerializedProperty topRight, SerializedProperty bottomRight, SerializedProperty bottomLeft) GetChildProperty(SerializedProperty property)
