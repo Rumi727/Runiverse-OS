@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
 
-namespace RuniOS.Utility
+namespace RuniOS.Reflection
 {
     public static class ReflectionUtility
     {

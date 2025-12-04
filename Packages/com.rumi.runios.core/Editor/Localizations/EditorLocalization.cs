@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Linq;
+using RuniOS.Reflection;
 
 namespace RuniOS.Editor.Localizations
 {

@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Reflection;
 using RuniOS.Tasks;
 
 namespace RuniOS.Resource
