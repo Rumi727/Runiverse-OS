@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
 
@@ -13,7 +14,7 @@ namespace RuniOS.Inspectors.Csharp
         public PropertyElement(InspectableObject inspectable, PropertyInfo property) : base(inspectable, property)
         {
             this.property = property;
-            nullabilityInfo = new NullabilityInfoContext().Create(property);
+            nullabilityInfo = NullabilityInfoContext.Create(property);
 
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
@@ -26,7 +27,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         public Type variableType => property.PropertyType;
-        public RuniNullabilityInfo nullabilityInfo { get; }
+        public NullabilityInfo nullabilityInfo { get; }
         
         public PropertyInfo property { get; }
         

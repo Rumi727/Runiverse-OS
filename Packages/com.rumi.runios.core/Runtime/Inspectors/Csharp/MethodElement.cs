@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Reflection;
 using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
@@ -15,7 +16,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         public Type returnType => method.ReturnType;
-        public RuniNullabilityInfo? returnNullabilityInfo { get; }
+        public NullabilityInfo? returnNullabilityInfo { get; }
         
         public MethodInfo method { get; }
 

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Editor.UIElements;
 using RuniOS.Inspectors;
+using RuniOS.Reflection;
 
 namespace RuniOS.Editor.Inspectors.Unity
 {
@@ -55,7 +56,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다. 직렬화된 프로퍼티의 경우 null을 반환합니다.
         /// </summary>
-        public RuniNullabilityInfo? nullabilityInfo => null;
+        public NullabilityInfo? nullabilityInfo => null;
 
         /// <summary>
         /// 직렬화된 프로퍼티를 가져옵니다.

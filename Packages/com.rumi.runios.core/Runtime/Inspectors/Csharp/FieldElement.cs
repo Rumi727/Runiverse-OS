@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
 
@@ -33,7 +34,7 @@ namespace RuniOS.Inspectors.Csharp
         public FieldElement(InspectableObject inspectable, FieldInfo field) : base(inspectable, field)
         {
             this.field = field;
-            nullabilityInfo = new NullabilityInfoContext().Create(field);
+            nullabilityInfo = NullabilityInfoContext.Create(field);
 
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
 
@@ -53,7 +54,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드의 null 허용 여부 정보를 가져옵니다.
         /// </summary>
-        public RuniNullabilityInfo nullabilityInfo { get; }
+        public NullabilityInfo nullabilityInfo { get; }
 
         /// <summary>
         /// 이 요소가 나타내는 <see cref="FieldInfo"/>를 가져옵니다.

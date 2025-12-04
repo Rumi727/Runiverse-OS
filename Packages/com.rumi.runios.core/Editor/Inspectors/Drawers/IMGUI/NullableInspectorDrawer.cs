@@ -82,7 +82,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) ? (bool)hasValueElement.value! : null,
                     (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsWritable(flags)) ? (x => hasValueElement.value = x) : null,
                     valueElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
-                    RuniNullabilityState.Nullable,
+                    NullabilityState.Nullable,
                     nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"
                 )
                )

@@ -2,6 +2,7 @@
 
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using UnityEditor.AnimatedValues;
@@ -40,7 +41,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 throw new NullReferenceException($"{nameof(elementType)} is null");
             
             CheckInspectableList();
-            if (inspectableList.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+            if (inspectableList.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
                 return true;
             
             return elementType.CanGetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
@@ -58,7 +59,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 throw new NullReferenceException($"{nameof(elementType)} is null");
             
             CheckInspectableList();
-            if (inspectableList.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+            if (inspectableList.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
                 return elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
             else
                 return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));

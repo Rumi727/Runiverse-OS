@@ -3,6 +3,7 @@ using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Collections.Generic;
 using RuniOS.Editor.Serialization;
 using RuniOS.Inspectors;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -46,7 +47,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedProperty property { get; }
         public PropertyConverter? converter { get; }
 
-        RuniNullabilityInfo? IInspectableList.elementNullabilityInfo => null;
+        NullabilityInfo? IInspectableList.elementNullabilityInfo => null;
 
         bool IList.IsReadOnly => false;
         bool IList.IsFixedSize => false;

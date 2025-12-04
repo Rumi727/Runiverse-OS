@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
 
@@ -37,7 +38,7 @@ namespace RuniOS.Inspectors.Csharp
         public Type variableType { get; }
         public Type currentElementType => value?.GetType() ?? variableType;
 
-        public RuniNullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
+        public NullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
         
         public object targetKey { get; set; }
 

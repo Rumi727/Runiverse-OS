@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Reflection;
 using System.Collections;
 
 namespace RuniOS.Inspectors
@@ -11,7 +12,7 @@ namespace RuniOS.Inspectors
         /// </summary>
         KeyValuePair<Type, Type>? inspectionElementType { get; }
         
-        RuniNullabilityInfo? elementNullabilityInfo { get; }
+        NullabilityInfo? elementNullabilityInfo { get; }
 
         void RenameKey(object fromKey, object toKey);
         

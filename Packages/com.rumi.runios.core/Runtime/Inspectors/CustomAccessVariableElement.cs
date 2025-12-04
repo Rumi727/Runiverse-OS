@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using RuniOS.Reflection;
+
 namespace RuniOS.Inspectors
 {
     /// <summary>
@@ -61,7 +63,7 @@ namespace RuniOS.Inspectors
         
         public Type variableType => targetElement.variableType;
         
-        public RuniNullabilityInfo? nullabilityInfo => targetElement.nullabilityInfo;
+        public NullabilityInfo? nullabilityInfo => targetElement.nullabilityInfo;
         
         public bool isPublic => targetElement.isPublic;
         

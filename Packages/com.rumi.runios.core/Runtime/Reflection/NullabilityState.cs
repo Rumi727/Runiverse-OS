@@ -1,12 +1,11 @@
 ﻿#nullable enable
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Reflection/NullabilityInfo.cs
-
-namespace RuniOS.Inspectors
+namespace RuniOS.Reflection
 {
     /// <summary>
     /// An enum that represents nullability state
     /// </summary> 
-    public enum RuniNullabilityState
+    public enum NullabilityState
     {
         /// <summary>
         /// Nullability context not enabled (oblivious)

@@ -3,6 +3,7 @@ using RuniOS.Collections.Handlers.Entrys;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using System.Collections;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
@@ -46,7 +47,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 return false;
             
             // 값 타입 Nullable 여부 체크
-            if (inspectableDictionary.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+            if (inspectableDictionary.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
                 return true;
             
             // 값 타입 인스턴스 생성 가능 여부 체크
@@ -65,7 +66,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             object key = elementTypePair.Value.Key.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
             object? value;
-            if (inspectableDictionary.elementNullabilityInfo?.writeState == RuniNullabilityState.Nullable)
+            if (inspectableDictionary.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
                 value = elementTypePair.Value.Value.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
             else
                 value = elementTypePair.Value.Value.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));

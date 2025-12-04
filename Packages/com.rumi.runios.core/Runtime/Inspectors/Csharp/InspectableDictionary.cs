@@ -2,6 +2,7 @@
 using RuniOS.Collections.Generic;
 using RuniOS.Collections.Handlers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -10,13 +11,13 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableDictionary : IInspectableDictionary
     {
-        public InspectableDictionary(IEnumerable instance, RuniNullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
+        public InspectableDictionary(IEnumerable instance, NullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
 
-        public InspectableDictionary(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
         
-        public InspectableDictionary(Type inspectionType, RuniNullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
+        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
         
-        public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, RuniNullabilityInfo? elementNullabilityInfo = null)
+        public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
@@ -44,7 +45,7 @@ namespace RuniOS.Inspectors.Csharp
         /// </remarks>
         public KeyValuePair<Type, Type>? inspectionElementType { get; }
 
-        public RuniNullabilityInfo? elementNullabilityInfo { get; }
+        public NullabilityInfo? elementNullabilityInfo { get; }
 
         public bool isReadOnly => dictionaryHandlers.Any(x => x.isReadOnly);
         bool IDictionary.IsReadOnly => isReadOnly;
