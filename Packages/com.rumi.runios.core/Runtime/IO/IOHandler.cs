@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using System.Collections.Immutable;
 using System.IO;
 using System.Security.Cryptography;
 
@@ -296,11 +297,11 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일의 MD5 해시를 포함하는 <see cref="byte"/>[]입니다.</returns>
         /// <exception cref="Exception">파일을 찾을 수 없거나(파일이 존재하지 않거나), 읽는 동안 오류가 발생한 경우입니다.</exception>
-        public virtual async UniTask<byte[]> GetMD5Hash()
+        public virtual async UniTask<ImmutableArray<byte>> GetMD5Hash()
         {
             using MD5 md5 = MD5.Create();
             await using Stream stream = await OpenRead();
-            return md5.ComputeHash(stream);
+            return md5.ComputeHash(stream).ToImmutableArray();
         }
 
 
@@ -342,7 +343,7 @@ namespace RuniOS.IO
             public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
 
             public override bool IsSameTarget(IOHandler? other) => other is EmptyIOHandler;
-            public override UniTask<byte[]> GetMD5Hash() => UniTask.FromResult(Array.Empty<byte>());
+            public override UniTask<ImmutableArray<byte>> GetMD5Hash() => UniTask.FromResult(ImmutableArray<byte>.Empty);
         }
     }
 }

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Linq;
+using System.Collections.Immutable;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Languages
@@ -28,7 +29,7 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => ResourceManager.RegisterAssetRegistry<LanguageAssetRegistry>();
 
-        protected override AssetHandle CreateHandle(IOHandler ioHandler, string md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
+        protected override AssetHandle CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
 
         protected override UniTask OnBeginAssetLoop()
         {

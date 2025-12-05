@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using RuniOS.IO;
+using System.Collections.Immutable;
 
 namespace RuniOS.Resource
 {
@@ -19,7 +20,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 파일의 MD5 해시 값을 가져오거나 설정합니다.
         /// </summary>
-        public string md5Hash { get; private set; }
+        public ImmutableArray<byte> md5Hash { get; private set; }
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -49,7 +50,7 @@ namespace RuniOS.Resource
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="md5Hash">에셋 파일의 초기 MD5 해시 값입니다.</param>
         /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-        protected AssetHandle(IOHandler ioHandler, string md5Hash, int unloadDelayFrame = 600)
+        protected AssetHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash, int unloadDelayFrame = 600)
         {
             this.ioHandler = ioHandler;
             this.md5Hash = md5Hash;
@@ -75,7 +76,7 @@ namespace RuniOS.Resource
 
                 try
                 {
-                    md5Hash = BitConverter.ToString(await ioHandler.GetMD5Hash());
+                    md5Hash = await ioHandler.GetMD5Hash();
                     assetObject = await Load();
                 }
                 catch (Exception e)
@@ -218,6 +219,6 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="other">비교할 다른 에셋 핸들입니다.</param>
         /// <returns>동일한 에셋을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
-        public virtual bool IsSameTarget(AssetHandle other) => GetType() == other.GetType() && ioHandler.IsSameTarget(other.ioHandler) && md5Hash == other.md5Hash;
+        public virtual bool IsSameTarget(AssetHandle other) => GetType() == other.GetType() && ioHandler.IsSameTarget(other.ioHandler) && md5Hash.SequenceEqual(other.md5Hash);
     }
 }
