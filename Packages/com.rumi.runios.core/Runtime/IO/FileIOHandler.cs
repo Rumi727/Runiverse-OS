@@ -92,18 +92,15 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetDirectories()
+        public override IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+            await UniTask.SwitchToThreadPool();
+            foreach (var item in Directory.EnumerateDirectories(targetPath))
             {
-                await UniTask.SwitchToThreadPool();
-                foreach (var item in Directory.EnumerateDirectories(targetPath))
-                {
-                    if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
-                        await writer.YieldAsync(result.ToString());
-                }
-            });
-        }
+                if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
+                    await writer.YieldAsync(result.ToString());
+            }
+        });
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 서브디렉토리 경로(재귀적으로)를 비동기적으로 열거합니다.
@@ -112,15 +109,12 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories()
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
-            {
-                await UniTask.SwitchToThreadPool();
-                foreach (var item in Directory.EnumerateDirectories(targetPath, "*", SearchOption.AllDirectories))
-                    await writer.YieldAsync(item - targetPath);
-            });
-        }
+            await UniTask.SwitchToThreadPool();
+            foreach (var item in Directory.EnumerateDirectories(targetPath, "*", SearchOption.AllDirectories))
+                await writer.YieldAsync(item - targetPath);
+        });
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 열거합니다.
@@ -129,18 +123,15 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles()
+        public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+            await UniTask.SwitchToThreadPool();
+            foreach (var item in Directory.EnumerateFiles(targetPath))
             {
-                await UniTask.SwitchToThreadPool();
-                foreach (var item in Directory.EnumerateFiles(targetPath))
-                {
-                    if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
-                        await writer.YieldAsync(result.ToString());
-                }
-            });
-        }
+                if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
+                    await writer.YieldAsync(result.ToString());
+            }
+        });
 
         /// <summary>
         /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 열거합니다.
@@ -150,19 +141,16 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns)
+        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<string>(async (writer, token) =>
+            await UniTask.SwitchToThreadPool();
+            foreach (var item in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns))
             {
-                await UniTask.SwitchToThreadPool();
-                foreach (var item in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns))
-                {
-                    FilePath path = item - targetPath;
-                    if (path != targetPath)
-                        await writer.YieldAsync(path.ToString());
-                }
-            });
-        }
+                FilePath path = item - targetPath;
+                if (path != targetPath)
+                    await writer.YieldAsync(path.ToString());
+            }
+        });
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 열거합니다.
@@ -171,15 +159,12 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles()
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<FilePath>(async (writer, token) =>
-            {
-                await UniTask.SwitchToThreadPool();
-                foreach (var file in Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories))
-                    await writer.YieldAsync(file - targetPath);
-            });
-        }
+            await UniTask.SwitchToThreadPool();
+            foreach (var file in Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories))
+                await writer.YieldAsync(file - targetPath);
+        });
 
         /// <summary>
         /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 열거합니다.
@@ -189,15 +174,12 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns)
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<FilePath>(async (writer, token) =>
-            {
-                await UniTask.SwitchToThreadPool();
-                foreach (var file in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns, SearchOption.AllDirectories))
-                    await writer.YieldAsync(file - targetPath);
-            });
-        }
+            await UniTask.SwitchToThreadPool();
+            foreach (var file in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns, SearchOption.AllDirectories))
+                await writer.YieldAsync(file - targetPath);
+        });
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일의 모든 바이트를 비동기적으로 읽습니다.
@@ -236,15 +218,12 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="PathTooLongException">경로가 시스템 정의 최대 길이를 초과하는 경우 발생합니다.</exception>
         /// <exception cref="NotSupportedException">경로에 콜론(:)이 포함된 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> ReadLines()
+        public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
         {
-            return UniTaskAsyncEnumerable.Create<string>(async (writer, token) =>
-            {
-                await UniTask.SwitchToThreadPool();
-                foreach (var line in File.ReadLines(targetPath))
-                    await writer.YieldAsync(line);
-            });
-        }
+            await UniTask.SwitchToThreadPool();
+            foreach (var line in File.ReadLines(targetPath))
+                await writer.YieldAsync(line);
+        });
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일을 읽기 모드로 열어 스트림을 비동기적으로 반환합니다.
