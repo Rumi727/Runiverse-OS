@@ -50,3 +50,4 @@ When this library is completed, it will replace the existing [SC KRM 1.0](https:
 지원
 * 기존 Runi Engine의 카메라, 캔버스 컴포넌트 가져와서 스크린 크롭 등 기능 추가
 * 이외에도 여러 기능들...
+* 리소스 레지스트리 고쳐라 아무리봐도 약간 나사 빠져잇다... 마인크래프트를 참고할 것
