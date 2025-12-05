@@ -82,7 +82,12 @@ namespace RuniOS.Reflection
                     Debug.LogException(e);
                 }
 
-                types = assemblys.Where(x => /* 병신; */ !x.FullName.StartsWith(nameof(JetBrains), StringComparison.Ordinal))
+                types = assemblys
+#if UNITY_EDITOR
+                    .Where(x => 
+                        /* 브릿지 코드 제외 */ !x.FullName.StartsWith("RuniOS.Editor.APIBridge", StringComparison.Ordinal) &&
+                        /* 병신; */ !x.FullName.StartsWith(nameof(JetBrains), StringComparison.Ordinal))
+#endif
                     .SelectMany(static x =>
                     {
                         try
