@@ -161,6 +161,14 @@ namespace RuniOS.Resource
 
 
 
+        public void Deconstruct(out string nameSpace, out FilePath path)
+        {
+            nameSpace = this.nameSpace;
+            path = this.path;
+        }
+
+
+
         public static implicit operator string(Identifier identifier) => identifier.ToString();
         public static implicit operator Identifier(string identifier) => Parse(identifier);
         

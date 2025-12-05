@@ -576,6 +576,22 @@ namespace RuniOS.IO
 
 
 
+        public void Deconstruct(out FilePath directory, out string name)
+        {
+            directory = GetParentPath();
+            name = GetFileName();
+        }
+        
+        public void Deconstruct(out FilePath directory, out string name, out FileExtension extension)
+        {
+            directory = GetParentPath();
+            name = GetFileNameWithoutExtension();
+            extension = GetExtension();
+        }
+
+
+
+
         #region operators
 
         /// <summary>

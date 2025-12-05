@@ -18,10 +18,10 @@ namespace RuniOS.Resource
 
         public override string ToString() => name;
 
-        public bool Equals(RegistryType other) => _name == other._name;
+        public bool Equals(RegistryType other) => name == other.name;
     
         public override bool Equals(object? obj) => obj is RegistryType other && Equals(other);
-        public override int GetHashCode() => _name?.GetHashCode() ?? 0;
+        public override int GetHashCode() => name.GetHashCode();
     
         public static bool operator ==(RegistryType left, RegistryType right) => left.Equals(right);
         public static bool operator !=(RegistryType left, RegistryType right) => !left.Equals(right);
