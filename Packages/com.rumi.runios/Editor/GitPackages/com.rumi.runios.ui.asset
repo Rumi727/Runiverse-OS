@@ -14,7 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Installer.GitPackages.GitPackage
   packages:
   - {fileID: 11400000, guid: 775dbedadb5cef947819fa38009798ed, type: 2}
-  - {fileID: 11400000, guid: b0afe334cb2bea5489bab60376038ebf, type: 2}
   dependencies:
   - com.unity.modules.ui
   - com.unity.ui
