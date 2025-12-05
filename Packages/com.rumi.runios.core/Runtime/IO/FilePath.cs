@@ -803,7 +803,7 @@ namespace RuniOS.IO
 
 
 
-        public void OnBeforeSerialize() => value = value;
-        public void OnAfterDeserialize() => value = value;
+        void ISerializationCallbackReceiver.OnBeforeSerialize() => value = value;
+        void ISerializationCallbackReceiver.OnAfterDeserialize() => value = value;
     }
 }
