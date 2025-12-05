@@ -146,7 +146,14 @@ namespace RuniOS.IO
         /// </summary>
         /// <param name="paths">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(params FilePath[] paths) => paths.Aggregate(this, (current, t) => current.CreateChild(t));
+        public IOHandler CreateChild(params FilePath[] paths) => CreateChild((IEnumerable<FilePath>)paths);
+        
+        /// <summary>
+        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
+        /// </summary>
+        /// <param name="paths">자식 핸들러의 경로입니다.</param>
+        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
+        public IOHandler CreateChild(IEnumerable<FilePath> paths) => paths.Aggregate(this, (current, t) => current.CreateChild(t));
 
         /// <summary>
         /// 이 핸들러의 경로에 지정된 확장자를 추가하여 새 <see cref="IOHandler"/>를 생성합니다.
