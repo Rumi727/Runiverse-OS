@@ -113,6 +113,11 @@
             퍼블릭인 멤버도 포함시킬지 여부를 결정합니다.
             </summary>
         </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.onlyByMyself">
+            <summary>
+            비퍼블릭 멤버를 제외할지 여부를 결정합니다.
+            </summary>
+        </member>
         <member name="T:RuniOS.APIBridge.UnityEngine.DrivenPropertyManagerBridge">
             <summary>
             이 브릿지는 다른 라이브러리의 비공개 타입과 멤버에 쉽게 접근할 수 있도록 래핑된 API입니다.<br/>
