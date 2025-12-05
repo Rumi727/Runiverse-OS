@@ -1,18 +1,24 @@
 ﻿using RuniOS.Editor.APIBridge.UnityEditor;
-using UnityToolbarExtender;
+using RuniOS.Editor.APIMarshal.UnityEditor;
+using UnityEditor.Toolbars;
+using UnityEngine.UIElements;
 
 namespace RuniOS.Editor
 {
     /// <summary>
     /// 에디터 상단 툴바의 프로그래스 바를 관리합니다.
     /// </summary>
-    [InitializeOnLoad]
     public static class ProgressInToolbar
     {
-        static ProgressInToolbar() => ToolbarExtender.LeftToolbarGUI.Add(OnToolbarGUI);
+        [MainToolbarElement("RuniOS/Progress Bar", defaultDockPosition = MainToolbarDockPosition.Left)]
+        public static MainToolbarElement ProgressBarElement() => new MainToolbarProgress();
+        
+        class MainToolbarProgress : MainToolbarElementMarshal
+        {
+            public override VisualElement CreateElementMarshal() => new IMGUIContainer(OnToolbarGUI);
+        }
 
         static readonly Dictionary<string, Dictionary<string, float>> progresses = new();
-
         static GUIViewBridge? toolbarGUIView;
 
         static void OnToolbarGUI()

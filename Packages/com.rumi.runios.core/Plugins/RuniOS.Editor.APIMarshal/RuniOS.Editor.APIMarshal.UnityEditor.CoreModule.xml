@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>RuniOS.Editor.APIMarshal.UnityEditor.CoreModule</name>
+    </assembly>
+    <members>
+        <member name="T:RuniOS.Editor.APIMarshalAbstract.UnityEditor.MainToolbarElementMarshalAbstract">
+            <inheritdoc />
+        </member>
+        <member name="M:RuniOS.Editor.APIMarshalAbstract.UnityEditor.MainToolbarElementMarshalAbstract.CreateElement">
+            <inheritdoc />
+        </member>
+        <member name="T:RuniOS.Editor.APIMarshal.UnityEditor.MainToolbarElementMarshal">
+            <inheritdoc />
+        </member>
+    </members>
+</doc>

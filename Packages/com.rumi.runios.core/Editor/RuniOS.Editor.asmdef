@@ -3,8 +3,7 @@
     "rootNamespace": "RuniOS.Editor",
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
-        "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:0a0471484b079be408cb3a0d7fe94736"
+        "GUID:f51ebe6a0ceec4240a699833d6309b23"
     ],
     "includePlatforms": [
         "Editor"
@@ -20,6 +19,7 @@
         "RuniOS.Editor.APIBridge.UnityEditor.UIBuilderModule.dll",
         "RuniOS.Editor.APIBridge.UnityEditor.UIElementsModule.dll",
         "RuniOS.Editor.APIMarshal.UnityEngine.UIElementsModule.dll",
+        "RuniOS.Editor.APIMarshal.UnityEditor.CoreModule.dll",
         "System.Collections.Immutable.dll",
         "ExtendedNumerics.BigDecimal.dll",
         "Newtonsoft.Json.dll",
