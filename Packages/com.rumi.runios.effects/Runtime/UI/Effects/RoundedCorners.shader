@@ -118,7 +118,7 @@ Shader "Hidden/RuniOS/RoundedCorners"
                 float2 pixelPos = IN.uiPos;
                 float2 halfSize = IN.rectInfo.xy;
                 float dist = CalcRoundedBox(pixelPos, halfSize, IN.radii);
-                float delta = fwidth(pixelPos.x); 
+                float delta = fwidth(pixelPos.x) * 0.5; 
                 
                 float outlineWidth = IN.outlineInfo.x;
                 float outlineSoftness = IN.outlineInfo.y;
