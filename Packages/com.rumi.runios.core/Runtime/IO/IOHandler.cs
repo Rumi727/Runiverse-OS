@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using System.Collections.Immutable;
 using System.IO;
 using System.Security.Cryptography;
@@ -189,71 +190,71 @@ namespace RuniOS.IO
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 디렉터리 이름을 가져옵니다.
         /// </summary>
         /// <returns>디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<string> GetDirectories();
+        public abstract IUniTaskAsyncEnumerable<string> GetDirectories();
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
         /// </summary>
-        public IAsyncEnumerable<IOHandler> GetDirectoryHandlers() => GetDirectories().Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetDirectoryHandlers() => GetDirectories().Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 이름을 가져옵니다.
         /// </summary>
         /// <returns>모든 디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<FilePath> GetAllDirectories();
+        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllDirectories();
         
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
         /// </summary>
-        public IAsyncEnumerable<IOHandler> GetAllDirectoryHandlers() => GetAllDirectories().Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetAllDirectoryHandlers() => GetAllDirectories().Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <returns>파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<string> GetFiles();
+        public abstract IUniTaskAsyncEnumerable<string> GetFiles();
         
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
         /// </summary>
-        public IAsyncEnumerable<IOHandler> GetFileHandlers() => GetFiles().Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetFileHandlers() => GetFiles().Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns);
+        public abstract IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns);
         
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        public IAsyncEnumerable<IOHandler> GetFileHandlers(WildcardPatterns wildcardPatterns) => GetFiles(wildcardPatterns).Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetFileHandlers(WildcardPatterns wildcardPatterns) => GetFiles(wildcardPatterns).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <returns>모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<FilePath> GetAllFiles();
+        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles();
         
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
         /// </summary>
-        public IAsyncEnumerable<IOHandler> GetAllFileHandlers() => GetAllFiles().Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetAllFileHandlers() => GetAllFiles().Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>일치하는 모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns);
+        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns);
         
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        public IAsyncEnumerable<IOHandler> GetAllFileHandlers(WildcardPatterns wildcardPatterns) => GetAllFiles(wildcardPatterns).Select(CreateChild);
+        public IUniTaskAsyncEnumerable<IOHandler> GetAllFileHandlers(WildcardPatterns wildcardPatterns) => GetAllFiles(wildcardPatterns).Select(CreateChild);
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일의 모든 바이트를 읽습니다.
@@ -271,7 +272,7 @@ namespace RuniOS.IO
         /// 이 핸들러가 나타내는 파일의 모든 줄을 읽습니다.
         /// </summary>
         /// <returns>파일의 모든 줄을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IAsyncEnumerable<string> ReadLines();
+        public abstract IUniTaskAsyncEnumerable<string> ReadLines();
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일에서 읽기 위한 스트림을 엽니다.
@@ -324,21 +325,21 @@ namespace RuniOS.IO
 
             public override UniTask<bool> FileExists() => UniTask.FromResult(false);
 
-            public override IAsyncEnumerable<string> GetDirectories() => Enumerable.Empty<string>().ToAsyncEnumerable();
+            public override IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Empty<string>();
 
-            public override IAsyncEnumerable<FilePath> GetAllDirectories() => Enumerable.Empty<FilePath>().ToAsyncEnumerable();
+            public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Empty<FilePath>();
 
-            public override IAsyncEnumerable<string> GetFiles() => Enumerable.Empty<string>().ToAsyncEnumerable();
-            public override IAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => Enumerable.Empty<string>().ToAsyncEnumerable();
+            public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Empty<string>();
+            public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<string>();
 
-            public override IAsyncEnumerable<FilePath> GetAllFiles() => Enumerable.Empty<FilePath>().ToAsyncEnumerable();
-            public override IAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => Enumerable.Empty<FilePath>().ToAsyncEnumerable();
+            public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Empty<FilePath>();
+            public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FilePath>();
 
             public override UniTask<byte[]> ReadAllBytes() => new UniTask<byte[]>(Array.Empty<byte>());
 
             public override UniTask<string> ReadAllText() => new UniTask<string>(string.Empty);
 
-            public override IAsyncEnumerable<string> ReadLines() => Enumerable.Empty<string>().ToAsyncEnumerable();
+            public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Empty<string>();
 
             public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
 

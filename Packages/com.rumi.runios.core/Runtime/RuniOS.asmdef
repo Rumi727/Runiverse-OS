@@ -3,6 +3,7 @@
     "rootNamespace": "RuniOS",
     "references": [
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:5c01796d064528144a599661eaab93a6",
         "GUID:12b970fc17bdc3041a8cc134ed15f8c6",
         "GUID:c358082e85227cc4f9dee2438a164545"
     ],

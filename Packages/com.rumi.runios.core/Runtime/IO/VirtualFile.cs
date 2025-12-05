@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using System.IO;
 using System.Text;
 
@@ -148,7 +149,7 @@ namespace RuniOS.IO
         public UniTask<byte[]> ReadAllBytesAsync()
         {
             ThrowIfDeletedException();
-            return ioHandler?.ReadAllBytes() ?? UniTask.FromResult(content); // UniTask.FromResult 사용
+            return ioHandler?.ReadAllBytes() ?? UniTask.FromResult(content);
         }
 
         /// <summary>
@@ -173,10 +174,10 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public IAsyncEnumerable<string> ReadLines()
+        public IUniTaskAsyncEnumerable<string> ReadLines()
         {
             ThrowIfDeletedException();
-            return ioHandler?.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToAsyncEnumerable();
+            return ioHandler?.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToUniTaskAsyncEnumerable();
         }
 
         /// <summary>
