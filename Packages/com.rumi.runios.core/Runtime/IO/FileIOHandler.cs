@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Linq.Async;
 using RuniOS.Spans;
 using System.IO;
 
@@ -92,10 +93,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var item in Directory.EnumerateDirectories(targetPath))
+            var stream = Directory.EnumerateDirectories(targetPath)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var item in stream)
             {
                 if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
                     await writer.YieldAsync(result.ToString());
@@ -109,10 +113,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var item in Directory.EnumerateDirectories(targetPath, "*", SearchOption.AllDirectories))
+            var stream = Directory.EnumerateDirectories(targetPath, "*", SearchOption.AllDirectories)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var item in stream)
                 await writer.YieldAsync(item - targetPath);
         });
 
@@ -123,10 +130,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var item in Directory.EnumerateFiles(targetPath))
+            var stream = Directory.EnumerateFiles(targetPath)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var item in stream)
             {
                 if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
                     await writer.YieldAsync(result.ToString());
@@ -141,10 +151,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var item in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns))
+            var stream = DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var item in stream)
             {
                 FilePath path = item - targetPath;
                 if (path != targetPath)
@@ -159,10 +172,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var file in Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories))
+            var stream = Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var file in stream)
                 await writer.YieldAsync(file - targetPath);
         });
 
@@ -174,10 +190,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var file in DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns, SearchOption.AllDirectories))
+            var stream = DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns, SearchOption.AllDirectories)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var file in stream)
                 await writer.YieldAsync(file - targetPath);
         });
 
@@ -218,10 +237,13 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="PathTooLongException">경로가 시스템 정의 최대 길이를 초과하는 경우 발생합니다.</exception>
         /// <exception cref="NotSupportedException">경로에 콜론(:)이 포함된 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Create<string>(async (writer, _) =>
+        public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
-            await UniTask.SwitchToThreadPool();
-            foreach (var line in File.ReadLines(targetPath))
+            var stream = File.ReadLines(targetPath)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+            
+            await foreach (var line in stream)
                 await writer.YieldAsync(line);
         });
 
