@@ -159,14 +159,14 @@ namespace RuniOS.Resource
         /// </summary>
         public bool isValid { get; private set; }
 
-        public ImmutableArray<string> nameSpaces { get; private set; } = ImmutableArray<string>.Empty;
+        public ImmutableArray<string> namespaces { get; private set; } = ImmutableArray<string>.Empty;
         
         public bool isDisposed { get; private set; }
 
         public async UniTask Reload()
         {
             metaData = new PackMetaData();
-            nameSpaces = ImmutableArray<string>.Empty;
+            namespaces = ImmutableArray<string>.Empty;
             
             isValid = false;
             
@@ -187,8 +187,10 @@ namespace RuniOS.Resource
             if (!isValid)
                 return;
             else if (await assetFolder.DirectoryExists())
-                nameSpaces = (await assetFolder.GetDirectories().ToArrayAsync()).ToImmutableArray();
+                namespaces = (await assetFolder.GetDirectories().ToArrayAsync()).ToImmutableArray();
         }
+        
+        public IEnumerable<IOHandler> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.
