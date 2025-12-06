@@ -14,6 +14,7 @@ namespace RuniOS.Resource
         IAssetHandle IAssetScope.handle => handle;
         
         public T asset { get; }
+        object? IAssetScope.asset => asset;
 
         /// <summary>
         /// <see cref="AssetScope{T}"/> 클래스의 새 인스턴스를 초기화합니다.
