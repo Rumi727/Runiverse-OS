@@ -95,6 +95,10 @@ MonoBehaviour:
       value: Width
     - key: gui.gap
       value: Gap
+    - key: gui.registry
+      value: Registry
+    - key: gui.asset
+      value: Asset
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 

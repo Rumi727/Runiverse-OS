@@ -8,12 +8,14 @@ using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Languages
 {
-    public sealed class LanguageAssetRegistry : SimpleAssetRegistry
+    public sealed class LanguageAssetRegistry : SimpleAssetRegistry<LanguageAssetHandle>
     {
+        public override Identifier registryId => new Identifier("runios", "lang");
         public override string registryName => "lang";
+        
+        public override bool isDefault => true;
 
-        public override Type handleType => typeof(LanguageAssetHandle);
-        public override Type scopeType => typeof(LanguageAssetScope);
+        public override Type assetType => typeof(IReadOnlyDictionary<string, string>);
 
         public override WildcardPatterns assetFilter => WildcardPatterns.jsonFileFilter;
 
@@ -27,9 +29,9 @@ namespace RuniOS.Resource.Languages
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
 #endif
-        static void Awaken() => ResourceManager.RegisterAssetRegistry<LanguageAssetRegistry>();
+        static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        protected override AssetHandle CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
+        protected override LanguageAssetHandle CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
 
         protected override UniTask OnBeginAssetLoop()
         {
@@ -37,9 +39,9 @@ namespace RuniOS.Resource.Languages
             return UniTask.CompletedTask;
         }
 
-        protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, AssetHandle assetHandle)
+        protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, LanguageAssetHandle assetHandle)
         {
-            using LanguageAssetScope? scope = (LanguageAssetScope?)await assetHandle.GetScope();
+            using AssetScope<IReadOnlyDictionary<string, string>>? scope = await assetHandle.GetScope();
             
             if (scope != null)
             {
@@ -48,7 +50,7 @@ namespace RuniOS.Resource.Languages
                     _calculatedAsset[identifier.path] = value
                         .Concat
                         (
-                            scope.texts
+                            scope.asset
                                 .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
                         )
                         .GroupBy(x => x.Key)
@@ -56,7 +58,7 @@ namespace RuniOS.Resource.Languages
                         .AsReadOnly();
                 }
                 else
-                    _calculatedAsset.Add(identifier.path, scope.texts.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+                    _calculatedAsset.Add(identifier.path, scope.asset.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
             }
                                     
             RecordAssetHandle(identifier, assetHandle);

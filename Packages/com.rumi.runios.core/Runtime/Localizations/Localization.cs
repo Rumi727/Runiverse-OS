@@ -281,7 +281,7 @@ namespace RuniOS.Localizations
         /// </returns>
         public static string? GetText(Identifier identifier, string? languageCode = null)
         {
-            LanguageAssetRegistry? registry = ResourceManager.GetRegistry<LanguageAssetRegistry>();
+            LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
             return registry?.calculatedAsset.GetValueOrDefault(languageCode ?? string.Empty /* TODO : 이거 바꿔라 */)?.GetValueOrDefault(identifier);
         }
 

@@ -5,6 +5,8 @@ namespace RuniOS.Collections.Generic
 {
     public sealed class ReadOnlyStack<T> : ICollection, IReadOnlyCollection<T>
     {
+        public static ReadOnlyStack<T> empty { get; } = new ReadOnlyStack<T>(new Stack<T>());
+        
         public ReadOnlyStack(Stack<T> stack) => this.stack = stack;
 
         readonly Stack<T> stack;

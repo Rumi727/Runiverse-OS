@@ -1,24 +1,22 @@
 #nullable enable
-using RuniOS.Editor.APIBridge.UnityEditor;
-
 namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), value, drawKeyAction, drawValueAction);
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
-        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiControlRect(), label, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairFieldLayout(GUIContent.none, value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairFieldLayout(new GUIContent(label), value, drawKeyAction, drawValueAction);
+        public static KeyValuePair<TKey, TValue> KeyValuePairFieldLayout<TKey, TValue>(GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(GetMultiColumnsControlRect(label), label, value, drawKeyAction, drawValueAction);
 
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, string label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction) => KeyValuePairField(position, new GUIContent(label), value, drawKeyAction, drawValueAction);
         public static KeyValuePair<TKey, TValue> KeyValuePairField<TKey, TValue>(Rect position, GUIContent label, KeyValuePair<TKey, TValue> value, Func<Rect, TKey, TKey> drawKeyAction, Func<Rect, TValue, TValue> drawValueAction)
         {
-            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
+            position = DrawMultiColumnsFieldPrefixLabel(position, label, 3); // 2로 하면 크기 절반 줄어듬
 
             BeginIndentLevel(0);
             value = DoKeyValuePairField(position, value, drawKeyAction, drawValueAction);
             EndIndentLevel();
+            
             return value;
         }
 

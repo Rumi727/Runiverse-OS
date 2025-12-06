@@ -95,6 +95,10 @@ MonoBehaviour:
       value: "\uB108\uBE44"
     - key: gui.gap
       value: "\uAC2D"
+    - key: gui.registry
+      value: "\uB808\uC9C0\uC2A4\uD2B8\uB9AC"
+    - key: gui.asset
+      value: "\uC5D0\uC14B"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
         \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C

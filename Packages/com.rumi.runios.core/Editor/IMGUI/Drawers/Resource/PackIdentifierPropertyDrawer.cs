@@ -36,13 +36,7 @@ namespace RuniOS.Editor.IMGUI.Drawers.Resource
             converter.Write(property, typeof(PackIdentifier), packIdentifier);
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-                return EditorGUIUtility.singleLineHeight;
-            else
-                return (EditorGUIUtility.singleLineHeight * 2) + 2;
-        }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiColumnsFieldHeight(label);
 
         public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
         {

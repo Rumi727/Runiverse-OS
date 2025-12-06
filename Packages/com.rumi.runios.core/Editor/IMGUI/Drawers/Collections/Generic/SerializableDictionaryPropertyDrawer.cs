@@ -223,7 +223,7 @@ namespace RuniOS.Editor.IMGUI.Drawers.Collections.Generic
                         if (pairs == null)
                             return EditorGUIUtility.singleLineHeight;
 
-                        return EditorGUI.GetPropertyHeight(pairs.GetArrayElementAtIndex(i));
+                        return EditorGUI.GetPropertyHeight(pairs.GetArrayElementAtIndex(i), GUIContent.none);
                     }
                 };
 

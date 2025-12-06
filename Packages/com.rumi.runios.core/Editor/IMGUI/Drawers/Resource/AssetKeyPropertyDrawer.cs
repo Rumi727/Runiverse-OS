@@ -4,8 +4,8 @@ using RuniOS.Resource;
 
 namespace RuniOS.Editor.IMGUI.Drawers.Resource
 {
-    [CustomPropertyDrawer(typeof(RegistryType))]
-    public class RegistryTypePropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(ResourceKey))]
+    public class AssetKeyPropertyDrawer : PropertyDrawer
     {
         //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
 
@@ -26,29 +26,29 @@ namespace RuniOS.Editor.IMGUI.Drawers.Resource
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
             PropertyConverter? converter = PropertyConverter.FindConverter(property);
-            if (converter?.Read(property, typeof(RegistryType)) is not RegistryType registryType)
+            if (converter?.Read(property, typeof(ResourceKey)) is not ResourceKey registryType)
             {
                 EditorGUI.LabelField(position, label, GUIContent.none);
                 return;
             }
 
-            registryType = RegistryTypeField(position, label, registryType);
-            converter.Write(property, typeof(RegistryType), registryType);
+            registryType = ResourceKeyField(position, label, registryType);
+            converter.Write(property, typeof(ResourceKey), registryType);
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => EditorGUIUtility.singleLineHeight;
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiRowsFieldHeight(label, 2);
 
-        public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
+        public static (SerializedProperty registryId, SerializedProperty assetId) GetChildProperty(SerializedProperty property)
         {
             property = property.Copy();
-            
+
             property.Next(true);
-            SerializedProperty internalID = property.Copy();
+            SerializedProperty registryId = property.Copy();
 
             property.Next(false);
-            SerializedProperty localPath = property;
+            SerializedProperty assetId = property;
 
-            return (internalID, localPath);
+            return (registryId, assetId);
         }
     }
 }

@@ -25,12 +25,6 @@ namespace RuniOS.Editor.IMGUI.Drawers
             EditorGUI.MultiPropertyField(position, labels, property, label);
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
-        {
-            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-                return EditorGUIUtility.singleLineHeight;
-            else
-                return (EditorGUIUtility.singleLineHeight * 2) + 2;
-        }
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiColumnsFieldHeight(label);
     }
 }

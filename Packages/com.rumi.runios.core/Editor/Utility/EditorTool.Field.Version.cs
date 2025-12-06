@@ -1,24 +1,22 @@
 #nullable enable
-using RuniOS.Editor.APIBridge.UnityEditor;
-
 namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static Version VersionFieldLayout(Version value) => VersionField(GetMultiControlRect(), value);
-        public static Version VersionFieldLayout(string label, Version value) => VersionField(GetMultiControlRect(), label, value);
-        public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(GetMultiControlRect(), label, value);
+        public static Version VersionFieldLayout(Version value) => VersionFieldLayout(GUIContent.none, value);
+        public static Version VersionFieldLayout(string label, Version value) => VersionFieldLayout(new GUIContent(label), value);
+        public static Version VersionFieldLayout(GUIContent label, Version value) => VersionField(GetMultiColumnsControlRect(label), label, value);
 
         public static Version VersionField(Rect position, Version value) => DoVersionField(position, value);
         public static Version VersionField(Rect position, string label, Version value) => VersionField(position, new GUIContent(label), value);
         public static Version VersionField(Rect position, GUIContent label, Version value)
         {
-            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
+            position = DrawMultiColumnsFieldPrefixLabel(position, label, 4);
 
             BeginIndentLevel(0);
             value = DoVersionField(position, value);
             EndIndentLevel();
+            
             return value;
         }
 

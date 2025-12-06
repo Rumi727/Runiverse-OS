@@ -7,23 +7,21 @@ using System.Collections.Immutable;
 
 namespace RuniOS.Resource.Languages
 {
-    public sealed class LanguageAssetHandle : AssetHandle
+    public sealed class LanguageAssetHandle : AssetHandle<IReadOnlyDictionary<string, string>>
     {
         public LanguageAssetHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) : base(ioHandler, md5Hash) { }
 
-        protected override async UniTask<object?> Load()
+        protected override async UniTask<IReadOnlyDictionary<string, string>?> Load()
         {
             if (await ioHandler.FileExists())
             {
                 string json = await ioHandler.ReadAllText();
-                return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json);
+                return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();
             }
             
-            return false;
+            return null;
         }
 
         protected override void Unload() { }
-        
-        protected override AssetScope CreateScope(object asset) => new LanguageAssetScope(this, ((Dictionary<string, string>)asset).AsReadOnly());
     }
 }

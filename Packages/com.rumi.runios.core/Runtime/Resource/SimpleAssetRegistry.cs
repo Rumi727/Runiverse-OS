@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using System.Collections.Immutable;
 
@@ -9,8 +10,15 @@ namespace RuniOS.Resource
     /// 단순 파일 검색 및 등록 로직을 사용하는 에셋 레지스트리의 기본 구현입니다.
     /// <br/>이 레지스트리는 파일 시스템을 직접 순회하며 에셋 핸들을 생성합니다.
     /// </summary>
-    public abstract class SimpleAssetRegistry : AssetRegistry
+    public abstract class SimpleAssetRegistry<T> : AssetRegistry where T : IAssetHandle
     {
+        /// <summary>
+        /// 이 레지스트리가 관리하는 파일 구조 내 폴더의 이름을 가져옵니다.
+        /// </summary>
+        public abstract string registryName { get; }
+
+        public sealed override Type handleType => typeof(T);
+
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
         /// </summary>
@@ -23,12 +31,30 @@ namespace RuniOS.Resource
         public abstract WildcardPatterns assetFilter { get; }
         
         /// <summary>
-        /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle"/> 인스턴스를 생성합니다.
+        /// 지정된 <paramref name="resourcePack"/> 내에서 이 레지스트리의 데이터를 포함하는 폴더를 비동기적으로 열거합니다.
+        /// <br/>각 폴더는 네임스페이스와 해당 레지스트리 핸들러를 반환합니다.
+        /// </summary>
+        /// <param name="resourcePack">검색할 리소스 팩입니다.</param>
+        /// <returns>비동기적으로 네임스페이스 이름과 레지스트리 핸들러를 반환하는 열거자입니다.</returns>
+        public IUniTaskAsyncEnumerable<(string nameSpace, IOHandler registryHandler)> GetRegistryFolder(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IOHandler registryHandler)>(async (write, _) =>
+        {
+            foreach (var namespaceHandler in resourcePack.GetNamespaceHandlers())
+            {
+                IOHandler registryHandler = namespaceHandler.CreateChild(registryName);
+                if (!await registryHandler.DirectoryExists())
+                    continue;
+
+                await write.YieldAsync((namespaceHandler.name, registryHandler));
+            }
+        });
+        
+        /// <summary>
+        /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="md5Hash">에셋 파일의 MD5 해시 값입니다.</param>
-        /// <returns>새로 생성된 <see cref="AssetHandle"/> 인스턴스입니다.</returns>
-        protected abstract AssetHandle CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash);
+        /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
+        protected abstract T CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -117,9 +143,9 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="identifier">에셋을 식별하는 고유 ID입니다.</param>
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
-        /// <param name="assetHandle">생성된 <see cref="AssetHandle"/>입니다.</param>
+        /// <param name="assetHandle">생성된 <see cref="AssetHandle{T}"/>입니다.</param>
         /// <returns>비동기 작업을 나타내는 <see cref="UniTask"/>입니다.</returns>
-        protected virtual UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, AssetHandle assetHandle)
+        protected virtual UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, T assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
             return UniTask.CompletedTask;

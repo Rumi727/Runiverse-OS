@@ -7,17 +7,15 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), value, dropdownAction);
-        public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
-        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiControlRect(), label, value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(Identifier value, Action<Rect>? dropdownAction = null) => IdentifierFieldLayout(GUIContent.none, value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierFieldLayout(new GUIContent(label), value, dropdownAction);
+        public static Identifier IdentifierFieldLayout(GUIContent label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(GetMultiColumnsControlRect(label), label, value, dropdownAction);
 
         public static Identifier IdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction = null) => DoIdentifierField(position, value, dropdownAction);
         public static Identifier IdentifierField(Rect position, string label, Identifier value, Action<Rect>? dropdownAction = null) => IdentifierField(position, new GUIContent(label), value, dropdownAction);
         public static Identifier IdentifierField(Rect position, GUIContent label, Identifier value, Action<Rect>? dropdownAction = null)
         {
-            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
-
+            position = DrawMultiColumnsFieldPrefixLabel(position, label, 3);
             return DoIdentifierField(position, value, dropdownAction);
         }
 
@@ -34,11 +32,12 @@ namespace RuniOS.Editor
                 position.width = fieldWidth;
 
                 TextDropdown nameSpaceDropdown = new TextDropdown();
-                nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.nameSpaces));
-
                 string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
                 if (isPressed)
+                {
+                    nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.namespaces));
                     nameSpaceDropdown.Show(position);
+                }
 
                 int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
                 nameSpaceDropdown.onSelectedItem += x =>

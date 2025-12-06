@@ -8,17 +8,15 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static PackIdentifier PackIdentifierFieldLayout(PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), value);
-        public static PackIdentifier PackIdentifierFieldLayout(string label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
-        public static PackIdentifier PackIdentifierFieldLayout(GUIContent label, PackIdentifier value) => PackIdentifierField(GetMultiControlRect(), label, value);
+        public static PackIdentifier PackIdentifierFieldLayout(PackIdentifier value) => PackIdentifierFieldLayout(GUIContent.none, value);
+        public static PackIdentifier PackIdentifierFieldLayout(string label, PackIdentifier value) => PackIdentifierFieldLayout(new GUIContent(label), value);
+        public static PackIdentifier PackIdentifierFieldLayout(GUIContent label, PackIdentifier value) => PackIdentifierField(GetMultiColumnsControlRect(label), label, value);
 
         public static PackIdentifier PackIdentifierField(Rect position, PackIdentifier value) => DoPackIdentifierField(position, value);
         public static PackIdentifier PackIdentifierField(Rect position, string label, PackIdentifier value) => PackIdentifierField(position, new GUIContent(label), value);
         public static PackIdentifier PackIdentifierField(Rect position, GUIContent label, PackIdentifier value)
         {
-            int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3);
-
+            position = DrawMultiColumnsFieldPrefixLabel(position, label, 3);
             return DoPackIdentifierField(position, value);
         }
 
@@ -33,14 +31,16 @@ namespace RuniOS.Editor
             if (value.identifier != null)
             {
                 TextDropdown valueDropdown = new TextDropdown();
-                valueDropdown.Rebuild
-                (
-                    ResourcePack.loadedResourcePacks.Keys
-                        .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
-                        .Select(x => x.identifier!.Value.path.ToString())
-                );
-
-                value.identifier = IdentifierField(position, value.identifier.Value, x => valueDropdown.Show(x));
+                value.identifier = IdentifierField(position, value.identifier.Value, x =>
+                {
+                    valueDropdown.Rebuild
+                    (
+                        ResourcePack.loadedResourcePacks.Keys
+                            .Where(x => x.identifier != null && x.identifier.Value.nameSpace == value.identifier.Value.nameSpace)
+                            .Select(x => x.identifier!.Value.path.ToString())
+                    );
+                    valueDropdown.Show(x);
+                });
 
                 int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
                 valueDropdown.onSelectedItem += x =>

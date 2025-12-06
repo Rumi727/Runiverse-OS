@@ -51,6 +51,9 @@ namespace RuniOS.Linq.Async
 
                     await writer.YieldAsync(item);
                 }
+
+                if (callerContext != null && SynchronizationContext.Current != callerContext)
+                    await UniTask.SwitchToSynchronizationContext(callerContext);
             }
             catch (OperationCanceledException)
             {
