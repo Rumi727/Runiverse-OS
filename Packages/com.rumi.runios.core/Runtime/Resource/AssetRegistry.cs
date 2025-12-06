@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.Linq;
 
@@ -98,21 +99,18 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="resourcePack">검색할 리소스 팩입니다.</param>
         /// <returns>비동기적으로 네임스페이스 이름과 레지스트리 핸들러를 반환하는 열거자입니다.</returns>
-        public async IAsyncEnumerable<(string nameSpace, IOHandler registryHandler)> GetRegistryFolder(ResourcePack resourcePack)
-        { 
-            if (!await resourcePack.assetFolder.DirectoryExists())
-                yield break;
-
-            await foreach (var nameSpaceHandler in resourcePack.assetFolder.GetDirectoryHandlers())
+        public IUniTaskAsyncEnumerable<(string nameSpace, IOHandler registryHandler)> GetRegistryFolder(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IOHandler registryHandler)>(async (write, _) =>
+        {
+            foreach (var namespaceHandler in resourcePack.GetNamespaceHandlers())
             {
-                IOHandler registryHandler = nameSpaceHandler.CreateChild(registryName);
+                IOHandler registryHandler = namespaceHandler.CreateChild(registryName);
                 if (!await registryHandler.DirectoryExists())
                     continue;
-                
-                yield return (nameSpaceHandler.name, registryHandler);
+
+                await write.YieldAsync((namespaceHandler.name, registryHandler));
             }
-        }
-        
+        });
+
         /// <summary>
         /// 에셋 핸들을 내부 컬렉션에 등록하고 해당 <paramref name="identifier"/>를 트래킹 목록에 추가합니다.
         /// <br/>핸들 등록 및 트래킹은 트래킹이 시작된 상태에서만 유효합니다.
