@@ -104,7 +104,7 @@ namespace RuniOS.Resource
 
 
 
-        public static AssetHandle<T>? GetHandle<T>(ResourceKey key) => GetHandle(key) as AssetHandle<T>;
+        public static IAssetHandle<T>? GetHandle<T>(ResourceKey key) => GetHandle(key) as IAssetHandle<T>;
         public static IAssetHandle? GetHandle(ResourceKey key)
         {
             AssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
@@ -115,17 +115,17 @@ namespace RuniOS.Resource
         }
         
         
-        public static AssetHandle<T>? GetHandle<T>(Identifier identifier)
+        public static IAssetHandle<T>? GetHandle<T>(Identifier identifier)
         {
             AssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
             if (registry?.assetHandles.TryGetValue(identifier, out IAssetHandle? handle) ?? false)
-                return handle as AssetHandle<T>;
+                return handle as IAssetHandle<T>;
 
             return null;
         }
         
         
-        public static async UniTask<AssetScope<T>?> LoadScopeAsync<T>(Identifier identifier)
+        public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier)
         {
             AssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
             if (registry == null)
@@ -133,14 +133,14 @@ namespace RuniOS.Resource
 
             if (registry.assetHandles.TryGetValue(identifier, out IAssetHandle handle))
             {
-                if (handle is AssetHandle<T> typedHandle)
+                if (handle is IAssetHandle<T> typedHandle)
                     return await typedHandle.GetScope();
             }
             
             return null;
         }
 
-        public static async UniTask<AssetScope<T>?> LoadScopeAsync<T>(ResourceKey key)
+        public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(ResourceKey key)
         {
             AssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
             if (registry == null)
@@ -148,7 +148,7 @@ namespace RuniOS.Resource
 
             if (registry.assetHandles.TryGetValue(key.assetId, out IAssetHandle handle))
             {
-                if (handle is AssetHandle<T> typedHandle)
+                if (handle is IAssetHandle<T> typedHandle)
                     return await typedHandle.GetScope();
             }
             

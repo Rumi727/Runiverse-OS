@@ -11,7 +11,7 @@ namespace RuniOS.Resource
     /// 단일 에셋에 대한 참조와 로드/언로드 로직을 관리하는 추상 핸들러입니다.
     /// <br/>에셋의 실제 로드는 <see cref="GetScope"/>를 통해 참조될 때 수행됩니다.
     /// </summary>
-    public abstract class AssetHandle<T> : IAssetHandle
+    public abstract class AssetHandle<TAsset> : IAssetHandle<TAsset>
     {
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
@@ -32,8 +32,7 @@ namespace RuniOS.Resource
         /// 로드된 실제 에셋 객체를 가져오거나 설정합니다.
         /// <br/>에셋이 언로드되었거나 아직 로드되지 않은 경우 <see langword="null"/>입니다.
         /// </summary>
-        public T? assetObject { get; private set; }
-        object? IAssetHandle.assetObject => assetObject;
+        public TAsset? assetObject { get; private set; }
         
         /// <summary>
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
@@ -44,7 +43,7 @@ namespace RuniOS.Resource
         readonly Subject<Unit> _unloadTrigger = new Subject<Unit>();
         IDisposable? _unloadSubscription;
         
-        internal readonly List<WeakReference<AssetScope<T>>> assetScopes = new List<WeakReference<AssetScope<T>>>();
+        internal readonly List<WeakReference<AssetScope<TAsset>>> assetScopes = new List<WeakReference<AssetScope<TAsset>>>();
 
         /// <summary>
         /// <see cref="AssetHandle{T}"/> 클래스의 새 인스턴스를 초기화합니다.
@@ -66,7 +65,7 @@ namespace RuniOS.Resource
         /// <returns>
         /// 로드된 에셋에 대한 <see cref="AssetScope{T}"/> 또는 로드에 실패한 경우 <see langword="null"/>을 반환합니다.
         /// </returns>
-        public async UniTask<AssetScope<T>?> GetScope()
+        public async UniTask<IAssetScope<TAsset>?> GetScope()
         {
             // 중복 로딩 방지 (경합 조건 방지)
             while (isLoading)
@@ -94,8 +93,8 @@ namespace RuniOS.Resource
 
             if (!IsDefaultAsset(assetObject))
             {
-                AssetScope<T> scope = new AssetScope<T>(this, assetObject);
-                assetScopes.Add(new WeakReference<AssetScope<T>>(scope));
+                AssetScope<TAsset> scope = new AssetScope<TAsset>(this, assetObject);
+                assetScopes.Add(new WeakReference<AssetScope<TAsset>>(scope));
 
                 CancelUnloadWatch();
                 return scope;
@@ -103,22 +102,20 @@ namespace RuniOS.Resource
 
             return null;
         }
-        
-        async UniTask<IAssetScope?> IAssetHandle.GetScope() => await GetScope();
 
         /// <summary>
         /// 사용이 완료된 <paramref name="assetScope"/>를 반환하고 내부 참조 목록에서 제거합니다.
         /// <br/>스코프 목록이 비어 있고 지연 언로드 프레임이 설정된 경우, 언로드 감시 타이머가 시작됩니다.
         /// </summary>
         /// <param name="assetScope">반환할 에셋 스코프입니다.</param>
-        internal void ReturnScope(AssetScope<T> assetScope)
+        internal void ReturnScope(AssetScope<TAsset> assetScope)
         {
             bool scopeFound = false;
             for (int i = assetScopes.Count - 1; i >= 0; i--)
             {
-                WeakReference<AssetScope<T>> weakRef = assetScopes[i];
+                WeakReference<AssetScope<TAsset>> weakRef = assetScopes[i];
         
-                if (weakRef.TryGetTarget(out AssetScope<T> outAssetScope))
+                if (weakRef.TryGetTarget(out AssetScope<TAsset> outAssetScope))
                 {
                     // 1. 현재 제거하려는 Scope를 찾았을 경우
                     if (assetScope == outAssetScope)
@@ -181,11 +178,11 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 파일을 비동기적으로 로드합니다.
         /// </summary>
-        /// <returns>로드된 에셋 객체 또는 실패 시 <see langword="null"/>을 반환하는 <see cref="T"/>입니다.</returns>
+        /// <returns>로드된 에셋 객체 또는 실패 시 <see langword="null"/>을 반환하는 <see cref="TAsset"/>입니다.</returns>
         /// <exception cref="Exception">
         /// 로드 중 발생할 수 있는 모든 예외입니다.
         /// </exception>
-        protected abstract UniTask<T?> Load();
+        protected abstract UniTask<TAsset?> Load();
         
         /// <summary>
         /// 로드된 에셋을 언로드하고 관련된 시스템 리소스를 해제합니다.
@@ -210,9 +207,9 @@ namespace RuniOS.Resource
             CancelUnloadWatch();
         }
         
-        protected virtual bool IsDefaultAsset([NotNullWhen(false)] T? asset) => asset == null;
+        protected virtual bool IsDefaultAsset([NotNullWhen(false)] TAsset? asset) => asset == null;
         
-        protected virtual T? GetDefaultAsset() => default;
+        protected virtual TAsset? GetDefaultAsset() => default;
 
         /// <summary>
         /// 다른 <see cref="IAssetHandle"/>이 현재 핸들과 동일한 에셋을 참조하는지 확인합니다.
@@ -220,6 +217,12 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="other">비교할 다른 에셋 핸들입니다.</param>
         /// <returns>동일한 에셋을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
-        public virtual bool IsSameTarget(IAssetHandle other) => GetType() == other.GetType() && ioHandler.IsSameTarget(other.ioHandler) && md5Hash.SequenceEqual(other.md5Hash);
+        public virtual bool IsSameTarget(IAssetHandle other)
+        {
+            if (other is not AssetHandle<TAsset> otherHandle)
+                return false;
+            
+            return GetType() == other.GetType() && ioHandler.IsSameTarget(otherHandle.ioHandler) && md5Hash.SequenceEqual(otherHandle.md5Hash);
+        }
     }
 }

@@ -1,27 +1,10 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.IO;
-using System.Collections.Immutable;
 
 namespace RuniOS.Resource
 {
     public interface IAssetHandle
     {
-        /// <summary>
-        /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
-        /// </summary>
-        IOHandler ioHandler { get; }
-        
-        /// <summary>
-        /// 에셋 파일의 MD5 해시 값을 가져오거나 설정합니다.
-        /// </summary>
-        ImmutableArray<byte> md5Hash { get; }
-
-        /// <summary>
-        /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
-        /// </summary>
-        int unloadDelayFrame { get; }
-        
         /// <summary>
         /// 로드된 실제 에셋 객체를 가져오거나 설정합니다.
         /// <br/>에셋이 언로드되었거나 아직 로드되지 않은 경우 <see langword="null"/>입니다.

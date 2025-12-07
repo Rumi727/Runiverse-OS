@@ -41,27 +41,26 @@ namespace RuniOS.Resource.Languages
 
         protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, LanguageAssetHandle assetHandle)
         {
-            using AssetScope<IReadOnlyDictionary<string, string>>? scope = await assetHandle.GetScope();
-            
-            if (scope != null)
-            {
-                if (_calculatedAsset.TryGetValue(identifier.path, out IReadOnlyDictionary<Identifier, string>? value))
-                {
-                    _calculatedAsset[identifier.path] = value
-                        .Concat
-                        (
-                            scope.asset
-                                .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
-                        )
-                        .GroupBy(x => x.Key)
-                        .ToDictionary(x => x.Key, x => x.First().Value)
-                        .AsReadOnly();
-                }
-                else
-                    _calculatedAsset.Add(identifier.path, scope.asset.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
-            }
-                                    
             RecordAssetHandle(identifier, assetHandle);
+            
+            using IAssetScope<IReadOnlyDictionary<string, string>>? scope = await assetHandle.GetScope();
+            if (scope == null)
+                return;
+            
+            if (_calculatedAsset.TryGetValue(identifier.path, out IReadOnlyDictionary<Identifier, string>? value))
+            {
+                _calculatedAsset[identifier.path] = value
+                    .Concat
+                    (
+                        scope.asset
+                            .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
+                    )
+                    .GroupBy(x => x.Key)
+                    .ToDictionary(x => x.Key, x => x.First().Value)
+                    .AsReadOnly();
+            }
+            else
+                _calculatedAsset.Add(identifier.path, scope.asset.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
         }
     }
 }
