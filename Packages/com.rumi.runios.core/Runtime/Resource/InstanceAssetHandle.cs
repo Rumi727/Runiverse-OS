@@ -3,17 +3,26 @@ using Cysharp.Threading.Tasks;
 
 namespace RuniOS.Resource
 {
-    public sealed class InstanceAssetHandle<TAsset> : IAssetHandle<TAsset>
+    public class InstanceAssetHandle<TAsset> : IAssetHandle<TAsset>
     {
-        public InstanceAssetHandle(TAsset assetObject) => this.assetObject = assetObject;
-        
+        public InstanceAssetHandle(TAsset assetObject)
+        {
+            this.assetObject = assetObject;
+            scope = new InstanceAssetScope<TAsset>(this, assetObject);
+        }
+
+        /// <summary>
+        /// 참조한 인스턴스를 가져옵니다.
+        /// </summary>
         public TAsset assetObject { get; }
-        public bool isLoading => false;
+        bool IAssetHandle.isLoading => false;
+
+        readonly InstanceAssetScope<TAsset> scope;
         
-        public UniTask<IAssetScope<TAsset>?> GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(new InstanceAssetScope<TAsset>(this, assetObject));
-        UniTask<IAssetScope?> IAssetHandle.GetScope() => UniTask.FromResult<IAssetScope?>(new InstanceAssetScope<TAsset>(this, assetObject));
+        UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(scope);
+        UniTask<IAssetScope?> IAssetHandle.GetScope() => UniTask.FromResult<IAssetScope?>(scope);
         
-        public bool IsSameTarget(IAssetHandle other)
+        public virtual bool IsSameTarget(IAssetHandle other)
         {
             if (other is not InstanceAssetHandle<TAsset> otherHandle)
                 return false;

@@ -1,27 +1,27 @@
 #nullable enable
-using Cysharp.Threading.Tasks;
-using Newtonsoft.Json;
 using RuniOS.IO;
-using RuniOS.Linq;
+using RuniOS.Localizations;
 using System.Collections.Immutable;
 
 namespace RuniOS.Resource.Languages
 {
-    public sealed class LanguageAssetHandle : AssetHandle<IReadOnlyDictionary<string, string>>
+    sealed class LanguageAssetHandle : InstanceAssetHandle<LocalizationData>
     {
-        public LanguageAssetHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) : base(ioHandler, md5Hash) { }
-
-        protected override async UniTask<IReadOnlyDictionary<string, string>?> Load()
+        internal LanguageAssetHandle(LocalizationData assetObject, IOHandler ioHandler, ImmutableArray<byte> md5Hash) : base(assetObject)
         {
-            if (await ioHandler.FileExists())
-            {
-                string json = await ioHandler.ReadAllText();
-                return JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();
-            }
-            
-            return null;
+            this.ioHandler = ioHandler;
+            this.md5Hash = md5Hash;
         }
 
-        protected override void Unload() { }
+        public IOHandler ioHandler { get; }
+        public ImmutableArray<byte> md5Hash { get; }
+
+        public override bool IsSameTarget(IAssetHandle other)
+        {
+            if (!base.IsSameTarget(other) || other is not LanguageAssetHandle otherHandle)
+                return false;
+            
+            return ioHandler.IsSameTarget(otherHandle.ioHandler) && md5Hash.SequenceEqual(otherHandle.md5Hash);
+        }
     }
 }

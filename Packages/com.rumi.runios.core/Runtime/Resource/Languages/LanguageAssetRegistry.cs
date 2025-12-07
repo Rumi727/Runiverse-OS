@@ -1,21 +1,24 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Newtonsoft.Json;
 using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Linq;
+using RuniOS.Localizations;
 using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Languages
 {
-    public sealed class LanguageAssetRegistry : SimpleAssetRegistry<LanguageAssetHandle>
+    sealed class LanguageAssetRegistry : SimpleAssetRegistry<LanguageAssetHandle>
     {
         public override Identifier registryId => new Identifier("runios", "lang");
         public override string registryName => "lang";
         
         public override bool isDefault => true;
 
-        public override Type assetType => typeof(IReadOnlyDictionary<string, string>);
+        public override Type assetType => typeof(LocalizationData);
 
         public override WildcardPatterns assetFilter => WildcardPatterns.jsonFileFilter;
 
@@ -31,7 +34,12 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        protected override LanguageAssetHandle CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash) => new LanguageAssetHandle(ioHandler, md5Hash);
+        protected override async UniTask<LanguageAssetHandle> CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash)
+        {
+            string json = await ioHandler.ReadAllText();
+            IReadOnlyDictionary<string, string>? assetObject = JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();
+            return new LanguageAssetHandle(new LocalizationData(assetObject ?? new ReadOnlyDictionary<string, string>(new Dictionary<string, string>())), ioHandler, md5Hash);
+        }
 
         protected override UniTask OnBeginAssetLoop()
         {
@@ -39,20 +47,17 @@ namespace RuniOS.Resource.Languages
             return UniTask.CompletedTask;
         }
 
-        protected override async UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, LanguageAssetHandle assetHandle)
+        protected override UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, LanguageAssetHandle assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
-            
-            using IAssetScope<IReadOnlyDictionary<string, string>>? scope = await assetHandle.GetScope();
-            if (scope == null)
-                return;
-            
+
+            IReadOnlyDictionary<string, string> localizations = assetHandle.assetObject.localizations;
             if (_calculatedAsset.TryGetValue(identifier.path, out IReadOnlyDictionary<Identifier, string>? value))
             {
                 _calculatedAsset[identifier.path] = value
                     .Concat
                     (
-                        scope.asset
+                        localizations
                             .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
                     )
                     .GroupBy(x => x.Key)
@@ -60,7 +65,9 @@ namespace RuniOS.Resource.Languages
                     .AsReadOnly();
             }
             else
-                _calculatedAsset.Add(identifier.path, scope.asset.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+                _calculatedAsset.Add(identifier.path, localizations.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+            
+            return UniTask.CompletedTask;
         }
     }
 }

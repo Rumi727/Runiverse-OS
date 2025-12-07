@@ -25,10 +25,10 @@ namespace RuniOS.Localizations
         {
             this.identifier = identifier;
             _languageCode = languageCode;
-            
+
             _replaces = ImmutableArray<PlaceholderReplacePair>.Empty;
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Localization"/> struct with initial replacements.<br/>
         /// 초기 대체 쌍(replacements)을 사용하여 새 <see cref="Localization"/> 구조체의 인스턴스를 초기화합니다.
@@ -49,10 +49,10 @@ namespace RuniOS.Localizations
         {
             this.identifier = identifier;
             _languageCode = languageCode;
-            
+
             _replaces = replaces.ToImmutableArray();
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Localization"/> struct with initial replacements.<br/>
         /// 초기 대체 쌍(replacements)을 사용하여 새 <see cref="Localization"/> 구조체의 인스턴스를 초기화합니다.<br/>
@@ -73,10 +73,10 @@ namespace RuniOS.Localizations
         {
             this.identifier = identifier;
             _languageCode = languageCode;
-            
+
             _replaces = replaces.ToImmutableArray();
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Localization"/> struct with initial replacements.<br/>
         /// 초기 대체 쌍(replacements)을 사용하여 새 <see cref="Localization"/> 구조체의 인스턴스를 초기화합니다.
@@ -97,7 +97,7 @@ namespace RuniOS.Localizations
         {
             this.identifier = identifier;
             _languageCode = languageCode;
-            
+
             _replaces = replaces;
         }
 
@@ -106,7 +106,7 @@ namespace RuniOS.Localizations
         /// 비어 있는 <see cref="Localization"/> 인스턴스를 가져옵니다.
         /// </summary>
         public static Localization empty => new Localization();
-        
+
         /// <summary>
         /// The unique identifier (key) for the localized text to be looked up in the resource registry.<br/>
         /// 리소스 레지스트리에서 조회할 지역화된 텍스트의 고유 식별자(키).
@@ -123,7 +123,7 @@ namespace RuniOS.Localizations
             set => _languageCode = value;
         }
         [SerializeField] string? _languageCode;
-        
+
         /// <summary>
         /// Gets or sets the immutable array of replacement pairs to be applied to the localized text.<br/>
         /// 지역화된 텍스트에 적용할 대체 쌍의 변경 불가능한 배열을 가져오거나 설정합니다.
@@ -149,7 +149,7 @@ namespace RuniOS.Localizations
         /// 지역화되고 대체가 적용된 텍스트.
         /// </returns>
         public override readonly string ToString() => replaces.Aggregate(GetTextOrKey(identifier, languageCode), (current, replace) => replace.ReplaceAsPlaceholder(current));
-        
+
         /// <summary>
         /// Retrieves the localized and replaced text, then formats it using C#'s composite formatting feature.<br/>
         /// 지역화되고 대체된 텍스트를 검색한 다음 C#의 복합 포맷팅 기능을 사용하여 서식을 지정합니다.
@@ -185,7 +185,7 @@ namespace RuniOS.Localizations
         /// 추가된 대체 쌍이 포함된 새 <see cref="Localization"/> 인스턴스.
         /// </returns>
         public readonly Localization AddReplace(string oldValue, string newValue) => new Localization(identifier, languageCode, replaces.Add(new PlaceholderReplacePair(oldValue, newValue)));
-        
+
         /// <summary>
         /// Creates a new <see cref="Localization"/> instance by adding a new replacement pair.<br/>
         /// 새 대체 쌍을 추가하여 새 <see cref="Localization"/> 인스턴스를 생성합니다.
@@ -199,7 +199,7 @@ namespace RuniOS.Localizations
         /// 추가된 대체 쌍이 포함된 새 <see cref="Localization"/> 인스턴스.
         /// </returns>
         public readonly Localization AddReplace(PlaceholderReplacePair replace) => new Localization(identifier, languageCode, replaces.Add(replace));
-        
+
         /// <summary>
         /// Creates a new <see cref="Localization"/> instance by adding multiple replacement pairs.<br/>
         /// 여러 대체 쌍을 추가하여 새 <see cref="Localization"/> 인스턴스를 생성합니다.
@@ -213,7 +213,7 @@ namespace RuniOS.Localizations
         /// 추가된 대체 쌍이 포함된 새 <see cref="Localization"/> 인스턴스.
         /// </returns>
         public readonly Localization AddReplace(params PlaceholderReplacePair[] replaces) => new Localization(identifier, languageCode, this.replaces.AddRange(replaces));
-        
+
         /// <summary>
         /// Creates a new <see cref="Localization"/> instance by adding multiple replacement pairs.<br/>
         /// 여러 대체 쌍을 추가하여 새 <see cref="Localization"/> 인스턴스를 생성합니다.
@@ -227,7 +227,7 @@ namespace RuniOS.Localizations
         /// 추가된 대체 쌍이 포함된 새 <see cref="Localization"/> 인스턴스.
         /// </returns>
         public readonly Localization AddReplace(IEnumerable<PlaceholderReplacePair> replaces) => new Localization(identifier, languageCode, this.replaces.AddRange(replaces));
-        
+
         /// <summary>
         /// Creates a new <see cref="Localization"/> instance by adding multiple replacement pairs.<br/>
         /// 여러 대체 쌍을 추가하여 새 <see cref="Localization"/> 인스턴스를 생성합니다.
@@ -262,7 +262,7 @@ namespace RuniOS.Localizations
         /// 찾은 경우 지역화된 텍스트, 그렇지 않으면 <paramref name="identifier"/> 문자열.
         /// </returns>
         public static string GetTextOrKey(Identifier identifier, string? languageCode = null) => GetText(identifier, languageCode) ?? identifier;
-        
+
         /// <summary>
         /// Retrieves the localized text for the given identifier and language code.<br/>
         /// 주어진 식별자와 언어 코드에 대한 지역화된 텍스트를 검색합니다.
@@ -285,6 +285,18 @@ namespace RuniOS.Localizations
             return registry?.calculatedAsset.GetValueOrDefault(languageCode ?? string.Empty /* TODO : 이거 바꿔라 */)?.GetValueOrDefault(identifier);
         }
 
+        public static IEnumerable<string> GetAllText(string languageCode)
+        {
+            LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
+            return registry?.calculatedAsset.GetValueOrDefault(languageCode)?.Values ?? Enumerable.Empty<string>();
+        }
+
+        public static IEnumerable<string> GetAllLanguageCode()
+        {
+            LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
+            return registry?.calculatedAsset.Keys ?? Enumerable.Empty<string>();
+        }
+
         /// <summary>
         /// Implicitly converts a <see cref="Localization"/> to its <see cref="identifier"/>.<br/>
         /// <see cref="Localization"/>을 <see cref="identifier"/>로 암시적으로 변환합니다.
@@ -293,7 +305,7 @@ namespace RuniOS.Localizations
         /// <see cref="Localization"/> 인스턴스.
         /// </param>
         public static implicit operator Identifier(Localization value) => value.identifier;
-        
+
         /// <summary>
         /// Implicitly converts an <see cref="Identifier"/> to a <see cref="Localization"/> instance.<br/>
         /// <see cref="Identifier"/>를 <see cref="Localization"/> 인스턴스로 암시적으로 변환합니다.
@@ -303,7 +315,7 @@ namespace RuniOS.Localizations
         /// <see cref="Identifier"/> 인스턴스.
         /// </param>
         public static implicit operator Localization(Identifier value) => new Localization(value);
-        
+
         /// <summary>
         /// Implicitly converts a <see cref="string"/> value to a <see cref="Localization"/> instance by treating the string as an <see cref="Identifier"/>.<br/>
         /// 문자열 값을 <see cref="Identifier"/>로 처리하여 <see cref="Localization"/> 인스턴스로 암시적으로 변환합니다.

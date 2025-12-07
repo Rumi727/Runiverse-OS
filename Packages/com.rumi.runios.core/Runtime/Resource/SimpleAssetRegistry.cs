@@ -10,14 +10,14 @@ namespace RuniOS.Resource
     /// 단순 파일 검색 및 등록 로직을 사용하는 에셋 레지스트리의 기본 구현입니다.
     /// <br/>이 레지스트리는 파일 시스템을 직접 순회하며 에셋 핸들을 생성합니다.
     /// </summary>
-    public abstract class SimpleAssetRegistry<T> : AssetRegistry where T : IAssetHandle
+    public abstract class SimpleAssetRegistry<THandle> : AssetRegistry where THandle : IAssetHandle
     {
         /// <summary>
         /// 이 레지스트리가 관리하는 파일 구조 내 폴더의 이름을 가져옵니다.
         /// </summary>
         public abstract string registryName { get; }
 
-        public sealed override Type handleType => typeof(T);
+        public sealed override Type handleType => typeof(THandle);
 
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
@@ -54,7 +54,7 @@ namespace RuniOS.Resource
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="md5Hash">에셋 파일의 MD5 해시 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract T CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash);
+        protected abstract UniTask<THandle> CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -100,7 +100,7 @@ namespace RuniOS.Resource
                                 try
                                 {
                                     FilePath path = ioHandler.fullPath.TrimStartPath(registryHandler.fullPath).GetPathWithoutExtension();
-                                    await OnAssetLoop(new Identifier(nameSpace, path), ioHandler, CreateHandle(ioHandler, await ioHandler.GetMD5Hash()));
+                                    await OnAssetLoop(new Identifier(nameSpace, path), ioHandler, await CreateHandle(ioHandler, await ioHandler.GetMD5Hash()));
                                 }
                                 catch (Exception e)
                                 {
@@ -145,7 +145,7 @@ namespace RuniOS.Resource
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="assetHandle">생성된 <see cref="AssetHandle{T}"/>입니다.</param>
         /// <returns>비동기 작업을 나타내는 <see cref="UniTask"/>입니다.</returns>
-        protected virtual UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, T assetHandle)
+        protected virtual UniTask OnAssetLoop(Identifier identifier, IOHandler ioHandler, THandle assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
             return UniTask.CompletedTask;
