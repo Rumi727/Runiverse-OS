@@ -12,7 +12,7 @@ namespace RuniOS.Resource
         public IAssetHandle<TAsset> handle { get; }
         public TAsset asset { get; }
         
-        public void Dispose() { }
+        void IDisposable.Dispose() { }
         
         public static implicit operator TAsset(InstanceAssetScope<TAsset> scope) => scope.asset;
     }
