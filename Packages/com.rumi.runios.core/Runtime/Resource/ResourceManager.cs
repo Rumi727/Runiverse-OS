@@ -37,7 +37,7 @@ namespace RuniOS.Resource
                 await ResourcePack.GetDefaultPack();
                 await ResourcePack.ReloadAll();
 
-                ReadOnlySet<AssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
+                ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
 
                 UniTask[] uniTasks = new UniTask[assetRegistries.Count];
                 float[] assetRegistryProgresses = new float[assetRegistries.Count];
@@ -50,7 +50,7 @@ namespace RuniOS.Resource
                     uniTasks[index] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
                     index++;
                     
-                    async UniTask RegistryReload(AssetRegistry assetRegistry, int targetIndex)
+                    async UniTask RegistryReload(IAssetRegistry assetRegistry, int targetIndex)
                     {
                         try
                         {
@@ -107,8 +107,8 @@ namespace RuniOS.Resource
         public static IAssetHandle<T>? GetHandle<T>(ResourceKey key) => GetHandle(key) as IAssetHandle<T>;
         public static IAssetHandle? GetHandle(ResourceKey key)
         {
-            AssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
-            if (registry?.assetHandles.TryGetValue(key.assetId, out IAssetHandle? handle) ?? false)
+            IAssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
+            if (registry?.TryGetValue(key.assetId, out IAssetHandle? handle) ?? false)
                 return handle;
 
             return null;
@@ -117,8 +117,8 @@ namespace RuniOS.Resource
         
         public static IAssetHandle<T>? GetHandle<T>(Identifier identifier)
         {
-            AssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
-            if (registry?.assetHandles.TryGetValue(identifier, out IAssetHandle? handle) ?? false)
+            IAssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
+            if (registry?.TryGetValue(identifier, out IAssetHandle? handle) ?? false)
                 return handle as IAssetHandle<T>;
 
             return null;
@@ -127,11 +127,11 @@ namespace RuniOS.Resource
         
         public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier)
         {
-            AssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
+            IAssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
             if (registry == null)
                 return null;
 
-            if (registry.assetHandles.TryGetValue(identifier, out IAssetHandle handle))
+            if (registry.TryGetValue(identifier, out IAssetHandle handle))
             {
                 if (handle is IAssetHandle<T> typedHandle)
                     return await typedHandle.GetScope();
@@ -142,11 +142,11 @@ namespace RuniOS.Resource
 
         public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(ResourceKey key)
         {
-            AssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
+            IAssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
             if (registry == null)
                 return null;
 
-            if (registry.assetHandles.TryGetValue(key.assetId, out IAssetHandle handle))
+            if (registry.TryGetValue(key.assetId, out IAssetHandle handle))
             {
                 if (handle is IAssetHandle<T> typedHandle)
                     return await typedHandle.GetScope();

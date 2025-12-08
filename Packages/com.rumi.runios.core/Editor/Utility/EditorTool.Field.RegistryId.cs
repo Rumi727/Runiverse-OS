@@ -7,13 +7,13 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static Identifier RegistryIdFieldLayout(Identifier value, Func<AssetRegistry, bool>? predicate = null) => RegistryIdFieldLayout(GUIContent.none, value, predicate);
-        public static Identifier RegistryIdFieldLayout(string label, Identifier value, Func<AssetRegistry, bool>? predicate = null) => RegistryIdFieldLayout(new GUIContent(label), value, predicate);
-        public static Identifier RegistryIdFieldLayout(GUIContent label, Identifier value, Func<AssetRegistry, bool>? predicate = null) => RegistryIdField(GetMultiColumnsControlRect(label), label, value, predicate);
+        public static Identifier RegistryIdFieldLayout(Identifier value, Func<IAssetRegistry, bool>? predicate = null) => RegistryIdFieldLayout(GUIContent.none, value, predicate);
+        public static Identifier RegistryIdFieldLayout(string label, Identifier value, Func<IAssetRegistry, bool>? predicate = null) => RegistryIdFieldLayout(new GUIContent(label), value, predicate);
+        public static Identifier RegistryIdFieldLayout(GUIContent label, Identifier value, Func<IAssetRegistry, bool>? predicate = null) => RegistryIdField(GetMultiColumnsControlRect(label), label, value, predicate);
 
-        public static Identifier RegistryIdField(Rect position, Identifier value, Func<AssetRegistry, bool>? predicate = null) => DoRegistryIdField(position, value, predicate);
-        public static Identifier RegistryIdField(Rect position, string label, Identifier value, Func<AssetRegistry, bool>? predicate = null) => RegistryIdField(position, new GUIContent(label), value, predicate);
-        public static Identifier RegistryIdField(Rect position, GUIContent label, Identifier value, Func<AssetRegistry, bool>? predicate = null)
+        public static Identifier RegistryIdField(Rect position, Identifier value, Func<IAssetRegistry, bool>? predicate = null) => DoRegistryIdField(position, value, predicate);
+        public static Identifier RegistryIdField(Rect position, string label, Identifier value, Func<IAssetRegistry, bool>? predicate = null) => RegistryIdField(position, new GUIContent(label), value, predicate);
+        public static Identifier RegistryIdField(Rect position, GUIContent label, Identifier value, Func<IAssetRegistry, bool>? predicate = null)
         {
             position = DrawMultiColumnsFieldPrefixLabel(position, label, 3);
             return DoRegistryIdField(position, value, predicate);
@@ -21,14 +21,14 @@ namespace RuniOS.Editor
 
         static int? registryIdFieldLastControlID;
         static string registryIdFieldSelectedNamespace = string.Empty;
-        static Identifier DoRegistryIdField(Rect position, Identifier value, Func<AssetRegistry, bool>? predicate)
+        static Identifier DoRegistryIdField(Rect position, Identifier value, Func<IAssetRegistry, bool>? predicate)
         {
             string currentNamespace = value.nameSpace;
             TextDropdown dropdown = new TextDropdown();
 
             value = IdentifierField(position, value, x =>
             {
-                IEnumerable<AssetRegistry> registryIds = AssetRegistryManager.GetAll();
+                IEnumerable<IAssetRegistry> registryIds = AssetRegistryManager.GetAll();
                 if (predicate != null)
                     registryIds = registryIds.Where(predicate);
 

@@ -22,10 +22,7 @@ namespace RuniOS.Resource.Languages
 
         public override WildcardPatterns assetFilter => WildcardPatterns.jsonFileFilter;
 
-        public IReadOnlyDictionary<string, IReadOnlyDictionary<Identifier, string>> calculatedAsset { get; }
-        readonly Dictionary<string, IReadOnlyDictionary<Identifier, string>> _calculatedAsset = new();
-
-        public LanguageAssetRegistry() => calculatedAsset = _calculatedAsset.AsReadOnly();
+        internal readonly Dictionary<string, Dictionary<Identifier, string>> calculatedAsset = new();
         
         [Awaken]
         [Preserve]
@@ -43,7 +40,7 @@ namespace RuniOS.Resource.Languages
 
         protected override UniTask OnBeginAssetLoop()
         {
-            _calculatedAsset.Clear();
+            calculatedAsset.Clear();
             return UniTask.CompletedTask;
         }
 
@@ -52,20 +49,19 @@ namespace RuniOS.Resource.Languages
             RecordAssetHandle(identifier, assetHandle);
 
             IReadOnlyDictionary<string, string> localizations = assetHandle.assetObject.localizations;
-            if (_calculatedAsset.TryGetValue(identifier.path, out IReadOnlyDictionary<Identifier, string>? value))
+            if (calculatedAsset.TryGetValue(identifier.path, out Dictionary<Identifier, string>? value))
             {
-                _calculatedAsset[identifier.path] = value
+                calculatedAsset[identifier.path] = value
                     .Concat
                     (
                         localizations
                             .AsDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value)
                     )
                     .GroupBy(x => x.Key)
-                    .ToDictionary(x => x.Key, x => x.First().Value)
-                    .AsReadOnly();
+                    .ToDictionary(x => x.Key, x => x.First().Value);
             }
             else
-                _calculatedAsset.Add(identifier.path, localizations.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+                calculatedAsset.Add(identifier.path, localizations.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
             
             return UniTask.CompletedTask;
         }

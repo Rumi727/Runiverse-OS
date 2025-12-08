@@ -10,7 +10,7 @@ namespace RuniOS.Editor
         public static void AssetRefFieldLayout(string label, IAssetRef value) => AssetRefFieldLayout(new GUIContent(label), value);
         public static void AssetRefFieldLayout(GUIContent label, IAssetRef value)
         {
-            ReadOnlySet<AssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
+            ReadOnlySet<IAssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
             float height;
             if (registries.Count > 1)
                 height = GetMultiRowsFieldHeight(label, 2);
@@ -24,8 +24,8 @@ namespace RuniOS.Editor
         public static void AssetRefField(Rect position, string label, IAssetRef value) => AssetRefField(position, new GUIContent(label), value);
         public static void AssetRefField(Rect position, GUIContent label, IAssetRef value)
         {
-            ReadOnlySet<AssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
-            AssetRegistry? defaultRegistry = AssetRegistryManager.GetDefaultForAsset(value.targetAssetType);
+            ReadOnlySet<IAssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
+            IAssetRegistry? defaultRegistry = AssetRegistryManager.GetDefaultForAsset(value.targetAssetType);
             
             if (registries.Count > 1 || defaultRegistry == null)
                 value.key = ResourceKeyField(position, label, value.key, x => registries.Contains(x));

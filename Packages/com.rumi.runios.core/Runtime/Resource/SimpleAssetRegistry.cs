@@ -10,14 +10,12 @@ namespace RuniOS.Resource
     /// 단순 파일 검색 및 등록 로직을 사용하는 에셋 레지스트리의 기본 구현입니다.
     /// <br/>이 레지스트리는 파일 시스템을 직접 순회하며 에셋 핸들을 생성합니다.
     /// </summary>
-    public abstract class SimpleAssetRegistry<THandle> : AssetRegistry where THandle : IAssetHandle
+    public abstract class SimpleAssetRegistry<THandle> : AssetRegistry<THandle> where THandle : class, IAssetHandle
     {
         /// <summary>
         /// 이 레지스트리가 관리하는 파일 구조 내 폴더의 이름을 가져옵니다.
         /// </summary>
         public abstract string registryName { get; }
-
-        public sealed override Type handleType => typeof(THandle);
 
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.

@@ -11,7 +11,7 @@ namespace RuniOS.Resource
 {
     /// <summary>
     /// 리소스 팩(Resource Pack)의 정보를 담는 참조 클래스입니다.
-    /// <br/>실제 에셋 데이터는 <see cref="AssetRegistry"/>를 통해 로드 및 관리됩니다.
+    /// <br/>실제 에셋 데이터는 <see cref="AssetRegistry{T}"/>를 통해 로드 및 관리됩니다.
     /// </summary>
     public sealed class ResourcePack : IDisposable
     {

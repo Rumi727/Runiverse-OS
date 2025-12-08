@@ -6,15 +6,15 @@ namespace RuniOS.Resource
 {
     public static class AssetRegistryManager
     {
-        static readonly HashSet<AssetRegistry> registries = new();
-        static readonly Dictionary<Identifier, AssetRegistry> registriesById = new();
-        static readonly Dictionary<Type, AssetRegistry> registriesByClassType = new();
-        static readonly Dictionary<Type, HashSet<AssetRegistry>> registriesByAssetType = new();
-        static readonly Dictionary<Type, AssetRegistry> defaultRegistriesByAssetType = new();
+        static readonly HashSet<IAssetRegistry> registries = new();
+        static readonly Dictionary<Identifier, IAssetRegistry> registriesById = new();
+        static readonly Dictionary<Type, IAssetRegistry> registriesByClassType = new();
+        static readonly Dictionary<Type, HashSet<IAssetRegistry>> registriesByAssetType = new();
+        static readonly Dictionary<Type, IAssetRegistry> defaultRegistriesByAssetType = new();
 
-        public static void Register<T>() where T : AssetRegistry, new() => Register(new T());
+        public static void Register<T>() where T : IAssetRegistry, new() => Register(new T());
 
-        public static void Register(AssetRegistry registry)
+        public static void Register(IAssetRegistry registry)
         {
             if (!registriesById.TryAdd(registry.registryId, registry))
                 throw new InvalidOperationException($"Registry ID conflict: {registry.registryId}");
@@ -23,7 +23,7 @@ namespace RuniOS.Resource
             registriesByClassType[registry.GetType()] = registry;
 
             if (!registriesByAssetType.TryGetValue(registry.assetType, out var list))
-                registriesByAssetType[registry.assetType] = list = new HashSet<AssetRegistry>();
+                registriesByAssetType[registry.assetType] = list = new HashSet<IAssetRegistry>();
             
             list.Add(registry);
 
@@ -36,7 +36,7 @@ namespace RuniOS.Resource
             }
         }
 
-        public static void Unregister(AssetRegistry registry)
+        public static void Unregister(IAssetRegistry registry)
         {
             registries.Remove(registry);
             
@@ -54,22 +54,22 @@ namespace RuniOS.Resource
                 defaultRegistriesByAssetType.Remove(registry.assetType);
         }
 
-        public static AssetRegistry? Get(Identifier registryId) => registriesById.GetValueOrDefault(registryId);
+        public static IAssetRegistry? Get(Identifier registryId) => registriesById.GetValueOrDefault(registryId);
 
-        public static T? Get<T>() where T : AssetRegistry => (T?)Get(typeof(T));
-        public static AssetRegistry? Get(Type registryType) => registriesByClassType.GetValueOrDefault(registryType);
+        public static T? Get<T>() where T : IAssetRegistry => (T?)Get(typeof(T));
+        public static IAssetRegistry? Get(Type registryType) => registriesByClassType.GetValueOrDefault(registryType);
 
-        public static AssetRegistry? GetDefaultForAsset<TAsset>() => GetDefaultForAsset(typeof(TAsset));
-        public static AssetRegistry? GetDefaultForAsset(Type assetType) => defaultRegistriesByAssetType.GetValueOrDefault(assetType);
+        public static IAssetRegistry? GetDefaultForAsset<TAsset>() => GetDefaultForAsset(typeof(TAsset));
+        public static IAssetRegistry? GetDefaultForAsset(Type assetType) => defaultRegistriesByAssetType.GetValueOrDefault(assetType);
 
-        public static ReadOnlySet<AssetRegistry> GetAll() => registries.AsReadOnly();
+        public static ReadOnlySet<IAssetRegistry> GetAll() => registries.AsReadOnly();
         
-        public static ReadOnlySet<AssetRegistry> GetAllForAsset(Type assetType)
+        public static ReadOnlySet<IAssetRegistry> GetAllForAsset(Type assetType)
         {
             if (registriesByAssetType.TryGetValue(assetType, out var list))
                 return list.AsReadOnly();
             
-            return ReadOnlySet<AssetRegistry>.empty;
+            return ReadOnlySet<IAssetRegistry>.empty;
         }
     }
 }

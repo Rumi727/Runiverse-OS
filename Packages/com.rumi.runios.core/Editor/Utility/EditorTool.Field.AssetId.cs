@@ -29,7 +29,7 @@ namespace RuniOS.Editor
 
             value = IdentifierField(position, value, x =>
             {
-                IEnumerable<FilePath>? assetPaths = AssetRegistryManager.Get(registryId)?.assetHandles.Keys
+                IEnumerable<FilePath>? assetPaths = AssetRegistryManager.Get(registryId)?.Keys
                     .Where(x => currentNamespace == x.nameSpace)
                     .Select(x => x.path);
 
