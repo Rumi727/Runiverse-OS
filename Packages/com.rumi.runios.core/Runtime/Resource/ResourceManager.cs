@@ -105,54 +105,12 @@ namespace RuniOS.Resource
 
 
         public static IAssetHandle<T>? GetHandle<T>(ResourceKey key) => GetHandle(key) as IAssetHandle<T>;
-        public static IAssetHandle? GetHandle(ResourceKey key)
-        {
-            IAssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
-            if (registry?.TryGetValue(key.assetId, out IAssetHandle? handle) ?? false)
-                return handle;
+        public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?[key.assetId];
 
-            return null;
-        }
-        
-        
-        public static IAssetHandle<T>? GetHandle<T>(Identifier identifier)
-        {
-            IAssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
-            if (registry?.TryGetValue(identifier, out IAssetHandle? handle) ?? false)
-                return handle as IAssetHandle<T>;
 
-            return null;
-        }
-        
-        
-        public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier)
-        {
-            IAssetRegistry? registry = AssetRegistryManager.GetDefaultForAsset<T>();
-            if (registry == null)
-                return null;
+        public static IAssetHandle<T>? GetHandle<T>(Identifier identifier) => AssetRegistryManager.GetDefaultForAsset<T>()?[identifier] as IAssetHandle<T>;
+        public static UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier) => GetHandle<T>(identifier)?.GetScope() ?? UniTask.FromResult<IAssetScope<T>?>(null);
 
-            if (registry.TryGetValue(identifier, out IAssetHandle handle))
-            {
-                if (handle is IAssetHandle<T> typedHandle)
-                    return await typedHandle.GetScope();
-            }
-            
-            return null;
-        }
-
-        public static async UniTask<IAssetScope<T>?> LoadScopeAsync<T>(ResourceKey key)
-        {
-            IAssetRegistry? registry = AssetRegistryManager.Get(key.registryId);
-            if (registry == null)
-                return null;
-
-            if (registry.TryGetValue(key.assetId, out IAssetHandle handle))
-            {
-                if (handle is IAssetHandle<T> typedHandle)
-                    return await typedHandle.GetScope();
-            }
-            
-            return null;
-        }
+        public static UniTask<IAssetScope<T>?> LoadScopeAsync<T>(ResourceKey key) => GetHandle<T>(key)?.GetScope() ?? UniTask.FromResult<IAssetScope<T>?>(null);
     }
 }

@@ -30,10 +30,19 @@ namespace RuniOS.Resource
         /// </summary>
         public bool isTracking { get; private set; }
         
-        public THandle this[Identifier key] => assetHandles[key];
-        
-        public IEnumerable<Identifier> Keys => assetHandles.Keys;
-        public IEnumerable<THandle> Values => assetHandles.Values;
+        public THandle? this[Identifier key]
+        {
+            get
+            {
+                if (TryGetHandle(key, out var handle))
+                    return handle;
+                
+                return null;
+            }
+        }
+
+        public IEnumerable<Identifier> keys => assetHandles.Keys;
+        public IEnumerable<THandle> handles => assetHandles.Values;
         
         public int Count => assetHandles.Count;
         
@@ -112,7 +121,7 @@ namespace RuniOS.Resource
         
         public bool ContainsKey(Identifier key) => assetHandles.ContainsKey(key);
         
-        public bool TryGetValue(Identifier key, out THandle value) => assetHandles.TryGetValue(key, out value);
+        public bool TryGetHandle(Identifier key, out THandle handle) => assetHandles.TryGetValue(key, out handle);
         
         public IEnumerator<KeyValuePair<Identifier, THandle>> GetEnumerator() => assetHandles.GetEnumerator();
     }

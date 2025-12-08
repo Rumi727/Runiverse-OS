@@ -7,25 +7,22 @@ namespace RuniOS.Resource
     {
         Type IAssetRegistry.handleType => typeof(THandle);
         
-        new THandle this[Identifier key] { get; }
-        IAssetHandle IReadOnlyDictionary<Identifier, IAssetHandle>.this[Identifier key] => this[key];
-
-        new IEnumerable<Identifier> Keys { get; }
-        IEnumerable<Identifier> IReadOnlyDictionary<Identifier, IAssetHandle>.Keys => Keys;
+        new THandle? this[Identifier key] { get; }
+        IAssetHandle? IAssetRegistry.this[Identifier key] => this[key];
         
-        new IEnumerable<THandle> Values { get; }
-        IEnumerable<IAssetHandle> IReadOnlyDictionary<Identifier, IAssetHandle>.Values => Values;
+        new IEnumerable<THandle> handles { get; }
+        IEnumerable<IAssetHandle> IAssetRegistry.handles => handles;
 
-        bool TryGetValue(Identifier key, [NotNullWhen(true)] out THandle? value);
-        bool IReadOnlyDictionary<Identifier, IAssetHandle>.TryGetValue(Identifier key, out IAssetHandle value)
+        bool TryGetHandle(Identifier key, [NotNullWhen(true)] out THandle? handle);
+        bool IAssetRegistry.TryGetHandle(Identifier key, [NotNullWhen(true)] out IAssetHandle? handle)
         {
-            if (TryGetValue(key, out THandle? genericValue))
+            if (TryGetHandle(key, out THandle? genericValue))
             {
-                value = genericValue;
+                handle = genericValue;
                 return true;
             }
             
-            value = null!;
+            handle = null!;
             return false;
         }
 
