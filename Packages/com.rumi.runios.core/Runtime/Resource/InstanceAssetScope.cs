@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Resource
 {
-    public sealed class InstanceAssetScope<TAsset> : IAssetScope<TAsset>
+    public struct InstanceAssetScope<TAsset> : IAssetScope<TAsset>
     {
         internal InstanceAssetScope(IAssetHandle<TAsset> handle, TAsset asset)
         {

@@ -5,22 +5,16 @@ namespace RuniOS.Resource
 {
     public class InstanceAssetHandle<TAsset> : IAssetHandle<TAsset>
     {
-        public InstanceAssetHandle(TAsset assetObject)
-        {
-            this.assetObject = assetObject;
-            scope = new InstanceAssetScope<TAsset>(this, assetObject);
-        }
+        public InstanceAssetHandle(TAsset assetObject) => this.assetObject = assetObject;
 
         /// <summary>
         /// 참조한 인스턴스를 가져옵니다.
         /// </summary>
         public TAsset assetObject { get; }
         bool IAssetHandle.isLoading => false;
-
-        readonly InstanceAssetScope<TAsset> scope;
         
-        UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(scope);
-        UniTask<IAssetScope?> IAssetHandle.GetScope() => UniTask.FromResult<IAssetScope?>(scope);
+        UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(new InstanceAssetScope<TAsset>(this, assetObject));
+        UniTask<IAssetScope?> IAssetHandle.GetScope() => UniTask.FromResult<IAssetScope?>(new InstanceAssetScope<TAsset>(this, assetObject));
         
         public virtual bool IsSameTarget(IAssetHandle other)
         {
