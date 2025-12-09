@@ -13,7 +13,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "0Harmony.dll"
+        "0Harmony.dll",
+        "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll"
     ],
     "autoReferenced": false,
     "defineConstraints": [],
