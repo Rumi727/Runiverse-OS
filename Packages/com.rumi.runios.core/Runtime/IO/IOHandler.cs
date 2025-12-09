@@ -181,9 +181,9 @@ namespace RuniOS.IO
         /// <returns>일치하는 파일이 있으면 해당 파일의 <see cref="IOHandler"/>를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.</returns>
         public async UniTask<IOHandler?> FileExists(WildcardPatterns wildcardPatterns)
         {
-            for (int i = 0; i < wildcardPatterns.patterns.Length; i++)
+            for (int i = 0; i < wildcardPatterns.count; i++)
             {
-                string extension = wildcardPatterns.patterns[i];
+                string extension = wildcardPatterns[i];
 
                 IOHandler extensionHandler = AddExtension(extension);
                 if (await extensionHandler.FileExists())

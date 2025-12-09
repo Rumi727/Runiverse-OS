@@ -38,6 +38,6 @@ namespace RuniOS.Utility
 
         public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
         public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => Directory.EnumerateFiles(path, "*", searchOption)
-            .Where(x => WildcardUtility.IsMatch(x, extensionFilter));
+            .Where(extensionFilter.IsMatch);
     }
 }

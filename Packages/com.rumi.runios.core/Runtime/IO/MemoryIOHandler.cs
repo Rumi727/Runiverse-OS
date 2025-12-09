@@ -118,7 +118,7 @@ namespace RuniOS.IO
         /// <param name="wildcardPatterns">파일 이름과 일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>지정된 패턴과 일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetFiles(fullPath).Where(x => WildcardUtility.IsMatch(x, wildcardPatterns)).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetFiles(fullPath).Where(wildcardPatterns.IsMatch).ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 가져옵니다.
@@ -133,7 +133,7 @@ namespace RuniOS.IO
         /// <param name="wildcardPatterns">파일 경로와 일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>지정된 패턴과 일치하는 파일 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetAllFiles(fullPath).Where(x => WildcardUtility.IsMatch(x, wildcardPatterns)).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetAllFiles(fullPath).Where(wildcardPatterns.IsMatch).ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 이 핸들러가 나타내는 가상 파일의 모든 바이트를 비동기적으로 읽습니다.

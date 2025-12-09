@@ -518,7 +518,7 @@ namespace RuniOS.IO
 
         public static IEnumerable<FilePath> FilterFiles(IEnumerable<FilePath> files, WildcardPatterns extensionFilter)
         {
-            IEnumerable<string> patterns = extensionFilter.patterns.Select(ConvertPatternToRegex);
+            IEnumerable<string> patterns = extensionFilter.Select(ConvertPatternToRegex);
 
             // `*` 패턴이 포함되어 있다면 바로 모든 파일 반환
             if (patterns.Contains(".*"))
