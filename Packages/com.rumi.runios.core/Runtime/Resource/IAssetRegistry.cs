@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.IO;
 using System.Collections;
 using System.Diagnostics.CodeAnalysis;
 
@@ -46,5 +47,16 @@ namespace RuniOS.Resource
         bool TryGetHandle(Identifier key, [NotNullWhen(true)] out IAssetHandle? handle);
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+        
+        /// <summary>
+        /// 지정된 경로가 레지스트리의 패턴 규칙과 일치하는지 확인합니다.
+        /// </summary>
+        /// <remarks>
+        /// 실제 파일 존재 여부는 확인하지 않으며, 오직 경로 문자열의 형식이 레지스트리가 담당하는 패턴인지 검사합니다.
+        /// <br/>경로는 리소스팩 루트를 기준으로 해야 합니다. (예: <c>assets/namespace/textures/...</c>)
+        /// </remarks>
+        /// <param name="relativePath">검사할 리소스팩 내부 경로입니다.</param>
+        /// <returns>패턴이 일치하여 처리 가능한 대상이면 <c>true</c>를 반환합니다.</returns>
+        bool IsMatch(FilePath relativePath);
     }
 }

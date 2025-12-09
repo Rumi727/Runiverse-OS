@@ -3,6 +3,8 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace RuniOS.Resource
 {
@@ -147,6 +149,54 @@ namespace RuniOS.Resource
         {
             RecordAssetHandle(identifier, assetHandle);
             return UniTask.CompletedTask;
+        }
+        
+        Regex? prefixRegex;
+        Regex? filterRegex;
+
+        [MemberNotNull(nameof(prefixRegex), nameof(filterRegex))]
+        void InitializeRegex()
+        {
+            // A. 경로 검사용: asset/namespace/registryName 패턴
+            string prefixPattern = $"^asset/[^/]+/{Regex.Escape(registryName)}(?:$|/(.*)$)";
+            prefixRegex = new Regex(prefixPattern, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+
+            // B. 필터 검사용: WildcardPatterns에 있는 모든 패턴을 하나의 정규식으로 통합
+            //    예: *.png, *.jpg -> \.(?:png|jpg)$
+            string filterPattern;
+
+            if (assetFilter.Contains("*") || assetFilter.Contains("*.*"))
+                filterPattern = ".*";
+            else
+            {
+                // 각 와일드카드(*.png)를 정규식(.*\.png)으로 변환 후 OR(|) 연결
+                var regexParts = assetFilter.Select(x => Regex.Escape(x).Replace("\\*", ".*").Replace("\\?", "."));
+                // ^ 와 $ 를 붙여서 전체 일치 유도
+                filterPattern = $"^(?:{string.Join("|", regexParts)})$";
+            }
+
+            filterRegex = new Regex(filterPattern, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
+        }
+
+        public override bool IsMatch(FilePath relativePath)
+        {
+            if (prefixRegex == null || filterRegex == null)
+                InitializeRegex();
+
+            // 1. 경로 앞부분(asset/ns/regName) 검사
+            Match match = prefixRegex.Match(relativePath);
+            if (!match.Success) 
+                return false;
+
+            // 2. 뒷부분(파일명) 추출
+            string suffix = match.Groups[1].Value;
+
+            // 3. 폴더 자체인 경우 (뒤가 비어있음) -> True
+            if (string.IsNullOrEmpty(suffix))
+                return true;
+
+            // 4. 파일인 경우 -> 미리 합쳐둔 필터 정규식으로 한 번에 검사
+            return filterRegex.IsMatch(suffix);
         }
     }
 }
