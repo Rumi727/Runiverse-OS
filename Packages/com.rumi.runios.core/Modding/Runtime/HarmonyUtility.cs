@@ -14,7 +14,7 @@ namespace RuniOS.Modding
 #if UNITY_EDITOR
         public static bool logEnable => Editor.Modding.ModdingConfigAsset.instance.logInEditor;
 #else
-    public static bool logEnable => true;
+        public static bool logEnable => true;
 #endif
         
         /// <summary>
@@ -28,7 +28,7 @@ namespace RuniOS.Modding
 #if UNITY_EDITOR
             Repatch(harmony, assembly);
 #else
-        Patch(harmony, assembly);
+            Patch(harmony, assembly);
 #endif
         }
 
