@@ -37,13 +37,7 @@ namespace RuniOS.Utility
         public static string[] GetFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => EnumerateFiles(path, extensionFilter, searchOption).ToArray();
 
         public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
-        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption)
-        {
-            if (extensionFilter.patterns.Length == 1)
-                return Directory.EnumerateFiles(path, extensionFilter.patterns[0], searchOption);
-
-            return Directory.EnumerateFiles(path, "*", searchOption)
-                .Where(x => WildcardUtility.IsMatch(x, extensionFilter));
-        }
+        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => Directory.EnumerateFiles(path, "*", searchOption)
+            .Where(x => WildcardUtility.IsMatch(x, extensionFilter));
     }
 }

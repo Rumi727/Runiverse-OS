@@ -21,6 +21,8 @@ namespace RuniOS.IO
 
         public WildcardPatterns(string pattern) => patterns = ImmutableArray.Create(pattern);
         public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToImmutableArray();
+        public WildcardPatterns(IEnumerable<string> patterns) => this.patterns = patterns.ToImmutableArray();
+        public WildcardPatterns(ImmutableArray<string> patterns) => this.patterns = patterns;
 
         public string this[int index] => patterns[index];
 
