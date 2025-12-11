@@ -1,11 +1,12 @@
 #nullable enable
+using RuniOS.IO;
 using System.IO;
 
 namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static string AbsolutePathToRelativePath(string path) => path.Remove(Directory.GetCurrentDirectory().Length + 1);
+        public static FilePath projectPath { get; } = Directory.GetCurrentDirectory();
 
         public static bool PathIsProjectPath(string path)
         {

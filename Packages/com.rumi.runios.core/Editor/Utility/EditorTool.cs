@@ -1,8 +1,11 @@
 #nullable enable
 namespace RuniOS.Editor
 {
+    [InitializeOnLoad]
     public static partial class EditorTool
     {
+        static EditorTool() => _ = projectPath;
+
         /*struct EditorLocalizationBridge : IEditorLocalizationBridge
         {
             public Action? onLanguageUpdate
