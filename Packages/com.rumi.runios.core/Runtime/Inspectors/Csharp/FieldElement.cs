@@ -69,7 +69,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드가 정적인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public override bool isStatic => field.IsStatic;
+        public override bool isStatic => field.IsStatic || field.IsLiteral;
 
         /// <summary>
         /// 필드의 값을 가져오거나 설정합니다.
