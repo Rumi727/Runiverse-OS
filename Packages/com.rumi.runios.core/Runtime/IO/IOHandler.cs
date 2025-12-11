@@ -1,9 +1,10 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using System.Collections.Immutable;
+using System.Buffers;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 
 namespace RuniOS.IO
 {
@@ -95,7 +96,7 @@ namespace RuniOS.IO
         /// <param name="path">자식 핸들러의 이름입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(string path) => CreateChild((FilePath)path);
-        
+
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
@@ -147,7 +148,7 @@ namespace RuniOS.IO
         /// <param name="paths">자식 핸들러의 경로입니다.</param>
         /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
         public IOHandler CreateChild(params FilePath[] paths) => CreateChild((IEnumerable<FilePath>)paths);
-        
+
         /// <summary>
         /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
         /// </summary>
@@ -209,7 +210,7 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>모든 디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract IUniTaskAsyncEnumerable<FilePath> GetAllDirectories();
-        
+
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
         /// </summary>
@@ -220,7 +221,13 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract IUniTaskAsyncEnumerable<string> GetFiles();
-        
+
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일의 메타데이터를 가져옵니다.
+        /// </summary>
+        /// <returns>파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public abstract IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData();
+
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
         /// </summary>
@@ -234,6 +241,13 @@ namespace RuniOS.IO
         public abstract IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns);
         
         /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 메타데이터를 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
+        /// <returns>일치하는 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public abstract IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns);
+
+        /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
@@ -246,6 +260,12 @@ namespace RuniOS.IO
         public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles();
         
         /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 메타데이터를 가져옵니다.
+        /// </summary>
+        /// <returns>모든 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public abstract IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData();
+
+        /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
         /// </summary>
         public IUniTaskAsyncEnumerable<IOHandler> GetAllFileHandlers() => GetAllFiles().Select(CreateChild);
@@ -257,6 +277,13 @@ namespace RuniOS.IO
         /// <returns>일치하는 모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns);
         
+        /// <summary>
+        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 메타데이터를 가져옵니다.
+        /// </summary>
+        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
+        /// <returns>모든 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public abstract IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns);
+
         /// <summary>
         /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
         /// </summary>
@@ -286,9 +313,48 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일에서 열린 <see cref="Stream"/>입니다.</returns>
         public abstract UniTask<Stream> OpenRead();
-        
-        
-        
+
+
+
+        public abstract UniTask<FileMetaData> GetFileMetaData();
+
+
+
+        /// <summary>
+        /// 이 핸들러가 나타내는 파일의 MD5 해시 값을 계산합니다.
+        /// </summary>
+        /// <returns>파일의 MD5 해시를 포함하는 <see cref="byte"/>[]입니다.</returns>
+        /// <exception cref="Exception">파일을 찾을 수 없거나(파일이 존재하지 않거나), 읽는 동안 오류가 발생한 경우입니다.</exception>
+        public virtual async UniTask<string> GetFileChecksum()
+        {
+            await using Stream stream = await OpenRead();
+
+            SynchronizationContext? callerContext = SynchronizationContext.Current;
+            await UniTask.SwitchToThreadPool();
+
+            using var incrementalHash = IncrementalHash.CreateHash(HashAlgorithmName.MD5);
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(8192); // 8KB 버퍼 대여
+
+            try
+            {
+                int bytesRead;
+                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    incrementalHash.AppendData(buffer, 0, bytesRead);
+
+                string result = BitConverter.ToString(incrementalHash.GetHashAndReset());
+                if (callerContext != null && SynchronizationContext.Current != callerContext)
+                    await UniTask.SwitchToSynchronizationContext(callerContext);
+
+                return result;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+
+
+
         /// <summary>
         /// 이 핸들러가 다른 지정된 핸들러와 동일한 최종 대상(파일 또는 디렉터리)을 참조하는지 확인합니다.<br/>
         /// 이 비교는 핸들러의 내부 구현 방식이나 객체 인스턴스의 동일성과는 무관하게,
@@ -299,22 +365,6 @@ namespace RuniOS.IO
         public abstract bool IsSameTarget(IOHandler? other);
 
 
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일의 MD5 해시 값을 계산합니다.
-        /// </summary>
-        /// <returns>파일의 MD5 해시를 포함하는 <see cref="byte"/>[]입니다.</returns>
-        /// <exception cref="Exception">파일을 찾을 수 없거나(파일이 존재하지 않거나), 읽는 동안 오류가 발생한 경우입니다.</exception>
-        public virtual async UniTask<ImmutableArray<byte>> GetMD5Hash()
-        {
-            using MD5 md5 = MD5.Create();
-            await using Stream stream = await OpenRead();
-            return md5.ComputeHash(stream).ToImmutableArray();
-        }
-
-
-
-        public override string ToString() => fullPath;
 
         sealed class EmptyIOHandler : IOHandler
         {
@@ -338,20 +388,26 @@ namespace RuniOS.IO
 
             public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Empty<string>();
             public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<string>();
+            public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<FileMetaData>();
+            public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FileMetaData>();
 
             public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Empty<FilePath>();
             public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FilePath>();
+            public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
+            public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
 
-            public override UniTask<byte[]> ReadAllBytes() => new UniTask<byte[]>(Array.Empty<byte>());
+            public override UniTask<byte[]> ReadAllBytes() => UniTask.FromResult(Array.Empty<byte>());
 
-            public override UniTask<string> ReadAllText() => new UniTask<string>(string.Empty);
+            public override UniTask<string> ReadAllText() => UniTask.FromResult(string.Empty);
 
             public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Empty<string>();
 
             public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
 
+            public override UniTask<FileMetaData> GetFileMetaData() => UniTask.FromResult(new FileMetaData());
+            public override UniTask<string> GetFileChecksum() => UniTask.FromResult(string.Empty);
+
             public override bool IsSameTarget(IOHandler? other) => other is EmptyIOHandler;
-            public override UniTask<ImmutableArray<byte>> GetMD5Hash() => UniTask.FromResult(ImmutableArray<byte>.Empty);
         }
     }
 }

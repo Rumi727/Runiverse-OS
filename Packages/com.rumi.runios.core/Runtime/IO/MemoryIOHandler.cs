@@ -83,13 +83,13 @@ namespace RuniOS.IO
         /// 이 핸들러가 나타내는 디렉토리가 가상 디렉토리 내에 존재하는지 비동기적으로 확인합니다.
         /// </summary>
         /// <returns>디렉토리가 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환하는 <see cref="bool"/>입니다.</returns>
-        public override UniTask<bool> DirectoryExists() => UniTask.FromResult(rootDirectory.GetDirectory(fullPath) != null);
+        public override UniTask<bool> DirectoryExists() => UniTask.FromResult(!rootDirectory.isDeleted && rootDirectory.GetDirectory(fullPath) != null);
 
         /// <summary>
         /// 이 핸들러가 나타내는 파일이 가상 디렉토리 내에 존재하는지 비동기적으로 확인합니다.
         /// </summary>
         /// <returns>파일이 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환하는 <see cref="bool"/>입니다.</returns>
-        public override UniTask<bool> FileExists() => UniTask.FromResult(rootDirectory.GetFile(fullPath) != null);
+        public override UniTask<bool> FileExists() => UniTask.FromResult(!rootDirectory.isDeleted && rootDirectory.GetFile(fullPath) != null);
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 서브디렉토리 이름을 비동기적으로 가져옵니다.
@@ -103,7 +103,9 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>디렉토리의 모든 서브디렉토리 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => rootDirectory.GetAllDirectories(fullPath).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => rootDirectory.GetAllDirectories(fullPath)
+            .Select(x => x - fullPath)
+            .ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 가져옵니다.
@@ -112,20 +114,34 @@ namespace RuniOS.IO
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
         public override IUniTaskAsyncEnumerable<string> GetFiles() => rootDirectory.GetFiles(fullPath).ToUniTaskAsyncEnumerable();
 
+        public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData() => rootDirectory.GetFilesWithMetaData(fullPath).ToUniTaskAsyncEnumerable();
+
         /// <summary>
         /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 이름을 비동기적으로 가져옵니다.
         /// </summary>
         /// <param name="wildcardPatterns">파일 이름과 일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>지정된 패턴과 일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="string"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetFiles(fullPath).Where(wildcardPatterns.IsMatch).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetFiles(fullPath)
+            .Where(wildcardPatterns.IsMatch)
+            .ToUniTaskAsyncEnumerable();
+
+        public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns) => rootDirectory.GetFilesWithMetaData(fullPath)
+            .Where(x => wildcardPatterns.IsMatch(x.name))
+            .ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 가져옵니다.
         /// </summary>
         /// <returns>디렉토리의 모든 파일 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => rootDirectory.GetAllFiles(fullPath).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => rootDirectory.GetAllFiles(fullPath)
+            .Select(x => x - fullPath)
+            .ToUniTaskAsyncEnumerable();
+
+        public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData() => rootDirectory.GetAllFilesWithMetaData(fullPath)
+            .Select(x => (x.path - fullPath, x.metaData))
+            .ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 지정된 와일드카드 패턴과 일치하는, 이 핸들러가 나타내는 디렉토리의 모든 파일 경로(재귀적으로)를 비동기적으로 가져옵니다.
@@ -133,7 +149,16 @@ namespace RuniOS.IO
         /// <param name="wildcardPatterns">파일 경로와 일치시킬 와일드카드 패턴입니다.</param>
         /// <returns>지정된 패턴과 일치하는 파일 경로 목록을 포함하는 <see cref="IEnumerable{T}"/> of <see cref="FilePath"/>입니다.</returns>
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 디렉토리를 찾을 수 없는 경우 발생합니다.</exception>
-        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => rootDirectory.GetAllFiles(fullPath).Where(wildcardPatterns.IsMatch).ToUniTaskAsyncEnumerable();
+        public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => rootDirectory
+            .GetAllFiles(fullPath)
+            .Where(wildcardPatterns.IsMatch)
+            .Select(x => x - fullPath)
+            .ToUniTaskAsyncEnumerable();
+
+        public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns) => rootDirectory.GetAllFilesWithMetaData(fullPath)
+            .Where(x => wildcardPatterns.IsMatch(x.path))
+            .Select(x => (x.path - fullPath, x.metaData))
+            .ToUniTaskAsyncEnumerable();
 
         /// <summary>
         /// 이 핸들러가 나타내는 가상 파일의 모든 바이트를 비동기적으로 읽습니다.
@@ -163,11 +188,13 @@ namespace RuniOS.IO
         /// <exception cref="FileNotFoundException">지정된 경로의 파일을 찾을 수 없는 경우 발생합니다.</exception>
         public override UniTask<Stream> OpenRead() => rootDirectory.GetFile(fullPath)?.OpenRead() ?? throw new FileNotFoundException();
 
+        public override UniTask<FileMetaData> GetFileMetaData() => throw new NotImplementedException();
+
         public override bool IsSameTarget(IOHandler? other)
         {
             if (other is not MemoryIOHandler memoryIOHandler)
                 return false;
-            
+
             return rootDirectory == memoryIOHandler.rootDirectory && fullPath == memoryIOHandler.fullPath;
         }
     }

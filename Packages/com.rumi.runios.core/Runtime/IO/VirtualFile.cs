@@ -10,7 +10,7 @@ namespace RuniOS.IO
     /// 가상 파일 시스템 내의 파일을 나타내는 클래스입니다.
     /// 파일의 내용을 메모리에 직접 저장하거나, <see cref="IOHandler"/>를 통해 실제 I/O 작업을 처리할 수 있습니다.
     /// </summary>
-    public class VirtualFile : IVirtualNode
+    public sealed class VirtualFile : IVirtualNode
     {
         /// <summary>
         /// 이 파일이 속한 가상 파일 시스템의 최상위 루트 디렉토리를 가져옵니다.
@@ -22,7 +22,7 @@ namespace RuniOS.IO
                 ThrowIfDeletedException();
                 return _root;
             }
-            protected internal set
+            internal set
             {
                 ThrowIfDeletedException();
                 _root = value;
@@ -41,7 +41,7 @@ namespace RuniOS.IO
                 ThrowIfDeletedException();
                 return _parent;
             }
-            protected internal set
+            internal set
             {
                 ThrowIfDeletedException();
                 _parent = value;
@@ -60,7 +60,7 @@ namespace RuniOS.IO
                 ThrowIfDeletedException();
                 return _name;
             }
-            protected internal set
+            internal set
             {
                 ThrowIfDeletedException();
                 _name = value;
@@ -79,13 +79,32 @@ namespace RuniOS.IO
                 ThrowIfDeletedException();
                 return _fullPath;
             }
-            protected internal set
+            internal set
             {
                 ThrowIfDeletedException();
                 _fullPath = value;
             }
         }
         FilePath? _fullPath;
+
+        /// <summary>
+        /// 이 파일의 메타 데이터입니다.
+        /// 부모 디렉토리가 없을 경우 <see langword="null"/>입니다.
+        /// </summary>
+        public FileMetaData? metaData
+        {
+            get
+            {
+                ThrowIfDeletedException();
+                return _metaData;
+            }
+            internal set
+            {
+                ThrowIfDeletedException();
+                _metaData = value;
+            }
+        }
+        FileMetaData? _metaData;
 
         /// <summary>
         /// 이 가상 파일이 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
@@ -201,7 +220,7 @@ namespace RuniOS.IO
         public void Delete()
         {
             ThrowIfDeletedException();
-            
+
             if (parent != null && name != null)
             {
                 parent.InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화

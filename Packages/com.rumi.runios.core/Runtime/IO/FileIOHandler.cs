@@ -98,7 +98,7 @@ namespace RuniOS.IO
             var stream = Directory.EnumerateDirectories(targetPath)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var item in stream)
             {
                 if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
@@ -118,7 +118,7 @@ namespace RuniOS.IO
             var stream = Directory.EnumerateDirectories(targetPath, "*", SearchOption.AllDirectories)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var item in stream)
                 await writer.YieldAsync(item - targetPath);
         });
@@ -135,12 +135,22 @@ namespace RuniOS.IO
             var stream = Directory.EnumerateFiles(targetPath)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var item in stream)
             {
                 if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
                     await writer.YieldAsync(result.ToString());
             }
+        });
+
+        public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData() => UniTaskAsyncEnumerable.Create<FileMetaData>(async (writer, cancellationToken) =>
+        {
+            var stream = new DirectoryInfo(targetPath).EnumerateFiles()
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+
+            await foreach (var item in stream)
+                await writer.YieldAsync(new FileMetaData(item.Name, item.Length, item.LastWriteTimeUtc));
         });
 
         /// <summary>
@@ -153,16 +163,27 @@ namespace RuniOS.IO
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
         public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
-            var stream = DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns)
+            var stream = Directory.EnumerateFiles(targetPath)
+                .Where(wildcardPatterns.IsMatch)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var item in stream)
             {
-                FilePath path = item - targetPath;
-                if (path != targetPath)
-                    await writer.YieldAsync(path.ToString());
+                if (item.ToPath().TryTrimStartPath(targetPath, out FilePath result))
+                    await writer.YieldAsync(result.ToString());
             }
+        });
+
+        public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<FileMetaData>(async (writer, cancellationToken) =>
+        {
+            var stream = new DirectoryInfo(targetPath).EnumerateFiles()
+                .Where(x => wildcardPatterns.IsMatch(x.FullName))
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+
+            await foreach (var item in stream)
+                await writer.YieldAsync(new FileMetaData(item.Name, item.Length, item.LastWriteTimeUtc));
         });
 
         /// <summary>
@@ -177,9 +198,19 @@ namespace RuniOS.IO
             var stream = Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var file in stream)
                 await writer.YieldAsync(file - targetPath);
+        });
+
+        public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData() => UniTaskAsyncEnumerable.Create<(FilePath relativePath, FileMetaData metaData)>(async (writer, cancellationToken) =>
+        {
+            var stream = new DirectoryInfo(targetPath).EnumerateFiles("*", SearchOption.AllDirectories)
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+
+            await foreach (var file in stream)
+                await writer.YieldAsync((file.FullName - targetPath, new FileMetaData(file.Name, file.Length, file.LastWriteTimeUtc)));
         });
 
         /// <summary>
@@ -192,12 +223,24 @@ namespace RuniOS.IO
         /// <exception cref="IOException">I/O 오류가 발생한 경우 발생합니다.</exception>
         public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<FilePath>(async (writer, cancellationToken) =>
         {
-            var stream = DirectoryUtility.EnumerateFiles(targetPath, wildcardPatterns, SearchOption.AllDirectories)
+            var stream = Directory.EnumerateFiles(targetPath, "*", SearchOption.AllDirectories)
+                .Where(wildcardPatterns.IsMatch)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var file in stream)
                 await writer.YieldAsync(file - targetPath);
+        });
+
+        public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Create<(FilePath relativePath, FileMetaData metaData)>(async (writer, cancellationToken) =>
+        {
+            var stream = new DirectoryInfo(targetPath).EnumerateFiles("*", SearchOption.AllDirectories)
+                .Where(x => wildcardPatterns.IsMatch(x.FullName))
+                .EnumerateOnThreadPool()
+                .WithCancellation(cancellationToken);
+
+            await foreach (var file in stream)
+                await writer.YieldAsync((file.FullName - targetPath, new FileMetaData(file.Name, file.Length, file.LastWriteTimeUtc)));
         });
 
         /// <summary>
@@ -242,7 +285,7 @@ namespace RuniOS.IO
             var stream = File.ReadLines(targetPath)
                 .EnumerateOnThreadPool()
                 .WithCancellation(cancellationToken);
-            
+
             await foreach (var line in stream)
                 await writer.YieldAsync(line);
         });
@@ -259,6 +302,12 @@ namespace RuniOS.IO
         /// <exception cref="PathTooLongException">경로가 시스템 정의 최대 길이를 초과하는 경우 발생합니다.</exception>
         /// <exception cref="NotSupportedException">경로에 콜론(:)이 포함된 경우 발생합니다.</exception>
         public override UniTask<Stream> OpenRead() => UniTask.FromResult<Stream>(new FileStream(targetPath, FileMode.Open, FileAccess.Read, FileShare.Read, 4096, true));
+
+        public override UniTask<FileMetaData> GetFileMetaData()
+        {
+            FileInfo info = new FileInfo(targetPath);
+            return UniTask.FromResult(new FileMetaData(name, info.Length, info.LastWriteTimeUtc));
+        }
 
         public override bool IsSameTarget(IOHandler? other)
         {

@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.IO;
 using System.IO;
 
 namespace RuniOS.Utility
@@ -32,12 +31,5 @@ namespace RuniOS.Utility
                 Copy(folder, dest);
             }
         }
-
-        public static string[] GetFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly).ToArray();
-        public static string[] GetFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => EnumerateFiles(path, extensionFilter, searchOption).ToArray();
-
-        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter) => EnumerateFiles(path, extensionFilter, SearchOption.TopDirectoryOnly);
-        public static IEnumerable<string> EnumerateFiles(string path, WildcardPatterns extensionFilter, SearchOption searchOption) => Directory.EnumerateFiles(path, "*", searchOption)
-            .Where(extensionFilter.IsMatch);
     }
 }

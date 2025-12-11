@@ -231,7 +231,7 @@ namespace RuniOS.IO
                 // 이는 디렉토리를 기대했지만 대상 경로에 파일이 있을 때 발생하는 예외입니다.
                 ThrowPathIsFileException(path, directoryName);
             }
-            
+
             existingNode.Delete();
             return true;
         }
@@ -335,6 +335,8 @@ namespace RuniOS.IO
 
             virtualFile.name = fileName;
             virtualFile.fullPath = fullPath + path;
+
+            virtualFile.metaData = new FileMetaData(fileName, 0, DateTime.UtcNow);
         }
 
         /// <summary>
@@ -433,7 +435,8 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
-        public IEnumerable<FilePath> GetAllDirectories(FilePath path) => InternalGetAllDirectories(path, false).Select(static x => x.Key);
+        public IEnumerable<FilePath> GetAllDirectories(FilePath path) => InternalGetAllDirectories(path, false)
+            .Select(static x => x.Key);
 
         /// <summary>
         /// 재귀적으로 모든 하위 디렉토리를 탐색하여 경로와 <see cref="VirtualDirectory"/> 쌍을 반환합니다.<br/>
@@ -504,6 +507,28 @@ namespace RuniOS.IO
         }
 
         /// <summary>
+        /// 지정된 경로에 있는 모든 직접적인 하위 파일의 메타데이터를 가져옵니다.
+        /// </summary>
+        /// <param name="path">파일을 검색할 디렉토리의 경로입니다.</param>
+        /// <returns>해당 디렉토리의 모든 직접적인 하위 파일의 메타데이터 컬렉션입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">
+        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
+        /// </exception>
+        public IEnumerable<FileMetaData> GetFilesWithMetaData(FilePath path)
+        {
+            ThrowIfDeletedException();
+
+            VirtualDirectory? directory = GetDirectory(path);
+            if (directory == null)
+                ThrowDirectoryNotFoundException(path);
+
+            return directory.children.Select(x => x.Value).OfType<VirtualFile>().Select(static x => x.metaData!.Value);
+        }
+
+        /// <summary>
         /// 지정된 경로를 시작으로 모든 하위 디렉토리의 파일을 포함하여 모든 파일의 전체 경로를 가져옵니다.
         /// </summary>
         /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
@@ -525,6 +550,29 @@ namespace RuniOS.IO
                     .Select(fileItem => directoryItem.Key + fileItem.Key));
         }
 
+        /// <summary>
+        /// 지정된 경로를 시작으로 모든 하위 디렉토리의 파일을 포함하여 모든 파일의 전체 경로와 메타 데이터를 가져옵니다.
+        /// </summary>
+        /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
+        /// <returns>시작 경로의 모든 하위 디렉토리에 있는 모든 파일의 전체 경로와 메타 데이터 컬렉션입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">
+        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
+        /// </exception>
+        public IEnumerable<(FilePath path, FileMetaData metaData)> GetAllFilesWithMetaData(FilePath path)
+        {
+            ThrowIfDeletedException();
+
+            var directories = InternalGetAllDirectories(path, true);
+            return directories.SelectMany(static directoryItem =>
+                directoryItem.Value.children
+                    .Select(static x => x.Value)
+                    .OfType<VirtualFile>()
+                    .Select(fileItem => ((directoryItem.Key + fileItem.name), fileItem.metaData!.Value)));
+        }
+
 
 
         /// <summary>
@@ -541,13 +589,13 @@ namespace RuniOS.IO
         public void Delete()
         {
             ThrowIfDeletedException();
-            
+
             InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
             parent?.children.Remove(name);
-            
+
             foreach (var item in children.ToList())
                 item.Value.Delete();
-            
+
             isDeleted = true; // 현재 디렉토리의 상태 업데이트
         }
 
