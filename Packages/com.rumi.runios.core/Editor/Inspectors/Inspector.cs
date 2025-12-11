@@ -147,6 +147,9 @@ namespace RuniOS.Editor.Inspectors
                 return;
             }
 
+            if (EditorGUIUtility.hierarchyMode && rootInspector == this)
+                position.xMin += 15;
+
             clipping ??= position;
 
             if (drawers.Length > 1)
