@@ -76,6 +76,14 @@ namespace RuniOS.Linq
         /// <param name="source">필터링할 시퀀스입니다.</param>
         /// <returns>null이 아닌 요소만 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
         public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) => source.Where(static x => !x.IsNull())!;
+        
+        /// <summary>
+        /// null이 아닌 요소만 포함하는 시퀀스를 반환합니다.
+        /// <see cref="Object.Equals(object)"/> 메소드를 사용하여 <see cref="SerializableNullable{T}"/> 및 <see cref="UnityEngine.Object"/> 등을 지원합니다.
+        /// </summary>
+        /// <param name="source">필터링할 시퀀스입니다.</param>
+        /// <returns>null이 아닌 요소만 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
+        public static IEnumerable<T> WhereNotNull<T>(this IEnumerable<T?> source) where T : struct => source.Where(static x => !x.IsNull()).Select(x => x!.Value);
 
         public static IEnumerable<KeyValuePair<TKey, TElement>> AsDictionary<TSource, TKey, TElement>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TElement> elementSelector) => source.Select(item => new KeyValuePair<TKey, TElement>(keySelector(item), elementSelector(item)));
 
