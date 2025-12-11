@@ -1,7 +1,7 @@
 #nullable enable
 namespace RuniOS.Resource
 {
-    public readonly struct PackMetaData
+    public struct PackMetaData
     {
         public PackMetaData(string name)
         {
@@ -30,10 +30,10 @@ namespace RuniOS.Resource
             this.targetRuniOSVersion = targetRuniOSVersion;
         }
 
-        public string name { get; }
-        public Version version { get; }
+        public string name { get; set; }
+        public Version version { get; set; }
 
-        public VersionRange targetVersion { get; }
-        public VersionRange targetRuniOSVersion { get; }
+        public VersionRange targetVersion { get; set; }
+        public VersionRange targetRuniOSVersion { get; set; }
     }
 }
