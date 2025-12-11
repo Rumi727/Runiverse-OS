@@ -1,5 +1,5 @@
 ﻿#nullable enable
-using RuniOS.Editor.IMGUI.Inspectors;
+using RuniOS.Editor.Unity.Inspectors;
 using RuniOS.UI.Effects;
 
 namespace RuniOS.Editor.Effects.IMGUI.Inspectors

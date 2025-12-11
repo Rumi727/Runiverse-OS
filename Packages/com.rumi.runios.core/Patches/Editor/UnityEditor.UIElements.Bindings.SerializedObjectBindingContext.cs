@@ -1,6 +1,6 @@
 ﻿#nullable enable
 using HarmonyLib;
-using RuniOS.Editor.Serialization;
+using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Reflection;
 using System.Linq.Expressions;
 using System.Reflection;

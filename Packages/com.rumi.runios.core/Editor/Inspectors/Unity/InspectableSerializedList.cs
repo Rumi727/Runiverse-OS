@@ -1,7 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Collections.Generic;
-using RuniOS.Editor.Serialization;
+using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Inspectors;
 using RuniOS.Reflection;
 using System.Collections;
