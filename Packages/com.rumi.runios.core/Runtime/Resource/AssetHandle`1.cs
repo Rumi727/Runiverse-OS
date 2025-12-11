@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using R3;
 using RuniOS.IO;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
@@ -19,9 +18,9 @@ namespace RuniOS.Resource
         public IOHandler ioHandler { get; }
         
         /// <summary>
-        /// 에셋 파일의 MD5 해시 값을 가져오거나 설정합니다.
+        /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
-        public ImmutableArray<byte> md5Hash { get; private set; }
+        public FileMetaData metaData { get; private set; }
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -49,12 +48,12 @@ namespace RuniOS.Resource
         /// <see cref="AssetHandle{T}"/> 클래스의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
-        /// <param name="md5Hash">에셋 파일의 초기 MD5 해시 값입니다.</param>
+        /// <param name="metaData">에셋 파일의 초기 메타 데이터입니다.</param>
         /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-        protected AssetHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash, int unloadDelayFrame = 600)
+        protected AssetHandle(IOHandler ioHandler, FileMetaData metaData, int unloadDelayFrame = 600)
         {
             this.ioHandler = ioHandler;
-            this.md5Hash = md5Hash;
+            this.metaData = metaData;
 
             this.unloadDelayFrame = unloadDelayFrame;
         }
@@ -77,7 +76,7 @@ namespace RuniOS.Resource
 
                 try
                 {
-                    md5Hash = await ioHandler.GetMD5Hash();
+                    metaData = await ioHandler.GetFileMetaData();
                     assetObject = await Load();
                 }
                 catch (Exception e)
@@ -221,8 +220,8 @@ namespace RuniOS.Resource
         {
             if (other is not AssetHandle<TAsset> otherHandle)
                 return false;
-            
-            return GetType() == other.GetType() && ioHandler.IsSameTarget(otherHandle.ioHandler) && md5Hash.SequenceEqual(otherHandle.md5Hash);
+
+            return GetType() == other.GetType() && ioHandler.IsSameTarget(otherHandle.ioHandler) && metaData == otherHandle.metaData;
         }
     }
 }

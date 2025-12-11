@@ -5,7 +5,6 @@ using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Localizations;
-using System.Collections.Immutable;
 using System.Collections.ObjectModel;
 using UnityEngine.Scripting;
 
@@ -31,11 +30,11 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        protected override async UniTask<LanguageAssetHandle> CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash)
+        protected override async UniTask<LanguageAssetHandle> CreateHandle(IOHandler ioHandler, FileMetaData metaData)
         {
             string json = await ioHandler.ReadAllText();
             IReadOnlyDictionary<string, string>? assetObject = JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();
-            return new LanguageAssetHandle(new LocalizationData(assetObject ?? new ReadOnlyDictionary<string, string>(new Dictionary<string, string>())), ioHandler, md5Hash);
+            return new LanguageAssetHandle(new LocalizationData(assetObject ?? new ReadOnlyDictionary<string, string>(new Dictionary<string, string>())), ioHandler, metaData);
         }
 
         protected override UniTask OnBeginAssetLoop()

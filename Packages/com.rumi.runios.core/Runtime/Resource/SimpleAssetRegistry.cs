@@ -2,7 +2,6 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
@@ -52,9 +51,9 @@ namespace RuniOS.Resource
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
         /// <param name="ioHandler">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
-        /// <param name="md5Hash">에셋 파일의 MD5 해시 값입니다.</param>
+        /// <param name="metaData">에셋 파일의 메타 데이터 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IOHandler ioHandler, ImmutableArray<byte> md5Hash);
+        protected abstract UniTask<THandle> CreateHandle(IOHandler ioHandler, FileMetaData metaData);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -91,8 +90,9 @@ namespace RuniOS.Resource
                 {
                     await foreach ((string nameSpace, IOHandler registryHandler) in GetRegistryFolder(resourcePack))
                     {
-                        await foreach (var ioHandler in registryHandler.GetAllFileHandlers(assetFilter))
+                        await foreach ((FilePath relativePath, FileMetaData metaData) in registryHandler.GetAllFilesWithMetaData(assetFilter))
                         {
+                            IOHandler ioHandler = registryHandler.CreateChild(relativePath);
                             uniTasks.Add(UniTask.Defer(Method));
 
                             async UniTask Method()
@@ -100,7 +100,7 @@ namespace RuniOS.Resource
                                 try
                                 {
                                     FilePath path = ioHandler.fullPath.TrimStartPath(registryHandler.fullPath).GetPathWithoutExtension();
-                                    await OnAssetLoop(new Identifier(nameSpace, path), ioHandler, await CreateHandle(ioHandler, await ioHandler.GetMD5Hash()));
+                                    await OnAssetLoop(new Identifier(nameSpace, path), ioHandler, await CreateHandle(ioHandler, metaData));
                                 }
                                 catch (Exception e)
                                 {
