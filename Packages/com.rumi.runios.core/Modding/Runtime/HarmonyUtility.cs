@@ -63,7 +63,7 @@ namespace RuniOS.Modding
                 Debug.Log($"[{harmony.Id}] Unpatching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            harmony.UnpatchSelf();
+            harmony.UnpatchAll(harmony.Id);
             stopwatch.Stop();
             
             if (logEnable)
@@ -83,7 +83,7 @@ namespace RuniOS.Modding
                 Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
-            harmony.UnpatchSelf();
+            harmony.UnpatchAll(harmony.Id);
             stopwatch.Stop();
             
             if (logEnable)

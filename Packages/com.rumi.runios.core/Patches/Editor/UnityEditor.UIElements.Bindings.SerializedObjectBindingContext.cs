@@ -70,7 +70,7 @@ namespace RuniOS.Editor.Patches
                                 // 원래 IL: IL_0977: brfalse.s IL_09a8
                                 // `IL_09a8`이 `prop.type == "ToggleButtonGroupState"`가 false일 때 점프하는 지점입니다.
                                 // 이 지점이 `case` 블록의 나머지 로직을 건너뛰는 `break` 지점으로 가장 적합합니다.
-                                matcher.MatchStartForward(Code.Br);
+                                matcher.MatchStartForward(Code.Br_S);
                                 
                                 if (matcher.IsInvalid)
                                 {
