@@ -509,6 +509,6 @@ namespace RuniOS
         /// 예: "1.2.3", "1.*.*", "*.*.3"
         /// </summary>
         /// <returns>이 인스턴스의 문자열 표현입니다.</returns>
-        public override readonly string ToString() => $"{major ?? noneSeparator}{separator}{minor ?? noneSeparator}{separator}{patch ?? noneSeparator}";
+        public override readonly string ToString() => $"{major?.ToString() ?? noneSeparator.ToString()}{separator}{minor?.ToString() ?? noneSeparator.ToString()}{separator}{patch?.ToString() ?? noneSeparator.ToString()}";
     }
 }
