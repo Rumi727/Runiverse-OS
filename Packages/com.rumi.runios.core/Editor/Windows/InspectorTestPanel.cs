@@ -37,7 +37,7 @@ namespace RuniOS.Editor.Windows
             if (EditorGUI.EndChangeCheck())
                 inspector.Rebuild(inspector.inspectable ?? new InspectableObject(test), flags);
             
-            inspector.DrawLayout();
+            inspector.DrawLayout(new Vector2(15, 0));
             EndHierarchyMode();
             EndWideMode();
         }
