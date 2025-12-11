@@ -3,6 +3,8 @@ using Cysharp.Threading.Tasks;
 using RuniOS.Linq;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine.Scripting;
@@ -193,5 +195,18 @@ namespace RuniOS.Reflection
         }
         
         public static bool IsFlags(this Enum value) => value.GetType().IsDefined(typeof(FlagsAttribute));
+
+        [return: NotNullIfNotNull("value")]
+        public static object? Cast(this Type Type, object? value)
+        {
+            if (value == null)
+                return null;
+
+            ParameterExpression param = Expression.Parameter(typeof(object), nameof(value));
+            BlockExpression block = Expression.Block(Expression.Convert(Expression.Convert(param, value.GetType()), Type));
+            Delegate run = Expression.Lambda(block, param).Compile();
+            
+            return run.DynamicInvoke(value);
+        }
     }
 }
