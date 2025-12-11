@@ -280,10 +280,9 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는 경우,
+        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는 경우,
         /// 해당 접두사 부분을 제거한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 예를 들어, 현재 경로가 "project/data/file.txt"이고 <paramref name="relativeTo"/>가 "project/data"인 경우,
-        /// "file.txt"를 반환합니다.
+        /// 단순 문자열 일치가 아닌, 경로 구분자를 기준으로 한 상위 디렉터리 일치를 확인합니다.
         /// </summary>
         /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
         /// <returns>
@@ -294,10 +293,9 @@ namespace RuniOS.IO
         public readonly FilePath TrimStartPath(FilePath? relativeTo) => string.IsNullOrEmpty(relativeTo?.value) ? this : TrimStartPath(relativeTo.Value);
 
         /// <summary>
-        /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는 경우,
+        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는 경우,
         /// 해당 접두사 부분을 제거한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 예를 들어, 현재 경로가 "project/data/file.txt"이고 <paramref name="relativeTo"/>가 "project/data"인 경우,
-        /// "file.txt"를 반환합니다.
+        /// 단순 문자열 일치가 아닌, 경로 구분자를 기준으로 한 상위 디렉터리 일치를 확인합니다.
         /// </summary>
         /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
         /// <returns>
@@ -314,48 +312,37 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 현재 경로의 시작 부분이 지정된 <paramref name="relativeTo"/> 경로와 일치하는지 시도하고,
+        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는지 확인하고,
         /// 일치하는 경우 해당 접두사를 제거한 새 <see cref="FilePath"/>를 반환합니다.
         /// </summary>
         /// <param name="relativeTo">
         /// 현재 경로의 시작 부분에서 제거할 접두사 경로입니다.
-        /// 이 경로가 비어있는 경우 (null 또는 빈 문자열), 현재 경로 자체가 결과로 반환되며 <see langword="true"/>를 반환합니다.
         /// </param>
         /// <param name="result">
-        /// 메서드가 성공적으로 접두사를 제거하면, 제거된 접두사 부분을 제외한 새 <see cref="FilePath"/>가 여기에 할당됩니다.
-        /// <paramref name="relativeTo"/>가 현재 경로와 완전히 일치하면, 빈 <see cref="empty"/>가 반환됩니다.
-        /// <br/>
-        /// <paramref name="relativeTo"/>가 비어있는 경우, 현재 <see cref="FilePath"/>의 값이 할당됩니다.
-        /// <br/>
-        /// 메서드가 실패하거나 현재 경로가 비어있는 경우, <see cref="empty"/>가 할당됩니다.
+        /// 메서드가 <see langword="true"/>를 반환하면, 접두사가 제거된 새 경로가 여기에 할당됩니다.
+        /// (완전 일치 시 빈 <see cref="empty"/>가 할당됨)<br/>
+        /// 메서드가 <see langword="false"/>를 반환하면, 변경되지 않은 현재 경로가 그대로 할당됩니다.
         /// </param>
         /// <returns>
-        /// <paramref name="relativeTo"/>가 비어있거나 현재 경로가 <paramref name="relativeTo"/>로 시작하면 <see langword="true"/>를 반환하고,
-        /// 현재 경로가 비어있거나 (그리고 <paramref name="relativeTo"/>가 비어있지 않은 경우)
-        /// <paramref name="relativeTo"/>로 시작하지 않으면 <see langword="false"/>를 반환합니다.
+        /// 현재 경로가 <paramref name="relativeTo"/>로 시작하여 잘라내기에 성공했거나, 
+        /// <paramref name="relativeTo"/>가 현재 경로와 완전히 일치하면 <see langword="true"/>를 반환합니다.<br/>
+        /// 일치하지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         public readonly bool TryTrimStartPath(FilePath relativeTo, out FilePath result)
         {
-            if (string.IsNullOrEmpty(relativeTo.value))
-            {
-                result = value;
-                return true;
-            }
-
-            if (string.IsNullOrEmpty(value) || relativeTo == this)
+            if (relativeTo == this)
             {
                 result = empty;
-                return false;
-            }
-
-            FilePath path = value;
-            if (path.StartsWith(relativeTo))
-            {
-                result = path.value.Substring(relativeTo.value.Length + 1);
                 return true;
             }
 
-            result = empty;
+            if (StartsWith(relativeTo))
+            {
+                result = value.Substring(relativeTo.value.Length + 1);
+                return true;
+            }
+
+            result = value;
             return false;
         }
 
@@ -371,11 +358,23 @@ namespace RuniOS.IO
 
         /// <summary>
         /// 현재 경로가 지정된 <paramref name="startPath"/>로 시작하는지 여부를 확인합니다.<br/>
-        /// 예를 들어, "dir/file.txt"가 "dir"로 시작하는지 확인합니다.
+        /// 단순 문자열 비교가 아닌, 경로 구분자(<see cref="directorySeparatorChar"/>)를 기준으로 상위 디렉터리가 일치하는지 확인합니다.<br/>
+        /// 예를 들어, "folder_A/file.txt"는 "folder"로 시작하는 것으로 간주되지 않습니다.
         /// </summary>
         /// <param name="startPath">현재 경로의 시작 부분과 비교할 경로입니다.</param>
-        /// <returns>현재 경로가 <paramref name="startPath"/>로 시작하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
-        public readonly bool StartsWith(FilePath startPath) => value.StartsWith(startPath.value, StringComparison.Ordinal);
+        /// <returns>
+        /// 현재 경로가 <paramref name="startPath"/>와 같거나, 
+        /// <paramref name="startPath"/> 디렉터리 아래에 위치하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.
+        /// </returns>
+        public readonly bool StartsWith(FilePath startPath)
+        {
+            if (value == startPath)
+                return true;
+            if (length < startPath.length)
+                return false;
+            
+            return value[startPath.length] == directorySeparatorChar && value.StartsWith(startPath.value, StringComparison.Ordinal);
+        }
 
 
 
@@ -593,7 +592,6 @@ namespace RuniOS.IO
 
 
         #region operators
-
         /// <summary>
         /// <see cref="FilePath"/>를 <see cref="string"/>으로 암시적으로 변환합니다.<br/>
         /// 이는 <see cref="value"/> 속성을 반환합니다.
@@ -695,83 +693,82 @@ namespace RuniOS.IO
 
         #region - operator
         /// <summary>
-        /// 두 <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// <paramref name="right"/> 경로가 <paramref name="left"/> 경로의 접두사인 경우, <paramref name="left"/>에서 <paramref name="right"/> 부분을 제거한 나머지 경로를 반환합니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
+        /// <paramref name="left"/>가 <paramref name="right"/> 디렉터리 아래에 있는 경우, 해당 상위 경로를 제거한 나머지 경로를 반환합니다.<br/>
+        /// 접두사가 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
         /// </summary>
         /// <param name="left">기준이 되는 경로입니다.</param>
         /// <param name="right">제거할 접두사 경로입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="FilePath"/>입니다.</returns>
         public static FilePath operator -(FilePath left, FilePath right) => left.TrimStartPath(right);
 
         /// <summary>
-        /// <see cref="FilePath"/>와 nullable <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// <paramref name="right"/>가 null이면 <see cref="empty"/>로 처리됩니다.<br/>
+        /// 왼쪽 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
+        /// <paramref name="right"/>가 null이거나 비어있으면 <paramref name="left"/>가 그대로 반환됩니다.<br/>
         /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
         /// </summary>
         /// <param name="left">기준이 되는 경로입니다.</param>
         /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="FilePath"/>입니다.</returns>
         public static FilePath operator -(FilePath left, FilePath? right) => left.TrimStartPath(right ?? empty);
 
         /// <summary>
-        /// nullable <see cref="FilePath"/>와 <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// <paramref name="left"/>가 null이면 <see cref="empty"/>로 처리됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
+        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
+        /// 일치하지 않으면 <paramref name="left"/>가 그대로 반환됩니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable 경로입니다.</param>
         /// <param name="right">제거할 접두사 경로입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
         public static FilePath operator -(FilePath? left, FilePath right) => left?.TrimStartPath(right) ?? empty;
 
         /// <summary>
-        /// 두 nullable <see cref="FilePath"/> 간의 상대 경로를 구합니다.<br/>
-        /// null 값은 <see cref="empty"/>로 처리됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
+        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
+        /// <paramref name="right"/>가 null이면 <paramref name="left"/>가 그대로 반환됩니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable 경로입니다.</param>
         /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
         public static FilePath operator -(FilePath? left, FilePath? right) => left?.TrimStartPath(right ?? empty) ?? empty;
 
         /// <summary>
-        /// <see cref="FilePath"/>와 문자열 접두사 간의 상대 경로를 구합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 경로(<paramref name="left"/>)에서 문자열 접두사(<paramref name="right"/>)를 제거합니다.<br/>
+        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 경로 비교가 수행됩니다.<br/>
+        /// 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
         /// </summary>
         /// <param name="left">기준이 되는 <see cref="FilePath"/>입니다.</param>
         /// <param name="right">제거할 문자열 접두사입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="FilePath"/>입니다.</returns>
         public static FilePath operator -(FilePath left, string? right) => left.TrimStartPath(right);
 
         /// <summary>
-        /// nullable <see cref="FilePath"/>와 문자열 접두사 간의 상대 경로를 구합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 문자열 접두사(<paramref name="right"/>)를 제거합니다.<br/>
+        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
+        /// 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
         /// </summary>
         /// <param name="left">기준이 되는 nullable <see cref="FilePath"/>입니다.</param>
         /// <param name="right">제거할 문자열 접두사입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
         public static FilePath operator -(FilePath? left, string? right) => left?.TrimStartPath(right ?? empty) ?? empty;
 
         /// <summary>
-        /// 문자열 경로와 <see cref="FilePath"/> 접두사 간의 상대 경로를 구합니다.<br/>
-        /// 문자열은 <see cref="FilePath"/>로 암시적으로 변환된 후 상대 경로가 계산됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 문자열 경로(<paramref name="left"/>)에서 <see cref="FilePath"/> 접두사(<paramref name="right"/>)를 제거합니다.<br/>
+        /// 문자열은 <see cref="FilePath"/>로 변환된 후 연산됩니다.<br/>
+        /// 변환된 경로가 접두사와 일치하지 않으면 변환된 경로를 그대로 반환합니다.
         /// </summary>
         /// <param name="left">기준이 되는 문자열 경로입니다.</param>
         /// <param name="right">제거할 <see cref="FilePath"/> 접두사입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="FilePath"/>입니다.</returns>
         public static FilePath operator -(string? left, FilePath right) => left.ToPath().TrimStartPath(right);
 
         /// <summary>
-        /// 문자열 경로와 nullable <see cref="FilePath"/> 접두사 간의 상대 경로를 구합니다.<br/>
-        /// null <see cref="FilePath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(FilePath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// 왼쪽 문자열 경로(<paramref name="left"/>)에서 nullable <see cref="FilePath"/> 접두사(<paramref name="right"/>)를 제거합니다.<br/>
+        /// <paramref name="right"/>가 null이면 왼쪽 경로가 변환되어 그대로 반환됩니다.
         /// </summary>
         /// <param name="left">기준이 되는 문자열 경로입니다.</param>
         /// <param name="right">제거할 nullable <see cref="FilePath"/> 접두사입니다.</param>
-        /// <returns>상대 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="FilePath"/>입니다.</returns>
         public static FilePath operator -(string? left, FilePath? right) => left.ToPath().TrimStartPath(right ?? empty);
         #endregion
 
