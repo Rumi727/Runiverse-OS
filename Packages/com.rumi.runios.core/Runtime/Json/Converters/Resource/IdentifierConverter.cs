@@ -34,21 +34,16 @@ namespace RuniOS.Json.Converters.Resource
         /// <param name="hasExistingValue">기존 값이 존재하는지 여부를 나타내는 <see langword="true"/> 또는 <see langword="false"/>입니다.</param>
         /// <param name="serializer">역직렬화 프로세스를 위한 <see cref="JsonSerializer"/> 객체입니다.</param>
         /// <returns>역직렬화된 <see cref="Identifier"/> 객체입니다.</returns>
-        /// <exception cref="JsonSerializationException">JSON 토큰이 문자열이 아닌데도 <see cref="Identifier"/>로 변환을 시도할 때 발생합니다.</exception>
+        /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="Identifier"/>로 변환을 시도할 때 발생합니다.</exception>
         /// <exception cref="InvalidIdentifierException">
         /// JSON 문자열이 <see cref="Identifier"/>의 유효한 형식이 아닐 경우
         /// <see cref="Identifier.Parse(string)"/> 메서드 내부에서 발생할 수 있습니다.
         /// </exception>
-        public override Identifier ReadJson(JsonReader reader, Type objectType, Identifier existingValue, bool hasExistingValue, JsonSerializer serializer)
+        public override Identifier ReadJson(JsonReader reader, Type objectType, Identifier existingValue, bool hasExistingValue, JsonSerializer serializer) => reader.TokenType switch
         {
-            if (reader.TokenType == JsonToken.Null)
-                return Identifier.empty;
-            
-            // reader.ReadAsString()은 현재 토큰이 문자열이 아닐 경우 JsonSerializationException을 발생시킬 수 있습니다.
-            string value = reader.ReadAsString() ?? string.Empty;
-            
-            // Identifier.Parse(string) 메서드가 InvalidIdentifierException을 발생시킬 수 있습니다.
-            return Identifier.Parse(value);
-        }
+            JsonToken.Null => Identifier.empty,
+            JsonToken.String => Identifier.Parse((string?)reader.Value ?? string.Empty),
+            _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing Identifier.")
+        };
     }
 }

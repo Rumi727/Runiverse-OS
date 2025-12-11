@@ -43,19 +43,24 @@ namespace RuniOS.Json.Converters
         /// <param name="hasExistingValue">기존 값이 존재하는지 여부를 나타내는 <see langword="true"/> 또는 <see langword="false"/>입니다.</param>
         /// <param name="serializer">역직렬화 프로세스를 위한 <see cref="JsonSerializer"/> 객체입니다.</param>
         /// <returns>역직렬화된 <see cref="SerializableType"/> 객체입니다.</returns>
-        /// <exception cref="JsonSerializationException">JSON 토큰이 문자열이 아닌데도 <see cref="SerializableType"/>으로 변환을 시도할 때 발생합니다.</exception>
+        /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="SerializableType"/>으로 변환을 시도할 때 발생합니다.</exception>
         public override SerializableType ReadJson(JsonReader reader, Type objectType, SerializableType existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.Null)
-                return new SerializableType(null);
+            switch (reader.TokenType)
+            {
+                case JsonToken.Null:
+                    return new SerializableType(null);
+                case JsonToken.String:
+                {
+                    string typeName = (string?)reader.Value ?? string.Empty;
+                    if (string.IsNullOrEmpty(typeName))
+                        return new SerializableType(null);
 
-            // reader.ReadAsString()은 현재 토큰이 문자열이 아닐 경우 JsonSerializationException을 발생시킬 수 있습니다.
-            string? typeName = reader.ReadAsString();
-            if (string.IsNullOrEmpty(typeName))
-                return new SerializableType(null);
-
-            // TypeUtility.DeserializeFromString()은 문자열로부터 Type을 역직렬화하며, 실패 시 null을 반환할 수 있습니다.
-            return new SerializableType(TypeUtility.DeserializeFromString(typeName));
+                    return new SerializableType(TypeUtility.DeserializeFromString(typeName));
+                }
+                default:
+                    throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing SerializableType.");
+            }
         }
     }
 }

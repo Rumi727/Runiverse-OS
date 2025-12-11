@@ -35,21 +35,12 @@ namespace RuniOS.Json.Converters
         /// <param name="hasExistingValue">기존 값이 존재하는지 여부를 나타내는 <see langword="true"/> 또는 <see langword="false"/>입니다.</param>
         /// <param name="serializer">역직렬화 프로세스를 위한 <see cref="JsonSerializer"/> 객체입니다.</param>
         /// <returns>역직렬화된 <see cref="HexColor"/> 객체입니다.</returns>
-        /// <exception cref="JsonSerializationException">JSON 토큰이 문자열이 아닌데도 <see cref="HexColor"/>로 변환을 시도할 때 발생합니다.</exception>
-        public override HexColor ReadJson(JsonReader reader, Type objectType, HexColor existingValue, bool hasExistingValue, JsonSerializer serializer)
+        /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="HexColor"/>로 변환을 시도할 때 발생합니다.</exception>
+        public override HexColor ReadJson(JsonReader reader, Type objectType, HexColor existingValue, bool hasExistingValue, JsonSerializer serializer) => reader.TokenType switch
         {
-            if (reader.TokenType == JsonToken.Null)
-                return HexColor.clear;
-
-            // reader.ReadAsString()은 현재 토큰이 문자열이 아닐 경우 JsonSerializationException을 발생시킬 수 있습니다.
-            string? value = reader.ReadAsString();
-            
-            // 읽어온 문자열이 null인 경우 clear 반환
-            if (value == null)
-                return HexColor.clear;
-            
-            // HexColor 생성자는 파싱에 실패할 경우 내부적으로 clearHex 값으로 설정됩니다.
-            return new HexColor(value);
-        }
+            JsonToken.Null => HexColor.clear,
+            JsonToken.String => new HexColor((string?)reader.Value ?? string.Empty),
+            _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing HexColor.")
+        };
     }
 }
