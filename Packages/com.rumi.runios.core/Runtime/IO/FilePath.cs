@@ -264,7 +264,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 현재 경로의 상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
         /// 예를 들어, "dir/file.txt"의 경우 "dir"을 반환합니다.<br/>
-        /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 빈 <see cref="empty"/>를 반환합니다.
+        /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 <see cref="empty"/>를 반환합니다.
         /// </summary>
         /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스 또는 <see cref="empty"/>.</returns>
         public readonly FilePath GetParentPath()
