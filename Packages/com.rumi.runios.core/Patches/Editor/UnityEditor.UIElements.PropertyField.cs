@@ -45,7 +45,7 @@ namespace RuniOS.Editor.Patches
                             );
                             
                             matcher.MatchStartForward(methodMatch);
-                            matcher.Advance(1);
+                            matcher.Advance();
                             
                             matcher.Insert
                             (
