@@ -5,7 +5,7 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static float GetMultiColumnsFieldHeight(GUIContent label, int rows = 1)
+        public static float GetMultiColumnsFieldHeight(GUIContent? label, int rows = 1)
         {
             float height = (EditorGUIUtility.singleLineHeight * rows) + ((rows - 1) * EditorGUIBridge.kControlVerticalSpacingLegacy);
             bool hasLabel = LabelHasContent(label);
