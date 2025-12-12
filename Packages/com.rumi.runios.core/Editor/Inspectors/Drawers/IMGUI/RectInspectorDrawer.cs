@@ -11,12 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.RectField(position, label, (Rect)value!);
         
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
-        {
-            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-                return EditorGUIUtility.singleLineHeight;
-            else
-                return (EditorGUIUtility.singleLineHeight * 3) + 4;
-        }
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => GetMultiColumnsFieldHeight(label, 2);
     }
 }

@@ -24,13 +24,14 @@ namespace RuniOS.Editor
         static string packIdentifierFieldSelectedValue = string.Empty;
         static PackIdentifier DoPackIdentifierField(Rect position, PackIdentifier value)
         {
-            if (!value.isValid)
-                return value;
-
             position.width -= 54;
-            if (value.identifier != null)
+            if (value.path != null)
+                value.path = FilePathField(position, value.path.Value, true);
+            else
             {
                 TextDropdown valueDropdown = new TextDropdown();
+                
+                value.identifier ??= Identifier.empty;
                 value.identifier = IdentifierField(position, value.identifier.Value, x =>
                 {
                     valueDropdown.Rebuild
@@ -59,8 +60,6 @@ namespace RuniOS.Editor
                     GUI.changed = true;
                 }
             }
-            else if (value.path != null)
-                value.path = FilePathField(position, value.path.Value);
 
             if (!EditorGUIUtility.wideMode)
                 position.y += EditorGUIUtility.singleLineHeight + 2;

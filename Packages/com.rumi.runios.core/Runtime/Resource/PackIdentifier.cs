@@ -182,9 +182,8 @@ namespace RuniOS.Resource
         public override readonly int GetHashCode()
         {
             // 유효하지 않은 객체는 모두 동일한 고정된 해시 값을 반환하여 Equals 계약을 준수합니다.
-            // int.MinValue는 다른 일반적인 해시 값과 겹칠 가능성이 매우 낮아 충돌 위험을 줄입니다.
             if (!isValid)
-                return int.MinValue;
+                return 0;
 
             // 유효한 객체는 해당 식별자 필드를 기반으로 해시 코드를 반환합니다.
             // isValid 속성 덕분에 internalID와 localPath 둘 중 하나만 null이 아님을 보장합니다.

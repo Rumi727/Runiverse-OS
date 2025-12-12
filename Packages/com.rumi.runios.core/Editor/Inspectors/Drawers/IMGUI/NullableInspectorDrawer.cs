@@ -14,7 +14,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public NullableInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector)
         {
             // 가독성 꼬라지ㅋㅋ
-            
+
             valueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.Value));
             valueElement = new CustomAccessVariableElement.Builder(valueElement)
                 .AddWriteAction((_, value) => element.value = Activator.CreateInstance(element.variableType, value))
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 {
                     if (Equals(hasValueElement.value, value))
                         return;
-                    
+
                     if ((bool)value!)
                         element.value = Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
                     else
@@ -43,7 +43,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     {
                         if (Equals(hasValueElement.value, x))
                             return x;
-                        
+
                         if ((bool)x!)
                             return Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
                         else
@@ -53,12 +53,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
                 .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
                 .Build();
-            
+
             valueDrawer = FindDrawer(valueElement);
         }
-        
+
         public override bool isField => valueDrawer.isField;
-        
+
         public IInspectorVariableElement hasValueElement { get; }
         public IInspectorVariableElement valueElement { get; }
 
@@ -67,14 +67,16 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
-            
+
             Type? underlyingType = variableElement.variableType.GetNullableUnderlyingType();
             if (underlyingType == null)
                 throw new InvalidOperationException("It is not a nullable type.");
-            
+
             label ??= GUIContent.none;
-            
-            if (NullToggleField
+
+            if
+            (
+                NullToggleField
                 (
                     position,
                     out position,
@@ -85,9 +87,9 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     NullabilityState.Nullable,
                     nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"
                 )
-               )
+            )
                 return;
-            
+
             valueDrawer.OnGUI(position, label, flags, isInArray, clipping);
         }
 
@@ -95,7 +97,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {
             CheckVariableElement();
-            
+
             float height = valueDrawer.GetHeight(label, flags, isInArray);
             bool valueIsNull = (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) && !(bool)hasValueElement.value!;
             nullableAnimFloat.target = valueIsNull ? 1 : 0;

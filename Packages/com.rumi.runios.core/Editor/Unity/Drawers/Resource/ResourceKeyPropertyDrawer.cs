@@ -5,7 +5,7 @@ using RuniOS.Resource;
 namespace RuniOS.Editor.Unity.Drawers.Resource
 {
     [CustomPropertyDrawer(typeof(ResourceKey))]
-    public class AssetKeyPropertyDrawer : PropertyDrawer
+    public class ResourceKeyPropertyDrawer : PropertyDrawer
     {
         //public override VisualElement CreatePropertyGUI(SerializedProperty property) => new PackIdentifierField().SetProperty(property);
 

@@ -3,7 +3,9 @@ using RuniOS.Collections.Generic;
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
+using RuniOS.IO;
 using RuniOS.Linq;
+using RuniOS.Localizations;
 using RuniOS.Resource;
 using System.Collections;
 
@@ -42,7 +44,8 @@ namespace RuniOS.Editor.Windows
             EndWideMode();
         }
         
-        public class Test
+#pragma warning disable CS0414 // 필드가 대입되었으나 값이 사용되지 않습니다
+        internal class Test
         {
             /*public unsafe int* pointer = (int*)new IntPtr(15335321);
             public unsafe int* nullPointer = null;*/
@@ -99,6 +102,20 @@ namespace RuniOS.Editor.Windows
             public Color32 color32;
             public Bounds bounds;
             public BoundsInt boundsInt;
+            public CornerRadius cornerRadius;
+            public SerializableType serializableType;
+            public Type? type;
+            public Version version;
+            public VersionRange versionRange;
+            public HexColor hexColor;
+            public RectOffset rectOffset;
+            public RectVertices rectVertices;
+            public Identifier identifier;
+            public PackIdentifier packIdentifier;
+            public ResourceKey resourceKey;
+            public AssetRef<LocalizationData> assetRef;
+            public FilePath filePath;
+            public FileExtension fileExtension;
             public StructTest2? nullableStructTest2;
             public SerializableNullable<StructTest2> serializableNullableStructTest2;
             public Dictionary<string, Test2> dictionary = new() { { "wa sans", new Test2() } };
@@ -172,5 +189,6 @@ namespace RuniOS.Editor.Windows
                 public float test4Field;
             }
         }
+#pragma warning restore CS0414 // 필드가 대입되었으나 값이 사용되지 않습니다
     }
 }

@@ -11,12 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.BoundsField(position, label, (Bounds)value!);
         
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
-        {
-            if (!LabelHasContent(label))
-                return (EditorGUIUtility.singleLineHeight * 2) + 2;
-            else
-                return (EditorGUIUtility.singleLineHeight * 3) + 4;
-        }
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => GetMultiRowsFieldHeight(label, 2);
     }
 }

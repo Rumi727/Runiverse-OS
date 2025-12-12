@@ -3,7 +3,7 @@ namespace RuniOS.Utility.Attributes
 {
     public sealed class FieldNameAttribute : PropertyAttribute
     {
-        public FieldNameAttribute(string name, bool force = false)
+        public FieldNameAttribute(string name, bool force = false) : base(true)
         {
             this.name = name;
             this.force = force;

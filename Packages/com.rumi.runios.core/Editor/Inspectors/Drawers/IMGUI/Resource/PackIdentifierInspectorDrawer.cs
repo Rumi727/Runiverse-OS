@@ -1,0 +1,17 @@
+﻿#nullable enable
+using RuniOS.Inspectors;
+using RuniOS.Inspectors.Drawers;
+using RuniOS.Resource;
+
+namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
+{
+    [CustomInspectorDrawer(typeof(PackIdentifier))]
+    public class PackIdentifierInspectorDrawer : GenericInspectorDrawer
+    {
+        public PackIdentifierInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => PackIdentifierField(position, label, (PackIdentifier)value!);
+
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => GetMultiColumnsFieldHeight(label);
+    }
+}
