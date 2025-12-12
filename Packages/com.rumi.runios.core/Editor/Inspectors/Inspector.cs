@@ -128,7 +128,7 @@ namespace RuniOS.Editor.Inspectors
         public void DrawLayout(Vector2 offset, string? label = null, bool isInArray = false) => DrawLayout(offset, label != null ? new GUIContent(label) : null, isInArray);
         public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
         {
-            Rect rect = EditorGUILayout.GetControlRect(false, GetHeight(label, inspectorFlags, isInArray));
+            Rect rect = EditorGUILayout.GetControlRect(true, GetHeight(label, inspectorFlags, isInArray));
             rect.x += offset.x;
             rect.width -= offset.x;
             
@@ -214,7 +214,13 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    return item.GetHeight(label, flags, isInArray) + 2;
+                    GUIContent elementLabel;
+                    if (inspectable is IInspectableList)
+                        elementLabel = label ?? GUIContent.none;
+                    else
+                        elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
+                    
+                    return item.GetHeight(elementLabel, flags, isInArray) + 2;
                 }
                 catch (ExitGUIException) 
                 {
