@@ -370,7 +370,7 @@ namespace RuniOS.IO
         {
             if (value == startPath)
                 return true;
-            if (length < startPath.length)
+            if (length <= startPath.length)
                 return false;
             
             return value[startPath.length] == directorySeparatorChar && value.StartsWith(startPath.value, StringComparison.Ordinal);
