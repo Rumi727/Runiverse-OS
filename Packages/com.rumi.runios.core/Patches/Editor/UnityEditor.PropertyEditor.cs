@@ -24,9 +24,12 @@ namespace RuniOS.Editor.Patches
                         
                         PropertyEditorBridge propertyEditor = PropertyEditorBridge.__GetInstanceFrom(__instance);
                         InspectorWindowBridge inspectorWindow = InspectorWindowBridge.__GetInstanceFrom(__instance);
-                        
-                        IMGUIContainer imguiContainer = propertyEditor.CreateIMGUIContainer(() => InspectorWindowEvent._onGUI?.SafeInvoke(inspectorWindow), typeof(InspectorWindowEvent).FullName);
-                        propertyEditor.editorsElement.Add(imguiContainer);
+
+                        if (propertyEditor.editorsElement.Q(typeof(InspectorWindowEvent).FullName) == null)
+                        {
+                            IMGUIContainer imguiContainer = propertyEditor.CreateIMGUIContainer(() => InspectorWindowEvent._onGUI?.SafeInvoke(inspectorWindow), typeof(InspectorWindowEvent).FullName);
+                            propertyEditor.editorsElement.Add(imguiContainer);
+                        }
                     }
                 }
             }
