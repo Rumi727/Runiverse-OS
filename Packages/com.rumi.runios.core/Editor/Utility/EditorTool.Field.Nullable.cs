@@ -84,20 +84,31 @@ namespace RuniOS.Editor
                 }
                 else if (value == null)
                 {
+                    EditorGUI.BeginChangeCheck();
+
+                    T primitiveValue;
                     if (typeof(T).IsText())
-                        value = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, label, nullText), typeof(T));
+                        primitiveValue = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, label, nullText), typeof(T));
                     else
                     {
-                        value = PrimitiveField(fieldRect, label, default(T));
+                        primitiveValue = PrimitiveField(fieldRect, label, default(T));
 
                         if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
                             GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
                         else
                             GUI.Box(Rect.zero, GUIContent.none);
                     }
+                    
+                    if (EditorGUI.EndChangeCheck())
+                        value = primitiveValue;
                 }
                 else
-                    value = (T)PrimitiveField(fieldRect, label, value);
+                {
+                    EditorGUI.BeginChangeCheck();
+                    T primitiveValue = PrimitiveField(fieldRect, label, value.Value);
+                    if (EditorGUI.EndChangeCheck())
+                        value = primitiveValue;
+                }
 
                 value = InternalNullableToggleField(value, toggleRect);
             }
