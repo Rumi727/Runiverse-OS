@@ -26,11 +26,7 @@ namespace RuniOS.Editor.Inspectors.Unity
             converter = PropertyConverter.FindConverter(inspectionElementType);
         }
         
-        IInspectorVariableElement? IInspectable.parentElement
-        {
-            get => null;
-            set { }
-        }
+        public IInspectorVariableElement? parentElement { get; set; }
 
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -46,6 +42,8 @@ namespace RuniOS.Editor.Inspectors.Unity
 
         public SerializedProperty property { get; }
         public PropertyConverter? converter { get; }
+
+        public Action? onValueChanged { get; set; }
 
         NullabilityInfo? IInspectableList.elementNullabilityInfo => null;
 
@@ -82,7 +80,11 @@ namespace RuniOS.Editor.Inspectors.Unity
         }
         int ICollection.Count => count;
         
-        
+        public void OnValueChangedInvoke()
+        {
+            onValueChanged?.SafeInvoke();
+            parentElement?.inspectableObjectElement.OnValueChangedInvoke();
+        }
 
         public int Add(object? value)
         {
@@ -137,6 +139,8 @@ namespace RuniOS.Editor.Inspectors.Unity
                 for (int i = 0; i < cachedElements.Count; i++)
                     cachedElements[i].index = i;
             }
+            
+            OnValueChangedInvoke();
         }
 
         public void OnRemoveAt(int index)
@@ -148,6 +152,8 @@ namespace RuniOS.Editor.Inspectors.Unity
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
         public void OnElementMoved(int oldIndex, int newIndex)
@@ -162,6 +168,8 @@ namespace RuniOS.Editor.Inspectors.Unity
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
         public void OnElementChanged(int oldIndex, int newIndex)
@@ -170,9 +178,15 @@ namespace RuniOS.Editor.Inspectors.Unity
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
-        public void OnClear() => cachedElements.Clear();
+        public void OnClear()
+        {
+            cachedElements.Clear();
+            OnValueChangedInvoke();
+        }
 
         public bool Contains(object? value) => throw new NotImplementedException();
         

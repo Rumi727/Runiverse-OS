@@ -63,6 +63,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     inspectable[index] = value;
+                    inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
                 {
@@ -121,6 +122,8 @@ namespace RuniOS.Inspectors.Csharp
             {
                 foreach ((ListHandlerBase instance, object? value) in inspectable.listHandlers.Zip(values, (instance, value) => (instance, value)))
                     instance[index] = value;
+                
+                inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
             {

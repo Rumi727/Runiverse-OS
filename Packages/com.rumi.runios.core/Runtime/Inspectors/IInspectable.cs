@@ -17,6 +17,8 @@ namespace RuniOS.Inspectors
         bool instanceIsMultiple { get; }
         
         int instanceCount { get; }
+
+        Action? onValueChanged { get; set; }
         
         IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
@@ -26,6 +28,8 @@ namespace RuniOS.Inspectors
         /// <param name="type">가져온 인스턴스의 타입입니다.</param>
         /// <returns>타입을 성공적으로 가져올 시 true를 반환합니다.</returns>
         bool TryGetInspectionType([NotNullWhen(true)] out Type? type);
+        
+        void OnValueChangedInvoke();
 
         new IInspectable Clone();
         object ICloneable.Clone() => Clone();

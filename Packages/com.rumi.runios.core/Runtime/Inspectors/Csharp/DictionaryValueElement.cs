@@ -63,6 +63,7 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     inspectable[targetKey] = value;
+                    inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
                 {
@@ -127,6 +128,8 @@ namespace RuniOS.Inspectors.Csharp
                     
                     instance[targetKey] = valueEnumerator.Current;
                 }
+                
+                inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
             {

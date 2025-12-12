@@ -112,6 +112,8 @@ namespace RuniOS.Inspectors.Csharp
                         foreach (var item in inspectable.instances)
                             field.SetValue(item, value);
                     }
+                    
+                    inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
                 {
@@ -203,6 +205,8 @@ namespace RuniOS.Inspectors.Csharp
                     foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
                         field.SetValue(instance, value);
                 }
+                
+                inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
             {

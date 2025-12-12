@@ -9,11 +9,7 @@ namespace RuniOS.Editor.Inspectors.Unity
 {
     public class InspectableSerializedObject : IInspectableObject
     {
-        IInspectorVariableElement? IInspectable.parentElement
-        {
-            get => null;
-            set { }
-        }
+        public IInspectorVariableElement? parentElement { get; set; }
         
         public SerializedObject serializedObject { get; }
         public SerializedProperty targetProperty { get; }
@@ -26,6 +22,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
         
         public int instanceCount => serializedObject.targetObjects.Length;
+
+        public Action? onValueChanged { get; set; }
 
         public InspectableSerializedObject(SerializedObject serializedObject, SerializedProperty? targetProperty = null)
         {
@@ -40,6 +38,12 @@ namespace RuniOS.Editor.Inspectors.Unity
         {
             type = inspectionType;
             return true;
+        }
+        
+        public void OnValueChangedInvoke()
+        {
+            onValueChanged?.SafeInvoke();
+            parentElement?.inspectableObjectElement.OnValueChangedInvoke();
         }
 
         public IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
@@ -59,7 +63,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                     break;
                 
                 if (property.isArray)
-                    elements.Add(new SerializedPropertyElement(property.Copy()));
+                    elements.Add(new SerializedPropertyElement(this, property.Copy()));
             }
             while (property.Next(false));
 

@@ -126,6 +126,8 @@ namespace RuniOS.Inspectors.Csharp
         
         public int instanceCount => instances.Count();
 
+        public Action? onValueChanged { get; set; }
+
         public object? this[int index]
         {
             get
@@ -157,6 +159,12 @@ namespace RuniOS.Inspectors.Csharp
         }
         int ICollection.Count => count;
         
+        public void OnValueChangedInvoke()
+        {
+            onValueChanged?.SafeInvoke();
+            parentElement?.inspectable.OnValueChangedInvoke();
+        }
+
         public void SynchronizeCollections()
         {
             foreach (var item in listHandlers)
@@ -325,6 +333,8 @@ namespace RuniOS.Inspectors.Csharp
                 for (int i = 0; i < cachedElements.Count; i++)
                     cachedElements[i].index = i;
             }
+            
+            OnValueChangedInvoke();
         }
 
         public virtual void OnRemoveAt(int index)
@@ -336,6 +346,8 @@ namespace RuniOS.Inspectors.Csharp
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
         public virtual void OnElementMoved(int oldIndex, int newIndex)
@@ -350,6 +362,8 @@ namespace RuniOS.Inspectors.Csharp
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
         public virtual void OnElementChanged(int oldIndex, int newIndex)
@@ -358,9 +372,15 @@ namespace RuniOS.Inspectors.Csharp
             
             for (int i = 0; i < cachedElements.Count; i++)
                 cachedElements[i].index = i;
+            
+            OnValueChangedInvoke();
         }
 
-        public virtual void OnClear() => cachedElements.Clear();
+        public virtual void OnClear()
+        {
+            cachedElements.Clear();
+            OnValueChangedInvoke();
+        }
 
         public bool Contains(object? value)
         {

@@ -128,6 +128,8 @@ namespace RuniOS.Inspectors.Csharp
 
         public int instanceCount => instances.Count();
 
+        public Action? onValueChanged { get; set; }
+
         public object? this[object key]
         {
             get
@@ -172,6 +174,12 @@ namespace RuniOS.Inspectors.Csharp
         }
         int ICollection.Count => count;
         
+        public void OnValueChangedInvoke()
+        {
+            onValueChanged?.SafeInvoke();
+            parentElement?.inspectable.OnValueChangedInvoke();
+        }
+
         public void SynchronizeCollections()
         {
             foreach (var item in dictionaryHandlers)

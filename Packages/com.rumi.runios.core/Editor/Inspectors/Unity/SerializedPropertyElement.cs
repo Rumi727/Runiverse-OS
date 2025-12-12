@@ -16,22 +16,27 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <see cref="SerializedPropertyElement"/> 클래스의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="property">이 요소가 나타내는 직렬화된 프로퍼티입니다.</param>
-        public SerializedPropertyElement(SerializedProperty property)
+        public SerializedPropertyElement(SerializedProperty property) : this(new InspectableSerializedObject(property.serializedObject), property) { }
+        
+        /// <summary>
+        /// <see cref="SerializedPropertyElement"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// </summary>
+        public SerializedPropertyElement(InspectableSerializedObject inspectable, SerializedProperty property)
         {
             displayName = property.GetFieldLabel();
             
             ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(property, out Type elementType);
 
-            inspectable = new InspectableSerializedObject(property.serializedObject);
+            this.inspectable = inspectable;
             
             this.property = property;
             converter = PropertyConverter.FindConverter(elementType);
 
             variableType = elementType;
 
-            inspectableObjectElement = new InspectableSerializedObject(property.serializedObject, property);
+            inspectableObjectElement = new InspectableSerializedObject(property.serializedObject, property) { parentElement = this };
             if (property.propertyType != SerializedPropertyType.String && property.isArray)
-                inspectableListElement = new InspectableSerializedList(property);
+                inspectableListElement = new InspectableSerializedList(property) { parentElement = this };
         }
 
         /// <summary>
@@ -97,6 +102,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                     throw new InspectorElementException($"Cannot convert value for property '{name}' because the converter is not set.", name);
 
                 converter.Write(property, variableType, value);
+                inspectable.OnValueChangedInvoke();
             }
         }
 

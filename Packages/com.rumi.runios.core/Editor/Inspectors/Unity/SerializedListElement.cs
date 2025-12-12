@@ -25,9 +25,9 @@ namespace RuniOS.Editor.Inspectors.Unity
             this.property = property;
             this.index = index;
 
-            inspectableObjectElement = new InspectableSerializedObject(property.serializedObject, property);
+            inspectableObjectElement = new InspectableSerializedObject(property.serializedObject, property) { parentElement = this };
             if (property.isArray)
-                inspectableListElement = new InspectableSerializedList(property);
+                inspectableListElement = new InspectableSerializedList(property) { parentElement = this };
         }
 
         /// <summary>
@@ -99,6 +99,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                 try
                 {
                     inspectable[index] = value;
+                    inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
                 {

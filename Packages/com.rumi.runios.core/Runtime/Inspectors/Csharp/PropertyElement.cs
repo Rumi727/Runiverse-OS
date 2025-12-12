@@ -72,6 +72,8 @@ namespace RuniOS.Inspectors.Csharp
                         foreach (var item in inspectable.instances)
                             property.SetValue(item, value);
                     }
+                    
+                    inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
                 {
@@ -136,6 +138,8 @@ namespace RuniOS.Inspectors.Csharp
                 // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
                 if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
                     inspectable.parentElement.SetValues(inspectable.instances);
+                
+                inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
             {

@@ -46,6 +46,8 @@ namespace RuniOS.Inspectors.Csharp
         public bool instanceIsMultiple => instances.TwoOrMore();
         
         public int instanceCount => instances.Count();
+        
+        public Action? onValueChanged { get; set; }
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
@@ -63,6 +65,12 @@ namespace RuniOS.Inspectors.Csharp
         {
             type = inspectionType;
             return true;
+        }
+
+        public void OnValueChangedInvoke()
+        {
+            onValueChanged?.SafeInvoke();
+            parentElement?.inspectable.OnValueChangedInvoke();
         }
 
         public IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
