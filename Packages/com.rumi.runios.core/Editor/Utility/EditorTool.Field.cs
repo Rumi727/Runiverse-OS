@@ -23,7 +23,7 @@ namespace RuniOS.Editor
             return EditorGUIBridge.MultiFieldPrefixLabel(position, controlId, label, columns);
         }
 
-        public static float GetMultiRowsFieldHeight(GUIContent label, int rows)
+        public static float GetMultiRowsFieldHeight(GUIContent? label, int rows)
         {
             float height = (EditorGUIUtility.singleLineHeight * rows) + ((rows - 1) * EditorGUIBridge.kControlVerticalSpacingLegacy);
             bool hasLabel = LabelHasContent(label); 
