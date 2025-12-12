@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public Vector4InspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value) => EditorGUI.Vector4Field(position, label, (Vector4)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.Vector4Field(position, label, (Vector4)value!);
         
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
         {

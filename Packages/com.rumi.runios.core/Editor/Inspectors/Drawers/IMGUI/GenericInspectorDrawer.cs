@@ -19,13 +19,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             {
                 EditorGUI.BeginDisabledGroup(variableElement.inspectable.instancesIsEmpty || !variableElement.IsWritable(flags));
                 EditorGUI.BeginChangeCheck();
-                object? value = DrawField(position, label ?? GUIContent.none, isReadable ? variableElement.value : variableElement.variableType.GetDefaultValue());
+                object? value = DrawField(position, label ?? GUIContent.none, isReadable ? variableElement.value : variableElement.variableType.GetDefaultValue(), isInArray);
                 if (EditorGUI.EndChangeCheck())
                     variableElement.value = value;
                 EditorGUI.EndDisabledGroup();
             }
         }
 
-        protected abstract object? DrawField(Rect position, GUIContent label, object? value);
+        protected abstract object? DrawField(Rect position, GUIContent label, object? value, bool isInArray);
     }
 }

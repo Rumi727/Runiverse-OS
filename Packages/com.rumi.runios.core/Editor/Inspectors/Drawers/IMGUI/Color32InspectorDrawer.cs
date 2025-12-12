@@ -9,6 +9,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public Color32InspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value) => (Color32)EditorGUI.ColorField(position, label, (Color32)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => (Color32)EditorGUI.ColorField(position, label, (Color32)value!);
     }
 }
