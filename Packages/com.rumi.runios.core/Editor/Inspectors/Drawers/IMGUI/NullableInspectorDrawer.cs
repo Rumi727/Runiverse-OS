@@ -19,8 +19,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             valueElement = new CustomAccessVariableElement.Builder(valueElement)
                 .AddWriteAction((_, value) => element.value = Activator.CreateInstance(element.variableType, value))
                 .AddSetValuesAction((_, values) => element.SetValues(values.Select(x => Activator.CreateInstance(element.variableType, x))))
-                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
-                .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
+                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
+                .SetIsWritableFunc((_, flags, _) => element.IsWritable(flags, true))
                 .Build();
 
             hasValueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.HasValue));
@@ -50,8 +50,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                             return null;
                     }));
                 })
-                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
-                .SetIsWritableFunc((_, flags) => element.IsWritable(flags))
+                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
+                .SetIsWritableFunc((_, flags, _) => element.IsWritable(flags, true))
                 .Build();
 
             valueDrawer = FindDrawer(valueElement);
@@ -82,7 +82,53 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     out position,
                     label,
                     hasValueElement.IsReadable(flags) ? (bool)hasValueElement.value! : null,
-                    hasValueElement.IsWritable(flags) ? (x => hasValueElement.value = x) : null,
+                    hasValueElement.IsWritable(flags) ? (x =>
+                    {
+                        if (x)
+                        {
+                            hasValueElement.value = true;
+                            object? value = valueElement.GetValueOrDefault(flags);
+
+                            IInspectorVariableElement clonedHasValueElement = hasValueElement.Clone();
+                            IInspectorVariableElement clonedValueElement = valueElement.Clone();
+                            
+                            undoRecorder?.Record
+                            (
+                                () => clonedHasValueElement.value = false,
+                                () =>
+                                {
+                                    clonedHasValueElement.value = true;
+                                    if (clonedValueElement.IsWritable(flags))
+                                        clonedValueElement.value = value;
+                                },
+                                GetVariableUndoName(variableElement),
+                                UndoHandler.instance.GetTokenForCurrentUnityGroup(),
+                                variableElement.path
+                            );
+                        }
+                        else
+                        {
+                            object? value = valueElement.GetValueOrDefault(flags);
+                            hasValueElement.value = false;
+                            
+                            IInspectorVariableElement clonedHasValueElement = hasValueElement.Clone();
+                            IInspectorVariableElement clonedValueElement = valueElement.Clone();
+                            
+                            undoRecorder?.Record
+                            (
+                                () =>
+                                {
+                                    clonedHasValueElement.value = true;
+                                    if (clonedValueElement.IsWritable(flags))
+                                        clonedValueElement.value = value;
+                                },
+                                () => clonedHasValueElement.value = false,
+                                GetVariableUndoName(variableElement),
+                                UndoHandler.instance.GetTokenForCurrentUnityGroup(),
+                                variableElement.path
+                            );
+                        }
+                    }) : null,
                     valueElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
                     NullabilityState.Nullable,
                     nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"

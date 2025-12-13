@@ -109,8 +109,9 @@ namespace RuniOS.Inspectors.Csharp
                     }
                     else
                     {
-                        foreach (var item in inspectable.instances)
-                            field.SetValue(item, value);
+                        var instances = inspectable.instances;
+                        for (int i = 0; i < instances.Count; i++)
+                            field.SetValue(instances[i], value);
                     }
 
                     inspectable.OnValueChangedInvoke();
@@ -136,8 +137,10 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    foreach (var item in inspectable.instances)
+                    var instances = inspectable.instances;
+                    for (int i = 0; i < instances.Count; i++)
                     {
+                        object? item = instances[i];
                         if (variableType.IsPointer)
                         {
                             if (((Pointer)field.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
@@ -180,21 +183,27 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 검사 중인 모든 객체에서 이 필드의 값 목록을 가져옵니다.
         /// </summary>
+        /// <param name="noCopy"></param>
         /// <returns>각 객체의 필드 값 컬렉션입니다.</returns>
         /// <exception cref="InspectorElementException">프로퍼티 값을 읽는 동안 예외가 발생할 때 발생합니다.</exception>
-        public IEnumerable<object?> GetValues()
+        public IEnumerable<object?> GetValues(bool noCopy = false)
         {
             valuesBuffer.Clear();
             try
             {
-                foreach (var instance in inspectable.instances)
-                    valuesBuffer.Add(field.GetValue(instance));
+                var instances = inspectable.instances;
+                for (int i = 0; i < instances.Count; i++)
+                    valuesBuffer.Add(field.GetValue(instances[i]));
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
             }
-            return valuesBuffer;
+            
+            if (noCopy)
+                return valuesBuffer;
+            
+            return valuesBuffer.ToArray();
         }
 
         public void SetValues(IEnumerable<object?> values)
@@ -236,9 +245,9 @@ namespace RuniOS.Inspectors.Csharp
             if (!flags.HasFlagFast(InspectorFlags.Field))
                 return false;
 
-            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            if (!IsWritable(flags, true) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
-            if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+            if (!IsReadable(flags, true) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
 
             return true;
@@ -247,14 +256,14 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && flags.HasFlagFast(InspectorFlags.Public);
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => (noInstanceCheck || !inspectable.instancesIsEmpty) && flags.HasFlagFast(InspectorFlags.Public);
 
         /// <summary>
         /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
         /// </summary>
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
         {
-            if (inspectable.instancesIsEmpty || !flags.HasFlagFast(InspectorFlags.Public))
+            if ((!noInstanceCheck && inspectable.instancesIsEmpty) || !flags.HasFlagFast(InspectorFlags.Public))
                 return false;
 
             if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
@@ -268,8 +277,8 @@ namespace RuniOS.Inspectors.Csharp
             if (!IsReadable(InspectorFlags.All))
                 return;
 
-            var rawValues = (List<object?>)GetValues();
-            inspectableObjectElement.instances = rawValues;
+            var rawValues = (IList<object?>)GetValues(true);
+            inspectableObjectElement.SetInstances(rawValues);
 
             if (inspectableListElement != null || inspectableDictionaryElement != null)
             {
@@ -281,9 +290,13 @@ namespace RuniOS.Inspectors.Csharp
                         collectionsBuffer.Add(enumerable);
                 }
 
-                if (inspectableListElement != null) inspectableListElement.instances = collectionsBuffer;
-                if (inspectableDictionaryElement != null) inspectableDictionaryElement.instances = collectionsBuffer;
+                inspectableListElement?.SetInstances(collectionsBuffer);
+                inspectableDictionaryElement?.SetInstances(collectionsBuffer);
             }
         }
+
+        /// <inheritdoc cref="IInspectorVariableElement.Clone"/>
+        public override MemberElement Clone() => new FieldElement(inspectable.Clone(), field);
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new FieldElement(inspectable.Clone(), field);
     }
 }

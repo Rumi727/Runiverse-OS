@@ -52,8 +52,9 @@ namespace RuniOS.Inspectors
         /// <summary>
         /// 검사 중인 모든 객체에서 이 변수의 값 목록을 가져옵니다.
         /// </summary>
+        /// <param name="noCopy"></param>
         /// <returns>각 객체의 변수 값 컬렉션입니다.</returns>
-        IEnumerable<object?> GetValues();
+        IEnumerable<object?> GetValues(bool noCopy = false);
         
         void SetValues(IEnumerable<object?> values);
         
@@ -62,7 +63,7 @@ namespace RuniOS.Inspectors
         /// </summary>
         /// <param name="flags">읽기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
         /// <returns>
-        /// <see cref="IsReadable(InspectorFlags)"/>가 <see langword="true"/>인 경우 현재 <see cref="value"/>를 반환하고, 
+        /// <see cref="IsReadable"/>가 <see langword="true"/>인 경우 현재 <see cref="value"/>를 반환하고, 
         /// 그렇지 않은 경우 <see cref="variableType"/>의 기본값(default)을 반환합니다.
         /// </returns>
         object? GetValueOrDefault(InspectorFlags flags) => IsReadable(flags) ? value : variableType.GetDefaultValue();
@@ -71,17 +72,23 @@ namespace RuniOS.Inspectors
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         /// <param name="flags">읽기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
-        bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess);
+        /// <param name="noInstanceCheck"></param>
+        bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false);
 
         /// <summary>
         /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         /// <param name="flags">쓰기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
-        bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess);
+        /// <param name="noInstanceCheck"></param>
+        bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false);
 
         /// <summary>
         /// 자식 <see cref="IInspectableObject"/> 또는 <see cref="IInspectableList"/>에 포함된 인스턴스 목록을 업데이트합니다.
         /// </summary>
         void UpdateChildInspectable();
+        
+        /// <inheritdoc cref="IInspectorElement.Clone"/>
+        new IInspectorVariableElement Clone();
+        IInspectorElement IInspectorElement.Clone() => Clone();
     }
 }

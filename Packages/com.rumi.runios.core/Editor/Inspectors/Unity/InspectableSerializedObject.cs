@@ -23,12 +23,12 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public int instanceCount => serializedObject.targetObjects.Length;
 
-        public Action? onValueChanged { get; set; }
+        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
         public InspectableSerializedObject(SerializedObject serializedObject, SerializedProperty? targetProperty = null)
         {
             this.serializedObject = serializedObject;
-            this.targetProperty = targetProperty ?? serializedObject.GetIterator();
+            this.targetProperty = targetProperty?.Copy() ?? serializedObject.GetIterator();
             
             ScriptAttributeUtilityBridge.GetFieldInfoFromProperty(this.targetProperty, out Type type);
             inspectionType = type;
@@ -42,7 +42,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public void OnValueChangedInvoke()
         {
-            onValueChanged?.SafeInvoke();
+            onValueChanged?.SafeInvoke(Enumerable.Empty<object?>());
             parentElement?.inspectableObjectElement.OnValueChangedInvoke();
         }
 
@@ -70,9 +70,9 @@ namespace RuniOS.Editor.Inspectors.Unity
             return elements.WhereNotNull().Where(x => x.HasFlags(flags));
         }
         
-        public IInspectableObject Clone() => new InspectableSerializedObject(serializedObject, targetProperty);
-        IInspectable IInspectable.Clone() => Clone();
-        object ICloneable.Clone() => Clone();
+        /// <inheritdoc cref="IInspectableObject.Clone"/>
+        public InspectableSerializedObject Clone() => new InspectableSerializedObject(new SerializedObject(serializedObject.targetObjects), new SerializedObject(targetProperty.serializedObject.targetObjects).FindProperty(targetProperty.propertyPath)) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+        IInspectableObject IInspectableObject.Clone() => Clone();
 
         public static implicit operator SerializedObject(InspectableSerializedObject inspectableObject) => inspectableObject.serializedObject;
         public static implicit operator InspectableSerializedObject(SerializedObject serializedObject) => new InspectableSerializedObject(serializedObject);

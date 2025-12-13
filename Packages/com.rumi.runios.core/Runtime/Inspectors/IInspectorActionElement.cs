@@ -9,5 +9,9 @@ namespace RuniOS.Inspectors
         NullabilityInfo? returnNullabilityInfo { get; }
 
         void Execute(object?[] parameters);
+        
+        /// <inheritdoc cref="IInspectorElement.Clone"/>
+        new IInspectorActionElement Clone();
+        IInspectorElement IInspectorElement.Clone() => Clone();
     }
 }

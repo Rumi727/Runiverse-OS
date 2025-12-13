@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Linq;
+using System.Collections;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
@@ -25,7 +26,7 @@ namespace RuniOS.Inspectors.Csharp
                 for (int i = 0; i < _instances.Count; i++)
                 {
                     var item = _instances[i];
-                    if (item != null)
+                    if (!item.IsNull())
                         return item;
                 }
 
@@ -43,45 +44,69 @@ namespace RuniOS.Inspectors.Csharp
         /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
         /// 값이 유효한지 검사하지 않습니다!
         /// </summary>
-        public IEnumerable<object?> instances
+        public IReadOnlyList<object?> instances
         {
             get
             {
                 parentElement?.UpdateChildInspectable();
-                return _instances;
-            }
-            set
-            {
-                _instances.Clear();
-
-                if (value is ICollection<object> col)
-                {
-                    if (_instances.Capacity < col.Count)
-                        _instances.Capacity = col.Count;
-                }
-
-                _instances.AddRange(value);
+                return readOnlyInstances;
             }
         }
+        readonly IReadOnlyList<object?> readOnlyInstances;
         readonly List<object?> _instances = new List<object?>();
 
         [MemberNotNullWhen(false, nameof(instance))]
-        public bool instancesIsEmpty => instance == null;
+        public bool instancesIsEmpty => instance.IsNull();
 
         public bool instanceIsMultiple => instances.TwoOrMore();
 
         public int instanceCount => instances.Count();
 
-        public Action? onValueChanged { get; set; }
+        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
         public InspectableObject(Type inspectionType, params object?[] instances) : this(inspectionType, instances.WhereNotNull()) { }
 
-        public InspectableObject(Type inspectionType, IEnumerable<object> instances)
+        public InspectableObject(Type inspectionType, IEnumerable instances)
         {
             this.inspectionType = inspectionType;
-            this.instances = instances;
+            readOnlyInstances = _instances.AsReadOnly();
+            
+            SetInstances(instances);
+        }
+
+        public void SetInstances(IEnumerable instances)
+        {
+            _instances.Clear();
+            _instances.Capacity = instances switch
+            {
+                ICollection collection when _instances.Capacity < collection.Count => collection.Count,
+                ICollection<object> genericCollection when _instances.Capacity < genericCollection.Count => genericCollection.Count,
+                _ => _instances.Capacity
+            };
+
+            switch (instances)
+            {
+                case IList list:
+                {
+                    for (int i = 0; i < list.Count; i++)
+                        _instances.Add(list[i]);
+                    break;
+                }
+                case IList<object?> genericList:
+                {
+                    for (int i = 0; i < genericList.Count; i++)
+                        _instances.Add(genericList[i]);
+                    break;
+                }
+                default:
+                {
+                    foreach (var instance in instances)
+                        _instances.Add(instance);
+                    break;
+                }
+            }
         }
 
         public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
@@ -92,7 +117,7 @@ namespace RuniOS.Inspectors.Csharp
 
         public void OnValueChangedInvoke()
         {
-            onValueChanged?.SafeInvoke();
+            onValueChanged?.SafeInvoke(instances);
             parentElement?.inspectable.OnValueChangedInvoke();
         }
 
@@ -124,8 +149,8 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public IInspectableObject Clone() => new InspectableObject(inspectionType) { parentElement = parentElement, instances = _instances };
-        IInspectable IInspectable.Clone() => Clone();
-        object ICloneable.Clone() => Clone();
+        /// <inheritdoc cref="IInspectableObject.Clone"/>
+        public InspectableObject Clone() => new InspectableObject(inspectionType, instances) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+        IInspectableObject IInspectableObject.Clone() => Clone();
     }
 }

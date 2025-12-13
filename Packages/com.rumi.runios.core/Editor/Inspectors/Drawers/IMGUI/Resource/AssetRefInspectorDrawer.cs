@@ -37,10 +37,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 
         protected override object CreateSnapshot(object? value) => ((IAssetRef)value!).key;
 
-        protected override void ApplySnapshot(object? value, InspectorFlags flags)
+        protected override void ApplySnapshot(IInspectorVariableElement variableElement, object? value, InspectorFlags flags)
         {
-            CheckVariableElement();
-
             IAssetRef? currentValue = (IAssetRef?)variableElement.GetValueOrDefault(flags);
             if (currentValue != null)
                 currentValue.key = (ResourceKey)value!;

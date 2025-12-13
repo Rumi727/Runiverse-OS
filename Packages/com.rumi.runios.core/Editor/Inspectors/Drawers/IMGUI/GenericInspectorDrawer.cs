@@ -52,11 +52,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         /// 캡처된 스냅샷을 실제 변수에 적용합니다. <br/>
         /// 기본 구현은 값을 통째로 교체합니다.
         /// </summary>
-        protected virtual void ApplySnapshot(object? value, InspectorFlags flags)
-        {
-            CheckVariableElement();
-            variableElement.value = value;
-        }
+        protected virtual void ApplySnapshot(IInspectorVariableElement variableElement, object? value, InspectorFlags flags) => variableElement.value = value;
 
         protected virtual void RecordUndo(object? undoValue, object? redoValue, InspectorFlags flags)
         {
@@ -65,11 +61,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             
             CheckVariableElement();
 
-            string name = GetTextOrKey("undo.modify.property_in_object");
-            name = new PlaceholderReplacePair("object", variableElement.variableType.Name).ReplaceAsPlaceholder(name);
-            name = new PlaceholderReplacePair("property", variableElement.path).ReplaceAsPlaceholder(name);
-            
-            undoRecorder.Record(() => ApplySnapshot(undoValue, flags), () => ApplySnapshot(redoValue, flags), name, UndoHandler.instance.GetTokenForCurrentUnityGroup(), variableElement.path);
+            IInspectorVariableElement variableElement = this.variableElement.Clone();
+            undoRecorder.Record(() => ApplySnapshot(variableElement, undoValue, flags), () => ApplySnapshot(variableElement, redoValue, flags), GetVariableUndoName(variableElement), UndoHandler.instance.GetTokenForCurrentUnityGroup(), variableElement.path);
         }
     }
 }

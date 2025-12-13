@@ -74,7 +74,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             if (inspectableList.parentElement != null)
             {
-                if (NullToggleField(inspectableList.parentElement, position, out position, label, flags))
+                if (NullToggleField(inspectableList.parentElement, position, out position, label, flags, nullText, undoRecorder))
                     return;
             }
             

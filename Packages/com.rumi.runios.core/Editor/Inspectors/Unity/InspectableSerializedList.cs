@@ -14,6 +14,7 @@ namespace RuniOS.Editor.Inspectors.Unity
     {
         public InspectableSerializedList(SerializedProperty property)
         {
+            property = property.Copy();
             if (property.propertyType == SerializedPropertyType.String || !property.isArray)
                 throw new ArgumentException($"Provided property '{property.propertyPath}' is not a array type.", nameof(property));
             
@@ -43,7 +44,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedProperty property { get; }
         public PropertyConverter? converter { get; }
 
-        public Action? onValueChanged { get; set; }
+        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
         NullabilityInfo? IInspectableList.elementNullabilityInfo => null;
 
@@ -82,7 +83,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         public void OnValueChangedInvoke()
         {
-            onValueChanged?.SafeInvoke();
+            onValueChanged?.SafeInvoke(Enumerable.Empty<object?>());
             parentElement?.inspectableObjectElement.OnValueChangedInvoke();
         }
 
@@ -278,9 +279,9 @@ namespace RuniOS.Editor.Inspectors.Unity
         
         IEnumerable<IInspectorElement> IInspectable.GetElements(InspectorFlags flags) => GetElements(flags);
         
-        public IInspectableList Clone() => new InspectableSerializedList(property);
-        IInspectable IInspectable.Clone() => Clone();
-        object ICloneable.Clone() => Clone();
+        /// <inheritdoc cref="IInspectableList.Clone"/>
+        public InspectableSerializedList Clone() => new InspectableSerializedList(new SerializedObject(property.serializedObject.targetObjects).FindProperty(property.propertyPath)) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+        IInspectableList IInspectableList.Clone() => Clone();
         
         void IInspectableList.SynchronizeCollections() { }
         void IInspectableList.UpdateSourceCollections() { }

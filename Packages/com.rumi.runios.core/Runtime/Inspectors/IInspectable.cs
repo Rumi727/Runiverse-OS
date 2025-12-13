@@ -18,7 +18,7 @@ namespace RuniOS.Inspectors
         
         int instanceCount { get; }
 
-        Action? onValueChanged { get; set; }
+        Action<IEnumerable<object?>>? onValueChanged { get; set; }
         
         IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
@@ -31,6 +31,11 @@ namespace RuniOS.Inspectors
         
         void OnValueChangedInvoke();
 
+        /// <summary>
+        /// 복제본을 생성합니다. 검사 중인 객체의 목록까지 같이 복제합니다.<br/>
+        /// 즉, 외부에서 인스턴스 목록을 교채해도, 이 복제본은 영향받지 않습니다.<br/>
+        /// 언도 히스토리에 기록할 때 유용합니다.
+        /// </summary>
         new IInspectable Clone();
         object ICloneable.Clone() => Clone();
     }

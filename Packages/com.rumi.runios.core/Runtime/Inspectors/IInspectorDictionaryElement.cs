@@ -10,5 +10,9 @@ namespace RuniOS.Inspectors
         /// <b><see cref="IInspectorVariableElement.value"/></b>의 값을 읽을 수 없거나 <see langword="null"/> 값인 경우에는 <see cref="object"/> 타입을 반환합니다.
         /// </summary>
         Type currentElementType { get; }
+        
+        /// <inheritdoc cref="IInspectorVariableElement.Clone"/>
+        new IInspectorDictionaryElement Clone();
+        IInspectorVariableElement IInspectorVariableElement.Clone() => Clone();
     }
 }

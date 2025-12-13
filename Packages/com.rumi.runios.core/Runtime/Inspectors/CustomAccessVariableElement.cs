@@ -17,8 +17,8 @@ namespace RuniOS.Inspectors
         public delegate IEnumerable<object?> GetValuesFunc(IInspectorVariableElement element);
         public delegate void SetValuesAction(IInspectorVariableElement element, IEnumerable<object?> values);
 
-        public delegate bool IsReadableFunc(IInspectorVariableElement element, InspectorFlags flags = InspectorFlags.Public);
-        public delegate bool IsWritableFunc(IInspectorVariableElement element, InspectorFlags flags = InspectorFlags.Public);
+        public delegate bool IsReadableFunc(IInspectorVariableElement element, InspectorFlags flags = InspectorFlags.Public, bool noInstanceCheck = false);
+        public delegate bool IsWritableFunc(IInspectorVariableElement element, InspectorFlags flags = InspectorFlags.Public, bool noInstanceCheck = false);
         
         CustomAccessVariableElement(IInspectorVariableElement targetElement, ReadFunc? readFunc, GetValuesFunc? getValuesFunc, WriteAction? writeAction, SetValuesAction? setValuesAction, IsReadableFunc? isReadableFunc, IsWritableFunc? isWritableFunc)
         {
@@ -30,21 +30,21 @@ namespace RuniOS.Inspectors
             this.writeAction = writeAction ?? ((element, value) => element.value = value);
             this.setValuesAction = setValuesAction ?? ((element, values) => element.SetValues(values));
 
-            this.isReadableFunc = isReadableFunc ?? ((element, flags) => element.IsReadable(flags));
-            this.isWritableFunc = isWritableFunc ?? ((element, flags) => element.IsWritable(flags));
+            this.isReadableFunc = isReadableFunc ?? ((element, flags, noInstanceCheck) => element.IsReadable(flags, noInstanceCheck));
+            this.isWritableFunc = isWritableFunc ?? ((element, flags, noInstanceCheck) => element.IsWritable(flags, noInstanceCheck));
 
-            inspectableObjectElement = targetElement.inspectableObjectElement.Clone();
+            inspectableObjectElement = targetElement.inspectableObjectElement;
             inspectableObjectElement.parentElement = this;
 
             if (targetElement.inspectableListElement != null)
             {
-                inspectableListElement = targetElement.inspectableListElement.Clone();
+                inspectableListElement = targetElement.inspectableListElement;
                 inspectableListElement.parentElement = this;
             }
             
             if (targetElement.inspectableDictionaryElement != null)
             {
-                inspectableDictionaryElement = targetElement.inspectableDictionaryElement.Clone();
+                inspectableDictionaryElement = targetElement.inspectableDictionaryElement;
                 inspectableDictionaryElement.parentElement = this;
             }
         }
@@ -58,6 +58,8 @@ namespace RuniOS.Inspectors
             get => targetElement.displayName;
             set => targetElement.displayName = value;
         }
+
+        public string path => targetElement.path;
 
         public IInspectable inspectable => targetElement.inspectable;
         
@@ -92,16 +94,18 @@ namespace RuniOS.Inspectors
         public event IsReadableFunc isReadableFunc;
         public event IsWritableFunc isWritableFunc;
 
-        public IEnumerable<object?> GetValues() => getValuesFunc.Invoke(targetElement);
+        public IEnumerable<object?> GetValues(bool noCopy = false) => getValuesFunc.Invoke(targetElement);
         public void SetValues(IEnumerable<object?> values) => setValuesAction.Invoke(targetElement, values);
 
         public bool HasFlags(InspectorFlags flags) => targetElement.HasFlags(flags);
-        
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => isReadableFunc.Invoke(targetElement, flags);
 
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => isWritableFunc.Invoke(targetElement, flags);
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => isReadableFunc.Invoke(targetElement, flags, noInstanceCheck);
+
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => isWritableFunc.Invoke(targetElement, flags, noInstanceCheck);
 
         public void UpdateChildInspectable() => targetElement.UpdateChildInspectable();
+
+        public IInspectorVariableElement Clone() => new CustomAccessVariableElement(targetElement.Clone(), readFunc, getValuesFunc, writeAction, setValuesAction, isReadableFunc, isWritableFunc);
 
         public sealed class Builder
         {

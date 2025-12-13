@@ -11,14 +11,6 @@ namespace RuniOS.Editor
     /// </summary>
     public sealed class UndoHandler : IUndoRecorder
     {
-        class SerializableUndoHandler : ScriptableObject
-        {
-            /// <summary>
-            /// Unity가 저장하고 복원하는 '목표 인덱스'입니다.
-            /// </summary>
-            public int historyIndex;
-        }
-        
         /// <summary>
         /// UndoHandler의 싱글톤 인스턴스입니다.
         /// </summary>
@@ -30,14 +22,6 @@ namespace RuniOS.Editor
 
         [NonSerialized] int lastUnityGroupId = -1;
         [NonSerialized] UndoGroupToken cachedGroupToken = new UndoGroupToken("UnityGroup_Initial");
-
-        void Awake()
-        {
-            Undo.undoRedoPerformed += DetectUndoneOrRedoneAction;
-            AssemblyReloadEvents.beforeAssemblyReload += () => Object.DestroyImmediate(serializableUndoHandler);
-        }
-
-        void OnDestroy() => Undo.undoRedoPerformed -= DetectUndoneOrRedoneAction;
 
         /// <summary>
         /// Unity의 현재 그룹 ID에 대응하는 토큰을 가져오거나 새로 생성합니다.
@@ -75,9 +59,15 @@ namespace RuniOS.Editor
         {
             // 1. RuniUndo에 기록
             runiUndo.Record(undoAction, redoAction, name, groupToken ?? GetTokenForCurrentUnityGroup(), collapseKey);
-            
+
             if (serializableUndoHandler == null)
+            {
                 serializableUndoHandler = ScriptableObject.CreateInstance<SerializableUndoHandler>();
+                serializableUndoHandler.hideFlags = HideFlags.HideAndDontSave;
+                serializableUndoHandler.historyIndex = runiUndo.currentHistoryIndex;
+                
+                EditorUtility.SetDirty(serializableUndoHandler);
+            }
 
             // 2. Unity에 상태 기록 (현재 시점의 인덱스를 저장)
             Undo.RecordObject(serializableUndoHandler, name);
@@ -85,46 +75,57 @@ namespace RuniOS.Editor
             // 3. 인덱스 동기화
             // Unity가 나중에 이 값을 복원하면, RuniUndo도 이 인덱스로 돌아가야 함
             serializableUndoHandler.historyIndex = runiUndo.currentHistoryIndex;
+            EditorUtility.SetDirty(serializableUndoHandler);
         }
-
-        /// <summary>
-        /// Unity의 Undo/Redo 동작을 감지하여 RuniUndo 상태를 동기화합니다.
-        /// </summary>
-        void DetectUndoneOrRedoneAction()
+        
+        class SerializableUndoHandler : ScriptableObject
         {
-            if (serializableUndoHandler == null)
-                serializableUndoHandler = ScriptableObject.CreateInstance<SerializableUndoHandler>();
+            /// <summary>
+            /// Unity가 저장하고 복원하는 '목표 인덱스'입니다.
+            /// </summary>
+            public int historyIndex;
             
-            // Unity가 복원한 '목표 인덱스'
-            int targetIndex = serializableUndoHandler.historyIndex;
-
-            // 현재 RuniUndo의 '실제 인덱스'
-            int currentIndex = runiUndo.currentHistoryIndex;
-
-            if (targetIndex == currentIndex)
-                return;
-
-            // 두 인덱스가 일치할 때까지 반복 수행 (Loop)
-            // Undo 상황: 현재 인덱스가 목표보다 큼 -> 줄여야 함
-            if (currentIndex > targetIndex)
+            void Awake()
             {
-                for (int i = 0; runiUndo.currentHistoryIndex > targetIndex && i < 100; i++)
-                {
-                    if (!runiUndo.canUndo)
-                        break;
-
-                    runiUndo.PerformUndo();
-                }
+                Undo.undoRedoPerformed += DetectUndoneOrRedoneAction;
+                AssemblyReloadEvents.beforeAssemblyReload += () => DestroyImmediate(this);
             }
-            // Redo 상황: 현재 인덱스가 목표보다 작음 -> 늘려야 함
-            else
-            {
-                for (int i = 0; runiUndo.currentHistoryIndex < targetIndex && i < 100; i++)
-                {
-                    if (!runiUndo.canRedo)
-                        break;
 
-                    runiUndo.PerformRedo();
+            void OnDestroy() => Undo.undoRedoPerformed -= DetectUndoneOrRedoneAction;
+            
+            void DetectUndoneOrRedoneAction()
+            {
+                // Unity가 복원한 '목표 인덱스'
+                int targetIndex = historyIndex;
+
+                // 현재 RuniUndo의 '실제 인덱스'
+                int currentIndex = instance.runiUndo.currentHistoryIndex;
+
+                if (targetIndex == currentIndex)
+                    return;
+
+                // 두 인덱스가 일치할 때까지 반복 수행 (Loop)
+                // Undo 상황: 현재 인덱스가 목표보다 큼 -> 줄여야 함
+                if (currentIndex > targetIndex)
+                {
+                    for (int i = 0; instance.runiUndo.currentHistoryIndex > targetIndex && i < 100; i++)
+                    {
+                        if (!instance.runiUndo.canUndo)
+                            break;
+
+                        instance.runiUndo.PerformUndo();
+                    }
+                }
+                // Redo 상황: 현재 인덱스가 목표보다 작음 -> 늘려야 함
+                else
+                {
+                    for (int i = 0; instance.runiUndo.currentHistoryIndex < targetIndex && i < 100; i++)
+                    {
+                        if (!instance.runiUndo.canRedo)
+                            break;
+
+                        instance.runiUndo.PerformRedo();
+                    }
                 }
             }
         }

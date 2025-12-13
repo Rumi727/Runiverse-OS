@@ -39,6 +39,8 @@ namespace RuniOS.Inspectors
             return element;
         }
         
+        /// <inheritdoc cref="IInspectable.Clone"/>
         new IInspectableObject Clone();
+        IInspectable IInspectable.Clone() => Clone();
     }
 }

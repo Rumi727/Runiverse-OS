@@ -36,8 +36,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                             .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
                     );
                 })
-                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
-                .SetIsWritableFunc((_, flags) => element.IsReadable(flags) && element.IsWritable(flags))
+                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
+                .SetIsWritableFunc((_, flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true))
                 .Build();
             
             valueElement = element.inspectableObjectElement.FindVariableElement(nameof(DictionaryEntry.Value));
@@ -58,8 +58,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                             .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
                     );
                 })
-                .SetIsReadableFunc((_, flags) => element.IsReadable(flags))
-                .SetIsWritableFunc((_, flags) => element.IsReadable(flags) && element.IsWritable(flags))
+                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
+                .SetIsWritableFunc((_, flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true))
                 .Build();
 
             keyDrawer = FindDrawer(keyElement);

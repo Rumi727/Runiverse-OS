@@ -24,12 +24,13 @@ namespace RuniOS.Inspectors.Csharp
 
             this.inspectionType = inspectionType;
             inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetEnumerableElementType(inspectionType);
-
-            this.instances = instances;
-
+            
             this.elementNullabilityInfo = elementNullabilityInfo;
 
-            listHandlers = _listHandlers.AsReadOnly();
+            readOnlyInstances = _instances.AsReadOnly();
+            readOnlyListHandlers = _listHandlers.AsReadOnly();
+
+            SetInstances(instances);
         }
 
         public IInspectorVariableElement? parentElement { get; set; }
@@ -115,10 +116,9 @@ namespace RuniOS.Inspectors.Csharp
                 if (value != null && !inspectionType.IsInstanceOfType(value))
                     throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
 
+                _instances.Clear();
                 if (value != null)
-                    instances = Enumerable.Repeat(value, 1);
-                else
-                    instances = Array.Empty<IList>();
+                    _instances.Add(value);
             }
         }
 
@@ -126,15 +126,17 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                if (_listHandlers.Count == 0)
+                parentElement?.UpdateChildInspectable();
+                var handlers = listHandlers;
+                if (handlers.Count == 0)
                     return null;
 
-                var minHandler = _listHandlers[0];
+                var minHandler = handlers[0];
                 int minCount = minHandler.count;
 
-                for (int i = 1; i < _listHandlers.Count; i++)
+                for (int i = 1; i < handlers.Count; i++)
                 {
-                    ListHandlerBase? currentHandler = _listHandlers[i];
+                    ListHandlerBase? currentHandler = handlers[i];
                     if (currentHandler.count < minCount)
                     {
                         minCount = currentHandler.count;
@@ -150,37 +152,29 @@ namespace RuniOS.Inspectors.Csharp
         /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
         /// 값이 유효한지 검사하지 않습니다!
         /// </summary>
-        public IEnumerable<IEnumerable> instances
+        public IReadOnlyList<IEnumerable> instances
         {
             get
             {
                 parentElement?.UpdateChildInspectable();
-                return _instances;
-            }
-            set
-            {
-                _instances.Clear();
-                if (value is ICollection<IEnumerable> col)
-                {
-                    if (_instances.Capacity < col.Count)
-                        _instances.Capacity = col.Count;
-                }
-                _instances.AddRange(value);
-                
-                _listHandlers.Clear();
-                for (int i = 0; i < _instances.Count; i++)
-                {
-                    var instance = _instances[i];
-                    if (instance != null)
-                        _listHandlers.Add(ListHandlerBase.FindListHandler(instance));
-                }
+                return readOnlyInstances;
             }
         }
+        readonly IReadOnlyList<IEnumerable> readOnlyInstances;
         readonly List<IEnumerable> _instances = new List<IEnumerable>();
         readonly List<IEnumerable> staleKeysBuffer = new List<IEnumerable>();
 
-        public IReadOnlyList<ListHandlerBase> listHandlers { get; }
+        public IReadOnlyList<ListHandlerBase> listHandlers
+        {
+            get
+            {
+                parentElement?.UpdateChildInspectable();
+                return readOnlyListHandlers;
+            }
+        }
+        readonly IReadOnlyList<ListHandlerBase> readOnlyListHandlers;
         readonly List<ListHandlerBase> _listHandlers = new List<ListHandlerBase>();
+        readonly Dictionary<IEnumerable, ListHandlerBase> handlerMap = new Dictionary<IEnumerable, ListHandlerBase>();
 
         [MemberNotNullWhen(false, nameof(instance), nameof(listHandler))]
         public bool instancesIsEmpty => instance == null;
@@ -190,26 +184,31 @@ namespace RuniOS.Inspectors.Csharp
 
         public int instanceCount => instances.Count();
 
-        public Action? onValueChanged { get; set; }
+        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
         public object? this[int index]
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
+                var handler = listHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
 
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                return listHandler[index];
+                return handler[index];
             }
             set
             {
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
 
-                foreach (var list in listHandlers)
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    ListHandlerBase? list = handlers[i];
                     list[index] = value;
+                }
             }
         }
 
@@ -217,11 +216,87 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
-                return listHandler.count;
+                var handler = listHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+                return handler.count;
             }
         }
         int ICollection.Count => count;
+        
+        public void SetInstances(IEnumerable<IEnumerable> instances)
+        {
+            _instances.Clear();
+            _instances.Capacity = instances switch
+            {
+                ICollection<IEnumerable> genericCollection when _instances.Capacity < genericCollection.Count => genericCollection.Count,
+                _ => _instances.Capacity
+            };
+
+            switch (instances)
+            {
+                case IList<IEnumerable> genericList:
+                {
+                    for (int i = 0; i < genericList.Count; i++)
+                        _instances.Add(genericList[i]);
+                    break;
+                }
+                default:
+                {
+                    _instances.AddRange(instances);
+                    break;
+                }
+            }
+            
+            // 인스턴스가 동일하면 리스트 핸들러를 새로 만들지 않기 위해 맵으로 관리하는거니 지우지 말것
+            
+            // -------------------------------------------------------------
+            // 맵 동기화 (SyncKeysWithEnumerable 인라인 -> 델리게이트 GC 제거)
+            // -------------------------------------------------------------
+
+            // A. 제거
+            staleKeysBuffer.Clear();
+            foreach (var key in handlerMap.Keys)
+            {
+                bool isUsed = false;
+                
+                // _instances는 List<T>이므로 for문 사용 (GC 없음)
+                // ReferenceEquals로 빠르게 비교
+                var instanceCount = _instances.Count;
+                for (int i = 0; i < instanceCount; i++)
+                {
+                    if (ReferenceEquals(_instances[i], key))
+                    {
+                        isUsed = true;
+                        break;
+                    }
+                }
+
+                if (!isUsed)
+                    staleKeysBuffer.Add(key);
+            }
+
+            // 버퍼에 담긴 키 제거
+            var removeCount = staleKeysBuffer.Count;
+            for (int i = 0; i < removeCount; i++)
+                handlerMap.Remove(staleKeysBuffer[i]);
+
+            // B. 추가
+            for (int i = 0; i < _instances.Count; i++)
+            {
+                var instance = _instances[i];
+                // 델리게이트(Func) 생성 없이 직접 팩토리 메서드 호출
+                if (instance != null && !handlerMap.ContainsKey(instance))
+                    handlerMap.Add(instance, ListHandlerBase.FindListHandler(instance));
+            }
+
+            _listHandlers.Clear();
+            for (int i = 0; i < _instances.Count; i++)
+            {
+                var instance = _instances[i];
+                if (handlerMap.TryGetValue(instance, out var handler))
+                    _listHandlers.Add(handler);
+            }
+        }
 
         public void OnValueChangedInvoke()
         {
@@ -231,14 +306,22 @@ namespace RuniOS.Inspectors.Csharp
 
         public void SynchronizeCollections()
         {
-            foreach (var item in listHandlers)
+            var handlers = listHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                ListHandlerBase? item = handlers[i];
                 item.SynchronizeCollections();
+            }
         }
 
         public void UpdateSourceCollections()
         {
-            foreach (var item in listHandlers)
+            var handlers = listHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                ListHandlerBase? item = handlers[i];
                 item.UpdateSourceCollections();
+            }
         }
 
         public int Add(object? value)
@@ -246,8 +329,12 @@ namespace RuniOS.Inspectors.Csharp
             int minCount = count;
             if (parentElement == null || !isArray)
             {
-                foreach (var list in listHandlers)
-                    list.Add(value);
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    ListHandlerBase? item = handlers[i];
+                    item.Add(value);
+                }
             }
             else
             {
@@ -271,8 +358,12 @@ namespace RuniOS.Inspectors.Csharp
 
             if (parentElement == null || !isArray)
             {
-                foreach (var list in listHandlers)
-                    list.Insert(index, value);
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    ListHandlerBase? item = handlers[i];
+                    item.Insert(index, value);
+                }
             }
             else
             {
@@ -293,16 +384,18 @@ namespace RuniOS.Inspectors.Csharp
             if (parentElement == null || !isArray)
             {
                 var minCollectionHandler = listHandler;
-                foreach (var list in listHandlers)
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
                 {
-                    if (list == minCollectionHandler)
+                    ListHandlerBase? item = handlers[i];
+                    if (item == minCollectionHandler)
                     {
-                        int index = list.IndexOf(value);
-                        list.RemoveAt(index);
+                        int index = item.IndexOf(value);
+                        item.RemoveAt(index);
                         OnRemoveAt(index);
                     }
                     else
-                        list.Remove(value);
+                        item.Remove(value);
                 }
             }
             else
@@ -334,8 +427,12 @@ namespace RuniOS.Inspectors.Csharp
 
             if (parentElement == null || !isArray)
             {
-                foreach (var list in listHandlers)
-                    list.RemoveAt(index);
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    ListHandlerBase? item = handlers[i];
+                    item.RemoveAt(index);
+                }
             }
             else
             {
@@ -355,8 +452,12 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (parentElement == null || !isArray)
             {
-                foreach (IList list in listHandlers)
-                    list.Clear();
+                var handlers = listHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    ListHandlerBase? item = handlers[i];
+                    item.Clear();
+                }
             }
             else
             {
@@ -379,8 +480,12 @@ namespace RuniOS.Inspectors.Csharp
             if (newIndex < 0 || newIndex >= count)
                 throw new ArgumentOutOfRangeException(nameof(newIndex));
 
-            foreach (var list in listHandlers)
-                list.Move(oldIndex, newIndex);
+            var handlers = listHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                ListHandlerBase? item = handlers[i];
+                item.Move(oldIndex, newIndex);
+            }
 
             OnElementMoved(oldIndex, newIndex);
         }
@@ -448,20 +553,31 @@ namespace RuniOS.Inspectors.Csharp
 
         public bool Contains(object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
-            return listHandlers.Any(x => x.Contains(value));
+            var handler = listHandler;
+            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            var handlers = listHandlers;
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                ListHandlerBase? item = handlers[i];
+                if (item.Contains(value))
+                    return true;
+            }
+            return false;
         }
 
         public int IndexOf(object value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
-            return listHandler.IndexOf(value);
+            var handler = listHandler;
+            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            return handler.IndexOf(value);
         }
 
         public IEnumerator GetEnumerator()
         {
-            ExceptionUtility.ThrowIfArgumentNull(listHandler, nameof(listHandler));
-            return listHandler.GetEnumerator();
+            var handler = listHandler;
+            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            return handler.GetEnumerator();
         }
 
         public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
@@ -509,6 +625,14 @@ namespace RuniOS.Inspectors.Csharp
 
         protected virtual ListElement CreateElement(int index) => new ListElement(this, index);
 
-        IInspectableList IInspectableList.Clone() => new InspectableList(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = _instances };
+        /// <inheritdoc cref="IInspectableList.Clone"/>
+        public InspectableList Clone()
+        {
+            InspectableList clonedList = new InspectableList(inspectionType, instances, elementNullabilityInfo) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+            clonedList.SynchronizeCollections();
+
+            return clonedList;
+        }
+        IInspectableList IInspectableList.Clone() => Clone();
     }
 }

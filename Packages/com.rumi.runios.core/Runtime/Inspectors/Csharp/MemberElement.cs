@@ -32,6 +32,17 @@ namespace RuniOS.Inspectors.Csharp
         /// UI에서 표시되는 멤버의 이름을 가져옵니다.
         /// </summary>
         public string displayName { get; set; }
+        
+        public string path
+        {
+            get
+            {
+                if (inspectable.parentElement != null)
+                    return $"{inspectable.parentElement.path}.{name}";
+                else
+                    return name;
+            }
+        }
 
         /// <summary>
         /// 이 멤버가 속한 <see cref="InspectableObject"/>를 가져옵니다.
@@ -70,5 +81,9 @@ namespace RuniOS.Inspectors.Csharp
 
             return true;
         }
+        
+        /// <inheritdoc cref="IInspectorElement.Clone"/>
+        public abstract MemberElement Clone();
+        IInspectorElement IInspectorElement.Clone() => Clone();
     }
 }

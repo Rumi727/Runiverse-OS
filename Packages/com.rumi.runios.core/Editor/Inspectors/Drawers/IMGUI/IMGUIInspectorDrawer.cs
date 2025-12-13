@@ -39,8 +39,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
+        protected static string GetVariableUndoName(IInspectorVariableElement variableElement)
+        {
+            var rootInspectable = variableElement.inspectable;
+            for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
+
+            string name = GetTextOrKey("undo.modify.property_in_object");
+            name = new PlaceholderReplacePair("object", rootInspectable.inspectionDisplayName).ReplaceAsPlaceholder(name);
+            name = new PlaceholderReplacePair("property", variableElement.path).ReplaceAsPlaceholder(name);
+
+            return name;
+        }
+
         /// <returns>변수가 null 값인지 여부를 반환합니다</returns>
-        protected static bool NullToggleField(IInspectorVariableElement variableElement, Rect position, out Rect resultPosition, GUIContent? label, InspectorFlags flags, string? nullText = null)
+        protected static bool NullToggleField(IInspectorVariableElement variableElement, Rect position, out Rect resultPosition, GUIContent? label, InspectorFlags flags, string? nullText = null, IUndoRecorder? undoRecorder = null)
         {
             resultPosition = position;
 
@@ -53,7 +65,39 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 out resultPosition,
                 label,
                 variableElement.IsReadable(flags) ? !variableElement.value.IsNull() : null,
-                variableElement.IsWritable(flags) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
+                variableElement.IsWritable(flags) ? (x =>
+                {
+                    if (x)
+                    {
+                        object value = variableElement.variableType.GetDefaultValueNotNull();
+                        variableElement.value = value;
+                        
+                        IInspectorVariableElement clonedElement = variableElement.Clone();
+                        undoRecorder?.Record
+                        (
+                            () => clonedElement.value = null,
+                            () => clonedElement.value = value,
+                            GetVariableUndoName(clonedElement),
+                            UndoHandler.instance.GetTokenForCurrentUnityGroup(),
+                            clonedElement.path
+                        );
+                    }
+                    else
+                    {
+                        object? undoValue = variableElement.GetValueOrDefault(flags);
+                        variableElement.value = null;
+
+                        IInspectorVariableElement clonedElement = variableElement.Clone();
+                        undoRecorder?.Record
+                        (
+                            () => clonedElement.value = undoValue,
+                            () => clonedElement.value = null,
+                            GetVariableUndoName(clonedElement),
+                            UndoHandler.instance.GetTokenForCurrentUnityGroup(),
+                            clonedElement.path
+                        );
+                    }
+                }) : null,
                 variableElement.variableType.CanGetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic)),
                 variableElement.nullabilityInfo?.writeState,
                 nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"

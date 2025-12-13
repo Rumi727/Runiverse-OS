@@ -69,8 +69,9 @@ namespace RuniOS.Inspectors.Csharp
                     }
                     else
                     {
-                        foreach (var item in inspectable.instances)
-                            property.SetValue(item, value);
+                        var instances = inspectable.instances;
+                        for (int i = 0; i < instances.Count; i++)
+                            property.SetValue(instances[i], value);
                     }
 
                     inspectable.OnValueChangedInvoke();
@@ -92,8 +93,10 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    foreach (var item in inspectable.instances)
+                    var instances = inspectable.instances;
+                    for (int i = 0; i < instances.Count; i++)
                     {
+                        object? item = instances[i];
                         if (variableType.IsPointer)
                         {
                             if (((Pointer)property.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
@@ -127,19 +130,24 @@ namespace RuniOS.Inspectors.Csharp
         readonly List<object?> valuesBuffer = new List<object?>();
         readonly List<IEnumerable> collectionsBuffer = new List<IEnumerable>();
 
-        public IEnumerable<object?> GetValues()
+        public IEnumerable<object?> GetValues(bool noCopy = false)
         {
             valuesBuffer.Clear();
             try
             {
-                foreach (var instance in inspectable.instances)
-                    valuesBuffer.Add(property.GetValue(instance));
+                var instances = inspectable.instances;
+                for (int i = 0; i < instances.Count; i++)
+                    valuesBuffer.Add(property.GetValue(instances[i]));
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
-            return valuesBuffer;
+            
+            if (noCopy)
+                return valuesBuffer;
+            
+            return valuesBuffer.ToArray();
         }
 
         public void SetValues(IEnumerable<object?> values)
@@ -169,9 +177,9 @@ namespace RuniOS.Inspectors.Csharp
             if (!flags.HasFlagFast(InspectorFlags.Property))
                 return false;
 
-            if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
+            if (!IsWritable(flags, true) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
-            if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
+            if (!IsReadable(flags, true) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
 
             if ((property.IsSpecialName || name.Contains('.')) && !flags.HasFlagFast(InspectorFlags.Hidden))
@@ -180,11 +188,11 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
 
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => (noInstanceCheck || !inspectable.instancesIsEmpty) && property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
 
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
         {
-            if (inspectable.instancesIsEmpty)
+            if (!noInstanceCheck && inspectable.instancesIsEmpty)
                 return false;
 
             if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
@@ -198,8 +206,8 @@ namespace RuniOS.Inspectors.Csharp
             if (!IsReadable(InspectorFlags.All))
                 return;
 
-            var rawValues = (List<object?>)GetValues();
-            inspectableObjectElement.instances = rawValues;
+            var rawValues = (IList<object?>)GetValues(true);
+            inspectableObjectElement.SetInstances(rawValues);
 
             if (inspectableListElement != null || inspectableDictionaryElement != null)
             {
@@ -211,9 +219,13 @@ namespace RuniOS.Inspectors.Csharp
                         collectionsBuffer.Add(enumerable);
                 }
 
-                if (inspectableListElement != null) inspectableListElement.instances = collectionsBuffer;
-                if (inspectableDictionaryElement != null) inspectableDictionaryElement.instances = collectionsBuffer;
+                inspectableListElement?.SetInstances(collectionsBuffer);
+                inspectableDictionaryElement?.SetInstances(collectionsBuffer);
             }
         }
+        
+        /// <inheritdoc cref="IInspectorVariableElement.Clone"/>
+        public override MemberElement Clone() => new PropertyElement(inspectable.Clone(), property);
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new PropertyElement(inspectable.Clone(), property);
     }
 }

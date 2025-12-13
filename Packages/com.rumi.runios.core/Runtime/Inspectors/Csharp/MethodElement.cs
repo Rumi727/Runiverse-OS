@@ -26,11 +26,13 @@ namespace RuniOS.Inspectors.Csharp
 
         public void Execute(object?[] parameters)
         {
-            foreach (var instance in inspectable.instances)
+            var instances = inspectable.instances;
+            for (int i = 0; i < instances.Count; i++)
             {
-                if (instance == null)
+                object? instance = instances[i];
+                if (instance.IsNull())
                     return;
-                
+
                 try
                 {
                     method.Invoke(instance, parameters);
@@ -39,7 +41,7 @@ namespace RuniOS.Inspectors.Csharp
                 {
                     string memberName = method.Name;
                     string instanceType = instance.GetType().FullName ?? string.Empty;
-            
+
                     throw new InspectorException($"An error occurred while trying to invoke method '{memberName}' on an instance of '{instanceType}'.", e);
                 }
             }
@@ -58,5 +60,9 @@ namespace RuniOS.Inspectors.Csharp
 
             return true;
         }
+        
+        /// <inheritdoc cref="IInspectorActionElement.Clone"/>
+        public override MemberElement Clone() => new MethodElement(inspectable.Clone(), method);
+        IInspectorActionElement IInspectorActionElement.Clone() => new MethodElement(inspectable.Clone(), method);
     }
 }

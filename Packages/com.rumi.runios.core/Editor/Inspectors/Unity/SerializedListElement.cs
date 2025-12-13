@@ -19,7 +19,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         public SerializedListElement(InspectableSerializedList inspectable, SerializedProperty property, int index)
         {
             displayName = property.GetFieldLabel();
-            
+
             this.inspectable = inspectable;
 
             this.property = property;
@@ -34,11 +34,13 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// 요소의 이름을 가져옵니다.
         /// </summary>
         public string name => property.name;
-        
+
         /// <summary>
         /// 요소의 디스플레이 이름을 가져옵니다.
         /// </summary>
         public string displayName { get; set; }
+
+        public string path => property.propertyPath;
 
         /// <summary>
         /// 이 요소가 속한 검사 가능한 직렬화된 리스트를 가져옵니다.
@@ -50,7 +52,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// 변수의 타입을 가져옵니다.
         /// </summary>
         public Type variableType => inspectable.inspectionElementType;
-        
+
         public Type currentElementType => variableType;
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// 변수가 공개되어있는지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 true입니다.
         /// </summary>
         public bool isPublic => true;
-        
+
         /// <summary>
         /// 변수가 정적인지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 false입니다.
         /// </summary>
@@ -130,7 +132,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// 이 요소에 대한 검사 가능한 객체를 가져옵니다.
         /// </summary>
         public IInspectableObject inspectableObjectElement { get; }
-        
+
         /// <summary>
         /// 이 요소가 배열이나 리스트인 경우, 검사 가능한 리스트를 가져옵니다.
         /// </summary>
@@ -144,24 +146,29 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 모든 대상 객체에서 값을 가져옵니다. 직렬화된 프로퍼티에 대해서는 지원되지 않습니다.
         /// </summary>
+        /// <param name="noCopy"></param>
         /// <returns></returns>
         /// <exception cref="NotSupportedException">직렬화된 프로퍼티에 대해 항상 발생합니다.</exception>
-        public IEnumerable<object?> GetValues() => throw new NotSupportedException("Fetching values for all target objects is not supported for serialized properties.");
-        
+        public IEnumerable<object?> GetValues(bool noCopy = false) => throw new NotSupportedException("Fetching values for all target objects is not supported for serialized properties.");
+
         public void SetValues(IEnumerable<object?> values) => throw new NotSupportedException("Writing values for all target objects is not supported for serialized properties.");
 
         public bool HasFlags(InspectorFlags flags) => flags != InspectorFlags.None && flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List);
-        
+
+        public IInspectorListElement Clone() => throw new NotImplementedException();
+
         /// <summary>
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty;
-        
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => !inspectable.instancesIsEmpty || noInstanceCheck;
+
         /// <summary>
         /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty;
-        
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => !inspectable.instancesIsEmpty || noInstanceCheck;
+
         public void UpdateChildInspectable() { }
+
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new SerializedListElement(inspectable.Clone(), new SerializedObject(property.serializedObject.targetObjects).FindProperty(property.propertyPath), index);
     }
 }

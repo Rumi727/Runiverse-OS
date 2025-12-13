@@ -27,11 +27,12 @@ namespace RuniOS.Inspectors.Csharp
             this.inspectionType = inspectionType;
             inspectionElementType = CollectionGenericUtility.GetDictionaryElementType(inspectionType);
 
-            this.instances = instances;
-
             this.elementNullabilityInfo = elementNullabilityInfo;
 
-            dictionaryHandlers = _dictionaryHandlers.AsReadOnly();
+            readOnlyInstances = _instances.AsReadOnly();
+            readonlyDictionaryHandlers = _dictionaryHandlers.AsReadOnly();
+            
+            SetInstances(instances);
         }
 
         public IInspectorVariableElement? parentElement { get; set; }
@@ -117,10 +118,9 @@ namespace RuniOS.Inspectors.Csharp
                 if (value != null && !inspectionType.IsInstanceOfType(value))
                     throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
 
+                _instances.Clear();
                 if (value != null)
-                    instances = Enumerable.Repeat(value, 1);
-                else
-                    instances = Array.Empty<IList>();
+                    _instances.Add(value);
             }
         }
 
@@ -128,6 +128,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
+                parentElement?.UpdateChildInspectable();
                 if (_dictionaryHandlers.Count == 0)
                     return null;
 
@@ -152,36 +153,29 @@ namespace RuniOS.Inspectors.Csharp
         /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
         /// 값이 유효한지 검사하지 않습니다!
         /// </summary>
-        public IEnumerable<IEnumerable> instances
+        public IReadOnlyList<IEnumerable> instances
         {
             get
             {
                 parentElement?.UpdateChildInspectable();
-                return _instances;
-            }
-            set
-            {
-                _instances.Clear();
-                if (value is ICollection<IEnumerable> col)
-                {
-                    if (_instances.Capacity < col.Count)
-                        _instances.Capacity = col.Count;
-                }
-                _instances.AddRange(value);
-                
-                _dictionaryHandlers.Clear();
-                for (int i = 0; i < _instances.Count; i++)
-                {
-                    var instance = _instances[i];
-                    if (instance != null)
-                        _dictionaryHandlers.Add(DictionaryHandlerBase.FindDictionaryHandler(instance));
-                }
+                return readOnlyInstances;
             }
         }
+        readonly IReadOnlyList<IEnumerable> readOnlyInstances;
         readonly List<IEnumerable> _instances = new List<IEnumerable>();
+        readonly List<IEnumerable> staleKeysBuffer = new List<IEnumerable>();
 
-        public IReadOnlyList<DictionaryHandlerBase> dictionaryHandlers { get; }
+        public IReadOnlyList<DictionaryHandlerBase> dictionaryHandlers
+        {
+            get
+            {
+                parentElement?.UpdateChildInspectable();
+                return readonlyDictionaryHandlers;
+            }
+        }
+        readonly IReadOnlyList<DictionaryHandlerBase> readonlyDictionaryHandlers;
         readonly List<DictionaryHandlerBase> _dictionaryHandlers = new List<DictionaryHandlerBase>();
+        readonly Dictionary<IEnumerable, DictionaryHandlerBase> handlerMap = new Dictionary<IEnumerable, DictionaryHandlerBase>();
 
         [MemberNotNullWhen(false, nameof(instance), nameof(dictionaryHandler))]
         public bool instancesIsEmpty => instance == null;
@@ -191,19 +185,24 @@ namespace RuniOS.Inspectors.Csharp
 
         public int instanceCount => instances.Count();
 
-        public Action? onValueChanged { get; set; }
+        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
         public object? this[object key]
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-                return dictionaryHandler[key];
+                var handler = dictionaryHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                return handler[key];
             }
             set
             {
-                foreach (var list in dictionaryHandlers)
-                    list[key] = value;
+                var handlers = dictionaryHandlers;
+                for (int i = 0; i < handlers.Count; i++)
+                {
+                    DictionaryHandlerBase? handler = handlers[i];
+                    handler[key] = value;
+                }
             }
         }
 
@@ -211,8 +210,9 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-                return dictionaryHandler.keys;
+                var handler = dictionaryHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                return handler.keys;
             }
         }
         ICollection IDictionary.Keys => keys;
@@ -221,8 +221,9 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-                return dictionaryHandler.values;
+                var handler = dictionaryHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                return handler.values;
             }
         }
         ICollection IDictionary.Values => values;
@@ -231,52 +232,142 @@ namespace RuniOS.Inspectors.Csharp
         {
             get
             {
-                ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-                return dictionaryHandler.count;
+                var handler = dictionaryHandler;
+                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                return handler.count;
             }
         }
         int ICollection.Count => count;
 
+        public void SetInstances(IEnumerable<IEnumerable> instances)
+        {
+            _instances.Clear();
+            _instances.Capacity = instances switch
+            {
+                ICollection<IEnumerable> genericCollection when _instances.Capacity < genericCollection.Count => genericCollection.Count,
+                _ => _instances.Capacity
+            };
+
+            switch (instances)
+            {
+                case IList<IEnumerable> genericList:
+                {
+                    for (int i = 0; i < genericList.Count; i++)
+                        _instances.Add(genericList[i]);
+                    break;
+                }
+                default:
+                {
+                    _instances.AddRange(instances);
+                    break;
+                }
+            }
+            
+            // 인스턴스가 동일하면 리스트 핸들러를 새로 만들지 않기 위해 맵으로 관리하는거니 지우지 말것
+            
+            // -------------------------------------------------------------
+            // 맵 동기화 (SyncKeysWithEnumerable 인라인 -> 델리게이트 GC 제거)
+            // -------------------------------------------------------------
+
+            // A. 제거
+            staleKeysBuffer.Clear();
+            foreach (var key in handlerMap.Keys)
+            {
+                bool isUsed = false;
+                
+                // _instances는 List<T>이므로 for문 사용 (GC 없음)
+                // ReferenceEquals로 빠르게 비교
+                var instanceCount = _instances.Count;
+                for (int i = 0; i < instanceCount; i++)
+                {
+                    if (ReferenceEquals(_instances[i], key))
+                    {
+                        isUsed = true;
+                        break;
+                    }
+                }
+
+                if (!isUsed)
+                    staleKeysBuffer.Add(key);
+            }
+
+            // 버퍼에 담긴 키 제거
+            var removeCount = staleKeysBuffer.Count;
+            for (int i = 0; i < removeCount; i++)
+                handlerMap.Remove(staleKeysBuffer[i]);
+
+            // B. 추가
+            for (int i = 0; i < _instances.Count; i++)
+            {
+                var instance = _instances[i];
+                // 델리게이트(Func) 생성 없이 직접 팩토리 메서드 호출
+                if (instance != null && !handlerMap.ContainsKey(instance))
+                    handlerMap.Add(instance, DictionaryHandlerBase.FindDictionaryHandler(instance));
+            }
+
+            _dictionaryHandlers.Clear();
+            var count = _instances.Count;
+            for (int i = 0; i < count; i++)
+            {
+                var inst = _instances[i];
+                if (inst != null && handlerMap.TryGetValue(inst, out var handler))
+                    _dictionaryHandlers.Add(handler);
+            }
+        }
+
         public void OnValueChangedInvoke()
         {
-            onValueChanged?.SafeInvoke();
+            onValueChanged?.SafeInvoke(instances);
             parentElement?.inspectable.OnValueChangedInvoke();
         }
 
         public void SynchronizeCollections()
         {
-            foreach (var item in dictionaryHandlers)
-                item.SynchronizeCollections();
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+                handlers[i].SynchronizeCollections();
         }
 
         public void UpdateSourceCollections()
         {
-            foreach (var item in dictionaryHandlers)
-                item.UpdateSourceCollections();
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+                handlers[i].UpdateSourceCollections();
         }
 
         public void Add(object key, object? value)
         {
-            foreach (var list in dictionaryHandlers)
-                list.Add(key, value);
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+                handlers[i].Add(key, value);
         }
 
         public void Remove(object key)
         {
-            foreach (var list in dictionaryHandlers)
-                list.Remove(key);
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+                handlers[i].Remove(key);
         }
 
         public void Clear()
         {
-            foreach (var list in dictionaryHandlers)
-                list.Clear();
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
+                handlers[i].Clear();
         }
 
         public bool Contains(object key)
         {
             ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-            return dictionaryHandlers.Any(x => x.Contains(key));
+            var handlers = dictionaryHandlers;
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (int i = 0; i < handlers.Count; i++)
+            {
+                DictionaryHandlerBase x = handlers[i];
+                if (x.Contains(key))
+                    return true;
+            }
+            return false;
         }
 
         public void RenameKey(object fromKey, object toKey)
@@ -284,8 +375,10 @@ namespace RuniOS.Inspectors.Csharp
             if (!Contains(fromKey))
                 throw new KeyNotFoundException($"Key '{fromKey}' not found.");
 
-            foreach (var list in dictionaryHandlers)
+            var handlers = dictionaryHandlers;
+            for (int i = 0; i < handlers.Count; i++)
             {
+                DictionaryHandlerBase? list = handlers[i];
                 object? value = list[fromKey];
 
                 list.Remove(fromKey);
@@ -299,8 +392,9 @@ namespace RuniOS.Inspectors.Csharp
 
         public IDictionaryEnumerator GetEnumerator()
         {
-            ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
-            return dictionaryHandler.GetEnumerator();
+            var handler = dictionaryHandler;
+            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+            return handler.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
@@ -317,7 +411,6 @@ namespace RuniOS.Inspectors.Csharp
 
         readonly Dictionary<object, IInspectorDictionaryElement> cachedElements = new();
         IReadOnlyDictionary<object, IInspectorDictionaryElement>? readOnlyCachedElements;
-        readonly List<object> elementKeysBuffer = new List<object>();
         public IReadOnlyDictionary<object, IInspectorDictionaryElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
@@ -328,7 +421,7 @@ namespace RuniOS.Inspectors.Csharp
                 return readOnlyCachedElements;
             }
 
-            cachedElements.SyncKeysWithEnumerable(dictionaryHandler.keys.Cast<object>(), CreateElement, elementKeysBuffer);
+            cachedElements.SyncKeysWithEnumerable(dictionaryHandler.keys.Cast<object>(), CreateElement);
             return readOnlyCachedElements;
         }
 
@@ -347,6 +440,14 @@ namespace RuniOS.Inspectors.Csharp
 
         protected virtual DictionaryValueElement CreateElement(object key) => new DictionaryValueElement(this, key);
 
-        IInspectableDictionary IInspectableDictionary.Clone() => new InspectableDictionary(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = instances };
+        /// <inheritdoc cref="IInspectableDictionary.Clone"/>
+        public InspectableDictionary Clone()
+        {
+            InspectableDictionary clonedDictionary = new InspectableDictionary(inspectionType, instances, elementNullabilityInfo) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+            clonedDictionary.SynchronizeCollections();
+
+            return clonedDictionary;
+        }
+        IInspectableDictionary IInspectableDictionary.Clone() => Clone();
     }
 }

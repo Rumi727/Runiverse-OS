@@ -2350,57 +2350,6 @@ namespace RuniOS.Utility
                     targetDictionary.Add(key, valueFactory != null ? valueFactory.Invoke(key) : Activator.CreateInstance<TValue>());
             }
         }
-        
-        /// <summary>
-        /// LINQ 없이 딕셔너리 키를 소스 컬렉션과 동기화합니다. (Zero GC 버전)
-        /// </summary>
-        /// <typeparam name="TKey">키 타입입니다.</typeparam>
-        /// <typeparam name="TValue">값 타입입니다.</typeparam>
-        /// <param name="targetDictionary">키를 동기화할 대상 Dictionary입니다.</param>
-        /// <param name="source">동기화의 기준이 되는 List입니다.</param>
-        /// <param name="valueFactory">새로운 키가 추가될 때 사용할 기본 값을 생성하는 함수입니다.</param>
-        /// <param name="buffer">키 제거를 위해 사용할 임시 리스트입니다. (재사용 권장)</param>
-        public static void SyncKeysWithEnumerable<TKey, TValue>(this IDictionary<TKey, TValue> targetDictionary, IEnumerable<TKey> source, Func<TKey, TValue>? valueFactory, List<TKey> buffer) where TKey : notnull
-        {
-            buffer.Clear();
-
-            foreach (var key in targetDictionary.Keys)
-            {
-                bool foundInSource = false;
-            
-                // Source가 List<T>라면 인덱스로 접근하는 것이 가장 빠르겠지만, 
-                // 범용성을 위해 foreach를 사용 (GC 없음)
-                
-                // ReSharper disable once LoopCanBeConvertedToQuery
-                foreach (var item in source)
-                {
-                    if (!EqualityComparer<TKey>.Default.Equals(item, key))
-                        continue;
-                    
-                    foundInSource = true;
-                    break;
-                }
-
-                if (!foundInSource)
-                    buffer.Add(key);
-            }
-
-            // 실제로 제거 수행
-            var removeCount = buffer.Count;
-            for (int i = 0; i < removeCount; i++)
-                targetDictionary.Remove(buffer[i]);
-
-            // 2. 추가할 키 찾기 (Source에는 있지만 Dictionary에는 없는 것)
-            foreach (var item in source)
-            {
-                // Dictionary.ContainsKey는 O(1)이므로 빠름
-                if (!targetDictionary.ContainsKey(item))
-                {
-                    TValue value = valueFactory != null ? valueFactory(item) : Activator.CreateInstance<TValue>();
-                    targetDictionary.Add(item, value);
-                }
-            }
-        }
 
         public static void SyncWithEnumerable(this IList target, IEnumerable source)
         {
