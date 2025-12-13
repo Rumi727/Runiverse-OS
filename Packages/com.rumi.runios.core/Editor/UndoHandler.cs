@@ -57,9 +57,6 @@ namespace RuniOS.Editor
         /// </param>
         public void Record(Action undoAction, Action redoAction, string name, UndoGroupToken? groupToken = null, object? collapseKey = null)
         {
-            // 1. RuniUndo에 기록
-            runiUndo.Record(undoAction, redoAction, name, groupToken ?? GetTokenForCurrentUnityGroup(), collapseKey);
-
             if (serializableUndoHandler == null)
             {
                 serializableUndoHandler = ScriptableObject.CreateInstance<SerializableUndoHandler>();
@@ -68,6 +65,9 @@ namespace RuniOS.Editor
                 
                 EditorUtility.SetDirty(serializableUndoHandler);
             }
+            
+            // 1. RuniUndo에 기록
+            runiUndo.Record(undoAction, redoAction, name, groupToken ?? GetTokenForCurrentUnityGroup(), collapseKey);
 
             // 2. Unity에 상태 기록 (현재 시점의 인덱스를 저장)
             Undo.RecordObject(serializableUndoHandler, name);
@@ -83,7 +83,7 @@ namespace RuniOS.Editor
             /// <summary>
             /// Unity가 저장하고 복원하는 '목표 인덱스'입니다.
             /// </summary>
-            public int historyIndex;
+            public int historyIndex = -1;
             
             void Awake()
             {
