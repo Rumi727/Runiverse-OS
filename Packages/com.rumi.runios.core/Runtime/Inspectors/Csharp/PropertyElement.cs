@@ -92,10 +92,18 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    if (variableType.IsPointer)
-                        return inspectable.instances.Any(x => ((Pointer)property.GetValue(x)).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    foreach (var item in inspectable.instances)
+                    {
+                        if (variableType.IsPointer)
+                        {
+                            if (((Pointer)property.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
+                                return true;
+                        }
+                        else if (!Equals(property.GetValue(item), value))
+                            return true;
+                    }
 
-                    return inspectable.instances.Any(x => !Equals(property.GetValue(x), value));
+                    return false;
                 }
                 catch (Exception e)
                 {
@@ -116,23 +124,29 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableDictionary? inspectableDictionaryElement { get; }
         IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
+        readonly List<object?> valuesBuffer = new List<object?>();
+        readonly List<IEnumerable> collectionsBuffer = new List<IEnumerable>();
+
         public IEnumerable<object?> GetValues()
         {
+            valuesBuffer.Clear();
             try
             {
-                return inspectable.instances.Select(x => property.GetValue(x));
+                foreach (var instance in inspectable.instances)
+                    valuesBuffer.Add(property.GetValue(instance));
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
+            return valuesBuffer;
         }
 
         public void SetValues(IEnumerable<object?> values)
         {
             try
             {
-                foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
+                foreach ((object instance, object? value) in inspectable.instances.WhereNotNull().Zip(values, (instance, value) => (instance, value)))
                     property.SetValue(instance, value);
 
                 // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
@@ -184,11 +198,22 @@ namespace RuniOS.Inspectors.Csharp
             if (!IsReadable(InspectorFlags.All))
                 return;
 
-            inspectableObjectElement.instances = GetValues().WhereNotNull();
-            if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
-            if (inspectableDictionaryElement != null)
-                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
+            var rawValues = (List<object?>)GetValues();
+            inspectableObjectElement.instances = rawValues;
+
+            if (inspectableListElement != null || inspectableDictionaryElement != null)
+            {
+                collectionsBuffer.Clear();
+                for (int i = 0; i < rawValues.Count; i++)
+                {
+                    object? value = rawValues[i];
+                    if (value is IEnumerable enumerable)
+                        collectionsBuffer.Add(enumerable);
+                }
+
+                if (inspectableListElement != null) inspectableListElement.instances = collectionsBuffer;
+                if (inspectableDictionaryElement != null) inspectableDictionaryElement.instances = collectionsBuffer;
+            }
         }
     }
 }

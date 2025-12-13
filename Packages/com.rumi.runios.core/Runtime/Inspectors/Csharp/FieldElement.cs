@@ -136,10 +136,18 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    if (variableType.IsPointer)
-                        return inspectable.instances.Any(x => ((Pointer)field.GetValue(x)).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    foreach (var item in inspectable.instances)
+                    {
+                        if (variableType.IsPointer)
+                        {
+                            if (((Pointer)field.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
+                                return true;
+                        }
+                        else if (!Equals(field.GetValue(item), value))
+                            return true;
+                    }
 
-                    return inspectable.instances.Any(x => !Equals(field.GetValue(x), value));
+                    return false;
                 }
                 catch (Exception e)
                 {
@@ -166,6 +174,9 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableDictionary? inspectableDictionaryElement { get; }
         IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
+        readonly List<object?> valuesBuffer = new List<object?>();
+        readonly List<IEnumerable> collectionsBuffer = new List<IEnumerable>();
+
         /// <summary>
         /// 검사 중인 모든 객체에서 이 필드의 값 목록을 가져옵니다.
         /// </summary>
@@ -173,14 +184,17 @@ namespace RuniOS.Inspectors.Csharp
         /// <exception cref="InspectorElementException">프로퍼티 값을 읽는 동안 예외가 발생할 때 발생합니다.</exception>
         public IEnumerable<object?> GetValues()
         {
+            valuesBuffer.Clear();
             try
             {
-                return inspectable.instances.Select(x => field.GetValue(x));
+                foreach (var instance in inspectable.instances)
+                    valuesBuffer.Add(field.GetValue(instance));
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
             }
+            return valuesBuffer;
         }
 
         public void SetValues(IEnumerable<object?> values)
@@ -202,7 +216,7 @@ namespace RuniOS.Inspectors.Csharp
                 }
                 else
                 {
-                    foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
+                    foreach ((object instance, object? value) in inspectable.instances.WhereNotNull().Zip(values, (instance, value) => (instance, value)))
                         field.SetValue(instance, value);
                 }
 
@@ -254,11 +268,22 @@ namespace RuniOS.Inspectors.Csharp
             if (!IsReadable(InspectorFlags.All))
                 return;
 
-            inspectableObjectElement.instances = GetValues().WhereNotNull();
-            if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
-            if (inspectableDictionaryElement != null)
-                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
+            var rawValues = (List<object?>)GetValues();
+            inspectableObjectElement.instances = rawValues;
+
+            if (inspectableListElement != null || inspectableDictionaryElement != null)
+            {
+                collectionsBuffer.Clear();
+                for (int i = 0; i < rawValues.Count; i++)
+                {
+                    object? value = rawValues[i];
+                    if (value is IEnumerable enumerable)
+                        collectionsBuffer.Add(enumerable);
+                }
+
+                if (inspectableListElement != null) inspectableListElement.instances = collectionsBuffer;
+                if (inspectableDictionaryElement != null) inspectableDictionaryElement.instances = collectionsBuffer;
+            }
         }
     }
 }

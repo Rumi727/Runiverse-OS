@@ -9,19 +9,33 @@ namespace RuniOS.Inspectors.Csharp
     public class InspectableObject : IInspectableObject
     {
         public IInspectorVariableElement? parentElement { get; set; }
-        
+
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
-        
+
+        /// <summary>
+        /// 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
+        /// 값이 유효한지 검사하지 않습니다!
+        /// </summary>
         public object? instance
         {
-            get => instances.WhereNotNull().FirstOrDefault();
+            get
+            {
+                parentElement?.UpdateChildInspectable();
+                for (int i = 0; i < _instances.Count; i++)
+                {
+                    var item = _instances[i];
+                    if (item != null)
+                        return item;
+                }
+
+                return null;
+            }
             set
             {
+                _instances.Clear();
                 if (value != null)
-                    instances = Enumerable.Repeat(value, 1);
-                else
-                    instances = Enumerable.Empty<object>();
+                    _instances.Add(value);
             }
         }
 
@@ -29,35 +43,44 @@ namespace RuniOS.Inspectors.Csharp
         /// 모든 요소의 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
         /// 값이 유효한지 검사하지 않습니다!
         /// </summary>
-        public IEnumerable<object> instances
+        public IEnumerable<object?> instances
         {
             get
             {
                 parentElement?.UpdateChildInspectable();
-                return _instances.Where(x => inspectionType.IsInstanceOfType(x));
+                return _instances;
             }
-            set => _instances = value;
+            set
+            {
+                _instances.Clear();
+
+                if (value is ICollection<object> col)
+                {
+                    if (_instances.Capacity < col.Count)
+                        _instances.Capacity = col.Count;
+                }
+
+                _instances.AddRange(value);
+            }
         }
-        IEnumerable<object> _instances;
+        readonly List<object?> _instances = new List<object?>();
 
         [MemberNotNullWhen(false, nameof(instance))]
         public bool instancesIsEmpty => instance == null;
 
         public bool instanceIsMultiple => instances.TwoOrMore();
-        
+
         public int instanceCount => instances.Count();
-        
+
         public Action? onValueChanged { get; set; }
 
         public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
         public InspectableObject(Type inspectionType, params object?[] instances) : this(inspectionType, instances.WhereNotNull()) { }
-        
+
         public InspectableObject(Type inspectionType, IEnumerable<object> instances)
         {
             this.inspectionType = inspectionType;
-            
-            _instances = null!;
             this.instances = instances;
         }
 
@@ -77,7 +100,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (flags == InspectorFlags.None)
                 return ImmutableArray<IInspectorElement>.Empty;
-            
+
             return inspectionType.GetRuntimeProperties().Where(x => x.GetIndexParameters().IsEmpty()).Select(x => (IInspectorElement)new PropertyElement(this, x))
                 .Concat(inspectionType.GetRuntimeFields().Select(x => (IInspectorElement)new FieldElement(this, x)))
                 .Concat(inspectionType.GetRuntimeMethods().Select(x => (IInspectorElement)new MethodElement(this, x)))
@@ -90,18 +113,18 @@ namespace RuniOS.Inspectors.Csharp
             {
                 string invalidTypes = string.Join
                 (
-                    ", ", 
+                    ", ",
                     _instances
                         .Where(x => x != null && !inspectionType.IsInstanceOfType(x))
                         .Select(static x => $"'{x!.GetType().FullName}'")
                         .Distinct()
                 );
-                                            
+
                 throw new InspectorException($"One or more elements in the collection have invalid types. Expected '{inspectionType.FullName}', but received the following: {invalidTypes}.");
             }
         }
 
-        public IInspectableObject Clone() => new InspectableObject(inspectionType) { parentElement = parentElement, instances = instances };
+        public IInspectableObject Clone() => new InspectableObject(inspectionType) { parentElement = parentElement, instances = _instances };
         IInspectable IInspectable.Clone() => Clone();
         object ICloneable.Clone() => Clone();
     }

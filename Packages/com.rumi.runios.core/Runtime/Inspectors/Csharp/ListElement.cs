@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
-using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
@@ -78,10 +77,18 @@ namespace RuniOS.Inspectors.Csharp
                 try
                 {
                     object? value = this.value;
-                    if (variableType.IsPointer)
-                        return inspectable.listHandlers.Any(x => ((Pointer)x[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
+                    foreach (var item in inspectable.listHandlers)
+                    {
+                        if (variableType.IsPointer)
+                        {
+                            if (((Pointer)item[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr())
+                                return true;
+                        }
+                        else if (!Equals(item[index], value))
+                            return true;
+                    }
 
-                    return inspectable.listHandlers.Any(x => !Equals(x[index], value));
+                    return false;
                 }
                 catch (Exception e)
                 {
@@ -103,16 +110,22 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableDictionary? inspectableDictionaryElement { get; }
         IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
+        readonly List<object?> valuesBuffer = new List<object?>();
+        readonly List<IEnumerable> collectionsBuffer = new List<IEnumerable>();
+
         public IEnumerable<object?> GetValues()
         {
+            valuesBuffer.Clear();
             try
             {
-                return inspectable.listHandlers.Select(x => x[index]);
+                foreach (var handler in inspectable.listHandlers)
+                    valuesBuffer.Add(handler[index]);
             }
             catch (Exception e)
             {
-                throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
+                throw new InspectorElementException($"An exception occurred while reading value from {name} list.", name, e);
             }
+            return valuesBuffer;
         }
 
         public void SetValues(IEnumerable<object?> values)
@@ -126,7 +139,7 @@ namespace RuniOS.Inspectors.Csharp
             }
             catch (Exception e)
             {
-                throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
+                throw new InspectorElementException($"An exception occurred while writing a value to the {name} list.", name, e);
             }
         }
 
@@ -152,11 +165,22 @@ namespace RuniOS.Inspectors.Csharp
             if (!IsReadable(InspectorFlags.All))
                 return;
 
-            inspectableObjectElement.instances = GetValues().WhereNotNull();
-            if (inspectableListElement != null)
-                inspectableListElement.instances = GetValues().OfType<IEnumerable>();
-            if (inspectableDictionaryElement != null)
-                inspectableDictionaryElement.instances = GetValues().OfType<IEnumerable>();
+            var rawValues = (List<object?>)GetValues();
+            inspectableObjectElement.instances = rawValues;
+
+            if (inspectableListElement != null || inspectableDictionaryElement != null)
+            {
+                collectionsBuffer.Clear();
+                for (int i = 0; i < rawValues.Count; i++)
+                {
+                    object? value = rawValues[i];
+                    if (value is IEnumerable enumerable)
+                        collectionsBuffer.Add(enumerable);
+                }
+
+                if (inspectableListElement != null) inspectableListElement.instances = collectionsBuffer;
+                if (inspectableDictionaryElement != null) inspectableDictionaryElement.instances = collectionsBuffer;
+            }
         }
     }
 }

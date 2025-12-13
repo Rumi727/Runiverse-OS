@@ -14,32 +14,31 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableDictionary(IEnumerable instance, NullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
 
         public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
-        
+
         public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
-        
+
         public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
             if (!CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a dictionary type.", nameof(inspectionType));
-            
+
             this.inspectionType = inspectionType;
             inspectionElementType = CollectionGenericUtility.GetDictionaryElementType(inspectionType);
-            
-            _instances = null!;
+
             this.instances = instances;
-            
+
             this.elementNullabilityInfo = elementNullabilityInfo;
 
-            readonlyDictionaryHandlerTable = _collectionHandlerTable.AsReadOnly();
+            dictionaryHandlers = _dictionaryHandlers.AsReadOnly();
         }
-        
+
         public IInspectorVariableElement? parentElement { get; set; }
-        
+
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
-        
+
         /// <remarks>
         /// null을 반환하는 경우, 리스트가 모든 타입 형식을 허용한다는 의미입니다.
         /// </remarks>
@@ -47,47 +46,105 @@ namespace RuniOS.Inspectors.Csharp
 
         public NullabilityInfo? elementNullabilityInfo { get; }
 
-        public bool isReadOnly => dictionaryHandlers.Any(x => x.isReadOnly);
+        public bool isReadOnly
+        {
+            get
+            {
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                for (int i = 0; i < _dictionaryHandlers.Count; i++)
+                {
+                    if (_dictionaryHandlers[i].isReadOnly)
+                        return true;
+                }
+                
+                return false;
+            }
+        }
         bool IDictionary.IsReadOnly => isReadOnly;
-        
-        public bool isFixedSize => dictionaryHandlers.Any(x => (parentElement == null || !isArray) && x.isFixedSize);
+
+        public bool isFixedSize
+        {
+            get
+            {
+                if (parentElement != null && isArray)
+                    return false;
+
+                // ReSharper disable once LoopCanBeConvertedToQuery
+                for (int i = 0; i < _dictionaryHandlers.Count; i++)
+                {
+                    if (_dictionaryHandlers[i].isFixedSize)
+                        return true;
+                }
+                return false;
+            }
+        }
         bool IDictionary.IsFixedSize => isFixedSize;
-        
+
         public bool isArray => inspectionType.IsArray;
-        
+
         bool ICollection.IsSynchronized => false;
         object ICollection.SyncRoot => this;
-        
+
+        /// <summary>
+        /// 타입이 <see cref="inspectionType"/>와 동일해야합니다.<br/>
+        /// 값이 유효한지 검사하지 않습니다!
+        /// </summary>
         public IEnumerable? instance
         {
             get
             {
-                var instances = dictionaryHandlerTable;
-                if (instances.Any())
-                    return instances.MinBy(static x => x.Value.count).Key;
-                
-                return null;
+                parentElement?.UpdateChildInspectable();
+                if (_dictionaryHandlers.Count == 0)
+                    return null;
+
+                var minHandler = _dictionaryHandlers[0];
+                int minCount = minHandler.count;
+
+                for (int i = 1; i < _dictionaryHandlers.Count; i++)
+                {
+                    DictionaryHandlerBase? currentHandler = _dictionaryHandlers[i];
+                    if (currentHandler.count < minCount)
+                    {
+                        minCount = currentHandler.count;
+                        minHandler = currentHandler;
+                    }
+                }
+
+                return minHandler.targetCollection;
             }
             set
             {
                 if (value != null && !inspectionType.IsInstanceOfType(value))
                     throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
-                
+
                 if (value != null)
                     instances = Enumerable.Repeat(value, 1);
                 else
                     instances = Array.Empty<IList>();
             }
         }
-        
+
         public DictionaryHandlerBase? dictionaryHandler
         {
             get
             {
-                if (instance == null)
+                if (_dictionaryHandlers.Count == 0)
                     return null;
-                
-                return dictionaryHandlerTable[instance];
+
+                var minHandler = _dictionaryHandlers[0];
+                int minCount = minHandler.count;
+
+                for (int i = 1; i < _dictionaryHandlers.Count; i++)
+                {
+                    DictionaryHandlerBase? currentHandler = _dictionaryHandlers[i];
+                    if (currentHandler.count < minCount)
+                    {
+                        minCount = currentHandler.count;
+                        minHandler = currentHandler;
+                    }
+                }
+
+                return minHandler;
             }
         }
 
@@ -102,23 +159,29 @@ namespace RuniOS.Inspectors.Csharp
                 parentElement?.UpdateChildInspectable();
                 return _instances;
             }
-            set => _instances = value;
-        }
-        IEnumerable<IEnumerable> _instances;
-        
-        public IEnumerable<DictionaryHandlerBase> dictionaryHandlers => instances.Select(x => dictionaryHandlerTable[x]);
-
-        // 이 InspectableCollection이 관리하는 모든 원본 컬렉션에 매핑되는 CollectionHandler 맵
-        public IReadOnlyDictionary<IEnumerable, DictionaryHandlerBase> dictionaryHandlerTable
-        {
-            get
+            set
             {
-                _collectionHandlerTable.SyncKeysWithEnumerable(instances, DictionaryHandlerBase.FindDictionaryHandler);
-                return readonlyDictionaryHandlerTable;
+                _instances.Clear();
+                if (value is ICollection<IEnumerable> col)
+                {
+                    if (_instances.Capacity < col.Count)
+                        _instances.Capacity = col.Count;
+                }
+                _instances.AddRange(value);
+                
+                _dictionaryHandlers.Clear();
+                for (int i = 0; i < _instances.Count; i++)
+                {
+                    var instance = _instances[i];
+                    if (instance != null)
+                        _dictionaryHandlers.Add(DictionaryHandlerBase.FindDictionaryHandler(instance));
+                }
             }
         }
-        readonly IReadOnlyDictionary<IEnumerable, DictionaryHandlerBase> readonlyDictionaryHandlerTable;
-        readonly Dictionary<IEnumerable, DictionaryHandlerBase> _collectionHandlerTable = new();
+        readonly List<IEnumerable> _instances = new List<IEnumerable>();
+
+        public IReadOnlyList<DictionaryHandlerBase> dictionaryHandlers { get; }
+        readonly List<DictionaryHandlerBase> _dictionaryHandlers = new List<DictionaryHandlerBase>();
 
         [MemberNotNullWhen(false, nameof(instance), nameof(dictionaryHandler))]
         public bool instancesIsEmpty => instance == null;
@@ -153,7 +216,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         ICollection IDictionary.Keys => keys;
-        
+
         public ICollection values
         {
             get
@@ -173,7 +236,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         int ICollection.Count => count;
-        
+
         public void OnValueChangedInvoke()
         {
             onValueChanged?.SafeInvoke();
@@ -185,7 +248,7 @@ namespace RuniOS.Inspectors.Csharp
             foreach (var item in dictionaryHandlers)
                 item.SynchronizeCollections();
         }
-        
+
         public void UpdateSourceCollections()
         {
             foreach (var item in dictionaryHandlers)
@@ -203,7 +266,7 @@ namespace RuniOS.Inspectors.Csharp
             foreach (var list in dictionaryHandlers)
                 list.Remove(key);
         }
-        
+
         public void Clear()
         {
             foreach (var list in dictionaryHandlers)
@@ -243,28 +306,29 @@ namespace RuniOS.Inspectors.Csharp
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public void CopyTo(Array array, int index) => throw new NotSupportedException("CopyTo is not implemented for multi-object editing.");
-        
+
         public bool TryGetInspectionType([NotNullWhen(true)] out Type? type)
         {
             type = inspectionType;
             return true;
         }
-        
-        
+
+
 
         readonly Dictionary<object, IInspectorDictionaryElement> cachedElements = new();
         IReadOnlyDictionary<object, IInspectorDictionaryElement>? readOnlyCachedElements;
+        readonly List<object> elementKeysBuffer = new List<object>();
         public IReadOnlyDictionary<object, IInspectorDictionaryElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
-            
+
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)) || instancesIsEmpty)
             {
                 cachedElements.Clear();
                 return readOnlyCachedElements;
             }
 
-            cachedElements.SyncKeysWithEnumerable(dictionaryHandler.keys.Cast<object>(), CreateElement);
+            cachedElements.SyncKeysWithEnumerable(dictionaryHandler.keys.Cast<object>(), CreateElement, elementKeysBuffer);
             return readOnlyCachedElements;
         }
 
@@ -282,7 +346,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         protected virtual DictionaryValueElement CreateElement(object key) => new DictionaryValueElement(this, key);
-        
+
         IInspectableDictionary IInspectableDictionary.Clone() => new InspectableDictionary(inspectionType, elementNullabilityInfo) { parentElement = parentElement, instances = instances };
     }
 }
