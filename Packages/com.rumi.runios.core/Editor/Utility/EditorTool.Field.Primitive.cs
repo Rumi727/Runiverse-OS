@@ -35,7 +35,7 @@ namespace RuniOS.Editor
                     int minValue = Convert.ToInt32(type.GetMinValue());
                     int maxValue = Convert.ToInt32(type.GetMaxValue());
 
-                    intValue = intValue.Repeat(minValue, maxValue);
+                    intValue = intValue.Clamp(minValue, maxValue);
 
                     if (EditorGUI.EndChangeCheck())
                         value = Convert.ChangeType(intValue, type);
@@ -51,7 +51,7 @@ namespace RuniOS.Editor
                     long minValue = Convert.ToInt64(type.GetMinValue());
                     long maxValue = Convert.ToInt64(type.GetMaxValue());
 
-                    longValue = longValue.Repeat(minValue, maxValue);
+                    longValue = longValue.Clamp(minValue, maxValue);
 
                     if (EditorGUI.EndChangeCheck())
                         value = Convert.ChangeType(longValue, type);
@@ -67,7 +67,7 @@ namespace RuniOS.Editor
                     float minValue = Convert.ToSingle(type.GetMinValue());
                     float maxValue = Convert.ToSingle(type.GetMaxValue());
 
-                    floatValue = floatValue.Repeat(minValue, maxValue);
+                    floatValue = floatValue.Clamp(minValue, maxValue);
 
                     if (EditorGUI.EndChangeCheck())
                         value = Convert.ChangeType(floatValue, type);
@@ -83,7 +83,7 @@ namespace RuniOS.Editor
                     double minValue = Convert.ToDouble(type.GetMinValue());
                     double maxValue = Convert.ToDouble(type.GetMaxValue());
 
-                    doubleValue = doubleValue.Repeat(minValue, maxValue);
+                    doubleValue = doubleValue.Clamp(minValue, maxValue);
 
                     if (EditorGUI.EndChangeCheck())
                         value = Convert.ChangeType(doubleValue, type);
