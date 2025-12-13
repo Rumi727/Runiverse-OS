@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     [CustomInspectorDrawer(typeof(int), allowInDebug = true)]
     public class IntInspectorDrawer : GenericInspectorDrawer
     {
-        public IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public IntInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.IntField(position, label, (int)value!);
     }

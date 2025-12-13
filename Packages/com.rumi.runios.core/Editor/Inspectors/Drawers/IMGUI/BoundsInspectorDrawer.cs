@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(Bounds))]
     public class BoundsInspectorDrawer : GenericInspectorDrawer
     {
-        public BoundsInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public BoundsInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.BoundsField(position, label, (Bounds)value!);
         

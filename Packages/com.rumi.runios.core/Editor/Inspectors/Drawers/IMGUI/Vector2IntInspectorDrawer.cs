@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(Vector2Int))]
     public class Vector2IntInspectorDrawer : GenericInspectorDrawer
     {
-        public Vector2IntInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public Vector2IntInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.Vector2IntField(position, label, (Vector2Int)value!);
         

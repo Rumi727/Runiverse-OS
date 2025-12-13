@@ -12,8 +12,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(IDictionary<,>), true)]
     public class DictionaryInspectorDrawer : ListInspectorDrawer
     {
-        public DictionaryInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
-        public DictionaryInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList, rootInspector) { }
+        public DictionaryInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public DictionaryInspectorDrawer(IInspectableList inspectableList) : base(inspectableList) { }
 
         object? defaultKey; 
         

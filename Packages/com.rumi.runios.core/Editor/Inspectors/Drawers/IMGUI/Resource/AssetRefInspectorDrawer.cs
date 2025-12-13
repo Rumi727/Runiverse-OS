@@ -8,7 +8,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
     [CustomInspectorDrawer(typeof(IAssetRef), true)]
     public class AssetRefInspectorDrawer : GenericInspectorDrawer
     {
-        public AssetRefInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public AssetRefInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
         {

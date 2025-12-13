@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(Version))]
     public class VersionInspectorDrawer : GenericInspectorDrawer
     {
-        public VersionInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public VersionInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => VersionField(position, label, (Version)value!);
 

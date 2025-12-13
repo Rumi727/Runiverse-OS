@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(RectOffset))]
     public class RectOffsetInspectorDrawer : GenericInspectorDrawer
     {
-        public RectOffsetInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public RectOffsetInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => RectOffsetField(position, label, (RectOffset)value!);
 

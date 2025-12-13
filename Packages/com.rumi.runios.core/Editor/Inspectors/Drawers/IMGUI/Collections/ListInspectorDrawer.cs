@@ -14,8 +14,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(Array), true, allowInDebug = true)]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ListInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
-        public ListInspectorDrawer(IInspectableList inspectableList, Inspector? rootInspector = null) : base(inspectableList, rootInspector) { }
+        public ListInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public ListInspectorDrawer(IInspectableList inspectableList) : base(inspectableList) { }
 
         public override bool isField => false;
 
@@ -164,7 +164,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             if (!elementDrawers.TryGetValue(element, out IMGUIInspectorDrawer? drawer) || drawer.element != element)
             {
-                drawer = FindDrawer(element, rootInspector);
+                drawer = FindDrawer(element);
                 elementDrawers.AddOrUpdate(element, drawer);
             }
             

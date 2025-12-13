@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     [CustomInspectorDrawer(typeof(sbyte), allowInDebug = true)]
     public class SByteInspectorDrawer : GenericInspectorDrawer
     {
-        public SByteInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public SByteInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.IntField(position, label, (sbyte)value!).ClampToSByte();
     }

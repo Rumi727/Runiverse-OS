@@ -7,7 +7,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     [CustomInspectorDrawer(typeof(bool), allowInDebug = true)]
     public class BoolInspectorDrawer : GenericInspectorDrawer
     {
-        public BoolInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public BoolInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.Toggle(position, label, (bool)value!);
     }

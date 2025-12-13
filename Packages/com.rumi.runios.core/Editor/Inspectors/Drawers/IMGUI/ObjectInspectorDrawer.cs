@@ -8,7 +8,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(object), true, allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ObjectInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) => inspector = new Inspector(rootInspector);
+        public ObjectInspectorDrawer(IInspectorVariableElement element) : base(element) => inspector = new Inspector();
 
         public override bool isField => false;
 

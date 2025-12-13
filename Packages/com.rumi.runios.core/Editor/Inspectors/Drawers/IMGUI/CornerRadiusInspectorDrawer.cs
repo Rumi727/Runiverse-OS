@@ -8,7 +8,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(CornerRadius))]
     public class CornerRadiusInspectorDrawer : GenericInspectorDrawer
     {
-        public CornerRadiusInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public CornerRadiusInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         readonly AnimFloat animFloat = new AnimFloat(EditorGUIUtility.singleLineHeight);
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => CornerRadiusField(position, label, (CornerRadius)value!, animFloat);

@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(ISerializableNullable<>), true)]
     public class NullableInspectorDrawer : IMGUIInspectorDrawer
     {
-        public NullableInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector)
+        public NullableInspectorDrawer(IInspectorVariableElement element) : base(element)
         {
             // 가독성 꼬라지ㅋㅋ
 

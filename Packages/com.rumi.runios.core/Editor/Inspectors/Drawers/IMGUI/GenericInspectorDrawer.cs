@@ -5,7 +5,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class GenericInspectorDrawer : IMGUIInspectorDrawer
     {
-        protected GenericInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        protected GenericInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         public override bool isField => true;
 

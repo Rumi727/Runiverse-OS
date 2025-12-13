@@ -8,7 +8,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.IO
     [CustomInspectorDrawer(typeof(FileExtension))]
     public class FileExtensionInspectorDrawer : GenericInspectorDrawer
     {
-        public FileExtensionInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public FileExtensionInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => FileExtensionField(position, label, (FileExtension)value!);
     }

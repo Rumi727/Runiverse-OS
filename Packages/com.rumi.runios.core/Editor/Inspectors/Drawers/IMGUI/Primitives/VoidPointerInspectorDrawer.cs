@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     [CustomInspectorDrawer(typeof(void*), true, allowInDebug = true)]
     public class VoidPointerInspectorDrawer : GenericInspectorDrawer
     {
-        public VoidPointerInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector) { }
+        public VoidPointerInspectorDrawer(IInspectorVariableElement element) : base(element) { }
 
         protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
         {

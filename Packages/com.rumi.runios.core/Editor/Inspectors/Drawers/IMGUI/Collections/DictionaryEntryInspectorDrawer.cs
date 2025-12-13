@@ -14,7 +14,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class DictionaryEntryInspectorDrawer : IMGUIInspectorDrawer
     {
-        public DictionaryEntryInspectorDrawer(IInspectorVariableElement element, Inspector? rootInspector = null) : base(element, rootInspector)
+        public DictionaryEntryInspectorDrawer(IInspectorVariableElement element) : base(element)
         {
             // 가독성 꼬라지ㅋㅋ
             
@@ -62,8 +62,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 .SetIsWritableFunc((_, flags) => element.IsReadable(flags) && element.IsWritable(flags))
                 .Build();
 
-            keyDrawer = FindDrawer(keyElement, rootInspector);
-            valueDrawer = FindDrawer(valueElement, rootInspector);
+            keyDrawer = FindDrawer(keyElement);
+            valueDrawer = FindDrawer(valueElement);
         }
 
         public override bool isField => keyDrawer.isField && valueDrawer.isField;
