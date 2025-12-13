@@ -1,4 +1,6 @@
 #nullable enable
+using System.Diagnostics.CodeAnalysis;
+
 namespace RuniOS
 {
     /// <summary>
@@ -39,8 +41,7 @@ namespace RuniOS
         /// <see cref="Object.Equals(object)"/> 메소드를 사용하여 <see cref="SerializableNullable{T}"/> 및 <see cref="UnityEngine.Object"/> 등을 지원합니다.
         /// </summary>
         /// <param name="value"></param>
-        /// <returns></returns>
-        public static bool IsNull(this object? value) => value == null || value.Equals(null);
+        public static bool IsNull([NotNullWhen(false)] this object? value) => value == null || value.Equals(null);
 
         /// <summary>
         /// Initializes the <see cref="NullableType"/> class.
