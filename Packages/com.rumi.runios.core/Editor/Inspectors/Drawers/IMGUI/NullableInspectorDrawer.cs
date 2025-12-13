@@ -81,8 +81,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                     position,
                     out position,
                     label,
-                    (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) ? (bool)hasValueElement.value! : null,
-                    (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsWritable(flags)) ? (x => hasValueElement.value = x) : null,
+                    hasValueElement.IsReadable(flags) ? (bool)hasValueElement.value! : null,
+                    hasValueElement.IsWritable(flags) ? (x => hasValueElement.value = x) : null,
                     valueElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
                     NullabilityState.Nullable,
                     nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"
@@ -99,7 +99,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             CheckVariableElement();
 
             float height = valueDrawer.GetHeight(label, flags, isInArray);
-            bool valueIsNull = (!variableElement.inspectable.instancesIsEmpty && hasValueElement.IsReadable(flags)) && !(bool)hasValueElement.value!;
+            bool valueIsNull = hasValueElement.IsReadable(flags) && !(bool)hasValueElement.value!;
             nullableAnimFloat.target = valueIsNull ? 1 : 0;
 
             if (!isInArray && nullableAnimFloat.isAnimating)

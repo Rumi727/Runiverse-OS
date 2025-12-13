@@ -9,6 +9,17 @@ namespace RuniOS.Inspectors
         
         string name { get; }
         string displayName { get; set; }
+
+        string path
+        {
+            get
+            {
+                if (inspectable.parentElement != null)
+                    return $"{inspectable.parentElement.path}.{name}";
+                else
+                    return name;
+            }
+        }
         
         /// <summary>
         /// 요소가 공개되어있는지 여부를 나타내는 값을 가져옵니다.

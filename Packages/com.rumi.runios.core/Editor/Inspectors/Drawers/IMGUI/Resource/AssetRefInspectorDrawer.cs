@@ -12,7 +12,15 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 
         protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
         {
-            AssetRefField(position, label, (IAssetRef?)value ?? new AssetRef<object>());
+            if (value.IsNull())
+            {
+                CheckVariableElement();
+                EditorGUI.LabelField(position, label, new GUIContent(nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"));
+
+                return value;
+            }
+
+            AssetRefField(position, label, (IAssetRef)value);
             return value;
         }
 
@@ -20,10 +28,22 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
         {
             CheckVariableElement();
 
-            bool isReadable = !variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags);
-            IAssetRef value = (IAssetRef?)(isReadable ? variableElement.value : variableElement.variableType.GetDefaultValue()) ?? new AssetRef<object>();
+            IAssetRef? value = (IAssetRef?)variableElement.GetValueOrDefault(flags);
+            if (value.IsNull())
+                return EditorGUIUtility.singleLineHeight;
+            else
+                return GetAssetRefFieldHeight(label, value);
+        }
 
-            return GetAssetRefFieldHeight(label, value);
+        protected override object CreateSnapshot(object? value) => ((IAssetRef)value!).key;
+
+        protected override void ApplySnapshot(object? value, InspectorFlags flags)
+        {
+            CheckVariableElement();
+
+            IAssetRef? currentValue = (IAssetRef?)variableElement.GetValueOrDefault(flags);
+            if (currentValue != null)
+                currentValue.key = (ResourceKey)value!;
         }
     }
 }

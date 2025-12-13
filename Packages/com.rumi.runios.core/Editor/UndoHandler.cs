@@ -9,18 +9,22 @@ namespace RuniOS.Editor
     /// Unity 에디터의 Undo 시스템과 런타임 Undo 로직을 연결하는 핸들러입니다.<br/>
     /// 스크립트가 리로드되면 인스턴스가 파괴되어 이전 기록은 초기화됩니다.
     /// </summary>
-    public sealed class UndoHandler : ScriptableObject, IUndoRecorder
+    public sealed class UndoHandler : IUndoRecorder
     {
+        class SerializableUndoHandler : ScriptableObject
+        {
+            /// <summary>
+            /// Unity가 저장하고 복원하는 '목표 인덱스'입니다.
+            /// </summary>
+            public int historyIndex;
+        }
+        
         /// <summary>
         /// UndoHandler의 싱글톤 인스턴스입니다.
         /// </summary>
-        public static UndoHandler instance => _instance = _instance != null ? _instance : CreateInstance<UndoHandler>();
-        static UndoHandler? _instance;
+        public static UndoHandler instance { get; } = new UndoHandler();
 
-        /// <summary>
-        /// Unity가 저장하고 복원하는 '목표 인덱스'입니다.
-        /// </summary>
-        [SerializeField] int historyIndex;
+        SerializableUndoHandler? serializableUndoHandler;
 
         [NonSerialized] readonly RuniUndo runiUndo = new RuniUndo();
 
@@ -30,7 +34,7 @@ namespace RuniOS.Editor
         void Awake()
         {
             Undo.undoRedoPerformed += DetectUndoneOrRedoneAction;
-            AssemblyReloadEvents.beforeAssemblyReload += () => DestroyImmediate(this);
+            AssemblyReloadEvents.beforeAssemblyReload += () => Object.DestroyImmediate(serializableUndoHandler);
         }
 
         void OnDestroy() => Undo.undoRedoPerformed -= DetectUndoneOrRedoneAction;
@@ -71,13 +75,16 @@ namespace RuniOS.Editor
         {
             // 1. RuniUndo에 기록
             runiUndo.Record(undoAction, redoAction, name, groupToken ?? GetTokenForCurrentUnityGroup(), collapseKey);
+            
+            if (serializableUndoHandler == null)
+                serializableUndoHandler = ScriptableObject.CreateInstance<SerializableUndoHandler>();
 
             // 2. Unity에 상태 기록 (현재 시점의 인덱스를 저장)
-            Undo.RecordObject(this, name);
+            Undo.RecordObject(serializableUndoHandler, name);
 
             // 3. 인덱스 동기화
             // Unity가 나중에 이 값을 복원하면, RuniUndo도 이 인덱스로 돌아가야 함
-            historyIndex = runiUndo.currentHistoryIndex;
+            serializableUndoHandler.historyIndex = runiUndo.currentHistoryIndex;
         }
 
         /// <summary>
@@ -85,8 +92,11 @@ namespace RuniOS.Editor
         /// </summary>
         void DetectUndoneOrRedoneAction()
         {
+            if (serializableUndoHandler == null)
+                serializableUndoHandler = ScriptableObject.CreateInstance<SerializableUndoHandler>();
+            
             // Unity가 복원한 '목표 인덱스'
-            int targetIndex = historyIndex;
+            int targetIndex = serializableUndoHandler.historyIndex;
 
             // 현재 RuniUndo의 '실제 인덱스'
             int currentIndex = runiUndo.currentHistoryIndex;

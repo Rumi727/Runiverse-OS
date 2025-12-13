@@ -11,22 +11,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     public abstract class IMGUIInspectorDrawer : InspectorDrawer
     {
         [return: NotNullIfNotNull(nameof(element))]
-        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
+        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IUndoRecorder? undoRecorder = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
         {
             if (element == null)
                 return null;
 
             Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
-                return new ObjectInspectorDrawer(element, rootInspector);
-            
-            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element, rootInspector }, null);
+                return new ObjectInspectorDrawer(element);
+
+            IMGUIInspectorDrawer drawer = (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element }, null);
+            drawer.undoRecorder = undoRecorder;
+
+            return drawer;
         }
-        
-        /// <summary>
-        /// 루트 인스펙터를 가져옵니다.
-        /// </summary>
-        public Inspector? rootInspector { get; }
 
         public IUndoRecorder? undoRecorder { get; set; }
 
@@ -54,9 +52,9 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 position,
                 out resultPosition,
                 label,
-                (!variableElement.inspectable.instancesIsEmpty && variableElement.IsReadable(flags)) ? !variableElement.value.IsNull() : null,
-                (!variableElement.inspectable.instancesIsEmpty && variableElement.IsWritable(flags)) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
-                variableElement.variableType.IsArray || variableElement.variableType == typeof(string) || variableElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
+                variableElement.IsReadable(flags) ? !variableElement.value.IsNull() : null,
+                variableElement.IsWritable(flags) ? (x => variableElement.value = x ? variableElement.variableType.GetDefaultValueNotNull() : null) : null,
+                variableElement.variableType.CanGetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic)),
                 variableElement.nullabilityInfo?.writeState,
                 nullText ?? $"null ({variableElement.variableType.GetTypeDisplayName()})"
             );

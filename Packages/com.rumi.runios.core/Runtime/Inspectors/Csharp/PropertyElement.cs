@@ -10,7 +10,7 @@ namespace RuniOS.Inspectors.Csharp
     public class PropertyElement : MemberElement, IInspectorVariableElement
     {
         public PropertyElement(Type targetType, PropertyInfo property) : this(new InspectableObject(targetType), property) { }
-        public PropertyElement(object instance, PropertyInfo property) : this(new InspectableObject(instance), property) { } 
+        public PropertyElement(object instance, PropertyInfo property) : this(new InspectableObject(instance), property) { }
         public PropertyElement(InspectableObject inspectable, PropertyInfo property) : base(inspectable, property)
         {
             this.property = property;
@@ -28,11 +28,11 @@ namespace RuniOS.Inspectors.Csharp
 
         public Type variableType => property.PropertyType;
         public NullabilityInfo nullabilityInfo { get; }
-        
+
         public PropertyInfo property { get; }
-        
+
         public override bool isPublic => property.GetMethod?.IsPublic ?? property.SetMethod?.IsPublic ?? false;
-        
+
         public override bool isStatic => property.GetMethod?.IsStatic ?? property.SetMethod?.IsStatic ?? false;
 
         public object? value
@@ -72,7 +72,7 @@ namespace RuniOS.Inspectors.Csharp
                         foreach (var item in inspectable.instances)
                             property.SetValue(item, value);
                     }
-                    
+
                     inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
@@ -88,13 +88,13 @@ namespace RuniOS.Inspectors.Csharp
             {
                 if (isStatic)
                     return false;
-                
+
                 try
                 {
                     object? value = this.value;
                     if (variableType.IsPointer)
                         return inspectable.instances.Any(x => ((Pointer)property.GetValue(x)).ToIntPtr() != ((Pointer)value!).ToIntPtr());
-                    
+
                     return inspectable.instances.Any(x => !Equals(property.GetValue(x), value));
                 }
                 catch (Exception e)
@@ -103,13 +103,13 @@ namespace RuniOS.Inspectors.Csharp
                 }
             }
         }
-        
+
         public InspectableObject inspectableObjectElement { get; }
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
 
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
-        
+
         /// <summary>
         /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
         /// </summary>
@@ -127,18 +127,18 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
         }
-        
+
         public void SetValues(IEnumerable<object?> values)
         {
             try
             {
                 foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
                     property.SetValue(instance, value);
-                
+
                 // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
                 if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
                     inspectable.parentElement.SetValues(inspectable.instances);
-                
+
                 inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
@@ -146,7 +146,7 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while writing a value to the {name} property.", name, e);
             }
         }
-        
+
         public override bool HasFlags(InspectorFlags flags)
         {
             if (!base.HasFlags(flags))
@@ -154,25 +154,28 @@ namespace RuniOS.Inspectors.Csharp
 
             if (!flags.HasFlagFast(InspectorFlags.Property))
                 return false;
-            
+
             if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
             if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
                 return false;
-            
+
             if ((property.IsSpecialName || name.Contains('.')) && !flags.HasFlagFast(InspectorFlags.Hidden))
                 return false;
 
             return true;
         }
-        
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
-        
+
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+
         public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
         {
+            if (inspectable.instancesIsEmpty)
+                return false;
+
             if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
                 return false;
-            
+
             return property.GetSetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
         }
 
@@ -180,7 +183,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (!IsReadable(InspectorFlags.All))
                 return;
-            
+
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();

@@ -60,7 +60,7 @@ namespace RuniOS.Inspectors.Csharp
         /// 이 요소가 나타내는 <see cref="FieldInfo"/>를 가져옵니다.
         /// </summary>
         public FieldInfo field { get; }
-        
+
         /// <summary>
         /// 필드가 공개되어있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
@@ -112,7 +112,7 @@ namespace RuniOS.Inspectors.Csharp
                         foreach (var item in inspectable.instances)
                             field.SetValue(item, value);
                     }
-                    
+
                     inspectable.OnValueChangedInvoke();
                 }
                 catch (Exception e)
@@ -138,7 +138,7 @@ namespace RuniOS.Inspectors.Csharp
                     object? value = this.value;
                     if (variableType.IsPointer)
                         return inspectable.instances.Any(x => ((Pointer)field.GetValue(x)).ToIntPtr() != ((Pointer)value!).ToIntPtr());
-                    
+
                     return inspectable.instances.Any(x => !Equals(field.GetValue(x), value));
                 }
                 catch (Exception e)
@@ -159,7 +159,7 @@ namespace RuniOS.Inspectors.Csharp
         /// </summary>
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
-        
+
         /// <summary>
         /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
         /// </summary>
@@ -182,7 +182,7 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
             }
         }
-        
+
         public void SetValues(IEnumerable<object?> values)
         {
             try
@@ -205,7 +205,7 @@ namespace RuniOS.Inspectors.Csharp
                     foreach ((object instance, object? value) in inspectable.instances.Zip(values, (instance, value) => (instance, value)))
                         field.SetValue(instance, value);
                 }
-                
+
                 inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
@@ -213,7 +213,7 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while writing a value to the {name} field.", name, e);
             }
         }
-        
+
         public override bool HasFlags(InspectorFlags flags)
         {
             if (!base.HasFlags(flags))
@@ -221,7 +221,7 @@ namespace RuniOS.Inspectors.Csharp
 
             if (!flags.HasFlagFast(InspectorFlags.Field))
                 return false;
-            
+
             if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
             if (!IsReadable(flags) && !flags.HasFlagFast(InspectorFlags.WriteOnly))
@@ -229,23 +229,23 @@ namespace RuniOS.Inspectors.Csharp
 
             return true;
         }
-        
+
         /// <summary>
         /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && flags.HasFlagFast(InspectorFlags.Public);
 
         /// <summary>
         /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
         /// </summary>
         public bool IsWritable(InspectorFlags flags = InspectorFlags.Public)
         {
-            if (!flags.HasFlagFast(InspectorFlags.Public))
+            if (inspectable.instancesIsEmpty || !flags.HasFlagFast(InspectorFlags.Public))
                 return false;
-            
+
             if ((inspectable.parentElement?.variableType.IsValueType ?? false) && !inspectable.parentElement.IsWritable(flags))
                 return false;
-            
+
             return !field.IsInitOnly && !field.IsLiteral;
         }
 
@@ -253,7 +253,7 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (!IsReadable(InspectorFlags.All))
                 return;
-            
+
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();

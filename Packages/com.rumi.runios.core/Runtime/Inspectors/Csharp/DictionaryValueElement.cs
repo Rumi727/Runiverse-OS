@@ -11,16 +11,15 @@ namespace RuniOS.Inspectors.Csharp
     {
         public DictionaryValueElement(InspectableDictionary inspectable, object targetKey)
         {
-            name = string.Empty;
             displayName = string.Empty;
-            
+
             this.inspectable = inspectable;
             this.targetKey = targetKey;
 
             variableType = inspectable.inspectionElementType?.Value ?? typeof(object);
-            
+
             inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
-            
+
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
                 inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault()) { parentElement = this };
@@ -29,7 +28,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public string name { get; }
+        public string name => $"[{targetKey}]";
         public string displayName { get; set; }
 
         public InspectableDictionary inspectable { get; }
@@ -39,7 +38,7 @@ namespace RuniOS.Inspectors.Csharp
         public Type currentElementType => value?.GetType() ?? variableType;
 
         public NullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
-        
+
         public object targetKey { get; set; }
 
         public bool isPublic => true;
@@ -81,7 +80,7 @@ namespace RuniOS.Inspectors.Csharp
                     object? value = this.value;
                     if (variableType.IsPointer)
                         return inspectable.dictionaryHandlers.Any(x => ((Pointer)x[targetKey]!).ToIntPtr() != ((Pointer)value!).ToIntPtr());
-                    
+
                     return inspectable.dictionaryHandlers.Any(x => !Equals(x[targetKey], value));
                 }
                 catch (Exception e)
@@ -90,14 +89,14 @@ namespace RuniOS.Inspectors.Csharp
                 }
             }
         }
-        
+
         public InspectableObject inspectableObjectElement { get; }
         IInspectableObject IInspectorVariableElement.inspectableObjectElement => inspectableObjectElement;
-        
+
 
         public InspectableList? inspectableListElement { get; }
         IInspectableList? IInspectorVariableElement.inspectableListElement => inspectableListElement;
-        
+
         /// <summary>
         /// 이 필드가 딕셔너리인 경우, 딕셔너리를 나타내는 <see cref="InspectableDictionary"/>를 가져옵니다.
         /// </summary>
@@ -115,7 +114,7 @@ namespace RuniOS.Inspectors.Csharp
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
         }
-        
+
         public void SetValues(IEnumerable<object?> values)
         {
             try
@@ -125,10 +124,10 @@ namespace RuniOS.Inspectors.Csharp
                 {
                     if (!valueEnumerator.MoveNext())
                         return;
-                    
+
                     instance[targetKey] = valueEnumerator.Current;
                 }
-                
+
                 inspectable.OnValueChangedInvoke();
             }
             catch (Exception e)
@@ -141,24 +140,24 @@ namespace RuniOS.Inspectors.Csharp
         {
             if (flags == InspectorFlags.None)
                 return false;
-            
+
             if (!flags.HasFlagFast(InspectorFlags.Public | InspectorFlags.Instance | InspectorFlags.List))
                 return false;
-            
+
             if (!IsWritable(flags) && !flags.HasFlagFast(InspectorFlags.ReadOnly))
                 return false;
 
             return true;
         }
-        
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public);
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
+
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && flags.HasFlagFast(InspectorFlags.Public);
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty && flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
 
         public void UpdateChildInspectable()
         {
             if (!IsReadable(InspectorFlags.All))
                 return;
-            
+
             inspectableObjectElement.instances = GetValues().WhereNotNull();
             if (inspectableListElement != null)
                 inspectableListElement.instances = GetValues().OfType<IEnumerable>();

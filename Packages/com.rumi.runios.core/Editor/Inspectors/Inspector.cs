@@ -21,6 +21,8 @@ namespace RuniOS.Editor.Inspectors
 
         public InspectorFlags inspectorFlags { get; private set; }
 
+        public IUndoRecorder? undoRecorder { get; set; } = UndoHandler.instance;
+
         (string label, string message)? lastException = null;
 
         public Inspector() { }
@@ -70,7 +72,7 @@ namespace RuniOS.Editor.Inspectors
                     return;
                 }
 
-                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, predicate)).ToImmutableArray();
+                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, undoRecorder, predicate)).ToImmutableArray();
             }
 
             this.inspectable = inspectable;
@@ -88,7 +90,7 @@ namespace RuniOS.Editor.Inspectors
                 predicate = x => x.attribute.allowInDebug;
 
             elements = ImmutableArray.Create(element);
-            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, predicate));
+            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, undoRecorder, predicate));
 
             inspectable = null;
             inspectorFlags = flags;
@@ -106,7 +108,7 @@ namespace RuniOS.Editor.Inspectors
                 predicate = x => x.attribute.allowInDebug;
 
             this.elements = elements.ToImmutableArray();
-            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, predicate)).ToImmutableArray();
+            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, undoRecorder, predicate)).ToImmutableArray();
 
             inspectable = null;
             inspectorFlags = flags;

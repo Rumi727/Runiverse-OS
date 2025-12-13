@@ -140,12 +140,12 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => true;
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty;
         
         /// <summary>
         /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => true;
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.Public) => !inspectable.instancesIsEmpty;
         
         public void UpdateChildInspectable() { }
     }

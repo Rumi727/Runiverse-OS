@@ -54,7 +54,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             bool valueIsNull =
                 !variableElement.variableType.IsValueType &&
-                !variableElement.inspectable.instancesIsEmpty &&
                 variableElement.IsReadable(flags) &&
                 variableElement.value.IsNull();
             bool isExpanded = this.isExpanded && !valueIsNull;

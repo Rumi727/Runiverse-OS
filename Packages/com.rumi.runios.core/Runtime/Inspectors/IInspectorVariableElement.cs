@@ -56,15 +56,27 @@ namespace RuniOS.Inspectors
         IEnumerable<object?> GetValues();
         
         void SetValues(IEnumerable<object?> values);
+        
+        /// <summary>
+        /// 지정된 플래그에 따라 변수의 값을 가져오거나, 읽을 수 없는 경우 해당 타입의 기본값을 반환합니다.
+        /// </summary>
+        /// <param name="flags">읽기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
+        /// <returns>
+        /// <see cref="IsReadable(InspectorFlags)"/>가 <see langword="true"/>인 경우 현재 <see cref="value"/>를 반환하고, 
+        /// 그렇지 않은 경우 <see cref="variableType"/>의 기본값(default)을 반환합니다.
+        /// </returns>
+        object? GetValueOrDefault(InspectorFlags flags) => IsReadable(flags) ? value : variableType.GetDefaultValue();
 
         /// <summary>
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
+        /// <param name="flags">읽기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
         bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess);
 
         /// <summary>
         /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
+        /// <param name="flags">쓰기 권한을 확인할 때 사용할 <see cref="InspectorFlags"/>입니다.</param>
         bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess);
 
         /// <summary>
