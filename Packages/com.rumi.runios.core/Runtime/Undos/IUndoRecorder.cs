@@ -3,8 +3,7 @@
     public interface IUndoRecorder
     {
         /// <summary>
-        /// 실행 취소(Undo) 및 재실행(Redo) 작업을 히스토리에 기록합니다.<br/>
-        /// 이미 수행된 로직을 언도 시스템에 등록할 때 사용합니다.
+        /// 실행 취소(Undo) 및 재실행(Redo) 작업을 히스토리에 기록합니다.
         /// </summary>
         /// <param name="undoAction">실행 취소(Undo) 시 호출될 작업입니다.</param>
         /// <param name="redoAction">재실행(Redo) 시 호출될 작업입니다.</param>
