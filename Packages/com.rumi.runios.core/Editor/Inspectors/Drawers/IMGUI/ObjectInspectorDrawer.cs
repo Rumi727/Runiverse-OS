@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Undos;
 using UnityEditor.AnimatedValues;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
@@ -8,7 +9,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(object), true, allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ObjectInspectorDrawer(IInspectorVariableElement element) : base(element) => inspector = new Inspector();
+        public ObjectInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) => inspector = new Inspector(undoRecorder);
 
         public override bool isField => false;
 

@@ -21,11 +21,13 @@ namespace RuniOS.Editor.Inspectors
 
         public InspectorFlags inspectorFlags { get; private set; }
 
-        public IUndoRecorder? undoRecorder { get; set; } = UndoHandler.instance;
+        public IUndoRecorder? undoRecorder { get; }
 
         (string label, string message)? lastException = null;
 
-        public Inspector() { }
+        public Inspector() => undoRecorder = UndoHandler.instance;
+        
+        public Inspector(IUndoRecorder? undoRecorder) => this.undoRecorder = undoRecorder;
 
         public Inspector(object instance) : this(new InspectableObject(instance)) { }
         public Inspector(Type type) : this(new InspectableObject(type)) { }
@@ -121,11 +123,8 @@ namespace RuniOS.Editor.Inspectors
         public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
         {
             Rect rect = EditorGUILayout.GetControlRect(true, GetHeight(label, inspectorFlags, isInArray));
-            rect.x += offset.x;
-            rect.width -= offset.x;
-
-            rect.y += offset.y;
-            rect.height -= offset.y;
+            rect.xMin += offset.x;
+            rect.yMin += offset.y;
 
             Draw(rect, label, isInArray);
         }

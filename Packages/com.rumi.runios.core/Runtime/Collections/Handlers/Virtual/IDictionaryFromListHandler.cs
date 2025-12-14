@@ -12,8 +12,16 @@ namespace RuniOS.Collections.Handlers.Virtual
         public override bool isReadOnly => ((IDictionary)targetCollection).IsReadOnly;
         
         public override bool isFixedSize => ((IDictionary)targetCollection).IsFixedSize;
+        
+        public override void SynchronizeCollections()
+        {
+            if (IsDuplicate())
+                return;
 
-        public override void UpdateSourceCollections()
+            base.SynchronizeCollections();
+        }
+
+        protected override void UpdateSourceCollections()
         {
             IDictionary dictionary = (IDictionary)targetCollection;
             
@@ -23,6 +31,23 @@ namespace RuniOS.Collections.Handlers.Virtual
                 KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
                 dictionary.Add(entry.Key!, entry.Value);
             }
+        }
+        
+        readonly HashSet<object?> tempKeyTable = new();
+        bool IsDuplicate()
+        {
+            tempKeyTable.Clear();
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (int i = 0; i < synchronizedList.Count; i++)
+            {
+                KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
+                if (!tempKeyTable.Add(entry.Key))
+                    return true;
+
+            }
+
+            return false;
         }
     }
 }

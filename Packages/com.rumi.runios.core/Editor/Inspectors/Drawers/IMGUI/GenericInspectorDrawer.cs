@@ -1,11 +1,12 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class GenericInspectorDrawer : IMGUIInspectorDrawer
     {
-        protected GenericInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        protected GenericInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
 
         public override bool isField => true;
 

@@ -335,3 +335,13 @@ MonoBehaviour:
       value: Filter by assembly name.
     - key: pack_identifier.open_folder.title
       value: Select resource pack
+    - key: pack_drawer.generic.title
+      value: Resource Pack Setting
+    - key: pack_drawer.pack_meta_data.create
+      value: Creating a metadata file
+    - key: file_path.open_folder.title
+      value: Open Folder
+    - key: file_path.open_file.title
+      value: Open File
+    - key: undo.modify.property_in_object
+      value: Modified {property} in {object}

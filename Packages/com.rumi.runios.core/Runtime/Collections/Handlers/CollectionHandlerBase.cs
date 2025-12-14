@@ -32,6 +32,6 @@ namespace RuniOS.Collections.Handlers
         public virtual IEnumerator GetEnumerator() => targetCollection.GetEnumerator();
 
         public virtual void SynchronizeCollections() { }
-        public virtual void UpdateSourceCollections() { }
+        protected virtual void UpdateSourceCollections() { }
     }
 }

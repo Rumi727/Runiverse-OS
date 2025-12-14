@@ -2,6 +2,7 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Reflection;
+using RuniOS.Undos;
 using UnityEditor.AnimatedValues;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
@@ -11,7 +12,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(ISerializableNullable<>), true)]
     public class NullableInspectorDrawer : IMGUIInspectorDrawer
     {
-        public NullableInspectorDrawer(IInspectorVariableElement element) : base(element)
+        public NullableInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder)
         {
             // 가독성 꼬라지ㅋㅋ
 
@@ -54,7 +55,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 .SetIsWritableFunc((_, flags, _) => element.IsWritable(flags, true))
                 .Build();
 
-            valueDrawer = FindDrawer(valueElement);
+            valueDrawer = FindDrawer(valueElement, undoRecorder);
         }
 
         public override bool isField => valueDrawer.isField;

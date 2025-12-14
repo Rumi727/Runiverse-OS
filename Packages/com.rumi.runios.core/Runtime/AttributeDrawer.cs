@@ -43,6 +43,7 @@ namespace RuniOS
             
             static void Update()
             {
+                cachedDrawerTypes.Clear();
                 lock (drawerTypesLock)
                 {
                     drawerTypes = ReflectionUtility.types

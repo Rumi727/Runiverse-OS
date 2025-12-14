@@ -12,7 +12,11 @@ namespace RuniOS.Collections.Handlers.Virtual
         public override object? this[object key]
         {
             get => synchronizedTable[key];
-            set => synchronizedTable[key] = value;
+            set
+            {
+                synchronizedTable[key] = value;
+                UpdateSourceCollections();
+            }
         }
 
         public override int count => synchronizedTable.Count;
@@ -24,10 +28,22 @@ namespace RuniOS.Collections.Handlers.Virtual
         public override ICollection keys => synchronizedTable.Keys;
         public override ICollection values => synchronizedTable.Values;
 
-        public override void Add(object key, object? value) => synchronizedTable.Add(key, value);
-        public override void Remove(object key) => synchronizedTable.Remove(key);
+        public override void Add(object key, object? value)
+        {
+            synchronizedTable.Add(key, value);
+            UpdateSourceCollections();
+        }
+        public override void Remove(object key)
+        {
+            synchronizedTable.Remove(key);
+            UpdateSourceCollections();
+        }
 
-        public override void Clear() => synchronizedTable.Clear();
+        public override void Clear()
+        {
+            synchronizedTable.Clear();
+            UpdateSourceCollections();
+        }
 
         public override bool Contains(object key) => synchronizedTable.Contains(key);
 

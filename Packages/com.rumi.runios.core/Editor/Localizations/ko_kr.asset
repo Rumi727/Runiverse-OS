@@ -340,3 +340,13 @@ MonoBehaviour:
       value: "\uC5B4\uC148\uBE14\uB9AC \uC774\uB984\uC73C\uB85C \uD544\uD130\uB9C1\uD569\uB2C8\uB2E4."
     - key: pack_identifier.open_folder.title
       value: "\uB9AC\uC18C\uC2A4\uD329 \uC120\uD0DD"
+    - key: pack_drawer.generic.title
+      value: "\uB9AC\uC18C\uC2A4\uD329 \uC124\uC815"
+    - key: pack_drawer.pack_meta_data.create
+      value: "\uBA54\uD0C0\uB370\uC774\uD130 \uD30C\uC77C \uB9CC\uB4E4\uAE30"
+    - key: file_path.open_folder.title
+      value: "\uD3F4\uB354 \uC5F4\uAE30"
+    - key: file_path.open_file.title
+      value: "\uD30C\uC77C \uC5F4\uAE30"
+    - key: undo.modify.property_in_object
+      value: "{object}\uC758 {property} \uC218\uC815"

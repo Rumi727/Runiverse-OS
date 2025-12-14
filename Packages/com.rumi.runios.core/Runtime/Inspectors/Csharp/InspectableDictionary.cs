@@ -328,13 +328,6 @@ namespace RuniOS.Inspectors.Csharp
                 handlers[i].SynchronizeCollections();
         }
 
-        public void UpdateSourceCollections()
-        {
-            var handlers = dictionaryHandlers;
-            for (int i = 0; i < handlers.Count; i++)
-                handlers[i].UpdateSourceCollections();
-        }
-
         public void Add(object key, object? value)
         {
             var handlers = dictionaryHandlers;

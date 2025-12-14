@@ -29,7 +29,7 @@ namespace RuniOS.Collections.Handlers.Entrys
         
         protected EntryHandler(object targetEntry) => this.targetEntry = targetEntry;
         
-        public object targetEntry { get; }
+        public object targetEntry { get; private set; }
 
         public KeyValuePair<object?, object?> entry => new KeyValuePair<object?, object?>(key, value);
 

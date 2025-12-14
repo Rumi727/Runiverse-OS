@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Undos;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Inspectors.Drawers
@@ -12,8 +13,10 @@ namespace RuniOS.Inspectors.Drawers
         public IInspectorElement? element { get; }
         public IInspectorVariableElement? variableElement { get; }
         public IInspectorActionElement? actionElement { get; }
+        
+        public IUndoRecorder? undoRecorder { get; }
 
-        protected InspectorDrawer(IInspectorElement element)
+        protected InspectorDrawer(IInspectorElement element, IUndoRecorder? undoRecorder = null)
         {
             inspectable = element.inspectable;
 
@@ -23,18 +26,24 @@ namespace RuniOS.Inspectors.Drawers
 
             inspectableList = variableElement?.inspectableListElement;
             inspectableDictionary = variableElement?.inspectableDictionaryElement;
+
+            this.undoRecorder = undoRecorder;
         }
 
-        protected InspectorDrawer(IInspectableList inspectableList)
+        protected InspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null)
         {
             inspectable = inspectableList;
             this.inspectableList = inspectableList;
+            
+            this.undoRecorder = undoRecorder;
         }
 
-        protected InspectorDrawer(IInspectableDictionary inspectableDictionary)
+        protected InspectorDrawer(IInspectableDictionary inspectableDictionary, IUndoRecorder? undoRecorder = null)
         {
             inspectable = inspectableDictionary;
             this.inspectableDictionary = inspectableDictionary;
+            
+            this.undoRecorder = undoRecorder;
         }
 
         [MemberNotNull(nameof(inspectableList))]

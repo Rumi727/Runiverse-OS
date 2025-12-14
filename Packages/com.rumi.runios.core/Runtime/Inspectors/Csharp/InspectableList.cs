@@ -314,16 +314,6 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
 
-        public void UpdateSourceCollections()
-        {
-            var handlers = listHandlers;
-            for (int i = 0; i < handlers.Count; i++)
-            {
-                ListHandlerBase? item = handlers[i];
-                item.UpdateSourceCollections();
-            }
-        }
-
         public int Add(object? value)
         {
             int minCount = count;

@@ -1,13 +1,14 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
     [CustomInspectorDrawer(typeof(sbyte), allowInDebug = true)]
     public class SByteInspectorDrawer : GenericInspectorDrawer
     {
-        public SByteInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public SByteInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.IntField(position, label, (sbyte)value!).ClampToSByte();
     }

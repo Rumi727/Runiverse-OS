@@ -2,13 +2,14 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Resource;
+using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 {
     [CustomInspectorDrawer(typeof(PackIdentifier))]
     public class PackIdentifierInspectorDrawer : GenericInspectorDrawer
     {
-        public PackIdentifierInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public PackIdentifierInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => PackIdentifierField(position, label, (PackIdentifier)value!);
 

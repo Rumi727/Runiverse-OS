@@ -3,6 +3,7 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Reflection;
+using RuniOS.Undos;
 using System.Collections;
 using System.Runtime.CompilerServices;
 using UnityEditor.AnimatedValues;
@@ -14,8 +15,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(Array), true, allowInDebug = true)]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ListInspectorDrawer(IInspectorVariableElement element) : base(element) { }
-        public ListInspectorDrawer(IInspectableList inspectableList) : base(inspectableList) { }
+        public ListInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
+        public ListInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
 
         public override bool isField => false;
 
@@ -50,7 +51,47 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         protected virtual void OnAddCallback(int index, Type? elementType, InspectorFlags flags)
         {
             CheckInspectableList();
-            inspectableList.Insert(index, CreateElementItem(elementType, flags));
+            
+            object? newValue = CreateElementItem(elementType, flags);
+            inspectableList.Insert(index, newValue);
+            
+            undoRecorder?.Record
+            (
+                () => inspectableList.RemoveAt(index),
+                () => inspectableList.Insert(index, newValue),
+                GetAddElementUndoName(inspectable, variableElement),
+                UndoHandler.instance.GetTokenForCurrentUnityGroup()
+            );
+        }
+        
+        protected virtual void OnRemoveCallback(int index)
+        {
+            CheckInspectableList();
+
+            object? lastValue = inspectableList[index]; 
+            inspectableList.RemoveAt(index);
+            
+            undoRecorder?.Record
+            (
+                () => inspectableList.Insert(index, lastValue),
+                () => inspectableList.RemoveAt(index),
+                GetRemoveElementUndoName(inspectable, variableElement),
+                UndoHandler.instance.GetTokenForCurrentUnityGroup()
+            );
+        }
+
+        protected virtual void OnReorderCallback(int oldIndex, int newIndex)
+        {
+            CheckInspectableList();
+            inspectableList.OnElementMoved(oldIndex, newIndex);
+            
+            undoRecorder?.Record
+            (
+                () => inspectableList.Move(newIndex, oldIndex),
+                () => inspectableList.Move(oldIndex, newIndex),
+                GetMoveElementUndoName(inspectable, variableElement),
+                UndoHandler.instance.GetTokenForCurrentUnityGroup()
+            );
         }
 
         protected virtual object? CreateElementItem(Type? elementType, InspectorFlags flags)
@@ -104,22 +145,34 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 x.Select(index);
             };
 
-            reorderableList.onReorderCallbackWithDetails = (_, oldIndex, newIndex) => inspectableList.OnElementMoved(oldIndex, newIndex);
-            reorderableList.onChangedCallback = _ => UpdateSourceCollections();
+            reorderableList.onRemoveCallback = x =>
+            {
+                if (x.selectedIndices.Count > 0)
+                {
+                    foreach (var index in x.selectedIndices.OrderByDescending(i => i))
+                        OnRemoveCallback(index);
+                    
+                    x.Select((x.selectedIndices.Min() - 1).Clamp(0));
+                }
+                else
+                {
+                    int count = x.count;
+                    OnRemoveCallback(count - 1);
+                    x.Select(count - 2);
+                }
+            };
+
+            reorderableList.onReorderCallbackWithDetails = (_, oldIndex, newIndex) => OnReorderCallback(oldIndex, newIndex);
             
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            EditorGUI.BeginChangeCheck();
             isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canHeaderResize ? (_ => CreateElementItem(elementType, flags)) : null, isInArray);
             position.y += headHeight + 2;
-            if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
-                UpdateSourceCollections();
             
             position.x += 15 * EditorGUI.indentLevel;
             position.width -= 15 * EditorGUI.indentLevel;
             
-            EditorGUI.BeginChangeCheck();
             if (!isInArray)
             {
                 if (isExpanded || animFloat.isAnimating)
@@ -130,9 +183,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             }
             else if (isExpanded)
                 reorderableList.DoList(position);
-            
-            if (EditorGUI.EndChangeCheck() && !inspectableList.IsFixedSize)
-                UpdateSourceCollections();
         }
 
         public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
@@ -164,7 +214,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             if (!elementDrawers.TryGetValue(element, out IMGUIInspectorDrawer? drawer) || drawer.element != element)
             {
-                drawer = FindDrawer(element);
+                drawer = FindDrawer(element, undoRecorder);
                 elementDrawers.AddOrUpdate(element, drawer);
             }
             
@@ -176,10 +226,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         public virtual void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, Rect? clipping)
         {
             if (EditorGUIUtility.hierarchyMode)
-            {
-                rect.x += 10;
-                rect.width -= 10;
-            }
+                rect.xMin += 10;
             
             if (EditorGUIUtility.hierarchyMode) BeginLabelWidth(EditorGUIUtility.labelWidth - 31f);
             GetElementDrawer(index, flags)?.OnGUI(rect, GetElementLabel(index), flags, true, clipping);
@@ -192,12 +239,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         {
             CheckInspectableList();
             inspectableList.SynchronizeCollections();
-        }
-
-        public virtual void UpdateSourceCollections()
-        {
-            CheckInspectableList();
-            inspectableList.UpdateSourceCollections();
         }
     }
 }

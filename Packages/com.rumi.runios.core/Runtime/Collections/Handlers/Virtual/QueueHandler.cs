@@ -12,7 +12,7 @@ namespace RuniOS.Collections.Handlers.Virtual
         
         public override bool isFixedSize => false;
 
-        public override void UpdateSourceCollections()
+        protected override void UpdateSourceCollections()
         {
             Queue queue = (Queue)targetCollection;
             queue.Clear();

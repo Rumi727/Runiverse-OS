@@ -18,15 +18,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
-                return new ObjectInspectorDrawer(element);
+                return new ObjectInspectorDrawer(element, undoRecorder);
 
-            IMGUIInspectorDrawer drawer = (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element }, null);
-            drawer.undoRecorder = undoRecorder;
-
-            return drawer;
+            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element, undoRecorder }, null);
         }
-
-        public IUndoRecorder? undoRecorder { get; set; }
 
         public abstract bool isField { get; }
 
@@ -39,14 +34,22 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
-        protected static string GetVariableUndoName(IInspectorVariableElement variableElement)
+        protected static string GetVariableUndoName(IInspectorVariableElement variableElement) => GetUndoName("undo.modify.property_in_object", variableElement.inspectable, variableElement.path);
+
+        protected static string GetAddElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.add", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
+
+        protected static string GetRemoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.remove", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
+        
+        protected static string GetMoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.move", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
+        
+        static string GetUndoName(string key, IInspectable inspectable, string path)
         {
-            var rootInspectable = variableElement.inspectable;
+            var rootInspectable = inspectable;
             for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
 
-            string name = GetTextOrKey("undo.modify.property_in_object");
+            string name = GetTextOrKey(key);
             name = new PlaceholderReplacePair("object", rootInspectable.inspectionDisplayName).ReplaceAsPlaceholder(name);
-            name = new PlaceholderReplacePair("property", variableElement.path).ReplaceAsPlaceholder(name);
+            name = new PlaceholderReplacePair("property", path).ReplaceAsPlaceholder(name);
 
             return name;
         }
@@ -178,8 +181,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             return false;
         }
 
-        protected IMGUIInspectorDrawer(IInspectorVariableElement element) : base(element) { }
-        protected IMGUIInspectorDrawer(IInspectableList inspectableList) : base(inspectableList) { }
-        protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary) : base(inspectableDictionary) { }
+        protected IMGUIInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
+        protected IMGUIInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
+        protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary, IUndoRecorder? undoRecorder = null) : base(inspectableDictionary, undoRecorder) { }
     }
 }

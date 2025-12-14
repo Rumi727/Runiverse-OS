@@ -72,6 +72,5 @@ namespace RuniOS.Inspectors
         IInspectable IInspectable.Clone() => Clone();
 
         void SynchronizeCollections();
-        void UpdateSourceCollections();
     }
 }

@@ -16,7 +16,7 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
 
         readonly Type resolvedTargetType;
         readonly Type resolvedTargetCollectionType;
-        
+
         public override bool isReadOnly
         {
             get
@@ -32,22 +32,50 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
         MethodInfo? clearInfo;
         MethodInfo? addInfo;
         readonly object?[] addInfoParameters = new object?[2];
-        
-        public override void UpdateSourceCollections()
+
+        public override void SynchronizeCollections()
         {
+            if (IsDuplicate())
+                return;
+
+            base.SynchronizeCollections();
+        }
+
+        protected override void UpdateSourceCollections()
+        {
+            if (IsDuplicate())
+                return;
+
             clearInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Clear));
             addInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(IDictionary<int, int>.Add));
-            
+
             clearInfo!.Invoke(targetCollection, null);
             for (int i = 0; i < synchronizedList.Count; i++)
             {
                 KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
-                
+
                 addInfoParameters[0] = entry.Key;
                 addInfoParameters[1] = entry.Value;
 
                 addInfo!.Invoke(targetCollection, addInfoParameters);
             }
+        }
+
+        readonly HashSet<object?> tempKeyTable = new();
+        bool IsDuplicate()
+        {
+            tempKeyTable.Clear();
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (int i = 0; i < synchronizedList.Count; i++)
+            {
+                KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(synchronizedList[i]);
+                if (!tempKeyTable.Add(entry.Key))
+                    return true;
+
+            }
+
+            return false;
         }
     }
 }

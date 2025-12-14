@@ -32,8 +32,19 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
         MethodInfo? addInfo;
         readonly object[] addInfoParameters = new object[1];
         
-        public override void UpdateSourceCollections()
+        public override void SynchronizeCollections()
         {
+            if (IsDuplicate())
+                return;
+
+            base.SynchronizeCollections();
+        }
+
+        protected override void UpdateSourceCollections()
+        {
+            if (IsDuplicate())
+                return;
+            
             clearInfo ??= AccessUtility.DeclaredMethod(resolvedTargetCollectionType, nameof(ICollection<int>.Clear));
             addInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(ISet<int>.Add));
                 
@@ -43,6 +54,21 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
                 addInfoParameters[0] = synchronizedList[i];
                 addInfo!.Invoke(targetCollection, addInfoParameters);
             }
+        }
+        
+        readonly HashSet<object?> tempKeyTable = new();
+        bool IsDuplicate()
+        {
+            tempKeyTable.Clear();
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            for (int i = 0; i < synchronizedList.Count; i++)
+            {
+                if (!tempKeyTable.Add(synchronizedList[i]))
+                    return true;
+            }
+
+            return false;
         }
     }
 }

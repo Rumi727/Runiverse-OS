@@ -132,11 +132,11 @@ namespace RuniOS.Undos
             // 그룹 ID가 같은 동안 계속 반복
             while (currentHistoryIndex >= 0 && _history[currentHistoryIndex].groupToken == targetToken)
             {
-                _history[currentHistoryIndex].undoAction?.Invoke();
+                _history[currentHistoryIndex].undoAction?.SafeInvoke();
                 currentHistoryIndex--;
             }
 
-            undoPerformed?.Invoke();
+            undoPerformed?.SafeInvoke();
         }
 
         /// <summary>
@@ -155,10 +155,10 @@ namespace RuniOS.Undos
             while (currentHistoryIndex < _history.Count - 1 && _history[currentHistoryIndex + 1].groupToken == targetToken)
             {
                 currentHistoryIndex++;
-                _history[currentHistoryIndex].redoAction?.Invoke();
+                _history[currentHistoryIndex].redoAction?.SafeInvoke();
             }
 
-            redoPerformed?.Invoke();
+            redoPerformed?.SafeInvoke();
         }
     }
 }

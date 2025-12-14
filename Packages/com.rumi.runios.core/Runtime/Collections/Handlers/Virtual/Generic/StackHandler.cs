@@ -18,8 +18,8 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
         MethodInfo? clearInfo;
         MethodInfo? addInfo;
         readonly object[] addInfoParameters = new object[1];
-        
-        public override void UpdateSourceCollections()
+
+        protected override void UpdateSourceCollections()
         {
             clearInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(Stack<int>.Clear));
             addInfo ??= AccessUtility.DeclaredMethod(resolvedTargetType, nameof(Stack<int>.Push));

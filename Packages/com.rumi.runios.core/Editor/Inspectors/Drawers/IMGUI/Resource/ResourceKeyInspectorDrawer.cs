@@ -2,13 +2,14 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Resource;
+using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 {
     [CustomInspectorDrawer(typeof(ResourceKey))]
     public class ResourceKeyInspectorDrawer : GenericInspectorDrawer
     {
-        public ResourceKeyInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public ResourceKeyInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
 
         protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => ResourceKeyField(position, label, (ResourceKey)value!);
 

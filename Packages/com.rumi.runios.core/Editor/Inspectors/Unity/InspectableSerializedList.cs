@@ -284,6 +284,5 @@ namespace RuniOS.Editor.Inspectors.Unity
         IInspectableList IInspectableList.Clone() => Clone();
         
         void IInspectableList.SynchronizeCollections() { }
-        void IInspectableList.UpdateSourceCollections() { }
     }
 }

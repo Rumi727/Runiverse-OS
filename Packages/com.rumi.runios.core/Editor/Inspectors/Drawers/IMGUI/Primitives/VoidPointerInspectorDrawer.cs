@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Undos;
 using System.Reflection;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
@@ -9,7 +10,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     [CustomInspectorDrawer(typeof(void*), true, allowInDebug = true)]
     public class VoidPointerInspectorDrawer : GenericInspectorDrawer
     {
-        public VoidPointerInspectorDrawer(IInspectorVariableElement element) : base(element) { }
+        public VoidPointerInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
 
         protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
         {
