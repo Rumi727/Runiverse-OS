@@ -104,10 +104,15 @@ namespace RuniOS.Resource
             if (!isTracking)
                 throw new InvalidOperationException("Tracking is not started. Call BeginTracking() before adding asset handles.");
 
+            /*
+             * TODO
+             * 따로 중복 체크를 하는 API를 만들어서 의미 없는 에셋 핸들을 만들게하지 말 것
+             */
+
             // identifier가 이미 트래킹되고 있다면 중복 등록 방지 (Tracking)
             if (!trackedIdentifier.Add(identifier))
                 return;
-            
+
             // 핸들이 없거나 IOHandler가 다를 경우에만 교체 (Register/Update)
             if (!assetHandles.TryGetValue(identifier, out THandle? value) || !value.IsSameTarget(assetHandle))
                 assetHandles[identifier] = assetHandle;
