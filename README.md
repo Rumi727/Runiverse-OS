@@ -31,8 +31,9 @@ When this library is completed, it will replace the existing [SC KRM 1.0](https:
 * 메쉬 리소스팩 지원
   * 런타임 fbx 로더가 안보여서 어쩔수 없이 에셋 번들 같은거로 가게 될듯...
   * 이거 안하면 리겜 커스텀 맵 지원 못한다.
-* 닷넷 확장 InternalTo어쩌구저쩌구로 internal을 대비한 다른 runios 어셈블리에도 표시
-  * 이거 자꾸 까먹네 쉬운건데
+* ~~닷넷 확장 InternalTo어쩌구저쩌구로 internal을 대비한 다른 runios 어셈블리에도 표시~~
+  * ~~이거 자꾸 까먹네 쉬운건데~~
+  * 해결 (RUNI_ENGINE_DOTNET_INTERNAL 스크립팅 정의 심볼 사용하여 실제 internal 환경에서 검증함)
 * 기초 UI 작업
   * 설정
   * 폴더/파일 입력창
@@ -50,4 +51,5 @@ When this library is completed, it will replace the existing [SC KRM 1.0](https:
 지원
 * 기존 Runi Engine의 카메라, 캔버스 컴포넌트 가져와서 스크린 크롭 등 기능 추가
 * 이외에도 여러 기능들...
-* 리소스 레지스트리 고쳐라 아무리봐도 약간 나사 빠져잇다... 마인크래프트를 참고할 것
+~~* 리소스 레지스트리 고쳐라 아무리봐도 약간 나사 빠져잇다... 마인크래프트를 참고할 것~~
+  * 많이 괜찮아짐
