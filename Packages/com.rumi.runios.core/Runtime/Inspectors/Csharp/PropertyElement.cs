@@ -16,13 +16,13 @@ namespace RuniOS.Inspectors.Csharp
             this.property = property;
             nullabilityInfo = NullabilityInfoContext.Create(property);
 
-            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
+            inspectableObjectElement = new InspectableObject(this, variableType);
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
-                inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault());
                 if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
+                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null);
             }
         }
 
@@ -34,6 +34,11 @@ namespace RuniOS.Inspectors.Csharp
         public override bool isPublic => property.GetMethod?.IsPublic ?? property.SetMethod?.IsPublic ?? false;
 
         public override bool isStatic => property.GetMethod?.IsStatic ?? property.SetMethod?.IsStatic ?? false;
+        
+        /// <summary>
+        /// 엑세스 메소드를 커스텀할 수 있습니다.
+        /// </summary>
+        public AccessInterceptor accessor { get; private init; } = new AccessInterceptor();
 
         public object? value
         {
@@ -41,7 +46,8 @@ namespace RuniOS.Inspectors.Csharp
             {
                 try
                 {
-                    return property.GetValue(inspectable.instance);
+                    object? Method() => property.GetValue(inspectable.instance);
+                    return accessor.readFunc != null ? accessor.readFunc.Invoke(Method) : Method();
                 }
                 catch (Exception e)
                 {
@@ -52,6 +58,14 @@ namespace RuniOS.Inspectors.Csharp
             {
                 try
                 {
+                    if (accessor.writeAction != null)
+                    {
+                        accessor.writeAction.Invoke(value);
+                        inspectable.OnValueChangedInvoke();
+                        
+                        return;
+                    }
+                    
                     if (isStatic)
                     {
                         property.SetValue(null, value);
@@ -92,6 +106,9 @@ namespace RuniOS.Inspectors.Csharp
 
                 try
                 {
+                    if (inspectable.instancesIsEmpty)
+                        return false;
+                    
                     object? value = this.value;
                     var instances = inspectable.instances;
                     for (int i = 0; i < instances.Count; i++)
@@ -132,28 +149,42 @@ namespace RuniOS.Inspectors.Csharp
 
         public IEnumerable<object?> GetValues(bool noCopy = false)
         {
-            valuesBuffer.Clear();
             try
             {
-                var instances = inspectable.instances;
-                for (int i = 0; i < instances.Count; i++)
-                    valuesBuffer.Add(property.GetValue(instances[i]));
+                return accessor.getValuesFunc != null ? accessor.getValuesFunc.Invoke(Method, noCopy) : Method(noCopy);
+
+                IEnumerable<object?> Method(bool noCopy = false)
+                {
+                    valuesBuffer.Clear();
+
+                    var instances = inspectable.instances;
+                    for (int i = 0; i < instances.Count; i++)
+                        valuesBuffer.Add(property.GetValue(instances[i]));
+
+                    if (noCopy)
+                        return valuesBuffer;
+
+                    return valuesBuffer.ToArray();
+                }
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} property.", name, e);
             }
-            
-            if (noCopy)
-                return valuesBuffer;
-            
-            return valuesBuffer.ToArray();
         }
 
         public void SetValues(IEnumerable<object?> values)
         {
             try
             {
+                if (accessor.setValuesAction != null)
+                {
+                    accessor.setValuesAction.Invoke(values);
+                    inspectable.OnValueChangedInvoke();
+                    
+                    return;
+                }
+                
                 foreach ((object instance, object? value) in inspectable.instances.WhereNotNull().Zip(values, (instance, value) => (instance, value)))
                     property.SetValue(instance, value);
 
@@ -188,10 +219,19 @@ namespace RuniOS.Inspectors.Csharp
             return true;
         }
 
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => (noInstanceCheck || !inspectable.instancesIsEmpty) && property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
+        {
+            if (accessor.isReadableFunc != null)
+                return accessor.isReadableFunc.Invoke(flags, noInstanceCheck);
+            
+            return (noInstanceCheck || !inspectable.instancesIsEmpty) && property.GetGetMethod(flags.HasFlagFast(InspectorFlags.NonPublic)) != null;
+        }
 
         public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
         {
+            if (accessor.isWritableFunc != null)
+                return accessor.isWritableFunc.Invoke(flags, noInstanceCheck);
+            
             if (!noInstanceCheck && inspectable.instancesIsEmpty)
                 return false;
 
@@ -223,9 +263,9 @@ namespace RuniOS.Inspectors.Csharp
                 inspectableDictionaryElement?.SetInstances(collectionsBuffer);
             }
         }
-        
+
         /// <inheritdoc cref="IInspectorVariableElement.Clone"/>
-        public override MemberElement Clone() => new PropertyElement(inspectable.Clone(), property);
-        IInspectorVariableElement IInspectorVariableElement.Clone() => new PropertyElement(inspectable.Clone(), property);
+        public override MemberElement Clone() => new PropertyElement(inspectable.Clone(), property) { accessor = accessor.Clone() };
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new PropertyElement(inspectable.Clone(), property) { accessor = accessor.Clone() };
     }
 }

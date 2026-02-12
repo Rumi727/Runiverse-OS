@@ -17,10 +17,15 @@ namespace RuniOS.Inspectors.Csharp
 
         public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
+        public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
+        
+        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
+
+            this.parentElement = parentElement;
 
             this.inspectionType = inspectionType;
             inspectionElementType = inspectionType.IsArray ? inspectionType.GetElementType() : CollectionGenericUtility.GetEnumerableElementType(inspectionType);
@@ -33,7 +38,7 @@ namespace RuniOS.Inspectors.Csharp
             SetInstances(instances);
         }
 
-        public IInspectorVariableElement? parentElement { get; set; }
+        public IInspectorVariableElement? parentElement { get; }
 
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -618,7 +623,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <inheritdoc cref="IInspectableList.Clone"/>
         public InspectableList Clone()
         {
-            InspectableList clonedList = new InspectableList(inspectionType, instances, elementNullabilityInfo) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+            InspectableList clonedList = new InspectableList(parentElement?.Clone(), inspectionType, instances, elementNullabilityInfo) { onValueChanged = onValueChanged };
             clonedList.SynchronizeCollections();
 
             return clonedList;

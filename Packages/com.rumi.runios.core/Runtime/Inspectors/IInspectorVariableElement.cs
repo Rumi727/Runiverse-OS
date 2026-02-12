@@ -30,6 +30,13 @@ namespace RuniOS.Inspectors
         /// 여러 객체를 검사할 때 값이 혼합되어 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         bool isMixedValue { get; }
+        
+        /// <summary>
+        /// 변수의 읽기/쓰기를 커스텀할 수 있습니다.
+        /// <br/><br/>
+        /// 구조체처럼 내부 필드는 읽기 전용이지만 새 구조체를 만드는 것과 같이 우회하고 싶을 때 사용할 수 있습니다.
+        /// </summary>
+        AccessInterceptor accessor { get; }
 
         /// <summary>
         /// 이 변수의 값을 나타내는 <see cref="IInspectableObject"/>를 가져옵니다.<br/>

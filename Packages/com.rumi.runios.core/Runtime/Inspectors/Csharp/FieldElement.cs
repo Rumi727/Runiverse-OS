@@ -36,13 +36,13 @@ namespace RuniOS.Inspectors.Csharp
             this.field = field;
             nullabilityInfo = NullabilityInfoContext.Create(field);
 
-            inspectableObjectElement = new InspectableObject(variableType) { parentElement = this };
+            inspectableObjectElement = new InspectableObject(this, variableType);
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
-                inspectableListElement = new InspectableList(variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault()) { parentElement = this };
+                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault());
                 if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null) { parentElement = this };
+                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null);
             }
         }
 
@@ -72,6 +72,11 @@ namespace RuniOS.Inspectors.Csharp
         public override bool isStatic => field.IsStatic || field.IsLiteral;
 
         /// <summary>
+        /// 엑세스 메소드를 커스텀할 수 있습니다.
+        /// </summary>
+        public AccessInterceptor accessor { get; private init; } = new AccessInterceptor();
+
+        /// <summary>
         /// 필드의 값을 가져오거나 설정합니다.
         /// </summary>
         /// <exception cref="InspectorElementException">필드 값을 가져오거나 설정하는 동안 예외가 발생할 때 발생합니다.</exception>
@@ -81,7 +86,8 @@ namespace RuniOS.Inspectors.Csharp
             {
                 try
                 {
-                    return field.GetValue(inspectable.instance);
+                    object? Method() => field.GetValue(inspectable.instance);
+                    return accessor.readFunc != null ? accessor.readFunc.Invoke(Method) : Method();
                 }
                 catch (Exception e)
                 {
@@ -92,6 +98,14 @@ namespace RuniOS.Inspectors.Csharp
             {
                 try
                 {
+                    if (accessor.writeAction != null)
+                    {
+                        accessor.writeAction.Invoke(value);
+                        inspectable.OnValueChangedInvoke();
+                        
+                        return;
+                    }
+                    
                     if (isStatic)
                     {
                         field.SetValue(null, value);
@@ -136,6 +150,9 @@ namespace RuniOS.Inspectors.Csharp
 
                 try
                 {
+                    if (inspectable.instancesIsEmpty)
+                        return false;
+                    
                     object? value = this.value;
                     var instances = inspectable.instances;
                     for (int i = 0; i < instances.Count; i++)
@@ -188,28 +205,42 @@ namespace RuniOS.Inspectors.Csharp
         /// <exception cref="InspectorElementException">프로퍼티 값을 읽는 동안 예외가 발생할 때 발생합니다.</exception>
         public IEnumerable<object?> GetValues(bool noCopy = false)
         {
-            valuesBuffer.Clear();
             try
             {
-                var instances = inspectable.instances;
-                for (int i = 0; i < instances.Count; i++)
-                    valuesBuffer.Add(field.GetValue(instances[i]));
+                return accessor.getValuesFunc != null ? accessor.getValuesFunc.Invoke(Method, noCopy) : Method(noCopy);
+                
+                IEnumerable<object?> Method(bool noCopy)
+                {
+                    valuesBuffer.Clear();
+
+                    var instances = inspectable.instances;
+                    for (int i = 0; i < instances.Count; i++)
+                        valuesBuffer.Add(field.GetValue(instances[i]));
+
+                    if (noCopy)
+                        return valuesBuffer;
+
+                    return valuesBuffer.ToArray();
+                }
             }
             catch (Exception e)
             {
                 throw new InspectorElementException($"An exception occurred while reading value from {name} field.", name, e);
             }
-            
-            if (noCopy)
-                return valuesBuffer;
-            
-            return valuesBuffer.ToArray();
         }
 
         public void SetValues(IEnumerable<object?> values)
         {
             try
             {
+                if (accessor.setValuesAction != null)
+                {
+                    accessor.setValuesAction.Invoke(values);
+                    inspectable.OnValueChangedInvoke();
+                    
+                    return;
+                }
+
                 if (inspectable.parentElement != null && inspectable.parentElement.variableType.IsValueType)
                 {
                     // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
@@ -256,13 +287,22 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => (noInstanceCheck || !inspectable.instancesIsEmpty) && flags.HasFlagFast(InspectorFlags.Public);
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
+        {
+            if (accessor.isReadableFunc != null)
+                return accessor.isReadableFunc.Invoke(flags, noInstanceCheck);
+            
+            return (noInstanceCheck || !inspectable.instancesIsEmpty) && flags.HasFlagFast(InspectorFlags.Public);
+        }
 
         /// <summary>
         /// 필드에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다. (예: init-only, literal 필드는 쓰기 불가)
         /// </summary>
         public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
         {
+            if (accessor.isWritableFunc != null)
+                return accessor.isWritableFunc.Invoke(flags, noInstanceCheck);
+            
             if ((!noInstanceCheck && inspectable.instancesIsEmpty) || !flags.HasFlagFast(InspectorFlags.Public))
                 return false;
 
@@ -296,7 +336,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         /// <inheritdoc cref="IInspectorVariableElement.Clone"/>
-        public override MemberElement Clone() => new FieldElement(inspectable.Clone(), field);
-        IInspectorVariableElement IInspectorVariableElement.Clone() => new FieldElement(inspectable.Clone(), field);
+        public override MemberElement Clone() => new FieldElement(inspectable.Clone(), field) { accessor = accessor.Clone() };
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new FieldElement(inspectable.Clone(), field) { accessor = accessor.Clone() };
     }
 }

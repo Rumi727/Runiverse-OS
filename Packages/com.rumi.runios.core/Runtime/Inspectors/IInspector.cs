@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using RuniOS.Undos;
 
 namespace RuniOS.Inspectors
 {
@@ -10,6 +11,7 @@ namespace RuniOS.Inspectors
         ImmutableArray<IInspectorElement> elements { get; }
 
         InspectorFlags inspectorFlags { get; }
+        IUndoRecorder? undoRecorder { get; }
 
         void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 

@@ -9,7 +9,7 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableObject : IInspectableObject
     {
-        public IInspectorVariableElement? parentElement { get; set; }
+        public IInspectorVariableElement? parentElement { get; }
 
         public Type inspectionType { get; }
         public string inspectionDisplayName => inspectionType.GetTypeDisplayName();
@@ -60,16 +60,22 @@ namespace RuniOS.Inspectors.Csharp
 
         public bool instanceIsMultiple => instances.TwoOrMore();
 
-        public int instanceCount => instances.Count();
+        public int instanceCount => instances.Count;
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
-        public InspectableObject(object instance) : this(instance.GetType(), ImmutableArray.Create(instance)) { }
+
+        public InspectableObject(object instance) : this(instance.GetType(), Enumerable.Repeat(instance, 1)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
         public InspectableObject(Type inspectionType, params object?[] instances) : this(inspectionType, instances.WhereNotNull()) { }
 
-        public InspectableObject(Type inspectionType, IEnumerable instances)
+        public InspectableObject(Type inspectionType, IEnumerable instances) : this(null, inspectionType, instances) { }
+        
+        public InspectableObject(IInspectorVariableElement? parentElement, Type inspectionType) : this(parentElement, inspectionType, Enumerable.Empty<object?>()) { }
+        public InspectableObject(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable instances)
         {
+            this.parentElement = parentElement;
+
             this.inspectionType = inspectionType;
             readOnlyInstances = _instances.AsReadOnly();
             
@@ -150,7 +156,7 @@ namespace RuniOS.Inspectors.Csharp
         }
 
         /// <inheritdoc cref="IInspectableObject.Clone"/>
-        public InspectableObject Clone() => new InspectableObject(inspectionType, instances) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+        public InspectableObject Clone() => new InspectableObject(parentElement?.Clone(), inspectionType, instances) { onValueChanged = onValueChanged };
         IInspectableObject IInspectableObject.Clone() => Clone();
     }
 }

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Collections.Handlers
 {
-    public sealed class CustomCollectionHandlerAttribute : CustomAttributeDrawerAttribute
+    public sealed class CustomCollectionHandlerAttribute : TypeHandlerAttribute
     {
         public override bool isSubtypeCompatible => true;
 

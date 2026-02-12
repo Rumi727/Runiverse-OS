@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Collections.Handlers.Entrys
 {
-    public abstract class EntryHandler : AttributeDrawer<EntryHandler, CustomEntryHandlerAttribute>
+    public abstract class EntryHandler : AttributeTypeResolver<EntryHandler, CustomEntryHandlerAttribute>
     {
         public static KeyValuePair<object?, object?> FindEntry(object? targetEntry)
         {

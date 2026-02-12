@@ -6,11 +6,11 @@ namespace RuniOS.Collections.Handlers
 {
     public abstract class CollectionHandlerBase : ICollection
     {
-        public static bool HandlerCheck<TDrawer>(Type targetType) where TDrawer : CollectionHandlerBase => typeof(TDrawer).IsAssignableFrom(AttributeDrawer<TDrawer, CustomCollectionHandlerAttribute>.FindDrawerType(targetType));
+        public static bool HandlerCheck<TDrawer>(Type targetType) where TDrawer : CollectionHandlerBase => typeof(TDrawer).IsAssignableFrom(AttributeTypeResolver<TDrawer, CustomCollectionHandlerAttribute>.FindDrawerType(targetType));
 
         public static CollectionHandlerBase FindCollectionHandler(IEnumerable targetCollection)
         {
-            Type? handlerType = AttributeDrawer<CollectionHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
+            Type? handlerType = AttributeTypeResolver<CollectionHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
             if (handlerType != null)
                 return (CollectionHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
 

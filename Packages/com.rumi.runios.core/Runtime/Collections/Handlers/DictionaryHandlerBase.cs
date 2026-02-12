@@ -9,7 +9,7 @@ namespace RuniOS.Collections.Handlers
     {
         public static DictionaryHandlerBase FindDictionaryHandler(IEnumerable targetCollection)
         {
-            Type? handlerType = AttributeDrawer<DictionaryHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
+            Type? handlerType = AttributeTypeResolver<DictionaryHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
             if (handlerType != null && typeof(DictionaryHandlerBase).IsAssignableFrom(handlerType))
                 return (DictionaryHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
 

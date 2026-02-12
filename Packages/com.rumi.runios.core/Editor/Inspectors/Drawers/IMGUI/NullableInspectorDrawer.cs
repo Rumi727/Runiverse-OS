@@ -17,43 +17,40 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             // 가독성 꼬라지ㅋㅋ
 
             valueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.Value));
-            valueElement = new CustomAccessVariableElement.Builder(valueElement)
-                .AddWriteAction((_, value) => element.value = Activator.CreateInstance(element.variableType, value))
-                .AddSetValuesAction((_, values) => element.SetValues(values.Select(x => Activator.CreateInstance(element.variableType, x))))
-                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
-                .SetIsWritableFunc((_, flags, _) => element.IsWritable(flags, true))
-                .Build();
+            valueElement.accessor.writeAction = value => element.value = Activator.CreateInstance(element.variableType, value);
+            valueElement.accessor.setValuesAction = values => element.SetValues(values.Select(x => Activator.CreateInstance(element.variableType, x)));
+            valueElement.accessor.isReadableFunc = (flags, noInstanceCheck) => (noInstanceCheck || !valueElement.inspectable.instancesIsEmpty) && element.IsReadable(flags, true);
+            valueElement.accessor.isWritableFunc = (flags, _) => element.IsWritable(flags, true);
 
             hasValueElement = element.inspectableObjectElement.FindVariableElement(nameof(Nullable<int>.HasValue));
-            hasValueElement = new CustomAccessVariableElement.Builder(hasValueElement)
-                // 닷넷의 Nullable<T>를 null로 만들면 구조체이지만 Nullable<T>의 Equals(null)가 true가 되면서 Nullable<T> 인스턴스를 가져오지 못하는 현상이 있습니다.
-                .SetReadFunc(x => !x.inspectable.instancesIsEmpty && (bool)x.value!)
-                .AddWriteAction((_, value) =>
-                {
-                    if (Equals(hasValueElement.value, value))
-                        return;
+            
+            // 닷넷의 Nullable<T>를 null로 만들면 구조체이지만 Nullable<T>의 Equals(null)가 true가 되면서 Nullable<T> 인스턴스를 가져오지 못하는 현상이 있습니다.
+            hasValueElement.accessor.readFunc = orgMethod => !hasValueElement.inspectable.instancesIsEmpty && (bool)orgMethod.Invoke()!;
+            hasValueElement.accessor.writeAction = value =>
+            {
+                if (Equals(hasValueElement.value, value))
+                    return;
 
-                    if ((bool)value!)
-                        element.value = Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
+                if ((bool)value!)
+                    element.value = Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
+                else
+                    element.value = null;
+            };
+            hasValueElement.accessor.setValuesAction = values =>
+            {
+                element.SetValues(values.Select(x =>
+                {
+                    if (Equals(hasValueElement.value, x))
+                        return x;
+
+                    if ((bool)x!)
+                        return Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
                     else
-                        element.value = null;
-                })
-                .AddSetValuesAction((_, values) =>
-                {
-                    element.SetValues(values.Select(x =>
-                    {
-                        if (Equals(hasValueElement.value, x))
-                            return x;
-
-                        if ((bool)x!)
-                            return Activator.CreateInstance(element.variableType, valueElement.variableType.GetDefaultValueNotNull());
-                        else
-                            return null;
-                    }));
-                })
-                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
-                .SetIsWritableFunc((_, flags, _) => element.IsWritable(flags, true))
-                .Build();
+                        return null;
+                }));
+            };
+            hasValueElement.accessor.isReadableFunc = (flags, _) => element.IsReadable(flags, true);
+            hasValueElement.accessor.isWritableFunc = (flags, _) => element.IsWritable(flags, true);
 
             valueDrawer = FindDrawer(valueElement, undoRecorder);
         }

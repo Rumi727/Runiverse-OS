@@ -17,10 +17,15 @@ namespace RuniOS.Inspectors.Csharp
         protected MemberElement(InspectableObject inspectable, MemberInfo member)
         {
             name = member.Name;
-            displayName = IInspectorElement.ToDisplayName(name);
+            displayName = InspectorUtility.ToDisplayName(name);
 
             this.inspectable = inspectable;
             this.member = member;
+
+            attributes = member.GetCustomAttributes()
+                .OfType<IInspectorAttribute>()
+                .Concat(inspectable.attributes)
+                .ToImmutableArray();
         }
 
         /// <summary>

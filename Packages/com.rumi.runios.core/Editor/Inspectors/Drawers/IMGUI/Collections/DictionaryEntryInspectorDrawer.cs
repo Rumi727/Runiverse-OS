@@ -20,48 +20,44 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             // 가독성 꼬라지ㅋㅋ
             
             keyElement = element.inspectableObjectElement.FindVariableElement(nameof(DictionaryEntry.Key));
-            keyElement = new CustomAccessVariableElement.Builder(keyElement)
-                .AddWriteAction((_, valueKey) =>
-                {
-                    KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
-                    element.value = EntryHandler.CreateEntry(element.variableType, valueKey, entry.Value);
-                })
-                .AddSetValuesAction((_, valueKeys) =>
-                {
-                    var zipedEnumerable = element.GetValues()
-                        .Zip(valueKeys, (elementValue, entryKey) => (value: EntryHandler.FindEntry(elementValue).Value, key: entryKey));
-                    
-                    element.SetValues
-                    (
-                        zipedEnumerable
-                            .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
-                    );
-                })
-                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
-                .SetIsWritableFunc((_, flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true))
-                .Build();
+            keyElement.accessor.writeAction = valueKey =>
+            {
+                KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
+                element.value = EntryHandler.CreateEntry(element.variableType, valueKey, entry.Value);
+            };
+            keyElement.accessor.setValuesAction = valueKeys =>
+            {
+                var zipedEnumerable = element.GetValues()
+                    .Zip(valueKeys, (elementValue, entryKey) => (value: EntryHandler.FindEntry(elementValue).Value, key: entryKey));
+                
+                element.SetValues
+                (
+                    zipedEnumerable
+                        .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
+                );
+            };
+            keyElement.accessor.isReadableFunc = (flags, _) => element.IsReadable(flags, true);
+            keyElement.accessor.isWritableFunc = (flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true);
             
             valueElement = element.inspectableObjectElement.FindVariableElement(nameof(DictionaryEntry.Value));
-            valueElement = new CustomAccessVariableElement.Builder(valueElement)
-                .AddWriteAction((_, valueValue) =>
-                {
-                    KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
-                    element.value = EntryHandler.CreateEntry(element.variableType, entry.Key, valueValue);
-                })
-                .AddSetValuesAction((_, valueValues) =>
-                {
-                    var zipedEnumerable = element.GetValues()
-                        .Zip(valueValues, (elementValue, entryValue) => (key: EntryHandler.FindEntry(elementValue).Key, value: entryValue));
-                    
-                    element.SetValues
-                    (
-                        zipedEnumerable
-                            .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
-                    );
-                })
-                .SetIsReadableFunc((_, flags, _) => element.IsReadable(flags, true))
-                .SetIsWritableFunc((_, flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true))
-                .Build();
+            valueElement.accessor.writeAction = valueValue =>
+            {
+                KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
+                element.value = EntryHandler.CreateEntry(element.variableType, entry.Key, valueValue);
+            };
+            valueElement.accessor.setValuesAction = valueValues =>
+            {
+                var zipedEnumerable = element.GetValues()
+                    .Zip(valueValues, (elementValue, entryValue) => (key: EntryHandler.FindEntry(elementValue).Key, value: entryValue));
+                
+                element.SetValues
+                (
+                    zipedEnumerable
+                        .Select(x => EntryHandler.CreateEntry(element.variableType, x.key, x.value))
+                );
+            };
+            valueElement.accessor.isReadableFunc = (flags, _) => element.IsReadable(flags, true);
+            valueElement.accessor.isWritableFunc = (flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true);
 
             keyDrawer = FindDrawer(keyElement, undoRecorder);
             valueDrawer = FindDrawer(valueElement, undoRecorder);

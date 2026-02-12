@@ -2,6 +2,7 @@
 using RuniOS.Editor.Inspectors.Drawers.IMGUI;
 using RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Csharp;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Linq;
@@ -21,13 +22,21 @@ namespace RuniOS.Editor.Inspectors
 
         public InspectorFlags inspectorFlags { get; private set; }
 
+        public ImmutableArray<IInspectorAttribute> inheritedAttributes { get; } = ImmutableArray<IInspectorAttribute>.Empty;
+
         public IUndoRecorder? undoRecorder { get; }
 
         (string label, string message)? lastException = null;
 
         public Inspector() => undoRecorder = UndoHandler.instance;
-        
+
         public Inspector(IUndoRecorder? undoRecorder) => this.undoRecorder = undoRecorder;
+
+        public Inspector(ImmutableArray<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder)
+        {
+            this.inheritedAttributes = inheritedAttributes;
+            this.undoRecorder = undoRecorder;
+        }
 
         public Inspector(object instance) : this(new InspectableObject(instance)) { }
         public Inspector(Type type) : this(new InspectableObject(type)) { }

@@ -8,7 +8,7 @@ namespace RuniOS.Inspectors
         /// <summary>
         /// 명확한 이유가 없으면 값을 변경하지 마세요.
         /// </summary>
-        IInspectorVariableElement? parentElement { get; set; }
+        IInspectorVariableElement? parentElement { get; }
         
         string inspectionDisplayName { get; }
 

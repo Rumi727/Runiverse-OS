@@ -8,7 +8,7 @@ namespace RuniOS.Collections.Handlers
     {
         public static ListHandlerBase FindListHandler(IEnumerable targetCollection)
         {
-            Type? handlerType = AttributeDrawer<ListHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
+            Type? handlerType = AttributeTypeResolver<ListHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
             if (handlerType != null && typeof(ListHandlerBase).IsAssignableFrom(handlerType))
                 return (ListHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
 

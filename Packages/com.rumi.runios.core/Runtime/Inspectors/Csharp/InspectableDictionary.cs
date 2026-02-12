@@ -17,12 +17,17 @@ namespace RuniOS.Inspectors.Csharp
 
         public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
 
-        public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
+        public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
+
+        public InspectableDictionary(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableDictionary(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
             if (!CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a dictionary type.", nameof(inspectionType));
+
+            this.parentElement = parentElement;
 
             this.inspectionType = inspectionType;
             inspectionElementType = CollectionGenericUtility.GetDictionaryElementType(inspectionType);
@@ -436,7 +441,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <inheritdoc cref="IInspectableDictionary.Clone"/>
         public InspectableDictionary Clone()
         {
-            InspectableDictionary clonedDictionary = new InspectableDictionary(inspectionType, instances, elementNullabilityInfo) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
+            InspectableDictionary clonedDictionary = new InspectableDictionary(parentElement?.Clone(), inspectionType, instances, elementNullabilityInfo) { onValueChanged = onValueChanged };
             clonedDictionary.SynchronizeCollections();
 
             return clonedDictionary;

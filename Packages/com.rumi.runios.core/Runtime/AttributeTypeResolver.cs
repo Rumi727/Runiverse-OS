@@ -9,34 +9,36 @@ using System.Reflection;
 namespace RuniOS
 {
     /// <summary>
-    /// This abstract class provides the core logic for automatically discovering and managing classes that implement specific attribute-based drawing logic.
+    /// This abstract class serves as a registry and resolver for types that implement specific attribute-based logic.
     /// <br/>
-    /// It functions as a **static utility class** for managing drawer types associated with <see cref="TAttribute"/>, and serves as a **base class** for specific drawer implementations.
+    /// It automatically discovers classes derived from <see cref="TBase"/> that are decorated with <see cref="TAttribute"/> and manages them for lookup.
     /// <br/><br/>
-    /// 이 추상 클래스는 특정 특성 기반 드로잉 로직을 구현하는 클래스를 자동으로 발견하고 관리하는 핵심 로직을 제공합니다.
+    /// 이 추상 클래스는 특정 특성 기반 로직을 구현하는 타입들을 위한 레지스트리 및 리졸버(해결자) 역할을 합니다.
     /// <br/>
-    /// 이 클래스는 <see cref="TAttribute"/>와 관련된 드로어 타입을 관리하는 <b>정적 유틸리티 클래스</b> 역할을 하며, 특정 드로어 구현을 위한 <b>기반 클래스</b> 역할도 수행합니다.
+    /// <see cref="TAttribute"/>가 지정된 <see cref="TBase"/>의 파생 클래스를 자동으로 발견하고 조회할 수 있도록 관리합니다.
     /// </summary>
-    /// <typeparam name="TBaseDrawer">The base type of the specific drawer system. This type is used to filter reflection results, ensuring only classes that derive from <see cref="TBaseDrawer"/> or are <see cref="TBaseDrawer"/> itself (if not abstract, and have <see cref="TAttribute"/>) are managed.
+    /// <typeparam name="TBase">
+    /// The base type of the handler system (formerly Drawer). Only classes derived from this type are managed.
     /// <br/>
-    /// 특정 드로어 시스템의 기준이 되는 기반 타입입니다. 이 타입은 리플렉션 결과를 필터링하는 데 사용되며, <see cref="TBaseDrawer"/>를 상속하는 클래스 또는 <see cref="TBaseDrawer"/> 자신(추상 클래스가 아닐 경우, 그리고 <see cref="TAttribute"/>가 있을 경우)만이 관리되도록 합니다.
+    /// 핸들러 시스템의 기반 타입입니다. 이 타입을 상속받는 클래스들만 관리 대상이 됩니다.
     /// </typeparam>
-    /// <typeparam name="TAttribute">The specific attribute type that marks the classes this drawer should manage, which must inherit from <see cref="CustomAttributeDrawerAttribute"/>.
+    /// <typeparam name="TAttribute">
+    /// The attribute type used to map a target type to a handler type.
     /// <br/>
-    /// 이 드로어가 관리해야 할 클래스를 표시하는 특정 특성 타입이며, <see cref="CustomAttributeDrawerAttribute"/>를 상속해야 합니다.
+    /// 대상 타입과 핸들러 타입을 매핑하는 데 사용되는 특성 타입입니다.
     /// </typeparam>
-    public abstract class AttributeDrawer<TBaseDrawer, TAttribute> where TAttribute : CustomAttributeDrawerAttribute
+    public abstract class AttributeTypeResolver<TBase, TAttribute> where TAttribute : TypeHandlerAttribute
     {
         /// <summary>
-        /// Initializes the static members of the <see cref="AttributeDrawer{TBaseDrawer, TAttribute}"/> class.
+        /// Initializes the static members of the <see cref="AttributeTypeResolver{TBase,TAttribute}"/> class.
         /// <br/>
         /// This process subscribes to the <see cref="ReflectionUtility.onListUpdate"/> event and immediately performs the initial discovery of drawer types.
         /// <br/>
-        /// <see cref="AttributeDrawer{TBaseDrawer, TAttribute}"/> 클래스의 정적 멤버를 초기화합니다.
+        /// <see cref="AttributeTypeResolver{TBase,TAttribute}"/> 클래스의 정적 멤버를 초기화합니다.
         /// <br/>
         /// 이 과정은 <see cref="ReflectionUtility.onListUpdate"/> 이벤트에 구독하고 드로어 타입의 초기 발견을 즉시 수행합니다.
         /// </summary>
-        static AttributeDrawer()
+        static AttributeTypeResolver()
         {
             ReflectionUtility.onListUpdate += Update;
             Update();
@@ -51,7 +53,7 @@ namespace RuniOS
                         (
                             x =>
                                 x.IsDefined(typeof(TAttribute)) &&
-                                ((!typeof(TBaseDrawer).IsAbstract && typeof(TBaseDrawer) == x) || x.IsSubclassOf(typeof(TBaseDrawer)))
+                                ((!typeof(TBase).IsAbstract && typeof(TBase) == x) || x.IsSubclassOf(typeof(TBase)))
                         )
                         .SelectMany
                         (
@@ -90,7 +92,7 @@ namespace RuniOS
                                 // 최종 정렬 키 튜플
                                 // OrderByDescending은 튜플의 요소를 순서대로 비교합니다.
                                 return
-                                    (
+                                (
                                     // 1. 특정 기본 타입 예외 처리 (높은 우선순위)
                                     targetType != typeof(void),
                                     targetType != typeof(object),
@@ -98,8 +100,9 @@ namespace RuniOS
                                     // 2. 클래스 우선
                                     isNotInterface,
                                     // 3. 깊이 가중치 (높을수록 구체적이고 우선순위 높음)
-                                    depthWeight
-                                    );
+                                    depthWeight,
+                                    x.attribute.priority
+                                );
                             }
                         ).ToImmutableArray();
                 }
@@ -107,11 +110,11 @@ namespace RuniOS
         }
         
         /// <summary>
-        /// Gets a read-only list of all discovered drawer types derived from <see cref="TBaseDrawer"/> and their associated <see cref="TAttribute"/>.
+        /// Gets a read-only list of all discovered drawer types derived from <see cref="TBase"/> and their associated <see cref="TAttribute"/>.
         /// <br/>
         /// The list is ordered by the hierarchy depth of the target type in descending order, ensuring that more specific drawers are prioritized.
         /// <br/><br/>
-        /// <see cref="TBaseDrawer"/>에서 파생된, 발견된 모든 드로어 타입과 관련 <see cref="TAttribute"/>의 읽기 전용 목록을 가져옵니다.
+        /// <see cref="TBase"/>에서 파생된, 발견된 모든 드로어 타입과 관련 <see cref="TAttribute"/>의 읽기 전용 목록을 가져옵니다.
         /// <br/>
         /// 이 목록은 대상 타입의 계층 깊이(내림차순)에 따라 정렬되어, 더 구체적인 서랍이 우선적으로 처리되도록 합니다.
         /// <br/><br/>
@@ -149,11 +152,11 @@ namespace RuniOS
         /// <summary>
         /// Finds the most specific drawer <see cref="Type"/> registered for the given target <see cref="Type"/>.
         /// <br/>
-        /// The search prioritizes drawers registered for the exact type, and then checks drawers that have <see cref="CustomAttributeDrawerAttribute.isSubtypeCompatible"/> set to <see langword="true"/> for assignable types.
+        /// The search prioritizes drawers registered for the exact type, and then checks drawers that have <see cref="TypeHandlerAttribute.isSubtypeCompatible"/> set to <see langword="true"/> for assignable types.
         /// <br/><br/>
         /// 주어진 대상 <see cref="Type"/>에 등록된 가장 구체적인 드로어 <see cref="Type"/>을 찾습니다.
         /// <br/>
-        /// 검색은 정확히 일치하는 타입에 등록된 드로어를 우선하며, 이후 <see cref="CustomAttributeDrawerAttribute.isSubtypeCompatible"/>이 <see langword="true"/>로 설정된 드로어에 대해서 할당 가능한 타입인지 확인하여 적용합니다.
+        /// 검색은 정확히 일치하는 타입에 등록된 드로어를 우선하며, 이후 <see cref="TypeHandlerAttribute.isSubtypeCompatible"/>이 <see langword="true"/>로 설정된 드로어에 대해서 할당 가능한 타입인지 확인하여 적용합니다.
         /// </summary>
         /// <param name="targetType">The type for which to find an associated drawer.</param>
         /// <param name="resolvedTargetType">

@@ -80,6 +80,12 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// </summary>
         public bool isStatic => false;
 
+        
+        /// <summary>
+        /// 엑세스 메소드를 커스텀할 수 있습니다.
+        /// </summary>
+        public AccessInterceptor accessor { get; private init; } = new AccessInterceptor();
+
         /// <summary>
         /// 변수의 값을 가져오거나 설정합니다.
         /// </summary>
@@ -89,7 +95,8 @@ namespace RuniOS.Editor.Inspectors.Unity
             {
                 try
                 {
-                    return inspectable[index];
+                    object? Method() => inspectable[index];
+                    return accessor.readFunc != null ? accessor.readFunc.Invoke(Method) : Method();
                 }
                 catch (Exception e)
                 {
@@ -100,6 +107,14 @@ namespace RuniOS.Editor.Inspectors.Unity
             {
                 try
                 {
+                    if (accessor.writeAction != null)
+                    {
+                        accessor.writeAction.Invoke(value);
+                        inspectable.OnValueChangedInvoke();
+                    
+                        return;
+                    }
+                    
                     inspectable[index] = value;
                     inspectable.OnValueChangedInvoke();
                 }
@@ -160,15 +175,27 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수를 읽을 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => !inspectable.instancesIsEmpty || noInstanceCheck;
+        public bool IsReadable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
+        {
+            if (accessor.isReadableFunc != null)
+                return accessor.isReadableFunc.Invoke(flags, noInstanceCheck);
+            
+            return !inspectable.instancesIsEmpty || noInstanceCheck;
+        }
 
         /// <summary>
         /// 변수에 쓸 수 있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false) => !inspectable.instancesIsEmpty || noInstanceCheck;
+        public bool IsWritable(InspectorFlags flags = InspectorFlags.PublicAccess, bool noInstanceCheck = false)
+        {
+            if (accessor.isWritableFunc != null)
+                return accessor.isWritableFunc.Invoke(flags, noInstanceCheck);
+            
+            return !inspectable.instancesIsEmpty || noInstanceCheck;
+        }
 
         public void UpdateChildInspectable() { }
 
-        IInspectorVariableElement IInspectorVariableElement.Clone() => new SerializedListElement(inspectable.Clone(), new SerializedObject(property.serializedObject.targetObjects).FindProperty(property.propertyPath), index);
+        IInspectorVariableElement IInspectorVariableElement.Clone() => new SerializedListElement(inspectable.Clone(), new SerializedObject(property.serializedObject.targetObjects).FindProperty(property.propertyPath), index) { accessor = accessor.Clone() };
     }
 }
