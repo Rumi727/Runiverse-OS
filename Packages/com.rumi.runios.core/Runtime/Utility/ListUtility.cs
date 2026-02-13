@@ -26,6 +26,7 @@ namespace RuniOS.Utility
             (list[oldIndex], list[newIndex]) = (list[newIndex], list[oldIndex]);
         }
         
+        // ReSharper disable Unity.PerformanceAnalysis
         public static void Resize(this IList list, int newSize, Func<int, object?>? activator = null)
         {
             if (list.Count == newSize)
