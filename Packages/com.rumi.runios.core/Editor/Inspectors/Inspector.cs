@@ -21,6 +21,8 @@ namespace RuniOS.Editor.Inspectors
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
 
         public InspectorFlags inspectorFlags { get; private set; }
+        
+        public bool debugMode => inspectorFlags.HasFlagFast(InspectorFlags.Debug);
 
         public ImmutableArray<IInspectorAttribute> inheritedAttributes { get; } = ImmutableArray<IInspectorAttribute>.Empty;
 
