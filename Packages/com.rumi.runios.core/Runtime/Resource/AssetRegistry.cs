@@ -86,7 +86,23 @@ namespace RuniOS.Resource
             trackedIdentifier.Clear();
             isTracking = false;
         }
-        
+
+        /// <summary>
+        /// 지정된 <paramref name="identifier"/>가 현재 트래킹되고 있는지 여부를 확인합니다.
+        /// </summary>
+        /// <param name="identifier">트래킹 여부를 확인할 에셋 식별자입니다.</param>
+        /// <returns>식별자가 트래킹 목록에 포함되어 있으면 <c>true</c>, 그렇지 않으면 <c>false</c>를 반환합니다.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// <see cref="BeginTracking"/> 메소드가 호출되지 않은 상태일 때 발생합니다.
+        /// </exception>
+        protected bool IsTracked(Identifier identifier)
+        {
+            if (!isTracking)
+                throw new InvalidOperationException("Tracking is not started. Call BeginTracking() before adding asset handles.");
+            
+            return trackedIdentifier.Contains(identifier);
+        }
+
         /// <summary>
         /// 에셋 핸들을 내부 컬렉션에 등록하고 해당 <paramref name="identifier"/>를 트래킹 목록에 추가합니다.
         /// <br/>핸들 등록 및 트래킹은 트래킹이 시작된 상태에서만 유효합니다.
