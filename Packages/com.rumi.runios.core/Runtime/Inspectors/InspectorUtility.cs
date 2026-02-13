@@ -1,41 +1,31 @@
-﻿using System.Globalization;
+﻿#nullable enable
+using System.Globalization;
 
 namespace RuniOS.Inspectors
 {
     public static class InspectorUtility
     {
-        public static IInspectorElement FindElement(this IInspectableObject inspectable, string name, InspectorFlags flags = InspectorFlags.All)
+        public static T FindElement<T>(this IInspectableObject inspectable, string name, InspectorFlags flags = InspectorFlags.All) where T : IInspectorElement
         {
-            IInspectorElement? element = inspectable.GetElements(flags)
-                .Where(x =>
-                {
-                    // 명시적 인터페이스 구현 감지
-                    int index = x.name.LastIndexOf('.');
-                    if (index++ >= 0) // index++의 "반환" 값은 index + 1이 아닌 index 입니다.
-                        return x.name[index..] == name;
-
-                    return x.name == name;
-                })
-                .FirstOrDefault();
+            IEnumerable<T> elements = inspectable.GetElements(flags)
+                .OfType<T>()
+                .Where(x => x.name == name);
             
-            if (element == null)
+            // Linq를 사용할 수도 있지만, 루프를 가능한 한번만 돌리기 위해 직접 구현
+            
+            T? element = default;
+            bool exists = false;
+            foreach (var item in elements)
+            {
+                if (exists)
+                    throw new InvalidOperationException($"There are two or more elements named {name}!");
+                
+                element = item;
+                exists = true;
+            }
+            
+            if (!exists || element == null)
                 throw new InvalidOperationException($"Could not find element named {name}!");
-
-            return element;
-        }
-        
-        public static IInspectorVariableElement FindVariableElement(this IInspectableObject inspectable, string name, InspectorFlags flags = InspectorFlags.All)
-        {
-            if (inspectable.FindElement(name, flags) is not IInspectorVariableElement element)
-                throw new InvalidOperationException($"Could not find variable element named {name}!");
-
-            return element;
-        }
-        
-        public static IInspectorActionElement FindActionElement(this IInspectableObject inspectable, string name, InspectorFlags flags = InspectorFlags.All)
-        {
-            if (inspectable.FindElement(name, flags) is not IInspectorActionElement element)
-                throw new InvalidOperationException($"Could not find action element named {name}!");
 
             return element;
         }

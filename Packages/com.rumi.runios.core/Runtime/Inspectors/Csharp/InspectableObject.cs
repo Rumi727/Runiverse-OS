@@ -64,6 +64,39 @@ namespace RuniOS.Inspectors.Csharp
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
+        public ImmutableArray<IInspectorElement> elements
+        {
+            get
+            {
+                if (_elements.IsDefault)
+                {
+                    _elements =
+                        inspectionType.GetRuntimeProperties()
+                            .Where(x => x.GetIndexParameters().IsEmpty())
+                            .Select(IInspectorElement (x) => new PropertyElement(this, x))
+                            .Concat
+                            (
+                                inspectionType.GetRuntimeFields()
+                                    .Select(IInspectorElement (x) => new FieldElement(this, x))
+                            )
+                            .Concat
+                            (
+                                inspectionType.GetRuntimeMethods()
+                                    .Select(IInspectorElement (x) => new MethodElement(this, x))
+                            )
+                            .ToImmutableArray();
+                }
+                
+                return _elements;
+            }
+        }
+        ImmutableArray<IInspectorElement> _elements;
+
+        public ImmutableDictionary<string, IInspectorVariableElement> variableElements =>
+            _variableElements ??= elements
+                .OfType<IInspectorVariableElement>()
+                .ToImmutableDictionary(x => x.name, x => x);
+        ImmutableDictionary<string, IInspectorVariableElement>? _variableElements;
 
         public InspectableObject(object instance) : this(instance.GetType(), Enumerable.Repeat(instance, 1)) { }
         public InspectableObject(Type inspectionType) : this(inspectionType, Enumerable.Empty<object>()) { }
@@ -80,6 +113,8 @@ namespace RuniOS.Inspectors.Csharp
             readOnlyInstances = _instances.AsReadOnly();
             
             SetInstances(instances);
+
+            attributes = parentElement?.attributes.Where(x => !x.applyToSelf).ToImmutableArray() ?? ImmutableArray<IInspectorAttribute>.Empty;
         }
 
         public void SetInstances(IEnumerable instances)
@@ -130,12 +165,17 @@ namespace RuniOS.Inspectors.Csharp
         public IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (flags == InspectorFlags.None)
-                return ImmutableArray<IInspectorElement>.Empty;
+                return Array.Empty<IInspectorElement>();
 
-            return inspectionType.GetRuntimeProperties().Where(x => x.GetIndexParameters().IsEmpty()).Select(x => (IInspectorElement)new PropertyElement(this, x))
-                .Concat(inspectionType.GetRuntimeFields().Select(x => (IInspectorElement)new FieldElement(this, x)))
-                .Concat(inspectionType.GetRuntimeMethods().Select(x => (IInspectorElement)new MethodElement(this, x)))
-                .WhereNotNull().Where(x => x.HasFlags(flags));
+            return elements.Where(x => x.HasFlags(flags));
+        }
+
+        public IInspectorVariableElement GetVariableElement(string name, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
+        {
+            if (!variableElements.TryGetValue(name, out IInspectorVariableElement? value))
+                throw new InvalidOperationException($"Could not find variable element named {name}!");
+
+            return value;
         }
 
         public void InstanceTypeCheck()

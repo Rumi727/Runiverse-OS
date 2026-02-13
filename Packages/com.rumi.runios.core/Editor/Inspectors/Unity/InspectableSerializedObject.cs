@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Inspectors;
-using RuniOS.Linq;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -24,6 +23,43 @@ namespace RuniOS.Editor.Inspectors.Unity
         public int instanceCount => serializedObject.targetObjects.Length;
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
+
+        public ImmutableArray<IInspectorElement> elements
+        {
+            get
+            {
+                if (_elements.IsDefault)
+                {
+                    SerializedProperty property = targetProperty.Copy();
+                    int depth = property.depth + 1;
+                    if (!property.Next(true))
+                        return _elements = ImmutableArray<IInspectorElement>.Empty;
+            
+                    List<IInspectorElement> elements = new();
+                    do
+                    {
+                        if (depth != property.depth)
+                            break;
+
+                        SerializedPropertyElement element = new SerializedPropertyElement(this, property.Copy());
+                        if (property.isArray)
+                            elements.Add(element);
+                    }
+                    while (property.Next(false));
+
+                    return _elements = elements.ToImmutableArray();
+                }
+
+                return _elements;
+            }
+        }
+        ImmutableArray<IInspectorElement> _elements;
+        
+        public ImmutableDictionary<string, IInspectorVariableElement> variableElements =>
+            _variableElements ??= elements
+                .OfType<IInspectorVariableElement>()
+                .ToImmutableDictionary(x => x.name, x => x);
+        ImmutableDictionary<string, IInspectorVariableElement>? _variableElements;
 
         public InspectableSerializedObject(SerializedObject serializedObject, SerializedProperty? targetProperty = null)
         {
@@ -50,26 +86,22 @@ namespace RuniOS.Editor.Inspectors.Unity
         {
             if (!flags.HasFlagFast(InspectorFlags.Public) || !flags.HasFlagFast(InspectorFlags.Instance))
                 return ImmutableArray<IInspectorElement>.Empty;
-            
-            SerializedProperty property = targetProperty.Copy();
-            int depth = property.depth + 1;
-            if (!property.Next(true))
-                return ImmutableArray<IInspectorElement>.Empty;
-            
-            List<IInspectorElement?> elements = new List<IInspectorElement?>();
-            do
-            {
-                if (depth != property.depth)
-                    break;
-                
-                if (property.isArray)
-                    elements.Add(new SerializedPropertyElement(this, property.Copy()));
-            }
-            while (property.Next(false));
 
-            return elements.WhereNotNull().Where(x => x.HasFlags(flags));
+            return elements.Where(x => x.HasFlags(flags));
         }
-        
+
+        public IInspectorVariableElement GetVariableElement(string name, InspectorFlags flags = InspectorFlags.All)
+        {
+            if 
+            (
+                !flags.HasFlagFast(InspectorFlags.Public) || !flags.HasFlagFast(InspectorFlags.Instance) ||
+                !variableElements.TryGetValue(name, out IInspectorVariableElement? value)
+            )
+                throw new InvalidOperationException($"Could not find element named {name}!");
+
+            return value;
+        }
+
         /// <inheritdoc cref="IInspectableObject.Clone"/>
         public InspectableSerializedObject Clone() => new InspectableSerializedObject(new SerializedObject(serializedObject.targetObjects), new SerializedObject(targetProperty.serializedObject.targetObjects).FindProperty(targetProperty.propertyPath)) { parentElement = parentElement?.Clone(), onValueChanged = onValueChanged };
         IInspectableObject IInspectableObject.Clone() => Clone();
