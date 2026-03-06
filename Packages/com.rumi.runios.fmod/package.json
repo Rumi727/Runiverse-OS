@@ -1,0 +1,13 @@
+{
+  "name": "com.rumi.runios.fmod",
+  "version": "0.0.0",
+  "displayName": "FMOD for RuniOS",
+  "description": "User-friendly game engine library for Unity Engine",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "com.rumi.runios.core": "1.0.0"
+  },
+  "unity": "6000.3"
+}

@@ -1,0 +1,20 @@
+{
+    "name": "RuniOS.Editor.Sounds",
+    "rootNamespace": "RuniOS.Editor",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:e04069b3d121e7b4db324e77dd2a22a4",
+        "GUID:539740484accacd4292d8460e00aac39"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

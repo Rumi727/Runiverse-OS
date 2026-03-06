@@ -10,15 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 658205eeebfb471dbb77a25e7493b6f9, type: 3}
-  m_Name: RuniPackage
+  m_Name: com.rumi.runios.fmod
   m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Installer.GitPackages.GitPackage
   packages:
   - {fileID: 11400000, guid: 775dbedadb5cef947819fa38009798ed, type: 2}
-  - {fileID: 11400000, guid: 2f87b8f015cf9784ea32ee3769ae4131, type: 2}
-  - {fileID: 11400000, guid: 0ff3eaad19fa6974f9d4f0d2a172aae6, type: 2}
   dependencies: []
-  id: 
-  gitUrl: 
-  label: 
-  oneLineDescription: 
-  description: 
+  id: com.rumi.runios.fmod
+  gitUrl: https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.fmod
+  label: installer.install_setting.fmod.label
+  oneLineDescription: installer.install_setting.fmod.one_line
+  description: installer.install_setting.fmod.description
