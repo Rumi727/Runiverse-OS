@@ -40,7 +40,12 @@ namespace RuniOS.Inspectors
         WriteOnly = 1 << 5,
         
         /// <summary>
-        /// 공개적으로 엑세스할 수 있는 모든 멤버를 엑세스 가능하게 합니다.
+        /// 공개적으로 엑세스할 수 있는 인스턴스 멤버를 엑세스 가능하게 합니다.
+        /// </summary>
+        InstanceAccess = Public | Instance,
+        
+        /// <summary>
+        /// 읽기/쓰기 전용 멤버와 정적 멤버를 포함하여 공개적으로 엑세스할 수 있는 모든 멤버를 엑세스 가능하게 합니다.
         /// </summary>
         PublicAccess = Public | Static | Instance | ReadOnly | WriteOnly,
         

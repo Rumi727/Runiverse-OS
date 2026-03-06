@@ -3,7 +3,9 @@ using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Editor.UIElements;
 using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Reflection;
+using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Inspectors.Unity
 {
@@ -85,6 +87,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// </summary>
         public bool isStatic => false;
 
+        public ImmutableArray<IInspectorAttribute> attributes => ImmutableArray<IInspectorAttribute>.Empty;
         
         /// <summary>
         /// 엑세스 메소드를 커스텀할 수 있습니다.

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Inspectors.Drawers
 {
-    public sealed class CustomInspectorDrawerAttribute : CustomAttributeDrawerAttribute
+    public sealed class CustomInspectorDrawerAttribute : TypeHandlerAttribute
     {
         public bool allowInDebug { get; set; }
         

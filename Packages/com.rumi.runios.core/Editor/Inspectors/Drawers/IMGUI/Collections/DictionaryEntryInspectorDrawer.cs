@@ -3,6 +3,7 @@ using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Collections.Generic;
 using RuniOS.Collections.Handlers.Entrys;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Undos;
 using System.Collections;
@@ -15,11 +16,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class DictionaryEntryInspectorDrawer : IMGUIInspectorDrawer
     {
-        public DictionaryEntryInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder)
+        public DictionaryEntryInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder)
         {
             // 가독성 꼬라지ㅋㅋ
             
-            keyElement = element.inspectableObjectElement.FindVariableElement(nameof(DictionaryEntry.Key));
+            keyElement = element.inspectableObjectElement.GetVariableElement(nameof(DictionaryEntry.Key));
             keyElement.accessor.writeAction = valueKey =>
             {
                 KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
@@ -39,7 +40,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             keyElement.accessor.isReadableFunc = (flags, _) => element.IsReadable(flags, true);
             keyElement.accessor.isWritableFunc = (flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true);
             
-            valueElement = element.inspectableObjectElement.FindVariableElement(nameof(DictionaryEntry.Value));
+            valueElement = element.inspectableObjectElement.GetVariableElement(nameof(DictionaryEntry.Value));
             valueElement.accessor.writeAction = valueValue =>
             {
                 KeyValuePair<object?, object?> entry = EntryHandler.FindEntry(element.value);
@@ -59,8 +60,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             valueElement.accessor.isReadableFunc = (flags, _) => element.IsReadable(flags, true);
             valueElement.accessor.isWritableFunc = (flags, _) => element.IsReadable(flags, true) && element.IsWritable(flags, true);
 
-            keyDrawer = FindDrawer(keyElement, undoRecorder);
-            valueDrawer = FindDrawer(valueElement, undoRecorder);
+            keyDrawer = FindDrawer(keyElement, inheritedAttributes, undoRecorder);
+            valueDrawer = FindDrawer(valueElement, inheritedAttributes, undoRecorder);
         }
 
         public override bool isField => keyDrawer.isField && valueDrawer.isField;
@@ -70,13 +71,15 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         
         public IInspectorVariableElement valueElement { get; }
         public IMGUIInspectorDrawer valueDrawer { get; }
-        
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+
+        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
         {
+            label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
+            
             BeginWideMode(EditorGUIUtility.wideMode && isField);
             
             int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
-            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label ?? GUIContent.none, 3); // 2로 하면 크기 절반 줄어듬
+            position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
             
             string keyLabel = GetTextOrKey("gui.key");
             GUIContent keyLabelContent = new GUIContent(keyLabel);
@@ -94,7 +97,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                     position.height = keyDrawer.GetHeight(keyLabelContent, flags, isInArray);
 
                     BeginLabelWidth(keyLabel);
-                    keyDrawer.OnGUI(position, keyLabelContent, flags, isInArray, clipping);
+                    keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
                     EndLabelWidth();
 
                     position.x += position.width + 4;
@@ -105,7 +108,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                     position.height = valueDrawer.GetHeight(valueLabelContent, flags, isInArray);
 
                     BeginLabelWidth(valueLabel);
-                    valueDrawer.OnGUI(position, valueLabelContent, flags, isInArray, clipping);
+                    valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
                     EndLabelWidth();
                 }
 
@@ -118,12 +121,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 
                 position.height = keyDrawer.GetHeight(label, flags, isInArray);
                 
-                keyDrawer.OnGUI(position, keyLabelContent, flags, isInArray, clipping);
+                keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
 
                 position.y += position.height + 2;
                 position.height = valueDrawer.GetHeight(label, flags, isInArray);
                 
-                valueDrawer.OnGUI(position, valueLabelContent, flags, isInArray, clipping);
+                valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
                 
                 if (EditorGUIUtility.hierarchyMode)
                     EndLabelWidth();

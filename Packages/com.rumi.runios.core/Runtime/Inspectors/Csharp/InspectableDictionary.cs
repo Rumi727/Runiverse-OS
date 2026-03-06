@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
 using RuniOS.Collections.Handlers;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
@@ -38,6 +39,11 @@ namespace RuniOS.Inspectors.Csharp
             readonlyDictionaryHandlers = _dictionaryHandlers.AsReadOnly();
             
             SetInstances(instances);
+            
+            attributes = inspectionType.GetCustomAttributes(true)
+                .OfType<IInspectorAttribute>()
+                .InheritFrom(parentElement)
+                .ToImmutableArray();
         }
 
         public IInspectorVariableElement? parentElement { get; set; }
@@ -191,6 +197,8 @@ namespace RuniOS.Inspectors.Csharp
         public int instanceCount => instances.Count();
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
+
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
 
         public object? this[object key]
         {

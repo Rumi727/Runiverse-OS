@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
@@ -23,6 +24,8 @@ namespace RuniOS.Editor.Inspectors.Unity
         public int instanceCount => serializedObject.targetObjects.Length;
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
+
+        public ImmutableArray<IInspectorAttribute> attributes => ImmutableArray<IInspectorAttribute>.Empty;
 
         public ImmutableArray<IInspectorElement> elements
         {

@@ -1,4 +1,6 @@
 ﻿#nullable enable
+using RuniOS.Inspectors.Attributes;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Inspectors
@@ -18,8 +20,11 @@ namespace RuniOS.Inspectors
         
         int instanceCount { get; }
 
-        Action<IEnumerable<object?>>? onValueChanged { get; set; }
-        
+        /// <summary>
+        /// 상속 받은 어트리뷰트를 포함한 현재 모든 인스펙터 어트리뷰트를 가져옵니다.<br/>
+        /// </summary>
+        ImmutableArray<IInspectorAttribute> attributes { get; }
+
         IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List);
 
         /// <summary>

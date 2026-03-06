@@ -34,9 +34,13 @@ namespace RuniOS.Editor.Inspectors
 
         public Inspector(IUndoRecorder? undoRecorder) => this.undoRecorder = undoRecorder;
 
-        public Inspector(ImmutableArray<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder)
+        public Inspector(IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder)
         {
-            this.inheritedAttributes = inheritedAttributes;
+            if (inheritedAttributes is ImmutableArray<IInspectorAttribute> array)
+                this.inheritedAttributes = array;
+            else
+                this.inheritedAttributes = inheritedAttributes.ToImmutableArray();
+            
             this.undoRecorder = undoRecorder;
         }
 
@@ -58,7 +62,7 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList);
+                    ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList, inheritedAttributes, undoRecorder);
 
                     elements = ImmutableArray<IInspectorElement>.Empty;
                     drawers = ImmutableArray.Create<IMGUIInspectorDrawer?>(drawer);
@@ -85,7 +89,7 @@ namespace RuniOS.Editor.Inspectors
                     return;
                 }
 
-                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, undoRecorder, predicate)).ToImmutableArray();
+                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate)).ToImmutableArray();
             }
 
             this.inspectable = inspectable;
@@ -103,7 +107,7 @@ namespace RuniOS.Editor.Inspectors
                 predicate = x => x.attribute.allowInDebug;
 
             elements = ImmutableArray.Create(element);
-            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, undoRecorder, predicate));
+            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate));
 
             inspectable = null;
             inspectorFlags = flags;
@@ -121,7 +125,7 @@ namespace RuniOS.Editor.Inspectors
                 predicate = x => x.attribute.allowInDebug;
 
             this.elements = elements.ToImmutableArray();
-            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, undoRecorder, predicate)).ToImmutableArray();
+            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate)).ToImmutableArray();
 
             inspectable = null;
             inspectorFlags = flags;
@@ -151,23 +155,19 @@ namespace RuniOS.Editor.Inspectors
 
             clipping ??= position;
 
+            GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
+
             if (drawers.Length > 1)
-                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
+                label = null;
 
             Rect elementPosition = position;
             foreach (var item in drawers.WhereNotNull())
             {
-                GUIContent elementLabel;
-                if (inspectable is IInspectableList)
-                    elementLabel = label ?? GUIContent.none;
-                else
-                    elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
-
                 if (drawers.Length > 1)
                 {
                     try
                     {
-                        elementPosition.height = item.GetHeight(elementLabel, inspectorFlags, isInArray);
+                        elementPosition.height = item.GetHeight(null, inspectorFlags, isInArray);
                     }
                     catch (ExitGUIException)
                     {
@@ -180,12 +180,11 @@ namespace RuniOS.Editor.Inspectors
                     }
                 }
 
-                if (drawers.Length > 1)
-                    GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
+                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
 
                 try
                 {
-                    item.OnGUI(elementPosition, elementLabel, inspectorFlags, isInArray, clipping);
+                    item.Draw(elementPosition, label, inspectorFlags, isInArray, clipping);
                 }
                 catch (ExitGUIException)
                 {
@@ -193,18 +192,22 @@ namespace RuniOS.Editor.Inspectors
                 }
                 catch (Exception e)
                 {
+                    GUIContent elementLabel;
+                    if (inspectable is IInspectableList)
+                        elementLabel = label ?? GUIContent.none;
+                    else
+                        elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
+                    
                     EditorGUI.LabelField(elementPosition, elementLabel, new GUIContent($"{e.GetType().Name}: {e.Message}"));
                     Debug.LogException(e);
                 }
 
-                if (drawers.Length > 1)
-                    GUI.EndClip();
+                GUI.EndClip();
 
                 elementPosition.y += elementPosition.height + 2;
             }
 
-            if (drawers.Length > 1)
-                GUI.EndClip();
+            GUI.EndClip();
         }
 
         public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
@@ -212,17 +215,14 @@ namespace RuniOS.Editor.Inspectors
             if (lastException != null)
                 return EditorGUIUtility.singleLineHeight;
 
+            if (drawers.Length > 1)
+                label = null;
+
             return (drawers.WhereNotNull().Sum(item =>
             {
                 try
                 {
-                    GUIContent elementLabel;
-                    if (inspectable is IInspectableList)
-                        elementLabel = label ?? GUIContent.none;
-                    else
-                        elementLabel = (drawers.Length > 1 ? null : label) ?? new GUIContent(item.element?.displayName ?? string.Empty);
-
-                    return item.GetHeight(elementLabel, flags, isInArray) + 2;
+                    return item.GetHeight(label, flags, isInArray) + 2;
                 }
                 catch (ExitGUIException)
                 {

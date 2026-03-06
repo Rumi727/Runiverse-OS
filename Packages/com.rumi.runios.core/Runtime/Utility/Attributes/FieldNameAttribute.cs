@@ -1,7 +1,9 @@
 #nullable enable
+using RuniOS.Inspectors.Attributes;
+
 namespace RuniOS.Utility.Attributes
 {
-    public sealed class FieldNameAttribute : PropertyAttribute
+    public sealed class FieldNameAttribute : PropertyAttribute, IInspectorAttribute
     {
         public FieldNameAttribute(string name, bool force = false) : base(true)
         {
@@ -11,5 +13,7 @@ namespace RuniOS.Utility.Attributes
 
         public string name { get; } = string.Empty;
         public bool force { get; } = false;
+
+        bool IInspectorAttribute.applyToSelf => true;
     }
 }

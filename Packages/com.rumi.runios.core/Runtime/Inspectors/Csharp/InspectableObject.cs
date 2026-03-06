@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Linq;
 using System.Collections;
 using System.Collections.Immutable;
@@ -64,6 +65,8 @@ namespace RuniOS.Inspectors.Csharp
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
+
         public ImmutableArray<IInspectorElement> elements
         {
             get
@@ -114,7 +117,10 @@ namespace RuniOS.Inspectors.Csharp
             
             SetInstances(instances);
 
-            attributes = parentElement?.attributes.Where(x => !x.applyToSelf).ToImmutableArray() ?? ImmutableArray<IInspectorAttribute>.Empty;
+            attributes = inspectionType.GetCustomAttributes(true)
+                .OfType<IInspectorAttribute>()
+                .InheritFrom(parentElement)
+                .ToImmutableArray();
         }
 
         public void SetInstances(IEnumerable instances)

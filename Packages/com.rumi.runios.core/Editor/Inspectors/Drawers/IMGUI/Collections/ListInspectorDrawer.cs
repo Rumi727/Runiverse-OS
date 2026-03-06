@@ -1,6 +1,7 @@
 ﻿#nullable enable
 
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Reflection;
 using RuniOS.Undos;
@@ -15,8 +16,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(Array), true, allowInDebug = true)]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ListInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
-        public ListInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
+        public ListInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
+        public ListInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) { }
 
         public override bool isField => false;
 
@@ -106,12 +107,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
         }
 
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
         {
             CheckInspectableList();
             Type? elementType = inspectableList.inspectionElementType;
 
-            label ??= GUIContent.none;
+            label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
             
             if (inspectableList.parentElement != null)
             {
@@ -214,7 +215,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             if (!elementDrawers.TryGetValue(element, out IMGUIInspectorDrawer? drawer) || drawer.element != element)
             {
-                drawer = FindDrawer(element, undoRecorder);
+                drawer = FindDrawer(element, attributes.Where(x => !x.applyToSelf), undoRecorder);
                 elementDrawers.AddOrUpdate(element, drawer);
             }
             
@@ -229,7 +230,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 rect.xMin += 10;
             
             if (EditorGUIUtility.hierarchyMode) BeginLabelWidth(EditorGUIUtility.labelWidth - 31f);
-            GetElementDrawer(index, flags)?.OnGUI(rect, GetElementLabel(index), flags, true, clipping);
+            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, true, clipping);
             if (EditorGUIUtility.hierarchyMode) EndLabelWidth();
         }
 

@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers.Entrys;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Reflection;
 using RuniOS.Undos;
@@ -12,8 +13,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
     [CustomInspectorDrawer(typeof(IDictionary<,>), true)]
     public class DictionaryInspectorDrawer : ListInspectorDrawer
     {
-        public DictionaryInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
-        public DictionaryInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
+        public DictionaryInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
+        public DictionaryInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) { }
 
         protected override bool IsFixedSize(InspectorFlags flags)
         {
@@ -119,7 +120,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 rect.xMin += 10;
             
             if (EditorGUIUtility.hierarchyMode) BeginLabelWidth(EditorGUIUtility.labelWidth - 16f);
-            GetElementDrawer(index, flags)?.OnGUI(rect, GetElementLabel(index), flags, true, clipping);
+            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, true, clipping);
             if (EditorGUIUtility.hierarchyMode) EndLabelWidth();
         }
     }

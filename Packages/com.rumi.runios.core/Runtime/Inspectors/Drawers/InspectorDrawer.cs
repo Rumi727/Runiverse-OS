@@ -1,5 +1,7 @@
 ﻿#nullable enable
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Undos;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Inspectors.Drawers
@@ -14,9 +16,11 @@ namespace RuniOS.Inspectors.Drawers
         public IInspectorVariableElement? variableElement { get; }
         public IInspectorActionElement? actionElement { get; }
         
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
+        
         public IUndoRecorder? undoRecorder { get; }
 
-        protected InspectorDrawer(IInspectorElement element, IUndoRecorder? undoRecorder = null)
+        protected InspectorDrawer(IInspectorElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null)
         {
             inspectable = element.inspectable;
 
@@ -26,22 +30,28 @@ namespace RuniOS.Inspectors.Drawers
 
             inspectableList = variableElement?.inspectableListElement;
             inspectableDictionary = variableElement?.inspectableDictionaryElement;
+            
+            attributes = element.attributes.Concat(inheritedAttributes).ToImmutableArray();
 
             this.undoRecorder = undoRecorder;
         }
 
-        protected InspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null)
+        protected InspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null)
         {
             inspectable = inspectableList;
             this.inspectableList = inspectableList;
             
+            attributes = inspectableList.attributes.Concat(inheritedAttributes).ToImmutableArray();
+            
             this.undoRecorder = undoRecorder;
         }
 
-        protected InspectorDrawer(IInspectableDictionary inspectableDictionary, IUndoRecorder? undoRecorder = null)
+        protected InspectorDrawer(IInspectableDictionary inspectableDictionary, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null)
         {
             inspectable = inspectableDictionary;
             this.inspectableDictionary = inspectableDictionary;
+            
+            attributes = inspectableDictionary.attributes.Concat(inheritedAttributes).ToImmutableArray();
             
             this.undoRecorder = undoRecorder;
         }

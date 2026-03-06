@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Resource;
 using RuniOS.Undos;
@@ -9,7 +10,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
     [CustomInspectorDrawer(typeof(IAssetRef), true)]
     public class AssetRefInspectorDrawer : GenericInspectorDrawer
     {
-        public AssetRefInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
+        public AssetRefInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
         protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
         {

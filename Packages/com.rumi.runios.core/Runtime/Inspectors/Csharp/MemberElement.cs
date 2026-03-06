@@ -1,5 +1,7 @@
 ﻿#nullable enable
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Reflection;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
@@ -22,9 +24,9 @@ namespace RuniOS.Inspectors.Csharp
             this.inspectable = inspectable;
             this.member = member;
 
-            attributes = member.GetCustomAttributes()
+            attributes = member.GetCustomAttributes(true)
                 .OfType<IInspectorAttribute>()
-                .Concat(inspectable.attributes)
+                .InheritFrom(inspectable)
                 .ToImmutableArray();
         }
 
@@ -69,6 +71,8 @@ namespace RuniOS.Inspectors.Csharp
         /// 멤버가 정적인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         public abstract bool isStatic { get; }
+
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
 
         public virtual bool HasFlags(InspectorFlags flags)
         {

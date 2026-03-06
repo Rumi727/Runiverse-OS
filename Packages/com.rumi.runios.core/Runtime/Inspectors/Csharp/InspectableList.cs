@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
 using RuniOS.Collections.Handlers;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
@@ -36,6 +37,11 @@ namespace RuniOS.Inspectors.Csharp
             readOnlyListHandlers = _listHandlers.AsReadOnly();
 
             SetInstances(instances);
+
+            attributes = inspectionType.GetCustomAttributes(true)
+                .OfType<IInspectorAttribute>()
+                .InheritFrom(parentElement)
+                .ToImmutableArray();
         }
 
         public IInspectorVariableElement? parentElement { get; }
@@ -121,9 +127,10 @@ namespace RuniOS.Inspectors.Csharp
                 if (value != null && !inspectionType.IsInstanceOfType(value))
                     throw new InspectorException($"Invalid type. Expected '{inspectionType.FullName}', but received '{value.GetType().FullName}'.");
 
-                _instances.Clear();
                 if (value != null)
-                    _instances.Add(value);
+                    SetInstances(Enumerable.Repeat(value, 1));
+                else
+                    SetInstances(Enumerable.Empty<IEnumerable>());
             }
         }
 
@@ -187,9 +194,11 @@ namespace RuniOS.Inspectors.Csharp
         [MemberNotNullWhen(true, nameof(instance), nameof(listHandler))]
         public bool instanceIsMultiple => instances.TwoOrMore();
 
-        public int instanceCount => instances.Count();
+        public int instanceCount => instances.Count;
 
-        public Action<IEnumerable<object?>>? onValueChanged { get; set; }
+        public Action<IEnumerable<IEnumerable?>>? onValueChanged { get; set; }
+
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
 
         public object? this[int index]
         {
@@ -305,7 +314,7 @@ namespace RuniOS.Inspectors.Csharp
 
         public void OnValueChangedInvoke()
         {
-            onValueChanged?.SafeInvoke();
+            onValueChanged?.SafeInvoke(instances);
             parentElement?.inspectable.OnValueChangedInvoke();
         }
 

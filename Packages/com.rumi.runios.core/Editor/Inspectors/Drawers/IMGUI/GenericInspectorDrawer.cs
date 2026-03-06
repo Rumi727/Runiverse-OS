@@ -1,20 +1,22 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class GenericInspectorDrawer : IMGUIInspectorDrawer
     {
-        protected GenericInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
+        protected GenericInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
         public override bool isField => true;
 
-        public sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List,
+        protected sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List,
             bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
-             
+            label ??= new GUIContent(element.displayName);
+            
             using (new EditorGUI.MixedValueScope(!variableElement.IsReadable(flags) || variableElement.isMixedValue))
             {
                 EditorGUI.BeginDisabledGroup(!variableElement.IsWritable(flags));
@@ -27,7 +29,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 object? undoSnapshot = CreateSnapshot(value);
                 
                 // 3. 필드 그리기 및 값 변경
-                object? changedValue = DrawField(position, label ?? GUIContent.none, value, isInArray);
+                object? changedValue = DrawField(position, label, value, isInArray);
                 if (EditorGUI.EndChangeCheck())
                 {
                     // 4. [변경 후] 상태 캡처

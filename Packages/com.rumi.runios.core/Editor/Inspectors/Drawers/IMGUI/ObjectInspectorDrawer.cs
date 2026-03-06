@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Undos;
 using UnityEditor.AnimatedValues;
@@ -9,7 +10,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(object), true, allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
-        public ObjectInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) => inspector = new Inspector(undoRecorder);
+        public ObjectInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) =>
+            inspector = new Inspector(InspectorAttributeUtility.FilterInheritable(attributes), undoRecorder);
 
         public override bool isField => false;
 
@@ -18,11 +20,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         static float foldoutYSize => EditorGUIUtility.singleLineHeight;
 
-        readonly AnimFloat animFloat = new AnimFloat(0);
-        readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        public override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        void Rebuild(InspectorFlags flags)
         {
             CheckVariableElement();
+            if (inspector.inspectable != variableElement.inspectableObjectElement || inspector.inspectorFlags != flags)
+                inspector.Rebuild(variableElement.inspectableObjectElement, flags);
+        }
+
+        readonly AnimFloat animFloat = new AnimFloat(0);
+        readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
+        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        {
+            CheckVariableElement();
+
+            label ??= new GUIContent(element.displayName);
             
             if (NullToggleField(variableElement, position, out Rect foldoutPosition, label, flags, nullText, undoRecorder))
                 return;
@@ -30,8 +41,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             foldoutPosition.height = foldoutYSize;
             isExpanded = EditorGUI.Foldout(foldoutPosition, isExpanded, label, true);
             
-            if (inspector.inspectable != variableElement.inspectableObjectElement || inspector.inspectorFlags != flags)
-                inspector.Rebuild(variableElement.inspectableObjectElement, flags);
+            Rebuild(flags);
 
             position.y += foldoutYSize + 2;
             position.height = inspector.GetHeight(label, flags, isInArray);
@@ -60,6 +70,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             bool isExpanded = this.isExpanded && !valueIsNull;
             
             animFloat.target = isExpanded ? 1 : 0;
+            
+            Rebuild(flags);
             
             float size = foldoutYSize;
             if (!isInArray && animFloat.isAnimating)

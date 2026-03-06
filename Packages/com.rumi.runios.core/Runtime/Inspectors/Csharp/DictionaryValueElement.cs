@@ -1,7 +1,9 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Reflection;
 using System.Collections;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
@@ -17,6 +19,8 @@ namespace RuniOS.Inspectors.Csharp
 
             variableType = inspectable.inspectionElementType?.Value ?? typeof(object);
 
+            attributes = inspectable.attributes.FilterInheritable()
+                .ToImmutableArray();
 
             inspectableObjectElement = new InspectableObject(this, variableType);
 
@@ -55,6 +59,8 @@ namespace RuniOS.Inspectors.Csharp
         public bool isPublic => true;
         public bool isStatic => false;
 
+        public ImmutableArray<IInspectorAttribute> attributes { get; }
+        
         /// <summary>
         /// 엑세스 메소드를 커스텀할 수 있습니다.
         /// </summary>

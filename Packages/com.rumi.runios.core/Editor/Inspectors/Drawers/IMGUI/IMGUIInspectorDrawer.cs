@@ -1,8 +1,12 @@
 ﻿#nullable enable
+using RuniOS.Editor.Inspectors.Attributes.IMGUI;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
+using RuniOS.Linq;
 using RuniOS.Reflection;
 using RuniOS.Undos;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
@@ -10,27 +14,60 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class IMGUIInspectorDrawer : InspectorDrawer
     {
+        static readonly object?[] args = new object?[2];
         [return: NotNullIfNotNull(nameof(element))]
-        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IUndoRecorder? undoRecorder = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
+        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
         {
             if (element == null)
                 return null;
 
             Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
-                return new ObjectInspectorDrawer(element, undoRecorder);
+                return new ObjectInspectorDrawer(element, inheritedAttributes, undoRecorder);
 
-            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, new object?[] { element, undoRecorder }, null);
+            args[0] = element;
+            args[1] = inheritedAttributes;
+            args[2] = undoRecorder;
+
+            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null);
         }
 
         public abstract bool isField { get; }
 
         public string? nullText { get; set; } = null;
 
+        public ImmutableArray<IMGUIInspectorAttributeDrawer> attributeDrawers { get; }
+
+        int currentAttributeIndex = -1;
+        
         /// <summary>
         /// UI 요소를 렌더링합니다.
         /// </summary>
-        public abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null);
+        public void Draw(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        {
+            currentAttributeIndex++;
+            
+            int index = currentAttributeIndex;
+            if (index >= attributeDrawers.Length)
+            {
+                currentAttributeIndex = -1;
+
+                OnGUI(position, label, flags, isInArray, clipping);
+                return;
+            }
+
+            try
+            {
+                attributeDrawers[index].OnGUI(this, position, label, flags, isInArray, clipping);
+            }
+            finally
+            {
+                if (index == currentAttributeIndex)
+                    currentAttributeIndex = -1;
+            }
+        }
+
+        protected abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null);
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
@@ -181,8 +218,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             return false;
         }
 
-        protected IMGUIInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
-        protected IMGUIInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
-        protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary, IUndoRecorder? undoRecorder = null) : base(inspectableDictionary, undoRecorder) { }
+        protected IMGUIInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) =>
+            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
+        
+        protected IMGUIInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) =>
+            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
+        
+        protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableDictionary, inheritedAttributes, undoRecorder) =>
+            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
     }
 }

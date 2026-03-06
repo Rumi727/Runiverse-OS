@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Undos;
 
@@ -8,8 +9,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections.Generic
     [CustomInspectorDrawer(typeof(ISet<>), true)]
     public class SetInspectorDrawer : ListInspectorDrawer
     {
-        public SetInspectorDrawer(IInspectorVariableElement element, IUndoRecorder? undoRecorder = null) : base(element, undoRecorder) { }
-        public SetInspectorDrawer(IInspectableList inspectableList, IUndoRecorder? undoRecorder = null) : base(inspectableList, undoRecorder) { }
+        public SetInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
+        public SetInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) { }
 
         readonly HashSet<int> duplicatedIndexes = new();
         readonly List<object?> keysBuffer = new();

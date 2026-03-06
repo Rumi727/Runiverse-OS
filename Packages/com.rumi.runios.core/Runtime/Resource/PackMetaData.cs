@@ -30,8 +30,8 @@ namespace RuniOS.Resource
             this.targetRuniOSVersion = targetRuniOSVersion;
         }
 
-        public string name { get; set; }
-        public Version version { get; set; }
+        [FieldName("gui.name")] public string name { get; set; }
+        [FieldName("gui.version")] public Version version { get; set; }
 
         public VersionRange targetVersion { get; set; }
         public VersionRange targetRuniOSVersion { get; set; }

@@ -3,6 +3,7 @@ using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Collections.Generic;
 using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Inspectors;
+using RuniOS.Inspectors.Attributes;
 using RuniOS.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
@@ -80,6 +81,8 @@ namespace RuniOS.Editor.Inspectors.Unity
             set => property.arraySize = value;
         }
         int ICollection.Count => count;
+
+        public ImmutableArray<IInspectorAttribute> attributes => ImmutableArray<IInspectorAttribute>.Empty;
         
         public void OnValueChangedInvoke()
         {
