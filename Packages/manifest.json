@@ -1,11 +1,12 @@
 {
   "dependencies": {
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
+    "com.quickeye.icon-browser": "https://github.com/ErnSur/unity-editor-icons.git",
     "com.rumi.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.singularitygroup.hotreload": "git+https://gitlab.hotreload.net/root/hot-reload-releases.git#1.13.11",
-    "com.unity.ide.rider": "3.0.38",
-    "com.unity.ide.visualstudio": "2.0.25",
+    "com.unity.ide.rider": "3.0.39",
+    "com.unity.ide.visualstudio": "2.0.26",
     "com.unity.memoryprofiler": "1.1.9"
   },
   "scopedRegistries": [
