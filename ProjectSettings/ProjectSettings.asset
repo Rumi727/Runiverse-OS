@@ -763,13 +763,18 @@ PlayerSettings:
   scriptingDefineSymbols:
     Android: RUNI_ENGINE
     EmbeddedLinux: RUNI_ENGINE
+    GameCoreScarlett: RUNI_ENGINE
+    GameCoreXboxOne: RUNI_ENGINE
+    Kepler: RUNI_ENGINE
     LinuxHeadlessSimulation: RUNI_ENGINE
     Nintendo Switch: RUNI_ENGINE
+    Nintendo Switch 2: RUNI_ENGINE
     PS4: RUNI_ENGINE
     PS5: RUNI_ENGINE
     QNX: RUNI_ENGINE
     Server: RUNI_ENGINE
-    Standalone: RUNI_ENGINE
+    Standalone: RUNI_ENGINE;RUNI_ENGINE_DOTNET_INTERNAL
+    VisionOS: RUNI_ENGINE
     WebGL: RUNI_ENGINE
     Windows Store Apps: RUNI_ENGINE
     XboxOne: RUNI_ENGINE
