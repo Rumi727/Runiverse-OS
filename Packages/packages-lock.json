@@ -25,6 +25,13 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "com.quickeye.icon-browser": {
+      "version": "https://github.com/ErnSur/unity-editor-icons.git",
+      "depth": 0,
+      "source": "git",
+      "dependencies": {},
+      "hash": "07434fccd016a2fabab284e0aff30a592881c318"
+    },
     "com.realitystop.linkmerge": {
       "version": "1.0.0",
       "depth": 1,
@@ -66,6 +73,22 @@
         "com.unity.ui": "1.0.0"
       }
     },
+    "com.rumi.runios.fmod": {
+      "version": "file:com.rumi.runios.fmod",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "1.0.0"
+      }
+    },
+    "com.rumi.runios.sound": {
+      "version": "file:com.rumi.runios.sound",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "1.0.0"
+      }
+    },
     "com.rumi.runios.ui": {
       "version": "file:com.rumi.runios.ui",
       "depth": 0,
@@ -90,7 +113,7 @@
       "hash": "418da38db7660aeace39d62b620a6366ce1a8b15"
     },
     "com.unity.burst": {
-      "version": "1.8.25",
+      "version": "1.8.27",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -126,7 +149,7 @@
       "dependencies": {}
     },
     "com.unity.ide.rider": {
-      "version": "3.0.38",
+      "version": "3.0.39",
       "depth": 0,
       "source": "registry",
       "dependencies": {
@@ -135,11 +158,11 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.ide.visualstudio": {
-      "version": "2.0.25",
+      "version": "2.0.26",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.test-framework": "1.1.31"
+        "com.unity.test-framework": "1.1.33"
       },
       "url": "https://packages.unity.com"
     },
