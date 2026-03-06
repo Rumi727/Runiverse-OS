@@ -126,18 +126,18 @@ fmod_editor.log
 .idea/*
 /[Uu][Ii][Ee]lements[Ss]chema/*
 
-
-/[Aa]ssets/Runi Engine/*
-/[Aa]ssets/Runi Engine.meta
-
 /[Aa]ssets/TextMesh Pro/*
 /[Aa]ssets/TextMesh Pro.meta
 
 /[Aa]ssets/~RumiEngineInstalled~
-/[Aa]ssets/[Ss]treamingAssets/assets/runi-test/*
-/[Aa]ssets/[Ss]treamingAssets/assets/runi-test.meta
 
-/[Aa]ssets/[Ss]treamingAssets/projectData/*
-/[Aa]ssets/[Ss]treamingAssets/projectData.meta
+/[Aa]ssets/[Ss]treamingAssets/assets/test/*
+/[Aa]ssets/[Ss]treamingAssets/assets/test.meta
+/[Aa]ssets/[Ss]treamingAssets/assets/test2/*
+/[Aa]ssets/[Ss]treamingAssets/assets/test2.meta
+
 /[Aa]ssets/[Aa]sset Bundles/*
 /[Aa]ssets/[Aa]sset Bundles.meta
+
+/[Aa]ssets/89478062_0.png
+/[Aa]ssets/89478062_0.png.meta
