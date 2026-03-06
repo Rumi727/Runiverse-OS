@@ -15,13 +15,16 @@ namespace RuniOS.Editor
         /// UndoHandler의 싱글톤 인스턴스입니다.
         /// </summary>
         public static UndoHandler instance { get; } = new UndoHandler();
+        
+        public string lastUndoName { get; private set; } = string.Empty; 
 
         SerializableUndoHandler? serializableUndoHandler;
 
-        [NonSerialized] readonly RuniUndo runiUndo = new RuniUndo();
+        readonly RuniUndo runiUndo = new RuniUndo();
 
-        [NonSerialized] int lastUnityGroupId = -1;
-        [NonSerialized] UndoGroupToken cachedGroupToken = new UndoGroupToken("UnityGroup_Initial");
+        int lastUnityGroupId = -1;
+        UndoGroupToken cachedGroupToken = new UndoGroupToken("UnityGroup_Initial");
+
 
         /// <summary>
         /// Unity의 현재 그룹 ID에 대응하는 토큰을 가져오거나 새로 생성합니다.
@@ -76,6 +79,27 @@ namespace RuniOS.Editor
             // Unity가 나중에 이 값을 복원하면, RuniUndo도 이 인덱스로 돌아가야 함
             serializableUndoHandler.historyIndex = runiUndo.currentHistoryIndex;
             EditorUtility.SetDirty(serializableUndoHandler);
+
+            lastUndoName = name;
+        }
+        
+        public static string GetVariableUndoName(object instance, string path) => GetUndoName("undo.modify.property_in_object", instance, path);
+
+        public static string GetAddElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.add", instance, path ?? GetTextOrKey("gui.collection"));
+
+        public static string GetRemoveElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.remove", instance, path ?? GetTextOrKey("gui.collection"));
+        
+        public static string GetMoveElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.move", instance, path ?? GetTextOrKey("gui.collection"));
+        
+        public static string GetDiscardUndoName(object instance) => GetUndoName("undo.discard", instance, string.Empty);
+        
+        static string GetUndoName(string key, object instance, string path)
+        {
+            string name = GetTextOrKey(key);
+            name = new PlaceholderReplacePair("object", instance.ToString()).ReplaceAsPlaceholder(name);
+            name = new PlaceholderReplacePair("property", path).ReplaceAsPlaceholder(name);
+
+            return name;
         }
         
         class SerializableUndoHandler : ScriptableObject
@@ -114,6 +138,7 @@ namespace RuniOS.Editor
                             break;
 
                         instance.runiUndo.PerformUndo();
+                        InfiniteLoopDetector.Run();
                     }
                 }
                 // Redo 상황: 현재 인덱스가 목표보다 작음 -> 늘려야 함
@@ -125,6 +150,7 @@ namespace RuniOS.Editor
                             break;
 
                         instance.runiUndo.PerformRedo();
+                        InfiniteLoopDetector.Run();
                     }
                 }
             }
