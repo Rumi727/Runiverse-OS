@@ -115,7 +115,12 @@
         </member>
         <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.onlyByMyself">
             <summary>
-            비퍼블릭 멤버를 제외할지 여부를 결정합니다.
+            재귀적 브릿지 생성을 비활성화할지 여부를 결정합니다.
+            </summary>
+        </member>
+        <member name="P:RuniOS.APIBridge.GenerateAPIBridgeForTypeAttribute.onlyInternal">
+            <summary>
+            internal 멤버만 생성할지 여부를 결정합니다.
             </summary>
         </member>
         <member name="T:RuniOS.Editor.APIBridge.UnityEditor.UIElements.UxmlAttributeConverterBridge">
