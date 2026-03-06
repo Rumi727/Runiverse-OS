@@ -63,7 +63,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly IMGUIInspectorDrawer valueDrawer;
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
         {
             CheckVariableElement();
 

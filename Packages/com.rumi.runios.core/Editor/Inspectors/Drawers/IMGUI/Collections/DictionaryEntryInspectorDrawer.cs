@@ -72,7 +72,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         public IInspectorVariableElement valueElement { get; }
         public IMGUIInspectorDrawer valueDrawer { get; }
 
-        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
         {
             label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
             

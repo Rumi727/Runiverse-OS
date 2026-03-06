@@ -70,10 +70,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (index >= attributeDrawers.Length)
                 OnGUI(position, label, flags, isInArray, clipping);
             else
-                attributeDrawers[index].OnGUI(this, position, label, flags, isInArray, clipping);
+                attributeDrawers[index].Draw(this, position, label, flags, isInArray, clipping);
         }
 
-        protected abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null);
+        protected abstract void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping);
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 

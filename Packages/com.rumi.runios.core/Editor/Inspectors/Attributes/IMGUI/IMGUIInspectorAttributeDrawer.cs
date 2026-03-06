@@ -25,7 +25,10 @@ namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 
         protected IMGUIInspectorAttributeDrawer(IInspectorAttribute attribute) : base(attribute) { }
 
-        public abstract void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null);
+        public void Draw(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+            => OnGUI(drawer, position, label, flags, isInArray, clipping);
+
+        protected abstract void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping);
 
         public virtual float GetHeight(IMGUIInspectorDrawer drawer, GUIContent? label, InspectorFlags flags, bool isInArray = false) => drawer.GetHeight(label, flags, isInArray);
     }

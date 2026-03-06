@@ -11,8 +11,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public override bool isField => true;
 
-        protected sealed override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List,
-            bool isInArray = false, Rect? clipping = null)
+        protected sealed override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags,
+            bool isInArray, Rect? clipping)
         {
             CheckVariableElement();
             label ??= new GUIContent(element.displayName);

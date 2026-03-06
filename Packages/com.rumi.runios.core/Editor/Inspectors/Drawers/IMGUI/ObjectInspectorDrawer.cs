@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
         public ObjectInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) =>
-            inspector = new Inspector(InspectorAttributeUtility.FilterInheritable(attributes), undoRecorder);
+            inspector = new Inspector(attributes.FilterInheritable(), undoRecorder);
 
         public override bool isField => false;
 
@@ -29,7 +29,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly AnimFloat animFloat = new AnimFloat(0);
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        protected override void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
         {
             CheckVariableElement();
 
