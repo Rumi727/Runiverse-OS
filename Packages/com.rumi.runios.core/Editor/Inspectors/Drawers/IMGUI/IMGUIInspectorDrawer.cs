@@ -77,24 +77,36 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
 
-        protected static string GetVariableUndoName(IInspectorVariableElement variableElement) => GetUndoName("undo.modify.property_in_object", variableElement.inspectable, variableElement.path);
+        protected static string GetVariableUndoName(IInspectorVariableElement variableElement)
+        {
+            var rootInspectable = variableElement.inspectable;
+            for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
+            
+            return UndoHandler.GetVariableUndoName(rootInspectable.inspectionDisplayName, variableElement.path);
+        }
 
-        protected static string GetAddElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.add", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
-
-        protected static string GetRemoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.remove", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
-        
-        protected static string GetMoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null) => GetUndoName("undo.collection.move", inspectable, variableElement?.path ?? GetTextOrKey("gui.collection"));
-        
-        static string GetUndoName(string key, IInspectable inspectable, string path)
+        protected static string GetAddElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null)
         {
             var rootInspectable = inspectable;
             for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
+            
+            return UndoHandler.GetAddElementUndoName(rootInspectable.inspectionDisplayName, variableElement?.path);
+        }
 
-            string name = GetTextOrKey(key);
-            name = new PlaceholderReplacePair("object", rootInspectable.inspectionDisplayName).ReplaceAsPlaceholder(name);
-            name = new PlaceholderReplacePair("property", path).ReplaceAsPlaceholder(name);
+        protected static string GetRemoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null)
+        {
+            var rootInspectable = inspectable;
+            for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
+            
+            return UndoHandler.GetRemoveElementUndoName(rootInspectable.inspectionDisplayName, variableElement?.path);
+        }
 
-            return name;
+        protected static string GetMoveElementUndoName(IInspectable inspectable, IInspectorVariableElement? variableElement = null)
+        {
+            var rootInspectable = inspectable;
+            for (; rootInspectable.parentElement != null; rootInspectable = rootInspectable.parentElement.inspectable) { }
+            
+            return UndoHandler.GetMoveElementUndoName(rootInspectable.inspectionDisplayName, variableElement?.path);
         }
 
         /// <returns>변수가 null 값인지 여부를 반환합니다</returns>

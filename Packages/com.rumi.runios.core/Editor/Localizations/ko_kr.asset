@@ -99,6 +99,14 @@ MonoBehaviour:
       value: "\uB808\uC9C0\uC2A4\uD2B8\uB9AC"
     - key: gui.asset
       value: "\uC5D0\uC14B"
+    - key: gui.resource_pack
+      value: "\uB9AC\uC18C\uC2A4\uD329"
+    - key: gui.collection
+      value: "\uBAA9\uB85D"
+    - key: gui.version
+      value: "\uBC84\uC804"
+    - key: gui.element.index
+      value: "\uC694\uC18C {index}"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
         \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
@@ -272,6 +280,9 @@ MonoBehaviour:
       value: "\uC798\uBABB\uB41C \uCEEC\uB809\uC158\uC785\uB2C8\uB2E4. \uAE30\uBCF8
         \uC778\uC2A4\uD399\uD130\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.\nIList\uB97C
         \uC0C1\uC18D\uD558\uACE0 \uC788\uB294\uC9C0 \uD655\uC778\uD574\uC8FC\uC138\uC694."
+    - key: inspector.invalid.collection.duplicate_key
+      value: "\uC911\uBCF5\uB41C \uD0A4\uC785\uB2C8\uB2E4.\n\uBCC0\uACBD \uC0AC\uD56D\uC774
+        \uC800\uC7A5\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
     - key: inspector.not_readable
       value: "\uC774 \uC694\uC18C\uB294 \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: inspector.no_instance
@@ -350,3 +361,11 @@ MonoBehaviour:
       value: "\uD30C\uC77C \uC5F4\uAE30"
     - key: undo.modify.property_in_object
       value: "{object}\uC758 {property} \uC218\uC815"
+    - key: undo.collection.add
+      value: "{object}\uC758 {property}\uC5D0 \uC694\uC18C \uCD94\uAC00"
+    - key: undo.collection.remove
+      value: "{object}\uC758 {property}\uC5D0\uC11C \uC694\uC18C \uC0AD\uC81C"
+    - key: undo.collection.move
+      value: "{object}\uC758 {property}\uC5D0\uC11C \uC694\uC18C \uC774\uB3D9"
+    - key: undo.discard
+      value: "{object}\uC758 \uBCC0\uACBD\uC0AC\uD56D \uBC84\uB9AC\uAE30"

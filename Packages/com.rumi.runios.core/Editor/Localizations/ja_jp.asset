@@ -99,6 +99,14 @@ MonoBehaviour:
       value: "\u30EC\u30B8\u30B9\u30C8\u30EA"
     - key: gui.asset
       value: "\u30A2\u30BB\u30C3\u30C8"
+    - key: gui.resource_pack
+      value: "\u30EA\u30BD\u30FC\u30B9\u30D1\u30C3\u30AF"
+    - key: gui.collection
+      value: "\u30EA\u30B9\u30C8"
+    - key: gui.version
+      value: "\u30D0\u30FC\u30B8\u30E7\u30F3"
+    - key: gui.element.index
+      value: "\u8981\u7D20{index}"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\u30B7\u30EA\u30A2\u30E9\u30A4\u30BA\u53EF\u80FD\u306A\u30D5\u30A3\u30FC\u30EB\u30C9\u300CserializableKeys\u300D\u304C\u5B58\u5728\u3057\u307E\u305B\u3093\u3002\nGUI
         \u306B\u81EA\u52D5\u7684\u306B\u8868\u793A\u3059\u308B\u306B\u306F\u3001\u30D5\u30A3\u30FC\u30EB\u30C9\u540D\u304C\u6B63\u78BA\u306B\u300CserializableKeys\u300D\u3067\u3042\u308B\u5FC5\u8981\u304C\u3042\u308A\u307E\u3059\u3002"
@@ -250,6 +258,8 @@ MonoBehaviour:
       value: "\u5236\u5FA1\u3055\u308C\u305F\u5C5E\u6027\u306F\u3042\u308A\u307E\u305B\u3093\u3002"
     - key: inspector.invalid.collection
       value: "\u7121\u52B9\u306A\u30B3\u30EC\u30AF\u30B7\u30E7\u30F3\u3067\u3059\u3002\u30C7\u30D5\u30A9\u30EB\u30C8\u306E\u30A4\u30F3\u30B9\u30DA\u30AF\u30BF\u304C\u8868\u793A\u3055\u308C\u307E\u3059\u3002\nIList\u3092\u7D99\u627F\u3057\u3066\u3044\u308B\u3053\u3068\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
+    - key: inspector.invalid.collection.duplicate_key
+      value: "\u91CD\u8907\u3057\u305F\u30AD\u30FC\u3067\u3059\u3002\n\u5909\u66F4\u306F\u4FDD\u5B58\u3055\u308C\u307E\u305B\u3093\u3002"
     - key: inspector.not_readable
       value: "\u3053\u306E\u8981\u7D20\u306F\u8AAD\u307F\u53D6\u308C\u307E\u305B\u3093\u3002"
     - key: inspector.no_instance
@@ -323,3 +333,11 @@ MonoBehaviour:
       value: "\u30D5\u30A1\u30A4\u30EB\u3092\u958B\u304F"
     - key: undo.modify.property_in_object
       value: "{object}\u306E{property}\u3092\u5909\u66F4"
+    - key: undo.collection.add
+      value: "{object}\u306E{property}\u306B\u8981\u7D20\u3092\u8FFD\u52A0\u3059\u308B"
+    - key: undo.collection.remove
+      value: "{object}\u306E{property}\u304B\u3089\u8981\u7D20\u3092\u524A\u9664\u3059\u308B"
+    - key: undo.collection.move
+      value: "{object}\u306E{property}\u3067\u8981\u7D20\u3092\u79FB\u52D5\u3059\u308B"
+    - key: undo.discard
+      value: "{object}\u306E\u5909\u66F4\u3092\u7834\u68C4\u3059\u308B"

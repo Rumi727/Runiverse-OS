@@ -18,6 +18,7 @@ namespace RuniOS.Editor.Inspectors
         public IInspectorElement? element => elements.Length == 1 ? elements[0] : null;
         public ImmutableArray<IInspectorElement> elements { get; private set; } = ImmutableArray<IInspectorElement>.Empty;
 
+        public IMGUIInspectorDrawer? drawer => drawers.Length == 1 ? drawers[0] : null;
         public ImmutableArray<IMGUIInspectorDrawer?> drawers { get; private set; } = ImmutableArray<IMGUIInspectorDrawer?>.Empty;
 
         public InspectorFlags inspectorFlags { get; private set; }

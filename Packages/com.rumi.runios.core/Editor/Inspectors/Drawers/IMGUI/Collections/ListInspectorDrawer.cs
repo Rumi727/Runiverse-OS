@@ -19,10 +19,35 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         public ListInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
         public ListInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) { }
 
+        // 진짜 누가봐도 노치식 코딩이라 이러면 안될 것 같은데 딱히 이거 말곤 방법이 떠오르지 않음.
+        public readonly record struct Property(bool draggable, bool displayHeader, bool displayAddButton, bool displayRemoveButton)
+        {
+            public readonly bool draggable = draggable;
+            public readonly bool displayHeader = displayHeader;
+            public readonly bool displayAddButton = displayAddButton;
+            public readonly bool displayRemoveButton = displayRemoveButton;
+        }
+
         public override bool isField => false;
 
         public ReorderableList? reorderableList { get; private set; }
         
+        public Property property
+        {
+            get => _property;
+            set
+            {
+                if (_property == value)
+                    return;
+                
+                _property = value;
+                reorderableList = null;
+            }
+        }
+        Property _property = new Property(true, false, true, true);
+
+        public bool drawFoldout { get; set; } = true;
+
         public bool isExpanded { get; set; } = false;
 
         readonly AnimFloat animFloat = new AnimFloat(0);
@@ -132,8 +157,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             bool canInsert = !isFixedSize && elementType != null && CanInsert(elementType, flags);
             bool canHeaderResize = canInsert && CanHeaderResize(elementType, flags);
             
-            reorderableList ??= new ReorderableList(inspectableList, elementType ?? typeof(object), true, false, true, true) { multiSelect = true, };
-
+            reorderableList ??= new ReorderableList(inspectableList, elementType ?? typeof(object), property.draggable, property.displayHeader, property.displayAddButton, property.displayRemoveButton) 
+            {
+                multiSelect = true,
+                drawHeaderCallback = rect => GUI.Label(rect, label)
+            };
+            
             reorderableList.drawElementCallback = (rect, index, isActive, isFocused) => OnElementGUI(rect, index, isActive, isFocused, flags, clipping);
             reorderableList.elementHeightCallback = index => GetElementHeight(index, flags);
             reorderableList.onCanAddCallback = _ => canInsert;
@@ -168,21 +197,26 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             float headHeight = GetYSize(label, EditorStyles.foldoutHeader);
             position.height = headHeight;
 
-            isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canHeaderResize ? (_ => CreateElementItem(elementType, flags)) : null, isInArray);
-            position.y += headHeight + 2;
-            
-            position.x += 15 * EditorGUI.indentLevel;
-            position.width -= 15 * EditorGUI.indentLevel;
-            
-            if (!isInArray)
+            if (drawFoldout)
             {
-                if (isExpanded || animFloat.isAnimating)
-                    reorderableList.DoList(position);
+                isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canHeaderResize ? (_ => CreateElementItem(elementType, flags)) : null, isInArray);
+                position.y += headHeight + 2;
 
-                if (animFloat.isAnimating)
-                    RepaintCurrentWindow();
+                position.x += 15 * EditorGUI.indentLevel;
+                position.width -= 15 * EditorGUI.indentLevel;
+
+                if (!isInArray)
+                {
+                    if (isExpanded || animFloat.isAnimating)
+                        reorderableList.DoList(position);
+
+                    if (animFloat.isAnimating)
+                        RepaintCurrentWindow();
+                }
+                else if (isExpanded)
+                    reorderableList.DoList(position);
             }
-            else if (isExpanded)
+            else
                 reorderableList.DoList(position);
         }
 
@@ -194,15 +228,21 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 return EditorGUIUtility.singleLineHeight;
             
             float listHeight = reorderableList?.GetHeight() ?? 0;
-            float headHeight = GetYSize(label ?? GUIContent.none, EditorStyles.foldoutHeader);
-
-            if (!isInArray)
+            
+            if (drawFoldout)
             {
-                animFloat.target = isExpanded ? listHeight + 2 : 0;
-                return headHeight + animFloat.value;
+                float headHeight = GetYSize(label ?? GUIContent.none, EditorStyles.foldoutHeader);
+
+                if (!isInArray)
+                {
+                    animFloat.target = isExpanded ? listHeight + 2 : 0;
+                    return headHeight + animFloat.value;
+                }
+                else
+                    return headHeight + (isExpanded ? listHeight + 2 : 0);
             }
             else
-                return headHeight + (isExpanded ? listHeight + 2 : 0);
+                return listHeight;
         }
 
         public IMGUIInspectorDrawer? GetElementDrawer(int index, InspectorFlags flags)

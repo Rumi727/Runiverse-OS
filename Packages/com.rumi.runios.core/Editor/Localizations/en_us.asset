@@ -99,6 +99,14 @@ MonoBehaviour:
       value: Registry
     - key: gui.asset
       value: Asset
+    - key: gui.resource_pack
+      value: Resource Pack
+    - key: gui.collection
+      value: Collection
+    - key: gui.version
+      value: Version
+    - key: gui.element.index
+      value: Element {index}
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -265,6 +273,10 @@ MonoBehaviour:
 
         Please
         ensure that it inherits from IList.'
+    - key: inspector.invalid.collection.duplicate_key
+      value: 'Duplicate key.
+
+        Your changes will not be saved.'
     - key: inspector.not_readable
       value: This element is not readable.
     - key: inspector.no_instance
@@ -345,3 +357,11 @@ MonoBehaviour:
       value: Open File
     - key: undo.modify.property_in_object
       value: Modified {property} in {object}
+    - key: undo.collection.add
+      value: Add element to {property} of {object}
+    - key: undo.collection.remove
+      value: Remove element from {property} of {object}
+    - key: undo.collection.move
+      value: Move element from {property} of {object}
+    - key: undo.discard
+      value: Discard changes to {object}
