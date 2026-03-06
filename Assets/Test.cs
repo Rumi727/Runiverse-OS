@@ -50,7 +50,7 @@ public sealed class Test : MonoBehaviour
     public FilePath filePath;
     public FileExtension fileExtension;
     public HexColor hexColor;
-    public RectCorner rectCorner;
+    public RectVertices rectVertices;
     public RuniOS.RectOffset rectOffset;
     public UnlimitedDateTime unlimitedDateTime;
     public SerializableKeyValuePair<string, SerializableNullable<double>> pair;
@@ -64,8 +64,14 @@ public sealed class Test : MonoBehaviour
     public float test;
     [NotNullField] public Object? uniObject;
     public InspectorFlags flags;
+    public CornerRadius cornerRadius;
     
-    void OnEnable() => DrivenPropertyManager.RegisterProperty(this, this, nameof(_a));
+    void OnEnable()
+    {
+        DrivenPropertyManager.RegisterProperty(this, this, nameof(_a));
+        QualitySettings.vSyncCount = 0;
+        Application.targetFrameRate = -1;
+    }
 
     void OnDisable() => DrivenPropertyManager.UnregisterProperty(this, this, nameof(_a));
 
@@ -96,7 +102,7 @@ public sealed class Test : MonoBehaviour
         public FilePath filePath;
         public FileExtension fileExtension;
         public HexColor hexColor;
-        public RectCorner rectCorner;
+        public RectVertices rectVertices;
         public RuniOS.RectOffset rectOffset;
         public UnlimitedDateTime unlimitedDateTime;
 
