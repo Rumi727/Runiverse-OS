@@ -14,7 +14,26 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     public abstract class IMGUIInspectorDrawer : InspectorDrawer
     {
-        static readonly object?[] args = new object?[2];
+        readonly struct NestingScope : IDisposable
+        {
+            readonly IMGUIInspectorDrawer drawer;
+
+            public readonly int nestingLevel;
+            readonly int oldNestingLevel;
+
+            public NestingScope(IMGUIInspectorDrawer drawer, int nestingLevel)
+            {
+                this.drawer = drawer;
+                this.nestingLevel = nestingLevel;
+                
+                oldNestingLevel = drawer.nestingLevel;
+                drawer.nestingLevel = nestingLevel;
+            }
+
+            public void Dispose() => drawer.nestingLevel = oldNestingLevel;
+        }
+        
+        static readonly object?[] args = new object?[3];
         [return: NotNullIfNotNull(nameof(element))]
         public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
         {
@@ -38,33 +57,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         public ImmutableArray<IMGUIInspectorAttributeDrawer> attributeDrawers { get; }
 
-        int currentAttributeIndex = -1;
+        int nestingLevel = 0;
         
         /// <summary>
         /// UI 요소를 렌더링합니다.
         /// </summary>
         public void Draw(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
         {
-            currentAttributeIndex++;
-            
-            int index = currentAttributeIndex;
+            using NestingScope scope = new NestingScope(this, nestingLevel + 1);
+
+            int index = scope.nestingLevel - 1;
             if (index >= attributeDrawers.Length)
-            {
-                currentAttributeIndex = -1;
-
                 OnGUI(position, label, flags, isInArray, clipping);
-                return;
-            }
-
-            try
-            {
+            else
                 attributeDrawers[index].OnGUI(this, position, label, flags, isInArray, clipping);
-            }
-            finally
-            {
-                if (index == currentAttributeIndex)
-                    currentAttributeIndex = -1;
-            }
         }
 
         protected abstract void OnGUI(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null);
