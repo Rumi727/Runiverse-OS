@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Serialization
         
         public static PropertyConverter? FindConverter(Type propertyType)
         {
-            Type? drawerType = AttributeDrawer<PropertyConverter, CustomPropertyConverterAttribute>.FindDrawerType(propertyType);
+            Type? drawerType = AttributeTypeResolver<PropertyConverter, CustomPropertyConverterAttribute>.FindDrawerType(propertyType);
             return drawerType != null ? (PropertyConverter)Activator.CreateInstance(drawerType) : null;
         }
 

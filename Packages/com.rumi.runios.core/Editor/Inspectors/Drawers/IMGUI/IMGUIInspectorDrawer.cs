@@ -21,7 +21,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             if (element == null)
                 return null;
 
-            Type? type = AttributeDrawer<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
+            Type? type = AttributeTypeResolver<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
             if (type == null)
                 return new ObjectInspectorDrawer(element, inheritedAttributes, undoRecorder);
 
