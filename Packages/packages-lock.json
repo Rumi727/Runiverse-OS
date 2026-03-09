@@ -113,7 +113,7 @@
       "hash": "418da38db7660aeace39d62b620a6366ce1a8b15"
     },
     "com.unity.burst": {
-      "version": "1.8.27",
+      "version": "1.8.28",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -174,7 +174,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.memoryprofiler": {
-      "version": "1.1.9",
+      "version": "1.1.11",
       "depth": 0,
       "source": "registry",
       "dependencies": {

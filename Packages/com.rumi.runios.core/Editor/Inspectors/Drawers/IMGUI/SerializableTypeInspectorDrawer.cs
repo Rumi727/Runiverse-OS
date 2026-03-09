@@ -11,6 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public SerializableTypeInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => (SerializableType)TypeField(position, label, (SerializableType)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => (SerializableType)TypeField(position, label, (SerializableType)value!);
     }
 }

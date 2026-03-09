@@ -1421,7 +1421,7 @@ MonoBehaviour:
     bottomRight: 50
     bottomLeft: 60.1
   _softness: 1
-  _outlineColor: {r: 1, g: 1, b: 1, a: 0.5019608}
+  _outlineColor: {r: 0, g: 0.19160748, b: 1, a: 0.6666667}
   _outlineWidth: 5
   _outlineSoftness: 1
   _insideOutline: 0
@@ -1449,7 +1449,7 @@ MonoBehaviour:
   m_UVRect:
     serializedVersion: 2
     x: 0
-    y: 0.13
+    y: 0.4
     width: 1
     height: 0.4
 --- !u!1001 &884968292
@@ -2153,7 +2153,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "New Text \uC640 \uC0CC\uC988 \uC544\uC2DC\uB294\uAD6C\uB098"
+  m_text: New Text
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 70326e25170c0754db3e2c1a70c9cd88, type: 2}
   m_sharedMaterial: {fileID: 7639992929945359739, guid: 70326e25170c0754db3e2c1a70c9cd88, type: 2}
@@ -3117,8 +3117,8 @@ MonoBehaviour:
   m_Type: 3
   m_PreserveAspect: 0
   m_FillCenter: 1
-  m_FillMethod: 1
-  m_FillAmount: 0.462
+  m_FillMethod: 4
+  m_FillAmount: 0.711
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0

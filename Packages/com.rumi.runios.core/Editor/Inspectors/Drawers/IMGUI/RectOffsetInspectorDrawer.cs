@@ -11,8 +11,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public RectOffsetInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => RectOffsetField(position, label, (RectOffset)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => RectOffsetField(position, label, (RectOffset)value!);
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => GetMultiColumnsFieldHeight(label);
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => GetMultiColumnsFieldHeight(label);
     }
 }

@@ -107,6 +107,10 @@ MonoBehaviour:
       value: "\uBC84\uC804"
     - key: gui.element.index
       value: "\uC694\uC18C {index}"
+    - key: gui.apply
+      value: "\uC801\uC6A9"
+    - key: gui.revert
+      value: "\uB418\uB3CC\uB9AC\uAE30"
     - key: serializable_dictionary_property_drawer.not_found.key
       value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
         \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
@@ -355,6 +359,8 @@ MonoBehaviour:
       value: "\uB9AC\uC18C\uC2A4\uD329 \uC124\uC815"
     - key: pack_drawer.pack_meta_data.create
       value: "\uBA54\uD0C0\uB370\uC774\uD130 \uD30C\uC77C \uB9CC\uB4E4\uAE30"
+    - key: pack_drawer.namespace.title
+      value: "\uB124\uC784\uC2A4\uD398\uC774\uC2A4 \uC124\uC815"
     - key: file_path.open_folder.title
       value: "\uD3F4\uB354 \uC5F4\uAE30"
     - key: file_path.open_file.title

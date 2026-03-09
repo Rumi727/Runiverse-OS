@@ -11,6 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         public CurveInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.CurveField(position, label, (AnimationCurve)value!);
+        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.CurveField(position, label, (AnimationCurve)value!);
     }
 }

@@ -8,6 +8,9 @@ namespace RuniOS.Editor.Resource
     [CanEditMultipleObjects]
     class DefaultAssetHook : EditorMarshal
     {
+        public static GUIStyle largeLabel => _largeLabel ??= new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold };
+        static GUIStyle? _largeLabel;
+        
         static GUIStyle? _paddingStyle;
         public static GUIStyle paddingStyle => _paddingStyle ??= new GUIStyle { padding = new RectOffset(15, 0, 3, 0) };
         
@@ -76,9 +79,15 @@ namespace RuniOS.Editor.Resource
             
                 bool lastEnabled = GUI.enabled;
                 GUI.enabled = true;
+
+                if (PackInspectorSystem.isFolderViewMode)
+                    Space(-4);
                 
                 EditorGUILayout.BeginVertical(paddingStyle);
                 {
+                    if (drawer.title != null)
+                        GUILayout.Label(GetTextOrKey(drawer.title), largeLabel);
+                    
                     drawer.OnGUI(PackInspectorSystem.activePaths, isDebug);
                     if (drawer.needsApplyRevert)
                         DrawFooter();
@@ -99,10 +108,10 @@ namespace RuniOS.Editor.Resource
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(L10n.Tr("Apply")))
+            if (GUILayout.Button(GetTextOrKey("gui.apply")))
                 PackInspectorSystem.activeDrawer?.SaveChanges();
             
-            if (GUILayout.Button(L10n.Tr("Revert")))
+            if (GUILayout.Button(GetTextOrKey("gui.revert")))
                 PackInspectorSystem.activeDrawer?.DiscardChanges();
 
             EditorGUILayout.EndHorizontal();

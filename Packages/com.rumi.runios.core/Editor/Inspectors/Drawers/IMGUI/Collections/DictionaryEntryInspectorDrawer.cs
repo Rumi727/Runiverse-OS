@@ -94,7 +94,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
                 {
                     position.width = fieldWidth;
-                    position.height = keyDrawer.GetHeight(keyLabelContent, flags, isInArray);
+                    position.height = keyDrawer.GetHeight(keyLabelContent, flags, isInArray, clipping);
 
                     BeginLabelWidth(keyLabel);
                     keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
@@ -105,7 +105,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
                 {
                     position.width = fieldWidth.Ceil();
-                    position.height = valueDrawer.GetHeight(valueLabelContent, flags, isInArray);
+                    position.height = valueDrawer.GetHeight(valueLabelContent, flags, isInArray, clipping);
 
                     BeginLabelWidth(valueLabel);
                     valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
@@ -119,12 +119,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 if (EditorGUIUtility.hierarchyMode)
                     BeginLabelWidth(EditorGUIUtility.labelWidth - 15);
                 
-                position.height = keyDrawer.GetHeight(label, flags, isInArray);
+                position.height = keyDrawer.GetHeight(label, flags, isInArray, clipping);
                 
                 keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
 
                 position.y += position.height + 2;
-                position.height = valueDrawer.GetHeight(label, flags, isInArray);
+                position.height = valueDrawer.GetHeight(label, flags, isInArray, clipping);
                 
                 valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
                 
@@ -135,13 +135,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             EndWideMode();
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
         {
             float height;
             if (isField)
-                height = Max(keyDrawer.GetHeight(label, flags, isInArray), valueDrawer.GetHeight(label, flags, isInArray));
+                height = Max(keyDrawer.GetHeight(label, flags, isInArray, clipping), valueDrawer.GetHeight(label, flags, isInArray, clipping));
             else
-                height = keyDrawer.GetHeight(label, flags, isInArray) + 2 + valueDrawer.GetHeight(label, flags, isInArray);
+                height = keyDrawer.GetHeight(label, flags, isInArray, clipping) + 2 + valueDrawer.GetHeight(label, flags, isInArray, clipping);
             
             return height + (!LabelHasContent(label) || (EditorGUIUtility.wideMode && isField) ? 0 : EditorGUIUtility.singleLineHeight + 2);
         }

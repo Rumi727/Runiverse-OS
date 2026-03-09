@@ -5,8 +5,7 @@ namespace RuniOS.Editor.Resource
 {
     public abstract class PackDrawer
     {
-        public static GUIStyle largeLabel => _largeLabel ??= new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold };
-        static GUIStyle? _largeLabel;
+        public virtual string? title => null;
 
         public virtual int order => 0;
 

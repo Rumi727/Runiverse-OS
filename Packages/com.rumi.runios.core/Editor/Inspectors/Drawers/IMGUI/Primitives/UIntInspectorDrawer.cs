@@ -11,6 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     {
         public UIntInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.LongField(position, label, (uint)value!).ClampToUInt();
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.LongField(position, label, (uint)value!).ClampToUInt();
     }
 }

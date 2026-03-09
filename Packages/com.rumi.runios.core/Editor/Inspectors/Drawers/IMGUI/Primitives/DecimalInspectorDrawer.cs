@@ -11,6 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     {
         public DecimalInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.DoubleField(position, label, ((decimal)value!).ClampToDouble()).ClampToDecimal();
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.DoubleField(position, label, ((decimal)value!).ClampToDouble()).ClampToDecimal();
     }
 }

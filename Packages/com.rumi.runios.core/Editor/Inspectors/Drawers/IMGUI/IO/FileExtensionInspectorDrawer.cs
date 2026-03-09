@@ -12,6 +12,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.IO
     {
         public FileExtensionInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => FileExtensionField(position, label, (FileExtension)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => FileExtensionField(position, label, (FileExtension)value!);
     }
 }

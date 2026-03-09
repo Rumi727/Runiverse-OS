@@ -139,11 +139,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         }
 
         float lastInspectorHeight;
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
 
-            float height = valueDrawer.GetHeight(label, flags, isInArray);
+            float height = valueDrawer.GetHeight(label, flags, isInArray, clipping);
             bool valueIsNull = hasValueElement.IsReadable(flags) && !(bool)hasValueElement.value!;
             nullableAnimFloat.target = valueIsNull ? 1 : 0;
 

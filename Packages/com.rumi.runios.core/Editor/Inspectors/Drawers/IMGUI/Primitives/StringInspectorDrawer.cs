@@ -11,6 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     {
         public StringInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => EditorGUI.TextField(position, label, (string?)value ?? string.Empty);
+        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.TextField(position, label, (string?)value ?? string.Empty);
     }
 }

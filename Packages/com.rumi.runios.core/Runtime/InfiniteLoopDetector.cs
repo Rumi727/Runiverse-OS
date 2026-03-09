@@ -36,7 +36,8 @@ namespace RuniOS
         [UnityEditor.InitializeOnLoadMethod]
         static void Init() => UnityEditor.EditorApplication.update += Update;
 #elif DEVELOPMENT_BUILD
-        static void Awaken() => RuniOS.LowLevel.RuniPlayerLoop.onInit += Update;
+        [Booting.Awaken]
+        static void Awaken() => LowLevel.RuniPlayerLoop.onInit += Update;
 #endif
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD

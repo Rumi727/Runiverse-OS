@@ -168,7 +168,7 @@ namespace RuniOS.Editor.Inspectors
                 {
                     try
                     {
-                        elementPosition.height = item.GetHeight(null, inspectorFlags, isInArray);
+                        elementPosition.height = item.GetHeight(null, inspectorFlags, isInArray, clipping);
                     }
                     catch (ExitGUIException)
                     {
@@ -211,7 +211,7 @@ namespace RuniOS.Editor.Inspectors
             GUI.EndClip();
         }
 
-        public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
         {
             if (lastException != null)
                 return EditorGUIUtility.singleLineHeight;
@@ -223,7 +223,7 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    return item.GetHeight(label, flags, isInArray) + 2;
+                    return item.GetHeight(label, flags, isInArray, clipping) + 2;
                 }
                 catch (ExitGUIException)
                 {

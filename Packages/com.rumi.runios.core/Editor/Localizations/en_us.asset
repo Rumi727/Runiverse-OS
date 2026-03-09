@@ -107,6 +107,10 @@ MonoBehaviour:
       value: Version
     - key: gui.element.index
       value: Element {index}
+    - key: gui.apply
+      value: Apply
+    - key: gui.revert
+      value: Revert
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
@@ -351,6 +355,8 @@ MonoBehaviour:
       value: Resource Pack Setting
     - key: pack_drawer.pack_meta_data.create
       value: Creating a metadata file
+    - key: pack_drawer.namespace.title
+      value: Namespace Setting
     - key: file_path.open_folder.title
       value: Open Folder
     - key: file_path.open_file.title

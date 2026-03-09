@@ -75,7 +75,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         protected abstract void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping);
 
-        public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => EditorGUIUtility.singleLineHeight;
+        public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null) => EditorGUIUtility.singleLineHeight;
 
         protected static string GetVariableUndoName(IInspectorVariableElement variableElement)
         {

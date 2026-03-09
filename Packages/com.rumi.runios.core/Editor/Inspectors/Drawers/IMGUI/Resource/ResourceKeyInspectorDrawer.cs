@@ -12,8 +12,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
     {
         public ResourceKeyInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray) => ResourceKeyField(position, label, (ResourceKey)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => ResourceKeyField(position, label, (ResourceKey)value!);
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false) => GetMultiRowsFieldHeight(label, 2);
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => GetMultiRowsFieldHeight(label, 2);
     }
 }

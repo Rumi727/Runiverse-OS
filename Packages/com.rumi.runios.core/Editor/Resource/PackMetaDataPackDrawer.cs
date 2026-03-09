@@ -11,6 +11,8 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class PackMetaDataPackDrawer : PackDrawer
     {
+        public override string title => "pack_drawer.generic.title";
+
         public override int order => int.MinValue;
 
         public override bool needsApplyRevert => true;
@@ -45,8 +47,6 @@ namespace RuniOS.Editor.Resource
                 
             if (inspector.inspectorFlags != flags)
                 inspector.Rebuild(inspectableObject, flags);
-            
-            GUILayout.Label(GetTextOrKey("pack_drawer.generic.title"), largeLabel);
 
             if (packMetaDatas.Length == 0)
             {

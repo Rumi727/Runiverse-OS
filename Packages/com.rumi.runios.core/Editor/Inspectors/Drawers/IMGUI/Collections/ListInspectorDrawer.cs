@@ -164,7 +164,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             };
             
             reorderableList.drawElementCallback = (rect, index, isActive, isFocused) => OnElementGUI(rect, index, isActive, isFocused, flags, clipping);
-            reorderableList.elementHeightCallback = index => GetElementHeight(index, flags);
+            reorderableList.elementHeightCallback = index => GetElementHeight(index, flags, clipping);
             reorderableList.onCanAddCallback = _ => canInsert;
             reorderableList.onCanRemoveCallback = _ => !isFixedSize;
             
@@ -220,7 +220,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 reorderableList.DoList(position);
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
         {
             CheckInspectableList();
             
@@ -274,7 +274,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             if (EditorGUIUtility.hierarchyMode) EndLabelWidth();
         }
 
-        public virtual float GetElementHeight(int index, InspectorFlags flags) => GetElementDrawer(index, flags)?.GetHeight(GetElementLabel(index), flags, true) ?? EditorGUIUtility.singleLineHeight;
+        public virtual float GetElementHeight(int index, InspectorFlags flags, Rect? clipping) => GetElementDrawer(index, flags)?.GetHeight(GetElementLabel(index), flags, true, clipping) ?? EditorGUIUtility.singleLineHeight;
 
         public virtual void SynchronizeCollections()
         {

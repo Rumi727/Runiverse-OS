@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
     {
         public VoidPointerInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray)
+        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping)
         {
             CheckVariableElement();
 

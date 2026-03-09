@@ -33,6 +33,7 @@ namespace RuniOS.Editor.Resource
 
             Selection.selectionChanged += RefreshState;
             EditorApplication.update += CheckFolderChange;
+            
             RefreshState();
         }
 

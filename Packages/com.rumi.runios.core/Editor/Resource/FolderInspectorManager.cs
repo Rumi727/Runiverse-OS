@@ -44,7 +44,7 @@ namespace RuniOS.Editor.Resource
 
             if (_cachedEditor == null && _dummyTarget != null)
             {
-                // 강제로 Editor 인스턴스 생성 (사용자 요구사항 충족)
+                // 강제로 Editor 인스턴스 생성
                 UnityEditor.Editor? editor = null;
                 UnityEditor.Editor.CreateCachedEditor(_dummyTarget, typeof(DefaultAssetHook), ref editor);
                 
@@ -54,11 +54,13 @@ namespace RuniOS.Editor.Resource
             if (_cachedEditor == null)
                 return;
 
+            _cachedEditor.DrawHeader();
+            
             BeginHierarchyMode();
-            BeginWideMode(Screen.width > 331);
-
-            _cachedEditor.OnInspectorGUI(); 
-
+            BeginWideMode();
+            
+            _cachedEditor.OnInspectorGUI();
+            
             EndWideMode();
             EndHierarchyMode();
         }

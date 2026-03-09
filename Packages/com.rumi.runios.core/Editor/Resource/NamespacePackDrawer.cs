@@ -8,6 +8,8 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class NamespacePackDrawer : PackDrawer
     {
+        public override string title => "pack_drawer.namespace.title";
+
         public override bool needsApplyRevert => true;
 
         public override bool IsMatch(IEnumerable<FilePath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
@@ -31,13 +33,8 @@ namespace RuniOS.Editor.Resource
         
         public override void OnGUI(IEnumerable<FilePath> relativePaths, bool isDebug = false)
         {
-            GUILayout.Label(GetTextOrKey("pack_drawer.generic.title"), largeLabel);
-
-            reorderableList ??= new ReorderableList(nameSpaces, typeof(string), false, true, true, true)
-            {
-                multiSelect = true,
-                drawHeaderCallback = rect => GUI.Label(rect, GetTextOrKey("gui.namespace"))
-            };
+            reorderableList ??= new ReorderableList(nameSpaces, typeof(string), false, false, true, true)
+            { multiSelect = true };
 
             reorderableList.list = nameSpaces;
 

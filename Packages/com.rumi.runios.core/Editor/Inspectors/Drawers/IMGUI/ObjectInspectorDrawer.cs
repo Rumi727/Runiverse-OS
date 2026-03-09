@@ -59,7 +59,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             EndIndentLevel();
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
         {
             CheckVariableElement();
 
