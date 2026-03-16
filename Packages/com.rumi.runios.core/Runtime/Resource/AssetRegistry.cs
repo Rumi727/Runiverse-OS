@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
@@ -29,7 +30,8 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 핸들 목록이 변경 사항에 대해 추적 중인지 여부를 가져옵니다.
         /// </summary>
-        public bool isTracking { get; private set; }
+        [MemberNotNullWhen(true, nameof(trackedHandles))]
+        public bool isTracking => trackedHandles != null;
         
         public THandle? this[Identifier key]
         {
@@ -47,8 +49,8 @@ namespace RuniOS.Resource
         
         public int Count => assetHandles.Count;
         
-        readonly Dictionary<Identifier, THandle> assetHandles = new();
-        readonly HashSet<Identifier> trackedIdentifier = new();
+        Dictionary<Identifier, THandle> assetHandles = new();
+        Dictionary<Identifier, THandle>? trackedHandles = new();
         
         /// <summary>
         /// 에셋 핸들 컬렉션 변경 사항에 대한 트래킹을 시작합니다.
@@ -61,9 +63,8 @@ namespace RuniOS.Resource
         {
             if (isTracking)
                 throw new InvalidOperationException("Tracking is already started.");
-            
-            isTracking = true;
-            trackedIdentifier.Clear();
+
+            trackedHandles = new Dictionary<Identifier, THandle>();
         }
         
         /// <summary>
@@ -79,12 +80,8 @@ namespace RuniOS.Resource
             if (!isTracking)
                 throw new InvalidOperationException("Tracking is not started. Cannot end tracking.");
 
-            var keysToRemove = assetHandles.Keys.Where(x => !trackedIdentifier.Contains(x)).ToArray();
-            foreach (var item in keysToRemove)
-                assetHandles.Remove(item);
-
-            trackedIdentifier.Clear();
-            isTracking = false;
+            assetHandles = trackedHandles;
+            trackedHandles = null;
         }
 
         /// <summary>
@@ -100,7 +97,7 @@ namespace RuniOS.Resource
             if (!isTracking)
                 throw new InvalidOperationException("Tracking is not started. Call BeginTracking() before adding asset handles.");
             
-            return trackedIdentifier.Contains(identifier);
+            return trackedHandles.ContainsKey(identifier);
         }
 
         /// <summary>
@@ -126,12 +123,14 @@ namespace RuniOS.Resource
              */
 
             // identifier가 이미 트래킹되고 있다면 중복 등록 방지 (Tracking)
-            if (!trackedIdentifier.Add(identifier))
+            if (!trackedHandles.ContainsKey(identifier))
                 return;
 
             // 핸들이 없거나 IOHandler가 다를 경우에만 교체 (Register/Update)
-            if (!assetHandles.TryGetValue(identifier, out THandle? value) || !value.IsSameTarget(assetHandle))
-                assetHandles[identifier] = assetHandle;
+            if (assetHandles.TryGetValue(identifier, out THandle? value) && !value.IsSameTarget(assetHandle))
+                assetHandle = value;
+            
+            trackedHandles[identifier] = assetHandle;
         }
         
         /// <summary>
