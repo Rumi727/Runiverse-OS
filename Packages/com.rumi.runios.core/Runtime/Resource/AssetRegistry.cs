@@ -50,7 +50,7 @@ namespace RuniOS.Resource
         public int Count => assetHandles.Count;
         
         Dictionary<Identifier, THandle> assetHandles = new();
-        Dictionary<Identifier, THandle>? trackedHandles = new();
+        Dictionary<Identifier, THandle>? trackedHandles = null;
         
         /// <summary>
         /// 에셋 핸들 컬렉션 변경 사항에 대한 트래킹을 시작합니다.
