@@ -43,6 +43,7 @@ namespace RuniOS.Editor.Unity.Inspectors
 
 
 
+        readonly Dictionary<string, SerializedProperty> propertyCache = new();
         readonly Dictionary<string, AnimatedReorderableList> animatedReorderableLists = new();
 
         public SerializedProperty? DrawPropertyLayout(string propertyName, params GUILayoutOption[] options) => InternalDrawPropertyLayout(propertyName, GUIContent.none, options);
@@ -53,7 +54,8 @@ namespace RuniOS.Editor.Unity.Inspectors
 
             try
             {
-                tps = serializedObject.FindProperty(propertyName);
+                if (!propertyCache.TryGetValue(propertyName, out tps))
+                    propertyCache[propertyName] = tps = serializedObject.FindProperty(propertyName);
             }
             catch (Exception)
             {
