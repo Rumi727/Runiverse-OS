@@ -123,11 +123,11 @@ namespace RuniOS.Editor.Unity.Inspectors
 
         /// <summary>
         /// 타겟들의 공통된 값을 문자열로 반환합니다.
-        /// <br/>값이 서로 다를 경우(Mixed Value)에는 "-"를 반환하여 시각적으로 표현합니다.
+        /// <br/>값이 서로 다를 경우(Mixed Value)에는 "—"를 반환하여 시각적으로 표현합니다.
         /// </summary>
         /// <typeparam name="TValue">값의 타입입니다.</typeparam>
         /// <param name="readFunc">값을 읽어오는 함수(Getter)입니다.</param>
-        /// <returns>값이 모두 같으면 해당 값의 문자열, 다르면 "-", 타겟이 없으면 "null"을 반환합니다.</returns>
+        /// <returns>값이 모두 같으면 해당 값의 문자열, 다르면 "—", 타겟이 없으면 "null"을 반환합니다.</returns>
         public string GetCommonValueString<TValue>(Func<TTarget, TValue> readFunc)
         {
             if (targets.Length <= 0)
@@ -135,7 +135,7 @@ namespace RuniOS.Editor.Unity.Inspectors
 
             // 값이 혼합되어 있는지 확인
             if (!HasSameValue(readFunc))
-                return "-";
+                return "—";
 
             // 값이 모두 같다면 첫 번째 값을 문자열로 변환
             return targets.WhereNotNull().Select(readFunc).FirstOrDefault()?.ToString() ?? "null";
