@@ -94,7 +94,7 @@ namespace RuniOS.Editor.Sounds
         }
 
         [MemberNotNull(nameof(studioListeners))]
-        static void UpdateGameView() => studioListeners = Object.FindObjectsByType<StudioListener>(FindObjectsSortMode.None);
+        static void UpdateGameView() => studioListeners = Object.FindObjectsByType<StudioListener>();
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void RuntimeInit()

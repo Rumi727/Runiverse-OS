@@ -25,6 +25,6 @@ namespace RuniOS.Resource.Sounds
 #endif
         static void Awaken() => AssetRegistryManager.Register<SoundWaveAssetRegistry>();
 
-        protected override UniTask<SoundWaveAssetHandle> CreateHandle(IOHandler ioHandler, FileMetaData metaData) => UniTask.FromResult(new SoundWaveAssetHandle(ioHandler, metaData));
+        protected override UniTask<SoundWaveAssetHandle> CreateHandle(IIOEntry entry, FileMetaData metaData) => UniTask.FromResult(new SoundWaveAssetHandle(entry, metaData));
     }
 }

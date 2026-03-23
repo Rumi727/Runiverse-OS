@@ -9,11 +9,11 @@ namespace RuniOS.Resource.Sounds
 {
     public class SoundWaveAssetHandle : AssetHandle<Sound>
     {
-        public SoundWaveAssetHandle(IOHandler ioHandler, FileMetaData metaData) : base(ioHandler, metaData) { }
+        public SoundWaveAssetHandle(IIOEntry entry, FileMetaData metaData) : base(entry, metaData) { }
         
         protected override async UniTask<Sound> Load()
         {
-            byte[] datas = await ioHandler.ReadAllBytes();
+            byte[] datas = await entry.ReadAllBytes();
             
             CREATESOUNDEXINFO exinfo = new CREATESOUNDEXINFO
             {

@@ -8,11 +8,11 @@ namespace RuniOS.Resource.Sounds
 {
     public class BankAssetHandle : AssetHandle<Bank>
     {
-        public BankAssetHandle(IOHandler ioHandler, FileMetaData metaData) : base(ioHandler, metaData) { }
+        public BankAssetHandle(IIOEntry entry, FileMetaData metaData) : base(entry, metaData) { }
         
         protected override async UniTask<Bank> Load()
         {
-            byte[] datas = await ioHandler.ReadAllBytes();
+            byte[] datas = await entry.ReadAllBytes();
             RuntimeManager.StudioSystem.loadBankMemory(datas, LOAD_BANK_FLAGS.NORMAL | LOAD_BANK_FLAGS.NONBLOCKING, out Bank bank).ThrowIfNotOk();
 
             await UniTask.WaitWhile(() =>

@@ -11,312 +11,107 @@ namespace RuniOS.IO
     /// <summary>
     /// 파일 시스템 작업을 처리하는 추상 기본 클래스입니다.
     /// </summary>
-    public abstract class IOHandler
+    public static class IOEntry
     {
         /// <summary>
-        /// 아무 작업도 수행하지 않는 빈 <see cref="IOHandler"/> 인스턴스를 가져옵니다.
+        /// 아무 작업도 수행하지 않는 빈 <see cref="IIOHandler"/> 인스턴스를 가져옵니다.
         /// </summary>
-        public static readonly IOHandler empty = new EmptyIOHandler();
+        public static readonly IIOHandler empty = new EmptyIOHandler();
 
 
+
+        // 내부 캐스팅 헬퍼: 인터페이스 설계상 T 타입의 자식은 T 타입을 반환하므로 안전합니다.
+        static T Cast<T>(IIOEntry entry) where T : IIOEntry => (T)entry;
+
+        #region CreateChild Overloads
+        /// <summary>
+        /// 지정된 경로를 사용하여 자식 항목을 생성하고 원래의 핸들러 타입을 유지합니다.
+        /// </summary>
+        public static T CreateChild<T>(this T handler, FilePath path1, FilePath path2) where T : IIOEntry
+            => Cast<T>(handler.CreateChild(path1).CreateChild(path2));
 
         /// <summary>
-        /// <see cref="IOHandler"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// 지정된 경로를 사용하여 자식 항목을 생성하고 원래의 핸들러 타입을 유지합니다.
         /// </summary>
-        protected IOHandler() => root = this;
+        public static T CreateChild<T>(this T handler, FilePath path1, FilePath path2, FilePath path3) where T : IIOEntry
+            => Cast<T>(handler.CreateChild(path1).CreateChild(path2).CreateChild(path3));
 
         /// <summary>
-        /// 지정된 상위 핸들러와 하위 경로를 사용하여 <see cref="IOHandler"/> 클래스의 새 인스턴스를 초기화합니다.
+        /// 지정된 경로를 사용하여 자식 항목을 생성하고 원래의 핸들러 타입을 유지합니다.
         /// </summary>
-        /// <param name="parent">이 핸들러의 상위 핸들러입니다. 최상위 핸들러인 경우 <see langword="null"/>일 수 있습니다.</param>
-        /// <param name="name">상위 핸들러에 대한 상대적인 이 핸들러의 경로입니다.</param>
-        protected IOHandler(IOHandler? parent, string name)
-        {
-            root = parent?.root ?? this;
-            this.parent = parent;
-
-            this.name = name;
-            fullPath = parent?.fullPath + this.name;
-        }
-
+        public static T CreateChild<T>(this T handler, FilePath path1, FilePath path2, FilePath path3, FilePath path4) where T : IIOEntry
+            => Cast<T>(handler.CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4));
 
         /// <summary>
-        /// 이 핸들러의 최상위 핸들러를 가져옵니다.
+        /// 지정된 경로를 사용하여 자식 항목을 생성하고 원래의 핸들러 타입을 유지합니다.
         /// </summary>
-        public IOHandler root { get; }
+        public static T CreateChild<T>(this T handler, FilePath path1, FilePath path2, FilePath path3, FilePath path4, FilePath path5) where T : IIOEntry
+            => Cast<T>(handler.CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4).CreateChild(path5));
 
         /// <summary>
-        /// 이 핸들러의 상위 핸들러를 가져옵니다. 최상위 핸들러인 경우 <see langword="null"/>입니다.
+        /// 여러 경로 배열을 사용하여 자식 항목을 순차적으로 생성하고 원래의 핸들러 타입을 유지합니다.
         /// </summary>
-        public IOHandler? parent { get; }
+        public static T CreateChild<T>(this T handler, params FilePath[] paths) where T : IIOEntry
+            => handler.CreateChild((IEnumerable<FilePath>)paths);
 
         /// <summary>
-        /// 이 <see cref="IOHandler"/> 인스턴스가 참조하는 파일 시스템의 구조가 <b>외부 요인에 의해 임의로 변경되지 않는 독립적인 상태</b>인지 여부를 나타내는 값을 가져옵니다.<br/>
-        /// 즉, 이 핸들러가 가리키는 경로 내부의 구조가 해당 핸들러 또는 개발자에 의해 제어되며, OS나 다른 외부 프로그램에 의해 마음대로 바뀔 수 없는 경우 <see langword="true"/>를 반환합니다.
+        /// 경로 열거형을 사용하여 자식 항목을 순차적으로 생성하고 원래의 핸들러 타입을 유지합니다.
         /// </summary>
-        /// <remarks>
-        /// <para>이 속성은 <see cref="IOHandler"/>의 구체적인 구현에 따라 다르게 동작합니다:</para>
-        /// <list type="bullet">
-        /// <item><description>
-        ///   <see langword="true"/>를 반환하는 경우: <see cref="IOHandler"/>가 에셋 번들, 압축 파일(.zip, .jar 등),
-        ///   또는 <see cref="VirtualDirectory"/>와 같이 자체적인 내부 구조를 가지며 외부에서 구조 변경이 어려운 대상을 참조할 때.<br/>
-        ///   개발자가 직접 코드를 통해 구조를 정의하거나 변경하는 가상 파일 시스템 또한 여기에 해당합니다.
-        /// </description></item>
-        /// <item><description>
-        ///   <see langword="false"/>를 반환하는 경우: <see cref="IOHandler"/>가 파일 시스템의 일반적인 경로를 참조할 때.<br/>
-        ///   이러한 경로는 OS나 다른 프로그램에 의해 디렉토리 구조나 파일이 임의로 생성, 삭제, 이동될 수 있으므로 독립적이지 않습니다.
-        /// </description></item>
-        /// </list>
-        /// </remarks>
-        public abstract bool isIndependent { get; }
+        public static T CreateChild<T>(this T handler, IEnumerable<FilePath> paths) where T : IIOEntry
+            => Cast<T>(paths.Aggregate((IIOEntry)handler, (current, t) => current.CreateChild(t)));
+        #endregion
 
         /// <summary>
-        /// 이 핸들러가 참조하고 있는 디렉토리/파일 이름입니다.
+        /// 지정된 와일드카드 패턴과 일치하는 파일이 존재하는지 확인하고, 존재하면 해당 타입의 핸들러를 반환합니다.
         /// </summary>
-        public string name { get; } = string.Empty;
-
-        /// <summary>
-        /// 전체 경로를 가져옵니다.
-        /// </summary>
-        public FilePath fullPath { get; } = new FilePath();
-
-
-
-        /// <summary>
-        /// 현재 위치를 최상위 경로로 취급하는 새 <see cref="IOHandler"/> 인스턴스를 생성합니다.
-        /// </summary>
-        /// <returns>현재 위치를 기반으로 하는 새 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public abstract IOHandler Recreate();
-
-
-
-        /// <summary>
-        /// 지정된 이름을 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path">자식 핸들러의 이름입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(string path) => CreateChild((FilePath)path);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public abstract IOHandler CreateChild(FilePath path);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path1">자식 핸들러의 경로입니다.</param>
-        /// /// <param name="path2">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(FilePath path1, FilePath path2) => CreateChild(path1).CreateChild(path2);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path1">자식 핸들러의 경로입니다.</param>
-        /// <param name="path2">자식 핸들러의 경로입니다.</param>
-        /// <param name="path3">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3) => CreateChild(path1).CreateChild(path2).CreateChild(path3);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path1">자식 핸들러의 경로입니다.</param>
-        /// <param name="path2">자식 핸들러의 경로입니다.</param>
-        /// <param name="path3">자식 핸들러의 경로입니다.</param>
-        /// <param name="path4">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3, FilePath path4) => CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="path1">자식 핸들러의 경로입니다.</param>
-        /// <param name="path2">자식 핸들러의 경로입니다.</param>
-        /// <param name="path3">자식 핸들러의 경로입니다.</param>
-        /// <param name="path4">자식 핸들러의 경로입니다.</param>
-        /// <param name="path5">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(FilePath path1, FilePath path2, FilePath path3, FilePath path4, FilePath path5) => CreateChild(path1).CreateChild(path2).CreateChild(path3).CreateChild(path4).CreateChild(path5);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="paths">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(params FilePath[] paths) => CreateChild((IEnumerable<FilePath>)paths);
-
-        /// <summary>
-        /// 지정된 경로를 사용하여 이 핸들러의 자식 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="paths">자식 핸들러의 경로입니다.</param>
-        /// <returns>생성된 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public IOHandler CreateChild(IEnumerable<FilePath> paths) => paths.Aggregate(this, (current, t) => current.CreateChild(t));
-
-        /// <summary>
-        /// 이 핸들러의 경로에 지정된 확장자를 추가하여 새 <see cref="IOHandler"/>를 생성합니다.
-        /// </summary>
-        /// <param name="extension">추가할 확장자입니다.</param>
-        /// <returns>확장자가 추가된 새 <see cref="IOHandler"/> 인스턴스입니다.</returns>
-        public abstract IOHandler AddExtension(FileExtension extension);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리가 존재하는지 확인합니다.
-        /// </summary>
-        /// <returns>디렉터리가 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
-        public abstract UniTask<bool> DirectoryExists();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일이 존재하는지 확인합니다.
-        /// </summary>
-        /// <returns>파일이 존재하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
-        public abstract UniTask<bool> FileExists();
-
-        /// <summary>
-        /// 지정된 와일드카드 패턴과 일치하는 파일이 존재하는지 확인합니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">파일 존재 여부를 확인할 와일드카드 패턴입니다.</param>
-        /// <returns>일치하는 파일이 있으면 해당 파일의 <see cref="IOHandler"/>를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.</returns>
-        public async UniTask<IOHandler?> FileExists(WildcardPatterns wildcardPatterns)
+        public static async UniTask<T?> FileExists<T>(this T handler, WildcardPatterns wildcardPatterns) where T : class, IIOEntry
         {
             for (int i = 0; i < wildcardPatterns.count; i++)
             {
-                string extension = wildcardPatterns[i];
-
-                IOHandler extensionHandler = AddExtension(extension);
+                T extensionHandler = Cast<T>(handler.AddExtension(wildcardPatterns[i]));
                 if (await extensionHandler.FileExists())
                     return extensionHandler;
             }
-
             return null;
         }
 
+        #region Handler Enumerables
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내의 모든 디렉터리 이름을 가져옵니다.
+        /// 현재 디렉터리 내의 모든 디렉터리 핸들러를 원래의 타입으로 가져옵니다.
         /// </summary>
-        /// <returns>디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<string> GetDirectories();
+        public static IUniTaskAsyncEnumerable<T> GetDirectoryHandlers<T>(this T handler) where T : IIOEntry
+            => handler.GetDirectories().Select(x => Cast<T>(handler.CreateChild(x)));
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
+        /// 모든 하위 디렉터리 핸들러를 원래의 타입으로 가져옵니다.
         /// </summary>
-        public IUniTaskAsyncEnumerable<IOHandler> GetDirectoryHandlers() => GetDirectories().Select(CreateChild);
+        public static IUniTaskAsyncEnumerable<T> GetAllDirectoryHandlers<T>(this T handler) where T : IIOEntry
+            => handler.GetAllDirectories().Select(x => Cast<T>(handler.CreateChild(x)));
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 이름을 가져옵니다.
+        /// 현재 디렉터리 내의 모든 파일 핸들러를 원래의 타입으로 가져옵니다.
         /// </summary>
-        /// <returns>모든 디렉터리 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllDirectories();
+        public static IUniTaskAsyncEnumerable<T> GetFileHandlers<T>(this T handler) where T : IIOEntry
+            => handler.GetFiles().Select(x => Cast<T>(handler.CreateChild(x)));
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 디렉터리 핸들러를 가져옵니다.
+        /// 와일드카드 패턴과 일치하는 현재 디렉터리의 파일 핸들러들을 원래의 타입으로 가져옵니다.
         /// </summary>
-        public IUniTaskAsyncEnumerable<IOHandler> GetAllDirectoryHandlers() => GetAllDirectories().Select(CreateChild);
+        public static IUniTaskAsyncEnumerable<T> GetFileHandlers<T>(this T handler, WildcardPatterns wildcardPatterns) where T : IIOEntry
+            => handler.GetFiles(wildcardPatterns).Select(x => Cast<T>(handler.CreateChild(x)));
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 이름을 가져옵니다.
+        /// 모든 하위 파일 핸들러를 원래의 타입으로 가져옵니다.
         /// </summary>
-        /// <returns>파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<string> GetFiles();
+        public static IUniTaskAsyncEnumerable<T> GetAllFileHandlers<T>(this T handler) where T : IIOEntry
+            => handler.GetAllFiles().Select(x => Cast<T>(handler.CreateChild(x)));
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일의 메타데이터를 가져옵니다.
+        /// 와일드카드 패턴과 일치하는 모든 하위 파일 핸들러를 원래의 타입으로 가져옵니다.
         /// </summary>
-        /// <returns>파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
-        /// </summary>
-        public IUniTaskAsyncEnumerable<IOHandler> GetFileHandlers() => GetFiles().Select(CreateChild);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        /// <returns>일치하는 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns);
-        
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 메타데이터를 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        /// <returns>일치하는 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        public IUniTaskAsyncEnumerable<IOHandler> GetFileHandlers(WildcardPatterns wildcardPatterns) => GetFiles(wildcardPatterns).Select(CreateChild);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 이름을 가져옵니다.
-        /// </summary>
-        /// <returns>모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles();
-        
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 메타데이터를 가져옵니다.
-        /// </summary>
-        /// <returns>모든 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내의 모든 파일 핸들러를 가져옵니다.
-        /// </summary>
-        public IUniTaskAsyncEnumerable<IOHandler> GetAllFileHandlers() => GetAllFiles().Select(CreateChild);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 이름을 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        /// <returns>일치하는 모든 파일 이름 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns);
-        
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 메타데이터를 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        /// <returns>모든 파일 메타데이터를 목록을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 디렉터리 및 모든 하위 디렉터리 내에서 지정된 와일드카드 패턴과 일치하는 모든 파일 핸들러를 가져옵니다.
-        /// </summary>
-        /// <param name="wildcardPatterns">일치시킬 와일드카드 패턴입니다.</param>
-        public IUniTaskAsyncEnumerable<IOHandler> GetAllFileHandlers(WildcardPatterns wildcardPatterns) => GetAllFiles(wildcardPatterns).Select(CreateChild);
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일의 모든 바이트를 읽습니다.
-        /// </summary>
-        /// <returns>파일의 모든 바이트를 포함하는 <see cref="byte"/>[]입니다.</returns>
-        public abstract UniTask<byte[]> ReadAllBytes();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일의 모든 텍스트를 읽습니다.
-        /// </summary>
-        /// <returns>파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
-        public abstract UniTask<string> ReadAllText();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일의 모든 줄을 읽습니다.
-        /// </summary>
-        /// <returns>파일의 모든 줄을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-        public abstract IUniTaskAsyncEnumerable<string> ReadLines();
-
-        /// <summary>
-        /// 이 핸들러가 나타내는 파일에서 읽기 위한 스트림을 엽니다.
-        /// </summary>
-        /// <returns>파일에서 열린 <see cref="Stream"/>입니다.</returns>
-        public abstract UniTask<Stream> OpenRead();
-
-
-
-        public abstract UniTask<FileMetaData> GetFileMetaData();
+        public static IUniTaskAsyncEnumerable<T> GetAllFileHandlers<T>(this T handler, WildcardPatterns wildcardPatterns) where T : IIOEntry
+            => handler.GetAllFiles(wildcardPatterns).Select(x => Cast<T>(handler.CreateChild(x)));
+        #endregion
 
 
 
@@ -325,9 +120,13 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일의 MD5 해시를 포함하는 <see cref="byte"/>[]입니다.</returns>
         /// <exception cref="Exception">파일을 찾을 수 없거나(파일이 존재하지 않거나), 읽는 동안 오류가 발생한 경우입니다.</exception>
-        public virtual async UniTask<string> GetFileChecksum()
+        public static async UniTask<string> GetFileChecksum(this IIOEntry entry)
         {
-            await using Stream stream = await OpenRead();
+            // ReSharper disable once SuspiciousTypeConversion.Global
+            if (entry is IPrecalculatedIOChecksum precalculated)
+                return await precalculated.GetPrecalculatedChecksum();
+
+            await using Stream stream = await entry.OpenRead();
 
             SynchronizationContext? callerContext = SynchronizationContext.Current;
             await UniTask.SwitchToThreadPool();
@@ -353,61 +152,79 @@ namespace RuniOS.IO
             }
         }
 
-
-
-        /// <summary>
-        /// 이 핸들러가 다른 지정된 핸들러와 동일한 최종 대상(파일 또는 디렉터리)을 참조하는지 확인합니다.<br/>
-        /// 이 비교는 핸들러의 내부 구현 방식이나 객체 인스턴스의 동일성과는 무관하게,
-        /// 두 핸들러가 가리키는 논리적 경로의 동등성만을 확인합니다.
-        /// </summary>
-        /// <param name="other">비교할 다른 <see cref="IOHandler"/> 인스턴스입니다.</param>
-        /// <returns>두 핸들러가 동일한 대상을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
-        public abstract bool IsSameTarget(IOHandler? other);
-
-
-
-        sealed class EmptyIOHandler : IOHandler
+        sealed class EmptyIOHandler : IIOHandler
         {
-            public EmptyIOHandler() { }
-            EmptyIOHandler(IOHandler? parent, string name) : base(parent, name) { }
+            public EmptyIOHandler() => root = this;
 
-            public override bool isIndependent => true;
+            EmptyIOHandler(IIOHandler? parent, string name)
+            {
+                root = parent?.root ?? this;
+                this.parent = parent;
 
-            public override IOHandler Recreate() => new EmptyIOHandler();
+                this.name = name;
+                fullPath = parent?.fullPath + name;
+            }
 
-            public override IOHandler CreateChild(FilePath path) => new EmptyIOHandler(this, path);
-            public override IOHandler AddExtension(FileExtension extension) => new EmptyIOHandler(parent, name + extension);
+            public IIOHandler root { get; }
+            IIOEntry IIOEntry.root => root;
 
-            public override UniTask<bool> DirectoryExists() => UniTask.FromResult(false);
+            public IIOHandler? parent { get; }
+            IIOEntry? IIOEntry.parent => parent;
 
-            public override UniTask<bool> FileExists() => UniTask.FromResult(false);
+            public bool isIndependent => true;
 
-            public override IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Empty<string>();
+            public string name { get; } = string.Empty;
 
-            public override IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Empty<FilePath>();
+            public FilePath fullPath { get; } = new FilePath();
 
-            public override IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Empty<string>();
-            public override IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<string>();
-            public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<FileMetaData>();
-            public override IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FileMetaData>();
+            public IIOHandler Recreate() => empty;
+            IIOEntry IIOEntry.Recreate() => Recreate();
 
-            public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Empty<FilePath>();
-            public override IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FilePath>();
-            public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
-            public override IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
+            public IIOHandler CreateChild(FilePath path) => new EmptyIOHandler(this, path);
+            IIOEntry IIOEntry.CreateChild(FilePath path) => CreateChild(path);
 
-            public override UniTask<byte[]> ReadAllBytes() => UniTask.FromResult(Array.Empty<byte>());
+            public IIOHandler AddExtension(FileExtension extension) => new EmptyIOHandler(parent, name + extension);
+            IIOEntry IIOEntry.AddExtension(FileExtension extension) => AddExtension(extension);
 
-            public override UniTask<string> ReadAllText() => UniTask.FromResult(string.Empty);
+            public UniTask<bool> DirectoryExists() => UniTask.FromResult(false);
 
-            public override IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Empty<string>();
+            public UniTask<bool> FileExists() => UniTask.FromResult(false);
 
-            public override UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
+            public IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Empty<string>();
 
-            public override UniTask<FileMetaData> GetFileMetaData() => UniTask.FromResult(new FileMetaData());
-            public override UniTask<string> GetFileChecksum() => UniTask.FromResult(string.Empty);
+            public IUniTaskAsyncEnumerable<FilePath> GetAllDirectories() => UniTaskAsyncEnumerable.Empty<FilePath>();
 
-            public override bool IsSameTarget(IOHandler? other) => other is EmptyIOHandler;
+            public IUniTaskAsyncEnumerable<string> GetFiles() => UniTaskAsyncEnumerable.Empty<string>();
+            public IUniTaskAsyncEnumerable<string> GetFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<string>();
+            public IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<FileMetaData>();
+            public IUniTaskAsyncEnumerable<FileMetaData> GetFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FileMetaData>();
+
+            public IUniTaskAsyncEnumerable<FilePath> GetAllFiles() => UniTaskAsyncEnumerable.Empty<FilePath>();
+            public IUniTaskAsyncEnumerable<FilePath> GetAllFiles(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<FilePath>();
+            public IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData() => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
+            public IUniTaskAsyncEnumerable<(FilePath relativePath, FileMetaData metaData)> GetAllFilesWithMetaData(WildcardPatterns wildcardPatterns) => UniTaskAsyncEnumerable.Empty<(FilePath relativePath, FileMetaData metaData)>();
+
+            public UniTask<byte[]> ReadAllBytes() => UniTask.FromResult(Array.Empty<byte>());
+
+            public UniTask<string> ReadAllText() => UniTask.FromResult(string.Empty);
+
+            public IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Empty<string>();
+
+            public UniTask<Stream> OpenRead() => UniTask.FromResult(Stream.Null);
+
+            public UniTask WriteAllBytes(byte[] bytes) => UniTask.CompletedTask;
+
+            public UniTask WriteAllText(string text) => UniTask.CompletedTask;
+
+            public UniTask WriteLines(IEnumerable<string> lines) => UniTask.CompletedTask;
+
+            public UniTask<Stream> OpenWrite() => UniTask.FromResult(Stream.Null);
+
+            public UniTask<FileMetaData> GetFileMetaData() => UniTask.FromResult(new FileMetaData());
+            public UniTask<string> GetFileChecksum() => UniTask.FromResult(string.Empty);
+
+            // NaN != NaN과 비슷한 이유로 false를 반환하는게 더 맞을 듯 합니다.
+            public bool IsSameTarget(IIOEntry? other) => false;
         }
     }
 }

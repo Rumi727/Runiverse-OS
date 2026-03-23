@@ -6,13 +6,13 @@ namespace RuniOS.Resource.Languages
 {
     sealed class LanguageAssetHandle : InstanceAssetHandle<LocalizationData>
     {
-        internal LanguageAssetHandle(LocalizationData assetObject, IOHandler ioHandler, FileMetaData metaData) : base(assetObject)
+        internal LanguageAssetHandle(LocalizationData assetObject, IIOEntry entry, FileMetaData metaData) : base(assetObject)
         {
-            this.ioHandler = ioHandler;
+            this.entry = entry;
             this.metaData = metaData;
         }
 
-        public IOHandler ioHandler { get; }
+        public IIOEntry entry { get; }
         public FileMetaData metaData { get; }
 
         public override bool IsSameTarget(IAssetHandle other)
@@ -20,7 +20,7 @@ namespace RuniOS.Resource.Languages
             if (!base.IsSameTarget(other) || other is not LanguageAssetHandle otherHandle)
                 return false;
             
-            return ioHandler.IsSameTarget(otherHandle.ioHandler) && metaData == otherHandle.metaData;
+            return entry.IsSameTarget(otherHandle.entry) && metaData == otherHandle.metaData;
         }
     }
 }

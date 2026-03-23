@@ -37,7 +37,7 @@ namespace RuniOS.Resource
         /// <see cref="AssetScope{T}"/>가 <see cref="Dispose()"/>를 통해 명시적으로 정리되지 않고 가비지 컬렉터에 의해 정리될 때 경고를 기록합니다.
         /// </summary>
         ~AssetScope() => Debug.RuntimeLogError(
-            $"AssetScope for handle '{handle.ioHandler.fullPath}' was finalized without being properly disposed.\n" +
+            $"AssetScope for handle '{handle.entry.fullPath}' was finalized without being properly disposed.\n" +
             "This is likely a resource leak. Ensure 'Dispose()' or 'using' is used to dispose this IDisposable asset."
         );
     }

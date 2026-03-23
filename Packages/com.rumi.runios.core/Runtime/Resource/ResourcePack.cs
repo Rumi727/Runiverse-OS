@@ -81,14 +81,14 @@ namespace RuniOS.Resource
         /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
         /// </summary>
         /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
-        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="IOHandler"/>입니다.</param>
+        /// <param name="entry">팩 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IOHandler handler)
+        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IIOEntry entry)
         {
             if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
                 return loadedPack;
             
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, handler.Recreate());
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, entry.Recreate());
             await resourcePack.Reload();
 
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
@@ -108,9 +108,9 @@ namespace RuniOS.Resource
         {
             identifier = PackIdentifier.empty;
             
-            rootFolder = IOHandler.empty;
-            assetFolder = IOHandler.empty;
-            infoFile = IOHandler.empty;
+            rootFolder = IOEntry.empty;
+            assetFolder = IOEntry.empty;
+            infoFile = IOEntry.empty;
 
             metaData = new PackMetaData(string.Empty);
         }
@@ -119,8 +119,8 @@ namespace RuniOS.Resource
         /// 지정된 식별자와 I/O 폴더 핸들러를 사용하여 <see cref="ResourcePack"/>의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
-        /// <param name="folder">팩의 루트 폴더에 접근하는 <see cref="IOHandler"/>입니다.</param>
-        ResourcePack(PackIdentifier identifier, IOHandler folder)
+        /// <param name="folder">팩의 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
+        ResourcePack(PackIdentifier identifier, IIOEntry folder)
         {
             this.identifier = identifier;
             
@@ -135,19 +135,19 @@ namespace RuniOS.Resource
         public PackIdentifier identifier { get; }
 
         /// <summary>
-        /// 이 팩의 루트 폴더에 접근하는 <see cref="IOHandler"/>를 가져옵니다.
+        /// 이 팩의 루트 폴더에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
         /// </summary>
-        public IOHandler rootFolder { get; }
+        public IIOEntry rootFolder { get; }
         
         /// <summary>
-        /// 이 팩의 에셋 폴더에 접근하는 <see cref="IOHandler"/>를 가져옵니다.
+        /// 이 팩의 에셋 폴더에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
         /// </summary>
-        public IOHandler assetFolder { get; }
+        public IIOEntry assetFolder { get; }
         
         /// <summary>
-        /// 이 팩의 메타데이터 파일(<c>pack.json</c>)에 접근하는 <see cref="IOHandler"/>를 가져옵니다.
+        /// 이 팩의 메타데이터 파일(<c>pack.json</c>)에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
         /// </summary>
-        public IOHandler infoFile { get; }
+        public IIOEntry infoFile { get; }
 
         /// <summary>
         /// 이 팩의 메타데이터(<c>pack.json</c>에 정의된)를 가져옵니다.
@@ -190,7 +190,7 @@ namespace RuniOS.Resource
                 namespaces = (await assetFolder.GetDirectories().ToArrayAsync()).ToImmutableArray();
         }
         
-        public IEnumerable<IOHandler> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
+        public IEnumerable<IIOEntry> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.
