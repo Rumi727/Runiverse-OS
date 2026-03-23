@@ -123,11 +123,11 @@ namespace RuniOS.Resource
              */
 
             // identifier가 이미 트래킹되고 있다면 중복 등록 방지 (Tracking)
-            if (!trackedHandles.ContainsKey(identifier))
+            if (IsTracked(identifier))
                 return;
 
             // 핸들이 없거나 IOHandler가 다를 경우에만 교체 (Register/Update)
-            if (assetHandles.TryGetValue(identifier, out THandle? value) && !value.IsSameTarget(assetHandle))
+            if (assetHandles.TryGetValue(identifier, out THandle? value) && value.IsSameTarget(assetHandle))
                 assetHandle = value;
             
             trackedHandles[identifier] = assetHandle;
