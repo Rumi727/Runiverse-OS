@@ -16,6 +16,8 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 13babf92d20768f418ece8b4f2af32f8, type: 2}
   dependencies:
   - com.unity.modules.ui
+  - com.unity.modules.uielements
+  - com.unity.modules.androidjni
   - com.unity.ui
   - com.unity.textmeshpro
   - com.unity.nuget.newtonsoft-json

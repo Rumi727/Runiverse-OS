@@ -55,7 +55,7 @@ namespace RuniOS.Resource
         /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 입니다.</returns>
         public static async UniTask<ResourcePack> GetDefaultPack()
         {
-            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOHandler.instance);
+            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOEntry.instance);
             EnablePack(defaultPackIdentifier);
 
             return defaultPack;

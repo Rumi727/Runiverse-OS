@@ -52,12 +52,12 @@ namespace RuniOS.IO
 
         public string name { get; } = string.Empty;
 
-        public FilePath fullPath { get; } = new FilePath();
+        public FilePath fullPath { get; } = FilePath.empty;
 
         /// <summary>
         /// 이 핸들러가 나타내는 실제 파일 또는 디렉토리 경로를 가져옵니다.
         /// </summary>
-        public FilePath targetPath { get; } = string.Empty;
+        public FilePath targetPath { get; } = FilePath.empty;
 
         #region Entry
         /// <summary>
