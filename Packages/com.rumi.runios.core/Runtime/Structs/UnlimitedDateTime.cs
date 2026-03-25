@@ -14,9 +14,9 @@ namespace RuniOS
         /// 지정된 연, 월, 일로 <see cref="UnlimitedDateTime"/> 구조체의 새 인스턴스를 초기화합니다.
         /// 시간 구성 요소(시, 분, 초, 밀리초)는 기본값인 0으로 설정됩니다.
         /// </summary>
-        /// <param name="year">연도입니다.</param>
-        /// <param name="month">월(1-12)입니다.</param>
-        /// <param name="day">일(1-31)입니다.</param>
+        /// <param name="year">연도 입니다.</param>
+        /// <param name="month">월 입니다.</param>
+        /// <param name="day">일 입니다.</param>
         public UnlimitedDateTime(int year, int month, int day) : this()
         {
             this.year = year;
