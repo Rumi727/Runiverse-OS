@@ -6,7 +6,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using UnityEngine.UIElements;
 
-#if UNITY_6000_0_OR_NEWER
+//#if UNITY_6000_0_OR_NEWER
+#if FALSE
 using System.Reflection.Emit;
 
 using Label = System.Reflection.Emit.Label;
@@ -31,7 +32,8 @@ namespace RuniOS.Editor.Patches
                         {
                             public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(targetType, nameof(CreateBindingObjectForProperty));
 
-#if UNITY_6000_0_OR_NEWER
+//#if UNITY_6000_0_OR_NEWER
+#if FALSE
                             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
                             {
                                 CodeMatcher matcher = new CodeMatcher(instructions, generator);
@@ -70,7 +72,11 @@ namespace RuniOS.Editor.Patches
                                 // 원래 IL: IL_0977: brfalse.s IL_09a8
                                 // `IL_09a8`이 `prop.type == "ToggleButtonGroupState"`가 false일 때 점프하는 지점입니다.
                                 // 이 지점이 `case` 블록의 나머지 로직을 건너뛰는 `break` 지점으로 가장 적합합니다.
+#if UNITY_6000_4_OR_NEWER
+                                matcher.MatchStartForward(Code.Brfalse_S);
+#else
                                 matcher.MatchStartForward(Code.Br_S);
+#endif
                                 
                                 if (matcher.IsInvalid)
                                 {
@@ -98,8 +104,20 @@ namespace RuniOS.Editor.Patches
 #else
                             public static bool Prefix(object __instance, VisualElement element, SerializedProperty prop)
                             {
-                                if (prop.propertyType == SerializedPropertyType.Generic)
-                                    return !CustomPreCondition(__instance, element, prop);
+                                switch (element)
+                                {
+                                    case Foldout:
+                                    case Label:
+                                    case BaseListView:
+                                        break;
+                                    default:
+                                    {
+                                        if (prop.propertyType == SerializedPropertyType.Generic)
+                                            return !CustomPreCondition(__instance, element, prop);
+                                        
+                                        break;
+                                    }
+                                }
 
                                 return true;
                             }
