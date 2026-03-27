@@ -8,6 +8,6 @@ namespace RuniOS.AnimatedValues
         
         public AnimFloat(float value, EasingFunction.Ease easing, double duration) : base(value, easing, duration) {}
         
-        public override float value => MathUtility.Lerp(start, target, progress).ClampToFloat();
+        public override float value => MathUtility.Lerp(start, target, progress.ClampToFloat());
     }
 }
