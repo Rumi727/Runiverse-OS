@@ -316,6 +316,18 @@ namespace RuniOS.IO
         /// <exception cref="DirectoryNotFoundException">지정된 경로의 일부가 유효하지 않은 경우 발생합니다.</exception>
         public UniTask<Stream> OpenWrite() => UniTask.FromResult<Stream>(new FileStream(targetPath, FileMode.Create, FileAccess.Write, FileShare.None, 4096, true));
         #endregion
+        
+        public UniTask DirectoryDelete()
+        {
+            Directory.Delete(targetPath, true);
+            return UniTask.CompletedTask;
+        }
+        
+        public UniTask FileDelete()
+        {
+            File.Delete(targetPath);
+            return UniTask.CompletedTask;
+        }
 
         public UniTask<FileMetaData> GetFileMetaData()
         {

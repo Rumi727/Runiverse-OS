@@ -47,5 +47,8 @@ namespace RuniOS.IO
         /// </summary>
         /// <returns>파일에 쓰기 위해 열린 <see cref="Stream"/>입니다.</returns>
         UniTask<Stream> OpenWrite();
+
+        UniTask DirectoryDelete();
+        UniTask FileDelete();
     }
 }

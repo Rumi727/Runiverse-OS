@@ -195,6 +195,18 @@ namespace RuniOS.IO
         }
         #endregion
 
+        public UniTask DirectoryDelete()
+        {
+            rootDirectory.DeleteDirectory(fullPath);
+            return UniTask.CompletedTask;
+        }
+        
+        public UniTask FileDelete()
+        {
+            rootDirectory.DeleteFile(fullPath);
+            return UniTask.CompletedTask;
+        }
+
         public UniTask<FileMetaData> GetFileMetaData()
         {
             var file = rootDirectory.GetFile(fullPath);
