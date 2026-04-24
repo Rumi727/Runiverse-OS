@@ -19,6 +19,7 @@ namespace RuniOS.Editor.Windows
 
 
 
+        // ReSharper disable once Unity.IncorrectMethodSignature
         [MenuItem("RuniOS/Control Panel")]
         public static ControlPanel GetWindow() => GetWindow<ControlPanel>();
 

@@ -220,6 +220,9 @@ namespace RuniOS.IO
 
             public UniTask<Stream> OpenWrite() => UniTask.FromResult(Stream.Null);
 
+            public UniTask DirectoryDelete() => UniTask.CompletedTask;
+            public UniTask FileDelete() => UniTask.CompletedTask;
+
             public UniTask<FileMetaData> GetFileMetaData() => UniTask.FromResult(new FileMetaData());
             public UniTask<string> GetFileChecksum() => UniTask.FromResult(string.Empty);
 

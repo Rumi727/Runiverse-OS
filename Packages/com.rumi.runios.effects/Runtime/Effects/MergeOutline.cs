@@ -22,7 +22,7 @@ namespace RuniOS.Effects
         [FormerlySerializedAs("profileId"),Tooltip("MergeOutlineEffect의 Profiles 리스트 인덱스 번호입니다.")]
         [SerializeField] int _profileId = 0;
         
-        public new Renderer? renderer { get; private set; }
+        public Renderer? renderer { get; private set; }
         
         void OnEnable()
         {

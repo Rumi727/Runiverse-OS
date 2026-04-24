@@ -19,9 +19,19 @@ namespace RuniOS.Editor.Patches
                 public static class PropertyFieldPatch
                 {
                     [HarmonyPatch]
+#if UNITY_6000_6_OR_NEWER
+                    public static class ResetInternal
+#else
                     public static class Reset
+#endif
                     {
-                        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(typeof(PropertyField), nameof(Reset), new Type[] { typeof(SerializedProperty) });
+                        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(typeof(PropertyField),
+#if UNITY_6000_6_OR_NEWER
+                            nameof(ResetInternal),
+#else
+                            nameof(Reset),
+#endif
+                            new Type[] { typeof(SerializedProperty) });
 
                         public static void Prefix(PropertyField __instance) => UIToolkitUtility.propertyExtensionDatas.Remove(__instance);
 
@@ -34,7 +44,13 @@ namespace RuniOS.Editor.Patches
                             
                             if (matcher.IsInvalid)
                             {
-                                Debug.LogWarning($"Harmony Transpiler: Could not find insertion point for {nameof(PropertyDrawer.CreatePropertyGUI)} check in {nameof(Reset)}.");
+                                Debug.LogWarning($"Harmony Transpiler: Could not find insertion point for {nameof(PropertyDrawer.CreatePropertyGUI)} check in " +
+#if UNITY_6000_6_OR_NEWER
+                                    $"{nameof(ResetInternal)}."
+#else
+                                    $"{nameof(Reset)}."
+#endif
+                                    );
                                 return instructions;
                             }
 

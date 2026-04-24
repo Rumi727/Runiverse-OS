@@ -17,6 +17,7 @@ namespace RuniOS.Booting
 #else
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
 #endif
+        // ReSharper disable once Unity.IncorrectMethodSignature
         static async UniTaskVoid Boot()
         {
             Debug.RuntimeLog("UniTask Initialize", nameof(BootLoader));

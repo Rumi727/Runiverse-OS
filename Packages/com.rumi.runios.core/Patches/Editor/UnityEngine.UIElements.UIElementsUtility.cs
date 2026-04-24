@@ -15,8 +15,13 @@ namespace RuniOS.Editor.Patches
             {
                 public static class UIElementsUtilityPatch
                 {
-                    public static Type targetType { get; } = AccessTools.TypeByName("UnityEngine.UIElements.UIElementsUtility");
-            
+                    public static Type targetType { get; } =
+#if UNITY_6000_6_OR_NEWER
+                        typeof(IMGUIContainer);
+#else
+                        AccessTools.TypeByName("UnityEngine.UIElements.UIElementsUtility");
+#endif
+
                     [HarmonyPatch]
                     public static class BeginContainerGUI
                     {
