@@ -15,13 +15,18 @@ namespace RuniOS.Linq.Async
         /// <param name="enumerable">순회할 소스 컬렉션입니다.</param>
         /// <param name="batchSize">한 번에 전달할 아이템의 개수입니다. (기본값: 64)</param>
         /// <param name="queueLimit">메모리에 미리 로드해둘 배치 덩어리의 개수입니다. (기본값: 2)</param>
+        /// <param name="cancellationToken">비동기 열거 및 백그라운드 스레드 풀 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         public static IUniTaskAsyncEnumerable<TSource> EnumerateOnThreadPool<TSource>
         (
             this IEnumerable<TSource> enumerable,
             int batchSize = 64,
-            int queueLimit = 2
-        ) => UniTaskAsyncEnumerable.Create<TSource>(async (writer, cancellationToken) =>
+            int queueLimit = 2,
+            CancellationToken cancellationToken = default
+        ) => UniTaskAsyncEnumerable.Create<TSource>(async (writer, iterationToken) =>
         {
+            using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, iterationToken);
+            var ct = linkedCTS.Token;
+
             // 호출 시점의 컨텍스트(주로 Main Thread) 캡처
             SynchronizationContext? callerContext = SynchronizationContext.Current;
             
@@ -40,7 +45,7 @@ namespace RuniOS.Linq.Async
                     List<TSource> buffer = new(batchSize);
                     foreach (var item in enumerable)
                     {
-                        if (cancellationToken.IsCancellationRequested)
+                        if (ct.IsCancellationRequested)
                             return;
 
                         buffer.Add(item);
@@ -51,7 +56,7 @@ namespace RuniOS.Linq.Async
                             // [3] 채널에 넣기 전에 세마포어 대기 (티켓 확인)
                             // 꽉 찼다면(티켓 0장), 소비자가 Release 할 때까지 여기서 멈춤 -> I/O 중단
                             // ReSharper disable once AccessToDisposedClosure
-                            await semaphore.WaitAsync(cancellationToken);
+                            await semaphore.WaitAsync(ct);
 
                             // Unbounded지만 세마포어 때문에 사실상 Bounded처럼 동작함
                             channel.Writer.TryWrite(buffer);
@@ -67,7 +72,7 @@ namespace RuniOS.Linq.Async
                     if (buffer.Count > 0)
                     {
                         // ReSharper disable once AccessToDisposedClosure
-                        await semaphore.WaitAsync(cancellationToken);
+                        await semaphore.WaitAsync(ct);
                         channel.Writer.TryWrite(buffer);
                     }
                 }
@@ -79,13 +84,13 @@ namespace RuniOS.Linq.Async
                 {
                     channel.Writer.TryComplete();
                 }
-            }, cancellationToken: cancellationToken);
+            }, cancellationToken: ct);
 
             // [Consumer] 호출한 컨텍스트(Main Thread)로 복귀하여 실행
             try
             {
                 // 채널에서 '묶음(batch)' 단위로 데이터를 가져옴 (여기서 컨텍스트 스위칭 발생)
-                await foreach (var batch in channel.Reader.ReadAllAsync(cancellationToken))
+                await foreach (var batch in channel.Reader.ReadAllAsync(ct))
                 {
                     // 데이터를 받으면 원래 컨텍스트로 스위칭
                     if (callerContext != null && SynchronizationContext.Current != callerContext)
