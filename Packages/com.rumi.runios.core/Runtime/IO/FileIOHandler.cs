@@ -102,8 +102,7 @@ namespace RuniOS.IO
         public IUniTaskAsyncEnumerable<string> GetDirectories() => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
         {
             var stream = Directory.EnumerateDirectories(targetPath)
-                .EnumerateOnThreadPool()
-                .WithCancellation(cancellationToken);
+                .EnumerateOnThreadPool(cancellationToken: cancellationToken);
 
             await foreach (var item in stream)
             {
@@ -262,15 +261,7 @@ namespace RuniOS.IO
         /// <exception cref="UnauthorizedAccessException">호출자에게 필요한 권한이 없는 경우 발생합니다.</exception>
         /// <exception cref="PathTooLongException">경로가 시스템 정의 최대 길이를 초과하는 경우 발생합니다.</exception>
         /// <exception cref="NotSupportedException">경로에 콜론(:)이 포함된 경우 발생합니다.</exception>
-        public IUniTaskAsyncEnumerable<string> ReadLines() => UniTaskAsyncEnumerable.Create<string>(async (writer, cancellationToken) =>
-        {
-            var stream = File.ReadLines(targetPath)
-                .EnumerateOnThreadPool()
-                .WithCancellation(cancellationToken);
-
-            await foreach (var line in stream)
-                await writer.YieldAsync(line);
-        });
+        public IUniTaskAsyncEnumerable<string> ReadLines() => File.ReadLines(targetPath).EnumerateOnThreadPool();
 
         /// <inheritdoc cref="IIOEntry.OpenRead()"/>
         /// <exception cref="ArgumentException">경로가 비어 있거나 공백만 포함하거나 유효하지 않은 문자를 포함하는 경우 발생합니다.</exception>
