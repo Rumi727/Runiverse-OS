@@ -1,6 +1,7 @@
 #nullable enable
 using Newtonsoft.Json;
 using RuniOS.Json.Converters.IO;
+using RuniOS.Spans;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -479,6 +480,7 @@ namespace RuniOS.IO
         /// 1. Windows 스타일의 역슬래시(<see cref="windowsDirectorySeparatorChar"/>)를 표준 슬래시(<see cref="directorySeparatorChar"/>)로 변경합니다.<br/>
         /// 2. 경로의 시작과 끝에 있는 불필요한 디렉터리 구분자(<see cref="directorySeparatorChars"/>)를 제거합니다.<br/>
         /// 3. 연속된 디렉터리 구분자(예: "a//b")를 단일 구분자로 축소합니다.
+        /// 4. 디렉터리 탐색 공격(Directory Traversal)을 방지하기 위해 경로 이동 문자("." 및 "..")를 안전한 문자("_" 및 "__")로 치환합니다.
         /// </summary>
         /// <param name="path">정규화할 경로 문자열입니다.</param>
         /// <returns>정규화된 경로 문자열입니다. 입력이 비어있으면 <see cref="string.Empty"/>를 반환합니다.</returns>
@@ -488,28 +490,40 @@ namespace RuniOS.IO
                 return string.Empty;
 
             StringBuilder stringBuilder = StringBuilderCache.Acquire();
-            ReadOnlySpan<char> trimPath = path.Trim(directorySeparatorChars);
-            bool lastCharWasSeparator = false; // 연속된 구분자 처리용 플래그
-            foreach (char item in trimPath)
+            var splitPath = path.Trim(directorySeparatorChars)
+                .SplitAny(directorySeparatorChars);
+
+            bool first = true;
+            foreach (var item in splitPath)
             {
-                char result = item;
-                if (item == windowsDirectorySeparatorChar)
-                    result = directorySeparatorChar;
+                if (item.IsEmpty)
+                    continue;
+                
+                if (!first)
+                    stringBuilder.Append(directorySeparatorChar);
 
-                // 연속된 구분자 제거 (예: "a//b" -> "a/b")
-                if (result == directorySeparatorChar)
+                switch (item)
                 {
-                    if (lastCharWasSeparator)
-                        continue; // 이전 문자가 이미 구분자였으면 현재 구분자 건너뛰기
-
-                    lastCharWasSeparator = true;
+                    case ".":
+                    {
+                        stringBuilder.Append('_');
+                        break;
+                    }
+                    case "..":
+                    {
+                        stringBuilder.Append("__");
+                        break;
+                    }
+                    default:
+                    {
+                        stringBuilder.Append(item);
+                        break;
+                    }
                 }
-                else
-                    lastCharWasSeparator = false;
 
-                stringBuilder.Append(result);
+                first = false;
             }
-
+            
             return StringBuilderCache.Release(stringBuilder);
         }
 
