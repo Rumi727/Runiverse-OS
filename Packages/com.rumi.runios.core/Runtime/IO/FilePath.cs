@@ -118,24 +118,40 @@ namespace RuniOS.IO
         /// <returns>잘못된 문자가 제거된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
         public readonly FilePath CleanPath()
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            if (string.IsNullOrEmpty(value))
+                return empty;
 
-            int lastPathIndex = value.LastIndexOf(directorySeparatorChar);
+            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
             if (lastPathIndex < 0)
-                lastPathIndex = stringBuilder.Length;
+                lastPathIndex = value.Length;
 
+            ReadOnlySpan<char> pathPart = value.AsSpan(0, lastPathIndex);
+            if (pathPart.IndexOfAny(invalidPathChars) < 0)
+                return value;
+
+            int validCount = 0;
             for (int i = 0; i < lastPathIndex; i++)
             {
-                if (invalidPathChars.Contains(stringBuilder[i]))
-                {
-                    stringBuilder.Remove(i, 1);
-
-                    lastPathIndex--;
-                    i--;
-                }
+                if (Array.IndexOf(invalidPathChars, value[i]) < 0)
+                    validCount++;
             }
 
-            return StringBuilderCache.Release(stringBuilder);
+            int newLength = validCount + (value.Length - lastPathIndex);
+            if (newLength == 0)
+                return empty;
+
+            return string.Create(newLength, (value, lastPathIndex), static (span, state) =>
+            {
+                int dst = 0;
+                for (int i = 0; i < state.lastPathIndex; i++)
+                {
+                    if (Array.IndexOf(invalidPathChars, state.value[i]) < 0)
+                        span[dst++] = state.value[i];
+                }
+
+                if (state.lastPathIndex < state.value.Length)
+                    state.value.AsSpan(state.lastPathIndex).CopyTo(span.Slice(dst));
+            });
         }
 
         /// <summary>
@@ -146,19 +162,25 @@ namespace RuniOS.IO
         /// <returns>잘못된 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
         public readonly FilePath FixPathChars(char newChar = alternativeNameChar)
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            if (string.IsNullOrEmpty(value))
+                return empty;
 
-            int lastPathIndex = value.LastIndexOf(directorySeparatorChar);
-            if (lastPathIndex < 0)
-                lastPathIndex = stringBuilder.Length;
+            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
+            if (lastPathIndex < 0) lastPathIndex = value.Length;
 
-            for (int i = 0; i < lastPathIndex; i++)
+            ReadOnlySpan<char> pathPart = value.AsSpan(0, lastPathIndex);
+            if (pathPart.IndexOfAny(invalidPathChars) < 0)
+                return value;
+
+            return string.Create(value.Length, (value, newChar, lastPathIndex), static (span, state) =>
             {
-                if (invalidPathChars.Contains(stringBuilder[i]))
-                    stringBuilder[i] = newChar;
-            }
-
-            return StringBuilderCache.Release(stringBuilder);
+                state.value.AsSpan().CopyTo(span);
+                for (int i = 0; i < state.lastPathIndex; i++)
+                {
+                    if (Array.IndexOf(invalidPathChars, span[i]) >= 0)
+                        span[i] = state.newChar;
+                }
+            });
         }
 
 
@@ -170,19 +192,37 @@ namespace RuniOS.IO
         /// <returns>잘못된 파일 이름 문자가 제거된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
         public readonly FilePath CleanFileName()
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
 
-            int lastPathIndex = value.LastIndexOf(directorySeparatorChar);
-            for (int i = lastPathIndex + 1; i < stringBuilder.Length; i++)
+            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
+            ReadOnlySpan<char> filePart = value.AsSpan(lastPathIndex + 1);
+            if (filePart.IndexOfAny(invalidFileNameChars) < 0)
+                return value;
+
+            int validCount = 0;
+            for (int i = lastPathIndex + 1; i < value.Length; i++)
             {
-                if (invalidFileNameChars.Contains(stringBuilder[i]))
-                {
-                    stringBuilder.Remove(i, 1);
-                    i--;
-                }
+                if (Array.IndexOf(invalidFileNameChars, value[i]) < 0)
+                    validCount++;
             }
 
-            return StringBuilderCache.Release(stringBuilder);
+            int newLength = (lastPathIndex + 1) + validCount;
+            if (newLength == 0)
+                return string.Empty;
+
+            return string.Create(newLength, (value, lastPathIndex), static (span, state) =>
+            {
+                if (state.lastPathIndex >= 0)
+                    state.value.AsSpan(0, state.lastPathIndex + 1).CopyTo(span);
+                
+                int dst = state.lastPathIndex + 1;
+                for (int i = state.lastPathIndex + 1; i < state.value.Length; i++)
+                {
+                    if (Array.IndexOf(invalidFileNameChars, state.value[i]) < 0)
+                        span[dst++] = state.value[i];
+                }
+            });
         }
 
         /// <summary>
@@ -193,16 +233,23 @@ namespace RuniOS.IO
         /// <returns>잘못된 파일 이름 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
         public readonly FilePath FixFileNameChars(char newChar = alternativeNameChar)
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            if (string.IsNullOrEmpty(value))
+                return string.Empty;
 
-            int lastPathIndex = value.LastIndexOf(directorySeparatorChar);
-            for (int i = lastPathIndex + 1; i < stringBuilder.Length; i++)
+            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
+            ReadOnlySpan<char> filePart = value.AsSpan(lastPathIndex + 1);
+            if (filePart.IndexOfAny(invalidFileNameChars) < 0)
+                return value;
+
+            return string.Create(value.Length, (value, newChar, lastPathIndex), static (span, state) =>
             {
-                if (invalidFileNameChars.Contains(stringBuilder[i]))
-                    stringBuilder[i] = newChar;
-            }
-
-            return StringBuilderCache.Release(stringBuilder);
+                state.value.AsSpan().CopyTo(span);
+                for (int i = state.lastPathIndex + 1; i < span.Length; i++)
+                {
+                    if (Array.IndexOf(invalidFileNameChars, span[i]) >= 0)
+                        span[i] = state.newChar;
+                }
+            });
         }
 
 
@@ -484,43 +531,71 @@ namespace RuniOS.IO
         /// </summary>
         /// <param name="path">정규화할 경로 문자열입니다.</param>
         /// <returns>정규화된 경로 문자열입니다. 입력이 비어있으면 <see cref="string.Empty"/>를 반환합니다.</returns>
+        
+        /// <summary>
+        /// 입력된 경로 문자열을 표준 형식으로 정규화합니다.<br/>
+        /// 이미 완벽히 정규화된 상태라면, 새로운 문자열을 생성하지 않고 원본 객체 참조를 그대로 반환합니다(완전한 제로 할당).
+        /// </summary>
+        /// <exception cref="ArgumentException">경로 이동 문자(., ..)나 잘못된 문자가 포함된 경우 발생합니다.</exception>
+        public static string NormalizePath(string? path)
+        {
+            if (string.IsNullOrEmpty(path))
+                return string.Empty;
+
+            // 1. 길이를 미리 계산하고 보안 검사를 수행합니다.
+            int requiredLength = CalculateLengthAndValidate(path.AsSpan());
+            if (requiredLength == 0)
+                return string.Empty;
+
+            // 2. [완전 제로 할당] 길이가 원본과 같고 역슬래시(\)가 없다면 이미 완벽히 정규화된 상태입니다.
+            // string.Create나 ToString()을 호출할 필요 없이 원본 string을 그대로 반환합니다.
+            if (requiredLength == path.Length && path.IndexOf(windowsDirectorySeparatorChar) < 0)
+                return path;
+
+            // 3. [최적화 할당] 정규화가 필요한 경우, static 람다를 사용해 클로저 GC 할당 없이 최종 메모리에 직접 씁니다.
+            return string.Create(requiredLength, path, static (span, state) =>
+            {
+                int dst = 0;
+                // state(원본 string)를 다시 잘라서 span(최종 string 메모리)에 덮어씁니다.
+                foreach (var item in state.AsSpan().Trim(directorySeparatorChars).SplitAny(directorySeparatorChars))
+                {
+                    if (item.IsEmpty)
+                        continue;
+
+                    if (dst > 0)
+                        span[dst++] = directorySeparatorChar;
+
+                    item.CopyTo(span.Slice(dst));
+                    dst += item.Length;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 입력된 Span 경로를 표준 형식으로 정규화합니다.<br/>
+        /// Span 타입은 string.Create의 상태(state)로 넘길 수 없으므로, 이 오버로드는 StringBuilderCache를 사용합니다.
+        /// </summary>
         public static string NormalizePath(ReadOnlySpan<char> path)
         {
             if (path.IsEmpty)
                 return string.Empty;
 
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
-            var splitPath = path.Trim(directorySeparatorChars)
-                .SplitAny(directorySeparatorChars);
+            int requiredLength = CalculateLengthAndValidate(path);
+            if (requiredLength == 0)
+                return string.Empty;
 
+            StringBuilder stringBuilder = StringBuilderCache.Acquire(requiredLength);
+            
             bool first = true;
-            foreach (var item in splitPath)
+            foreach (var item in path.Trim(directorySeparatorChars).SplitAny(directorySeparatorChars))
             {
                 if (item.IsEmpty)
                     continue;
-                
+
                 if (!first)
                     stringBuilder.Append(directorySeparatorChar);
 
-                switch (item)
-                {
-                    case ".":
-                    {
-                        stringBuilder.Append('_');
-                        break;
-                    }
-                    case "..":
-                    {
-                        stringBuilder.Append("__");
-                        break;
-                    }
-                    default:
-                    {
-                        stringBuilder.Append(item);
-                        break;
-                    }
-                }
-
+                stringBuilder.Append(item);
                 first = false;
             }
             
@@ -547,6 +622,106 @@ namespace RuniOS.IO
                 string escaped = Regex.Escape(pattern).Replace(@"\*", ".*"); // '*'를 '.*'로 변환
                 return $"^{escaped}$";
             }
+        }
+        
+        /// <summary>
+        /// 파일 이름이 Windows 예약어(CON, PRN, AUX, NUL, COM1~9, LPT1~9)인지 확인합니다.
+        /// 예약어인 경우 시스템 다운이나 스레드 블로킹을 유발할 수 있습니다.
+        /// </summary>
+        public static bool IsWindowsReservedName(ReadOnlySpan<char> fileName)
+        {
+            // 1. 확장자가 있다면 확장자 이전까지만 추출 (예: "CON.txt" -> "CON")
+            int extIndex = fileName.IndexOf('.');
+            ReadOnlySpan<char> nameOnly = extIndex >= 0 ? fileName.Slice(0, extIndex) : fileName;
+
+            // 예약어는 길이가 무조건 3이거나 4입니다. 아니면 바로 패스 (성능 최적화)
+            if (nameOnly.Length != 3 && nameOnly.Length != 4)
+                return false;
+
+            // 2. 대소문자 무시를 위해 스택 메모리에 복사 (Zero-Allocation)
+            Span<char> upperName = stackalloc char[nameOnly.Length];
+            for (int i = 0; i < nameOnly.Length; i++)
+                upperName[i] = char.ToUpperInvariant(nameOnly[i]);
+
+            // 3. 패턴 매칭으로 검사
+            if (upperName.Length == 3)
+            {
+                return upperName switch
+                {
+                    "CON" or "PRN" or "AUX" or "NUL" => true,
+                    _ => false
+                };
+            }
+            else // Length == 4
+            {
+                if (upperName.StartsWith("COM") || upperName.StartsWith("LPT"))
+                {
+                    char lastChar = upperName[3];
+                    return lastChar is >= '1' and <= '9'; // COM1~9, LPT1~9
+                }
+            }
+
+            return false;
+        }
+        
+        /// <summary>
+        /// 경로의 세그먼트들을 순회하며 최종 정규화 시 필요한 문자열 길이를 계산하고, 보안 취약점을 검사합니다.
+        /// </summary>
+        static int CalculateLengthAndValidate(ReadOnlySpan<char> path)
+        {
+            ReadOnlySpan<char> trimmedPath = path.Trim(directorySeparatorChars);
+            if (trimmedPath.IsEmpty)
+                return 0;
+
+            // 1. 디렉터리 부분과 파일 부분을 분리하여 각각 맞는 잘못된 문자 검사를 수행합니다.
+            int lastSepIndex = trimmedPath.LastIndexOfAny(directorySeparatorChars);
+            if (lastSepIndex >= 0)
+            {
+                ReadOnlySpan<char> dirPart = trimmedPath.Slice(0, lastSepIndex);
+                if (dirPart.IndexOfAny(invalidPathChars) >= 0)
+                    throw new ArgumentException("The directory path contains invalid characters.");
+            }
+
+            ReadOnlySpan<char> filePart = lastSepIndex >= 0 ? trimmedPath.Slice(lastSepIndex + 1) : trimmedPath;
+            
+            // 예외 처리: Windows 볼륨 드라이브("C:")만 단독으로 들어온 경우 파일 이름이 아닌 디렉터리로 간주
+            bool isDriveLetter = filePart.Length == 2 && filePart[1] == ':' && char.IsLetter(filePart[0]);
+            if (!isDriveLetter && filePart.IndexOfAny(invalidFileNameChars) >= 0)
+                throw new ArgumentException($"The file name '{filePart.ToString()}' contains invalid characters.");
+
+            // 2. 세그먼트 순회: 길이 계산 및 디렉터리 탐색, 예약어 검사
+            int requiredLength = 0;
+            int segmentCount = 0;
+
+            foreach (var item in trimmedPath.SplitAny(directorySeparatorChars))
+            {
+                if (item.IsEmpty)
+                    continue;
+
+                switch (item)
+                {
+                    // 보안 검사: 디렉터리 탐색 공격(., ..) 차단
+                    case ".":
+                        throw new ArgumentException("Directory traversal ('.') is not allowed for security reasons.");
+                    case "..":
+                        throw new ArgumentException("Directory traversal ('..') is not allowed for security reasons.");
+                }
+
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN || UNITY_WSA
+                // 보안 검사: Windows 예약어 차단
+                if (IsWindowsReservedName(item))
+                    throw new ArgumentException($"The path contains an OS reserved name: '{item.ToString()}'");
+#endif
+
+                requiredLength += item.Length;
+                segmentCount++;
+            }
+
+            if (segmentCount == 0)
+                return 0;
+
+            // (세그먼트들의 길이 총합) + (세그먼트 사이사이에 들어갈 '/' 구분자의 개수)
+            return requiredLength + (segmentCount - 1);
         }
 
 
