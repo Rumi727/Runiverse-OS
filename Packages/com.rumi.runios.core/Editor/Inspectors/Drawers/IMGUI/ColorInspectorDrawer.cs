@@ -7,10 +7,8 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     [CustomInspectorDrawer(typeof(Color))]
-    public class ColorInspectorDrawer : GenericInspectorDrawer
+    public class ColorInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public ColorInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.ColorField(position, label, (Color)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.ColorField(position, label, (Color)value!);
     }
 }

@@ -3,10 +3,8 @@ using UnityEditor.IMGUI.Controls;
 
 namespace RuniOS.Editor.IMGUI
 {
-    public class TextDropdownItem : AdvancedDropdownItem
+    public class TextDropdownItem(string value, string name) : AdvancedDropdownItem(name)
     {
-        public string value { get; }
-
-        public TextDropdownItem(string value, string name) : base(name) => this.value = value;
+        public string value { get; } = value;
     }
 }

@@ -100,7 +100,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             }
         }
 
-        public override void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, Rect? clipping)
+        public override void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, DrawerContext context = default)
         {
             if (duplicatedIndexes.Contains(index))
             {
@@ -120,7 +120,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 rect.xMin += 10;
             
             if (EditorGUIUtility.hierarchyMode) BeginLabelWidth(EditorGUIUtility.labelWidth - 16f);
-            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, true, clipping);
+            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, new DrawerContext(true, context.clipping));
             if (EditorGUIUtility.hierarchyMode) EndLabelWidth();
         }
     }

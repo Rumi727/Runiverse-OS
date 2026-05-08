@@ -7,7 +7,7 @@ using System.Reflection;
 
 namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 {
-    public abstract class IMGUIInspectorAttributeDrawer : InspectorAttributeDrawer
+    public abstract class IMGUIInspectorAttributeDrawer(IInspectorAttribute attribute) : InspectorAttributeDrawer(attribute)
     {
         static readonly object?[] args = new object?[1];
         public static IMGUIInspectorAttributeDrawer? FindDrawer(IInspectorAttribute? attribute, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
@@ -23,13 +23,11 @@ namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
             return (IMGUIInspectorAttributeDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null);
         }
 
-        protected IMGUIInspectorAttributeDrawer(IInspectorAttribute attribute) : base(attribute) { }
+        public void Draw(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
+            => OnGUI(drawer, position, label, flags, context);
 
-        public void Draw(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
-            => OnGUI(drawer, position, label, flags, isInArray, clipping);
+        protected abstract void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default);
 
-        protected abstract void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping);
-
-        public virtual float GetHeight(IMGUIInspectorDrawer drawer, GUIContent? label, InspectorFlags flags, bool isInArray = false) => drawer.GetHeight(label, flags, isInArray);
+        public virtual float GetHeight(IMGUIInspectorDrawer drawer, GUIContent? label, InspectorFlags flags, DrawerContext context = default) => drawer.GetHeight(label, flags, context);
     }
 }

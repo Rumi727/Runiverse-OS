@@ -7,12 +7,10 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     [CustomInspectorDrawer(typeof(BoundsInt))]
-    public class BoundsIntInspectorDrawer : GenericInspectorDrawer
+    public class BoundsIntInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public BoundsIntInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
+        protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.BoundsIntField(position, label, (BoundsInt)value!);
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.BoundsIntField(position, label, (BoundsInt)value!);
-
-        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => GetMultiRowsFieldHeight(label, 2);
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => GetMultiRowsFieldHeight(label, 2);
     }
 }

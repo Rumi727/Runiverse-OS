@@ -6,14 +6,12 @@ using RuniOS.Inspectors.Drawers;
 namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 {
     [CustomInspectorDrawer(typeof(ReadOnlyFieldAttribute))]
-    public class ReadOnlyInspectorAttributeDrawer : IMGUIInspectorAttributeDrawer
+    public class ReadOnlyInspectorAttributeDrawer(IInspectorAttribute attribute) : IMGUIInspectorAttributeDrawer(attribute)
     {
-        public ReadOnlyInspectorAttributeDrawer(IInspectorAttribute attribute) : base(attribute) { }
-
-        protected override void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             EditorGUI.BeginDisabledGroup(true);
-            drawer.Draw(position, label, flags, isInArray, clipping);
+            drawer.Draw(position, label, flags, context);
             EditorGUI.EndDisabledGroup();
         }
     }

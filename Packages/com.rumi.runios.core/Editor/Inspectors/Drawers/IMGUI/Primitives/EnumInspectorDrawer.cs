@@ -8,11 +8,9 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
     [CustomInspectorDrawer(typeof(Enum), true, allowInDebug = true)]
-    public class EnumInspectorDrawer : GenericInspectorDrawer
+    public class EnumInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public EnumInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
-        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping)
+        protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default)
         {
             Enum enumValue = (Enum)value!;
             if (enumValue.IsFlags())

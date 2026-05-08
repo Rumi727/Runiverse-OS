@@ -8,11 +8,10 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 {
     [CustomInspectorDrawer(typeof(IAssetRef), true)]
-    public class AssetRefInspectorDrawer : GenericInspectorDrawer
+    public class AssetRefInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public AssetRefInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping)
+        protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default)
         {
             if (value.IsNull())
             {
@@ -26,7 +25,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
             return value;
         }
 
-        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
 

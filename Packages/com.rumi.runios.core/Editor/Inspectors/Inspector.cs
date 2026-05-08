@@ -133,20 +133,20 @@ namespace RuniOS.Editor.Inspectors
         }
 
 
-        public void DrawLayout(string? label = null, bool isInArray = false) => DrawLayout(Vector2.zero, label != null ? new GUIContent(label) : null, isInArray);
-        public void DrawLayout(GUIContent? label, bool isInArray = false) => DrawLayout(Vector2.zero, label, isInArray);
-        public void DrawLayout(Vector2 offset, string? label = null, bool isInArray = false) => DrawLayout(offset, label != null ? new GUIContent(label) : null, isInArray);
-        public void DrawLayout(Vector2 offset, GUIContent? label, bool isInArray = false)
+        public void DrawLayout(string? label = null, DrawerContext context = default) => DrawLayout(Vector2.zero, label != null ? new GUIContent(label) : null, context);
+        public void DrawLayout(GUIContent? label, DrawerContext context = default) => DrawLayout(Vector2.zero, label, context);
+        public void DrawLayout(Vector2 offset, string? label = null, DrawerContext context = default) => DrawLayout(offset, label != null ? new GUIContent(label) : null, context);
+        public void DrawLayout(Vector2 offset, GUIContent? label, DrawerContext context = default)
         {
-            Rect rect = EditorGUILayout.GetControlRect(true, GetHeight(label, inspectorFlags, isInArray));
+            Rect rect = EditorGUILayout.GetControlRect(true, GetHeight(label, inspectorFlags, context));
             rect.xMin += offset.x;
             rect.yMin += offset.y;
 
-            Draw(rect, label, isInArray);
+            Draw(rect, label, context);
         }
 
-        public void Draw(Rect position, string? label = null, bool isInArray = false, Rect? clipping = null) => Draw(position, label != null ? new GUIContent(label) : null, isInArray, clipping);
-        public void Draw(Rect position, GUIContent? label, bool isInArray = false, Rect? clipping = null)
+        public void Draw(Rect position, string? label = null, DrawerContext context = default) => Draw(position, label != null ? new GUIContent(label) : null, context);
+        public void Draw(Rect position, GUIContent? label, DrawerContext context = default)
         {
             if (lastException != null)
             {
@@ -154,9 +154,8 @@ namespace RuniOS.Editor.Inspectors
                 return;
             }
 
-            clipping ??= position;
-
-            GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, position.y + position.height));
+            Rect clipping = context.clipping ?? position;
+            GUI.BeginClip(new Rect(0, 0, clipping.x + clipping.width, position.y + position.height));
 
             if (drawers.Length > 1)
                 label = null;
@@ -168,7 +167,7 @@ namespace RuniOS.Editor.Inspectors
                 {
                     try
                     {
-                        elementPosition.height = item.GetHeight(null, inspectorFlags, isInArray, clipping);
+                        elementPosition.height = item.GetHeight(null, inspectorFlags, context);
                     }
                     catch (ExitGUIException)
                     {
@@ -181,11 +180,11 @@ namespace RuniOS.Editor.Inspectors
                     }
                 }
 
-                GUI.BeginClip(new Rect(0, 0, clipping.Value.x + clipping.Value.width, elementPosition.y + elementPosition.height));
+                GUI.BeginClip(new Rect(0, 0, clipping.x + clipping.width, elementPosition.y + elementPosition.height));
 
                 try
                 {
-                    item.Draw(elementPosition, label, inspectorFlags, isInArray, clipping);
+                    item.Draw(elementPosition, label, inspectorFlags, context with { clipping = clipping });
                 }
                 catch (ExitGUIException)
                 {
@@ -211,7 +210,7 @@ namespace RuniOS.Editor.Inspectors
             GUI.EndClip();
         }
 
-        public float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             if (lastException != null)
                 return EditorGUIUtility.singleLineHeight;
@@ -223,7 +222,7 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    return item.GetHeight(label, flags, isInArray, clipping) + 2;
+                    return item.GetHeight(label, flags, context) + 2;
                 }
                 catch (ExitGUIException)
                 {

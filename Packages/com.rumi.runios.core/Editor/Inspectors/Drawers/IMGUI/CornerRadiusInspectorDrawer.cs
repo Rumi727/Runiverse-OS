@@ -8,13 +8,11 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     [CustomInspectorDrawer(typeof(CornerRadius))]
-    public class CornerRadiusInspectorDrawer : GenericInspectorDrawer
+    public class CornerRadiusInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public CornerRadiusInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
         readonly AnimFloat animFloat = new AnimFloat(EditorGUIUtility.singleLineHeight);
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => CornerRadiusField(position, label, (CornerRadius)value!, animFloat);
+        protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => CornerRadiusField(position, label, (CornerRadius)value!, animFloat);
 
-        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => EditorGUIUtility.singleLineHeight + animFloat.value;
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => EditorGUIUtility.singleLineHeight + animFloat.value;
     }
 }

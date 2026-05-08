@@ -7,10 +7,8 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     [CustomInspectorDrawer(typeof(AnimationCurve))]
-    public class CurveInspectorDrawer : GenericInspectorDrawer
+    public class CurveInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public CurveInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
-        protected override object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => EditorGUI.CurveField(position, label, (AnimationCurve)value!);
+        protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.CurveField(position, label, (AnimationCurve)value!);
     }
 }

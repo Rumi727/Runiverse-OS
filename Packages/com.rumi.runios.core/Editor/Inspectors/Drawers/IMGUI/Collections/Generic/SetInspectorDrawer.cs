@@ -44,7 +44,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections.Generic
             }
         }
 
-        public override void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, Rect? clipping)
+        public override void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, DrawerContext context = default)
         {
             if (duplicatedIndexes.Contains(index))
             {
@@ -60,7 +60,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections.Generic
                 GUI.Label(iconRect, content);
             }
 
-            base.OnElementGUI(rect, index, isActive, isFocused, flags, clipping);
+            base.OnElementGUI(rect, index, isActive, isFocused, flags, context);
         }
     }
 }

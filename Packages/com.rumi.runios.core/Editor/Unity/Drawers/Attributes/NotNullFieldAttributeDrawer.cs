@@ -19,7 +19,10 @@ namespace RuniOS.Editor.Unity.Drawers.Attributes
                 position.width = fieldWidth * 0.4f;
                 position.width -= 4;
 
-                EditorGUI.HelpBox(position, GetTextOrKey("gui.field_is_null"), MessageType.Error);
+                Texture icon = EditorGUIUtility.IconContent("console.erroricon").image;
+                string text = GetTextOrKey("gui.field_is_null");
+
+                EditorGUI.LabelField(position, new GUIContent(text, icon), EditorStyles.helpBox);
             }
             else
                 EditorGUI.PropertyField(position, property, label, property.IsGeneric());

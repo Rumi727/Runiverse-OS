@@ -29,7 +29,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly AnimFloat animFloat = new AnimFloat(0);
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
 
@@ -44,22 +44,22 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             Rebuild(flags);
 
             position.y += foldoutYSize + 2;
-            position.height = inspector.GetHeight(label, flags, isInArray);
+            position.height = inspector.GetHeight(label, flags, context);
             
             BeginIndentLevel();
 
-            if (!isInArray)
+            if (!context.isInArray)
             {
                 if (isExpanded || animFloat.isAnimating)
-                    inspector.Draw(position, label, isInArray, clipping);
+                    inspector.Draw(position, label, context);
             }
             else if (isExpanded)
-                inspector.Draw(position, label, isInArray, clipping);
+                inspector.Draw(position, label, context);
 
             EndIndentLevel();
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
 
@@ -74,13 +74,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             Rebuild(flags);
             
             float size = foldoutYSize;
-            if (!isInArray && animFloat.isAnimating)
+            if (!context.isInArray && animFloat.isAnimating)
             {
-                size += ((inspector.GetHeight(label, flags, isInArray) + 2) * animFloat.value);
+                size += ((inspector.GetHeight(label, flags, context) + 2) * animFloat.value);
                 RepaintCurrentWindow();
             }
             else
-                size += isExpanded ? inspector.GetHeight(label, flags, isInArray) + 2 : 0;
+                size += isExpanded ? inspector.GetHeight(label, flags, context) + 2 : 0;
 
             return size;
         }

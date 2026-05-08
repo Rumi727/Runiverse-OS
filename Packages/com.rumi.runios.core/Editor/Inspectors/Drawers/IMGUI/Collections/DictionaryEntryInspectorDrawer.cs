@@ -72,7 +72,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         public IInspectorVariableElement valueElement { get; }
         public IMGUIInspectorDrawer valueDrawer { get; }
 
-        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
             
@@ -94,10 +94,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
                 {
                     position.width = fieldWidth;
-                    position.height = keyDrawer.GetHeight(keyLabelContent, flags, isInArray, clipping);
+                    position.height = keyDrawer.GetHeight(keyLabelContent, flags, context);
 
                     BeginLabelWidth(keyLabel);
-                    keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
+                    keyDrawer.Draw(position, keyLabelContent, flags, context);
                     EndLabelWidth();
 
                     position.x += position.width + 4;
@@ -105,10 +105,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
                 {
                     position.width = fieldWidth.Ceil();
-                    position.height = valueDrawer.GetHeight(valueLabelContent, flags, isInArray, clipping);
+                    position.height = valueDrawer.GetHeight(valueLabelContent, flags, context);
 
                     BeginLabelWidth(valueLabel);
-                    valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
+                    valueDrawer.Draw(position, valueLabelContent, flags, context);
                     EndLabelWidth();
                 }
 
@@ -119,14 +119,14 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 if (EditorGUIUtility.hierarchyMode)
                     BeginLabelWidth(EditorGUIUtility.labelWidth - 15);
                 
-                position.height = keyDrawer.GetHeight(label, flags, isInArray, clipping);
+                position.height = keyDrawer.GetHeight(label, flags, context);
                 
-                keyDrawer.Draw(position, keyLabelContent, flags, isInArray, clipping);
+                keyDrawer.Draw(position, keyLabelContent, flags, context);
 
                 position.y += position.height + 2;
-                position.height = valueDrawer.GetHeight(label, flags, isInArray, clipping);
+                position.height = valueDrawer.GetHeight(label, flags, context);
                 
-                valueDrawer.Draw(position, valueLabelContent, flags, isInArray, clipping);
+                valueDrawer.Draw(position, valueLabelContent, flags, context);
                 
                 if (EditorGUIUtility.hierarchyMode)
                     EndLabelWidth();
@@ -135,13 +135,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             EndWideMode();
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             float height;
             if (isField)
-                height = Max(keyDrawer.GetHeight(label, flags, isInArray, clipping), valueDrawer.GetHeight(label, flags, isInArray, clipping));
+                height = Max(keyDrawer.GetHeight(label, flags, context), valueDrawer.GetHeight(label, flags, context));
             else
-                height = keyDrawer.GetHeight(label, flags, isInArray, clipping) + 2 + valueDrawer.GetHeight(label, flags, isInArray, clipping);
+                height = keyDrawer.GetHeight(label, flags, context) + 2 + valueDrawer.GetHeight(label, flags, context);
             
             return height + (!LabelHasContent(label) || (EditorGUIUtility.wideMode && isField) ? 0 : EditorGUIUtility.singleLineHeight + 2);
         }

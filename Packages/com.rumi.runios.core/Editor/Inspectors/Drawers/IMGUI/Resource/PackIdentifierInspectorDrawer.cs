@@ -8,12 +8,11 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 {
     [CustomInspectorDrawer(typeof(PackIdentifier))]
-    public class PackIdentifierInspectorDrawer : GenericInspectorDrawer
+    public class PackIdentifierInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public PackIdentifierInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
 
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => PackIdentifierField(position, label, (PackIdentifier)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => PackIdentifierField(position, label, (PackIdentifier)value!);
 
-        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => GetMultiColumnsFieldHeight(label);
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => GetMultiColumnsFieldHeight(label);
     }
 }

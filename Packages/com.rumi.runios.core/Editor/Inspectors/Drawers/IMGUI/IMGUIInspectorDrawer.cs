@@ -62,20 +62,20 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         /// <summary>
         /// UI 요소를 렌더링합니다.
         /// </summary>
-        public void Draw(Rect position, GUIContent? label = null, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List, bool isInArray = false, Rect? clipping = null)
+        public void Draw(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             using NestingScope scope = new NestingScope(this, nestingLevel + 1);
 
             int index = scope.nestingLevel - 1;
             if (index >= attributeDrawers.Length)
-                OnGUI(position, label, flags, isInArray, clipping);
+                OnGUI(position, label, flags, context);
             else
-                attributeDrawers[index].Draw(this, position, label, flags, isInArray, clipping);
+                attributeDrawers[index].Draw(this, position, label, flags, context);
         }
 
-        protected abstract void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping);
+        protected abstract void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default);
 
-        public virtual float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null) => EditorGUIUtility.singleLineHeight;
+        public virtual float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default) => EditorGUIUtility.singleLineHeight;
 
         protected static string GetVariableUndoName(IInspectorVariableElement variableElement)
         {

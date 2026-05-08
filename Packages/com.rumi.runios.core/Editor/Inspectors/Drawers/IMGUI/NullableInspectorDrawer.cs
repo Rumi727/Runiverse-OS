@@ -63,7 +63,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
         readonly IMGUIInspectorDrawer valueDrawer;
         readonly AnimFloat nullableAnimFloat = new AnimFloat(1);
-        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
 
@@ -135,19 +135,19 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             )
                 return;
 
-            valueDrawer.Draw(position, label, flags, isInArray, clipping);
+            valueDrawer.Draw(position, label, flags, context);
         }
 
         float lastInspectorHeight;
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
 
-            float height = valueDrawer.GetHeight(label, flags, isInArray, clipping);
+            float height = valueDrawer.GetHeight(label, flags, context);
             bool valueIsNull = hasValueElement.IsReadable(flags) && !(bool)hasValueElement.value!;
             nullableAnimFloat.target = valueIsNull ? 1 : 0;
 
-            if (!isInArray && nullableAnimFloat.isAnimating)
+            if (!context.isInArray && nullableAnimFloat.isAnimating)
             {
                 RepaintCurrentWindow();
                 return height.Lerp(EditorGUIUtility.singleLineHeight, nullableAnimFloat.value);

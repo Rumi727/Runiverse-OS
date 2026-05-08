@@ -5,17 +5,12 @@ using System.Diagnostics;
 namespace RuniOS.Editor.Localizations
 {
     [Serializable]
-    struct EditorLanguageSerializableKeyValuePair : ISerializableKeyValuePair, ISerializableKeyValuePair<string?, string?>
+    struct EditorLanguageSerializableKeyValuePair(string key, string value) : ISerializableKeyValuePair, ISerializableKeyValuePair<string?, string?>
     {
-        public EditorLanguageSerializableKeyValuePair(string key, string value)
-        {
-            this.key = key;
-            this.value = value;
-        }
 
         // 이름은 바꾸지 마세요 (직렬화)
-        [SerializeField, FieldName("gui.key"), DebuggerBrowsable(DebuggerBrowsableState.Never)] string? key;
-        [SerializeField, FieldName("gui.value"), TextArea(0, 1000), DebuggerBrowsable(DebuggerBrowsableState.Never)] string? value;
+        [SerializeField, FieldName("gui.key"), DebuggerBrowsable(DebuggerBrowsableState.Never)] string? key = key;
+        [SerializeField, FieldName("gui.value"), TextArea(0, 1000), DebuggerBrowsable(DebuggerBrowsableState.Never)] string? value = value;
 
         public string? Key
         {

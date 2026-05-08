@@ -8,10 +8,8 @@ using RuniOS.Undos;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.IO
 {
     [CustomInspectorDrawer(typeof(FilePath))]
-    public class FilePathInspectorDrawer : GenericInspectorDrawer
+    public class FilePathInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        public FilePathInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
-        protected override object DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping) => FilePathField(position, label, (FilePath)value!);
+        protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => FilePathField(position, label, (FilePath)value!);
     }
 }

@@ -132,7 +132,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
         }
 
-        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckInspectableList();
             Type? elementType = inspectableList.inspectionElementType;
@@ -163,8 +163,8 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 drawHeaderCallback = rect => GUI.Label(rect, label)
             };
             
-            reorderableList.drawElementCallback = (rect, index, isActive, isFocused) => OnElementGUI(rect, index, isActive, isFocused, flags, clipping);
-            reorderableList.elementHeightCallback = index => GetElementHeight(index, flags, clipping);
+            reorderableList.drawElementCallback = (rect, index, isActive, isFocused) => OnElementGUI(rect, index, isActive, isFocused, flags, context);
+            reorderableList.elementHeightCallback = index => GetElementHeight(index, flags, context);
             reorderableList.onCanAddCallback = _ => canInsert;
             reorderableList.onCanRemoveCallback = _ => !isFixedSize;
             
@@ -199,13 +199,13 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
             if (drawFoldout)
             {
-                isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canHeaderResize ? (_ => CreateElementItem(elementType, flags)) : null, isInArray);
+                isExpanded = DrawListHeader(position, inspectableList, label, isExpanded, canHeaderResize ? (_ => CreateElementItem(elementType, flags)) : null, context.isInArray);
                 position.y += headHeight + 2;
 
                 position.x += 15 * EditorGUI.indentLevel;
                 position.width -= 15 * EditorGUI.indentLevel;
 
-                if (!isInArray)
+                if (!context.isInArray)
                 {
                     if (isExpanded || animFloat.isAnimating)
                         reorderableList.DoList(position);
@@ -220,7 +220,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 reorderableList.DoList(position);
         }
 
-        public override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckInspectableList();
             
@@ -233,7 +233,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             {
                 float headHeight = GetYSize(label ?? GUIContent.none, EditorStyles.foldoutHeader);
 
-                if (!isInArray)
+                if (!context.isInArray)
                 {
                     animFloat.target = isExpanded ? listHeight + 2 : 0;
                     return headHeight + animFloat.value;
@@ -264,17 +264,17 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
         public virtual GUIContent? GetElementLabel(int index) => new GUIContent($"Element {index}");
 
-        public virtual void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, Rect? clipping)
+        public virtual void OnElementGUI(Rect rect, int index, bool isActive, bool isFocused, InspectorFlags flags, DrawerContext context = default)
         {
             if (EditorGUIUtility.hierarchyMode)
                 rect.xMin += 10;
             
             if (EditorGUIUtility.hierarchyMode) BeginLabelWidth(EditorGUIUtility.labelWidth - 31f);
-            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, true, clipping);
+            GetElementDrawer(index, flags)?.Draw(rect, GetElementLabel(index), flags, context.InArray());
             if (EditorGUIUtility.hierarchyMode) EndLabelWidth();
         }
 
-        public virtual float GetElementHeight(int index, InspectorFlags flags, Rect? clipping) => GetElementDrawer(index, flags)?.GetHeight(GetElementLabel(index), flags, true, clipping) ?? EditorGUIUtility.singleLineHeight;
+        public virtual float GetElementHeight(int index, InspectorFlags flags, DrawerContext context = default) => GetElementDrawer(index, flags)?.GetHeight(GetElementLabel(index), flags, context.InArray() ) ?? EditorGUIUtility.singleLineHeight;
 
         public virtual void SynchronizeCollections()
         {

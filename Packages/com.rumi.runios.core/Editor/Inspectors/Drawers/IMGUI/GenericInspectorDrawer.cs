@@ -5,13 +5,11 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    public abstract class GenericInspectorDrawer : IMGUIInspectorDrawer
+    public abstract class GenericInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : IMGUIInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        protected GenericInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }
-
         public override bool isField => true;
 
-        protected sealed override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, bool isInArray, Rect? clipping)
+        protected sealed override void OnGUI(Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckVariableElement();
             label ??= new GUIContent(element.displayName);
@@ -28,7 +26,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 object? undoSnapshot = CreateSnapshot(value);
                 
                 // 3. 필드 그리기 및 값 변경
-                object? changedValue = DrawField(position, label, value, isInArray, clipping);
+                object? changedValue = DrawField(position, label, value, context);
                 if (EditorGUI.EndChangeCheck())
                 {
                     // 4. [변경 후] 상태 캡처
@@ -42,15 +40,15 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             }
         }
 
-        public sealed override float GetHeight(GUIContent? label, InspectorFlags flags, bool isInArray = false, Rect? clipping = null)
+        public sealed override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
         {
             CheckElement();
-            return CalculationHeight(label ?? new GUIContent(element.displayName), flags, isInArray, clipping);
+            return CalculationHeight(label ?? new GUIContent(element.displayName), flags, context);
         }
 
-        protected abstract object? DrawField(Rect position, GUIContent label, object? value, bool isInArray, Rect? clipping);
+        protected abstract object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default);
 
-        protected virtual float CalculationHeight(GUIContent label, InspectorFlags flags, bool isInArray, Rect? clipping) => EditorGUIUtility.singleLineHeight;
+        protected virtual float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => EditorGUIUtility.singleLineHeight;
 
         /// <summary>
         /// 현재 값에서 언도/리도에 사용할 상태(스냅샷)를 추출합니다. <br/>
