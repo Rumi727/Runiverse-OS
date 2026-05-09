@@ -22,13 +22,27 @@ namespace RuniOS.IO
         /// </summary>
         public VirtualDirectory rootDirectory { get; }
 
-        /// <summary>
-        /// 이 프로바이더의 최상위 루트를 가리키는 쓰기 가능한 노드를 가져옵니다.
-        /// </summary>
+        /// <inheritdoc/>
         public IOWriteNode rootNode => new IOWriteNode(this);
 
         /// <inheritdoc/>
         public bool isIndependent => rootDirectory.isIndependent;
+
+        /// <inheritdoc/>
+        public IWritableIOProvider Recreate(FilePath path)
+        {
+            if (path.IsEmpty())
+                return this;
+
+            VirtualDirectory? directory = rootDirectory.GetDirectory(path);
+            if (directory == null)
+                throw new DirectoryNotFoundException($"The directory at path '{path}' was not found.");
+
+            return new MemoryIOProvider(directory);
+        }
+
+        /// <inheritdoc/>
+        public bool IsSameTarget(IIOProvider other) => other is MemoryIOProvider otherMemory && rootDirectory == otherMemory.rootDirectory;
 
         #region Entry
         /// <inheritdoc/>
@@ -186,10 +200,7 @@ namespace RuniOS.IO
 
         static IOEntry CreateFileEntry(FilePath path, VirtualFile file)
         {
-            FileMetaData fileMetaData = file.metaData ?? new FileMetaData(path.GetFileName(), 0, DateTime.MinValue);
-            DateTime? lastWriteTime = fileMetaData.modifiedTime == DateTime.MinValue
-                ? null
-                : fileMetaData.modifiedTime.ToUniversalTime();
+            IOMetaData fileMetaData = file.metaData ?? new IOMetaData(path.GetFileName());
 
             return new IOEntry
             {
@@ -198,8 +209,10 @@ namespace RuniOS.IO
                 {
                     name = fileMetaData.name,
                     size = fileMetaData.size,
-                    lastWriteTime = lastWriteTime,
-                    attributes = FileAttributes.Normal
+                    creationTime = fileMetaData.creationTime,
+                    lastAccessTime = fileMetaData.lastAccessTime,
+                    lastWriteTime = fileMetaData.lastWriteTime,
+                    attributes = fileMetaData.attributes
                 },
                 isDirectory = false
             };

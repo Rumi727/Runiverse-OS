@@ -31,25 +31,25 @@ namespace RuniOS.IO
             /// 이 노드가 나타내는 파일의 모든 바이트를 읽습니다.
             /// </summary>
             /// <returns>파일의 모든 바이트를 포함하는 <see cref="byte"/>[]입니다.</returns>
-            public UniTask<byte[]> ReadAllBytes(CancellationToken cancellationToken) => node.provider.ReadAllBytes(node.path, cancellationToken);
+            public UniTask<byte[]> ReadAllBytes(CancellationToken cancellationToken = default) => node.provider.ReadAllBytes(node.path, cancellationToken);
 
             /// <summary>
             /// 이 노드가 나타내는 파일의 모든 텍스트를 읽습니다.
             /// </summary>
             /// <returns>파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
-            public UniTask<string> ReadAllText(CancellationToken cancellationToken) => node.provider.ReadAllText(node.path, cancellationToken);
+            public UniTask<string> ReadAllText(CancellationToken cancellationToken = default) => node.provider.ReadAllText(node.path, cancellationToken);
 
             /// <summary>
             /// 이 노드가 나타내는 파일의 모든 줄을 읽습니다.
             /// </summary>
             /// <returns>파일의 모든 줄을 포함하는 <see cref="IEnumerable{T}"/>입니다.</returns>
-            public IUniTaskAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken) => node.provider.ReadLines(node.path, cancellationToken);
+            public IUniTaskAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken = default) => node.provider.ReadLines(node.path, cancellationToken);
 
             /// <summary>
             /// 이 노드가 나타내는 파일에서 읽기 위한 스트림을 엽니다.
             /// </summary>
             /// <returns>파일에서 열린 <see cref="Stream"/>입니다.</returns>
-            public UniTask<Stream> OpenRead(CancellationToken cancellationToken) => node.provider.OpenRead(node.path, cancellationToken);
+            public UniTask<Stream> OpenRead(CancellationToken cancellationToken = default) => node.provider.OpenRead(node.path, cancellationToken);
         }
     }
 }

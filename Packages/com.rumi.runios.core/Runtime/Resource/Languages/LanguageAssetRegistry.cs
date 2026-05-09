@@ -30,11 +30,11 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        protected override async UniTask<LanguageAssetHandle> CreateHandle(IIOEntry entry, FileMetaData metaData)
+        protected override async UniTask<LanguageAssetHandle> CreateHandle(IONode node, IOMetaData metaData)
         {
-            string json = await entry.ReadAllText();
+            string json = await node.file.ReadAllText();
             IReadOnlyDictionary<string, string>? assetObject = JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();
-            return new LanguageAssetHandle(new LocalizationData(assetObject ?? new ReadOnlyDictionary<string, string>(new Dictionary<string, string>())), entry, metaData);
+            return new LanguageAssetHandle(new LocalizationData(assetObject ?? new ReadOnlyDictionary<string, string>(new Dictionary<string, string>())), node, metaData);
         }
 
         protected override UniTask OnBeginAssetLoop()
@@ -43,7 +43,7 @@ namespace RuniOS.Resource.Languages
             return UniTask.CompletedTask;
         }
 
-        protected override UniTask OnAssetLoop(Identifier identifier, IIOEntry entry, LanguageAssetHandle assetHandle)
+        protected override UniTask OnAssetLoop(Identifier identifier, IONode entry, LanguageAssetHandle assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
 

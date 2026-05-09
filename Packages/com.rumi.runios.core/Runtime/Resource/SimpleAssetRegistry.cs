@@ -35,12 +35,12 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="resourcePack">검색할 리소스 팩입니다.</param>
         /// <returns>비동기적으로 네임스페이스 이름과 레지스트리 핸들러를 반환하는 열거자입니다.</returns>
-        public IUniTaskAsyncEnumerable<(string nameSpace, IIOEntry registryEntry)> GetRegistryFolder(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IIOEntry registryEntry)>(async (write, _) =>
+        public IUniTaskAsyncEnumerable<(string nameSpace, IONode registryEntry)> GetRegistryFolder(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IONode registryEntry)>(async (write, iterationToken) =>
         {
             foreach (var namespaceHandler in resourcePack.GetNamespaceHandlers())
             {
-                IIOEntry registryEntry = namespaceHandler.CreateChild(registryName);
-                if (!await registryEntry.DirectoryExists())
+                IONode registryEntry = namespaceHandler.CreateChild(registryName);
+                if (await registryEntry.dir.GetEntry(iterationToken) == null)
                     continue;
 
                 await write.YieldAsync((namespaceHandler.name, registryEntry));
@@ -50,10 +50,10 @@ namespace RuniOS.Resource
         /// <summary>
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
-        /// <param name="entry">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
+        /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="metaData">에셋 파일의 메타 데이터 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IIOEntry entry, FileMetaData metaData);
+        protected abstract UniTask<THandle> CreateHandle(IONode node, IOMetaData metaData);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -88,23 +88,25 @@ namespace RuniOS.Resource
                 // 모든 리소스 팩을 순회하며 에셋 핸들을 비동기적으로 로드 및 등록
                 foreach (var resourcePack in resourcePacks)
                 {
-                    await foreach ((string nameSpace, IIOEntry registryEntry) in GetRegistryFolder(resourcePack))
+                    await foreach ((string nameSpace, IONode registryEntry) in GetRegistryFolder(resourcePack))
                     {
-                        await foreach ((FilePath relativePath, FileMetaData metaData) in registryEntry.GetAllFilesWithMetaData(assetFilter))
+                        await foreach (IOEntry fileEntry in registryEntry.dir.GetAllFiles(assetFilter))
                         {
-                            IIOEntry entry = registryEntry.CreateChild(relativePath);
+                            FilePath relativePath = fileEntry.path.TrimStartPath(registryEntry.path);
+                            IONode entry = registryEntry.CreateChild(relativePath);
+                            IOMetaData metaData = fileEntry.metaData;
                             uniTasks.Add(UniTask.Defer(Method));
 
                             async UniTask Method()
                             {
                                 try
                                 {
-                                    FilePath path = entry.fullPath.TrimStartPath(registryEntry.fullPath).GetPathWithoutExtension();
+                                    FilePath path = entry.path.TrimStartPath(registryEntry.path).GetPathWithoutExtension();
                                     await OnAssetLoop(new Identifier(nameSpace, path), entry, await CreateHandle(entry, metaData));
                                 }
                                 catch (Exception e)
                                 {
-                                    Debug.LogError($"An exception occurred while loading {entry.fullPath} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
+                                    Debug.LogError($"An exception occurred while loading {entry.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
                                 }
 
                                 // UniTask.WhenAll이 대기하는 작업의 진행률 보고
@@ -142,10 +144,10 @@ namespace RuniOS.Resource
         /// <br/>파생 클래스에서 이 메서드를 오버라이드하여 추가적인 등록 로직을 구현할 수 있습니다.
         /// </summary>
         /// <param name="identifier">에셋을 식별하는 고유 ID입니다.</param>
-        /// <param name="entry">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
+        /// <param name="entry">에셋 파일에 접근하는 I/O 노드입니다.</param>
         /// <param name="assetHandle">생성된 <see cref="AssetHandle{T}"/>입니다.</param>
         /// <returns>비동기 작업을 나타내는 <see cref="UniTask"/>입니다.</returns>
-        protected virtual UniTask OnAssetLoop(Identifier identifier, IIOEntry entry, THandle assetHandle)
+        protected virtual UniTask OnAssetLoop(Identifier identifier, IONode entry, THandle assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
             return UniTask.CompletedTask;

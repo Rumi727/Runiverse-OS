@@ -38,6 +38,16 @@ namespace RuniOS.IO
         bool isIndependent { get; }
 
         /// <summary>
+        /// 지정된 경로를 새 루트로 삼는 읽기 전용 프로바이더를 생성합니다.
+        /// </summary>
+        IIOProvider Recreate(FilePath path);
+
+        /// <summary>
+        /// 이 프로바이더와 다른 프로바이더가 같은 실제 루트를 가리키는지 확인합니다.
+        /// </summary>
+        bool IsSameTarget(IIOProvider other);
+
+        /// <summary>
         /// 지정된 경로에 대한 파일 또는 디렉터리 정보(스냅샷)를 가져옵니다.
         /// </summary>
         /// <param name="path">조회할 대상의 가상 파일 시스템 경로입니다.</param>

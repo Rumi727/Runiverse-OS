@@ -25,6 +25,6 @@ namespace RuniOS.Resource.Sounds
 #endif
         static void Awaken() => AssetRegistryManager.Register<BankAssetRegistry>();
 
-        protected override UniTask<BankAssetHandle> CreateHandle(IIOEntry entry, FileMetaData metaData) => UniTask.FromResult(new BankAssetHandle(entry, metaData));
+        protected override UniTask<BankAssetHandle> CreateHandle(IONode node, IOMetaData metaData) => UniTask.FromResult(new BankAssetHandle(node, metaData));
     }
 }

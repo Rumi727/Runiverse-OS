@@ -12,7 +12,7 @@ namespace RuniOS.IO
     /// <br/>
     /// 내부적으로 Android <c>AssetManager</c>를 사용하여 파일 열기 및 디렉토리 열거를 수행합니다.
     /// </summary>
-    public class AndroidStreamingIOProvider : IIOProvider
+    public class AndroidStreamingIOProvider(FilePath rootPath = default) : IIOProvider
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
@@ -44,13 +44,19 @@ namespace RuniOS.IO
             return manager ?? throw new InvalidOperationException("Unable to resolve Android AssetManager.");
         }
 
-        /// <summary>
-        /// 이 프로바이더의 최상위 루트 경로를 가리키는 읽기 전용 노드를 가져옵니다.
-        /// </summary>
+        /// <inheritdoc/>
         public IONode rootNode => new IONode(this);
+
+        readonly FilePath rootPath = rootPath;
 
         /// <inheritdoc/>
         public bool isIndependent => false;
+
+        /// <inheritdoc/>
+        public IIOProvider Recreate(FilePath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath + path);
+
+        /// <inheritdoc/>
+        public bool IsSameTarget(IIOProvider other) => other is AndroidStreamingIOProvider otherAndroid && rootPath == otherAndroid.rootPath;
 
         #region Entry
         /// <inheritdoc/>
@@ -58,7 +64,8 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string relativePath = path.value;
+            FilePath actualPath = rootPath + path;
+            string relativePath = actualPath.value;
             string[] children = ListAssets(relativePath);
             string name = path.GetFileName();
 
@@ -95,11 +102,11 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default)
         {
-            return Enumerate(path, recursive, cancellationToken).EnumerateOnThreadPool(cancellationToken: cancellationToken);
+            return Enumerate(rootPath, path, recursive, cancellationToken).EnumerateOnThreadPool(cancellationToken: cancellationToken);
 
-            static IEnumerable<IOEntry> Enumerate(FilePath path, bool recursive, CancellationToken cancellationToken)
+            static IEnumerable<IOEntry> Enumerate(FilePath rootPath, FilePath path, bool recursive, CancellationToken cancellationToken)
             {
-                string[] rootItems = ListAssets(path.value);
+                string[] rootItems = ListAssets((rootPath + path).value);
                 if (rootItems.Length <= 0)
                     yield break;
 
@@ -116,7 +123,8 @@ namespace RuniOS.IO
                         cancellationToken.ThrowIfCancellationRequested();
 
                         FilePath entryPath = currentPath + item;
-                        string[] childItems = ListAssets(entryPath.value);
+                        FilePath actualEntryPath = rootPath + entryPath;
+                        string[] childItems = ListAssets(actualEntryPath.value);
                         bool isDirectory = childItems.Length > 0;
 
                         IOEntry entry;
@@ -141,7 +149,7 @@ namespace RuniOS.IO
                                 metaData = new IOMetaData
                                 {
                                     name = item,
-                                    size = TryGetFileSize(entryPath.value),
+                                    size = TryGetFileSize(actualEntryPath.value),
                                     attributes = FileAttributes.ReadOnly
                                 },
                                 isDirectory = false
@@ -164,7 +172,7 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string relativePath = path.value;
+            string relativePath = (rootPath + path).value;
             if (!TryOpenAsset(relativePath, out AndroidJavaObject? inputStream) || inputStream == null)
                 throw new FileNotFoundException($"Streaming asset not found: '{relativePath}'.", relativePath);
 

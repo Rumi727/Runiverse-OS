@@ -14,6 +14,12 @@ namespace RuniOS.IO
         IONode IIOProvider.rootNode => rootNode;
 
         /// <summary>
+        /// 지정된 경로를 새 루트로 삼는 쓰기 가능 프로바이더를 생성합니다.
+        /// </summary>
+        new IWritableIOProvider Recreate(FilePath path);
+        IIOProvider IIOProvider.Recreate(FilePath path) => Recreate(path);
+
+        /// <summary>
         /// 지정된 경로의 파일에 데이터를 쓰기 위한 스트림을 엽니다. 파일이 이미 존재하면 기존 내용을 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>

@@ -50,7 +50,7 @@ namespace RuniOS.Resource.Sounds
                 
                 foreach (var resourcePack in resourcePacks)
                 {
-                    foreach ((string nameSpace, IIOEntry jsonEntry) in resourcePack.GetNamespaceHandlers()
+                    foreach ((string nameSpace, IONode jsonNode) in resourcePack.GetNamespaceHandlers()
                                  .Select(x => (x.name, x.CreateChild(jsonFileName))))
                     {
                         uniTasks.Add(UniTask.Defer(Method));
@@ -59,10 +59,10 @@ namespace RuniOS.Resource.Sounds
                         {
                             try
                             {
-                                if (!await jsonEntry.FileExists())
+                                if (await jsonNode.file.GetEntry() == null)
                                     return;
                                 
-                                Dictionary<string, ResourceKey>? sounds = JsonConvert.DeserializeObject<Dictionary<string, ResourceKey>>(await jsonEntry.ReadAllText());
+                                Dictionary<string, ResourceKey>? sounds = JsonConvert.DeserializeObject<Dictionary<string, ResourceKey>>(await jsonNode.file.ReadAllText());
                                 if (sounds == null)
                                     return;
                                 
@@ -71,7 +71,7 @@ namespace RuniOS.Resource.Sounds
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError($"An exception occurred while loading {jsonEntry.fullPath} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
+                                Debug.LogError($"An exception occurred while loading {jsonNode.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
                             }
 
                             // UniTask.WhenAll이 대기하는 작업의 진행률 보고

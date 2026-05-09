@@ -65,6 +65,16 @@ namespace RuniOS.IO
         public IOWriteNode AddExtension(FileExtension extension) => new IOWriteNode(provider, path.value + extension);
 
         /// <summary>
+        /// 현재 노드가 가리키는 위치를 새 루트로 삼는 쓰기 가능 노드를 생성합니다.
+        /// </summary>
+        public IOWriteNode Recreate() => provider.Recreate(path).rootNode;
+
+        /// <summary>
+        /// 두 노드가 같은 실제 대상 경로를 가리키는지 확인합니다.
+        /// </summary>
+        public bool IsSameTarget(IONode other) => ((IONode)this).IsSameTarget(other);
+
+        /// <summary>
         /// 검색된 데이터 스냅샷(<see cref="IOEntry"/>)을 바탕으로, 해당 위치를 가리키고 조작할 수 있는 새 노드를 생성합니다.
         /// </summary>
         /// <param name="entry">노드로 변환할 대상 엔트리 정보입니다.</param>

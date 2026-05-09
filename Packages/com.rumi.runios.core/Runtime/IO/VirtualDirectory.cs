@@ -336,7 +336,12 @@ namespace RuniOS.IO
             virtualFile.name = fileName;
             virtualFile.fullPath = fullPath + path;
 
-            virtualFile.metaData = new FileMetaData(fileName, 0, DateTime.UtcNow);
+            virtualFile.metaData = new IOMetaData
+            {
+                name = fileName,
+                lastWriteTime = DateTime.UtcNow,
+                attributes = FileAttributes.Normal
+            };
         }
 
         /// <summary>
@@ -517,7 +522,7 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
-        public IEnumerable<FileMetaData> GetFilesWithMetaData(FilePath path)
+        public IEnumerable<IOMetaData> GetFilesWithMetaData(FilePath path)
         {
             ThrowIfDeletedException();
 
@@ -561,7 +566,7 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
-        public IEnumerable<(FilePath path, FileMetaData metaData)> GetAllFilesWithMetaData(FilePath path)
+        public IEnumerable<(FilePath path, IOMetaData metaData)> GetAllFilesWithMetaData(FilePath path)
         {
             ThrowIfDeletedException();
 

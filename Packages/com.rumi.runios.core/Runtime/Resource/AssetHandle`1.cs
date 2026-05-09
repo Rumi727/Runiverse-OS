@@ -15,12 +15,12 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
         /// </summary>
-        public IIOEntry entry { get; }
+        public IONode node { get; }
         
         /// <summary>
         /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
-        public FileMetaData metaData { get; private set; }
+        public IOMetaData metaData { get; private set; }
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -47,12 +47,12 @@ namespace RuniOS.Resource
         /// <summary>
         /// <see cref="AssetHandle{T}"/> 클래스의 새 인스턴스를 초기화합니다.
         /// </summary>
-        /// <param name="entry">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
+        /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="metaData">에셋 파일의 초기 메타 데이터입니다.</param>
         /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-        protected AssetHandle(IIOEntry entry, FileMetaData metaData, int unloadDelayFrame = 600)
+        protected AssetHandle(IONode node, IOMetaData metaData, int unloadDelayFrame = 600)
         {
-            this.entry = entry;
+            this.node = node;
             this.metaData = metaData;
 
             this.unloadDelayFrame = unloadDelayFrame;
@@ -70,18 +70,18 @@ namespace RuniOS.Resource
             while (isLoading)
                 await UniTask.Yield();
             
-            if (IsDefaultAsset(assetObject) && await entry.FileExists())
+            if (IsDefaultAsset(assetObject) && await node.file.GetEntry() is { } entry)
             {
                 isLoading = true;
 
                 try
                 {
-                    metaData = await entry.GetFileMetaData();
+                    metaData = entry.metaData;
                     assetObject = await Load();
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to load asset at path {entry.fullPath}! The exception is: {e}");
+                    Debug.LogError($"Failed to load asset at path {entry.path}! The exception is: {e}");
                     assetObject = GetDefaultAsset();
                 }
                 finally
@@ -137,7 +137,7 @@ namespace RuniOS.Resource
             {
                 Debug.LogWarning
                 (
-                    $"Invalid or already-returned AssetScope detected! Scope for asset '{entry.fullPath}' was not found in the handle's list.\n" +
+                    $"Invalid or already-returned AssetScope detected! Scope for asset '{node.path}' was not found in the handle's list.\n" +
                     "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle."
                 );
                 
@@ -199,7 +199,7 @@ namespace RuniOS.Resource
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to unload asset at path {entry.fullPath}! The exception is: {e}");
+                Debug.LogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
             }
         
             assetObject = default;
@@ -221,7 +221,7 @@ namespace RuniOS.Resource
             if (other is not AssetHandle<TAsset> otherHandle)
                 return false;
 
-            return GetType() == other.GetType() && entry.IsSameTarget(otherHandle.entry) && metaData == otherHandle.metaData;
+            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && metaData == otherHandle.metaData;
         }
     }
 }

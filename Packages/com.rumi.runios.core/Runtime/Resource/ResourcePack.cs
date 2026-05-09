@@ -55,7 +55,7 @@ namespace RuniOS.Resource
         /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 입니다.</returns>
         public static async UniTask<ResourcePack> GetDefaultPack()
         {
-            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOEntry.instance);
+            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOProvider.instance.rootNode);
             EnablePack(defaultPackIdentifier);
 
             return defaultPack;
@@ -69,26 +69,26 @@ namespace RuniOS.Resource
         public static ResourcePack? TryGetDefaultPack() => defaultPack;
 
         /// <summary>
-        /// 지정된 <see cref="FileIOHandler"/>를 사용하여 리소스 팩을 생성합니다.
+        /// 지정된 <see cref="PhysicalIOProvider"/>를 사용하여 리소스 팩을 생성합니다.
         /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
         /// </summary>
-        /// <param name="handler">팩 루트 폴더에 접근하는 <see cref="FileIOHandler"/>입니다.</param>
+        /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="PhysicalIOProvider"/>입니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
-        public static UniTask<ResourcePack> Create(FileIOHandler handler) => Create(PackIdentifier.CreateByPath(handler.targetPath), handler);
+        public static UniTask<ResourcePack> Create(PhysicalIOProvider provider) => Create(PackIdentifier.CreateByPath(provider.targetPath), provider.rootNode);
         
         /// <summary>
         /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성하고 메타데이터를 로드합니다.
         /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
         /// </summary>
         /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
-        /// <param name="entry">팩 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
+        /// <param name="node">팩 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IIOEntry entry)
+        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IONode node)
         {
             if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
                 return loadedPack;
             
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, entry.Recreate());
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, node.Recreate());
             await resourcePack.Reload();
 
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
@@ -108,19 +108,19 @@ namespace RuniOS.Resource
         {
             identifier = PackIdentifier.empty;
             
-            rootFolder = IOEntry.empty;
-            assetFolder = IOEntry.empty;
-            infoFile = IOEntry.empty;
+            rootFolder = default(IONode);
+            assetFolder = default(IONode);
+            infoFile = default(IONode);
 
             metaData = new PackMetaData(string.Empty);
         }
 
         /// <summary>
-        /// 지정된 식별자와 I/O 폴더 핸들러를 사용하여 <see cref="ResourcePack"/>의 새 인스턴스를 초기화합니다.
+        /// 지정된 식별자와 I/O 폴더 노드를 사용하여 <see cref="ResourcePack"/>의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
-        /// <param name="folder">팩의 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
-        ResourcePack(PackIdentifier identifier, IIOEntry folder)
+        /// <param name="folder">팩의 루트 폴더에 접근하는 <see cref="IONode"/>입니다.</param>
+        ResourcePack(PackIdentifier identifier, IONode folder)
         {
             this.identifier = identifier;
             
@@ -135,19 +135,19 @@ namespace RuniOS.Resource
         public PackIdentifier identifier { get; }
 
         /// <summary>
-        /// 이 팩의 루트 폴더에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
+        /// 이 팩의 루트 폴더에 접근하는 <see cref="IONode"/>를 가져옵니다.
         /// </summary>
-        public IIOEntry rootFolder { get; }
+        public IONode rootFolder { get; }
         
         /// <summary>
-        /// 이 팩의 에셋 폴더에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
+        /// 이 팩의 에셋 폴더에 접근하는 <see cref="IONode"/>를 가져옵니다.
         /// </summary>
-        public IIOEntry assetFolder { get; }
+        public IONode assetFolder { get; }
         
         /// <summary>
-        /// 이 팩의 메타데이터 파일(<c>pack.json</c>)에 접근하는 <see cref="IIOEntry"/>를 가져옵니다.
+        /// 이 팩의 메타데이터 파일(<c>pack.json</c>)에 접근하는 <see cref="IONode"/>를 가져옵니다.
         /// </summary>
-        public IIOEntry infoFile { get; }
+        public IONode infoFile { get; }
 
         /// <summary>
         /// 이 팩의 메타데이터(<c>pack.json</c>에 정의된)를 가져옵니다.
@@ -170,12 +170,12 @@ namespace RuniOS.Resource
             
             isValid = false;
             
-            if (!await infoFile.FileExists())
+            if (await infoFile.file.GetEntry() == null)
                 return;
             
             try
             {
-                metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.ReadAllText());
+                metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.file.ReadAllText());
                 isValid = true;
             }
             catch (Exception e)
@@ -186,11 +186,11 @@ namespace RuniOS.Resource
             
             if (!isValid)
                 return;
-            else if (await assetFolder.DirectoryExists())
-                namespaces = (await assetFolder.GetDirectories().ToArrayAsync()).ToImmutableArray();
+            else if ((await assetFolder.dir.GetEntry()).HasValue)
+                namespaces = (await assetFolder.dir.GetDirectories().Select(x => x.path.GetFileName()).ToArrayAsync()).ToImmutableArray();
         }
         
-        public IEnumerable<IIOEntry> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
+        public IEnumerable<IONode> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.

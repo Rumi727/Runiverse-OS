@@ -16,19 +16,19 @@ namespace RuniOS.IO
             IONode.File readOnlyFile => ((IONode)node).file;
 
             /// <inheritdoc cref="IONode.File.GetEntry(CancellationToken)"/>
-            public UniTask<IOEntry?> GetEntry(CancellationToken cancellationToken) => readOnlyFile.GetEntry(cancellationToken);
+            public UniTask<IOEntry?> GetEntry(CancellationToken cancellationToken = default) => readOnlyFile.GetEntry(cancellationToken);
 
             /// <inheritdoc cref="IONode.File.ReadAllBytes(CancellationToken)"/>
-            public UniTask<byte[]> ReadAllBytes(CancellationToken cancellationToken) => readOnlyFile.ReadAllBytes(cancellationToken);
+            public UniTask<byte[]> ReadAllBytes(CancellationToken cancellationToken = default) => readOnlyFile.ReadAllBytes(cancellationToken);
 
             /// <inheritdoc cref="IONode.File.ReadAllText(CancellationToken)"/>
-            public UniTask<string> ReadAllText(CancellationToken cancellationToken) => readOnlyFile.ReadAllText(cancellationToken);
+            public UniTask<string> ReadAllText(CancellationToken cancellationToken = default) => readOnlyFile.ReadAllText(cancellationToken);
 
             /// <inheritdoc cref="IONode.File.ReadLines(CancellationToken)"/>
-            public IUniTaskAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken) => readOnlyFile.ReadLines(cancellationToken);
+            public IUniTaskAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken = default) => readOnlyFile.ReadLines(cancellationToken);
 
             /// <inheritdoc cref="IONode.File.OpenRead(CancellationToken)"/>
-            public UniTask<Stream> OpenRead(CancellationToken cancellationToken) => readOnlyFile.OpenRead(cancellationToken);
+            public UniTask<Stream> OpenRead(CancellationToken cancellationToken = default) => readOnlyFile.OpenRead(cancellationToken);
 
             /// <summary>
             /// 이 노드가 나타내는 파일에 지정된 바이트 배열을 씁니다. 파일이 이미 존재하면 덮어씁니다.

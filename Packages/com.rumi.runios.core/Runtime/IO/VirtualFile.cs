@@ -8,7 +8,7 @@ namespace RuniOS.IO
 {
     /// <summary>
     /// 가상 파일 시스템 내의 파일을 나타내는 클래스입니다.
-    /// 파일의 내용을 메모리에 직접 저장하거나, <see cref="IIOEntry"/>를 통해 실제 I/O 작업을 처리할 수 있습니다.
+    /// 파일의 내용을 메모리에 직접 저장하거나, <see cref="IONode"/>를 통해 실제 I/O 작업을 처리할 수 있습니다.
     /// </summary>
     public sealed class VirtualFile : IVirtualNode
     {
@@ -91,7 +91,7 @@ namespace RuniOS.IO
         /// 이 파일의 메타 데이터입니다.
         /// 부모 디렉토리가 없을 경우 <see langword="null"/>입니다.
         /// </summary>
-        public FileMetaData? metaData
+        public IOMetaData? metaData
         {
             get
             {
@@ -104,7 +104,7 @@ namespace RuniOS.IO
                 _metaData = value;
             }
         }
-        FileMetaData? _metaData;
+        IOMetaData? _metaData;
 
         /// <summary>
         /// 이 가상 파일이 독립적인 최상위 항목인지 여부를 나타내는 값을 가져옵니다.<br/>
@@ -130,16 +130,15 @@ namespace RuniOS.IO
 
 
 
-        // IOHandler는 실제 파일 시스템과의 상호작용을 담당합니다.
-        readonly IIOEntry? entry = null;
-        readonly byte[] content = Array.Empty<byte>();
+        readonly IONode? entry;
+        readonly byte[] content = [];
 
         /// <summary>
-        /// 실제 파일 시스템에 접근할 수 있는 <see cref="IIOEntry"/>를 사용하여 <see cref="VirtualFile"/>의 새 인스턴스를 초기화합니다.
+        /// 실제 파일 시스템에 접근할 수 있는 <see cref="IONode"/>를 사용하여 <see cref="VirtualFile"/>의 새 인스턴스를 초기화합니다.
         /// 이 생성자는 주로 실제 디스크의 파일을 가상 파일 시스템에 매핑할 때 사용됩니다.
         /// </summary>
-        /// <param name="entry">파일 I/O 작업을 처리할 <see cref="IIOEntry"/> 인스턴스입니다.</param>
-        public VirtualFile(IIOEntry entry) => this.entry = entry;
+        /// <param name="entry">파일 I/O 작업을 처리할 <see cref="IONode"/> 인스턴스입니다.</param>
+        public VirtualFile(IONode entry) => this.entry = entry;
 
         /// <summary>
         /// 지정된 바이트 배열을 파일 내용으로 사용하여 <see cref="VirtualFile"/>의 새 인스턴스를 초기화합니다.
@@ -159,7 +158,7 @@ namespace RuniOS.IO
 
         /// <summary>
         /// 파일의 모든 내용을 비동기적으로 바이트 배열로 읽어옵니다.
-        /// <see cref="IIOEntry"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 반환합니다.
+        /// <see cref="IONode"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 반환합니다.
         /// </summary>
         /// <returns>파일의 모든 바이트 내용을 포함하는 <see cref="byte"/>[]입니다.</returns>
         /// <exception cref="ObjectDisposedException">
@@ -168,12 +167,12 @@ namespace RuniOS.IO
         public UniTask<byte[]> ReadAllBytesAsync()
         {
             ThrowIfDeletedException();
-            return entry?.ReadAllBytes() ?? UniTask.FromResult(content);
+            return entry?.file.ReadAllBytes() ?? UniTask.FromResult(content);
         }
 
         /// <summary>
         /// 파일의 모든 내용을 비동기적으로 문자열로 읽어옵니다.
-        /// <see cref="IIOEntry"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 UTF-8로 디코딩하여 반환합니다.
+        /// <see cref="IONode"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 UTF-8로 디코딩하여 반환합니다.
         /// </summary>
         /// <returns>파일의 모든 텍스트 내용을 포함하는 <see cref="string"/>입니다.</returns>
         /// <exception cref="ObjectDisposedException">
@@ -182,12 +181,12 @@ namespace RuniOS.IO
         public UniTask<string> ReadAllTextAsync()
         {
             ThrowIfDeletedException();
-            return entry?.ReadAllText() ?? UniTask.FromResult(Encoding.UTF8.GetString(content));
+            return entry?.file.ReadAllText() ?? UniTask.FromResult(Encoding.UTF8.GetString(content));
         }
 
         /// <summary>
         /// 파일의 모든 내용을 비동기적으로 읽어와 줄 단위의 문자열 컬렉션을 반환합니다.
-        /// <see cref="IIOEntry"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 줄 단위로 분리하여 반환합니다.
+        /// <see cref="IONode"/>가 지정된 경우 해당 핸들러를 사용하고, 그렇지 않으면 메모리에 저장된 내용을 줄 단위로 분리하여 반환합니다.
         /// </summary>
         /// <returns>파일의 각 줄을 나타내는 문자열의 <see cref="IEnumerable{T}"/> 컬렉션입니다.</returns>
         /// <exception cref="ObjectDisposedException">
@@ -196,12 +195,12 @@ namespace RuniOS.IO
         public IUniTaskAsyncEnumerable<string> ReadLines()
         {
             ThrowIfDeletedException();
-            return entry?.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToUniTaskAsyncEnumerable();
+            return entry?.file.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToUniTaskAsyncEnumerable();
         }
 
         /// <summary>
         /// 파일의 내용을 읽기 위한 <see cref="Stream"/>을 비동기적으로 엽니다.
-        /// <see cref="IIOEntry"/>가 지정된 경우 해당 핸들러를 통해 스트림을 얻고, 그렇지 않으면 메모리 내용을 기반으로 <see cref="MemoryStream"/>을 반환합니다.
+        /// <see cref="IONode"/>가 지정된 경우 해당 핸들러를 통해 스트림을 얻고, 그렇지 않으면 메모리 내용을 기반으로 <see cref="MemoryStream"/>을 반환합니다.
         /// </summary>
         /// <returns>파일 내용을 읽을 수 있는 <see cref="Stream"/> 스트림입니다.</returns>
         /// <exception cref="ObjectDisposedException">
@@ -210,7 +209,7 @@ namespace RuniOS.IO
         public UniTask<Stream> OpenRead()
         {
             ThrowIfDeletedException();
-            return entry?.OpenRead() ?? UniTask.FromResult<Stream>(new MemoryStream(content, false));
+            return entry?.file.OpenRead() ?? UniTask.FromResult<Stream>(new MemoryStream(content, false));
         }
 
 

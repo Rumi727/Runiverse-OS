@@ -13,9 +13,7 @@ namespace RuniOS.IO
     /// </summary>
     public class PhysicalIOProvider(FilePath targetPath) : IWritableIOProvider
     {
-        /// <summary>
-        /// 이 프로바이더의 최상위 루트를 가리키는 쓰기 가능한 노드를 가져옵니다.
-        /// </summary>
+        /// <inheritdoc/>
         public IOWriteNode rootNode => new IOWriteNode(this);
 
         /// <summary>
@@ -25,6 +23,12 @@ namespace RuniOS.IO
 
         /// <inheritdoc/>
         public bool isIndependent => false;
+
+        /// <inheritdoc/>
+        public IWritableIOProvider Recreate(FilePath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath + path);
+
+        /// <inheritdoc/>
+        public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath;
 
         #region Entry
         /// <inheritdoc/>
@@ -154,14 +158,14 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default)
         {
-            Directory.Delete(path, true);
+            Directory.Delete(targetPath + path, true);
             return UniTask.CompletedTask;
         }
 
         /// <inheritdoc/>
         public UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default)
         {
-            File.Delete(path);
+            File.Delete(targetPath + path);
             return UniTask.CompletedTask;
         }
 
