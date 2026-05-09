@@ -487,6 +487,7 @@ namespace RuniOS.IO
         /// 3. 연속된 디렉터리 구분자(예: "a//b")를 단일 구분자로 축소합니다
         /// </summary>
         /// <exception cref="ArgumentException">경로 이동 문자(., ..)가 포함된 경우 발생합니다.</exception>
+        /// <exception cref="System.IO.PathTooLongException">경로가 너무 길어 처리할 수 없을 때 발생합니다.</exception>
         public static string NormalizePath(string? path)
         {
             if (string.IsNullOrEmpty(path))
@@ -495,6 +496,8 @@ namespace RuniOS.IO
             int length = CalculateNormalizeLength(path.AsSpan());
             if (length == 0)
                 return string.Empty;
+            else if (length > 32767)
+                throw new System.IO.PathTooLongException("The normalized path is too long.");
 
             return string.Create(length, path, static (span, path) =>
             {
@@ -535,7 +538,7 @@ namespace RuniOS.IO
             int length = CalculateNormalizeLength(path);
             if (length == 0)
                 return string.Empty;
-            else if (length > 2048)
+            else if (length > 32767)
                 throw new System.IO.PathTooLongException("The normalized path is too long.");
 
             int dst = 0;

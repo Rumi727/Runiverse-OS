@@ -8,10 +8,14 @@ namespace RuniOS.IONew
 {
     public interface IWritableIOProvider : IIOProvider
     {
-        new IOHandle rootNode => new IOHandle(this);
+        /// <summary>
+        /// 이 프로바이더의 최상위 루트 경로를 가리키는 쓰기 가능한 노드를 가져옵니다.
+        /// </summary>
+        new IOWriteNode rootNode => new IOWriteNode(this);
+        IONode IIOProvider.rootNode => rootNode;
 
         /// <summary>
-        /// 이 핸들러가 나타내는 파일에 데이터를 쓰기 위한 스트림을 엽니다. 파일이 이미 존재하면 기존 내용을 덮어씁니다.
+        /// 지정된 경로의 파일에 데이터를 쓰기 위한 스트림을 엽니다. 파일이 이미 존재하면 기존 내용을 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
@@ -19,21 +23,21 @@ namespace RuniOS.IONew
         UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 이 핸들러가 나타내는 디렉토리를 삭제합니다.
+        /// 지정된 경로의 디렉토리를 삭제합니다.
         /// </summary>
         /// <param name="path">삭제할 디렉토리 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 이 핸들러가 나타내는 파일을 삭제합니다.
+        /// 지정된 경로의 파일을 삭제합니다.
         /// </summary>
         /// <param name="path">삭제할 파일 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 이 핸들러가 나타내는 파일에 지정된 바이트 배열을 씁니다. 파일이 이미 존재하면 덮어씁니다.
+        /// 지정된 경로의 파일에 지정된 바이트 배열을 씁니다. 파일이 이미 존재하면 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>
         /// <param name="bytes">파일에 기록할 바이트 배열입니다.</param>
@@ -45,7 +49,7 @@ namespace RuniOS.IONew
         }
 
         /// <summary>
-        /// 이 핸들러가 나타내는 파일에 지정된 문자열을 씁니다. 파일이 이미 존재하면 덮어씁니다.
+        /// 지정된 경로의 파일에 지정된 문자열을 씁니다. 파일이 이미 존재하면 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>
         /// <param name="text">파일에 기록할 문자열입니다.</param>
@@ -58,7 +62,7 @@ namespace RuniOS.IONew
         }
 
         /// <summary>
-        /// 이 핸들러가 나타내는 파일에 문자열 목록을 한 줄씩 씁니다. 파일이 이미 존재하면 덮어씁니다.
+        /// 지정된 경로의 파일에 문자열 목록을 한 줄씩 씁니다. 파일이 이미 존재하면 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>
         /// <param name="lines">파일에 기록할 문자열 목록입니다.</param>

@@ -5,9 +5,13 @@ using System.Threading;
 
 namespace RuniOS.IONew
 {
-    partial record struct IOHandle
+    partial record struct IOWriteNode
     {
-        public readonly struct Directory(IOHandle node)
+        /// <summary>
+        /// 노드를 디렉토리로 취급하여 디렉토리 관련 I/O 작업을 수행할 수 있는 객체입니다.
+        /// </summary>
+        /// <param name="node">대상 노드입니다.</param>
+        public readonly struct Directory(IOWriteNode node)
         {
             IONode.Directory readOnlyDir => ((IONode)node).dir;
 
@@ -33,7 +37,7 @@ namespace RuniOS.IONew
             public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) => readOnlyDir.GetAllFiles(wildcardPatterns, cancellationToken);
 
             /// <summary>
-            /// 이 핸들러가 나타내는 디렉토리를 삭제합니다.
+            /// 이 노드가 나타내는 디렉토리를 삭제합니다.
             /// </summary>
             /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
             public UniTask Delete(CancellationToken cancellationToken = default) => node.provider.DirectoryDelete(node.path, cancellationToken);

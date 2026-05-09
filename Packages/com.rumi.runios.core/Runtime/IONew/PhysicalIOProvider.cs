@@ -1,4 +1,5 @@
-﻿using Cysharp.Threading.Tasks;
+﻿#nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using RuniOS.Linq.Async;
 using System.IO;
@@ -7,13 +8,27 @@ using System.Threading;
 
 namespace RuniOS.IONew
 {
+    /// <summary>
+    /// OS의 실제 물리적 로컬 파일 시스템을 가상 파일 시스템 형태로 제공하는 구현체입니다.
+    /// 지정된 타겟 디렉토리를 루트로 삼아 안전하게 파일 입출력을 수행합니다.
+    /// </summary>
     public class PhysicalIOProvider(FilePath targetPath) : IWritableIOProvider
     {
-        public FilePath targetPath { get; } = targetPath;
+        /// <summary>
+        /// 이 프로바이더의 최상위 루트를 가리키는 쓰기 가능한 노드를 가져옵니다.
+        /// </summary>
+        public IOWriteNode rootNode => new IOWriteNode(this);
 
+        /// <summary>
+        /// 이 시스템이 가리키는 실제 OS 상의 디렉토리 전체 경로입니다. (샌드박스의 기준점)
+        /// </summary>
+        public FilePath targetPath { get; } = Path.GetFullPath(targetPath);
+
+        /// <inheritdoc/>
         public bool isIndependent => false;
 
         #region Entry
+        /// <inheritdoc/>
         public UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default)
         {
             string fullPath = targetPath + path;
@@ -25,36 +40,70 @@ namespace RuniOS.IONew
                 if (!dirInfo.Exists)
                     return UniTask.FromResult<IOEntry?>(null); // 둘 다 없으면 null
 
-                return UniTask.FromResult<IOEntry?>(new IOEntry(
-                    path,
-                    new IOMetaData(dirInfo.Name, null, dirInfo.CreationTimeUtc, dirInfo.LastAccessTimeUtc, dirInfo.LastWriteTimeUtc, dirInfo.Attributes),
-                    true
-                ));
+                return UniTask.FromResult<IOEntry?>(new IOEntry
+                {
+                    path = path,
+                    metaData = new IOMetaData
+                    {
+                        name = dirInfo.Name,
+                        creationTime = dirInfo.CreationTimeUtc,
+                        lastAccessTime = dirInfo.LastAccessTimeUtc,
+                        lastWriteTime = dirInfo.LastWriteTimeUtc,
+                        attributes = dirInfo.Attributes
+                    },
+                    isDirectory = true
+                });
             }
 
-            return UniTask.FromResult<IOEntry?>(new IOEntry(
-                path: path,
-                metaData: new IOMetaData(info.Name, info.Length, info.CreationTimeUtc, info.LastAccessTimeUtc, info.LastWriteTimeUtc, info.Attributes),
-                isDirectory: false
-            ));
+            return UniTask.FromResult<IOEntry?>(new IOEntry
+            {
+                path = path,
+                metaData = new IOMetaData
+                {
+                    name = info.Name,
+                    size = info.Length,
+                    creationTime = info.CreationTimeUtc,
+                    lastAccessTime = info.LastAccessTimeUtc,
+                    lastWriteTime = info.LastWriteTimeUtc,
+                    attributes = info.Attributes
+                },
+                isDirectory = false
+            });
         }
 
+        /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default)
         {
-            var enumerable = new FileSystemEnumerable<IOEntry>(
+            var enumerable = new FileSystemEnumerable<IOEntry>
+            (
                 targetPath + path,
-                (ref FileSystemEntry entry) => new IOEntry(
-                    path + entry.FileName.ToString(),
-                    new IOMetaData(
-                        entry.FileName.ToString(),
-                        entry.IsDirectory ? null : entry.Length,
-                        entry.CreationTimeUtc.UtcDateTime,
-                        entry.LastAccessTimeUtc.UtcDateTime,
-                        entry.LastWriteTimeUtc.UtcDateTime,
-                        entry.Attributes
-                    ),
-                    entry.IsDirectory
-                ),
+                (ref FileSystemEntry entry) =>
+                {
+                    FilePath entryFullPath = entry.ToFullPath().ToPath();
+                    if (!entryFullPath.TryTrimStartPath(targetPath, out FilePath entryPath))
+                    {
+                        throw new InvalidOperationException
+                        (
+                            $"The enumerated file path '{entryFullPath}' is outside the bounds of the target directory '{targetPath}'. " +
+                            "This may indicate an invalid symbolic link or a path traversal violation."
+                        );
+                    }
+
+                    return new IOEntry
+                    {
+                        path = entryPath,
+                        metaData = new IOMetaData
+                        {
+                            name = entry.FileName.ToString(),
+                            size = entry.IsDirectory ? null : entry.Length,
+                            creationTime = entry.CreationTimeUtc.UtcDateTime,
+                            lastAccessTime = entry.LastAccessTimeUtc.UtcDateTime,
+                            lastWriteTime = entry.LastWriteTimeUtc.UtcDateTime,
+                            attributes = entry.Attributes
+                        },
+                        isDirectory = entry.IsDirectory
+                    };
+                },
                 new EnumerationOptions
                 {
                     RecurseSubdirectories = recursive,
@@ -68,39 +117,49 @@ namespace RuniOS.IONew
         #endregion
 
         #region Read
+        /// <inheritdoc cref="IIOProvider.OpenRead(FilePath, CancellationToken)"/>
         public FileStream OpenRead(FilePath path) => File.OpenRead(targetPath + path);
         UniTask<Stream> IIOProvider.OpenRead(FilePath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenRead(path));
 
+        /// <inheritdoc/>
         public UniTask<byte[]> ReadAllBytes(FilePath path, CancellationToken cancellationToken = default) =>
             File.ReadAllBytesAsync(targetPath + path, cancellationToken).AsUniTask();
 
+        /// <inheritdoc/>
         public UniTask<string> ReadAllText(FilePath path, CancellationToken cancellationToken = default) =>
             File.ReadAllTextAsync(targetPath + path, cancellationToken).AsUniTask();
 
+        /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<string> ReadLines(FilePath path, CancellationToken cancellationToken = default) =>
             File.ReadLines(targetPath + path).EnumerateOnThreadPool(cancellationToken: cancellationToken);
         #endregion
 
         #region Write
+        /// <inheritdoc cref="IWritableIOProvider.OpenWrite(FilePath, CancellationToken)"/>
         public FileStream OpenWrite(FilePath path) => File.OpenWrite(targetPath + path);
         UniTask<Stream> IWritableIOProvider.OpenWrite(FilePath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenWrite(path));
 
+        /// <inheritdoc/>
         public UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default) =>
             File.WriteAllBytesAsync(targetPath + path, bytes, cancellationToken).AsUniTask();
 
+        /// <inheritdoc/>
         public UniTask WriteAllText(FilePath path, string text, CancellationToken cancellationToken = default) =>
             File.WriteAllTextAsync(targetPath + path, text, cancellationToken).AsUniTask();
 
+        /// <inheritdoc/>
         public UniTask WriteLines(FilePath path, IEnumerable<string> lines, CancellationToken cancellationToken = default) =>
             File.WriteAllLinesAsync(targetPath + path, lines, cancellationToken).AsUniTask();
         #endregion
 
+        /// <inheritdoc/>
         public UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default)
         {
-            Directory.Delete(path);
+            Directory.Delete(path, true);
             return UniTask.CompletedTask;
         }
 
+        /// <inheritdoc/>
         public UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default)
         {
             File.Delete(path);
