@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     partial record struct IOWriteNode
     {

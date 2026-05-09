@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using System.IO;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     partial record struct IONode
     {

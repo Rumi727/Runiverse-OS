@@ -1,7 +1,5 @@
 ﻿#nullable enable
-using RuniOS.IO;
-
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// 특정 파일 시스템(<see cref="IWritableIOProvider"/>)의 특정 경로를 가리키고 제어하는 <b>읽기/쓰기 가능</b> 노드입니다.

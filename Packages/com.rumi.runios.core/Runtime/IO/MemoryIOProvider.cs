@@ -1,11 +1,10 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.IO;
 using System.IO;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// 메모리 기반 가상 파일 시스템(<see cref="VirtualDirectory"/>)을 <see cref="IWritableIOProvider"/> 형태로 제공하는 구현체입니다.

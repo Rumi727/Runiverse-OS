@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 또는 디렉토리의 세부 상태 정보(메타데이터)를 나타냅니다.

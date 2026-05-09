@@ -1,10 +1,9 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.IO;
 using System.IO;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     public interface IWritableIOProvider : IIOProvider
     {

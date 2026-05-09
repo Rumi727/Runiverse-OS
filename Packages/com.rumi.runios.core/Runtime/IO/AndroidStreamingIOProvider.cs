@@ -1,12 +1,11 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.IO;
 using RuniOS.Linq.Async;
 using System.IO;
 using System.Threading;
 using UnityEngine.Android;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// Android 환경의 StreamingAssets를 대상으로 읽기 전용 접근을 제공하는 <see cref="IIOProvider"/> 구현체입니다.

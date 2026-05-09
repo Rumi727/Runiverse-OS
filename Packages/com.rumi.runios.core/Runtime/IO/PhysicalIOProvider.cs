@@ -1,12 +1,11 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.IO;
 using RuniOS.Linq.Async;
 using System.IO;
 using System.IO.Enumeration;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// OS의 실제 물리적 로컬 파일 시스템을 가상 파일 시스템 형태로 제공하는 구현체입니다.

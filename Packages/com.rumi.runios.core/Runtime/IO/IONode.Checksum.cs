@@ -5,7 +5,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     partial record struct IONode
     {

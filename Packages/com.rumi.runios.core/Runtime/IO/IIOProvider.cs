@@ -1,11 +1,10 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.IO;
 using System.IO;
 using System.Threading;
 
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 시스템에 대한 읽기 전용 접근을 제공하는 프로바이더의 인터페이스입니다.

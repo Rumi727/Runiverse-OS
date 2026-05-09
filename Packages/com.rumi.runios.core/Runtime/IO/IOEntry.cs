@@ -1,7 +1,5 @@
 ﻿#nullable enable
-using RuniOS.IO;
-
-namespace RuniOS.IONew
+namespace RuniOS.IO
 {
     /// <summary>
     /// 파일 시스템에서 검색된 특정 파일 또는 디렉토리의 정보(스냅샷)를 나타냅니다.
