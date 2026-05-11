@@ -8,6 +8,11 @@ namespace RuniOS.IO
     public readonly partial record struct IOWriteNode(IWritableIOProvider provider, FilePath path = default)
     {
         /// <summary>
+        /// 항상 빈 파일 또는 빈 디렉토리처럼 동작하는 쓰기 가능 노드입니다.
+        /// </summary>
+        public static IOWriteNode empty => EmptyIOProvider.instance.rootNode;
+
+        /// <summary>
         /// 이 노드가 유효한 프로바이더를 참조하고 있는지 여부를 가져옵니다.
         /// </summary>
         public bool isValid => _provider != null;
