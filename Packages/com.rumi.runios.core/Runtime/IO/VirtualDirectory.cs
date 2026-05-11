@@ -1,4 +1,5 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.Spans;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
@@ -345,6 +346,37 @@ namespace RuniOS.IO
         }
 
         /// <summary>
+        /// 지정된 경로의 가상 파일에 데이터를 쓰기 위한 스트림을 엽니다.
+        /// 쓰기 시작 시점에 새 <see cref="VirtualFile"/> 인스턴스를 만들고 해당 경로의 기존 파일을 대체합니다.
+        /// </summary>
+        /// <param name="path">쓰기 스트림을 열 파일 경로입니다.</param>
+        /// <returns>파일 내용을 쓸 수 있는 <see cref="Stream"/> 스트림입니다.</returns>
+        /// <exception cref="DirectoryNotFoundException">
+        /// 파일을 쓸 상위 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        /// 지정된 경로에 디렉토리가 존재하는 경우 발생합니다.
+        /// </exception>
+        public UniTask<Stream> OpenWrite(FilePath path)
+        {
+            ThrowIfDeletedException();
+
+            VirtualDirectory? directory = GetDirectory(path.GetParentPath());
+            if (directory == null)
+                ThrowDirectoryNotFoundException(path);
+
+            string fileName = path.GetFileName();
+            if (directory.children.TryGetValue(fileName, out IVirtualNode? existingNode) && existingNode is not VirtualFile)
+            {
+                ThrowPathIsDirectoryException(path, fileName);
+            }
+
+            VirtualFile virtualFile = new VirtualFile([]);
+            FileWrite(path, virtualFile);
+            return virtualFile.OpenWrite();
+        }
+
+        /// <summary>
         /// 지정된 경로의 가상 파일을 삭제합니다.
         /// </summary>
         /// <param name="path">삭제할 가상 파일의 경로입니다. 예: "assets/runios/sounds.json"</param>
@@ -407,56 +439,30 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 지정된 경로에 있는 모든 직접적인 하위 디렉토리의 이름을 가져옵니다.
+        /// 지정된 경로의 파일 또는 디렉토리 엔트리 스냅샷을 가져옵니다.
         /// </summary>
-        /// <param name="path">하위 디렉토리를 검색할 디렉토리의 경로입니다.</param>
-        /// <returns>해당 디렉토리의 모든 직접적인 하위 디렉토리 이름 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<string> GetDirectories(FilePath path)
+        public IOEntry? GetEntry(FilePath path)
         {
             ThrowIfDeletedException();
 
-            VirtualDirectory? directory = GetDirectory(path);
-            if (directory == null)
-                ThrowDirectoryNotFoundException(path);
+            if (path.IsEmpty())
+                return CreateDirectoryEntry(path);
 
-            return directory.children.Where(static x => x.Value is VirtualDirectory).Select(static x => x.Key);
+            VirtualDirectory? directory = GetDirectory(path);
+            if (directory != null)
+                return CreateDirectoryEntry(path);
+
+            VirtualFile? file = GetFile(path);
+            if (file != null)
+                return CreateFileEntry(path, file);
+
+            return null;
         }
 
         /// <summary>
-        /// 지정된 경로를 시작으로 모든 하위 디렉토리의 전체 경로를 깊이 우선 탐색(DFS) 방식으로 가져옵니다.<br/>
-        /// 시작 경로 자체는 결과에 포함되지 않습니다.
+        /// 지정된 디렉토리 경로 내의 파일 및 하위 디렉토리 엔트리 스냅샷을 열거합니다.
         /// </summary>
-        /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
-        /// <returns>시작 경로의 모든 하위 디렉토리의 전체 경로 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<FilePath> GetAllDirectories(FilePath path) => InternalGetAllDirectories(path, false)
-            .Select(static x => x.Key);
-
-        /// <summary>
-        /// 재귀적으로 모든 하위 디렉토리를 탐색하여 경로와 <see cref="VirtualDirectory"/> 쌍을 반환합니다.<br/>
-        /// 깊이 우선 탐색(DFS) 방식을 사용합니다.
-        /// </summary>
-        /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
-        /// <param name="includeSelf">탐색 시작 디렉토리 자체를 결과에 포함할지 여부입니다.</param>
-        /// <returns>탐색된 모든 디렉토리의 <see cref="FilePath"/>와 <see cref="VirtualDirectory"/> 쌍 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        IEnumerable<KeyValuePair<FilePath, VirtualDirectory>> InternalGetAllDirectories(FilePath path, bool includeSelf)
+        public IEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive)
         {
             ThrowIfDeletedException();
 
@@ -464,118 +470,68 @@ namespace RuniOS.IO
             if (initialDirectory == null)
                 ThrowDirectoryNotFoundException(path);
 
-            if (includeSelf)
-                yield return new KeyValuePair<FilePath, VirtualDirectory>(path, initialDirectory);
+            if (!recursive)
+            {
+                foreach (KeyValuePair<string, IVirtualNode> child in initialDirectory.children)
+                    yield return CreateEntry(path + child.Key, child.Value);
 
-            // DFS(깊이 우선 탐색)를 위해 Stack 사용
-            Stack<(FilePath currentPath, VirtualDirectory dir)> stack = new Stack<(FilePath currentPath, VirtualDirectory dir)>();
-            stack.Push((path, initialDirectory)); // 시작 디렉토리를 스택에 추가
+                yield break;
+            }
+
+            Stack<(FilePath currentPath, VirtualDirectory directory)> stack = new Stack<(FilePath currentPath, VirtualDirectory directory)>();
+            stack.Push((path, initialDirectory));
 
             while (stack.Count > 0)
             {
-                (FilePath currentPath, VirtualDirectory currentDir) = stack.Pop(); // 스택에서 디렉토리와 현재 경로를 꺼냄
+                (FilePath currentPath, VirtualDirectory currentDirectory) = stack.Pop();
 
-                // Dictionary의 ValueCollection을 직접 순회
-                foreach (var item in currentDir.children.Reverse()) // children이 Dictionary인 경우 Values 사용
+                foreach (KeyValuePair<string, IVirtualNode> child in currentDirectory.children)
                 {
-                    if (item.Value is VirtualDirectory childDirectory)
-                    {
-                        FilePath newPath = currentPath + item.Key;
-                        yield return new KeyValuePair<FilePath, VirtualDirectory>(newPath, childDirectory); // 자식 디렉토리와 조합된 경로 반환
+                    FilePath childPath = currentPath + child.Key;
+                    yield return CreateEntry(childPath, child.Value);
 
-                        stack.Push((newPath, childDirectory)); // 자식 디렉토리와 새로운 경로를 스택에 추가하여 나중에 탐색
-                    }
+                    if (child.Value is VirtualDirectory childDirectory)
+                        stack.Push((childPath, childDirectory));
                 }
             }
         }
 
-        /// <summary>
-        /// 지정된 경로에 있는 모든 직접적인 하위 파일의 이름을 가져옵니다.
-        /// </summary>
-        /// <param name="path">파일을 검색할 디렉토리의 경로입니다.</param>
-        /// <returns>해당 디렉토리의 모든 직접적인 하위 파일 이름 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<string> GetFiles(FilePath path)
+        static IOEntry CreateEntry(FilePath path, IVirtualNode node) => node switch
         {
-            ThrowIfDeletedException();
+            VirtualDirectory => CreateDirectoryEntry(path),
+            VirtualFile file => CreateFileEntry(path, file),
+            _ => throw new InvalidDataException($"Unknown virtual node type '{node.GetType().Name}' at path '{path}'.")
+        };
 
-            VirtualDirectory? directory = GetDirectory(path);
-            if (directory == null)
-                ThrowDirectoryNotFoundException(path);
-
-            return directory.children.Where(static x => x.Value is VirtualFile).Select(static x => x.Key);
-        }
-
-        /// <summary>
-        /// 지정된 경로에 있는 모든 직접적인 하위 파일의 메타데이터를 가져옵니다.
-        /// </summary>
-        /// <param name="path">파일을 검색할 디렉토리의 경로입니다.</param>
-        /// <returns>해당 디렉토리의 모든 직접적인 하위 파일의 메타데이터 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<IOMetaData> GetFilesWithMetaData(FilePath path)
+        static IOEntry CreateDirectoryEntry(FilePath path) => new IOEntry
         {
-            ThrowIfDeletedException();
+            path = path,
+            metaData = new IOMetaData
+            {
+                name = path.GetFileName(),
+                attributes = FileAttributes.Directory
+            },
+            isDirectory = true
+        };
 
-            VirtualDirectory? directory = GetDirectory(path);
-            if (directory == null)
-                ThrowDirectoryNotFoundException(path);
-
-            return directory.children.Select(x => x.Value).OfType<VirtualFile>().Select(static x => x.metaData!.Value);
-        }
-
-        /// <summary>
-        /// 지정된 경로를 시작으로 모든 하위 디렉토리의 파일을 포함하여 모든 파일의 전체 경로를 가져옵니다.
-        /// </summary>
-        /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
-        /// <returns>시작 경로의 모든 하위 디렉토리에 있는 모든 파일의 전체 경로 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<FilePath> GetAllFiles(FilePath path)
+        static IOEntry CreateFileEntry(FilePath path, VirtualFile file)
         {
-            ThrowIfDeletedException();
+            IOMetaData fileMetaData = file.metaData ?? new IOMetaData(path.GetFileName());
 
-            var directories = InternalGetAllDirectories(path, true);
-            return directories.SelectMany(static directoryItem =>
-                directoryItem.Value.children
-                    .Where(static x => x.Value is VirtualFile)
-                    .Select(fileItem => directoryItem.Key + fileItem.Key));
-        }
-
-        /// <summary>
-        /// 지정된 경로를 시작으로 모든 하위 디렉토리의 파일을 포함하여 모든 파일의 전체 경로와 메타 데이터를 가져옵니다.
-        /// </summary>
-        /// <param name="path">탐색을 시작할 디렉토리의 경로입니다.</param>
-        /// <returns>시작 경로의 모든 하위 디렉토리에 있는 모든 파일의 전체 경로와 메타 데이터 컬렉션입니다.</returns>
-        /// <exception cref="DirectoryNotFoundException">
-        /// 지정된 경로의 디렉토리를 찾을 수 없거나, 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
-        /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 더 이상 가상 파일 시스템의 일부가 아니거나 유효하지 않은 상태인 경우 발생합니다.
-        /// </exception>
-        public IEnumerable<(FilePath path, IOMetaData metaData)> GetAllFilesWithMetaData(FilePath path)
-        {
-            ThrowIfDeletedException();
-
-            var directories = InternalGetAllDirectories(path, true);
-            return directories.SelectMany(static directoryItem =>
-                directoryItem.Value.children
-                    .Select(static x => x.Value)
-                    .OfType<VirtualFile>()
-                    .Select(fileItem => ((directoryItem.Key + fileItem.name), fileItem.metaData!.Value)));
+            return new IOEntry
+            {
+                path = path,
+                metaData = new IOMetaData
+                {
+                    name = fileMetaData.name,
+                    size = fileMetaData.size,
+                    creationTime = fileMetaData.creationTime,
+                    lastAccessTime = fileMetaData.lastAccessTime,
+                    lastWriteTime = fileMetaData.lastWriteTime,
+                    attributes = fileMetaData.attributes
+                },
+                isDirectory = false
+            };
         }
 
 

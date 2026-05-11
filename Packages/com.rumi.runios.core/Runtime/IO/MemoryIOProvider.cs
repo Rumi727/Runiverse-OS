@@ -49,22 +49,7 @@ namespace RuniOS.IO
         public UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            if (path.IsEmpty())
-            {
-                _ = rootDirectory.GetDirectory(path);
-                return UniTask.FromResult<IOEntry?>(CreateDirectoryEntry(path));
-            }
-
-            VirtualDirectory? directory = rootDirectory.GetDirectory(path);
-            if (directory != null)
-                return UniTask.FromResult<IOEntry?>(CreateDirectoryEntry(path));
-
-            VirtualFile? file = rootDirectory.GetFile(path);
-            if (file != null)
-                return UniTask.FromResult<IOEntry?>(CreateFileEntry(path, file));
-
-            return UniTask.FromResult<IOEntry?>(null);
+            return UniTask.FromResult(rootDirectory.GetEntry(path));
         }
 
         /// <inheritdoc/>
@@ -73,46 +58,66 @@ namespace RuniOS.IO
             using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, iterationToken);
             CancellationToken ct = linkedCTS.Token;
 
-            VirtualDirectory? startDirectory = rootDirectory.GetDirectory(path);
-            if (startDirectory == null)
-                throw new DirectoryNotFoundException($"The directory at path '{path}' was not found.");
-
-            if (!recursive)
-            {
-                foreach (KeyValuePair<string, IVirtualNode> child in startDirectory.children)
-                {
-                    ct.ThrowIfCancellationRequested();
-                    FilePath childPath = path + child.Key;
-                    await writer.YieldAsync(CreateEntry(childPath, child.Value));
-                }
-
-                return;
-            }
-
-            Stack<(FilePath path, VirtualDirectory directory)> stack = new Stack<(FilePath path, VirtualDirectory directory)>();
-            stack.Push((path, startDirectory));
-
-            while (stack.Count > 0)
+            foreach (IOEntry entry in rootDirectory.EnumerateEntries(path, recursive))
             {
                 ct.ThrowIfCancellationRequested();
-                (FilePath currentPath, VirtualDirectory currentDirectory) = stack.Pop();
-
-                foreach (KeyValuePair<string, IVirtualNode> child in currentDirectory.children)
-                {
-                    ct.ThrowIfCancellationRequested();
-
-                    FilePath childPath = currentPath + child.Key;
-                    IOEntry entry = CreateEntry(childPath, child.Value);
-                    await writer.YieldAsync(entry);
-
-                    if (child.Value is VirtualDirectory childDirectory)
-                        stack.Push((childPath, childDirectory));
-                }
+                await writer.YieldAsync(entry);
             }
         });
         #endregion
 
         #region Read
+        /// <summary>
+        /// 지정된 경로의 파일의 모든 바이트를 읽습니다.
+        /// </summary>
+        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
+        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
+        /// <returns>파일의 모든 바이트를 포함하는 <see cref="byte"/> 배열입니다.</returns>
+        public UniTask<byte[]> ReadAllBytes(FilePath path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            VirtualFile? file = rootDirectory.GetFile(path);
+            if (file == null)
+                throw new FileNotFoundException($"The file at path '{path}' was not found.", path);
+
+            return file.ReadAllBytesAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// 지정된 경로의 파일의 모든 텍스트를 읽습니다.
+        /// </summary>
+        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
+        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
+        /// <returns>파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
+        public UniTask<string> ReadAllText(FilePath path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            VirtualFile? file = rootDirectory.GetFile(path);
+            if (file == null)
+                throw new FileNotFoundException($"The file at path '{path}' was not found.", path);
+
+            return file.ReadAllTextAsync(cancellationToken);
+        }
+
+        /// <summary>
+        /// 지정된 경로의 파일의 모든 줄을 한 줄씩 읽어 비동기 스트림으로 제공합니다.
+        /// </summary>
+        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
+        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
+        /// <returns>파일의 각 줄을 제공하는 비동기 문자열 스트림입니다.</returns>
+        public IUniTaskAsyncEnumerable<string> ReadLines(FilePath path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            VirtualFile? file = rootDirectory.GetFile(path);
+            if (file == null)
+                throw new FileNotFoundException($"The file at path '{path}' was not found.", path);
+
+            return file.ReadLines(cancellationToken);
+        }
+
         /// <inheritdoc/>
         public UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default)
         {
@@ -122,7 +127,7 @@ namespace RuniOS.IO
             if (file == null)
                 throw new FileNotFoundException($"The file at path '{path}' was not found.", path);
 
-            return file.OpenRead();
+            return file.OpenRead(cancellationToken);
         }
         #endregion
 
@@ -131,12 +136,7 @@ namespace RuniOS.IO
         public UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-
-            FilePath parentPath = path.GetParentPath();
-            if (rootDirectory.GetDirectory(parentPath) == null)
-                throw new DirectoryNotFoundException($"The directory at path '{parentPath}' was not found.");
-
-            return UniTask.FromResult<Stream>(new BufferedWriteStream(bytes => rootDirectory.FileWrite(path, new VirtualFile(bytes))));
+            return rootDirectory.OpenWrite(path);
         }
 
         /// <inheritdoc/>
@@ -178,61 +178,6 @@ namespace RuniOS.IO
             cancellationToken.ThrowIfCancellationRequested();
             rootDirectory.DeleteFile(path);
             return UniTask.CompletedTask;
-        }
-
-        static IOEntry CreateEntry(FilePath path, IVirtualNode node) => node switch
-        {
-            VirtualDirectory => CreateDirectoryEntry(path),
-            VirtualFile file => CreateFileEntry(path, file),
-            _ => throw new InvalidDataException($"Unknown virtual node type '{node.GetType().Name}' at path '{path}'.")
-        };
-
-        static IOEntry CreateDirectoryEntry(FilePath path) => new IOEntry
-        {
-            path = path,
-            metaData = new IOMetaData
-            {
-                name = path.GetFileName(),
-                attributes = FileAttributes.Directory
-            },
-            isDirectory = true
-        };
-
-        static IOEntry CreateFileEntry(FilePath path, VirtualFile file)
-        {
-            IOMetaData fileMetaData = file.metaData ?? new IOMetaData(path.GetFileName());
-
-            return new IOEntry
-            {
-                path = path,
-                metaData = new IOMetaData
-                {
-                    name = fileMetaData.name,
-                    size = fileMetaData.size,
-                    creationTime = fileMetaData.creationTime,
-                    lastAccessTime = fileMetaData.lastAccessTime,
-                    lastWriteTime = fileMetaData.lastWriteTime,
-                    attributes = fileMetaData.attributes
-                },
-                isDirectory = false
-            };
-        }
-
-        sealed class BufferedWriteStream(Action<byte[]> onCommit) : MemoryStream
-        {
-            readonly Action<byte[]> _onCommit = onCommit;
-            bool _isCommitted;
-
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing && !_isCommitted)
-                {
-                    _onCommit(ToArray());
-                    _isCommitted = true;
-                }
-
-                base.Dispose(disposing);
-            }
         }
 
         void IDisposable.Dispose() { }

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using System.IO;
 using System.Text;
+using System.Threading;
 
 namespace RuniOS.IO
 {
@@ -131,7 +132,8 @@ namespace RuniOS.IO
 
 
         readonly IONode? entry;
-        readonly byte[] content = [];
+        byte[] content = [];
+        bool hasLocalContent;
 
         /// <summary>
         /// 실제 파일 시스템에 접근할 수 있는 <see cref="IONode"/>를 사용하여 <see cref="VirtualFile"/>의 새 인스턴스를 초기화합니다.
@@ -145,14 +147,22 @@ namespace RuniOS.IO
         /// 이 생성자는 파일 내용을 메모리에 직접 저장할 때 사용됩니다.
         /// </summary>
         /// <param name="content">파일의 원본 바이트 배열 내용입니다.</param>
-        public VirtualFile(byte[] content) => this.content = content.ToArray();
+        public VirtualFile(byte[] content)
+        {
+            this.content = content.ToArray();
+            hasLocalContent = true;
+        }
 
         /// <summary>
         /// 지정된 문자열을 UTF-8로 인코딩하여 파일 내용으로 사용하여 <see cref="VirtualFile"/>의 새 인스턴스를 초기화합니다.
         /// 이 생성자는 텍스트 파일을 가상으로 생성하거나 관리할 때 사용됩니다.
         /// </summary>
         /// <param name="content">파일의 원본 문자열 내용입니다.</param>
-        public VirtualFile(string content) => this.content = Encoding.UTF8.GetBytes(content);
+        public VirtualFile(string content)
+        {
+            this.content = Encoding.UTF8.GetBytes(content);
+            hasLocalContent = true;
+        }
 
 
 
@@ -164,10 +174,10 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public UniTask<byte[]> ReadAllBytesAsync()
+        public UniTask<byte[]> ReadAllBytesAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDeletedException();
-            return entry?.file.ReadAllBytes() ?? UniTask.FromResult(content);
+            return !hasLocalContent && entry.HasValue ? entry.Value.file.ReadAllBytes(cancellationToken) : UniTask.FromResult(content);
         }
 
         /// <summary>
@@ -178,10 +188,10 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public UniTask<string> ReadAllTextAsync()
+        public UniTask<string> ReadAllTextAsync(CancellationToken cancellationToken = default)
         {
             ThrowIfDeletedException();
-            return entry?.file.ReadAllText() ?? UniTask.FromResult(Encoding.UTF8.GetString(content));
+            return !hasLocalContent && entry.HasValue ? entry.Value.file.ReadAllText(cancellationToken) : UniTask.FromResult(Encoding.UTF8.GetString(content));
         }
 
         /// <summary>
@@ -192,10 +202,10 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public IUniTaskAsyncEnumerable<string> ReadLines()
+        public IUniTaskAsyncEnumerable<string> ReadLines(CancellationToken cancellationToken = default)
         {
             ThrowIfDeletedException();
-            return entry?.file.ReadLines() ?? Encoding.UTF8.GetString(content).GetLines().ToUniTaskAsyncEnumerable();
+            return !hasLocalContent && entry.HasValue ? entry.Value.file.ReadLines(cancellationToken) : Encoding.UTF8.GetString(content).GetLines().ToUniTaskAsyncEnumerable();
         }
 
         /// <summary>
@@ -206,10 +216,41 @@ namespace RuniOS.IO
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
         /// </exception>
-        public UniTask<Stream> OpenRead()
+        public UniTask<Stream> OpenRead(CancellationToken cancellationToken = default)
         {
             ThrowIfDeletedException();
-            return entry?.file.OpenRead() ?? UniTask.FromResult<Stream>(new MemoryStream(content, false));
+            return !hasLocalContent && entry.HasValue ? entry.Value.file.OpenRead(cancellationToken) : UniTask.FromResult<Stream>(new MemoryStream(content, false));
+        }
+
+        /// <summary>
+        /// 파일의 내용을 쓰기 위한 <see cref="Stream"/>을 비동기적으로 엽니다.
+        /// 이 메서드는 새 파일 인스턴스를 생성한 경로 쓰기 작업에서만 사용됩니다.
+        /// </summary>
+        /// <returns>파일 내용을 쓸 수 있는 <see cref="Stream"/> 스트림입니다.</returns>
+        /// <exception cref="ObjectDisposedException">
+        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 상위 디렉토리에서 제거되어 유효하지 않은 경우 발생합니다.
+        /// </exception>
+        internal UniTask<Stream> OpenWrite(CancellationToken cancellationToken = default)
+        {
+            ThrowIfDeletedException();
+            return UniTask.FromResult<Stream>(new VirtualFileWriteStream(this));
+        }
+
+        void CommitWrite(byte[] bytes)
+        {
+            content = bytes;
+            hasLocalContent = true;
+
+            IOMetaData oldMetaData = metaData ?? new IOMetaData(name ?? string.Empty);
+            metaData = new IOMetaData
+            {
+                name = oldMetaData.name,
+                size = bytes.LongLength,
+                creationTime = oldMetaData.creationTime,
+                lastAccessTime = oldMetaData.lastAccessTime,
+                lastWriteTime = DateTime.UtcNow,
+                attributes = oldMetaData.attributes ?? FileAttributes.Normal
+            };
         }
 
 
@@ -241,6 +282,63 @@ namespace RuniOS.IO
         {
             if (isDeleted)
                 throw new ObjectDisposedException(nameof(VirtualFile), $"This '{nameof(VirtualFile)}' instance is no longer part of the virtual file system and is invalid for operations.");
+        }
+
+        sealed class VirtualFileWriteStream : Stream
+        {
+            readonly VirtualFile _file;
+            readonly MemoryStream _buffer = new MemoryStream();
+
+            public VirtualFileWriteStream(VirtualFile file)
+            {
+                _file = file;
+                Commit();
+            }
+
+            public override bool CanRead => false;
+            public override bool CanSeek => true;
+            public override bool CanWrite => true;
+            public override long Length => _buffer.Length;
+
+            public override long Position
+            {
+                get => _buffer.Position;
+                set => _buffer.Position = value;
+            }
+
+            public override void Flush() { }
+
+            public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+            public override long Seek(long offset, SeekOrigin origin) => _buffer.Seek(offset, origin);
+
+            public override void SetLength(long value)
+            {
+                _buffer.SetLength(value);
+                Commit();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                _buffer.Write(buffer, offset, count);
+                Commit();
+            }
+
+            public override void WriteByte(byte value)
+            {
+                _buffer.WriteByte(value);
+                Commit();
+            }
+
+            void Commit() => _file.CommitWrite(_buffer.ToArray());
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                    _buffer.Dispose();
+
+                base.Dispose(disposing);
+            }
         }
     }
 }
