@@ -138,6 +138,13 @@ namespace RuniOS.IO
             cancellationToken.ThrowIfCancellationRequested();
             return rootDirectory.OpenWrite(path);
         }
+        
+        /// <inheritdoc/>
+        public UniTask<Stream> CreateFile(FilePath path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return rootDirectory.OpenWrite(path);
+        }
 
         /// <inheritdoc/>
         public UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default)
@@ -165,7 +172,7 @@ namespace RuniOS.IO
         #endregion
 
         /// <inheritdoc/>
-        public UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             rootDirectory.DeleteDirectory(path);
@@ -173,7 +180,7 @@ namespace RuniOS.IO
         }
 
         /// <inheritdoc/>
-        public UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             rootDirectory.DeleteFile(path);

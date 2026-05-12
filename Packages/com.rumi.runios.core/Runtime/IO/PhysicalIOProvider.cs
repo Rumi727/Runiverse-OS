@@ -142,6 +142,10 @@ namespace RuniOS.IO
         public FileStream OpenWrite(FilePath path) => File.OpenWrite(targetPath + path);
         UniTask<Stream> IWritableIOProvider.OpenWrite(FilePath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenWrite(path));
 
+        /// <inheritdoc cref="IWritableIOProvider.CreateFile(FilePath, CancellationToken)"/>
+        public FileStream CreateFile(FilePath path) => File.Create(targetPath + path);
+        UniTask<Stream> IWritableIOProvider.CreateFile(FilePath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(CreateFile(path));
+
         /// <inheritdoc/>
         public UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default) =>
             File.WriteAllBytesAsync(targetPath + path, bytes, cancellationToken).AsUniTask();
@@ -156,14 +160,14 @@ namespace RuniOS.IO
         #endregion
 
         /// <inheritdoc/>
-        public UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default)
         {
             Directory.Delete(targetPath + path, true);
             return UniTask.CompletedTask;
         }
 
         /// <inheritdoc/>
-        public UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default)
         {
             File.Delete(targetPath + path);
             return UniTask.CompletedTask;

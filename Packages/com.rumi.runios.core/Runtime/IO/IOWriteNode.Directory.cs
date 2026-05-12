@@ -39,7 +39,7 @@ namespace RuniOS.IO
             /// 이 노드가 나타내는 디렉토리를 삭제합니다.
             /// </summary>
             /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
-            public UniTask Delete(CancellationToken cancellationToken = default) => node.provider.DirectoryDelete(node.path, cancellationToken);
+            public UniTask Delete(CancellationToken cancellationToken = default) => node.provider.DeleteDirectory(node.path, cancellationToken);
         }
     }
 }
