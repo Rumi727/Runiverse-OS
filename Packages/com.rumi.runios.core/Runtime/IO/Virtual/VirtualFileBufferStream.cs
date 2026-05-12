@@ -75,9 +75,9 @@ namespace RuniOS.IO.Virtual
 
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
-            if (offset < 0)
+            if (offset < 0 || offset > buffer.Length)
                 throw new ArgumentOutOfRangeException(nameof(offset));
-            if (count < 0 || buffer.Length - offset < count)
+            if (count < 0 || count > buffer.Length - offset)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
             long endPosition = Position + count;
