@@ -31,8 +31,10 @@ namespace RuniOS.IO
         public UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
         public UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
 
-        public UniTask DirectoryDelete(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
-        public UniTask FileDelete(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
+        public UniTask<Stream> CreateFile(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
+
+        public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
+        public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
 
         void IDisposable.Dispose() { }
     }
