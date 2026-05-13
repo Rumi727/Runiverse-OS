@@ -43,7 +43,9 @@ namespace RuniOS.IO.Virtual
         /// </summary>
         public IOMetaData metaData { get; private set; } = new IOMetaData
         {
-            name = null, creationTime = DateTime.UtcNow, lastWriteTime = DateTime.UtcNow
+            name = null,
+            creationTime = DateTime.UtcNow,
+            lastWriteTime = DateTime.UtcNow
         };
 
         /// <summary>

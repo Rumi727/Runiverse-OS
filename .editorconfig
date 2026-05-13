@@ -1,5 +1,5 @@
-# 상위 디렉터리에서 .editorconfig 설정을 상속하려면 아래 행을 제거하세요.
 root = true
+# 상위 디렉터리에서 .editorconfig 설정을 상속하려면 아래 행을 제거하세요.
 
 [*]
 charset = utf-8
@@ -33,7 +33,7 @@ dotnet_search_reference_assemblies = true
 # Using 구성
 dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = false
-file_header_template = unset
+file_header_template = 
 
 # this. 및 Me. 기본 설정
 dotnet_style_qualification_for_event = false:suggestion
@@ -136,7 +136,7 @@ csharp_style_prefer_method_group_conversion = true:suggestion
 csharp_style_prefer_primary_constructors = true:suggestion
 csharp_style_prefer_top_level_statements = true:suggestion
 
-resharper_remove_redundant_braces_highlighting=none
+resharper_remove_redundant_braces_highlighting = none
 
 # 식 수준 기본 설정
 csharp_prefer_simple_default_expression = true:suggestion
@@ -170,7 +170,7 @@ csharp_new_line_before_catch = true
 csharp_new_line_before_else = true
 csharp_new_line_before_finally = true
 csharp_new_line_before_members_in_anonymous_types = true
-csharp_new_line_before_members_in_object_initializers = true
+csharp_new_line_before_members_in_object_initializers = false
 csharp_new_line_before_open_brace = all
 csharp_new_line_between_query_expression_clauses = true
 
@@ -297,44 +297,44 @@ dotnet_naming_style.interface.word_separator =
 dotnet_naming_style.interface.capitalization = pascal_case
 
 ### C#
-dotnet_diagnostic.IDE0051.severity = none
+dotnet_diagnostic.ide0051.severity = none
 
 #### 유니티 ####
 
-dotnet_diagnostic.UNT0004.severity = suggestion
-dotnet_diagnostic.UNT0005.severity = suggestion
-dotnet_diagnostic.UNT0007.severity = suggestion
-dotnet_diagnostic.UNT0008.severity = suggestion
-dotnet_diagnostic.UNT0009.severity = suggestion
-dotnet_diagnostic.UNT0012.severity = suggestion
-dotnet_diagnostic.UNT0013.severity = suggestion
-dotnet_diagnostic.UNT0020.severity = suggestion
-dotnet_diagnostic.UNT0021.severity = suggestion
-dotnet_diagnostic.UNT0023.severity = suggestion
-dotnet_diagnostic.UNT0025.severity = suggestion
-dotnet_diagnostic.UNT0027.severity = suggestion
-dotnet_diagnostic.UNT0029.severity = suggestion
-dotnet_diagnostic.UNT0030.severity = suggestion
-dotnet_diagnostic.UNT0031.severity = suggestion
-dotnet_diagnostic.UNT0033.severity = warning
-dotnet_diagnostic.UNT0001.severity = suggestion
-dotnet_diagnostic.UNT0002.severity = suggestion
-dotnet_diagnostic.UNT0017.severity = suggestion
-dotnet_diagnostic.UNT0018.severity = suggestion
-dotnet_diagnostic.UNT0019.severity = suggestion
-dotnet_diagnostic.UNT0022.severity = suggestion
-dotnet_diagnostic.UNT0024.severity = suggestion
-dotnet_diagnostic.UNT0026.severity = suggestion
-dotnet_diagnostic.UNT0028.severity = suggestion
-dotnet_diagnostic.UNT0032.severity = suggestion
-dotnet_diagnostic.UNT0034.severity = suggestion
-dotnet_diagnostic.UNT0035.severity = suggestion
-dotnet_diagnostic.UNT0036.severity = suggestion
-dotnet_diagnostic.UNT0037.severity = suggestion
-dotnet_diagnostic.UNT0003.severity = suggestion
-dotnet_diagnostic.UNT0006.severity = warning
-dotnet_diagnostic.UNT0010.severity = suggestion
-dotnet_diagnostic.UNT0011.severity = suggestion
-dotnet_diagnostic.UNT0014.severity = suggestion
-dotnet_diagnostic.UNT0015.severity = warning
-dotnet_diagnostic.UNT0016.severity = suggestion
+dotnet_diagnostic.unt0004.severity = suggestion
+dotnet_diagnostic.unt0005.severity = suggestion
+dotnet_diagnostic.unt0007.severity = suggestion
+dotnet_diagnostic.unt0008.severity = suggestion
+dotnet_diagnostic.unt0009.severity = suggestion
+dotnet_diagnostic.unt0012.severity = suggestion
+dotnet_diagnostic.unt0013.severity = suggestion
+dotnet_diagnostic.unt0020.severity = suggestion
+dotnet_diagnostic.unt0021.severity = suggestion
+dotnet_diagnostic.unt0023.severity = suggestion
+dotnet_diagnostic.unt0025.severity = suggestion
+dotnet_diagnostic.unt0027.severity = suggestion
+dotnet_diagnostic.unt0029.severity = suggestion
+dotnet_diagnostic.unt0030.severity = suggestion
+dotnet_diagnostic.unt0031.severity = suggestion
+dotnet_diagnostic.unt0033.severity = warning
+dotnet_diagnostic.unt0001.severity = suggestion
+dotnet_diagnostic.unt0002.severity = suggestion
+dotnet_diagnostic.unt0017.severity = suggestion
+dotnet_diagnostic.unt0018.severity = suggestion
+dotnet_diagnostic.unt0019.severity = suggestion
+dotnet_diagnostic.unt0022.severity = suggestion
+dotnet_diagnostic.unt0024.severity = suggestion
+dotnet_diagnostic.unt0026.severity = suggestion
+dotnet_diagnostic.unt0028.severity = suggestion
+dotnet_diagnostic.unt0032.severity = suggestion
+dotnet_diagnostic.unt0034.severity = suggestion
+dotnet_diagnostic.unt0035.severity = suggestion
+dotnet_diagnostic.unt0036.severity = suggestion
+dotnet_diagnostic.unt0037.severity = suggestion
+dotnet_diagnostic.unt0003.severity = suggestion
+dotnet_diagnostic.unt0006.severity = warning
+dotnet_diagnostic.unt0010.severity = suggestion
+dotnet_diagnostic.unt0011.severity = suggestion
+dotnet_diagnostic.unt0014.severity = suggestion
+dotnet_diagnostic.unt0015.severity = warning
+dotnet_diagnostic.unt0016.severity = suggestion
