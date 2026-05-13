@@ -23,6 +23,11 @@ namespace RuniOS.IO.Virtual
         }
         readonly Dictionary<FilePath, VirtualNode?> _rootDirectoryCache = [];
 
+        public void Attach(FilePath path, VirtualNode? rootDirectory = null)
+        {
+
+        }
+
         /// <exception cref="ObjectDisposedException">
         /// 이 <see cref="VirtualDirectory"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
@@ -86,7 +91,6 @@ namespace RuniOS.IO.Virtual
                 if (childNode != childDirectory)
                 {
                     // 경로 중간에 디렉토리가 아닌 노드가 있거나 노드를 찾지 못했을 경우 null 반환
-                    rootDirectoryCache[fullPath + path] = null;
                     return null;
                 }
 
