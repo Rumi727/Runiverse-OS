@@ -1,11 +1,103 @@
 #nullable enable
 using RuniOS.IO;
+using System.IO;
 
 namespace RuniOS.Utility
 {
     public static class PathUtility
     {
+        static readonly char[] invalidPathChars = Path.GetInvalidPathChars();
+        static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
+
         public static FilePath ToPath(this string? path) => path;
+
+        /// <summary>
+        /// 지정한 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
+        /// 기본 대체 문자는 <see cref="FilePath.alternativeNameChar"/> ('_')입니다.
+        /// </summary>
+        /// <param name="path">지정할 경로입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
+        /// <returns>잘못된 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        public static FilePath FixPathChars(FilePath path, char newChar = FilePath.alternativeNameChar)
+        {
+            if (string.IsNullOrEmpty(path.value))
+                return FilePath.empty;
+
+            int lastPathIndex = path.value.LastIndexOfAny(FilePath.directorySeparatorChars);
+            if (lastPathIndex < 0) lastPathIndex = path.value.Length;
+
+            ReadOnlySpan<char> pathPart = path.value.AsSpan(0, lastPathIndex);
+            if (pathPart.IndexOfAny(invalidPathChars) < 0)
+                return path;
+
+            return string.Create(path.value.Length, (value: path, newChar, lastPathIndex), static (span, state) =>
+            {
+                state.value.value.AsSpan().CopyTo(span);
+                for (int i = 0; i < state.lastPathIndex; i++)
+                {
+                    if (Array.IndexOf(invalidPathChars, span[i]) >= 0)
+                        span[i] = state.newChar;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 지정한 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
+        /// 기본 대체 문자는 <see cref="FilePath.alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
+        /// </summary>
+        /// <param name="path">지정할 경로입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
+        /// <returns>잘못된 파일 이름 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
+        public static FilePath FixFileNameChars(FilePath path, char newChar = FilePath.alternativeNameChar)
+        {
+            if (string.IsNullOrEmpty(path.value))
+                return string.Empty;
+
+            int lastPathIndex = path.value.LastIndexOfAny(FilePath.directorySeparatorChars);
+            ReadOnlySpan<char> filePart = path.value.AsSpan(lastPathIndex + 1);
+            if (filePart.IndexOfAny(invalidFileNameChars) < 0)
+                return path.value;
+
+            return string.Create(path.value.Length, (path.value, newChar, lastPathIndex), static (span, state) =>
+            {
+                state.value.AsSpan().CopyTo(span);
+                for (int i = state.lastPathIndex + 1; i < span.Length; i++)
+                {
+                    if (Array.IndexOf(invalidFileNameChars, span[i]) >= 0)
+                        span[i] = state.newChar;
+                }
+            });
+        }
+
+        /// <summary>
+        /// 파일 이름이 Windows 예약어(CON, PRN, AUX, NUL, COM1~9, LPT1~9)인지 확인합니다.
+        /// </summary>
+        public static bool IsWindowsReservedName(ReadOnlySpan<char> path)
+        {
+            ReadOnlySpan<char> name = Path.GetFileNameWithoutExtension(path);
+            if (name.Length != 3 && name.Length != 4)
+                return false;
+
+            Span<char> upperName = stackalloc char[name.Length];
+            for (int i = 0; i < name.Length; i++)
+                upperName[i] = char.ToUpperInvariant(name[i]);
+
+            if (upperName.Length == 3)
+            {
+                return upperName switch
+                {
+                    "CON" or "PRN" or "AUX" or "NUL" => true,
+                    _ => false
+                };
+            }
+            else if (upperName.StartsWith("COM") || upperName.StartsWith("LPT"))
+            {
+                char lastChar = upperName[3];
+                return lastChar is >= '1' and <= '9'; // COM1~9, LPT1~9
+            }
+
+            return false;
+        }
 
         /*public const char directorySeparatorChar = '/';
         public const char alternativeNameChar = '_';

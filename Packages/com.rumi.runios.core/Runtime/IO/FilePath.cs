@@ -53,9 +53,6 @@ namespace RuniOS.IO
         /// </summary>
         public static readonly FilePath empty = new FilePath();
 
-        static readonly char[] invalidPathChars = System.IO.Path.GetInvalidPathChars();
-        static readonly char[] invalidFileNameChars = System.IO.Path.GetInvalidFileNameChars();
-
 
 
         /// <summary>
@@ -100,71 +97,13 @@ namespace RuniOS.IO
         /// <returns>정규화된 새 <see cref="FilePath"/> 인스턴스입니다. 입력이 null이거나 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
         public FilePath(params string[] paths) => _value = NormalizePath(string.Join(directorySeparatorChar, paths));
 
-        /// <summary>
+        /*/// <summary>
         /// 지정된 <see cref="ReadOnlySpan{T}"/> 경로로부터 새 <see cref="FilePath"/> 인스턴스를 생성하고 정규화합니다.<br/>
-        /// 입력된 경로는 <see cref="NormalizePath(ReadOnlySpan{char})"/>를 통해 표준 형식으로 변환됩니다.
+        /// 입력된 경로는 <see cref="NormalizePath(string)"/>를 통해 표준 형식으로 변환됩니다.
         /// </summary>
         /// <param name="path">생성할 파일 경로를 나타내는 <see cref="ReadOnlySpan{T}"/>입니다.</param>
         /// <returns>정규화된 새 <see cref="FilePath"/> 인스턴스입니다. 입력이 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
-        public FilePath(ReadOnlySpan<char> path) => _value = NormalizePath(path);
-
-
-
-        /// <summary>
-        /// 현재 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="System.IO.Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다.
-        /// </summary>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
-        public readonly FilePath FixPathChars(char newChar = alternativeNameChar)
-        {
-            if (string.IsNullOrEmpty(value))
-                return empty;
-
-            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
-            if (lastPathIndex < 0) lastPathIndex = value.Length;
-
-            ReadOnlySpan<char> pathPart = value.AsSpan(0, lastPathIndex);
-            if (pathPart.IndexOfAny(invalidPathChars) < 0)
-                return value;
-
-            return string.Create(value.Length, (value, newChar, lastPathIndex), static (span, state) =>
-            {
-                state.value.AsSpan().CopyTo(span);
-                for (int i = 0; i < state.lastPathIndex; i++)
-                {
-                    if (Array.IndexOf(invalidPathChars, span[i]) >= 0)
-                        span[i] = state.newChar;
-                }
-            });
-        }
-
-        /// <summary>
-        /// 현재 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
-        /// </summary>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 파일 이름 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
-        public readonly FilePath FixFileNameChars(char newChar = alternativeNameChar)
-        {
-            if (string.IsNullOrEmpty(value))
-                return string.Empty;
-
-            int lastPathIndex = value.LastIndexOfAny(directorySeparatorChars);
-            ReadOnlySpan<char> filePart = value.AsSpan(lastPathIndex + 1);
-            if (filePart.IndexOfAny(invalidFileNameChars) < 0)
-                return value;
-
-            return string.Create(value.Length, (value, newChar, lastPathIndex), static (span, state) =>
-            {
-                state.value.AsSpan().CopyTo(span);
-                for (int i = state.lastPathIndex + 1; i < span.Length; i++)
-                {
-                    if (Array.IndexOf(invalidFileNameChars, span[i]) >= 0)
-                        span[i] = state.newChar;
-                }
-            });
-        }
+        public FilePath(ReadOnlySpan<char> path) => _value = NormalizePath(path);*/
 
 
 
@@ -192,21 +131,6 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 지정한 경로에서 마지막 디렉터리 구분자(<see cref="directorySeparatorChars"/>) 이후의 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "file.txt"를 반환합니다.<br/>
-        /// 경로에 디렉터리 구분자가 없으면 전체 경로 문자열을 반환합니다.
-        /// </summary>
-        /// <returns>마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 부분 또는 경로에 디렉터리가 없는 경우 전체 경로 문자열.</returns>
-        public static ReadOnlySpan<char> GetFileName(ReadOnlySpan<char> path)
-        {
-            int index = path.LastIndexOfAny(directorySeparatorChars);
-            if (index < 0)
-                return path;
-
-            return path.Slice(index + 1);
-        }
-
-        /// <summary>
         /// 현재 경로의 파일 이름에서 확장자를 제외한 부분만 문자열로 가져옵니다.<br/>
         /// 예를 들어, "dir/file.txt"의 경우 "file"을 반환합니다.<br/>
         /// 파일 이름에 확장자가 없으면 파일 이름 전체를 반환합니다.
@@ -221,23 +145,6 @@ namespace RuniOS.IO
                 return fileName;
             else
                 return fileName.Remove(extIndex);
-        }
-
-        /// <summary>
-        /// 지정한 경로의 파일 이름에서 확장자를 제외한 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "file"을 반환합니다.<br/>
-        /// 파일 이름에 확장자가 없으면 파일 이름 전체를 반환합니다.
-        /// </summary>
-        /// <returns>확장자를 제외한 파일 이름 부분.</returns>
-        public static ReadOnlySpan<char> GetFileNameWithoutExtension(ReadOnlySpan<char> path)
-        {
-            path = GetFileName(path);
-            int extIndex = path.LastIndexOf(FileExtension.extensionSeparatorChar);
-
-            if (extIndex < 0)
-                return path;
-            else
-                return path.Slice(0, extIndex);
         }
 
         /// <summary>
@@ -256,21 +163,6 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 지정한 경로에서 파일 확장자를 제외한 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "dir/file"을 반환합니다.<br/>
-        /// 경로에 확장자가 없으면 원래 경로를 반환합니다.
-        /// </summary>
-        /// <returns>확장자가 제거된 경로 부분.</returns>
-        public static ReadOnlySpan<char> GetPathWithoutExtension(ReadOnlySpan<char> path)
-        {
-            int extIndex = path.LastIndexOf(FileExtension.extensionSeparatorChar);
-            if (extIndex < 0)
-                return path;
-            else
-                return path.Slice(0, extIndex);
-        }
-
-        /// <summary>
         /// 현재 경로의 상위 디렉터리 경로를 나타내는 새 <see cref="FilePath"/> 인스턴스를 반환합니다.<br/>
         /// 예를 들어, "dir/file.txt"의 경우 "dir"을 반환합니다.<br/>
         /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 <see cref="empty"/>를 반환합니다.
@@ -283,21 +175,6 @@ namespace RuniOS.IO
                 return string.Empty;
 
             return value.Substring(0, index);
-        }
-
-        /// <summary>
-        /// 현재 경로의 상위 디렉터리 경로를 나타내는 경로 부분을 반환합니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "dir"을 반환합니다.<br/>
-        /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 빈 경로를 반환합니다.
-        /// </summary>
-        /// <returns>상위 디렉터리 경로를 나타내는 경로 부분.</returns>
-        public static ReadOnlySpan<char> GetParentPath(ReadOnlySpan<char> path)
-        {
-            int index = path.LastIndexOfAny(directorySeparatorChars);
-            if (index < 0)
-                return ReadOnlySpan<char>.Empty;
-
-            return path.Slice(0, index);
         }
 
 
@@ -487,8 +364,7 @@ namespace RuniOS.IO
         /// 3. 연속된 디렉터리 구분자(예: "a//b")를 단일 구분자로 축소합니다
         /// </summary>
         /// <exception cref="ArgumentException">경로 이동 문자(., ..)가 포함된 경우 발생합니다.</exception>
-        /// <exception cref="System.IO.PathTooLongException">경로가 너무 길어 처리할 수 없을 때 발생합니다.</exception>
-        public static string NormalizePath(string? path)
+        public static string NormalizePath(string? path) // TODO : 나중에 유니티 닷넷 올라가면 Span으로 바꿀 것 (string.Create에 allows ref struct 붙어있어서 사용 가능)
         {
             if (string.IsNullOrEmpty(path))
                 return string.Empty;
@@ -496,8 +372,6 @@ namespace RuniOS.IO
             int length = CalculateNormalizeLength(path.AsSpan());
             if (length == 0)
                 return string.Empty;
-            else if (length > 32767)
-                throw new System.IO.PathTooLongException("The normalized path is too long.");
 
             return string.Create(length, path, static (span, path) =>
             {
@@ -517,48 +391,6 @@ namespace RuniOS.IO
                     dst += item.Length;
                 }
             });
-        }
-
-
-
-        /// <summary>
-        /// 입력된 경로 문자열을 표준 형식으로 정규화합니다.<br/>
-        /// 이 과정에서 다음 변환이 수행됩니다:<br/>
-        /// 1. Windows 스타일의 역슬래시(<see cref="windowsDirectorySeparatorChar"/>)를 표준 슬래시(<see cref="directorySeparatorChar"/>)로 변경합니다.<br/>
-        /// 2. 경로의 시작과 끝에 있는 불필요한 디렉터리 구분자(<see cref="directorySeparatorChars"/>)를 제거합니다.<br/>
-        /// 3. 연속된 디렉터리 구분자(예: "a//b")를 단일 구분자로 축소합니다.
-        /// </summary>
-        /// <exception cref="ArgumentException">경로 이동 문자(., ..)가 포함된 경우 발생합니다.</exception>
-        /// <exception cref="System.IO.PathTooLongException">경로가 너무 길어 처리할 수 없을 때 발생합니다.</exception>
-        public static string NormalizePath(ReadOnlySpan<char> path)
-        {
-            if (path.IsEmpty)
-                return string.Empty;
-
-            int length = CalculateNormalizeLength(path);
-            if (length == 0)
-                return string.Empty;
-            else if (length > 32767)
-                throw new System.IO.PathTooLongException("The normalized path is too long.");
-
-            int dst = 0;
-            Span<char> span = stackalloc char[length];
-            foreach (var item in path.Trim(directorySeparatorChars).SplitAny(directorySeparatorChars))
-            {
-                if (item.IsEmpty)
-                    continue;
-
-                if (dst > 0)
-                {
-                    span[dst] = directorySeparatorChar;
-                    dst++;
-                }
-
-                item.CopyTo(span.Slice(dst));
-                dst += item.Length;
-            }
-
-            return new string(span);
         }
 
         static int CalculateNormalizeLength(ReadOnlySpan<char> path)
@@ -610,36 +442,6 @@ namespace RuniOS.IO
                 string escaped = Regex.Escape(pattern).Replace(@"\*", ".*"); // '*'를 '.*'로 변환
                 return $"^{escaped}$";
             }
-        }
-        
-        /// <summary>
-        /// 파일 이름이 Windows 예약어(CON, PRN, AUX, NUL, COM1~9, LPT1~9)인지 확인합니다.
-        /// </summary>
-        public static bool IsWindowsReservedName(ReadOnlySpan<char> path)
-        {
-            ReadOnlySpan<char> name = GetFileNameWithoutExtension(path);
-            if (name.Length != 3 && name.Length != 4)
-                return false;
-
-            Span<char> upperName = stackalloc char[name.Length];
-            for (int i = 0; i < name.Length; i++)
-                upperName[i] = char.ToUpperInvariant(name[i]);
-
-            if (upperName.Length == 3)
-            {
-                return upperName switch
-                {
-                    "CON" or "PRN" or "AUX" or "NUL" => true,
-                    _ => false
-                };
-            }
-            else if (upperName.StartsWith("COM") || upperName.StartsWith("LPT"))
-            {
-                char lastChar = upperName[3];
-                return lastChar is >= '1' and <= '9'; // COM1~9, LPT1~9
-            }
-
-            return false;
         }
 
 
