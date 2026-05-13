@@ -28,6 +28,13 @@ namespace RuniOS.IO
         UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default);
 
         /// <summary>
+        /// 지정된 경로에 디렉토리를 만듭니다.
+        /// </summary>
+        /// <param name="path">만들 디렉토리 경로입니다.</param>
+        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
+        UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// 지정된 경로에 새 파일을 쓰기 위한 스트림을 엽니다. 파일이 이미 존재하면 기존 내용을 덮어씁니다.
         /// </summary>
         /// <param name="path">기록할 파일 경로입니다.</param>

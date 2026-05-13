@@ -138,6 +138,12 @@ namespace RuniOS.IO
         #endregion
 
         #region Write
+        public UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default)
+        {
+            Directory.CreateDirectory(targetPath + path);
+            return UniTask.CompletedTask;
+        }
+
         /// <inheritdoc cref="IWritableIOProvider.OpenWrite(FilePath, CancellationToken)"/>
         public FileStream OpenWrite(FilePath path) => File.OpenWrite(targetPath + path);
         UniTask<Stream> IWritableIOProvider.OpenWrite(FilePath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenWrite(path));
