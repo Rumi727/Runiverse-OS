@@ -173,7 +173,7 @@ namespace RuniOS.IO.Virtual
             cancellationToken.ThrowIfCancellationRequested();
             
             VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteAllBytes(cancellationToken);
+            return file.WriteAllBytes(bytes, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -182,7 +182,7 @@ namespace RuniOS.IO.Virtual
             cancellationToken.ThrowIfCancellationRequested();
             
             VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteAllText(cancellationToken);
+            return file.WriteAllText(text, cancellationToken);
         }
 
         /// <inheritdoc/>
@@ -191,7 +191,7 @@ namespace RuniOS.IO.Virtual
             cancellationToken.ThrowIfCancellationRequested();
             
             VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteLines(cancellationToken);
+            return file.WriteLines(lines, cancellationToken);
         }
         #endregion
 

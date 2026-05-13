@@ -26,7 +26,7 @@ namespace RuniOS.IO
         /// <list type="bullet">
         /// <item><description>
         ///   <see langword="true"/>를 반환하는 경우: 프로바이더가 에셋 번들, 압축 파일(.zip, .jar 등),
-        ///   또는 <see cref="VirtualDirectory"/>와 같이 자체적인 내부 구조를 가지며 외부에서 구조 변경이 어려운 대상을 참조할 때.<br/>
+        ///   또는 <see cref="Virtual.VirtualDirectory"/>와 같이 자체적인 내부 구조를 가지며 외부에서 구조 변경이 어려운 대상을 참조할 때.<br/>
         ///   개발자가 직접 코드를 통해 구조를 정의하거나 변경하는 가상 파일 시스템 또한 여기에 해당합니다.
         /// </description></item>
         /// <item><description>

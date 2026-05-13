@@ -57,9 +57,7 @@ namespace RuniOS.IO
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         async UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default)
         {
-            await using Stream stream = await OpenWrite(path, cancellationToken);
-            stream.SetLength(0);
-
+            await using Stream stream = await CreateFile(path, cancellationToken);
             await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
         }
 
@@ -71,9 +69,7 @@ namespace RuniOS.IO
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         async UniTask WriteAllText(FilePath path, string text, CancellationToken cancellationToken = default)
         {
-            await using Stream stream = await OpenWrite(path, cancellationToken);
-            stream.SetLength(0);
-
+            await using Stream stream = await CreateFile(path, cancellationToken);
             await using StreamWriter writer = new StreamWriter(stream);
             await writer.WriteAsync(text);
         }
@@ -86,9 +82,7 @@ namespace RuniOS.IO
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         async UniTask WriteLines(FilePath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
         {
-            await using Stream stream = await OpenWrite(path, cancellationToken);
-            stream.SetLength(0);
-
+            await using Stream stream = await CreateFile(path, cancellationToken);
             await using StreamWriter writer = new StreamWriter(stream);
             foreach (var line in lines)
                 await writer.WriteLineAsync(line);
