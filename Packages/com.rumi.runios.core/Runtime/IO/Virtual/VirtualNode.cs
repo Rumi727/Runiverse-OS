@@ -159,5 +159,14 @@ namespace RuniOS.IO.Virtual
             if (string.IsNullOrEmpty(name) || name.IndexOfAny(FilePath.directorySeparatorChars) >= 0)
                 throw new InvalidOperationException($"The node name '{name}' contains invalid characters.");
         }
+
+        /// <summary>
+        /// 잘못된 파일 이름일 때 예외를 던집니다.
+        /// </summary>
+        public static void ThrowIfInvalidFileName(string name)
+        {
+            if (string.IsNullOrEmpty(name) || name.IndexOfAny(FilePath.directorySeparatorChars) >= 0)
+                throw new InvalidOperationException($"The file name '{name}' contains invalid characters.");
+        }
     }
 }

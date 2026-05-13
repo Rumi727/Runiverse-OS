@@ -54,7 +54,7 @@ namespace RuniOS.IO.Virtual
             VirtualNode? node = rootDirectory.GetNode(path);
             if (node == null)
                 return UniTask.FromResult<IOEntry?>(null);
-            
+
             return UniTask.FromResult<IOEntry?>(new IOEntry
             {
                 path = path,
@@ -69,7 +69,11 @@ namespace RuniOS.IO.Virtual
             using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, iterationToken);
             CancellationToken ct = linkedCTS.Token;
 
-            IEnumerable<VirtualNode> enumerable = recursive ? rootDirectory.EnumerateNodes() : rootDirectory.EnumerateChildNodes();
+            VirtualDirectoryBase? directory = rootDirectory.GetDirectory(path);
+            if (directory == null)
+                return;
+
+            IEnumerable<VirtualNode> enumerable = recursive ? directory.EnumerateNodes() : directory.EnumerateChildNodes();
             foreach (VirtualNode node in enumerable)
             {
                 ct.ThrowIfCancellationRequested();
@@ -94,7 +98,7 @@ namespace RuniOS.IO.Virtual
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            VirtualFileBase? file = rootDirectory.GetNode(path)?.AsFile();
+            VirtualFileBase? file = rootDirectory.GetFile(path);
             if (file == null)
                 VirtualDirectoryBase.ThrowFileNotFound(path);
 
@@ -111,7 +115,7 @@ namespace RuniOS.IO.Virtual
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            VirtualFileBase? file = rootDirectory.GetNode(path)?.AsFile();
+            VirtualFileBase? file = rootDirectory.GetFile(path);
             if (file == null)
                 VirtualDirectoryBase.ThrowFileNotFound(path);
 
@@ -128,7 +132,7 @@ namespace RuniOS.IO.Virtual
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            VirtualFileBase? file = rootDirectory.GetNode(path)?.AsFile();
+            VirtualFileBase? file = rootDirectory.GetFile(path);
             if (file == null)
                 VirtualDirectoryBase.ThrowFileNotFound(path);
 
@@ -140,7 +144,7 @@ namespace RuniOS.IO.Virtual
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            VirtualFileBase? file = rootDirectory.GetNode(path)?.AsFile();
+            VirtualFileBase? file = rootDirectory.GetFile(path);
             if (file == null)
                 VirtualDirectoryBase.ThrowFileNotFound(path);
 
@@ -149,49 +153,57 @@ namespace RuniOS.IO.Virtual
         #endregion
 
         #region Write
+        public UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            rootDirectory.CreateDirectory(path);
+
+            return UniTask.CompletedTask;
+        }
+
         /// <inheritdoc/>
         public UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default)
         {
+            VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
+
             cancellationToken.ThrowIfCancellationRequested();
-            
-            VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.OpenWrite(cancellationToken);
+            return rootDirectory.GetOrCreateFile(path).OpenWrite(cancellationToken);
         }
-        
+
         /// <inheritdoc/>
         public UniTask<Stream> CreateFile(FilePath path, CancellationToken cancellationToken = default)
         {
+            VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
+
             cancellationToken.ThrowIfCancellationRequested();
-            
-            VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.Create(cancellationToken);
+            return rootDirectory.GetOrCreateFile(path).Create(cancellationToken);
         }
 
         /// <inheritdoc/>
         public UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default)
         {
+            VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
+
             cancellationToken.ThrowIfCancellationRequested();
-            
-            VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteAllBytes(bytes, cancellationToken);
+            return rootDirectory.GetOrCreateFile(path).WriteAllBytes(bytes, cancellationToken);
         }
 
         /// <inheritdoc/>
         public UniTask WriteAllText(FilePath path, string text, CancellationToken cancellationToken = default)
         {
+            VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
+
             cancellationToken.ThrowIfCancellationRequested();
-            
-            VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteAllText(text, cancellationToken);
+            return rootDirectory.GetOrCreateFile(path).WriteAllText(text, cancellationToken);
         }
 
         /// <inheritdoc/>
         public UniTask WriteLines(FilePath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
         {
+            VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
+
             cancellationToken.ThrowIfCancellationRequested();
-            
-            VirtualFileBase file = rootDirectory.GetNode(path)?.AsFile() ?? new VirtualFile();
-            return file.WriteLines(lines, cancellationToken);
+            return rootDirectory.GetOrCreateFile(path).WriteLines(lines, cancellationToken);
         }
         #endregion
 
@@ -199,11 +211,11 @@ namespace RuniOS.IO.Virtual
         public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             VirtualDirectoryBase? directory = rootDirectory.GetNode(path)?.AsDirectory();
             if (directory == null)
                 VirtualDirectoryBase.ThrowDirectoryNotFound(path);
-                
+
             directory.Delete();
             return UniTask.CompletedTask;
         }
@@ -212,11 +224,11 @@ namespace RuniOS.IO.Virtual
         public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            
+
             VirtualFileBase? file = rootDirectory.GetNode(path)?.AsFile();
             if (file == null)
                 VirtualDirectoryBase.ThrowFileNotFound(path);
-                
+
             file.Delete();
             return UniTask.CompletedTask;
         }
