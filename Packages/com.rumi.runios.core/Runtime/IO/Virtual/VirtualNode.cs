@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace RuniOS.IO.Virtual
 {
@@ -44,10 +43,13 @@ namespace RuniOS.IO.Virtual
         /// </summary>
         public IOMetaData metaData { get; private set; } = new IOMetaData
         {
-            name = null,
-            creationTime = DateTime.UtcNow,
-            lastWriteTime = DateTime.UtcNow
+            name = null, creationTime = DateTime.UtcNow, lastWriteTime = DateTime.UtcNow
         };
+
+        /// <summary>
+        /// 이 노드가 디렉토리인지 여부를 나타내는 값을 가져옵니다.
+        /// </summary>
+        public bool isDirectory => this is VirtualDirectoryBase;
 
         /// <summary>
         /// 이 노드가 어태치 상태인지 여부를 나타내는 값을 가져옵니다.
@@ -74,7 +76,10 @@ namespace RuniOS.IO.Virtual
             this.parent = parent;
             this.name = name;
 
-            metaData = metaData with { name = name };
+            metaData = metaData with
+            {
+                name = name
+            };
 
             if (this is VirtualDirectoryBase directory)
                 directory.InvalidateCache();
@@ -112,13 +117,17 @@ namespace RuniOS.IO.Virtual
 
         public abstract void OnDelete();
 
+        public VirtualDirectoryBase? AsDirectory() => this as VirtualDirectoryBase;
+
+        public VirtualFileBase? AsFile() => this as VirtualFileBase;
+
         /// <summary>
         /// 이 노드의 <see cref="isAttached"/> 상태가 <see langword="true"/>일 때 예외를 던집니다.
         /// </summary>
         public void ThrowIfAttachedException()
         {
             if (isAttached)
-                throw new InvalidOperationException(/* TODO 예외 메시지 적기 */);
+                throw new InvalidOperationException( /* TODO 예외 메시지 적기 */);
         }
 
         /// <summary>
@@ -128,7 +137,7 @@ namespace RuniOS.IO.Virtual
         public void ThrowIfNotAttachedException()
         {
             if (!isAttached)
-                throw new InvalidOperationException(/* TODO 예외 메시지 적기 */);
+                throw new InvalidOperationException( /* TODO 예외 메시지 적기 */);
         }
 
         /// <summary>
@@ -140,10 +149,13 @@ namespace RuniOS.IO.Virtual
                 throw new ObjectDisposedException(GetType().Name, "/* TODO 예외 메시지 적기 */");
         }
 
+        /// <summary>
+        /// 잘못된 노드 이름일 때 예외를 던집니다.
+        /// </summary>
         public static void ThrowIfInvalidNodeName(string name)
         {
             if (string.IsNullOrEmpty(name) || name.IndexOfAny(FilePath.directorySeparatorChars) >= 0)
-                throw new InvalidDataException($"The node name '{name}' contains invalid characters.");
+                throw new InvalidOperationException($"The node name '{name}' contains invalid characters.");
         }
     }
 }

@@ -7,7 +7,7 @@ namespace RuniOS.IO.Virtual
 {
     public class VirtualDirectory : VirtualDirectoryBase
     {
-        readonly Dictionary<string, VirtualNode> children = new Dictionary<string, VirtualNode>();
+        readonly SortedDictionary<string, VirtualNode> children = [];
 
         /// <summary>
         /// 지정된 경로에 새로운 디렉토리를 생성합니다.<br/>
@@ -22,6 +22,9 @@ namespace RuniOS.IO.Virtual
         /// 경로의 주어진 세그먼트가 디렉토리가 아닌 다른 유형의 항목일 때 발생합니다.<br/>
         /// 예를 들어, 디렉토리를 생성하거나 찾으려는데 경로 중간 또는 마지막에 파일이 존재하는 경우,
         /// 시스템은 기대하는 디렉토리를 찾을 수 없으므로 이 예외를 발생시킵니다.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        /// 이 <see cref="VirtualDirectory"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
         /// </exception>
         public bool CreateDirectory(FilePath path)
         {
@@ -63,14 +66,21 @@ namespace RuniOS.IO.Virtual
 
         public override VirtualNode? GetChildNode(string name)
         {
+            ThrowIfDeletedException();
             ThrowIfInvalidNodeName(name);
+
             return children.GetValueOrDefault(name);
         }
 
-        public override IEnumerable<VirtualNode> EnumerateNode() => children.Values;
+        public override IEnumerable<VirtualNode> EnumerateChildNodes()
+        {
+            ThrowIfDeletedException();
+            return children.Values;
+        }
 
         public override void AttachChild(string name, VirtualNode child)
         {
+            ThrowIfDeletedException();
             ThrowIfInvalidNodeName(name);
 
             child.ThrowIfDeletedException();
@@ -86,6 +96,7 @@ namespace RuniOS.IO.Virtual
 
         public override void SetChild(string name, VirtualNode child)
         {
+            ThrowIfDeletedException();
             ThrowIfInvalidNodeName(name);
 
             child.ThrowIfDeletedException();
@@ -101,6 +112,8 @@ namespace RuniOS.IO.Virtual
 
         protected internal override void OnDetachChild(VirtualNode child)
         {
+            ThrowIfDeletedException();
+            
             child.ThrowIfNotAttachedException();
             if (!children.ContainsKey(child.name))
                 ThrowNodeNotFound(child.name);
@@ -115,6 +128,8 @@ namespace RuniOS.IO.Virtual
 
             foreach (var item in children.ToList())
                 item.Value.Delete();
+            
+            children.Clear();
         }
 
         /// <summary>
