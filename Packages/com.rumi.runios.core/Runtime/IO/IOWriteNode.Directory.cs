@@ -36,6 +36,12 @@ namespace RuniOS.IO
             public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) => readOnlyDir.GetAllFiles(wildcardPatterns, cancellationToken);
 
             /// <summary>
+            /// 이 노드가 나타내는 경로에 디렉토리를 만듭니다.
+            /// </summary>
+            /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
+            public UniTask Create(CancellationToken cancellationToken = default) => node.provider.CreateDirectory(node.path, cancellationToken);
+
+            /// <summary>
             /// 이 노드가 나타내는 디렉토리를 삭제합니다.
             /// </summary>
             /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
