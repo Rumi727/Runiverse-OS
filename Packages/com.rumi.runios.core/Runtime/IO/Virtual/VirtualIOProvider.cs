@@ -7,18 +7,24 @@ using System.Threading;
 namespace RuniOS.IO.Virtual
 {
     /// <summary>
-    /// 메모리 기반 가상 파일 시스템(<see cref="VirtualDirectory"/>)을 <see cref="IWritableIOProvider"/> 형태로 제공하는 구현체입니다.
+    /// Exposes a virtual directory tree as a writable I/O provider.<br/>
+    /// 가상 디렉터리 트리를 쓰기 가능한 I/O 프로바이더로 제공합니다.
     /// </summary>
     public sealed class VirtualIOProvider : IWritableIOProvider
     {
         /// <summary>
-        /// 지정된 가상 루트 디렉토리를 기반으로 <see cref="VirtualIOProvider"/> 인스턴스를 생성합니다.
+        /// Initializes a new <see cref="VirtualIOProvider"/> instance for the specified root directory.<br/>
+        /// 지정된 루트 디렉터리를 사용하는 새 <see cref="VirtualIOProvider"/> 인스턴스를 초기화합니다.
         /// </summary>
-        /// <param name="rootDirectory">이 프로바이더가 참조할 루트 가상 디렉토리입니다.</param>
+        /// <param name="rootDirectory">
+        /// The virtual root directory referenced by this provider.<br/>
+        /// 이 프로바이더가 참조하는 가상 루트 디렉터리입니다.
+        /// </param>
         public VirtualIOProvider(VirtualDirectoryBase rootDirectory) => this.rootDirectory = rootDirectory;
 
         /// <summary>
-        /// 이 프로바이더가 참조하는 루트 가상 디렉토리입니다.
+        /// Gets the virtual root directory referenced by this provider.<br/>
+        /// 이 프로바이더가 참조하는 가상 루트 디렉터리를 가져옵니다.
         /// </summary>
         public VirtualDirectoryBase rootDirectory { get; }
 
@@ -89,11 +95,21 @@ namespace RuniOS.IO.Virtual
 
         #region Read
         /// <summary>
-        /// 지정된 경로의 파일의 모든 바이트를 읽습니다.
+        /// Reads all bytes from the file at the specified path.<br/>
+        /// 지정된 경로의 파일에서 모든 바이트를 읽습니다.
         /// </summary>
-        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
-        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
-        /// <returns>파일의 모든 바이트를 포함하는 <see cref="byte"/> 배열입니다.</returns>
+        /// <param name="path">
+        /// The virtual file-system path of the file to read.<br/>
+        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// When the asynchronous operation completes, returns a byte array containing the full file contents.<br/>
+        /// 비동기 작업이 완료되면 파일 전체 내용을 포함하는 <see cref="byte"/> 배열을 반환합니다.
+        /// </returns>
         public UniTask<byte[]> ReadAllBytes(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -106,11 +122,21 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로의 파일의 모든 텍스트를 읽습니다.
+        /// Reads all text from the file at the specified path.<br/>
+        /// 지정된 경로의 파일에서 모든 텍스트를 읽습니다.
         /// </summary>
-        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
-        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
-        /// <returns>파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
+        /// <param name="path">
+        /// The virtual file-system path of the file to read.<br/>
+        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// When the asynchronous operation completes, returns the full file contents as text.<br/>
+        /// 비동기 작업이 완료되면 파일 전체 내용을 텍스트로 반환합니다.
+        /// </returns>
         public UniTask<string> ReadAllText(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -123,11 +149,21 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로의 파일의 모든 줄을 한 줄씩 읽어 비동기 스트림으로 제공합니다.
+        /// Reads the file at the specified path as an asynchronous sequence of lines.<br/>
+        /// 지정된 경로의 파일을 줄 단위 비동기 시퀀스로 읽습니다.
         /// </summary>
-        /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
-        /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
-        /// <returns>파일의 각 줄을 제공하는 비동기 문자열 스트림입니다.</returns>
+        /// <param name="path">
+        /// The virtual file-system path of the file to read.<br/>
+        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// An asynchronous sequence that yields each line from the file.<br/>
+        /// 파일의 각 줄을 제공하는 비동기 시퀀스입니다.
+        /// </returns>
         public IUniTaskAsyncEnumerable<string> ReadLines(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -153,6 +189,7 @@ namespace RuniOS.IO.Virtual
         #endregion
 
         #region Write
+        /// <inheritdoc/>
         public UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

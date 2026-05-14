@@ -5,11 +5,15 @@ using System.IO;
 
 namespace RuniOS.IO.Virtual
 {
+    /// <summary>
+    /// Provides path-based directory operations for a virtual directory node.<br/>
+    /// 가상 디렉터리 노드의 경로 기반 디렉터리 작업을 제공합니다.
+    /// </summary>
     public abstract class VirtualDirectoryBase : VirtualNode
     {
         /// <summary>
-        /// 지정된 경로에 해당하는 <see cref="VirtualDirectory"/> 인스턴스를 캐싱하여 가져옵니다.<br/>
-        /// 이 캐시는 가상 파일 시스템의 구조가 변경될 때 무효화되어야 합니다.
+        /// Gets the path lookup cache owned by the root directory.<br/>
+        /// 루트 디렉터리가 소유한 경로 조회 캐시를 가져옵니다.
         /// </summary>
         protected Dictionary<FilePath, VirtualNode> rootDirectoryCache
         {
@@ -23,6 +27,22 @@ namespace RuniOS.IO.Virtual
         }
         readonly Dictionary<FilePath, VirtualNode> _rootDirectoryCache = [];
 
+        /// <summary>
+        /// Attaches a child node at the specified path.<br/>
+        /// 지정된 경로에 자식 노드를 연결합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path where <paramref name="child"/> should be attached.<br/>
+        /// <paramref name="child"/>를 연결할 경로입니다.
+        /// </param>
+        /// <param name="child">
+        /// The node to attach.<br/>
+        /// 연결할 노드입니다.
+        /// </param>
+        /// <exception cref="DirectoryNotFoundException">
+        /// Thrown when the parent directory for <paramref name="path"/> does not exist.<br/>
+        /// <paramref name="path"/>의 부모 디렉터리가 없는 경우 발생합니다.
+        /// </exception>
         public void Attach(FilePath path, VirtualNode child)
         {
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
@@ -32,23 +52,71 @@ namespace RuniOS.IO.Virtual
             directory.AttachChild(path.GetFileName(), child);
         }
 
+        /// <summary>
+        /// Attaches a child node with the specified name.<br/>
+        /// 지정된 이름으로 자식 노드를 연결합니다.
+        /// </summary>
+        /// <param name="name">
+        /// The child name to assign.<br/>
+        /// 할당할 자식 이름입니다.
+        /// </param>
+        /// <param name="child">
+        /// The child node to attach.<br/>
+        /// 연결할 자식 노드입니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory or <paramref name="child"/> has been deleted.<br/>
+        /// 이 디렉터리 또는 <paramref name="child"/>가 삭제된 경우 발생합니다.
         /// </exception>
         public abstract void AttachChild(string name, VirtualNode child);
 
+        /// <summary>
+        /// Binds a child node to this directory after it has been added to the directory storage.<br/>
+        /// 자식 노드가 디렉터리 저장소에 추가된 뒤 이 디렉터리에 바인딩합니다.
+        /// </summary>
+        /// <param name="name">
+        /// The child name assigned by this directory.<br/>
+        /// 이 디렉터리가 할당한 자식 이름입니다.
+        /// </param>
+        /// <param name="child">
+        /// The child node to bind.<br/>
+        /// 바인딩할 자식 노드입니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when <paramref name="child"/> has been deleted.<br/>
+        /// <paramref name="child"/>가 삭제된 경우 발생합니다.
         /// </exception>
         protected void BindChild(string name, VirtualNode child) => child.OnAttached(name, this);
 
+        /// <summary>
+        /// Sets the child node for the specified name, replacing an existing child when present.<br/>
+        /// 지정된 이름의 자식 노드를 설정하며, 기존 자식이 있으면 교체합니다.
+        /// </summary>
+        /// <param name="name">
+        /// The child name to set.<br/>
+        /// 설정할 자식 이름입니다.
+        /// </param>
+        /// <param name="child">
+        /// The child node to attach.<br/>
+        /// 연결할 자식 노드입니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory or <paramref name="child"/> has been deleted.<br/>
+        /// 이 디렉터리 또는 <paramref name="child"/>가 삭제된 경우 발생합니다.
         /// </exception>
         public abstract void SetChild(string name, VirtualNode child);
 
+        /// <summary>
+        /// Detaches the child node with the specified name if it exists.<br/>
+        /// 지정된 이름의 자식 노드가 있으면 분리합니다.
+        /// </summary>
+        /// <param name="name">
+        /// The child name to detach.<br/>
+        /// 분리할 자식 이름입니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public void DetachChild(string name)
         {
@@ -59,22 +127,28 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로에 새로운 디렉토리를 생성합니다.<br/>
-        /// 중간 경로가 없으면 자동으로 생성됩니다.
+        /// Creates a directory at the specified path, creating missing intermediate directories as needed.<br/>
+        /// 지정된 경로에 디렉터리를 만들고, 필요한 경우 누락된 중간 디렉터리도 만듭니다.
         /// </summary>
-        /// <param name="path">생성할 디렉토리의 경로입니다. 예: "assets/runios/textures", "assets/runios/sounds"</param>
-        /// <param name="constructor">디렉토리를 생성하기 위해 호출되는 함수입니다. <see langword="null"/>이라면 기본값을 사용합니다.</param>
+        /// <param name="path">
+        /// The directory path to create.<br/>
+        /// 만들 디렉터리 경로입니다.
+        /// </param>
+        /// <param name="constructor">
+        /// The factory used to create new directory nodes, or <see langword="null"/> to use <see cref="VirtualDirectory"/>.<br/>
+        /// 새 디렉터리 노드를 만들 팩터리이며, <see langword="null"/>이면 <see cref="VirtualDirectory"/>를 사용합니다.
+        /// </param>
         /// <returns>
-        /// 디렉토리가 성공적으로 생성되었거나 이미 존재하여 접근할 수 있는 경우 <see langword="true"/>를 반환하고,<br/>
-        /// 경로가 비어있는 경우 <see langword="false"/>를 반환합니다.
+        /// <see langword="true"/> if any directory was created; otherwise, <see langword="false"/>.<br/>
+        /// 디렉터리가 하나라도 생성되었으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         /// <exception cref="DirectoryNotFoundException">
-        /// 경로의 주어진 세그먼트가 디렉토리가 아닌 다른 유형의 항목일 때 발생합니다.<br/>
-        /// 예를 들어, 디렉토리를 생성하거나 찾으려는데 경로 중간 또는 마지막에 파일이 존재하는 경우,
-        /// 시스템은 기대하는 디렉토리를 찾을 수 없으므로 이 예외를 발생시킵니다.
+        /// Thrown when a path segment exists but is not a directory.<br/>
+        /// 경로 세그먼트가 존재하지만 디렉터리가 아닌 경우 발생합니다.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public bool CreateDirectory(FilePath path, Func<VirtualDirectoryBase>? constructor = null)
         {
@@ -117,15 +191,20 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로에 해당하는 노드를 가져옵니다.
+        /// Gets the node at the specified path.<br/>
+        /// 지정된 경로의 노드를 가져옵니다.
         /// </summary>
-        /// <param name="path">가져올 노드의 경로입니다. 예: "assets/runios/textures", "assets/runios/sounds"</param>
+        /// <param name="path">
+        /// The path of the node to get.<br/>
+        /// 가져올 노드의 경로입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 경로의 <see cref="VirtualNode"/> 인스턴스이거나,<br/>
-        /// 해당 경로의 노드를 찾을 수 없는 경우 <see langword="null"/>을 반환합니다.
+        /// The matching <see cref="VirtualNode"/> if found; otherwise, <see langword="null"/>.<br/>
+        /// 값을 찾은 경우 해당 <see cref="VirtualNode"/>를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public virtual VirtualNode? GetNode(FilePath path)
         {
@@ -164,30 +243,42 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 이름에 해당하는 직계 노드를 가져옵니다.
+        /// Gets the direct child node with the specified name.<br/>
+        /// 지정된 이름의 직계 자식 노드를 가져옵니다.
         /// </summary>
+        /// <param name="name">
+        /// The child node name to resolve.<br/>
+        /// 조회할 자식 노드 이름입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 이름의 <see cref="VirtualNode"/> 인스턴스이거나,<br/>
-        /// 해당 이름의 직계 노드를 찾을 수 없는 경우 <see langword="null"/>을 반환합니다.
+        /// The matching child node if found; otherwise, <see langword="null"/>.<br/>
+        /// 값을 찾은 경우 해당 자식 노드를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// 지정한 이름이 잘못된 노드 이름일 때 발생합니다.
+        /// Thrown when <paramref name="name"/> is not a valid node name.<br/>
+        /// <paramref name="name"/>이 유효한 노드 이름이 아닌 경우 발생합니다.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public abstract VirtualNode? GetChildNode(string name);
 
         /// <summary>
-        /// 지정된 경로에 해당하는 디렉토리를 가져옵니다.
+        /// Gets the directory at the specified path.<br/>
+        /// 지정된 경로의 디렉터리를 가져옵니다.
         /// </summary>
-        /// <param name="path">가져올 디렉토리의 경로입니다. 예: "assets/runios/textures", "assets/runios/sounds"</param>
+        /// <param name="path">
+        /// The path of the directory to get.<br/>
+        /// 가져올 디렉터리의 경로입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 경로의 <see cref="VirtualDirectoryBase"/> 인스턴스이거나,<br/>
-        /// 해당 경로의 디렉토리를 찾을 수 없는 경우 <see langword="null"/>을 반환합니다.
+        /// The matching <see cref="VirtualDirectoryBase"/> if found; otherwise, <see langword="null"/>.<br/>
+        /// 값을 찾은 경우 해당 <see cref="VirtualDirectoryBase"/>를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public virtual VirtualDirectoryBase? GetDirectory(FilePath path)
         {
@@ -211,16 +302,20 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로에 해당하는 파일을 가져옵니다.<br/>
-        /// 지정된 경로에 파일이 없다면, 새로 만듭니다.
+        /// Gets the file at the specified path.<br/>
+        /// 지정된 경로의 파일을 가져옵니다.
         /// </summary>
-        /// <param name="path">가져올 파일의 경로입니다. 예: "assets/runios/textures/monster.png", "assets/runios/sounds/attack.ogg"</param>
+        /// <param name="path">
+        /// The path of the file to get.<br/>
+        /// 가져올 파일의 경로입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 경로의 <see cref="VirtualFileBase"/> 인스턴스이거나,<br/>
-        /// 해당 경로의 파일을 찾을 수 없는 경우 <see langword="null"/>을 반환합니다.
+        /// The matching <see cref="VirtualFileBase"/> if found; otherwise, <see langword="null"/>.<br/>
+        /// 값을 찾은 경우 해당 <see cref="VirtualFileBase"/>를 반환하고, 그렇지 않으면 <see langword="null"/>을 반환합니다.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public virtual VirtualFileBase? GetFile(FilePath path)
         {
@@ -244,15 +339,20 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 지정된 경로에 해당하는 파일을 가져옵니다.<br/>
-        /// 지정된 경로에 파일이 없다면, 새로 만듭니다.
+        /// Gets the file at the specified path, or creates it when it does not exist.<br/>
+        /// 지정된 경로의 파일을 가져오며, 파일이 없으면 새로 만듭니다.
         /// </summary>
-        /// <param name="path">가져올 파일의 경로입니다. 예: "assets/runios/textures", "assets/runios/sounds"</param>
+        /// <param name="path">
+        /// The path of the file to get or create.<br/>
+        /// 가져오거나 만들 파일의 경로입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 경로의 <see cref="VirtualFileBase"/> 인스턴스입니다.
+        /// The existing or newly created <see cref="VirtualFileBase"/>.<br/>
+        /// 기존 또는 새로 만든 <see cref="VirtualFileBase"/>를 반환합니다.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public virtual VirtualFileBase GetOrCreateFile(FilePath path)
         {
@@ -281,10 +381,16 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 모든 하위 디렉토리의 노드를 포함하여 모든 노드를 열거합니다.
+        /// Enumerates all descendant nodes recursively.<br/>
+        /// 모든 하위 노드를 재귀적으로 열거합니다.
         /// </summary>
+        /// <returns>
+        /// A sequence containing every descendant node under this directory.<br/>
+        /// 이 디렉터리 아래의 모든 하위 노드를 포함하는 시퀀스입니다.
+        /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public virtual IEnumerable<VirtualNode> EnumerateNodes()
         {
@@ -304,17 +410,32 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <summary>
-        /// 모든 직계 노드를 열거합니다.
+        /// Enumerates the direct child nodes of this directory.<br/>
+        /// 이 디렉터리의 직계 자식 노드를 열거합니다.
         /// </summary>
+        /// <returns>
+        /// A sequence containing direct child nodes.<br/>
+        /// 직계 자식 노드를 포함하는 시퀀스입니다.
+        /// </returns>
         /// <exception cref="ObjectDisposedException">
-        /// 이 <see cref="VirtualDirectoryBase"/> 인스턴스가 삭제되어 유효하지 않은 상태인 경우 발생합니다.
+        /// Thrown when this directory has been deleted.<br/>
+        /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
         public abstract IEnumerable<VirtualNode> EnumerateChildNodes();
 
+        /// <summary>
+        /// Removes the specified attached child from this directory's child storage.<br/>
+        /// 지정된 연결된 자식을 이 디렉터리의 자식 저장소에서 제거합니다.
+        /// </summary>
+        /// <param name="child">
+        /// The attached child node to remove.<br/>
+        /// 제거할 연결된 자식 노드입니다.
+        /// </param>
         protected internal abstract void OnDetachChild(VirtualNode child);
 
         /// <summary>
-        /// 루트 디렉토리 인스턴스에 대한 캐시를 무효화합니다.
+        /// Clears cached path lookups for this directory and its root directory.<br/>
+        /// 이 디렉터리와 루트 디렉터리의 경로 조회 캐시를 지웁니다.
         /// </summary>
         public void InvalidateCache()
         {
@@ -322,35 +443,81 @@ namespace RuniOS.IO.Virtual
             _rootDirectoryCache.Clear();
         }
 
+        /// <summary>
+        /// Throws an exception indicating that a node was not found at the specified path.<br/>
+        /// 지정된 경로에서 노드를 찾을 수 없음을 나타내는 예외를 발생시킵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The missing node path.<br/>
+        /// 찾을 수 없는 노드 경로입니다.
+        /// </param>
+        /// <exception cref="InvalidOperationException">
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
+        /// </exception>
         [DoesNotReturn]
         public static void ThrowNodeNotFound(FilePath path) => throw new InvalidOperationException($"The node at path '{path}' was not found.");
 
+        /// <summary>
+        /// Throws an exception indicating that a directory was not found at the specified path.<br/>
+        /// 지정된 경로에서 디렉터리를 찾을 수 없음을 나타내는 예외를 발생시킵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The missing directory path.<br/>
+        /// 찾을 수 없는 디렉터리 경로입니다.
+        /// </param>
+        /// <exception cref="DirectoryNotFoundException">
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
+        /// </exception>
         [DoesNotReturn]
         public static void ThrowDirectoryNotFound(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was not found.");
 
+        /// <summary>
+        /// Throws an exception indicating that a file was not found at the specified path.<br/>
+        /// 지정된 경로에서 파일을 찾을 수 없음을 나타내는 예외를 발생시킵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The missing file path.<br/>
+        /// 찾을 수 없는 파일 경로입니다.
+        /// </param>
+        /// <exception cref="FileNotFoundException">
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
+        /// </exception>
         [DoesNotReturn]
         public static void ThrowFileNotFound(FilePath path) => throw new FileNotFoundException($"The file at path '{path}' was not found.");
 
         /// <summary>
-        /// 항상 예외를 던집니다.<br/>
-        /// 이는 경로 중간에 파일이 있어 티렉토리를 탐색할 수 없는 상황에 사용됩니다.
+        /// Throws an exception indicating that the directory path is invalid.<br/>
+        /// 디렉터리 경로가 유효하지 않음을 나타내는 예외를 발생시킵니다.
         /// </summary>
+        /// <param name="path">
+        /// The invalid directory path.<br/>
+        /// 유효하지 않은 디렉터리 경로입니다.
+        /// </param>
         /// <exception cref="DirectoryNotFoundException">
-        /// 경로 중간에 파일이 있어 디렉토리를 탐색할 수 없는 경우 발생합니다.
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
         public static void ThrowInvalidDirectoryException(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was invalid.");
 
         /// <summary>
-        /// 항상 예외를 던집니다.<br/>
-        /// 이는 파일을 기대했지만 실제로는 디렉토리가 존재하는 상황에 사용됩니다.
+        /// Throws an exception indicating that a directory exists where a file was expected.<br/>
+        /// 파일이 필요한 위치에 디렉터리가 있음을 나타내는 예외를 발생시킵니다.
         /// </summary>
-        /// <param name="path">문제가 발생한 전체 경로입니다.</param>
-        /// <param name="segmentName">파일이 아닌 항목의 이름(문제의 원인이 된 경로 세그먼트)입니다.</param>
+        /// <param name="path">
+        /// The full path that caused the failure.<br/>
+        /// 실패를 일으킨 전체 경로입니다.
+        /// </param>
+        /// <param name="segmentName">
+        /// The path segment that was not a file.<br/>
+        /// 파일이 아니었던 경로 세그먼트입니다.
+        /// </param>
         /// <exception cref="UnauthorizedAccessException">
-        /// 경로의 주어진 세그먼트가 파일이 아닌 다른 유형의 항목일 때 발생합니다.<br/>
-        /// 예를 들어, 파일을 삭제하거나 찾으려는데 경로의 해당 위치에 디렉토리가 존재하는 경우,
-        /// 해당 디렉토리에 대한 파일 작업이 허용되지 않음을 나타냅니다.
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
         public static void ThrowPathIsDirectoryException(FilePath path, string segmentName)
@@ -364,15 +531,20 @@ namespace RuniOS.IO.Virtual
 
 
         /// <summary>
-        /// 항상 예외를 던집니다.<br/>
-        /// 이는 디렉토리를 기대했지만 실제로는 디렉토리가 아닌 다른 유형의 항목인 상황에 사용됩니다.
+        /// Throws an exception indicating that a file exists where a directory was expected.<br/>
+        /// 디렉터리가 필요한 위치에 파일이 있음을 나타내는 예외를 발생시킵니다.
         /// </summary>
-        /// <param name="path">문제가 발생한 전체 경로입니다.</param>
-        /// <param name="segmentName">디렉토리가 아닌 항목의 이름(문제의 원인이 된 경로 세그먼트)입니다.</param>
+        /// <param name="path">
+        /// The full path that caused the failure.<br/>
+        /// 실패를 일으킨 전체 경로입니다.
+        /// </param>
+        /// <param name="segmentName">
+        /// The path segment that was not a directory.<br/>
+        /// 디렉터리가 아니었던 경로 세그먼트입니다.
+        /// </param>
         /// <exception cref="DirectoryNotFoundException">
-        /// 경로의 주어진 세그먼트가 디렉토리가 아닌 다른 유형의 항목일 때 발생합니다.<br/>
-        /// 예를 들어, 디렉토리를 생성하거나 찾으려는데 경로 중간 또는 마지막에 파일이 존재하는 경우,
-        /// 시스템은 기대하는 디렉토리를 찾을 수 없으므로 이 예외를 발생시킵니다.
+        /// Always thrown.<br/>
+        /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
         public static void ThrowPathIsFileException(FilePath path, string segmentName)
