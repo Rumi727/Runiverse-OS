@@ -1,24 +1,45 @@
 #nullable enable
 using RuniOS.IO;
 using System.IO;
+using UnityEngine.Networking;
 
 namespace RuniOS.Utility
 {
     public static class PathUtility
     {
+        /// <summary>
+        /// The replacement character used when invalid name characters are converted to a safe character.<br/>
+        /// 이름에 사용할 수 없는 문자를 안전한 문자로 변환할 때 사용하는 대체 문자를 나타냅니다.
+        /// </summary>
+        public const char alternativeNameChar = '_';
+
+        /// <summary>
+        /// The prefix used when converting a path value to a local file URL string.<br/>
+        /// 경로 값을 로컬 파일 URL 문자열로 변환할 때 사용하는 접두사를 나타냅니다.
+        /// </summary>
+        public const string urlPathPrefix = "file:///";
+
         static readonly char[] invalidPathChars = Path.GetInvalidPathChars();
         static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-        public static RuniPath ToPath(this string? path) => path;
+        /// <summary>
+        /// Converts this path value to a local file URL string.<br/>
+        /// 이 경로 값을 로컬 파일 URL 문자열로 변환합니다.
+        /// </summary>
+        /// <returns>
+        /// A string prefixed with <see cref="urlPathPrefix"/> and escaped for URL usage.<br/>
+        /// <see cref="urlPathPrefix"/>가 붙고 URL 용도로 이스케이프된 문자열을 반환합니다.
+        /// </returns>
+        public static string UrlPathPrefix(string path) => urlPathPrefix + UnityWebRequest.EscapeURL(path);
 
         /// <summary>
         /// 지정한 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="RuniPath.alternativeNameChar"/> ('_')입니다.
+        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다.
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="RuniPath.alternativeNameChar"/>입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
         /// <returns>잘못된 문자가 대체된 새 문자열입니다.</returns>
-        public static string FixPathChars(string path, char newChar = RuniPath.alternativeNameChar)
+        public static string FixPathChars(string path, char newChar = alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
                 return RuniPath.empty;
@@ -43,12 +64,12 @@ namespace RuniOS.Utility
 
         /// <summary>
         /// 지정한 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="RuniPath.alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
+        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="RuniPath.alternativeNameChar"/>입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
         /// <returns>잘못된 파일 이름 문자가 대체된 새 문자열입니다.</returns>
-        public static string FixFileNameChars(string path, char newChar = RuniPath.alternativeNameChar)
+        public static string FixFileNameChars(string path, char newChar = alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
                 return string.Empty;

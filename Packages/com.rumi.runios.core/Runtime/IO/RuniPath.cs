@@ -4,7 +4,6 @@ using RuniOS.Json.Converters.IO;
 using RuniOS.Spans;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
-using UnityEngine.Networking;
 
 namespace RuniOS.IO
 {
@@ -30,18 +29,6 @@ namespace RuniOS.IO
         /// 정규화 과정에서 허용되는 Windows 디렉터리 구분 문자를 나타냅니다.
         /// </summary>
         public const char windowsDirectorySeparatorChar = '\\';
-
-        /// <summary>
-        /// The replacement character used when invalid name characters are converted to a safe character.<br/>
-        /// 이름에 사용할 수 없는 문자를 안전한 문자로 변환할 때 사용하는 대체 문자를 나타냅니다.
-        /// </summary>
-        public const char alternativeNameChar = '_';
-
-        /// <summary>
-        /// The prefix used when converting a path value to a local file URL string.<br/>
-        /// 경로 값을 로컬 파일 URL 문자열로 변환할 때 사용하는 접두사를 나타냅니다.
-        /// </summary>
-        public const string urlPathPrefix = "file:///";
 
         /// <summary>
         /// The directory separator characters recognized by normalization.<br/>
@@ -378,18 +365,6 @@ namespace RuniOS.IO
             
             return value[startPath.length] == directorySeparatorChar && value.StartsWith(startPath.value, StringComparison.Ordinal);
         }
-
-
-
-        /// <summary>
-        /// Converts this path value to a local file URL string.<br/>
-        /// 이 경로 값을 로컬 파일 URL 문자열로 변환합니다.
-        /// </summary>
-        /// <returns>
-        /// A string prefixed with <see cref="urlPathPrefix"/> and escaped for URL usage.<br/>
-        /// <see cref="urlPathPrefix"/>가 붙고 URL 용도로 이스케이프된 문자열을 반환합니다.
-        /// </returns>
-        public readonly string UrlPathPrefix() => urlPathPrefix + UnityWebRequest.EscapeURL(value);
 
 
 
@@ -832,42 +807,6 @@ namespace RuniOS.IO
         /// 결합된 경로를 반환합니다.
         /// </returns>
         public static RuniPath operator +(RuniPath? left, string? right) => Combine(left ?? empty, right);
-
-        /// <summary>
-        /// Combines a path string and a path.<br/>
-        /// 경로 문자열과 경로를 결합합니다.
-        /// </summary>
-        /// <param name="left">
-        /// The first path string to combine. It may be <see langword="null"/>.<br/>
-        /// 결합할 첫 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
-        /// </param>
-        /// <param name="right">
-        /// The second path to combine.<br/>
-        /// 결합할 두 번째 경로입니다.
-        /// </param>
-        /// <returns>
-        /// The combined path.<br/>
-        /// 결합된 경로를 반환합니다.
-        /// </returns>
-        public static RuniPath operator +(string? left, RuniPath right) => Combine(left, right);
-
-        /// <summary>
-        /// Combines a path string and a nullable path.<br/>
-        /// 경로 문자열과 nullable 경로를 결합합니다.
-        /// </summary>
-        /// <param name="left">
-        /// The first path string to combine. It may be <see langword="null"/>.<br/>
-        /// 결합할 첫 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
-        /// </param>
-        /// <param name="right">
-        /// The second path to combine. It may be <see langword="null"/>.<br/>
-        /// 결합할 두 번째 경로입니다. <see langword="null"/>일 수 있습니다.
-        /// </param>
-        /// <returns>
-        /// The combined path.<br/>
-        /// 결합된 경로를 반환합니다.
-        /// </returns>
-        public static RuniPath operator +(string? left, RuniPath? right) => Combine(left, right ?? empty);
         #endregion
 
 
