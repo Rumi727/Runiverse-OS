@@ -40,11 +40,11 @@ namespace RuniOS.Editor.UIElements.Resource
 
             yield return new ElementDescription<TextElement>(nameof(Identifier.separator), new TextElement { text = Identifier.separator.ToString() });
             
-            yield return new FieldDescription<FilePathField, FilePath>
+            yield return new FieldDescription<RuniPathField, RuniPath>
             (
                 "_path",
                 static x => x.path,
-                static (ref Identifier identifier, FilePath fieldValue) =>
+                static (ref Identifier identifier, RuniPath fieldValue) =>
                 {
                     if (Identifier.IsPathValid(fieldValue))
                         identifier.path = fieldValue;

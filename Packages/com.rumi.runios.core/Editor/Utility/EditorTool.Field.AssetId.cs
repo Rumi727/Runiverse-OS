@@ -21,19 +21,19 @@ namespace RuniOS.Editor
         }
 
         static int? assetIdFieldLastControlID;
-        static FilePath assetIdFieldSelectedPath = string.Empty;
+        static RuniPath assetIdFieldSelectedPath = string.Empty;
         static Identifier DoAssetIdField(Rect position, Identifier registryId, Identifier value)
         {
             string currentNamespace = value.nameSpace;
-            FilePathDropdown dropdown = new FilePathDropdown();
+            RuniPathDropdown dropdown = new RuniPathDropdown();
 
             value = IdentifierField(position, value, x =>
             {
-                IEnumerable<FilePath>? assetPaths = AssetRegistryManager.Get(registryId)?.keys
+                IEnumerable<RuniPath>? assetPaths = AssetRegistryManager.Get(registryId)?.keys
                     .Where(x => currentNamespace == x.nameSpace)
                     .Select(x => x.path);
 
-                dropdown.Rebuild(assetPaths ?? Enumerable.Empty<FilePath>());
+                dropdown.Rebuild(assetPaths ?? Enumerable.Empty<RuniPath>());
                 dropdown.Show(x);
             });
 

@@ -26,7 +26,7 @@ namespace RuniOS.Editor
         {
             position.width -= 54;
             if (value.path != null)
-                value.path = FilePathField(position, value.path.Value, true);
+                value.path = RuniPathField(position, value.path.Value, true);
             else
             {
                 TextDropdown valueDropdown = new TextDropdown();
@@ -82,7 +82,7 @@ namespace RuniOS.Editor
                     }
                     case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
                     {
-                        value.path ??= FilePath.empty;
+                        value.path ??= RuniPath.empty;
                         break;
                     }
                     default:

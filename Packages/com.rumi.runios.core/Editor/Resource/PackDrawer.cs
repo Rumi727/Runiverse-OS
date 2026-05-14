@@ -27,12 +27,12 @@ namespace RuniOS.Editor.Resource
         
         public event Action? onDirtyStateChanged;
         
-        public abstract bool IsMatch(IEnumerable<FilePath> relativePaths);
+        public abstract bool IsMatch(IEnumerable<RuniPath> relativePaths);
         
-        public virtual void OnEnable(IEnumerable<FilePath> relativePaths) { }
+        public virtual void OnEnable(IEnumerable<RuniPath> relativePaths) { }
         public virtual void OnDisable() { }
         
-        public abstract void OnGUI(IEnumerable<FilePath> relativePaths, bool isDebug = false);
+        public abstract void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false);
 
         protected void SetDirty() => isDirty = true;
 

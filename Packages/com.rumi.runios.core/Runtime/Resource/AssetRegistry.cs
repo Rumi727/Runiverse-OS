@@ -146,6 +146,6 @@ namespace RuniOS.Resource
 
         public IEnumerator<KeyValuePair<Identifier, THandle>> GetEnumerator() => assetHandles.GetEnumerator();
         
-        public abstract bool IsMatch(FilePath relativePath);
+        public abstract bool IsMatch(RuniPath relativePath);
     }
 }

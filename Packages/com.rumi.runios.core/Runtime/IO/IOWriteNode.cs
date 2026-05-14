@@ -5,7 +5,7 @@ namespace RuniOS.IO
     /// 특정 파일 시스템(<see cref="IWritableIOProvider"/>)의 특정 경로를 가리키고 제어하는 <b>읽기/쓰기 가능</b> 노드입니다.
     /// 파일 생성, 수정, 삭제 등의 작업을 지원합니다.
     /// </summary>
-    public readonly partial record struct IOWriteNode(IWritableIOProvider provider, FilePath path = default)
+    public readonly partial record struct IOWriteNode(IWritableIOProvider provider, RuniPath path = default)
     {
         /// <summary>
         /// 항상 빈 파일 또는 빈 디렉토리처럼 동작하는 쓰기 가능 노드입니다.
@@ -31,7 +31,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 이 노드가 가리키는 가상 파일 시스템 상의 경로입니다.
         /// </summary>
-        public FilePath path { get; } = path;
+        public RuniPath path { get; } = path;
         
         /// <summary>
         /// 이 노드의 파일 또는 디렉토리 이름입니다.
@@ -56,7 +56,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 현재 경로 아래에 지정된 자식 경로를 덧붙인 새 노드를 반환합니다.
         /// </summary>
-        public IOWriteNode CreateChild(FilePath childPath)
+        public IOWriteNode CreateChild(RuniPath childPath)
         {
             if (childPath.IsEmpty())
                 return this;

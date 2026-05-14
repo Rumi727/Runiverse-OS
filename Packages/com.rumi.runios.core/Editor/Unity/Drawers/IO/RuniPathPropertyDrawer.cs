@@ -6,10 +6,10 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Unity.Drawers.IO
 {
-    [CustomPropertyDrawer(typeof(FilePath))]
-    public class FilePathPropertyDrawer : PropertyDrawer
+    [CustomPropertyDrawer(typeof(RuniPath))]
+    public class RuniPathPropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new FilePathField().SetProperty(property);
+        public override VisualElement CreatePropertyGUI(SerializedProperty property) => new RuniPathField().SetProperty(property);
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
@@ -30,7 +30,7 @@ namespace RuniOS.Editor.Unity.Drawers.IO
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            string value = FilePathField(position, label, property.stringValue);
+            string value = RuniPathField(position, label, property.stringValue);
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = value;
         }

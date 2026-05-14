@@ -9,21 +9,21 @@ namespace RuniOS.Utility
         static readonly char[] invalidPathChars = Path.GetInvalidPathChars();
         static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
 
-        public static FilePath ToPath(this string? path) => path;
+        public static RuniPath ToPath(this string? path) => path;
 
         /// <summary>
-        /// 지정한 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="FilePath.alternativeNameChar"/> ('_')입니다.
+        /// 지정한 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
+        /// 기본 대체 문자는 <see cref="RuniPath.alternativeNameChar"/> ('_')입니다.
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="RuniPath.alternativeNameChar"/>입니다.</param>
         /// <returns>잘못된 문자가 대체된 새 문자열입니다.</returns>
-        public static string FixPathChars(string path, char newChar = FilePath.alternativeNameChar)
+        public static string FixPathChars(string path, char newChar = RuniPath.alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
-                return FilePath.empty;
+                return RuniPath.empty;
 
-            int lastPathIndex = path.LastIndexOfAny(FilePath.directorySeparatorChars);
+            int lastPathIndex = path.LastIndexOfAny(RuniPath.directorySeparatorChars);
             if (lastPathIndex < 0) lastPathIndex = path.Length;
 
             ReadOnlySpan<char> pathPart = path.AsSpan(0, lastPathIndex);
@@ -42,18 +42,18 @@ namespace RuniOS.Utility
         }
 
         /// <summary>
-        /// 지정한 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="FilePath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="FilePath.alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
+        /// 지정한 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
+        /// 기본 대체 문자는 <see cref="RuniPath.alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
+        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="RuniPath.alternativeNameChar"/>입니다.</param>
         /// <returns>잘못된 파일 이름 문자가 대체된 새 문자열입니다.</returns>
-        public static string FixFileNameChars(string path, char newChar = FilePath.alternativeNameChar)
+        public static string FixFileNameChars(string path, char newChar = RuniPath.alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
                 return string.Empty;
 
-            int lastPathIndex = path.LastIndexOfAny(FilePath.directorySeparatorChars);
+            int lastPathIndex = path.LastIndexOfAny(RuniPath.directorySeparatorChars);
             ReadOnlySpan<char> filePart = path.AsSpan(lastPathIndex + 1);
             if (filePart.IndexOfAny(invalidFileNameChars) < 0)
                 return path;

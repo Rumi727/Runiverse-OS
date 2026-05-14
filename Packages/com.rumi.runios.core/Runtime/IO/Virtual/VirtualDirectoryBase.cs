@@ -15,7 +15,7 @@ namespace RuniOS.IO.Virtual
         /// Gets the path lookup cache owned by the root directory.<br/>
         /// 루트 디렉터리가 소유한 경로 조회 캐시를 가져옵니다.
         /// </summary>
-        protected Dictionary<FilePath, VirtualNode> rootDirectoryCache
+        protected Dictionary<RuniPath, VirtualNode> rootDirectoryCache
         {
             get
             {
@@ -25,7 +25,7 @@ namespace RuniOS.IO.Virtual
                     return root!.rootDirectoryCache;
             }
         }
-        readonly Dictionary<FilePath, VirtualNode> _rootDirectoryCache = [];
+        readonly Dictionary<RuniPath, VirtualNode> _rootDirectoryCache = [];
 
         /// <summary>
         /// Attaches a child node at the specified path.<br/>
@@ -43,7 +43,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when the parent directory for <paramref name="path"/> does not exist.<br/>
         /// <paramref name="path"/>의 부모 디렉터리가 없는 경우 발생합니다.
         /// </exception>
-        public void Attach(FilePath path, VirtualNode child)
+        public void Attach(RuniPath path, VirtualNode child)
         {
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
             if (directory == null)
@@ -150,7 +150,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when this directory has been deleted.<br/>
         /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
-        public bool CreateDirectory(FilePath path, Func<VirtualDirectoryBase>? constructor = null)
+        public bool CreateDirectory(RuniPath path, Func<VirtualDirectoryBase>? constructor = null)
         {
             ThrowIfDeletedException();
 
@@ -161,7 +161,7 @@ namespace RuniOS.IO.Virtual
 
             bool isCreated = false;
             VirtualDirectoryBase childDirectory = this;
-            foreach (var directoryNameSpan in path.value.AsSpan().Split(FilePath.directorySeparatorChar))
+            foreach (var directoryNameSpan in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
             {
                 string directoryName = new string(directoryNameSpan);
                 VirtualNode? childNode = childDirectory.GetChildNode(directoryName);
@@ -206,7 +206,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when this directory has been deleted.<br/>
         /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
-        public virtual VirtualNode? GetNode(FilePath path)
+        public virtual VirtualNode? GetNode(RuniPath path)
         {
             ThrowIfDeletedException();
 
@@ -223,7 +223,7 @@ namespace RuniOS.IO.Virtual
             VirtualNode? childNode = this;
             VirtualDirectoryBase childDirectory = this;
 
-            foreach (var directoryName in path.value.AsSpan().Split(FilePath.directorySeparatorChar))
+            foreach (var directoryName in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
             {
                 if (childNode != childDirectory)
                 {
@@ -280,7 +280,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when this directory has been deleted.<br/>
         /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
-        public virtual VirtualDirectoryBase? GetDirectory(FilePath path)
+        public virtual VirtualDirectoryBase? GetDirectory(RuniPath path)
         {
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
             if (directory == null)
@@ -317,7 +317,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when this directory has been deleted.<br/>
         /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
-        public virtual VirtualFileBase? GetFile(FilePath path)
+        public virtual VirtualFileBase? GetFile(RuniPath path)
         {
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
             if (directory == null)
@@ -354,7 +354,7 @@ namespace RuniOS.IO.Virtual
         /// Thrown when this directory has been deleted.<br/>
         /// 이 디렉터리가 삭제된 경우 발생합니다.
         /// </exception>
-        public virtual VirtualFileBase GetOrCreateFile(FilePath path)
+        public virtual VirtualFileBase GetOrCreateFile(RuniPath path)
         {
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
             if (directory == null)
@@ -456,7 +456,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowNodeNotFound(FilePath path) => throw new InvalidOperationException($"The node at path '{path}' was not found.");
+        public static void ThrowNodeNotFound(RuniPath path) => throw new InvalidOperationException($"The node at path '{path}' was not found.");
 
         /// <summary>
         /// Throws an exception indicating that a directory was not found at the specified path.<br/>
@@ -471,7 +471,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowDirectoryNotFound(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was not found.");
+        public static void ThrowDirectoryNotFound(RuniPath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was not found.");
 
         /// <summary>
         /// Throws an exception indicating that a file was not found at the specified path.<br/>
@@ -486,7 +486,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowFileNotFound(FilePath path) => throw new FileNotFoundException($"The file at path '{path}' was not found.");
+        public static void ThrowFileNotFound(RuniPath path) => throw new FileNotFoundException($"The file at path '{path}' was not found.");
 
         /// <summary>
         /// Throws an exception indicating that the directory path is invalid.<br/>
@@ -501,7 +501,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowInvalidDirectoryException(FilePath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was invalid.");
+        public static void ThrowInvalidDirectoryException(RuniPath path) => throw new DirectoryNotFoundException($"The directory at path '{path}' was invalid.");
 
         /// <summary>
         /// Throws an exception indicating that a directory exists where a file was expected.<br/>
@@ -520,7 +520,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowPathIsDirectoryException(FilePath path, string segmentName)
+        public static void ThrowPathIsDirectoryException(RuniPath path, string segmentName)
         {
             throw new UnauthorizedAccessException(
                 $"Path operation failed for '{path}'. " +
@@ -547,7 +547,7 @@ namespace RuniOS.IO.Virtual
         /// 항상 발생합니다.
         /// </exception>
         [DoesNotReturn]
-        public static void ThrowPathIsFileException(FilePath path, string segmentName)
+        public static void ThrowPathIsFileException(RuniPath path, string segmentName)
         {
             throw new DirectoryNotFoundException(
                 $"Path operation failed for '{path}'. " +

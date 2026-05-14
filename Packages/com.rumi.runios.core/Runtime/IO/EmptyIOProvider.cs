@@ -21,21 +21,21 @@ namespace RuniOS.IO
 
         public bool isIndependent => true;
 
-        public IWritableIOProvider Recreate(FilePath path) => this;
+        public IWritableIOProvider Recreate(RuniPath path) => this;
 
         public bool IsSameTarget(IIOProvider other) => ReferenceEquals(this, other);
 
-        public UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult<IOEntry?>(null);
-        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Empty<IOEntry>();
+        public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult<IOEntry?>(null);
+        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Empty<IOEntry>();
 
-        public UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
-        public UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
+        public UniTask<Stream> OpenRead(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
+        public UniTask<Stream> OpenWrite(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
 
-        public UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
-        public UniTask<Stream> CreateFile(FilePath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
+        public UniTask CreateDirectory(RuniPath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
+        public UniTask<Stream> CreateFile(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Stream.Null);
 
-        public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
-        public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
+        public UniTask DeleteDirectory(RuniPath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
+        public UniTask DeleteFile(RuniPath path, CancellationToken cancellationToken = default) => UniTask.CompletedTask;
 
         void IDisposable.Dispose() { }
     }

@@ -12,9 +12,9 @@ namespace RuniOS.Editor.Resource
 
         public override bool needsApplyRevert => true;
 
-        public override bool IsMatch(IEnumerable<FilePath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
-        public override void OnEnable(IEnumerable<FilePath> relativePaths)
+        public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
             relativeExistsPaths = relativePaths
                 .Select(x => (Application.streamingAssetsPath + x).value)
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Resource
 
         ReorderableList? reorderableList;
         
-        public override void OnGUI(IEnumerable<FilePath> relativePaths, bool isDebug = false)
+        public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
             reorderableList ??= new ReorderableList(nameSpaces, typeof(string), false, false, true, true)
             { multiSelect = true };
@@ -158,7 +158,7 @@ namespace RuniOS.Editor.Resource
             List<string> oldList = nameSpaces;
             List<string> newList = relativeExistsPaths
                 .SelectMany(Directory.GetDirectories)
-                .Select(x => ((FilePath)x).GetFileName())
+                .Select(x => ((RuniPath)x).GetFileName())
                 .Distinct()
                 .ToList();
 
@@ -187,7 +187,7 @@ namespace RuniOS.Editor.Resource
         {
             nameSpaces = relativeExistsPaths
                 .SelectMany(Directory.GetDirectories)
-                .Select(x => ((FilePath)x).GetFileName())
+                .Select(x => ((RuniPath)x).GetFileName())
                 .Distinct()
                 .ToList();
 

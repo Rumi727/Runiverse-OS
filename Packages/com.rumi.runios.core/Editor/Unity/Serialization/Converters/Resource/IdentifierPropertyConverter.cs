@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
         public override object Read(SerializedProperty property, Type propertyType)
         {
             (SerializedProperty nameSpace, SerializedProperty path) = IdentifierPropertyDrawer.GetChildProperty(property);
-            path = FilePathPropertyDrawer.GetChildProperty(path);
+            path = RuniPathPropertyDrawer.GetChildProperty(path);
             
             return new Identifier(nameSpace.stringValue, path.stringValue);
         }
@@ -21,7 +21,7 @@ namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
             if (value is Identifier identifier)
             {
                 (SerializedProperty nameSpace, SerializedProperty path) = IdentifierPropertyDrawer.GetChildProperty(property);
-                path = FilePathPropertyDrawer.GetChildProperty(path);
+                path = RuniPathPropertyDrawer.GetChildProperty(path);
                 
                 nameSpace.stringValue = identifier.nameSpace;
                 path.stringValue = identifier.path;

@@ -10,15 +10,15 @@ namespace RuniOS.Editor.Resource
     [InitializeOnLoad]
     public static class PackInspectorSystem
     {
-        public static readonly FilePath packRootPath;
+        public static readonly RuniPath packRootPath;
         
         static readonly ImmutableArray<PackDrawer> drawers;
 
         public static PackDrawer? activeDrawer { get; private set; }
-        public static ImmutableArray<FilePath> activePaths { get; private set; } = ImmutableArray<FilePath>.Empty;
+        public static ImmutableArray<RuniPath> activePaths { get; private set; } = ImmutableArray<RuniPath>.Empty;
 
         public static bool isFolderViewMode { get; private set; }
-        public static FilePath activeFolderPath { get; private set; }
+        public static RuniPath activeFolderPath { get; private set; }
 
         public static event Action? onActiveDrawerChanged;
 
@@ -48,7 +48,7 @@ namespace RuniOS.Editor.Resource
                     .Select(AssetDatabase.GetAssetPath)
                     .Select(x => 
                     {
-                        bool success = x.ToPath().TryTrimStartPath(packRootPath, out FilePath path);
+                        bool success = x.ToPath().TryTrimStartPath(packRootPath, out RuniPath path);
                         return (success, path);
                     })
                     .Where(x => x.success)
@@ -72,26 +72,26 @@ namespace RuniOS.Editor.Resource
                 lastCheckPath = currentPath;
                 InspectorWindowBridge.RepaintAllInspectors();
                 
-                if (currentPath.ToPath().TryTrimStartPath(packRootPath, out FilePath relative))
+                if (currentPath.ToPath().TryTrimStartPath(packRootPath, out RuniPath relative))
                 {
                     activeFolderPath = relative;
                     UpdateDrawer(Enumerable.Repeat(relative, 1), true);
                 }
                 else
                 {
-                    activeFolderPath = FilePath.empty;
-                    UpdateDrawer(Enumerable.Empty<FilePath>(), true);
+                    activeFolderPath = RuniPath.empty;
+                    UpdateDrawer(Enumerable.Empty<RuniPath>(), true);
                 }
             }
         }
 
-        static void UpdateDrawer(IEnumerable<FilePath> paths, bool isFolderView)
+        static void UpdateDrawer(IEnumerable<RuniPath> paths, bool isFolderView)
         {
             isFolderViewMode = isFolderView;
             
             if (paths.IsEmpty())
             {
-                SetNewDrawer(null, Enumerable.Empty<FilePath>());
+                SetNewDrawer(null, Enumerable.Empty<RuniPath>());
                 return;
             }
 
@@ -99,7 +99,7 @@ namespace RuniOS.Editor.Resource
             SetNewDrawer(drawer, paths);
         }
 
-        static void SetNewDrawer(PackDrawer? drawer, IEnumerable<FilePath> paths)
+        static void SetNewDrawer(PackDrawer? drawer, IEnumerable<RuniPath> paths)
         {
             bool isChanged = activeDrawer != drawer;
             if (isChanged)

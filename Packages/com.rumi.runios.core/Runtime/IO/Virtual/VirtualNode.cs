@@ -44,7 +44,7 @@ namespace RuniOS.IO.Virtual
         /// Gets the full path of this node, or <see langword="null"/> when the node is detached.<br/>
         /// 이 노드의 전체 경로를 가져오며, 노드가 분리되어 있으면 <see langword="null"/>을 반환합니다.
         /// </summary>
-        public FilePath? fullPath => isDetached ? null : parent?.fullPath + name;
+        public RuniPath? fullPath => isDetached ? null : parent?.fullPath + name;
 
         /// <summary>
         /// Gets the metadata associated with this node.<br/>
@@ -226,7 +226,7 @@ namespace RuniOS.IO.Virtual
         /// </exception>
         public static void ThrowIfInvalidNodeName(string name)
         {
-            if (string.IsNullOrEmpty(name) || name.IndexOfAny(FilePath.directorySeparatorChars) >= 0)
+            if (string.IsNullOrEmpty(name) || name.IndexOfAny(RuniPath.directorySeparatorChars) >= 0)
                 throw new InvalidOperationException($"The node name '{name}' contains invalid characters.");
         }
 
@@ -244,7 +244,7 @@ namespace RuniOS.IO.Virtual
         /// </exception>
         public static void ThrowIfInvalidFileName(string name)
         {
-            if (string.IsNullOrEmpty(name) || name.IndexOfAny(FilePath.directorySeparatorChars) >= 0)
+            if (string.IsNullOrEmpty(name) || name.IndexOfAny(RuniPath.directorySeparatorChars) >= 0)
                 throw new InvalidOperationException($"The file name '{name}' contains invalid characters.");
         }
     }

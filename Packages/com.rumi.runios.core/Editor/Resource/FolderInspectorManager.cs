@@ -38,7 +38,7 @@ namespace RuniOS.Editor.Resource
             if (_dummyTarget == null)
             {
                 // 현재 보고 있는 폴더를 타겟으로 로드
-                FilePath path = PackInspectorSystem.packRootPath + PackInspectorSystem.activeFolderPath;
+                RuniPath path = PackInspectorSystem.packRootPath + PackInspectorSystem.activeFolderPath;
                 _dummyTarget = AssetDatabase.LoadAssetAtPath<DefaultAsset>(path);
             }
 

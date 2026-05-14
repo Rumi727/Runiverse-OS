@@ -40,7 +40,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 지정된 경로를 새 루트로 삼는 읽기 전용 프로바이더를 생성합니다.
         /// </summary>
-        IIOProvider Recreate(FilePath path);
+        IIOProvider Recreate(RuniPath path);
 
         /// <summary>
         /// 이 프로바이더와 다른 프로바이더가 같은 실제 루트를 가리키는지 확인합니다.
@@ -53,7 +53,7 @@ namespace RuniOS.IO
         /// <param name="path">조회할 대상의 가상 파일 시스템 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>해당 경로에 대상이 존재하면 <see cref="IOEntry"/>를 반환하고, 존재하지 않으면 <see langword="null"/>을 반환합니다.</returns>
-        UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default);
+        UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 지정된 디렉터리 경로 내에 있는 파일 및 하위 디렉터리들의 정보(스냅샷)를 비동기 스트림으로 열거합니다.
@@ -62,7 +62,7 @@ namespace RuniOS.IO
         /// <param name="recursive"><see langword="true"/>이면 하위 디렉터리까지 재귀적으로 탐색합니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>검색된 대상들의 <see cref="IOEntry"/> 목록을 제공하는 비동기 스트림입니다.</returns>
-        IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default);
+        IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 지정된 경로의 파일에서 읽기 위한 스트림을 엽니다.
@@ -70,7 +70,7 @@ namespace RuniOS.IO
         /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>파일에서 열린 읽기 전용 <see cref="Stream"/>입니다.</returns>
-        UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default);
+        UniTask<Stream> OpenRead(RuniPath path, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 지정된 경로의 파일의 모든 바이트를 읽습니다.
@@ -78,7 +78,7 @@ namespace RuniOS.IO
         /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>파일의 모든 바이트를 포함하는 <see cref="byte"/> 배열입니다.</returns>
-        async UniTask<byte[]> ReadAllBytes(FilePath path, CancellationToken cancellationToken = default)
+        async UniTask<byte[]> ReadAllBytes(RuniPath path, CancellationToken cancellationToken = default)
         {
             await using Stream? stream = await OpenRead(path, cancellationToken);
             return await stream.ReadToEndAsync(cancellationToken);
@@ -90,7 +90,7 @@ namespace RuniOS.IO
         /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>파일의 모든 텍스트를 포함하는 <see cref="string"/>입니다.</returns>
-        async UniTask<string> ReadAllText(FilePath path, CancellationToken cancellationToken = default)
+        async UniTask<string> ReadAllText(RuniPath path, CancellationToken cancellationToken = default)
         {
             await using var stream = await OpenRead(path, cancellationToken);
             using var reader = new StreamReader(stream);
@@ -103,7 +103,7 @@ namespace RuniOS.IO
         /// <param name="path">읽을 파일의 가상 파일 시스템 경로입니다.</param>
         /// <param name="cancellationToken">비동기 작업을 취소하는 데 사용되는 취소 토큰입니다.</param>
         /// <returns>파일의 각 줄을 제공하는 비동기 문자열 스트림입니다.</returns>
-        IUniTaskAsyncEnumerable<string> ReadLines(FilePath path, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Create<string>(async (writer, iterationToken) =>
+        IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Create<string>(async (writer, iterationToken) =>
         {
             using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, iterationToken);
             var ct = linkedCTS.Token;

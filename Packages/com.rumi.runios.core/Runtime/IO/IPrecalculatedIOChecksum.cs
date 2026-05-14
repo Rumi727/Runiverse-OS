@@ -12,6 +12,6 @@ namespace RuniOS.IO
         /// 지정된 경로의 사전 계산된 체크섬 값을 가져옵니다.
         /// </summary>
         /// <param name="path">체크섬을 가져올 파일 경로입니다.</param>
-        UniTask<string> GetPrecalculatedChecksum(FilePath path);
+        UniTask<string> GetPrecalculatedChecksum(RuniPath path);
     }
 }

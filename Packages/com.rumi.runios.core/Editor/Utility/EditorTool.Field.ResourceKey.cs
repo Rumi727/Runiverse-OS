@@ -20,7 +20,7 @@ namespace RuniOS.Editor
         }
 
         static int? registryTypeFieldLastControlID;
-        static FilePath registryTypeFieldSelectedPath = FilePath.empty;
+        static RuniPath registryTypeFieldSelectedPath = RuniPath.empty;
         static ResourceKey DoResourceKeyField(Rect position, ResourceKey value, bool isBelowLabel, Func<IAssetRegistry, bool>? predicate)
         {
             position.height = EditorGUIUtility.singleLineHeight;

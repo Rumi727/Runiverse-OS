@@ -8,5 +8,5 @@ namespace RuniOS.IO
     /// <param name="path">이 엔트리가 참조하는 가상 파일 시스템 상의 절대 경로입니다.</param>
     /// <param name="metaData">파일 또는 디렉토리의 메타데이터(이름, 크기, 시간 등)입니다.</param>
     /// <param name="isDirectory">이 엔트리가 디렉토리인지 여부를 나타냅니다.</param>
-    public readonly record struct IOEntry(FilePath path, IOMetaData metaData, bool isDirectory);
+    public readonly record struct IOEntry(RuniPath path, IOMetaData metaData, bool isDirectory);
 }

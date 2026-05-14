@@ -57,6 +57,6 @@ namespace RuniOS.Resource
         /// </remarks>
         /// <param name="relativePath">검사할 리소스팩 내부 경로입니다.</param>
         /// <returns>패턴이 일치하여 처리 가능한 대상이면 <c>true</c>를 반환합니다.</returns>
-        bool IsMatch(FilePath relativePath);
+        bool IsMatch(RuniPath relativePath);
     }
 }

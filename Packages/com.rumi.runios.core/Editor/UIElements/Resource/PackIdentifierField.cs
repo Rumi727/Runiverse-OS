@@ -32,7 +32,7 @@ namespace RuniOS.Editor.UIElements.Resource
         }
         
         public IdentifierField identifierField { get; }
-        public FilePathField pathField { get; }
+        public RuniPathField pathField { get; }
         public EnumField modeField { get; }
         
         public PackIdentifierField() : this(string.Empty) { }
@@ -42,7 +42,7 @@ namespace RuniOS.Editor.UIElements.Resource
             visualInput.AddToClassList(inputUssClassName);
             
             identifierField = new IdentifierField();
-            pathField = new FilePathField { style = { display = DisplayStyle.None } };
+            pathField = new RuniPathField { style = { display = DisplayStyle.None } };
             modeField = new EnumField(mode);
             
             AddToClassList(ussClassName);
@@ -59,12 +59,12 @@ namespace RuniOS.Editor.UIElements.Resource
                 static (ref PackIdentifier packIdentifier, Identifier fieldValue) => packIdentifier.identifier = fieldValue
             );
 
-            yield return new FieldDescription<FilePathField, FilePath>
+            yield return new FieldDescription<RuniPathField, RuniPath>
             (
                 "_path",
                 pathField,
-                static x => x.path ?? FilePath.empty,
-                static (ref PackIdentifier packIdentifier, FilePath fieldValue) => packIdentifier.path = fieldValue
+                static x => x.path ?? RuniPath.empty,
+                static (ref PackIdentifier packIdentifier, RuniPath fieldValue) => packIdentifier.path = fieldValue
             );
             
             yield return new FieldDescription<EnumField, Enum>

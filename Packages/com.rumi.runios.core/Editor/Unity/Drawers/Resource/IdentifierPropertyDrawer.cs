@@ -20,7 +20,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
             (SerializedProperty nameSpace, SerializedProperty path) = GetChildProperty(property);
-            path = FilePathPropertyDrawer.GetChildProperty(path);
+            path = RuniPathPropertyDrawer.GetChildProperty(path);
 
             Identifier value = Identifier.empty;
             EditorGUI.BeginChangeCheck();

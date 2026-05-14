@@ -92,7 +92,7 @@ namespace RuniOS.Resource
                     {
                         await foreach (IOEntry fileEntry in registryEntry.dir.GetAllFiles(assetFilter))
                         {
-                            FilePath relativePath = fileEntry.path.TrimStartPath(registryEntry.path);
+                            RuniPath relativePath = fileEntry.path.TrimStartPath(registryEntry.path);
                             IONode entry = registryEntry.CreateChild(relativePath);
                             IOMetaData metaData = fileEntry.metaData;
                             uniTasks.Add(UniTask.Defer(Method));
@@ -101,7 +101,7 @@ namespace RuniOS.Resource
                             {
                                 try
                                 {
-                                    FilePath path = entry.path.TrimStartPath(registryEntry.path).GetPathWithoutExtension();
+                                    RuniPath path = entry.path.TrimStartPath(registryEntry.path).GetPathWithoutExtension();
                                     await OnAssetLoop(new Identifier(nameSpace, path), entry, await CreateHandle(entry, metaData));
                                 }
                                 catch (Exception e)
@@ -180,7 +180,7 @@ namespace RuniOS.Resource
             filterRegex = new Regex(filterPattern, RegexOptions.Compiled | RegexOptions.ExplicitCapture);
         }
 
-        public override bool IsMatch(FilePath relativePath)
+        public override bool IsMatch(RuniPath relativePath)
         {
             if (prefixRegex == null || filterRegex == null)
                 InitializeRegex();

@@ -31,7 +31,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="path">식별자의 경로 구성 요소입니다.</param>
         /// <exception cref="InvalidIdentifierException">제공된 경로가 유효하지 않은 경우 발생합니다.</exception>
-        public Identifier(FilePath path)
+        public Identifier(RuniPath path)
         {
             if (!IsPathValid(path))
                 throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
@@ -46,7 +46,7 @@ namespace RuniOS.Resource
         /// <param name="nameSpace">식별자의 네임스페이스 구성 요소입니다. null 또는 비어 있는 경우, <see cref="defaultNamespace"/>가 사용됩니다.</param>
         /// <param name="path">식별자의 경로 구성 요소입니다.</param>
         /// <exception cref="InvalidIdentifierException">제공된 네임스페이스 또는 경로가 유효하지 않은 경우 발생합니다.</exception>
-        public Identifier(string nameSpace, FilePath path)
+        public Identifier(string nameSpace, RuniPath path)
         {
             if (!IsNamespaceValid(nameSpace))
                 throw new InvalidIdentifierException(GetInvalidNamespaceMessage(nameSpace));
@@ -82,7 +82,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 식별자의 경로 구성 요소를 가져오거나 설정합니다.
         /// </summary>
-        public FilePath path
+        public RuniPath path
         {
             readonly get => _path;
             set
@@ -93,7 +93,7 @@ namespace RuniOS.Resource
                     throw new InvalidIdentifierException(GetInvalidPathMessage(value));
             }
         }
-        [SerializeField, FieldName("gui.path"), JsonIgnore] FilePath _path;
+        [SerializeField, FieldName("gui.path"), JsonIgnore] RuniPath _path;
 
 
 
@@ -105,7 +105,7 @@ namespace RuniOS.Resource
                 nameSpace = defaultNamespace;
             
             if (!IsPathValid(path))
-                path = FilePath.empty;
+                path = RuniPath.empty;
         }
         void ISerializationCallbackReceiver.OnAfterDeserialize()
         {
@@ -115,7 +115,7 @@ namespace RuniOS.Resource
                 nameSpace = defaultNamespace;
             
             if (!IsPathValid(path))
-                path = FilePath.empty;
+                path = RuniPath.empty;
         }
         
         
@@ -161,7 +161,7 @@ namespace RuniOS.Resource
 
 
 
-        public void Deconstruct(out string nameSpace, out FilePath path)
+        public void Deconstruct(out string nameSpace, out RuniPath path)
         {
             nameSpace = this.nameSpace;
             path = this.path;
@@ -234,7 +234,7 @@ namespace RuniOS.Resource
         /// 경로의 유효성을 검사합니다.
         /// 허용되는 문자: 'a-z', '0-9', '.', '/', '-', '_'
         /// </summary>
-        public static bool IsPathValid(FilePath path)
+        public static bool IsPathValid(RuniPath path)
         {
             if (path.IsEmpty())
                 return true; // 비어있는 경로는 유효한 경로로 간주
@@ -247,6 +247,6 @@ namespace RuniOS.Resource
         
         public static string GetInvalidNamespaceMessage(string? nameSpace) => $"Invalid namespace: '{nameSpace}'. Allowed characters are 'a-z', '0-9', '.', '-', and '_'.";
         
-        public static string GetInvalidPathMessage(FilePath path) => $"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.";
+        public static string GetInvalidPathMessage(RuniPath path) => $"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.";
     }
 }

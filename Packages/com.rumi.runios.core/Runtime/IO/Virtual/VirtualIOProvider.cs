@@ -35,7 +35,7 @@ namespace RuniOS.IO.Virtual
         public bool isIndependent => rootDirectory.isRoot;
 
         /// <inheritdoc/>
-        public IWritableIOProvider Recreate(FilePath path)
+        public IWritableIOProvider Recreate(RuniPath path)
         {
             if (path.IsEmpty())
                 return this;
@@ -54,7 +54,7 @@ namespace RuniOS.IO.Virtual
 
         #region Entry
         /// <inheritdoc/>
-        public UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             VirtualNode? node = rootDirectory.GetNode(path);
@@ -70,7 +70,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Create<IOEntry>(async (writer, iterationToken) =>
+        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Create<IOEntry>(async (writer, iterationToken) =>
         {
             using var linkedCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, iterationToken);
             CancellationToken ct = linkedCTS.Token;
@@ -110,7 +110,7 @@ namespace RuniOS.IO.Virtual
         /// When the asynchronous operation completes, returns a byte array containing the full file contents.<br/>
         /// 비동기 작업이 완료되면 파일 전체 내용을 포함하는 <see cref="byte"/> 배열을 반환합니다.
         /// </returns>
-        public UniTask<byte[]> ReadAllBytes(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<byte[]> ReadAllBytes(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -137,7 +137,7 @@ namespace RuniOS.IO.Virtual
         /// When the asynchronous operation completes, returns the full file contents as text.<br/>
         /// 비동기 작업이 완료되면 파일 전체 내용을 텍스트로 반환합니다.
         /// </returns>
-        public UniTask<string> ReadAllText(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<string> ReadAllText(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -164,7 +164,7 @@ namespace RuniOS.IO.Virtual
         /// An asynchronous sequence that yields each line from the file.<br/>
         /// 파일의 각 줄을 제공하는 비동기 시퀀스입니다.
         /// </returns>
-        public IUniTaskAsyncEnumerable<string> ReadLines(FilePath path, CancellationToken cancellationToken = default)
+        public IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -176,7 +176,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<Stream> OpenRead(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -190,7 +190,7 @@ namespace RuniOS.IO.Virtual
 
         #region Write
         /// <inheritdoc/>
-        public UniTask CreateDirectory(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask CreateDirectory(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             rootDirectory.CreateDirectory(path);
@@ -199,7 +199,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask<Stream> OpenWrite(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<Stream> OpenWrite(RuniPath path, CancellationToken cancellationToken = default)
         {
             VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
 
@@ -208,7 +208,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask<Stream> CreateFile(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask<Stream> CreateFile(RuniPath path, CancellationToken cancellationToken = default)
         {
             VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
 
@@ -217,7 +217,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask WriteAllBytes(FilePath path, byte[] bytes, CancellationToken cancellationToken = default)
+        public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default)
         {
             VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
 
@@ -226,7 +226,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask WriteAllText(FilePath path, string text, CancellationToken cancellationToken = default)
+        public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default)
         {
             VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
 
@@ -235,7 +235,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask WriteLines(FilePath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
+        public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
         {
             VirtualNode.ThrowIfInvalidFileName(path.GetFileName());
 
@@ -245,7 +245,7 @@ namespace RuniOS.IO.Virtual
         #endregion
 
         /// <inheritdoc/>
-        public UniTask DeleteDirectory(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteDirectory(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -258,7 +258,7 @@ namespace RuniOS.IO.Virtual
         }
 
         /// <inheritdoc/>
-        public UniTask DeleteFile(FilePath path, CancellationToken cancellationToken = default)
+        public UniTask DeleteFile(RuniPath path, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -273,7 +273,7 @@ namespace RuniOS.IO.Virtual
         static string GetRelativePath(VirtualDirectoryBase directory, VirtualNode node)
         {
             node.ThrowIfNotAttachedException();
-            return node.fullPath.Value.TrimStartPath(directory.fullPath ?? FilePath.empty);
+            return node.fullPath.Value.TrimStartPath(directory.fullPath ?? RuniPath.empty);
         }
 
         void IDisposable.Dispose() { }

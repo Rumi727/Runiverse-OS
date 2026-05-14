@@ -47,7 +47,7 @@ public sealed class Test : MonoBehaviour
     [ReadOnlyField] public SerializableNullable<char> nChar = 'a';
     public char @char = 'a';
     [Range(10, 20)] public float slider;
-    public FilePath filePath;
+    public RuniPath path;
     public FileExtension fileExtension;
     public HexColor hexColor;
     public RectVertices rectVertices;
@@ -99,7 +99,7 @@ public sealed class Test : MonoBehaviour
         public SerializableNullable<char> nChar = 'a';
         public char @char = 'a';
         [Range(10, 20)] public float slider;
-        public FilePath filePath;
+        public RuniPath path;
         public FileExtension fileExtension;
         public HexColor hexColor;
         public RectVertices rectVertices;

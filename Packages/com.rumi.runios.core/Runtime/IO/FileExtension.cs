@@ -24,17 +24,17 @@ namespace RuniOS.IO
         public static readonly FileExtension empty = new FileExtension();
 
         /// <summary>
-        /// <see cref="FilePath"/>에서 파일 확장자를 초기화합니다.
+        /// <see cref="RuniPath"/>에서 파일 확장자를 초기화합니다.
         /// </summary>
-        /// <param name="path">확장자를 추출할 <see cref="FilePath"/>입니다.</param>
-        public FileExtension(FilePath path) : this(path.value) { }
+        /// <param name="path">확장자를 추출할 <see cref="RuniPath"/>입니다.</param>
+        public FileExtension(RuniPath path) : this(path.value) { }
         
         /// <summary>
-        /// nullable <see cref="FilePath"/>에서 파일 확장자를 초기화합니다.<br/>
+        /// nullable <see cref="RuniPath"/>에서 파일 확장자를 초기화합니다.<br/>
         /// <paramref name="path"/>가 <see langword="null"/>이면 빈 확장자로 초기화됩니다.
         /// </summary>
-        /// <param name="path">확장자를 추출할 nullable <see cref="FilePath"/>입니다.</param>
-        public FileExtension(FilePath? path) : this(path?.value) { }
+        /// <param name="path">확장자를 추출할 nullable <see cref="RuniPath"/>입니다.</param>
+        public FileExtension(RuniPath? path) : this(path?.value) { }
         
         /// <summary>
         /// 문자열 값에서 파일 확장자를 초기화합니다.<br/>

@@ -17,9 +17,9 @@ namespace RuniOS.Editor.Resource
 
         public override bool needsApplyRevert => true;
 
-        public override bool IsMatch(IEnumerable<FilePath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
 
-        public override void OnEnable(IEnumerable<FilePath> relativePaths)
+        public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
             relativeExistsPaths = relativePaths
                 .Select(x =>
@@ -39,7 +39,7 @@ namespace RuniOS.Editor.Resource
         PackMetaData[] packMetaDatas = Array.Empty<PackMetaData>();
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
-        public override void OnGUI(IEnumerable<FilePath> relativePaths, bool isDebug = false)
+        public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
             InspectorFlags flags = InspectorFlags.InstanceAccess | InspectorFlags.Variable;
             if (isDebug)

@@ -12,7 +12,7 @@ namespace RuniOS.IO
     /// <br/>
     /// 내부적으로 Android <c>AssetManager</c>를 사용하여 파일 열기 및 디렉토리 열거를 수행합니다.
     /// </summary>
-    public class AndroidStreamingIOProvider(FilePath rootPath = default) : IIOProvider
+    public class AndroidStreamingIOProvider(RuniPath rootPath = default) : IIOProvider
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
@@ -47,24 +47,24 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public IONode rootNode => new IONode(this);
 
-        readonly FilePath rootPath = rootPath;
+        readonly RuniPath rootPath = rootPath;
 
         /// <inheritdoc/>
         public bool isIndependent => false;
 
         /// <inheritdoc/>
-        public IIOProvider Recreate(FilePath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath + path);
+        public IIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath + path);
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is AndroidStreamingIOProvider otherAndroid && rootPath == otherAndroid.rootPath;
 
         #region Entry
         /// <inheritdoc/>
-        public UniTask<IOEntry?> GetEntry(FilePath path, CancellationToken cancellationToken = default) => UniTask.RunOnThreadPool(() =>
+        public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default) => UniTask.RunOnThreadPool(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            FilePath actualPath = rootPath + path;
+            RuniPath actualPath = rootPath + path;
             string relativePath = actualPath.value;
             string[] children = ListAssets(relativePath);
             string name = path.GetFileName();
@@ -100,30 +100,30 @@ namespace RuniOS.IO
         }, cancellationToken: cancellationToken);
 
         /// <inheritdoc/>
-        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(FilePath path, bool recursive, CancellationToken cancellationToken = default)
+        public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default)
         {
             return Enumerate(rootPath, path, recursive, cancellationToken).EnumerateOnThreadPool(cancellationToken: cancellationToken);
 
-            static IEnumerable<IOEntry> Enumerate(FilePath rootPath, FilePath path, bool recursive, CancellationToken cancellationToken)
+            static IEnumerable<IOEntry> Enumerate(RuniPath rootPath, RuniPath path, bool recursive, CancellationToken cancellationToken)
             {
                 string[] rootItems = ListAssets((rootPath + path).value);
                 if (rootItems.Length <= 0)
                     yield break;
 
-                Queue<(FilePath path, string[] items)> queue = new Queue<(FilePath path, string[] items)>();
+                Queue<(RuniPath path, string[] items)> queue = new Queue<(RuniPath path, string[] items)>();
                 queue.Enqueue((path, rootItems));
 
                 while (queue.Count > 0)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    (FilePath currentPath, string[] items) = queue.Dequeue();
+                    (RuniPath currentPath, string[] items) = queue.Dequeue();
 
                     foreach (string item in items)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        FilePath entryPath = currentPath + item;
-                        FilePath actualEntryPath = rootPath + entryPath;
+                        RuniPath entryPath = currentPath + item;
+                        RuniPath actualEntryPath = rootPath + entryPath;
                         string[] childItems = ListAssets(actualEntryPath.value);
                         bool isDirectory = childItems.Length > 0;
 
@@ -168,7 +168,7 @@ namespace RuniOS.IO
 
         #region Read
         /// <inheritdoc/>
-        public UniTask<Stream> OpenRead(FilePath path, CancellationToken cancellationToken = default) => UniTask.RunOnThreadPool<Stream>(() =>
+        public UniTask<Stream> OpenRead(RuniPath path, CancellationToken cancellationToken = default) => UniTask.RunOnThreadPool<Stream>(() =>
         {
             cancellationToken.ThrowIfCancellationRequested();
 

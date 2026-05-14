@@ -5,7 +5,7 @@ namespace RuniOS.IO
     /// 특정 파일 시스템(<see cref="IIOProvider"/>)의 특정 경로를 가리키고 제어하는 <b>읽기 전용</b> 노드입니다.
     /// 경로 조합 및 데이터 읽기 작업을 위한 진입점 역할을 합니다.
     /// </summary>
-    public readonly partial record struct IONode(IIOProvider provider, FilePath path = default)
+    public readonly partial record struct IONode(IIOProvider provider, RuniPath path = default)
     {
         /// <summary>
         /// 항상 빈 파일 또는 빈 디렉토리처럼 동작하는 노드입니다.
@@ -31,7 +31,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 이 노드가 가리키는 가상 파일 시스템 상의 경로입니다.
         /// </summary>
-        public FilePath path { get; } = path;
+        public RuniPath path { get; } = path;
 
         /// <summary>
         /// 이 노드의 파일 또는 디렉토리 이름입니다.
@@ -56,7 +56,7 @@ namespace RuniOS.IO
         /// <summary>
         /// 현재 경로 아래에 지정된 자식 경로를 덧붙인 새 노드를 반환합니다.
         /// </summary>
-        public IONode CreateChild(FilePath childPath)
+        public IONode CreateChild(RuniPath childPath)
         {
             if (childPath.IsEmpty())
                 return this;

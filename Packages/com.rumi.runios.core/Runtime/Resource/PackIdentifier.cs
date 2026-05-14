@@ -33,7 +33,7 @@ namespace RuniOS.Resource
                 {
                     _identifier = null;
                     if (_path == null)
-                        _path = FilePath.empty;
+                        _path = RuniPath.empty;
                 }
             }
         }
@@ -42,7 +42,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 팩의 로컬 파일 시스템 경로입니다. 내부 ID가 없을 때 사용됩니다.
         /// </summary>
-        public FilePath? path
+        public RuniPath? path
         {
             readonly get => _path;
             set
@@ -60,7 +60,7 @@ namespace RuniOS.Resource
                 }
             }
         }
-        [SerializeField, JsonIgnore] SerializableNullable<FilePath> _path;
+        [SerializeField, JsonIgnore] SerializableNullable<RuniPath> _path;
 
         /// <summary>
         /// 이 식별자가 유효한 상태인지 여부를 나타냅니다.
@@ -76,7 +76,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="identifier">팩의 내부 식별자입니다.</param>
         /// <param name="path">팩의 로컬 경로입니다.</param>
-        PackIdentifier(Identifier? identifier, FilePath? path)
+        PackIdentifier(Identifier? identifier, RuniPath? path)
         {
             _identifier = identifier;
             _path = path;
@@ -94,7 +94,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="path">팩의 로컬 경로입니다.</param>
         /// <returns>생성된 <see cref="PackIdentifier"/> 인스턴스입니다.</returns>
-        public static PackIdentifier CreateByPath(FilePath path) => new PackIdentifier(null, path);
+        public static PackIdentifier CreateByPath(RuniPath path) => new PackIdentifier(null, path);
 
 
 
@@ -200,7 +200,7 @@ namespace RuniOS.Resource
         /// <list type="bullet">
         /// <item><description>인스턴스가 유효하지 않으면 (<see cref="isValid"/>가 <see langword="false"/>이면), <c>"Invalid PackIdentifier"</c> 문자열을 반환합니다.</description></item>
         /// <item><description>내부 식별자 (<see cref="identifier"/>)를 포함하는 유효한 인스턴스이면, 해당 <see cref="Identifier"/>의 <see cref="Identifier.ToString"/> 결과를 반환합니다.</description></item>
-        /// <item><description>로컬 경로 (<see cref="path"/>)를 포함하는 유효한 인스턴스이면, 해당 <see cref="FilePath"/>의 <see cref="FilePath.ToString"/> 결과를 반환합니다.</description></item>
+        /// <item><description>로컬 경로 (<see cref="path"/>)를 포함하는 유효한 인스턴스이면, 해당 <see cref="RuniPath"/>의 <see cref="RuniPath.ToString"/> 결과를 반환합니다.</description></item>
         /// </list>
         /// </summary>
         /// <returns>현재 인스턴스를 나타내는 문자열입니다.</returns>
