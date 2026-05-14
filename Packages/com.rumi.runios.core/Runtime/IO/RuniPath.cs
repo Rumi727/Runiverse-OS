@@ -9,57 +9,60 @@ using UnityEngine.Networking;
 namespace RuniOS.IO
 {
     /// <summary>
-    /// 플랫폼에 독립적인 파일 또는 디렉터리 경로를 나타내는 구조체입니다.
-    /// 경로 정규화, 결합, 비교 및 다양한 경로 부분 추출 유틸리티 메서드를 제공합니다.
-    /// 모든 경로는 내부적으로 표준 구분자(<see cref="directorySeparatorChar"/>)를 사용하도록 정규화됩니다.
+    /// Represents a normalized logical path used by the framework.<br/>
+    /// The path uses <see cref="directorySeparatorChar"/> internally and strips leading and trailing separators during normalization.
+    /// <br/><br/>
+    /// 프레임워크에서 사용하는 정규화된 논리 경로를 나타냅니다.<br/>
+    /// 경로는 내부적으로 <see cref="directorySeparatorChar"/>를 사용하며, 정규화 과정에서 시작과 끝의 구분자를 제거합니다.
     /// </summary>
     [Serializable]
     [JsonConverter(typeof(RuniPathConverter))]
     public struct RuniPath : IEquatable<RuniPath>, ISerializationCallbackReceiver
     {
         /// <summary>
-        /// 표준 디렉터리 구분 문자로, 항상 '/'입니다.<br/>
-        /// 모든 경로는 내부적으로 이 구분자를 사용하도록 정규화됩니다.
+        /// The normalized directory separator character used by <see cref="RuniPath"/>.<br/>
+        /// <see cref="RuniPath"/>가 정규화된 경로에 사용하는 디렉터리 구분 문자를 나타냅니다.
         /// </summary>
         public const char directorySeparatorChar = '/';
 
         /// <summary>
-        /// Windows 운영체제에서 사용되는 대체 디렉터리 구분 문자로, 항상 '\'입니다.<br/>
-        /// 경로 입력 시 이 문자가 사용될 수 있으며, 내부적으로 <see cref="directorySeparatorChar"/>로 정규화됩니다.
+        /// The Windows directory separator character that is accepted during normalization.<br/>
+        /// 정규화 과정에서 허용되는 Windows 디렉터리 구분 문자를 나타냅니다.
         /// </summary>
         public const char windowsDirectorySeparatorChar = '\\';
 
         /// <summary>
-        /// 파일 또는 경로 이름에서 유효하지 않은 문자를 대체할 때 사용되는 문자입니다. 항상 '_'입니다.<br/>
-        /// 예를 들어, Windows에서 파일 이름에 사용할 수 없는 ':' 문자는 이 문자로 대체될 수 있습니다.
+        /// The replacement character used when invalid name characters are converted to a safe character.<br/>
+        /// 이름에 사용할 수 없는 문자를 안전한 문자로 변환할 때 사용하는 대체 문자를 나타냅니다.
         /// </summary>
         public const char alternativeNameChar = '_';
 
         /// <summary>
-        /// 로컬 파일 URL에 사용되는 접두사입니다. 항상 "file:///"입니다.<br/>
-        /// 이 접두사는 로컬 파일 시스템의 경로를 웹 URL 형식으로 변환할 때 사용됩니다.
+        /// The prefix used when converting a path value to a local file URL string.<br/>
+        /// 경로 값을 로컬 파일 URL 문자열로 변환할 때 사용하는 접두사를 나타냅니다.
         /// </summary>
         public const string urlPathPrefix = "file:///";
 
         /// <summary>
-        /// 인식되는 모든 디렉터리 구분자 문자 배열입니다. 현재 '/' 및 '\'를 포함합니다.<br/>
-        /// 경로 정규화 시 이 문자들을 기준으로 분리 및 처리됩니다.
+        /// The directory separator characters recognized by normalization.<br/>
+        /// 정규화 과정에서 인식하는 디렉터리 구분 문자 컬렉션입니다.
         /// </summary>
         public static readonly char[] directorySeparatorChars = ['/', '\\'];
 
         /// <summary>
-        /// 빈 파일 경로를 나타내는 정적 읽기 전용 인스턴스입니다.<br/>
-        /// <c>new RuniPath()</c>와 동일하며, 경로가 없는 상태를 표현할 때 사용됩니다.
+        /// The empty <see cref="RuniPath"/> value.<br/>
+        /// 빈 <see cref="RuniPath"/> 값을 나타냅니다.
         /// </summary>
         public static readonly RuniPath empty = new RuniPath();
 
 
 
         /// <summary>
-        /// 현재 <see cref="RuniPath"/> 인스턴스가 나타내는 정규화된 경로의 문자열 표현을 가져오거나 설정합니다.<br/>
-        /// 값을 설정할 때 입력된 문자열은 <see cref="NormalizePath(string)"/> 메서드를 통해 자동으로 정규화됩니다.<br/>
-        /// 이 과정에서 Windows 스타일의 역슬래시('\')는 슬래시('/')로 변경되고, 불필요한 시작/끝 구분자는 제거됩니다.<br/>
-        /// 경로가 null이거나 비어있을 경우 <see cref="string.Empty"/>를 반환합니다.
+        /// Gets or sets the normalized string value of this path.<br/>
+        /// Assigned values are normalized through <see cref="NormalizePath(string)"/>.
+        /// <br/><br/>
+        /// 이 경로의 정규화된 문자열 값을 가져오거나 설정합니다.<br/>
+        /// 설정된 값은 <see cref="NormalizePath(string)"/>를 통해 정규화됩니다.
         /// </summary>
         [AllowNull]
         public string value
@@ -70,31 +73,111 @@ namespace RuniOS.IO
         [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
         /// <summary>
-        /// 경로 문자열의 길이를 반환합니다.<br/>
-        /// 경로가 비어있거나 null인 경우 0을 반환합니다.
+        /// Gets the length of the normalized path string.<br/>
+        /// 정규화된 경로 문자열의 길이를 가져옵니다.
         /// </summary>
         public readonly int length => _value?.Length ?? 0;
 
 
 
         /// <summary>
-        /// 지정된 문자열 경로로부터 새 <see cref="RuniPath"/> 인스턴스를 생성하고 정규화합니다.<br/>
-        /// 입력된 경로는 <see cref="NormalizePath(string)"/>를 통해 표준 형식으로 변환됩니다.
+        /// Initializes a new <see cref="RuniPath"/> from the specified path string.<br/>
+        /// 지정된 경로 문자열에서 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
         /// </summary>
-        /// <param name="path">생성할 파일 경로 문자열입니다. null이거나 비어있을 수 있습니다.</param>
+        /// <param name="path">
+        /// The path string to normalize. It may be <see langword="null"/>.<br/>
+        /// 정규화할 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
         public RuniPath(string? path) => _value = NormalizePath(path ?? string.Empty);
 
-        public RuniPath(string? path1, string? path2) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty);
-        public RuniPath(string? path1, string? path2, string? path3) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty);
-        public RuniPath(string? path1, string? path2, string? path3, string? path4) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty) + directorySeparatorChar + NormalizePath(path4 ?? string.Empty);
-        public RuniPath(string? path1, string? path2, string? path3, string? path4, string? path5) => _value = NormalizePath(path1 ?? string.Empty) + directorySeparatorChar + NormalizePath(path2 ?? string.Empty) + directorySeparatorChar + NormalizePath(path3 ?? string.Empty) + directorySeparatorChar + NormalizePath(path4 ?? string.Empty) + directorySeparatorChar + NormalizePath(path5 ?? string.Empty);
+        /// <summary>
+        /// Initializes a new <see cref="RuniPath"/> by combining two path segments.<br/>
+        /// 두 경로 세그먼트를 결합하여 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="path1">
+        /// The first path segment. It may be <see langword="null"/>.<br/>
+        /// 첫 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path2">
+        /// The second path segment. It may be <see langword="null"/>.<br/>
+        /// 두 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        public RuniPath(string? path1, string? path2) => _value = NormalizePath(path1 + directorySeparatorChar + path2);
 
         /// <summary>
-        /// 지정된 문자열 경로로부터 새 <see cref="RuniPath"/> 인스턴스를 생성하고 정규화합니다.<br/>
-        /// 입력된 경로는 <see cref="NormalizePath(string)"/>를 통해 표준 형식으로 변환됩니다.
+        /// Initializes a new <see cref="RuniPath"/> by combining three path segments.<br/>
+        /// 세 경로 세그먼트를 결합하여 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
         /// </summary>
-        /// <param name="paths">생성할 파일 경로 문자열입니다. null이거나 비어있을 수 있습니다.</param>
-        /// <returns>정규화된 새 <see cref="RuniPath"/> 인스턴스입니다. 입력이 null이거나 비어있으면 빈 경로를 나타내는 <see cref="empty"/> 인스턴스가 반환됩니다.</returns>
+        /// <param name="path1">
+        /// The first path segment. It may be <see langword="null"/>.<br/>
+        /// 첫 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path2">
+        /// The second path segment. It may be <see langword="null"/>.<br/>
+        /// 두 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path3">
+        /// The third path segment. It may be <see langword="null"/>.<br/>
+        /// 세 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        public RuniPath(string? path1, string? path2, string? path3) => _value = NormalizePath(path1 + directorySeparatorChar + path2 + directorySeparatorChar + path3);
+
+        /// <summary>
+        /// Initializes a new <see cref="RuniPath"/> by combining four path segments.<br/>
+        /// 네 경로 세그먼트를 결합하여 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="path1">
+        /// The first path segment. It may be <see langword="null"/>.<br/>
+        /// 첫 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path2">
+        /// The second path segment. It may be <see langword="null"/>.<br/>
+        /// 두 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path3">
+        /// The third path segment. It may be <see langword="null"/>.<br/>
+        /// 세 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path4">
+        /// The fourth path segment. It may be <see langword="null"/>.<br/>
+        /// 네 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        public RuniPath(string? path1, string? path2, string? path3, string? path4) => _value = NormalizePath(path1 + directorySeparatorChar + path2 + directorySeparatorChar + path3 + directorySeparatorChar + path4);
+
+        /// <summary>
+        /// Initializes a new <see cref="RuniPath"/> by combining five path segments.<br/>
+        /// 다섯 경로 세그먼트를 결합하여 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="path1">
+        /// The first path segment. It may be <see langword="null"/>.<br/>
+        /// 첫 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path2">
+        /// The second path segment. It may be <see langword="null"/>.<br/>
+        /// 두 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path3">
+        /// The third path segment. It may be <see langword="null"/>.<br/>
+        /// 세 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path4">
+        /// The fourth path segment. It may be <see langword="null"/>.<br/>
+        /// 네 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="path5">
+        /// The fifth path segment. It may be <see langword="null"/>.<br/>
+        /// 다섯 번째 경로 세그먼트입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        public RuniPath(string? path1, string? path2, string? path3, string? path4, string? path5) => _value = NormalizePath(path1 + directorySeparatorChar + path2 + directorySeparatorChar + path3 + directorySeparatorChar + path4 + directorySeparatorChar + path5);
+
+        /// <summary>
+        /// Initializes a new <see cref="RuniPath"/> by joining the specified path segments.<br/>
+        /// 지정된 경로 세그먼트들을 결합하여 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
+        /// </summary>
+        /// <param name="paths">
+        /// The path segments to join.<br/>
+        /// 결합할 경로 세그먼트 컬렉션입니다.
+        /// </param>
         public RuniPath(params string[] paths) => _value = NormalizePath(string.Join(directorySeparatorChar, paths));
 
         /*/// <summary>
@@ -108,19 +191,23 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 경로의 파일 확장자을 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "txt"를 반환합니다.<br/>
-        /// 경로에 확장자가 없으면 <see cref="string.Empty"/>를 반환합니다.
+        /// Gets the extension portion of the last path segment.<br/>
+        /// 마지막 경로 세그먼트의 확장자 부분을 가져옵니다.
         /// </summary>
-        /// <returns>파일 확장자(점 포함) 또는 확장자가 없는 경우 <see cref="string.Empty"/>.</returns>
+        /// <returns>
+        /// The extension represented by the last path segment.<br/>
+        /// 마지막 경로 세그먼트에서 얻은 확장자를 반환합니다.
+        /// </returns>
         public readonly FileExtension GetExtension() => new FileExtension(this);
 
         /// <summary>
-        /// 현재 경로에서 마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "file.txt"를 반환합니다.<br/>
-        /// 경로에 디렉터리 구분자가 없으면 전체 경로 문자열을 반환합니다.
+        /// Gets the last segment of this path.<br/>
+        /// 이 경로의 마지막 세그먼트를 가져옵니다.
         /// </summary>
-        /// <returns>마지막 디렉터리 구분자(<see cref="directorySeparatorChar"/>) 이후의 부분 또는 경로에 디렉터리가 없는 경우 전체 경로 문자열.</returns>
+        /// <returns>
+        /// The text after the last <see cref="directorySeparatorChar"/>, or the whole path when it has no separator.<br/>
+        /// 마지막 <see cref="directorySeparatorChar"/> 뒤의 문자열을 반환하며, 구분자가 없으면 전체 경로를 반환합니다.
+        /// </returns>
         public readonly string GetFileName()
         {
             int index = value.LastIndexOf(directorySeparatorChar);
@@ -131,11 +218,13 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 현재 경로의 파일 이름에서 확장자를 제외한 부분만 문자열로 가져옵니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "file"을 반환합니다.<br/>
-        /// 파일 이름에 확장자가 없으면 파일 이름 전체를 반환합니다.
+        /// Gets the last path segment without its extension.<br/>
+        /// 마지막 경로 세그먼트에서 확장자를 제외한 값을 가져옵니다.
         /// </summary>
-        /// <returns>확장자를 제외한 파일 이름 부분.</returns>
+        /// <returns>
+        /// The last path segment without its extension, or the full segment when no extension exists.<br/>
+        /// 확장자를 제외한 마지막 경로 세그먼트를 반환하며, 확장자가 없으면 세그먼트 전체를 반환합니다.
+        /// </returns>
         public readonly string GetFileNameWithoutExtension()
         {
             string fileName = GetFileName();
@@ -148,11 +237,13 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 현재 경로에서 파일 확장자를 제외한 새 <see cref="RuniPath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "dir/file"을 반환합니다.<br/>
-        /// 경로에 확장자가 없으면 원래 <see cref="RuniPath"/>를 반환합니다.
+        /// Gets a path with the extension removed from the last segment.<br/>
+        /// 마지막 세그먼트의 확장자를 제거한 경로를 가져옵니다.
         /// </summary>
-        /// <returns>확장자가 제거된 새 <see cref="RuniPath"/> 인스턴스.</returns>
+        /// <returns>
+        /// A path without the last segment extension, or this path when no extension exists.<br/>
+        /// 마지막 세그먼트의 확장자가 제거된 경로를 반환하며, 확장자가 없으면 현재 경로를 반환합니다.
+        /// </returns>
         public readonly RuniPath GetPathWithoutExtension()
         {
             int extIndex = value.LastIndexOf(FileExtension.extensionSeparatorChar);
@@ -163,11 +254,13 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 현재 경로의 상위 디렉터리 경로를 나타내는 새 <see cref="RuniPath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, "dir/file.txt"의 경우 "dir"을 반환합니다.<br/>
-        /// 경로에 상위 디렉터리가 없거나 루트 경로인 경우 <see cref="empty"/>를 반환합니다.
+        /// Gets the path that contains every segment except the last one.<br/>
+        /// 마지막 세그먼트를 제외한 나머지 경로를 가져옵니다.
         /// </summary>
-        /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="RuniPath"/> 인스턴스 또는 <see cref="empty"/>.</returns>
+        /// <returns>
+        /// The parent path, or <see cref="empty"/> when this path has no parent segment.<br/>
+        /// 상위 경로를 반환하며, 상위 세그먼트가 없으면 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public readonly RuniPath GetParentPath()
         {
             int index = value.LastIndexOf(directorySeparatorChar);
@@ -181,28 +274,30 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는 경우,
-        /// 해당 접두사 부분을 제거한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 단순 문자열 일치가 아닌, 경로 구분자를 기준으로 한 상위 디렉터리 일치를 확인합니다.
+        /// Removes the specified prefix path when this path is under it.<br/>
+        /// 이 경로가 지정된 접두사 경로 아래에 있으면 해당 접두사를 제거합니다.
         /// </summary>
-        /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
+        /// <param name="relativeTo">
+        /// The prefix path to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
         /// <returns>
-        /// 지정된 접두사가 제거된 새 <see cref="RuniPath"/>입니다.<br/>
-        /// 접두사가 비어있거나 일치하지 않으면 원래 <see cref="RuniPath"/>가 반환됩니다.<br/>
-        /// 접두사가 현재 경로와 완전히 일치하면 빈 <see cref="empty"/>가 반환됩니다.
+        /// The trimmed path when the prefix matches; otherwise, this path.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
         public readonly RuniPath TrimStartPath(RuniPath? relativeTo) => string.IsNullOrEmpty(relativeTo?.value) ? this : TrimStartPath(relativeTo.Value);
 
         /// <summary>
-        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는 경우,
-        /// 해당 접두사 부분을 제거한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 단순 문자열 일치가 아닌, 경로 구분자를 기준으로 한 상위 디렉터리 일치를 확인합니다.
+        /// Removes the specified prefix path when this path is under it.<br/>
+        /// 이 경로가 지정된 접두사 경로 아래에 있으면 해당 접두사를 제거합니다.
         /// </summary>
-        /// <param name="relativeTo">현재 경로의 시작 부분에서 제거할 접두사 경로입니다.</param>
+        /// <param name="relativeTo">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
         /// <returns>
-        /// 지정된 접두사가 제거된 새 <see cref="RuniPath"/>입니다.<br/>
-        /// 접두사가 비어있거나 일치하지 않으면 원래 <see cref="RuniPath"/>가 반환됩니다.<br/>
-        /// 접두사가 현재 경로와 완전히 일치하면 빈 <see cref="empty"/>가 반환됩니다.
+        /// The trimmed path when the prefix matches; otherwise, this path.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
         public readonly RuniPath TrimStartPath(RuniPath relativeTo)
         {
@@ -213,21 +308,20 @@ namespace RuniOS.IO
         }
 
         /// <summary>
-        /// 현재 경로가 지정된 <paramref name="relativeTo"/> 경로로 시작하는지 확인하고,
-        /// 일치하는 경우 해당 접두사를 제거한 새 <see cref="RuniPath"/>를 반환합니다.
+        /// Attempts to remove the specified prefix path from this path.<br/>
+        /// 이 경로에서 지정된 접두사 경로 제거를 시도합니다.
         /// </summary>
         /// <param name="relativeTo">
-        /// 현재 경로의 시작 부분에서 제거할 접두사 경로입니다.
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
         /// </param>
         /// <param name="result">
-        /// 메서드가 <see langword="true"/>를 반환하면, 접두사가 제거된 새 경로가 여기에 할당됩니다.
-        /// (완전 일치 시 빈 <see cref="empty"/>가 할당됨)<br/>
-        /// 메서드가 <see langword="false"/>를 반환하면, 변경되지 않은 현재 경로가 그대로 할당됩니다.
+        /// When this method returns <see langword="true"/>, contains the trimmed path.<br/>
+        /// 이 메서드가 <see langword="true"/>를 반환하면 접두사가 제거된 경로를 포함합니다.
         /// </param>
         /// <returns>
-        /// 현재 경로가 <paramref name="relativeTo"/>로 시작하여 잘라내기에 성공했거나, 
-        /// <paramref name="relativeTo"/>가 현재 경로와 완전히 일치하면 <see langword="true"/>를 반환합니다.<br/>
-        /// 일치하지 않으면 <see langword="false"/>를 반환합니다.
+        /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
+        /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         public readonly bool TryTrimStartPath(RuniPath relativeTo, out RuniPath result)
         {
@@ -250,22 +344,30 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 경로가 지정된 <paramref name="startPath"/>로 시작하는지 여부를 확인합니다.<br/>
-        /// <paramref name="startPath"/>가 null이거나 비어 있으면 항상 <c>true</c>를 반환합니다.
+        /// Determines whether this path starts with the specified prefix path.<br/>
+        /// 이 경로가 지정된 접두사 경로로 시작하는지 확인합니다.
         /// </summary>
-        /// <param name="startPath">현재 경로의 시작 부분과 비교할 경로입니다.</param>
-        /// <returns>현재 경로가 <paramref name="startPath"/>로 시작하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <param name="startPath">
+        /// The prefix path to compare. It may be <see langword="null"/>.<br/>
+        /// 비교할 접두사 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the prefix matches or <paramref name="startPath"/> is empty; otherwise, <see langword="false"/>.<br/>
+        /// 접두사가 일치하거나 <paramref name="startPath"/>가 비어 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public readonly bool StartsWith(RuniPath? startPath) => string.IsNullOrEmpty(startPath?.value) || StartsWith(startPath);
 
         /// <summary>
-        /// 현재 경로가 지정된 <paramref name="startPath"/>로 시작하는지 여부를 확인합니다.<br/>
-        /// 단순 문자열 비교가 아닌, 경로 구분자(<see cref="directorySeparatorChar"/>)를 기준으로 상위 디렉터리가 일치하는지 확인합니다.<br/>
-        /// 예를 들어, "folder_A/file.txt"는 "folder"로 시작하는 것으로 간주되지 않습니다.
+        /// Determines whether this path starts with the specified prefix path on a segment boundary.<br/>
+        /// 이 경로가 지정된 접두사 경로로 시작하며 세그먼트 경계가 일치하는지 확인합니다.
         /// </summary>
-        /// <param name="startPath">현재 경로의 시작 부분과 비교할 경로입니다.</param>
+        /// <param name="startPath">
+        /// The prefix path to compare.<br/>
+        /// 비교할 접두사 경로입니다.
+        /// </param>
         /// <returns>
-        /// 현재 경로가 <paramref name="startPath"/>와 같거나, 
-        /// <paramref name="startPath"/> 디렉터리 아래에 위치하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.
+        /// <see langword="true"/> if this path equals <paramref name="startPath"/> or is under it; otherwise, <see langword="false"/>.<br/>
+        /// 이 경로가 <paramref name="startPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         public readonly bool StartsWith(RuniPath startPath)
         {
@@ -280,51 +382,79 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 경로를 "file:///" 접두사가 붙은 URL 호환 문자열로 변환한 문자열을 반환합니다.<br/>
-        /// 경로 내의 특수 문자는 <see cref="UnityWebRequest.EscapeURL(string)"/>을 사용하여 URL 인코딩됩니다.
+        /// Converts this path value to a local file URL string.<br/>
+        /// 이 경로 값을 로컬 파일 URL 문자열로 변환합니다.
         /// </summary>
-        /// <returns>"file:///" 접두사가 붙고 URL 인코딩된 문자열.</returns>
+        /// <returns>
+        /// A string prefixed with <see cref="urlPathPrefix"/> and escaped for URL usage.<br/>
+        /// <see cref="urlPathPrefix"/>가 붙고 URL 용도로 이스케이프된 문자열을 반환합니다.
+        /// </returns>
         public readonly string UrlPathPrefix() => urlPathPrefix + UnityWebRequest.EscapeURL(value);
 
 
 
         /// <summary>
-        /// 현재 경로가 비어있는지 (null이거나 <see cref="string.Empty"/>) 여부를 확인합니다.<br/>
-        /// 이 메서드는 <see cref="empty"/>와 동일한 상태를 확인하는 데 사용됩니다.
+        /// Determines whether this path has an empty value.<br/>
+        /// 이 경로가 빈 값을 가지는지 확인합니다.
         /// </summary>
-        /// <returns>경로가 비어있으면 <c>true</c>이고, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <returns>
+        /// <see langword="true"/> if the path is empty; otherwise, <see langword="false"/>.<br/>
+        /// 경로가 비어 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public readonly bool IsEmpty() => string.IsNullOrEmpty(_value);
 
 
 
         /// <summary>
-        /// 현재 경로에 지정된 확장자를 덧붙인 새 <see cref="RuniPath"/> 인스턴스를 반환합니다.<br/>
-        /// 예를 들어, 현재 경로가 "dir/file"이고 <paramref name="ext"/>가 ".txt"인 경우, "dir/file.txt"를 반환합니다.
+        /// Appends the specified extension to this path.<br/>
+        /// 이 경로에 지정된 확장자를 덧붙입니다.
         /// </summary>
-        /// <param name="ext">추가할 확장자입니다. 점(.)을 포함해야 합니다 (예: ".txt").</param>
-        /// <returns>확장자가 덧붙여진 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="ext">
+        /// The extension to append.<br/>
+        /// 덧붙일 확장자입니다.
+        /// </param>
+        /// <returns>
+        /// A new <see cref="RuniPath"/> with the extension appended.<br/>
+        /// 확장자가 덧붙여진 새 <see cref="RuniPath"/>를 반환합니다.
+        /// </returns>
         public readonly RuniPath AddExtension(FileExtension ext) => new RuniPath(value + ext);
 
 
 
         /// <summary>
-        /// 두 <see cref="RuniPath"/> 객체를 하나의 경로로 결합합니다.<br/>
-        /// 두 경로 사이에 표준 디렉터리 구분자(<see cref="directorySeparatorChar"/>)가 자동으로 삽입됩니다.<br/>
-        /// 어느 한쪽 또는 양쪽이 빈 경로인 경우, 유효한 경로를 그대로 반환하거나 양쪽 모두 빈 경우 <see cref="empty"/>를 반환합니다.
+        /// Combines two nullable path values into one normalized path.<br/>
+        /// 두 nullable 경로 값을 하나의 정규화된 경로로 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path, or <see cref="empty"/> when both paths are empty.<br/>
+        /// 결합된 경로를 반환하며, 두 경로가 모두 비어 있으면 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public static RuniPath Combine(RuniPath? left, RuniPath? right) => Combine(left ?? empty, right ?? empty);
 
         /// <summary>
-        /// 두 <see cref="RuniPath"/> 객체를 하나의 경로로 결합합니다.<br/>
-        /// 두 경로 사이에 표준 디렉터리 구분자(<see cref="directorySeparatorChar"/>)가 자동으로 삽입됩니다.<br/>
-        /// 어느 한쪽 또는 양쪽이 빈 경로인 경우, 유효한 경로를 그대로 반환하거나 양쪽 모두 빈 경우 <see cref="empty"/>를 반환합니다.
+        /// Combines two path values into one normalized path.<br/>
+        /// 두 경로 값을 하나의 정규화된 경로로 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine.<br/>
+        /// 결합할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine.<br/>
+        /// 결합할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The combined path, or the non-empty operand when one operand is empty.<br/>
+        /// 결합된 경로를 반환하며, 한쪽 경로가 비어 있으면 비어 있지 않은 피연산자를 반환합니다.
+        /// </returns>
         public static RuniPath Combine(RuniPath left, RuniPath right)
         {
             if (left.value.Length == 0 && right.value.Length == 0)
@@ -357,13 +487,24 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 입력된 경로 문자열을 표준 형식으로 정규화합니다.<br/>
-        /// 이 과정에서 다음 변환이 수행됩니다:<br/>
-        /// 1. Windows 스타일의 역슬래시(<see cref="windowsDirectorySeparatorChar"/>)를 표준 슬래시(<see cref="directorySeparatorChar"/>)로 변경합니다.<br/>
-        /// 2. 경로의 시작과 끝에 있는 불필요한 디렉터리 구분자(<see cref="directorySeparatorChars"/>)를 제거합니다.<br/>
-        /// 3. 연속된 디렉터리 구분자(예: "a//b")를 단일 구분자로 축소합니다
+        /// Normalizes a path string into the <see cref="RuniPath"/> text format.<br/>
+        /// The result uses <see cref="directorySeparatorChar"/>, removes leading and trailing separators, collapses repeated separators, and rejects traversal segments.
+        /// <br/><br/>
+        /// 경로 문자열을 <see cref="RuniPath"/> 텍스트 형식으로 정규화합니다.<br/>
+        /// 결과는 <see cref="directorySeparatorChar"/>를 사용하고, 시작과 끝의 구분자를 제거하며, 반복된 구분자를 합치고, 경로 이동 세그먼트를 거부합니다.
         /// </summary>
-        /// <exception cref="ArgumentException">경로 이동 문자(., ..)가 포함된 경우 발생합니다.</exception>
+        /// <param name="path">
+        /// The path string to normalize. It may be <see langword="null"/>.<br/>
+        /// 정규화할 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The normalized path string, or <see cref="string.Empty"/> when <paramref name="path"/> has no usable segment.<br/>
+        /// 정규화된 경로 문자열을 반환하며, <paramref name="path"/>에 사용할 수 있는 세그먼트가 없으면 <see cref="string.Empty"/>를 반환합니다.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="path"/> contains <c>.</c> or <c>..</c> as a path segment.<br/>
+        /// <paramref name="path"/>가 경로 세그먼트로 <c>.</c> 또는 <c>..</c>를 포함하는 경우 발생합니다.
+        /// </exception>
         public static string NormalizePath(string? path) // TODO : 나중에 유니티 닷넷 올라가면 Span으로 바꿀 것 (string.Create에 allows ref struct 붙어있어서 사용 가능)
         {
             if (string.IsNullOrEmpty(path))
@@ -422,8 +563,22 @@ namespace RuniOS.IO
             return length - 1;
         }
 
-
-
+        /// <summary>
+        /// Filters the specified paths by matching their values against wildcard patterns.<br/>
+        /// 지정된 경로들을 와일드카드 패턴과 비교하여 필터링합니다.
+        /// </summary>
+        /// <param name="files">
+        /// The paths to filter.<br/>
+        /// 필터링할 경로 컬렉션입니다.
+        /// </param>
+        /// <param name="extensionFilter">
+        /// The wildcard patterns used for matching.<br/>
+        /// 매칭에 사용할 와일드카드 패턴 컬렉션입니다.
+        /// </param>
+        /// <returns>
+        /// A collection containing the paths matched by <paramref name="extensionFilter"/>.<br/>
+        /// <paramref name="extensionFilter"/>와 일치하는 경로를 포함하는 컬렉션을 반환합니다.
+        /// </returns>
         public static IEnumerable<RuniPath> FilterFiles(IEnumerable<RuniPath> files, WildcardPatterns extensionFilter)
         {
             IEnumerable<string> patterns = extensionFilter.Select(ConvertPatternToRegex);
@@ -447,49 +602,95 @@ namespace RuniOS.IO
 
 
         /// <summary>
-        /// 현재 <see cref="RuniPath"/> 인스턴스의 문자열 표현을 반환합니다.<br/>
-        /// 이는 <see cref="value"/> 속성과 동일합니다.
+        /// Returns the normalized string value of this path.<br/>
+        /// 이 경로의 정규화된 문자열 값을 반환합니다.
         /// </summary>
-        /// <returns>현재 경로의 정규화된 문자열 표현입니다.</returns>
+        /// <returns>
+        /// The value of <see cref="value"/>.<br/>
+        /// <see cref="value"/> 값을 반환합니다.
+        /// </returns>
         public override readonly string ToString() => value;
 
 
 
         #region Equals
         /// <summary>
-        /// 현재 <see cref="RuniPath"/> 인스턴스가 지정된 객체와 동일한지 여부를 확인합니다.<br/>
-        /// 비교 대상이 <see cref="RuniPath"/> 타입이고 그 <see cref="value"/>가 현재 인스턴스의 <see cref="value"/>와 동일하면 <c>true</c>를 반환합니다.
+        /// Determines whether the specified object is equal to this path.<br/>
+        /// 지정된 객체가 이 경로와 같은지 확인합니다.
         /// </summary>
-        /// <param name="obj">현재 인스턴스와 비교할 객체입니다.</param>
-        /// <returns>지정된 객체가 현재 <see cref="RuniPath"/>와 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <param name="obj">
+        /// The object to compare with this path.<br/>
+        /// 이 경로와 비교할 객체입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if <paramref name="obj"/> is an equal <see cref="RuniPath"/>; otherwise, <see langword="false"/>.<br/>
+        /// <paramref name="obj"/>가 같은 <see cref="RuniPath"/>이면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public override readonly bool Equals(object? obj) => obj is RuniPath path && Equals(path);
 
         /// <summary>
-        /// 현재 <see cref="RuniPath"/> 인스턴스가 지정된 다른 <see cref="RuniPath"/> 인스턴스와 동일한지 여부를 확인합니다.<br/>
-        /// 두 경로의 <see cref="value"/> 문자열이 동일하면 <c>true</c>를 반환합니다.
+        /// Determines whether the specified path is equal to this path.<br/>
+        /// 지정된 경로가 이 경로와 같은지 확인합니다.
         /// </summary>
-        /// <param name="other">현재 인스턴스와 비교할 다른 <see cref="RuniPath"/> 인스턴스입니다.</param>
-        /// <returns>두 <see cref="RuniPath"/> 인스턴스가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <param name="other">
+        /// The path to compare with this path.<br/>
+        /// 이 경로와 비교할 경로입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if both paths have the same <see cref="value"/>; otherwise, <see langword="false"/>.<br/>
+        /// 두 경로의 <see cref="value"/>가 같으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public readonly bool Equals(RuniPath other) => value == other.value;
         #endregion
 
 
 
         /// <summary>
-        /// 현재 <see cref="RuniPath"/> 인스턴스의 해시 코드를 반환합니다.<br/>
-        /// 해시 코드는 <see cref="value"/> 문자열의 해시 코드와 동일합니다.
+        /// Returns the hash code for this path.<br/>
+        /// 이 경로의 해시 코드를 반환합니다.
         /// </summary>
-        /// <returns>현재 <see cref="RuniPath"/> 인스턴스의 해시 코드입니다.</returns>
+        /// <returns>
+        /// The hash code of <see cref="value"/>.<br/>
+        /// <see cref="value"/>의 해시 코드를 반환합니다.
+        /// </returns>
         public override readonly int GetHashCode() => value.GetHashCode();
 
 
 
+        /// <summary>
+        /// Deconstructs this path into its parent path and last segment.<br/>
+        /// 이 경로를 상위 경로와 마지막 세그먼트로 분해합니다.
+        /// </summary>
+        /// <param name="directory">
+        /// The parent path.<br/>
+        /// 상위 경로입니다.
+        /// </param>
+        /// <param name="name">
+        /// The last path segment.<br/>
+        /// 마지막 경로 세그먼트입니다.
+        /// </param>
         public void Deconstruct(out RuniPath directory, out string name)
         {
             directory = GetParentPath();
             name = GetFileName();
         }
         
+        /// <summary>
+        /// Deconstructs this path into its parent path, last segment without extension, and extension.<br/>
+        /// 이 경로를 상위 경로, 확장자를 제외한 마지막 세그먼트, 확장자로 분해합니다.
+        /// </summary>
+        /// <param name="directory">
+        /// The parent path.<br/>
+        /// 상위 경로입니다.
+        /// </param>
+        /// <param name="name">
+        /// The last path segment without its extension.<br/>
+        /// 확장자를 제외한 마지막 경로 세그먼트입니다.
+        /// </param>
+        /// <param name="extension">
+        /// The extension of the last path segment.<br/>
+        /// 마지막 경로 세그먼트의 확장자입니다.
+        /// </param>
         public void Deconstruct(out RuniPath directory, out string name, out FileExtension extension)
         {
             directory = GetParentPath();
@@ -502,99 +703,170 @@ namespace RuniOS.IO
 
         #region operators
         /// <summary>
-        /// <see cref="RuniPath"/>를 <see cref="string"/>으로 암시적으로 변환합니다.<br/>
-        /// 이는 <see cref="value"/> 속성을 반환합니다.
+        /// Converts a <see cref="RuniPath"/> to its normalized string value.<br/>
+        /// <see cref="RuniPath"/>를 정규화된 문자열 값으로 변환합니다.
         /// </summary>
-        /// <param name="path">변환할 <see cref="RuniPath"/> 인스턴스입니다.</param>
+        /// <param name="path">
+        /// The path to convert.<br/>
+        /// 변환할 경로입니다.
+        /// </param>
         public static implicit operator string(RuniPath path) => path.value;
 
         /// <summary>
-        /// <see cref="string"/>을 <see cref="RuniPath"/>로 암시적으로 변환합니다.<br/>
-        /// 입력된 문자열은 <see cref="NormalizePath(string)"/> 메서드를 통해 정규화됩니다.
+        /// Converts a string to a normalized <see cref="RuniPath"/>.<br/>
+        /// 문자열을 정규화된 <see cref="RuniPath"/>로 변환합니다.
         /// </summary>
-        /// <param name="path">변환할 문자열 경로입니다.</param>
+        /// <param name="path">
+        /// The path string to convert. It may be <see langword="null"/>.<br/>
+        /// 변환할 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
         public static implicit operator RuniPath(string? path) => new RuniPath(path);
 
 
 
         #region + operator
         /// <summary>
-        /// 두 <see cref="RuniPath"/> 객체를 하나의 경로로 결합합니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines two paths.<br/>
+        /// 두 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine.<br/>
+        /// 결합할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine.<br/>
+        /// 결합할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath left, RuniPath right) => Combine(left, right);
 
         /// <summary>
-        /// <see cref="RuniPath"/>와 nullable <see cref="RuniPath"/>를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="RuniPath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a path and a nullable path.<br/>
+        /// 경로와 nullable 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 nullable 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine.<br/>
+        /// 결합할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath left, RuniPath? right) => Combine(left, right ?? empty);
 
         /// <summary>
-        /// nullable <see cref="RuniPath"/>와 <see cref="RuniPath"/>를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="RuniPath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a nullable path and a path.<br/>
+        /// nullable 경로와 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 nullable 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine.<br/>
+        /// 결합할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath? left, RuniPath right) => Combine(left ?? empty, right);
 
         /// <summary>
-        /// 두 nullable <see cref="RuniPath"/> 객체를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="RuniPath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines two nullable paths.<br/>
+        /// 두 nullable 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 첫 번째 nullable 경로입니다.</param>
-        /// <param name="right">결합할 두 번째 nullable 경로입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath? left, RuniPath? right) => Combine(left ?? empty, right ?? empty);
 
         /// <summary>
-        /// <see cref="RuniPath"/>와 문자열 경로 세그먼트를 하나의 경로로 결합합니다.<br/>
-        /// 문자열은 <see cref="RuniPath"/>로 암시적으로 변환된 후 결합됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a path and a path string.<br/>
+        /// 경로와 경로 문자열을 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">결합할 문자열 경로 세그먼트입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine.<br/>
+        /// 결합할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path string to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath left, string? right) => Combine(left, right);
 
         /// <summary>
-        /// nullable <see cref="RuniPath"/>와 문자열 경로 세그먼트를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="RuniPath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a nullable path and a path string.<br/>
+        /// nullable 경로와 경로 문자열을 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 nullable <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">결합할 문자열 경로 세그먼트입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path string to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(RuniPath? left, string? right) => Combine(left ?? empty, right);
 
         /// <summary>
-        /// 문자열 경로와 <see cref="RuniPath"/>를 하나의 경로로 결합합니다.<br/>
-        /// 문자열은 <see cref="RuniPath"/>로 암시적으로 변환된 후 결합됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a path string and a path.<br/>
+        /// 경로 문자열과 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 문자열 경로입니다.</param>
-        /// <param name="right">결합할 <see cref="RuniPath"/>입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path string to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine.<br/>
+        /// 결합할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(string? left, RuniPath right) => Combine(left, right);
 
         /// <summary>
-        /// 문자열 경로와 nullable <see cref="RuniPath"/>를 하나의 경로로 결합합니다.<br/>
-        /// null <see cref="RuniPath"/>는 <see cref="empty"/>로 처리됩니다.<br/>
-        /// <see cref="Combine(RuniPath, RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Combines a path string and a nullable path.<br/>
+        /// 경로 문자열과 nullable 경로를 결합합니다.
         /// </summary>
-        /// <param name="left">결합할 문자열 경로입니다.</param>
-        /// <param name="right">결합할 nullable <see cref="RuniPath"/>입니다.</param>
-        /// <returns>결합된 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="left">
+        /// The first path string to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 첫 번째 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to combine. It may be <see langword="null"/>.<br/>
+        /// 결합할 두 번째 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The combined path.<br/>
+        /// 결합된 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator +(string? left, RuniPath? right) => Combine(left, right ?? empty);
         #endregion
 
@@ -602,82 +874,147 @@ namespace RuniOS.IO
 
         #region - operator
         /// <summary>
-        /// 왼쪽 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
-        /// <paramref name="left"/>가 <paramref name="right"/> 디렉터리 아래에 있는 경우, 해당 상위 경로를 제거한 나머지 경로를 반환합니다.<br/>
-        /// 접두사가 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
+        /// Removes a prefix path from another path.<br/>
+        /// 한 경로에서 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 경로입니다.</param>
-        /// <param name="right">제거할 접두사 경로입니다.</param>
-        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="RuniPath"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim.<br/>
+        /// 접두사를 제거할 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, <paramref name="left"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="left"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath left, RuniPath right) => left.TrimStartPath(right);
 
         /// <summary>
-        /// 왼쪽 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
-        /// <paramref name="right"/>가 null이거나 비어있으면 <paramref name="left"/>가 그대로 반환됩니다.<br/>
-        /// 이는 <see cref="TrimStartPath(RuniPath)"/> 메서드와 동일한 기능을 수행합니다.
+        /// Removes a nullable prefix path from another path.<br/>
+        /// 한 경로에서 nullable 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 경로입니다.</param>
-        /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
-        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="RuniPath"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim.<br/>
+        /// 접두사를 제거할 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, <paramref name="left"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="left"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath left, RuniPath? right) => left.TrimStartPath(right ?? empty);
 
         /// <summary>
-        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
-        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
-        /// 일치하지 않으면 <paramref name="left"/>가 그대로 반환됩니다.
+        /// Removes a prefix path from a nullable path.<br/>
+        /// nullable 경로에서 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 nullable 경로입니다.</param>
-        /// <param name="right">제거할 접두사 경로입니다.</param>
-        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim. It may be <see langword="null"/>.<br/>
+        /// 접두사를 제거할 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path, the original path, or <see cref="empty"/> when <paramref name="left"/> is <see langword="null"/>.<br/>
+        /// 제거된 경로, 원본 경로, 또는 <paramref name="left"/>가 <see langword="null"/>일 때 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath? left, RuniPath right) => left?.TrimStartPath(right) ?? empty;
 
         /// <summary>
-        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 오른쪽 경로(<paramref name="right"/>) 접두사를 제거합니다.<br/>
-        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
-        /// <paramref name="right"/>가 null이면 <paramref name="left"/>가 그대로 반환됩니다.
+        /// Removes a nullable prefix path from a nullable path.<br/>
+        /// nullable 경로에서 nullable 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 nullable 경로입니다.</param>
-        /// <param name="right">제거할 nullable 접두사 경로입니다.</param>
-        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim. It may be <see langword="null"/>.<br/>
+        /// 접두사를 제거할 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path, the original path, or <see cref="empty"/> when <paramref name="left"/> is <see langword="null"/>.<br/>
+        /// 제거된 경로, 원본 경로, 또는 <paramref name="left"/>가 <see langword="null"/>일 때 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath? left, RuniPath? right) => left?.TrimStartPath(right ?? empty) ?? empty;
 
         /// <summary>
-        /// 왼쪽 경로(<paramref name="left"/>)에서 문자열 접두사(<paramref name="right"/>)를 제거합니다.<br/>
-        /// 문자열은 <see cref="RuniPath"/>로 암시적으로 변환된 후 경로 비교가 수행됩니다.<br/>
-        /// 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
+        /// Removes a prefix path string from another path.<br/>
+        /// 한 경로에서 접두사 경로 문자열을 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">제거할 문자열 접두사입니다.</param>
-        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="RuniPath"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim.<br/>
+        /// 접두사를 제거할 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path string to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, <paramref name="left"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="left"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath left, string? right) => left.TrimStartPath(right);
 
         /// <summary>
-        /// 왼쪽 nullable 경로(<paramref name="left"/>)에서 문자열 접두사(<paramref name="right"/>)를 제거합니다.<br/>
-        /// <paramref name="left"/>가 null이면 <see cref="empty"/>가 반환됩니다.<br/>
-        /// 일치하지 않으면 <paramref name="left"/>를 그대로 반환합니다.
+        /// Removes a prefix path string from a nullable path.<br/>
+        /// nullable 경로에서 접두사 경로 문자열을 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 nullable <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">제거할 문자열 접두사입니다.</param>
-        /// <returns>접두사가 제거된 경로, 원본 경로, 또는 <see cref="empty"/>입니다.</returns>
+        /// <param name="left">
+        /// The path to trim. It may be <see langword="null"/>.<br/>
+        /// 접두사를 제거할 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path string to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path, the original path, or <see cref="empty"/> when <paramref name="left"/> is <see langword="null"/>.<br/>
+        /// 제거된 경로, 원본 경로, 또는 <paramref name="left"/>가 <see langword="null"/>일 때 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public static RuniPath operator -(RuniPath? left, string? right) => left?.TrimStartPath(right ?? empty) ?? empty;
 
         /// <summary>
-        /// 왼쪽 문자열 경로(<paramref name="left"/>)에서 <see cref="RuniPath"/> 접두사(<paramref name="right"/>)를 제거합니다.<br/>
-        /// 문자열은 <see cref="RuniPath"/>로 변환된 후 연산됩니다.<br/>
-        /// 변환된 경로가 접두사와 일치하지 않으면 변환된 경로를 그대로 반환합니다.
+        /// Removes a prefix path from a path string.<br/>
+        /// 경로 문자열에서 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 문자열 경로입니다.</param>
-        /// <param name="right">제거할 <see cref="RuniPath"/> 접두사입니다.</param>
-        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="RuniPath"/>입니다.</returns>
+        /// <param name="left">
+        /// The path string to trim. It may be <see langword="null"/>.<br/>
+        /// 접두사를 제거할 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, the normalized value of <paramref name="left"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="left"/>의 정규화된 값을 반환합니다.
+        /// </returns>
         public static RuniPath operator -(string? left, RuniPath right) => left.ToPath().TrimStartPath(right);
 
         /// <summary>
-        /// 왼쪽 문자열 경로(<paramref name="left"/>)에서 nullable <see cref="RuniPath"/> 접두사(<paramref name="right"/>)를 제거합니다.<br/>
-        /// <paramref name="right"/>가 null이면 왼쪽 경로가 변환되어 그대로 반환됩니다.
+        /// Removes a nullable prefix path from a path string.<br/>
+        /// 경로 문자열에서 nullable 접두사 경로를 제거합니다.
         /// </summary>
-        /// <param name="left">기준이 되는 문자열 경로입니다.</param>
-        /// <param name="right">제거할 nullable <see cref="RuniPath"/> 접두사입니다.</param>
-        /// <returns>접두사가 제거되었거나 원본 그대로인 <see cref="RuniPath"/>입니다.</returns>
+        /// <param name="left">
+        /// The path string to trim. It may be <see langword="null"/>.<br/>
+        /// 접두사를 제거할 경로 문자열입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <param name="right">
+        /// The prefix path to remove. It may be <see langword="null"/>.<br/>
+        /// 제거할 접두사 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, the normalized value of <paramref name="left"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="left"/>의 정규화된 값을 반환합니다.
+        /// </returns>
         public static RuniPath operator -(string? left, RuniPath? right) => left.ToPath().TrimStartPath(right ?? empty);
         #endregion
 
@@ -685,41 +1022,70 @@ namespace RuniOS.IO
 
         #region -- operator
         /// <summary>
-        /// 현재 경로의 상위 디렉터리 경로를 구합니다.<br/>
-        /// 이는 <see cref="GetParentPath()"/> 메서드와 동일한 기능을 수행합니다.
+        /// Gets the parent path.<br/>
+        /// 상위 경로를 가져옵니다.
         /// </summary>
-        /// <param name="path">상위 디렉터리를 구할 경로입니다.</param>
-        /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="RuniPath"/> 인스턴스입니다.</returns>
+        /// <param name="path">
+        /// The path whose parent should be returned.<br/>
+        /// 상위 경로를 가져올 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The parent path.<br/>
+        /// 상위 경로를 반환합니다.
+        /// </returns>
         public static RuniPath operator --(RuniPath path) => path.GetParentPath();
 
         /// <summary>
-        /// nullable <see cref="RuniPath"/>의 상위 디렉터리 경로를 구합니다.<br/>
-        /// <paramref name="path"/>가 null이면 <see cref="empty"/>를 반환합니다.<br/>
-        /// 이는 <see cref="GetParentPath()"/> 메서드와 동일한 기능을 수행합니다.
+        /// Gets the parent path of a nullable path.<br/>
+        /// nullable 경로의 상위 경로를 가져옵니다.
         /// </summary>
-        /// <param name="path">상위 디렉터리를 구할 nullable 경로입니다.</param>
-        /// <returns>상위 디렉터리 경로를 나타내는 새 <see cref="RuniPath"/> 인스턴스 또는 <see cref="empty"/>.</returns>
+        /// <param name="path">
+        /// The path whose parent should be returned. It may be <see langword="null"/>.<br/>
+        /// 상위 경로를 가져올 경로입니다. <see langword="null"/>일 수 있습니다.
+        /// </param>
+        /// <returns>
+        /// The parent path, or <see cref="empty"/> when <paramref name="path"/> is <see langword="null"/>.<br/>
+        /// 상위 경로를 반환하며, <paramref name="path"/>가 <see langword="null"/>이면 <see cref="empty"/>를 반환합니다.
+        /// </returns>
         public static RuniPath? operator --(RuniPath? path) => path?.GetParentPath() ?? empty;
         #endregion
 
 
 
         /// <summary>
-        /// 두 <see cref="RuniPath"/> 객체가 동일한지 여부를 확인합니다.<br/>
-        /// 이는 <see cref="Equals(RuniPath)"/> 메서드와 동일합니다.
+        /// Determines whether two paths are equal.<br/>
+        /// 두 경로가 같은지 확인합니다.
         /// </summary>
-        /// <param name="left">비교할 첫 번째 <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">비교할 두 번째 <see cref="RuniPath"/>입니다.</param>
-        /// <returns>두 경로가 동일하면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <param name="left">
+        /// The first path to compare.<br/>
+        /// 비교할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to compare.<br/>
+        /// 비교할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the paths are equal; otherwise, <see langword="false"/>.<br/>
+        /// 두 경로가 같으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public static bool operator ==(RuniPath left, RuniPath right) => left.Equals(right);
 
         /// <summary>
-        /// 두 <see cref="RuniPath"/> 객체가 동일하지 않은지 여부를 확인합니다.<br/>
-        /// 이는 <c>operator ==</c>의 반대입니다.
+        /// Determines whether two paths are not equal.<br/>
+        /// 두 경로가 같지 않은지 확인합니다.
         /// </summary>
-        /// <param name="left">비교할 첫 번째 <see cref="RuniPath"/>입니다.</param>
-        /// <param name="right">비교할 두 번째 <see cref="RuniPath"/>입니다.</param>
-        /// <returns>두 경로가 동일하지 않으면 <c>true</c>, 그렇지 않으면 <c>false</c>입니다.</returns>
+        /// <param name="left">
+        /// The first path to compare.<br/>
+        /// 비교할 첫 번째 경로입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second path to compare.<br/>
+        /// 비교할 두 번째 경로입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the paths are not equal; otherwise, <see langword="false"/>.<br/>
+        /// 두 경로가 같지 않으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public static bool operator !=(RuniPath left, RuniPath right) => !(left == right);
         #endregion
 
