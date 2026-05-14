@@ -233,11 +233,13 @@ namespace RuniOS.IO
         /// </returns>
         public readonly RuniPath GetPathWithoutExtension()
         {
+            int separatorIndex = value.LastIndexOf(directorySeparatorChar);
             int extIndex = value.LastIndexOf(FileExtension.extensionSeparatorChar);
-            if (extIndex < 0)
-                return _value;
-            else
-                return value.Remove(extIndex);
+
+            if (extIndex <= separatorIndex)
+                return this;
+
+            return value.Remove(extIndex);
         }
 
         /// <summary>
