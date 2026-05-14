@@ -17,22 +17,22 @@ namespace RuniOS.Utility
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
         /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
-        public static FilePath FixPathChars(FilePath path, char newChar = FilePath.alternativeNameChar)
+        /// <returns>잘못된 문자가 대체된 새 문자열입니다.</returns>
+        public static string FixPathChars(string path, char newChar = FilePath.alternativeNameChar)
         {
-            if (string.IsNullOrEmpty(path.value))
+            if (string.IsNullOrEmpty(path))
                 return FilePath.empty;
 
-            int lastPathIndex = path.value.LastIndexOfAny(FilePath.directorySeparatorChars);
-            if (lastPathIndex < 0) lastPathIndex = path.value.Length;
+            int lastPathIndex = path.LastIndexOfAny(FilePath.directorySeparatorChars);
+            if (lastPathIndex < 0) lastPathIndex = path.Length;
 
-            ReadOnlySpan<char> pathPart = path.value.AsSpan(0, lastPathIndex);
+            ReadOnlySpan<char> pathPart = path.AsSpan(0, lastPathIndex);
             if (pathPart.IndexOfAny(invalidPathChars) < 0)
                 return path;
 
-            return string.Create(path.value.Length, (value: path, newChar, lastPathIndex), static (span, state) =>
+            return string.Create(path.Length, (value: path, newChar, lastPathIndex), static (span, state) =>
             {
-                state.value.value.AsSpan().CopyTo(span);
+                state.value.AsSpan().CopyTo(span);
                 for (int i = 0; i < state.lastPathIndex; i++)
                 {
                     if (Array.IndexOf(invalidPathChars, span[i]) >= 0)
@@ -47,20 +47,20 @@ namespace RuniOS.Utility
         /// </summary>
         /// <param name="path">지정할 경로입니다.</param>
         /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="FilePath.alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 파일 이름 문자가 대체된 새 <see cref="FilePath"/> 인스턴스입니다.</returns>
-        public static FilePath FixFileNameChars(FilePath path, char newChar = FilePath.alternativeNameChar)
+        /// <returns>잘못된 파일 이름 문자가 대체된 새 문자열입니다.</returns>
+        public static string FixFileNameChars(string path, char newChar = FilePath.alternativeNameChar)
         {
-            if (string.IsNullOrEmpty(path.value))
+            if (string.IsNullOrEmpty(path))
                 return string.Empty;
 
-            int lastPathIndex = path.value.LastIndexOfAny(FilePath.directorySeparatorChars);
-            ReadOnlySpan<char> filePart = path.value.AsSpan(lastPathIndex + 1);
+            int lastPathIndex = path.LastIndexOfAny(FilePath.directorySeparatorChars);
+            ReadOnlySpan<char> filePart = path.AsSpan(lastPathIndex + 1);
             if (filePart.IndexOfAny(invalidFileNameChars) < 0)
-                return path.value;
+                return path;
 
-            return string.Create(path.value.Length, (path.value, newChar, lastPathIndex), static (span, state) =>
+            return string.Create(path.Length, (path, newChar, lastPathIndex), static (span, state) =>
             {
-                state.value.AsSpan().CopyTo(span);
+                state.path.AsSpan().CopyTo(span);
                 for (int i = state.lastPathIndex + 1; i < span.Length; i++)
                 {
                     if (Array.IndexOf(invalidFileNameChars, span[i]) >= 0)
