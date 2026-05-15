@@ -21,7 +21,7 @@ namespace RuniOS.Editor.IMGUI
         public RuniPath DrawLayout(RuniPath value, FocusType focusType, params GUILayoutOption[] options) => DrawLayout(value, focusType, EditorStyles.miniPullDown, options);
         public RuniPath DrawLayout(RuniPath value, FocusType focusType, GUIStyle style, params GUILayoutOption[] options)
         {
-            DrawLayoutButton(value, focusType, style, options);
+            DrawLayoutButton(value.value, focusType, style, options);
 
             RuniPath result = imguiSelectedItem?.path ?? value;
             if (imguiSelectedItem != null)
@@ -39,7 +39,7 @@ namespace RuniOS.Editor.IMGUI
         public RuniPath Draw(Rect position, RuniPath value, FocusType focusType) => Draw(position, value, focusType, EditorStyles.miniPullDown);
         public RuniPath Draw(Rect position, RuniPath value, FocusType focusType, GUIStyle style)
         {
-            DrawButton(position, value, focusType, style);
+            DrawButton(position, value.value, focusType, style);
 
             RuniPath result = imguiSelectedItem?.path ?? value;
             if (imguiSelectedItem != null)
@@ -75,8 +75,8 @@ namespace RuniOS.Editor.IMGUI
                 RuniPath splitAllPath = RuniPath.empty;
                 foreach (var span in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
                 {
-                    string splitPath = new string(span);
-                    splitAllPath += splitPath;
+                    RuniPath splitPath = (RuniPath)span;
+                    splitAllPath.Combine(splitPath);
 
                     if (buildRootPaths.ContainsKey(splitAllPath))
                         continue;

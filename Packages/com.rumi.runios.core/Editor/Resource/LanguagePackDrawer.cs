@@ -8,12 +8,12 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class LanguagePackDrawer : PackDrawer
     {
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => Regex.IsMatch(x, "^assets/.*/lang/.*\\.json$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => Regex.IsMatch(x.value, "^assets/.*/lang/.*\\.json$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
 
         public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
             contents = relativePaths
-                .Select(x => (Application.streamingAssetsPath + x).value)
+                .Select(x => PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value)
                 .Select(File.ReadAllText)
                 .Select(x => new GUIContent(x))
                 .ToArray();

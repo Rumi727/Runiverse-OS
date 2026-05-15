@@ -1,6 +1,7 @@
 #nullable enable
 
 using RuniOS.Editor.Unity.Drawers.IO;
+using RuniOS.IO;
 using RuniOS.Resource;
 
 namespace RuniOS.Editor.Unity.Drawers.Resource
@@ -26,17 +27,17 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
             EditorGUI.BeginChangeCheck();
 
             string nameSpaceValue = nameSpace.stringValue;
-            string pathValue = path.stringValue;
+            RuniPath pathValue = (RuniPath)path.stringValue;
             
             if (Identifier.IsNamespaceValid(nameSpaceValue) && Identifier.IsPathValid(pathValue))
-                value = new Identifier(nameSpace.stringValue, path.stringValue);
+                value = new Identifier(nameSpace.stringValue, pathValue);
             
             value = IdentifierField(position, label, value);
             
             if (EditorGUI.EndChangeCheck())
             {
                 nameSpace.stringValue = value.nameSpace;
-                path.stringValue = value.path;
+                path.stringValue = value.path.value;
             }
         }
 

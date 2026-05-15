@@ -99,8 +99,8 @@ namespace RuniOS.IO.Virtual
         /// 지정된 경로의 파일에서 모든 바이트를 읽습니다.
         /// </summary>
         /// <param name="path">
-        /// The virtual file-system path of the file to read.<br/>
-        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// The provider-relative file path to read.<br/>
+        /// 읽을 프로바이더 기준 파일 경로입니다.
         /// </param>
         /// <param name="cancellationToken">
         /// The cancellation token used to cancel the operation.<br/>
@@ -126,8 +126,8 @@ namespace RuniOS.IO.Virtual
         /// 지정된 경로의 파일에서 모든 텍스트를 읽습니다.
         /// </summary>
         /// <param name="path">
-        /// The virtual file-system path of the file to read.<br/>
-        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// The provider-relative file path to read.<br/>
+        /// 읽을 프로바이더 기준 파일 경로입니다.
         /// </param>
         /// <param name="cancellationToken">
         /// The cancellation token used to cancel the operation.<br/>
@@ -153,8 +153,8 @@ namespace RuniOS.IO.Virtual
         /// 지정된 경로의 파일을 줄 단위 비동기 시퀀스로 읽습니다.
         /// </summary>
         /// <param name="path">
-        /// The virtual file-system path of the file to read.<br/>
-        /// 읽을 파일의 가상 파일 시스템 경로입니다.
+        /// The provider-relative file path to read.<br/>
+        /// 읽을 프로바이더 기준 파일 경로입니다.
         /// </param>
         /// <param name="cancellationToken">
         /// The cancellation token used to cancel the operation.<br/>
@@ -270,7 +270,7 @@ namespace RuniOS.IO.Virtual
             return UniTask.CompletedTask;
         }
 
-        static string GetRelativePath(VirtualDirectoryBase directory, VirtualNode node)
+        static RuniPath GetRelativePath(VirtualDirectoryBase directory, VirtualNode node)
         {
             node.ThrowIfNotAttachedException();
             return node.fullPath.Value.TrimStartPath(directory.fullPath ?? RuniPath.empty);

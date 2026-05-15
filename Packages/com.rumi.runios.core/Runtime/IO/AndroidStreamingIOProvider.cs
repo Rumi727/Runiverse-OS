@@ -8,9 +8,11 @@ using UnityEngine.Android;
 namespace RuniOS.IO
 {
     /// <summary>
-    /// Android 환경의 StreamingAssets를 대상으로 읽기 전용 접근을 제공하는 <see cref="IIOProvider"/> 구현체입니다.
-    /// <br/>
-    /// 내부적으로 Android <c>AssetManager</c>를 사용하여 파일 열기 및 디렉토리 열거를 수행합니다.
+    /// Provides read-only access to Android streaming assets through the <see cref="IIOProvider"/> API.<br/>
+    /// The provider uses Android <c>AssetManager</c> to open assets and enumerate asset directories.
+    /// <br/><br/>
+    /// Android StreamingAssets에 대한 읽기 전용 접근을 <see cref="IIOProvider"/> API로 제공합니다.<br/>
+    /// 내부적으로 Android <c>AssetManager</c>를 사용해 에셋을 열고 에셋 디렉터리를 열거합니다.
     /// </summary>
     public class AndroidStreamingIOProvider(RuniPath rootPath = default) : IIOProvider
     {
@@ -53,7 +55,7 @@ namespace RuniOS.IO
         public bool isIndependent => false;
 
         /// <inheritdoc/>
-        public IIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath + path);
+        public IIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath.Combine(path));
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is AndroidStreamingIOProvider otherAndroid && rootPath == otherAndroid.rootPath;
@@ -64,7 +66,7 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            RuniPath actualPath = rootPath + path;
+            RuniPath actualPath = rootPath.Combine(path);
             string relativePath = actualPath.value;
             string[] children = ListAssets(relativePath);
             string name = path.GetFileName();
@@ -106,7 +108,7 @@ namespace RuniOS.IO
 
             static IEnumerable<IOEntry> Enumerate(RuniPath rootPath, RuniPath path, bool recursive, CancellationToken cancellationToken)
             {
-                string[] rootItems = ListAssets((rootPath + path).value);
+                string[] rootItems = ListAssets(rootPath.Combine(path).value);
                 if (rootItems.Length <= 0)
                     yield break;
 
@@ -122,8 +124,8 @@ namespace RuniOS.IO
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        RuniPath entryPath = currentPath + item;
-                        RuniPath actualEntryPath = rootPath + entryPath;
+                        RuniPath entryPath = currentPath.Combine(item);
+                        RuniPath actualEntryPath = rootPath.Combine(entryPath);
                         string[] childItems = ListAssets(actualEntryPath.value);
                         bool isDirectory = childItems.Length > 0;
 
@@ -172,7 +174,7 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string relativePath = (rootPath + path).value;
+            string relativePath = rootPath.Combine(path).value;
             if (!TryOpenAsset(relativePath, out AndroidJavaObject? inputStream) || inputStream == null)
                 throw new FileNotFoundException($"Streaming asset not found: '{relativePath}'.", relativePath);
 

@@ -48,9 +48,9 @@ namespace RuniOS.Resource.Languages
             RecordAssetHandle(identifier, assetHandle);
 
             IReadOnlyDictionary<string, string> localizations = assetHandle.assetObject.localizations;
-            if (calculatedAsset.TryGetValue(identifier.path, out Dictionary<Identifier, string>? value))
+            if (calculatedAsset.TryGetValue(identifier.path.value, out Dictionary<Identifier, string>? value))
             {
-                calculatedAsset[identifier.path] = value
+                calculatedAsset[identifier.path.value] = value
                     .Concat
                     (
                         localizations
@@ -60,7 +60,7 @@ namespace RuniOS.Resource.Languages
                     .ToDictionary(x => x.Key, x => x.First().Value);
             }
             else
-                calculatedAsset.Add(identifier.path, localizations.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
+                calculatedAsset.Add(identifier.path.value, localizations.ToDictionary(x => new Identifier(identifier.nameSpace, x.Key), x => x.Value));
             
             return UniTask.CompletedTask;
         }

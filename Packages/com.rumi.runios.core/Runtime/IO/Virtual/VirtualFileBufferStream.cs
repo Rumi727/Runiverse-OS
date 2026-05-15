@@ -101,14 +101,17 @@ namespace RuniOS.IO.Virtual
             if (count < 0 || count > buffer.Length - offset)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            long endPosition = Position + count;
-            if (endPosition > Length)
-                fileBuffer.SetLength(endPosition);
+            checked
+            {
+                long endPosition = Position + count;
+                if (endPosition > Length)
+                    fileBuffer.SetLength(endPosition);
 
-            for (int i = 0; i < count; i++)
-                fileBuffer[Position + i] = buffer[i + offset];
+                for (int i = 0; i < count; i++)
+                    fileBuffer[Position + i] = buffer[i + offset];
 
-            Position = endPosition;
+                Position = endPosition;
+            }
         }
 
         /// <inheritdoc/>

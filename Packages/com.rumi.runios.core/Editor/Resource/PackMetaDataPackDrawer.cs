@@ -25,9 +25,9 @@ namespace RuniOS.Editor.Resource
                 .Select(x =>
                 {
                     if (x.IsEmpty())
-                        return (Application.streamingAssetsPath + x + ResourcePack.infoPath).value;
+                        return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).Combine((RuniPath)ResourcePack.infoPath).value;
                     
-                    return (Application.streamingAssetsPath + x).value;
+                    return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value;
                 })
                 .Where(File.Exists)
                 .ToArray();
@@ -53,7 +53,7 @@ namespace RuniOS.Editor.Resource
                 if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
-                    File.WriteAllText(Application.streamingAssetsPath.ToPath() + ResourcePack.infoPath, json);
+                    File.WriteAllText(PhysicalPath.From(Application.streamingAssetsPath) + ResourcePack.infoPath, json);
                     
                     OnEnable(relativePaths);
                 }

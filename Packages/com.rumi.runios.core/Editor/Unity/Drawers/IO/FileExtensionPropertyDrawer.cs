@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Drawers.IO
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            FileExtension value = FileExtensionField(position, label, property.stringValue); //boxedValue 쓰면 크래시남..
+            FileExtension value = FileExtensionField(position, label, (FileExtension)property.stringValue); //boxedValue 쓰면 크래시남..
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = value;
         }

@@ -55,7 +55,7 @@ namespace RuniOS.Json.Converters.Resource
         /// JSON 객체를 <see cref="PackIdentifier"/> 객체로 역직렬화합니다.
         /// <br/>
         /// JSON 객체 내의 "identifier" 또는 "path" 속성을 찾아 해당 값을 읽어
-        /// <see cref="PackIdentifier.CreateByID(Identifier)"/> 또는 <see cref="PackIdentifier.CreateByPath(RuniPath)"/>를 통해 인스턴스를 생성합니다.
+        /// <see cref="PackIdentifier.CreateByID(Identifier)"/> 또는 <see cref="PackIdentifier.CreateByPath(PhysicalPath)"/>를 통해 인스턴스를 생성합니다.
         /// 유효한 속성이 없거나 JSON 형식이 올바르지 않으면 <see cref="PackIdentifier.empty"/>를 반환합니다.
         /// </summary>
         /// <param name="reader">JSON 읽기를 위한 <see cref="JsonReader"/> 객체입니다.</param>
@@ -99,7 +99,7 @@ namespace RuniOS.Json.Converters.Resource
                         case nameof(PackIdentifier.path):
                             // "path" 속성의 값을 RuniPath 타입으로 역직렬화하고 PackIdentifier를 생성합니다.
                             // RuniPathConverter가 사용될 것입니다.
-                            return PackIdentifier.CreateByPath(serializer.Deserialize<RuniPath>(reader));
+                            return PackIdentifier.CreateByPath(serializer.Deserialize<PhysicalPath>(reader));
                         default:
                             reader.Skip();
                             break;

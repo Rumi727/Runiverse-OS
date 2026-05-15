@@ -211,12 +211,12 @@ namespace RuniOS.IO.Virtual
             ThrowIfDeletedException();
 
             // 캐시에서 먼저 시도
-            if (rootDirectoryCache.TryGetValue(fullPath + path, out VirtualNode cachedNode))
+            if (rootDirectoryCache.TryGetValue(fullPath?.Combine(path) ?? path, out VirtualNode cachedNode))
                 return cachedNode;
 
             if (path.IsEmpty())
             {
-                rootDirectoryCache[fullPath + path] = this; // 이 인스턴스의 디렉토리 캐싱
+                rootDirectoryCache[fullPath?.Combine(path) ?? path] = this; // 이 인스턴스의 디렉토리 캐싱
                 return this;
             }
 
@@ -237,7 +237,7 @@ namespace RuniOS.IO.Virtual
             }
 
             if (childNode != null)
-                rootDirectoryCache[fullPath + path] = childNode;
+                rootDirectoryCache[fullPath?.Combine(path) ?? path] = childNode;
 
             return childNode;
         }
@@ -282,6 +282,9 @@ namespace RuniOS.IO.Virtual
         /// </exception>
         public virtual VirtualDirectoryBase? GetDirectory(RuniPath path)
         {
+            if (path.IsEmpty())
+                return this;
+
             VirtualDirectoryBase? directory = GetNode(path.GetParentPath())?.AsDirectory();
             if (directory == null)
                 return null;

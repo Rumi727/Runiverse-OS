@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RuniOS.IO;
 using RuniOS.Json.Converters.Resource;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
@@ -19,22 +20,14 @@ namespace RuniOS.Resource
         /// <summary>
         /// 팩의 내부 식별자입니다. 로컬 경로가 없을 때 사용됩니다.
         /// </summary>
+        [DisallowNull]
         public Identifier? identifier
         {
             readonly get => _identifier;
             set
             {
-                if (value != null)
-                {
-                    _identifier = value;
-                    _path = null;
-                }
-                else
-                {
-                    _identifier = null;
-                    if (_path == null)
-                        _path = RuniPath.empty;
-                }
+                _identifier = value;
+                _path = null;
             }
         }
         [SerializeField, JsonIgnore] SerializableNullable<Identifier> _identifier;
@@ -42,25 +35,17 @@ namespace RuniOS.Resource
         /// <summary>
         /// 팩의 로컬 파일 시스템 경로입니다. 내부 ID가 없을 때 사용됩니다.
         /// </summary>
-        public RuniPath? path
+        [DisallowNull]
+        public PhysicalPath? path
         {
             readonly get => _path;
             set
             {
-                if (value != null)
-                {
-                    _identifier = null;
-                    _path = value;
-                }
-                else
-                {
-                    if (_identifier == null)
-                        _identifier = Identifier.empty;
-                    _path = null;
-                }
+                _identifier = null;
+                _path = value;
             }
         }
-        [SerializeField, JsonIgnore] SerializableNullable<RuniPath> _path;
+        [SerializeField, JsonIgnore] SerializableNullable<PhysicalPath> _path;
 
         /// <summary>
         /// 이 식별자가 유효한 상태인지 여부를 나타냅니다.
@@ -76,7 +61,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="identifier">팩의 내부 식별자입니다.</param>
         /// <param name="path">팩의 로컬 경로입니다.</param>
-        PackIdentifier(Identifier? identifier, RuniPath? path)
+        PackIdentifier(Identifier? identifier, PhysicalPath? path)
         {
             _identifier = identifier;
             _path = path;
@@ -94,7 +79,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="path">팩의 로컬 경로입니다.</param>
         /// <returns>생성된 <see cref="PackIdentifier"/> 인스턴스입니다.</returns>
-        public static PackIdentifier CreateByPath(RuniPath path) => new PackIdentifier(null, path);
+        public static PackIdentifier CreateByPath(PhysicalPath path) => new PackIdentifier(null, path);
 
 
 

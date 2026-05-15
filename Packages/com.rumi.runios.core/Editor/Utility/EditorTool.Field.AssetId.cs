@@ -21,7 +21,7 @@ namespace RuniOS.Editor
         }
 
         static int? assetIdFieldLastControlID;
-        static RuniPath assetIdFieldSelectedPath = string.Empty;
+        static RuniPath assetIdFieldSelectedPath = RuniPath.empty;
         static Identifier DoAssetIdField(Rect position, Identifier registryId, Identifier value)
         {
             string currentNamespace = value.nameSpace;
@@ -48,7 +48,7 @@ namespace RuniOS.Editor
             {
                 value.path = registryTypeFieldSelectedPath;
 
-                registryTypeFieldSelectedPath = string.Empty;
+                registryTypeFieldSelectedPath = RuniPath.empty;
                 registryTypeFieldLastControlID = null;
 
                 GUI.changed = true;

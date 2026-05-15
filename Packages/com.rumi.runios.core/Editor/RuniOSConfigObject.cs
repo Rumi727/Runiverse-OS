@@ -22,12 +22,12 @@ namespace RuniOS.Editor
                 if (_instance != null)
                     return _instance;
 
-                RuniPath assetFolderPath = "Assets/Runiverse OS";
-                string assetPath = (assetFolderPath + typeof(T).Name).AddExtension(".asset");
+                RuniPath assetFolderPath = (RuniPath)"Assets/Runiverse OS";
+                string assetPath = assetFolderPath.Combine((RuniPath)typeof(T).Name).AddExtension(".asset").value;
 
                 T? scriptableObject = AssetDatabase.LoadAssetAtPath<T>(assetPath) ? AssetDatabase.LoadAssetAtPath<T>(assetPath) : CreateInstance<T>();
 
-                if (!AssetDatabase.AssetPathExists(assetFolderPath))
+                if (!AssetDatabase.AssetPathExists(assetFolderPath.value))
                     AssetDatabase.CreateFolder("Assets", "Runiverse OS");
 
                 if (!AssetDatabase.AssetPathExists(assetPath))

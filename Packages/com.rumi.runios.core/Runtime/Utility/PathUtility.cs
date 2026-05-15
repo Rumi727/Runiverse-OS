@@ -5,6 +5,10 @@ using UnityEngine.Networking;
 
 namespace RuniOS.Utility
 {
+    /// <summary>
+    /// Provides shared helpers for normalized path strings used by <see cref="RuniPath"/> and related path types.<br/>
+    /// <see cref="RuniPath"/> 및 관련 경로 타입에서 사용하는 정규화된 경로 문자열 헬퍼를 제공합니다.
+    /// </summary>
     public static class PathUtility
     {
         /// <summary>
@@ -26,6 +30,10 @@ namespace RuniOS.Utility
         /// Converts this path value to a local file URL string.<br/>
         /// 이 경로 값을 로컬 파일 URL 문자열로 변환합니다.
         /// </summary>
+        /// <param name="path">
+        /// The path string to convert.<br/>
+        /// 변환할 경로 문자열입니다.
+        /// </param>
         /// <returns>
         /// A string prefixed with <see cref="urlPathPrefix"/> and escaped for URL usage.<br/>
         /// <see cref="urlPathPrefix"/>가 붙고 URL 용도로 이스케이프된 문자열을 반환합니다.
@@ -33,16 +41,25 @@ namespace RuniOS.Utility
         public static string UrlPathPrefix(string path) => urlPathPrefix + UnityWebRequest.EscapeURL(path);
 
         /// <summary>
-        /// 지정한 경로에서 시스템에서 정의한 잘못된 경로 문자(<see cref="Path.GetInvalidPathChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다.
+        /// Replaces invalid path characters in the directory portion of the specified path string.<br/>
+        /// 지정된 경로 문자열의 디렉터리 부분에서 잘못된 경로 문자를 대체합니다.
         /// </summary>
-        /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 문자가 대체된 새 문자열입니다.</returns>
+        /// <param name="path">
+        /// The path string to sanitize.<br/>
+        /// 정리할 경로 문자열입니다.
+        /// </param>
+        /// <param name="newChar">
+        /// The replacement character used for invalid path characters.<br/>
+        /// 잘못된 경로 문자를 대체할 문자입니다.
+        /// </param>
+        /// <returns>
+        /// A string with invalid path characters replaced, or the original string when no replacement is needed.<br/>
+        /// 잘못된 경로 문자가 대체된 문자열을 반환하며, 대체가 필요 없으면 원본 문자열을 반환합니다.
+        /// </returns>
         public static string FixPathChars(string path, char newChar = alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
-                return RuniPath.empty;
+                return string.Empty;
 
             int lastPathIndex = path.LastIndexOfAny(RuniPath.directorySeparatorChars);
             if (lastPathIndex < 0) lastPathIndex = path.Length;
@@ -63,12 +80,21 @@ namespace RuniOS.Utility
         }
 
         /// <summary>
-        /// 지정한 경로의 파일 이름 부분에서 시스템에서 정의한 잘못된 파일 이름 문자(<see cref="System.IO.Path.GetInvalidFileNameChars"/>)를 지정된 문자로 대체한 새 <see cref="RuniPath"/>를 반환합니다.<br/>
-        /// 기본 대체 문자는 <see cref="alternativeNameChar"/> ('_')입니다. 이 메서드는 경로 전체가 아닌 파일 이름 부분에만 적용됩니다.
+        /// Replaces invalid file-name characters in the last segment of the specified path string.<br/>
+        /// 지정된 경로 문자열의 마지막 세그먼트에서 잘못된 파일 이름 문자를 대체합니다.
         /// </summary>
-        /// <param name="path">지정할 경로입니다.</param>
-        /// <param name="newChar">잘못된 문자를 대체할 문자입니다. 기본값은 <see cref="alternativeNameChar"/>입니다.</param>
-        /// <returns>잘못된 파일 이름 문자가 대체된 새 문자열입니다.</returns>
+        /// <param name="path">
+        /// The path string to sanitize.<br/>
+        /// 정리할 경로 문자열입니다.
+        /// </param>
+        /// <param name="newChar">
+        /// The replacement character used for invalid file-name characters.<br/>
+        /// 잘못된 파일 이름 문자를 대체할 문자입니다.
+        /// </param>
+        /// <returns>
+        /// A string with invalid file-name characters replaced, or the original string when no replacement is needed.<br/>
+        /// 잘못된 파일 이름 문자가 대체된 문자열을 반환하며, 대체가 필요 없으면 원본 문자열을 반환합니다.
+        /// </returns>
         public static string FixFileNameChars(string path, char newChar = alternativeNameChar)
         {
             if (string.IsNullOrEmpty(path))
@@ -91,8 +117,17 @@ namespace RuniOS.Utility
         }
 
         /// <summary>
-        /// 파일 이름이 Windows 예약어(CON, PRN, AUX, NUL, COM1~9, LPT1~9)인지 확인합니다.
+        /// Determines whether the file name portion of the specified path is a Windows reserved device name.<br/>
+        /// 지정된 경로의 파일 이름 부분이 Windows 예약 장치 이름인지 확인합니다.
         /// </summary>
+        /// <param name="path">
+        /// The path or file name to inspect.<br/>
+        /// 검사할 경로 또는 파일 이름입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the file name is a Windows reserved device name; otherwise, <see langword="false"/>.<br/>
+        /// 파일 이름이 Windows 예약 장치 이름이면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         public static bool IsWindowsReservedName(ReadOnlySpan<char> path)
         {
             ReadOnlySpan<char> name = Path.GetFileNameWithoutExtension(path);
@@ -120,133 +155,246 @@ namespace RuniOS.Utility
             return false;
         }
 
-        /*public const char directorySeparatorChar = '/';
-        public const char alternativeNameChar = '_';
-        public const string urlPathPrefix = "file:///";
 
-        public static readonly char[] directorySeparatorChars = new char[] { '/', '\\' };
+        /// <summary>
+        /// Gets the extension from the last segment of the specified path string.<br/>
+        /// 지정된 경로 문자열의 마지막 세그먼트에서 확장자를 가져옵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path string to inspect.<br/>
+        /// 검사할 경로 문자열입니다.
+        /// </param>
+        /// <returns>
+        /// The extension represented by the last segment of <paramref name="path"/>.<br/>
+        /// <paramref name="path"/>의 마지막 세그먼트에서 얻은 확장자를 반환합니다.
+        /// </returns>
+        public static FileExtension GetExtension(string path) => new FileExtension(path);
 
-        public static string RemoveInvalidPathChars(string filename) => string.Concat(filename.Split(System.IO.Path.GetInvalidPathChars()));
-        public static string ReplaceInvalidPathChars(string filename, char newChar = alternativeNameChar) => string.Join(newChar, filename.Split(System.IO.Path.GetInvalidPathChars()));
 
-        public static string RemoveInvalidFileNameChars(string filename) => string.Concat(filename.Split(System.IO.Path.GetInvalidFileNameChars()));
-        public static string ReplaceInvalidFileNameChars(string filename, char newChar = alternativeNameChar) => string.Join(newChar, filename.Split(System.IO.Path.GetInvalidFileNameChars()));
 
-        public static string GetExtension(string path)
+        /// <summary>
+        /// Gets the last segment of the specified normalized path span.<br/>
+        /// 지정된 정규화 경로 span의 마지막 세그먼트를 가져옵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to inspect.<br/>
+        /// 검사할 경로 span입니다.
+        /// </param>
+        /// <returns>
+        /// The text after the last <see cref="RuniPath.directorySeparatorChar"/>, or the whole span when it has no separator.<br/>
+        /// 마지막 <see cref="RuniPath.directorySeparatorChar"/> 뒤의 문자열을 반환하며, 구분자가 없으면 전체 span을 반환합니다.
+        /// </returns>
+        public static ReadOnlySpan<char> GetFileName(ReadOnlySpan<char> path)
         {
-            int index = path.LastIndexOf('.');
-            if (index < 0)
-                return string.Empty;
-
-            return path.Substring(index);
-        }
-
-        public static string GetFileName(string path)
-        {
-            int index = path.LastIndexOfAny(directorySeparatorChars);
+            int index = path.LastIndexOf(RuniPath.directorySeparatorChar);
             if (index < 0)
                 return path;
 
-            return path.Substring(index + 1);
+            return path.Slice(index + 1);
         }
 
-        public static string GetFileNameWithoutExtension(string path)
+        /// <summary>
+        /// Gets the last path segment without its extension.<br/>
+        /// 마지막 경로 세그먼트에서 확장자를 제외한 값을 가져옵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to inspect.<br/>
+        /// 검사할 경로 span입니다.
+        /// </param>
+        /// <returns>
+        /// The last path segment without its extension, or the full segment when no extension exists.<br/>
+        /// 확장자를 제외한 마지막 경로 세그먼트를 반환하며, 확장자가 없으면 세그먼트 전체를 반환합니다.
+        /// </returns>
+        public static ReadOnlySpan<char> GetFileNameWithoutExtension(ReadOnlySpan<char> path)
         {
-            string fileName = GetFileName(path);
-            int extIndex = fileName.LastIndexOf('.');
+            ReadOnlySpan<char> fileName = GetFileName(path);
+            int extIndex = fileName.LastIndexOf(FileExtension.extensionSeparatorChar);
 
             if (extIndex < 0)
                 return fileName;
             else
-                return fileName.Remove(extIndex);
+                return fileName.Slice(0, extIndex);
         }
 
-        public static string GetPathWithoutExtension(string path)
+
+        /// <summary>
+        /// Gets the specified path without the extension of its last segment.<br/>
+        /// 지정된 경로에서 마지막 세그먼트의 확장자를 제거한 값을 가져옵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to inspect.<br/>
+        /// 검사할 경로 span입니다.
+        /// </param>
+        /// <returns>
+        /// A span without the last segment extension, or the original span when no extension exists.<br/>
+        /// 마지막 세그먼트의 확장자가 제거된 span을 반환하며, 확장자가 없으면 원본 span을 반환합니다.
+        /// </returns>
+        public static ReadOnlySpan<char> GetPathWithoutExtension(ReadOnlySpan<char> path)
         {
-            int extIndex = path.LastIndexOf('.');
-            if (extIndex < 0)
+            int separatorIndex = path.LastIndexOf(RuniPath.directorySeparatorChar);
+            int extIndex = path.LastIndexOf(FileExtension.extensionSeparatorChar);
+
+            if (extIndex <= separatorIndex)
                 return path;
-            else
-                return path.Remove(extIndex);
+
+            return path.Slice(0, extIndex);
         }
 
-        public static string GetParentPath(string path)
+
+        /// <summary>
+        /// Gets the parent path of the specified normalized path span.<br/>
+        /// 지정된 정규화 경로 span의 상위 경로를 가져옵니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to inspect.<br/>
+        /// 검사할 경로 span입니다.
+        /// </param>
+        /// <returns>
+        /// The parent path span, or an empty span when the path has no parent segment.<br/>
+        /// 상위 경로 span을 반환하며, 상위 세그먼트가 없으면 빈 span을 반환합니다.
+        /// </returns>
+        public static ReadOnlySpan<char> GetParentPath(ReadOnlySpan<char> path)
         {
-            int index = path.LastIndexOfAny(directorySeparatorChars);
+            int index = path.LastIndexOf(RuniPath.directorySeparatorChar);
             if (index < 0)
-                return string.Empty;
+                return ReadOnlySpan<char>.Empty;
 
-            return path.Substring(0, index);
+            return path.Slice(0, index);
         }
 
-        public static string UrlPathPrefix(this string path) => urlPathPrefix + UnityWebRequest.EscapeURL(path);
 
-        public static string NormalizeSeparators(this string path) => path.NormalizeSeparators('\\', directorySeparatorChar);
-        public static string NormalizeSeparators(this string path, char altSeparatorChar, char separatorChar) => path.Replace(altSeparatorChar, separatorChar);
-
-        public static string Combine(params string?[] paths)
+        /// <summary>
+        /// Removes the specified prefix path when the path is under it.<br/>
+        /// 경로가 지정된 접두사 경로 아래에 있으면 해당 접두사를 제거합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to trim.<br/>
+        /// 접두사를 제거할 경로 span입니다.
+        /// </param>
+        /// <param name="relativeTo">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
+        /// <returns>
+        /// The trimmed path when the prefix matches; otherwise, <paramref name="path"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="path"/>를 반환합니다.
+        /// </returns>
+        public static ReadOnlySpan<char> TrimStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
         {
-            StringBuilder stringBuilder = StringBuilderCache.Acquire();
-            for (int i = 0; i < paths.Length; i++)
-            {
-                string? path = paths[i];
-                if (path == null || path.Length <= 0)
-                    continue;
-
-                path = path.NormalizeSeparators();
-
-                if (stringBuilder.Length <= 0)
-                {
-                    stringBuilder.Append(path);
-                    continue;
-                }
-
-                char last = stringBuilder[stringBuilder.Length - 1];
-                if (last != directorySeparatorChar)
-                    stringBuilder.Append(directorySeparatorChar);
-
-                stringBuilder.Append(path);
-            }
-
-            return StringBuilderCache.Release(stringBuilder);
-        }
-
-        public static string GetRelativePath(string relativeTo, string path)
-        {
-            relativeTo = relativeTo.NormalizeSeparators();
-            path = path.NormalizeSeparators();
-
-            if (relativeTo.Length <= 0)
-                return path;
-
-            if (path.Length <= 0 || relativeTo == path)
-                return string.Empty;
-
-            if (path.StartsWith(relativeTo))
-            {
-                path = path.Substring(relativeTo.Length);
-                if (path.Length > 0 && path[0] == directorySeparatorChar)
-                    path = path.Substring(1);
-            }
+            if (TryTrimStartPath(path, relativeTo, out var result))
+                return result;
 
             return path;
         }
 
-        public static bool StartsWith(string path, string startPath)
+        /// <summary>
+        /// Attempts to remove the specified prefix path from the path span.<br/>
+        /// 경로 span에서 지정된 접두사 경로 제거를 시도합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to trim.<br/>
+        /// 접두사를 제거할 경로 span입니다.
+        /// </param>
+        /// <param name="relativeTo">
+        /// The prefix path to remove.<br/>
+        /// 제거할 접두사 경로입니다.
+        /// </param>
+        /// <param name="result">
+        /// When this method returns <see langword="true"/>, contains the trimmed path.<br/>
+        /// 이 메서드가 <see langword="true"/>를 반환하면 접두사가 제거된 경로를 포함합니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
+        /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        public static bool TryTrimStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
         {
-            string[] paths = path.Split(directorySeparatorChars);
-            string[] startPaths = startPath.Split(directorySeparatorChars);
-
-            if (paths.Length < startPaths.Length)
-                return false;
-
-            for (int i = 0; i < startPaths.Length; i++)
+            if (path == relativeTo)
             {
-                if (paths[i] != startPaths[i])
-                    return false;
+                result = ReadOnlySpan<char>.Empty;
+                return true;
             }
 
-            return true;
-        }*/
+            if (StartsWith(path, relativeTo))
+            {
+                result = path.Slice(relativeTo.Length + 1);
+                return true;
+            }
+
+            result = path;
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the path starts with the specified prefix on a segment boundary.<br/>
+        /// 경로가 지정된 접두사로 시작하며 세그먼트 경계가 일치하는지 확인합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The path span to inspect.<br/>
+        /// 검사할 경로 span입니다.
+        /// </param>
+        /// <param name="startPath">
+        /// The prefix path to compare.<br/>
+        /// 비교할 접두사 경로입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if <paramref name="path"/> equals <paramref name="startPath"/> or is under it; otherwise, <see langword="false"/>.<br/>
+        /// <paramref name="path"/>가 <paramref name="startPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        public static bool StartsWith(ReadOnlySpan<char> path, ReadOnlySpan<char> startPath)
+        {
+            if (path == startPath)
+                return true;
+            if (path.Length <= startPath.Length)
+                return false;
+
+            // 접두사 뒤에 구분자가 있어야 "folder_A"가 "folder"의 하위 경로로 판정되지 않습니다.
+            return path[startPath.Length] == RuniPath.directorySeparatorChar && path.StartsWith(startPath, StringComparison.Ordinal);
+        }
+
+        /// <summary>
+        /// Combines two already-normalized path strings without re-normalizing them.<br/>
+        /// 이미 정규화된 두 경로 문자열을 다시 정규화하지 않고 결합합니다.
+        /// </summary>
+        /// <param name="left">
+        /// The first normalized path string.<br/>
+        /// 첫 번째 정규화 경로 문자열입니다.
+        /// </param>
+        /// <param name="right">
+        /// The second normalized path string.<br/>
+        /// 두 번째 정규화 경로 문자열입니다.
+        /// </param>
+        /// <returns>
+        /// The combined path string, or the non-empty operand when one operand is empty.<br/>
+        /// 결합된 경로 문자열을 반환하며, 한쪽 경로가 비어 있으면 비어 있지 않은 피연산자를 반환합니다.
+        /// </returns>
+        internal static string CombineFromNormalizedPath(string left, string right)
+        {
+            if (left.Length == 0 && right.Length == 0)
+                return string.Empty;
+            else if (left.Length == 0)
+                return right;
+            else if (right.Length == 0)
+                return left;
+
+            return string.Create(left.Length + 1 + right.Length, (left, right), static (span, state) =>
+            {
+                int index = 0;
+                for (int i = 0; i < state.left.Length; i++)
+                {
+                    span[index] = state.left[i];
+                    index++;
+                }
+
+                span[index] = RuniPath.directorySeparatorChar;
+                index++;
+
+                for (int i = 0; i < state.right.Length; i++)
+                {
+                    span[index] = state.right[i];
+                    index++;
+                }
+            });
+        }
     }
 }

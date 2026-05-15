@@ -39,8 +39,8 @@ namespace RuniOS.IO
         public bool IsMatch(string text) => IsMatch(text, this);
         public bool IsMatch(string text, bool ignoreCase) => IsMatch(text, this, ignoreCase);
         
-        public bool IsMatch(RuniPath text) => IsMatch(text, this);
-        public bool IsMatch(RuniPath path, bool ignoreCase) => IsMatch(path, this, ignoreCase);
+        public bool IsMatch(RuniPath text) => IsMatch(text.value, this);
+        public bool IsMatch(RuniPath path, bool ignoreCase) => IsMatch(path.value, this, ignoreCase);
 
         /// <summary>
         /// 와일드카드 패턴에 따라 문자열이 일치하는지 확인합니다.

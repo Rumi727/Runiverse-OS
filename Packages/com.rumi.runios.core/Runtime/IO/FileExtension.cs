@@ -10,6 +10,7 @@ namespace RuniOS.IO
     /// 경로의 마지막 '.' 이후 문자열만 확장자로 간주합니다.
     /// </summary>
     [Serializable]
+    [JsonConverter(typeof(FileExtension))]
     public struct FileExtension : IEquatable<FileExtension>, ISerializationCallbackReceiver
     {
         /// <summary>
@@ -63,17 +64,23 @@ namespace RuniOS.IO
             {
                 value ??= string.Empty;
 
-                int index = value.LastIndexOf(extensionSeparatorChar);
-                if (index >= 0)
+                int separatorIndex = value.LastIndexOf(RuniPath.directorySeparatorChar);
+                int extIndex = value.LastIndexOf(extensionSeparatorChar);
+
+                if (extIndex <= separatorIndex)
                 {
-                    _value = value.Substring(index);
+                    _value = string.Empty;
                     return;
                 }
 
-                _value = string.Empty;
+                _value = value.Substring(extIndex);
             }
         }
         [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
+
+
+
+        public static FileExtension From(string? value) => new FileExtension(value);
 
 
 
@@ -125,7 +132,10 @@ namespace RuniOS.IO
         /// 해시 코드는 <see cref="value"/> 문자열의 해시 코드와 동일합니다.
         /// </summary>
         /// <returns>현재 <see cref="FileExtension"/> 인스턴스의 해시 코드입니다.</returns>
-        public override readonly int GetHashCode() => value.GetHashCode();
+        public override readonly int GetHashCode()
+        {
+            return (_value != null ? _value.GetHashCode() : 0);
+        }
 
 
 
@@ -138,17 +148,20 @@ namespace RuniOS.IO
         public static implicit operator string(FileExtension extension) => extension.value;
 
         /// <summary>
-        /// nullable <see cref="FileExtension"/>를 <see cref="string"/>으로 암시적으로 변환합니다.<br/>
+        /// nullable <see cref="FileExtension"/>를 <see cref="string"/>으로 명시적으로 변환합니다.<br/>
         /// <paramref name="extension"/>가 <see langword="null"/>이면 <see cref="string.Empty"/>를 반환하고, 그렇지 않으면 <see cref="value"/>를 반환합니다.
         /// </summary>
         /// <param name="extension">변환할 nullable <see cref="FileExtension"/> 인스턴스입니다.</param>
-        public static implicit operator string(FileExtension? extension) => extension?.value ?? string.Empty;
+        public static explicit operator string(FileExtension? extension) => extension?.value ?? string.Empty;
 
         /// <summary>
         /// <see cref="string"/>을 <see cref="FileExtension"/>로 암시적으로 변환합니다.<br/>
         /// </summary>
         /// <param name="extension">변환할 문자열 확장자입니다.</param>
-        public static implicit operator FileExtension(string? extension) => new FileExtension(extension);
+        public static explicit operator FileExtension(string? extension) => new FileExtension(extension);
+
+        public static bool operator ==(FileExtension left, FileExtension right) => left.Equals(right);
+        public static bool operator !=(FileExtension left, FileExtension right) => !left.Equals(right);
         #endregion
 
 

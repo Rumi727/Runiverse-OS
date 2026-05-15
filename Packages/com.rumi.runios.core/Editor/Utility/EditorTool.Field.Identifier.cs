@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Editor.IMGUI;
+using RuniOS.IO;
 using RuniOS.Resource;
 
 namespace RuniOS.Editor
@@ -76,15 +77,15 @@ namespace RuniOS.Editor
             {
                 position.width = (fieldWidth * 2) + 8;
 
-                string path;
+                RuniPath path;
                 if (dropdownAction != null)
                 {
-                    path = TextFieldDropDown(position, value.path, out bool isPressed);
+                    path = (RuniPath)TextFieldDropDown(position, value.path.value, out bool isPressed);
                     if (isPressed)
                         dropdownAction.Invoke(position);
                 }
                 else
-                    path = EditorGUI.TextField(position, value.path);
+                    path = (RuniPath)EditorGUI.TextField(position, value.path.value);
 
                 if (Identifier.IsPathValid(path))
                     value.path = path;

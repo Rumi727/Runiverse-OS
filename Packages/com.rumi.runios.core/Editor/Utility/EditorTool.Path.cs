@@ -6,8 +6,8 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static RuniPath projectPath { get; } = Directory.GetCurrentDirectory();
+        public static PhysicalPath projectPath { get; } = (PhysicalPath)Directory.GetCurrentDirectory();
 
-        public static bool IsProjectPath(RuniPath path) => path.StartsWith(projectPath + "Assets") || path.StartsWith(projectPath + "Packages");
+        public static bool IsProjectPath(PhysicalPath path) => path.StartsWith(projectPath.Combine("Assets")) || path.StartsWith(projectPath.Combine("Packages"));
     }
 }

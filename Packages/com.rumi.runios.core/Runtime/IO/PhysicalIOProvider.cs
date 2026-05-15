@@ -8,24 +8,32 @@ using System.Threading;
 namespace RuniOS.IO
 {
     /// <summary>
-    /// OS의 실제 물리적 로컬 파일 시스템을 가상 파일 시스템 형태로 제공하는 구현체입니다.
-    /// 지정된 타겟 디렉토리를 루트로 삼아 안전하게 파일 입출력을 수행합니다.
+    /// Exposes a physical local file-system directory through the <see cref="IWritableIOProvider"/> API.<br/>
+    /// All provider-relative <see cref="RuniPath"/> values are resolved under <see cref="targetPath"/>.
+    /// <br/><br/>
+    /// 실제 로컬 파일 시스템 디렉터리를 <see cref="IWritableIOProvider"/> API로 제공합니다.<br/>
+    /// 모든 프로바이더 기준 <see cref="RuniPath"/> 값은 <see cref="targetPath"/> 아래에서 해석됩니다.
     /// </summary>
-    public class PhysicalIOProvider(RuniPath targetPath) : IWritableIOProvider
+    /// <remarks>
+    /// TODO: 심볼릭 링크 및 기타 재분석 지점의 샌드박스 정책을 생성자 설정으로 추가해야 합니다:
+    /// 원천 차단, 최종 해석 경로 검증, 추가 검사 없이 허용 중에서 선택할 수 있어야 합니다.
+    /// </remarks>
+    public class PhysicalIOProvider(PhysicalPath targetPath) : IWritableIOProvider
     {
         /// <inheritdoc/>
         public IOWriteNode rootNode => new IOWriteNode(this);
 
         /// <summary>
-        /// 이 시스템이 가리키는 실제 OS 상의 디렉토리 전체 경로입니다. (샌드박스의 기준점)
+        /// Gets the physical root path used by this provider.<br/>
+        /// 이 프로바이더가 기준으로 사용하는 물리 루트 경로를 가져옵니다.
         /// </summary>
-        public RuniPath targetPath { get; } = Path.GetFullPath(targetPath);
+        public PhysicalPath targetPath { get; } = targetPath;
 
         /// <inheritdoc/>
         public bool isIndependent => false;
 
         /// <inheritdoc/>
-        public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath + path);
+        public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath;
@@ -34,7 +42,7 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default)
         {
-            string fullPath = targetPath + path;
+            string fullPath = targetPath.Combine(path).value;
             var info = new FileInfo(fullPath);
             if (!info.Exists)
             {
@@ -79,10 +87,10 @@ namespace RuniOS.IO
         {
             var enumerable = new FileSystemEnumerable<IOEntry>
             (
-                targetPath + path,
+                targetPath.Combine(path).value,
                 (ref FileSystemEntry entry) =>
                 {
-                    RuniPath entryFullPath = entry.ToFullPath().ToPath();
+                    PhysicalPath entryFullPath = (PhysicalPath)entry.ToFullPath();
                     if (!entryFullPath.TryTrimStartPath(targetPath, out RuniPath entryPath))
                     {
                         throw new InvalidOperationException
@@ -115,67 +123,68 @@ namespace RuniOS.IO
                 }
             );
 
-            return enumerable.EnumerateOnThreadPool();
+            return enumerable.EnumerateOnThreadPool(cancellationToken: cancellationToken);
         }
         #endregion
 
         #region Read
         /// <inheritdoc cref="IIOProvider.OpenRead(RuniPath, CancellationToken)"/>
-        public FileStream OpenRead(RuniPath path) => File.OpenRead(targetPath + path);
+        public FileStream OpenRead(RuniPath path) => File.OpenRead(targetPath.Combine(path).value);
         UniTask<Stream> IIOProvider.OpenRead(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenRead(path));
 
         /// <inheritdoc/>
         public UniTask<byte[]> ReadAllBytes(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllBytesAsync(targetPath + path, cancellationToken).AsUniTask();
+            File.ReadAllBytesAsync(targetPath.Combine(path).value, cancellationToken).AsUniTask();
 
         /// <inheritdoc/>
         public UniTask<string> ReadAllText(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllTextAsync(targetPath + path, cancellationToken).AsUniTask();
+            File.ReadAllTextAsync(targetPath.Combine(path).value, cancellationToken).AsUniTask();
 
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadLines(targetPath + path).EnumerateOnThreadPool(cancellationToken: cancellationToken);
+            File.ReadLines(targetPath.Combine(path).value).EnumerateOnThreadPool(cancellationToken: cancellationToken);
         #endregion
 
         #region Write
+        /// <inheritdoc/>
         public UniTask CreateDirectory(RuniPath path, CancellationToken cancellationToken = default)
         {
-            Directory.CreateDirectory(targetPath + path);
+            Directory.CreateDirectory(targetPath.Combine(path).value);
             return UniTask.CompletedTask;
         }
 
         /// <inheritdoc cref="IWritableIOProvider.OpenWrite(RuniPath, CancellationToken)"/>
-        public FileStream OpenWrite(RuniPath path) => File.OpenWrite(targetPath + path);
+        public FileStream OpenWrite(RuniPath path) => File.OpenWrite(targetPath.Combine(path).value);
         UniTask<Stream> IWritableIOProvider.OpenWrite(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenWrite(path));
 
         /// <inheritdoc cref="IWritableIOProvider.CreateFile(RuniPath, CancellationToken)"/>
-        public FileStream CreateFile(RuniPath path) => File.Create(targetPath + path);
+        public FileStream CreateFile(RuniPath path) => File.Create(targetPath.Combine(path).value);
         UniTask<Stream> IWritableIOProvider.CreateFile(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(CreateFile(path));
 
         /// <inheritdoc/>
         public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default) =>
-            File.WriteAllBytesAsync(targetPath + path, bytes, cancellationToken).AsUniTask();
+            File.WriteAllBytesAsync(targetPath.Combine(path).value, bytes, cancellationToken).AsUniTask();
 
         /// <inheritdoc/>
         public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default) =>
-            File.WriteAllTextAsync(targetPath + path, text, cancellationToken).AsUniTask();
+            File.WriteAllTextAsync(targetPath.Combine(path).value, text, cancellationToken).AsUniTask();
 
         /// <inheritdoc/>
         public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default) =>
-            File.WriteAllLinesAsync(targetPath + path, lines, cancellationToken).AsUniTask();
+            File.WriteAllLinesAsync(targetPath.Combine(path).value, lines, cancellationToken).AsUniTask();
         #endregion
 
         /// <inheritdoc/>
         public UniTask DeleteDirectory(RuniPath path, CancellationToken cancellationToken = default)
         {
-            Directory.Delete(targetPath + path, true);
+            Directory.Delete(targetPath.Combine(path).value, true);
             return UniTask.CompletedTask;
         }
 
         /// <inheritdoc/>
         public UniTask DeleteFile(RuniPath path, CancellationToken cancellationToken = default)
         {
-            File.Delete(targetPath + path);
+            File.Delete(targetPath.Combine(path).value);
             return UniTask.CompletedTask;
         }
 

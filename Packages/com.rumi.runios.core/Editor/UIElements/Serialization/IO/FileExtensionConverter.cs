@@ -6,7 +6,7 @@ namespace RuniOS.Editor.UIElements.Serialization.IO
 {
     public sealed class FileExtensionConverter : UxmlAttributeConverter<FileExtension>
     {
-        public override FileExtension FromString(string value) => value;
+        public override FileExtension FromString(string value) => (FileExtension)value;
         public override string ToString(FileExtension value) => value;
     }
 }

@@ -25,8 +25,7 @@ namespace RuniOS.Json.Converters.IO
         /// <summary>
         /// JSON 문자열을 <see cref="RuniPath"/> 객체로 역직렬화합니다.
         /// <br/>
-        /// JSON 토큰이 <see langword="null"/>인 경우, <see cref="RuniPath.empty"/>를 반환합니다.
-        /// 그렇지 않으면 JSON 문자열을 읽어 새로운 <see cref="RuniPath"/> 인스턴스를 생성합니다.
+        /// JSON 문자열을 읽어 새로운 <see cref="RuniPath"/> 인스턴스를 생성합니다.
         /// </summary>
         /// <param name="reader">JSON 읽기를 위한 <see cref="JsonReader"/> 객체입니다.</param>
         /// <param name="objectType">역직렬화할 객체의 <see cref="Type"/>입니다.</param>
@@ -37,9 +36,8 @@ namespace RuniOS.Json.Converters.IO
         /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="RuniPath"/>로 변환을 시도할 때 발생합니다.</exception>
         public override RuniPath ReadJson(JsonReader reader, Type objectType, RuniPath existingValue, bool hasExistingValue, JsonSerializer serializer) => reader.TokenType switch
         {
-            JsonToken.Null => RuniPath.empty,
-            JsonToken.String => new RuniPath((string?)reader.Value),
-            _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing FilePath.")
+            JsonToken.String => new RuniPath((string?)reader.Value ?? string.Empty),
+            _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing RuniPath.")
         };
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine.UIElements;
 namespace RuniOS.Editor.UIElements.IO
 {
     [UxmlElement]
-    public partial class RuniPathField : TextInputBaseFieldMarshal<RuniPath>
+    public partial class PhysicalPathField : TextInputBaseFieldMarshal<PhysicalPath>
     {
         public new const string ussClassName = "runios-file-path-field";
         public new const string labelUssClassName = ussClassName + "__label";
@@ -15,8 +15,8 @@ namespace RuniOS.Editor.UIElements.IO
         public TextInput textInput => (TextInput)textInputBase;
         public TextElement textElement => textInput.textElement;
 
-        public RuniPathField() : this(string.Empty) { }
-        public RuniPathField(string label) : base(label, -1, '*', new TextInput())
+        public PhysicalPathField() : this(string.Empty) { }
+        public PhysicalPathField(string label) : base(label, -1, '*', new TextInput())
         {
             this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
             
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.UIElements.IO
 
 
 
-        public override void SetValueWithoutNotify(RuniPath newValue)
+        public override void SetValueWithoutNotify(PhysicalPath newValue)
         {
             base.SetValueWithoutNotify(newValue);
             
@@ -42,8 +42,8 @@ namespace RuniOS.Editor.UIElements.IO
             textElement.SetValueWithoutNotify(inputValue);
         }
 
-        protected override string ValueToString(RuniPath value) => value.value;
-        protected override RuniPath StringToValue(string str) => (RuniPath)str;
+        protected override string ValueToString(PhysicalPath value) => value.value;
+        protected override PhysicalPath StringToValue(string str) => (PhysicalPath)str;
 
         public class TextInput : TextInputBaseMarshal { }
     }

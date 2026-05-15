@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Resource
 
         static PackInspectorSystem()
         {
-            packRootPath = Application.streamingAssetsPath.ToPath().TrimStartPath(projectPath);
+            packRootPath = PhysicalPath.From(Application.streamingAssetsPath).TrimStartPath(projectPath);
             drawers = ReflectionUtility.types
                 .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
                 .Select(x => (PackDrawer)Activator.CreateInstance(x))
@@ -46,9 +46,10 @@ namespace RuniOS.Editor.Resource
             {
                 var paths = Selection.objects
                     .Select(AssetDatabase.GetAssetPath)
+                    .Select(RuniPath.From)
                     .Select(x => 
                     {
-                        bool success = x.ToPath().TryTrimStartPath(packRootPath, out RuniPath path);
+                        bool success = x.TryTrimStartPath(packRootPath, out RuniPath path);
                         return (success, path);
                     })
                     .Where(x => x.success)
@@ -60,19 +61,19 @@ namespace RuniOS.Editor.Resource
                 CheckFolder(true);
         }
 
-        static string lastCheckPath = string.Empty;
+        static RuniPath lastCheckPath = RuniPath.empty;
         static void CheckFolder(bool force)
         {
             if (Selection.objects.Length > 0)
                 return;
 
-            string currentPath = ProjectWindowUtilBridge.GetActiveFolderPath();
+            RuniPath currentPath = (RuniPath)ProjectWindowUtilBridge.GetActiveFolderPath();
             if (force || lastCheckPath != currentPath)
             {
                 lastCheckPath = currentPath;
                 InspectorWindowBridge.RepaintAllInspectors();
                 
-                if (currentPath.ToPath().TryTrimStartPath(packRootPath, out RuniPath relative))
+                if (currentPath.TryTrimStartPath(packRootPath, out RuniPath relative))
                 {
                     activeFolderPath = relative;
                     UpdateDrawer(Enumerable.Repeat(relative, 1), true);

@@ -66,7 +66,7 @@ namespace RuniOS.IO.Virtual
             
             child.ThrowIfNotAttachedException();
             if (!children.ContainsKey(child.name))
-                ThrowNodeNotFound(child.name);
+                ThrowNodeNotFound((RuniPath)child.name);
 
             InvalidateCache(); // 디렉토리 구조 변경 전에 캐시 무효화
             children.Remove(child.name);

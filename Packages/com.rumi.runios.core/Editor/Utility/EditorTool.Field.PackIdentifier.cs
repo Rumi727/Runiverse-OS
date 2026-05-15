@@ -21,12 +21,12 @@ namespace RuniOS.Editor
         }
 
         static int? packIdentifierFieldLastControlID;
-        static string packIdentifierFieldSelectedValue = string.Empty;
+        static RuniPath packIdentifierFieldSelectedValue = RuniPath.empty;
         static PackIdentifier DoPackIdentifierField(Rect position, PackIdentifier value)
         {
             position.width -= 54;
             if (value.path != null)
-                value.path = RuniPathField(position, value.path.Value, true);
+                value.path = PhysicalPathField(position, value.path.Value, true);
             else
             {
                 TextDropdown valueDropdown = new TextDropdown();
@@ -47,14 +47,14 @@ namespace RuniOS.Editor
                 valueDropdown.onSelectedItem += x =>
                 {
                     packIdentifierFieldLastControlID = lastControlID;
-                    packIdentifierFieldSelectedValue = x.value;
+                    packIdentifierFieldSelectedValue = (RuniPath)x.value;
                 };
 
                 if (packIdentifierFieldLastControlID == lastControlID)
                 {
                     value.identifier = new Identifier(value.identifier.Value.nameSpace, packIdentifierFieldSelectedValue);
 
-                    packIdentifierFieldSelectedValue = string.Empty;
+                    packIdentifierFieldSelectedValue = RuniPath.empty;
                     packIdentifierFieldLastControlID = null;
 
                     GUI.changed = true;
@@ -82,7 +82,7 @@ namespace RuniOS.Editor
                     }
                     case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
                     {
-                        value.path ??= RuniPath.empty;
+                        value.path ??= PhysicalPath.currentDirectory;
                         break;
                     }
                     default:

@@ -99,6 +99,6 @@ namespace RuniOS.Resource.Sounds
         }
 
         static readonly Regex pathRegex = new Regex($"^asset/[^/]+/{Regex.Escape(jsonFileName)}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-        public override bool IsMatch(RuniPath relativePath) => pathRegex.IsMatch(relativePath);
+        public override bool IsMatch(RuniPath relativePath) => pathRegex.IsMatch(relativePath.value);
     }
 }

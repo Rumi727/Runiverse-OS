@@ -23,16 +23,16 @@ namespace RuniOS.Editor.UIElements.Resource
                 
                 PackIdentifier packIdentifier = this.value;
                 if (value == PackIdentifierMode.id)
-                    packIdentifier.path = null;
+                    packIdentifier.identifier = Identifier.empty;
                 else if (value == PackIdentifierMode.path)
-                    packIdentifier.identifier = null;
+                    packIdentifier.path = PhysicalPath.currentDirectory;
 
                 this.value = packIdentifier;
             }
         }
         
         public IdentifierField identifierField { get; }
-        public RuniPathField pathField { get; }
+        public PhysicalPathField pathField { get; }
         public EnumField modeField { get; }
         
         public PackIdentifierField() : this(string.Empty) { }
@@ -42,7 +42,7 @@ namespace RuniOS.Editor.UIElements.Resource
             visualInput.AddToClassList(inputUssClassName);
             
             identifierField = new IdentifierField();
-            pathField = new RuniPathField { style = { display = DisplayStyle.None } };
+            pathField = new PhysicalPathField { style = { display = DisplayStyle.None } };
             modeField = new EnumField(mode);
             
             AddToClassList(ussClassName);
@@ -59,14 +59,14 @@ namespace RuniOS.Editor.UIElements.Resource
                 static (ref PackIdentifier packIdentifier, Identifier fieldValue) => packIdentifier.identifier = fieldValue
             );
 
-            yield return new FieldDescription<RuniPathField, RuniPath>
+            yield return new FieldDescription<PhysicalPathField, PhysicalPath>
             (
                 "_path",
                 pathField,
-                static x => x.path ?? RuniPath.empty,
-                static (ref PackIdentifier packIdentifier, RuniPath fieldValue) => packIdentifier.path = fieldValue
+                static x => x.path ?? PhysicalPath.currentDirectory,
+                static (ref PackIdentifier packIdentifier, PhysicalPath fieldValue) => packIdentifier.path = fieldValue
             );
-            
+
             yield return new FieldDescription<EnumField, Enum>
             (
                 nameof(mode),
@@ -76,9 +76,9 @@ namespace RuniOS.Editor.UIElements.Resource
                 {
                     PackIdentifierMode mode = (PackIdentifierMode)fieldValue;
                     if (mode == PackIdentifierMode.id)
-                        packIdentifier.path = null;
+                        packIdentifier.identifier = Identifier.empty;
                     else if (mode == PackIdentifierMode.path)
-                        packIdentifier.identifier = null;
+                        packIdentifier.path = PhysicalPath.currentDirectory;
                 }
             );
         }

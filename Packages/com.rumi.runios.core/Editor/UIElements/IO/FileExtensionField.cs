@@ -61,7 +61,7 @@ namespace RuniOS.Editor.UIElements.IO
         protected override string ValueToString(FileExtension value) => value.value.TrimStart(FileExtension.extensionSeparatorChar);
         protected override FileExtension StringToValue(string str)
         {
-            FileExtension value = FileExtension.extensionSeparatorChar + str;
+            FileExtension value = FileExtension.From(FileExtension.extensionSeparatorChar + str);
             if (value.value.Length <= 1)
                 value = FileExtension.empty;
 

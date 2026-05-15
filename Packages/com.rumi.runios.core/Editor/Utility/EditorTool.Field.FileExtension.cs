@@ -26,7 +26,7 @@ namespace RuniOS.Editor
                 if (textValue.Length > 0)
                     textValue = FileExtension.extensionSeparatorChar + textValue;
 
-                value = textValue;
+                value = (FileExtension)textValue;
 
                 EditorStyles.textField.padding.left = leftPadding;
             }

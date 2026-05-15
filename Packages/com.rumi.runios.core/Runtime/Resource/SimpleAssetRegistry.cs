@@ -92,8 +92,7 @@ namespace RuniOS.Resource
                     {
                         await foreach (IOEntry fileEntry in registryEntry.dir.GetAllFiles(assetFilter))
                         {
-                            RuniPath relativePath = fileEntry.path.TrimStartPath(registryEntry.path);
-                            IONode entry = registryEntry.CreateChild(relativePath);
+                            IONode entry = registryEntry.Bind(fileEntry);
                             IOMetaData metaData = fileEntry.metaData;
                             uniTasks.Add(UniTask.Defer(Method));
 
@@ -186,7 +185,7 @@ namespace RuniOS.Resource
                 InitializeRegex();
 
             // 1. 경로 앞부분(asset/ns/regName) 검사
-            Match match = prefixRegex.Match(relativePath);
+            Match match = prefixRegex.Match(relativePath.value);
             if (!match.Success) 
                 return false;
 

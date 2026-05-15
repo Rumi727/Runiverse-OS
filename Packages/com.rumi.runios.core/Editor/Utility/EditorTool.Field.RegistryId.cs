@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Editor.IMGUI;
+using RuniOS.IO;
 using RuniOS.Resource;
 
 namespace RuniOS.Editor
@@ -44,14 +45,14 @@ namespace RuniOS.Editor
             dropdown.onSelectedItem += x =>
             {
                 registryTypeFieldLastControlID = lastControlID;
-                registryTypeFieldSelectedPath = x.value;
+                registryTypeFieldSelectedPath = (RuniPath)x.value;
             };
 
             if (registryTypeFieldLastControlID == lastControlID)
             {
                 value.path = registryTypeFieldSelectedPath;
 
-                registryTypeFieldSelectedPath = string.Empty;
+                registryTypeFieldSelectedPath = RuniPath.empty;
                 registryTypeFieldLastControlID = null;
 
                 GUI.changed = true;

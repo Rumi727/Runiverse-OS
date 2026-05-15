@@ -19,12 +19,12 @@ namespace RuniOS.IO.Virtual
         /// Gets a value indicating whether this node is the root directory node.<br/>
         /// 이 노드가 루트 디렉터리 노드인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        [MemberNotNullWhen(true, nameof(fullPath))]
+        [MemberNotNullWhen(true, nameof(root), nameof(fullPath))]
         public bool isRoot => this is VirtualDirectoryBase && parent == null;
 
         /// <summary>
         /// Gets the top-level root directory of the virtual file system that contains this node.<br/>
-        /// 이 노드가 속한 가상 파일 시스템의 최상위 루트 디렉터리를 가져옵니다.
+        /// 이 노드가 속한 가상 파일 시스템의 최상위 루트 디렉터리를 가져오며, 루트 디렉토리가 아니거나 노드가 연결되어 있지 않으면 <see langword="null"/>을 반환합니다.
         /// </summary>
         public VirtualDirectoryBase? root { get; private set; }
 
@@ -44,7 +44,7 @@ namespace RuniOS.IO.Virtual
         /// Gets the full path of this node, or <see langword="null"/> when the node is detached.<br/>
         /// 이 노드의 전체 경로를 가져오며, 노드가 분리되어 있으면 <see langword="null"/>을 반환합니다.
         /// </summary>
-        public RuniPath? fullPath => isDetached ? null : parent?.fullPath + name;
+        public RuniPath? fullPath => isDetached ? null : parent?.fullPath?.Combine(name) ?? RuniPath.From(name);
 
         /// <summary>
         /// Gets the metadata associated with this node.<br/>
@@ -74,6 +74,7 @@ namespace RuniOS.IO.Virtual
         /// Gets a value indicating whether this node is neither a root directory nor attached to a parent directory.<br/>
         /// 이 노드가 루트 디렉터리도 아니고 부모 디렉터리에 연결되어 있지도 않은지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
+        [MemberNotNullWhen(false, nameof(root), nameof(parent), nameof(name), nameof(fullPath))]
         public bool isDetached => !isRoot && !isAttached;
 
         /// <summary>

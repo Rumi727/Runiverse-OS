@@ -2,93 +2,129 @@
 namespace RuniOS.IO
 {
     /// <summary>
-    /// 특정 파일 시스템(<see cref="IWritableIOProvider"/>)의 특정 경로를 가리키고 제어하는 <b>읽기/쓰기 가능</b> 노드입니다.
-    /// 파일 생성, 수정, 삭제 등의 작업을 지원합니다.
+    /// Represents a writable handle to a provider-relative path in an <see cref="IWritableIOProvider"/>.<br/>
+    /// Path navigation and file write operations are delegated to the provider referenced by this node.
+    /// <br/><br/>
+    /// <see cref="IWritableIOProvider"/> 안의 프로바이더 기준 경로를 가리키는 쓰기 가능 핸들을 나타냅니다.<br/>
+    /// 경로 탐색과 파일 쓰기 작업은 이 노드가 참조하는 프로바이더에 위임됩니다.
     /// </summary>
     public readonly partial record struct IOWriteNode(IWritableIOProvider provider, RuniPath path = default)
     {
         /// <summary>
-        /// 항상 빈 파일 또는 빈 디렉토리처럼 동작하는 쓰기 가능 노드입니다.
+        /// Gets a writable node backed by the empty provider.<br/>
+        /// 빈 프로바이더가 지원하는 쓰기 가능 노드를 가져옵니다.
         /// </summary>
         public static IOWriteNode empty => EmptyIOProvider.instance.rootNode;
 
         /// <summary>
-        /// 이 노드가 유효한 프로바이더를 참조하고 있는지 여부를 가져옵니다.
+        /// Gets a value indicating whether this node references a provider.<br/>
+        /// 이 노드가 프로바이더를 참조하는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
         public bool isValid => _provider != null;
 
         /// <summary>
-        /// 이 노드가 속한 파일 시스템 프로바이더입니다.
+        /// Gets the writable provider referenced by this node.<br/>
+        /// 이 노드가 참조하는 쓰기 가능 프로바이더를 가져옵니다.
         /// </summary>
         public IWritableIOProvider provider => _provider ?? throw new InvalidOperationException("Invalid Handle! (provider is null)");
         readonly IWritableIOProvider? _provider = provider;
 
         /// <summary>
-        /// 현재 프로바이더의 최상위(Root) 경로를 가리키는 노드를 가져옵니다.
+        /// Gets the root node of the current provider.<br/>
+        /// 현재 프로바이더의 루트 노드를 가져옵니다.
         /// </summary>
         public IOWriteNode rootNode => provider.rootNode;
 
         /// <summary>
-        /// 이 노드가 가리키는 가상 파일 시스템 상의 경로입니다.
+        /// Gets the provider-relative path referenced by this node.<br/>
+        /// 이 노드가 참조하는 프로바이더 기준 경로를 가져옵니다.
         /// </summary>
         public RuniPath path { get; } = path;
         
         /// <summary>
-        /// 이 노드의 파일 또는 디렉토리 이름입니다.
+        /// Gets the last path segment of this node.<br/>
+        /// 이 노드 경로의 마지막 세그먼트를 가져옵니다.
         /// </summary>
         public string name => path.GetFileName();
 
         /// <summary>
-        /// 이 노드를 디렉토리로 취급하여 디렉토리 관련 I/O 작업을 수행할 수 있는 객체를 가져옵니다.
+        /// Gets directory-oriented read and write operations for this node.<br/>
+        /// 이 노드에 대한 디렉터리 중심 읽기 및 쓰기 작업을 가져옵니다.
         /// </summary>
         public Directory dir => new Directory(this);
 
         /// <summary>
-        /// 이 노드를 파일로 취급하여 파일 관련 I/O 작업을 수행할 수 있는 객체를 가져옵니다.
+        /// Gets file-oriented read and write operations for this node.<br/>
+        /// 이 노드에 대한 파일 중심 읽기 및 쓰기 작업을 가져옵니다.
         /// </summary>
         public File file => new File(this);
 
         /// <summary>
-        /// 현재 경로의 부모 경로를 가리키는 새 노드를 반환합니다.
+        /// Gets a new writable node that points to this node's parent path.<br/>
+        /// 이 노드의 상위 경로를 가리키는 새 쓰기 가능 노드를 가져옵니다.
         /// </summary>
         public IOWriteNode GetParent() => new IOWriteNode(provider, path.GetParentPath());
 
         /// <summary>
-        /// 현재 경로 아래에 지정된 자식 경로를 덧붙인 새 노드를 반환합니다.
+        /// Creates a new writable node by appending the specified child path to this node's path.<br/>
+        /// 이 노드의 경로에 지정된 자식 경로를 덧붙인 새 쓰기 가능 노드를 생성합니다.
         /// </summary>
         public IOWriteNode CreateChild(RuniPath childPath)
         {
             if (childPath.IsEmpty())
                 return this;
 
-            return new IOWriteNode(provider, path + childPath);
+            return new IOWriteNode(provider, path.Combine(childPath));
         }
 
         /// <summary>
-        /// 현재 경로의 끝에 지정된 확장자를 추가한 새 노드를 반환합니다.
+        /// Creates a new writable node by appending the specified child path string to this node's path.<br/>
+        /// 이 노드의 경로에 지정된 자식 경로 문자열을 덧붙인 새 쓰기 가능 노드를 생성합니다.
         /// </summary>
-        public IOWriteNode AddExtension(FileExtension extension) => new IOWriteNode(provider, path.value + extension);
+        public IOWriteNode CreateChild(string childName)
+        {
+            if (string.IsNullOrEmpty(childName))
+                return this;
+
+            return new IOWriteNode(provider, path.Combine(childName));
+        }
 
         /// <summary>
-        /// 현재 노드가 가리키는 위치를 새 루트로 삼는 쓰기 가능 노드를 생성합니다.
+        /// Creates a new writable node by appending the specified extension to this node's path.<br/>
+        /// 이 노드의 경로에 지정된 확장자를 덧붙인 새 쓰기 가능 노드를 생성합니다.
+        /// </summary>
+        public IOWriteNode AddExtension(FileExtension extension) => new IOWriteNode(provider, path.AddExtension(extension));
+
+        /// <summary>
+        /// Creates a root node from a writable provider recreated at this node's path.<br/>
+        /// 이 노드의 경로를 새 루트로 재생성한 쓰기 가능 프로바이더의 루트 노드를 생성합니다.
         /// </summary>
         public IOWriteNode Recreate() => provider.Recreate(path).rootNode;
 
         /// <summary>
-        /// 두 노드가 같은 실제 대상 경로를 가리키는지 확인합니다.
+        /// Determines whether this node and another node refer to the same provider target and path.<br/>
+        /// 이 노드와 다른 노드가 같은 프로바이더 대상과 경로를 참조하는지 확인합니다.
         /// </summary>
         public bool IsSameTarget(IONode other) => ((IONode)this).IsSameTarget(other);
 
         /// <summary>
-        /// 검색된 데이터 스냅샷(<see cref="IOEntry"/>)을 바탕으로, 해당 위치를 가리키고 조작할 수 있는 새 노드를 생성합니다.
+        /// Creates a new writable node bound to the path stored in the specified entry.<br/>
+        /// 지정된 엔트리에 저장된 경로에 바인딩된 새 쓰기 가능 노드를 생성합니다.
         /// </summary>
-        /// <param name="entry">노드로 변환할 대상 엔트리 정보입니다.</param>
+        /// <param name="entry">
+        /// The entry whose path should be bound to the new node.<br/>
+        /// 새 노드에 바인딩할 경로를 가진 엔트리입니다.
+        /// </param>
         public IOWriteNode Bind(IOEntry entry) => new IOWriteNode(provider, entry.path);
 
         /// <summary>
-        /// 쓰기 가능 노드를 읽기 전용 노드로 형변환합니다.
+        /// Converts a writable node to a read-only node that references the same provider and path.<br/>
+        /// 같은 프로바이더와 경로를 참조하는 읽기 전용 노드로 쓰기 가능 노드를 변환합니다.
         /// </summary>
-        /// <param name="node">읽기 전용 노드로 형변환할 대상 노드입니다.</param>
+        /// <param name="node">
+        /// The writable node to convert.<br/>
+        /// 변환할 쓰기 가능 노드입니다.
+        /// </param>
         public static implicit operator IONode(IOWriteNode node) => new IONode(node.provider, node.path);
     }
 }

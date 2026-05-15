@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
                 path = RuniPathPropertyDrawer.GetChildProperty(path);
                 
                 nameSpace.stringValue = identifier.nameSpace;
-                path.stringValue = identifier.path;
+                path.stringValue = identifier.path.value;
             }
         }
     }
