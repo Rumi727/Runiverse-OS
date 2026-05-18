@@ -25,7 +25,7 @@ namespace RuniOS.Editor
             fetchItems = FetchItems;
             fetchColumns = FetchColumns;
             
-            SearchProviderBridge.__GetInstanceFrom(this).tableConfig = GetDefaultTableConfig;
+            SearchProviderBridge.__GetInstanceFrom(this).tableConfig = _ => GetDefaultTableConfig();
             
             queryEngine.SetSearchDataCallback(GetSearchableData, StringComparison.OrdinalIgnoreCase);
             queryEngine.AddFilter(assemblyToken, o => o.Assembly.GetName().Name);
@@ -68,16 +68,11 @@ namespace RuniOS.Editor
 
         static IEnumerable<string> GetSearchableData(Type t) => Enumerable.Repeat(t.AssemblyQualifiedName ?? string.Empty, 1);
 
-        static SearchTable GetDefaultTableConfig(SearchContext context)
-        {
-            List<SearchColumn> defaultColumns = new List<SearchColumn> { new SearchColumn(GetTextOrKey("gui.name"), "label") { width = 400 } };
-            defaultColumns.AddRange(FetchColumns(context, null));
-            
-            return new SearchTable("type", defaultColumns);
-        }
+        public static SearchTable GetDefaultTableConfig() => new SearchTable("type", FetchColumns());
 
-        static IEnumerable<SearchColumn> FetchColumns(SearchContext context, IEnumerable<SearchItem>? searchDatas)
+        static IEnumerable<SearchColumn> FetchColumns(SearchContext? context = null, IEnumerable<SearchItem>? searchDatas = null)
         {
+            yield return new SearchColumn(GetTextOrKey("gui.name"), "label") { width = 400 };
             yield return new SearchColumn(GetTextOrKey("type_search_provider.namespace")) { getter = GetNamespace, width = 250 };
             yield return new SearchColumn(GetTextOrKey("type_search_provider.assembly")) { getter = GetAssemblyName, width = 250 };
         }
