@@ -28,7 +28,7 @@ namespace RuniOS.IO
         /// </summary>
         public string value
         {
-            readonly get => _value ?? throw new InvalidOperationException("PhysicalPath is not initialized.");
+            readonly get => _value ?? NormalizePath(string.Empty);
             set => _value = NormalizePath(value);
         }
         [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value = NormalizePath(path);
