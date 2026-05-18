@@ -127,9 +127,8 @@
     "com.unity.editorcoroutines": {
       "version": "1.1.0",
       "depth": 1,
-      "source": "registry",
-      "dependencies": {},
-      "url": "https://packages.unity.com"
+      "source": "builtin",
+      "dependencies": {}
     },
     "com.unity.ext.nunit": {
       "version": "2.1.0",
@@ -196,7 +195,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.test-framework": {
-      "version": "1.7.1",
+      "version": "1.8.0",
       "depth": 1,
       "source": "builtin",
       "dependencies": {
@@ -206,7 +205,7 @@
       }
     },
     "com.unity.test-framework.performance": {
-      "version": "3.2.0",
+      "version": "3.4.0",
       "depth": 2,
       "source": "registry",
       "dependencies": {
@@ -224,7 +223,7 @@
       }
     },
     "com.unity.ugui": {
-      "version": "2.5.0",
+      "version": "2.6.0",
       "depth": 0,
       "source": "builtin",
       "dependencies": {
