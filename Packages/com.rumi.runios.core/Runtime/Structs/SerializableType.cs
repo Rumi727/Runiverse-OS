@@ -27,12 +27,12 @@ namespace RuniOS
         /// <summary>
         /// 이 <see cref="SerializableType"/> 인스턴스가 나타내는 <see cref="Type"/> 객체를 가져오거나 설정합니다.
         /// </summary>
-        public Type? value { get; set; }
+        [JsonIgnore] public Type? value { get; set; }
         
         /// <summary>
         /// 유니티 직렬화를 위한 <see cref="Type"/>의 문자열 표현을 저장하는 내부 필드입니다.
         /// </summary>
-        [SerializeField, Delayed, JsonIgnore] string? _value;
+        [SerializeField, Delayed, JsonProperty(nameof(value))] string? _value;
         
         /// <summary>
         /// 이 <see cref="SerializableType"/> 인스턴스와 다른 지정된 <see cref="SerializableType"/> 인스턴스의 값이 같은지 여부를 결정합니다.
