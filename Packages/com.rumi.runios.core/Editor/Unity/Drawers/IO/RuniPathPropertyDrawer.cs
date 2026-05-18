@@ -30,7 +30,7 @@ namespace RuniOS.Editor.Unity.Drawers.IO
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            string value = EditorGUI.TextField(position, label, PhysicalPath.NormalizePath(property.stringValue));
+            string value = RuniPathField(position, label, (RuniPath)property.stringValue).value;
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = value;
         }
