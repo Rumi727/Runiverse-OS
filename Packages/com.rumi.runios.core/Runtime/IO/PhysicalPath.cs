@@ -26,10 +26,6 @@ namespace RuniOS.IO
         /// Gets the normalized string value of this path.<br/>
         /// 이 경로의 정규화된 문자열 값을 가져옵니다.
         /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown when this instance was not initialized with a path value.<br/>
-        /// 이 인스턴스가 경로 값으로 초기화되지 않은 경우 발생합니다.
-        /// </exception>
         public string value
         {
             readonly get => _value ?? throw new InvalidOperationException("PhysicalPath is not initialized.");
@@ -171,6 +167,9 @@ namespace RuniOS.IO
         /// </exception>
         public static string NormalizePath(string path)
         {
+            if (string.IsNullOrEmpty(path))
+                path = Directory.GetCurrentDirectory();
+
             string fullPath = Path.GetFullPath(path);
             int rootLength = Path.GetPathRoot(fullPath.AsSpan()).Length;
 
