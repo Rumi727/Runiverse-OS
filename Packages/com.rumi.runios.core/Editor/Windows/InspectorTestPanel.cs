@@ -114,6 +114,7 @@ namespace RuniOS.Editor.Windows
             public PackIdentifier packIdentifier;
             public ResourceKey resourceKey;
             public AssetRef<LocalizationData> assetRef;
+            public PhysicalPath physicalPath;
             public RuniPath path;
             public FileExtension fileExtension;
             public StructTest2? nullableStructTest2;
