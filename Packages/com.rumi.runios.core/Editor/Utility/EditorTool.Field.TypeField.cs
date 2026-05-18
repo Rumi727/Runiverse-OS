@@ -68,6 +68,7 @@ namespace RuniOS.Editor
                 title = GetTextOrKey("gui.type"),
                 queryBuilderEnabled = true,
                 hideTabs = true,
+                tableConfig = TypeSearchProvider.GetDefaultTableConfig(),
                 selectHandler = (SearchItem item, bool cancelled) =>
                 {
                     if (cancelled)
@@ -78,7 +79,7 @@ namespace RuniOS.Editor
                     else
                         selectHandler.Invoke(null);
                 },
-                flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle)
+                flags = (SearchViewFlags.TableView | SearchViewFlags.DisableInspectorPreview | SearchViewFlags.DisableBuilderModeToggle | SearchViewFlags.DisableSavedSearchQuery)
             };
             SearchService.ShowPicker(viewState);
         }
