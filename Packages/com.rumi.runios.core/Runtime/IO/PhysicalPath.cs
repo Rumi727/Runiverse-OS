@@ -41,6 +41,11 @@ namespace RuniOS.IO
 
 
 
+        // default로는 여전히 _value가 null이지만, 그래도 일단 value 값 가져올 때 마다 NormalizePath 되는건 안좋으니 매개변수 없는 생성자라도 만들었습니다.
+        public PhysicalPath() : this(string.Empty) { }
+
+
+
         /// <summary>
         /// Creates a new <see cref="PhysicalPath"/> from the specified path string.<br/>
         /// 지정된 경로 문자열에서 새 <see cref="PhysicalPath"/>를 생성합니다.
@@ -157,10 +162,6 @@ namespace RuniOS.IO
         /// The normalized physical path string.<br/>
         /// 정규화된 물리 경로 문자열을 반환합니다.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown by <see cref="Path.GetFullPath(string)"/> when <paramref name="path"/> is <see langword="null"/>.<br/>
-        /// <paramref name="path"/>가 <see langword="null"/>인 경우 <see cref="Path.GetFullPath(string)"/>에서 발생합니다.
-        /// </exception>
         /// <exception cref="ArgumentException">
         /// Thrown by <see cref="Path.GetFullPath(string)"/> when <paramref name="path"/> is invalid.<br/>
         /// <paramref name="path"/>가 잘못된 경우 <see cref="Path.GetFullPath(string)"/>에서 발생합니다.
