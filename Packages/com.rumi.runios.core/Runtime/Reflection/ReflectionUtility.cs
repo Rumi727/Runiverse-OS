@@ -77,7 +77,11 @@ namespace RuniOS.Reflection
             {
                 try
                 {
+#if UNITY_6000_6_OR_NEWER
+                    assemblys = UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies().ToImmutableArray();
+#else
                     assemblys = AppDomain.CurrentDomain.GetAssemblies().ToImmutableArray();
+#endif
                 }
                 catch (Exception e)
                 {
