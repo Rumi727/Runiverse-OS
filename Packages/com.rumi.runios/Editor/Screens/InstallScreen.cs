@@ -106,7 +106,7 @@ namespace RuniOS.Installer.Screens
                     string label = InstallerWindow.TryGetText(gitPackage.label);
                     Vector2 labelSize = buttonLabelStyle.CalcSize(new GUIContent(label));
 
-                    float closeBackgroundHeight = labelSize.y + EditorStyles.helpBox.padding.vertical;
+                    float closeBackgroundHeight = labelSize.y + RuniStyles.contentBox.padding.vertical;
                     
                     float oneLineLabelYSize = oneLineLabelStyle.CalcSize(GUIContent.none).y;
                     
@@ -132,7 +132,7 @@ namespace RuniOS.Installer.Screens
                     if (selectedIndex != index && !animBool.isAnimating)
                         GUI.color = new Color(orgColor.r, orgColor.g, orgColor.b, 1 - alphaAnimBool.faded);
 
-                    GUILayout.BeginArea(area, EditorStyles.helpBox);
+                    GUILayout.BeginArea(area, RuniStyles.contentBox);
                     
                     if (GUILayout.Button(label, buttonLabelStyle, GUILayout.Width(area.width - installButtonXSize - 10)))
                     {
@@ -149,7 +149,7 @@ namespace RuniOS.Installer.Screens
                         rect.y = 3;
                         rect.x = area.width - installButtonXSize - 4;
                         rect.width = installButtonXSize;
-                        rect.height = Mathf.Lerp(labelSize.y, labelSize.y + oneLineLabelYSize + 2, animBool.faded);
+                        rect.height = Mathf.Lerp(labelSize.y + 2, labelSize.y + oneLineLabelYSize + 2, animBool.faded);
 
                         string buttonText;
                         if (installed)

@@ -61,7 +61,7 @@ namespace RuniOS.Installer
                 ShowInstallerWindow();
                 EditorApplication.update -= ShowOnce;
             }
-            
+
 #if RUNI_ENGINE
             Editor.Localizations.EditorLocalization.currentLanguage = ConfigScriptableObject.config.currentLanguage;
 #endif
@@ -172,7 +172,7 @@ namespace RuniOS.Installer
 
             foreach (var screen in installerScreens)
                 screen.mainWindow = this;
-            
+
 #if RUNI_ENGINE
             ConfigScriptableObject.config.currentLanguage = Editor.Localizations.EditorLocalization.currentLanguage;
             ConfigScriptableObject.config.SetDirty();
@@ -250,7 +250,7 @@ namespace RuniOS.Installer
 
                 Rect area = new Rect(x - offsetX - 2, 0, Screen.width + 2, Screen.height - 33);
                 GUILayout.BeginArea(area);
-                
+
                 if (area.x + area.width >= 0 && area.x <= area.width)
                 {
                     /*Matrix4x4 matrix = GUI.matrix;
@@ -263,7 +263,7 @@ namespace RuniOS.Installer
                     DrawLineV(new Rect(-3, headHeightOffset + 18, area.width, area.height - headHeightOffset));
                     Rect drawRect = new Rect(2, screen.headDisable ? 0 : headHeight, area.width - 2, area.height - (screen.headDisable ? 0 : headHeight));
                     GUILayout.BeginArea(drawRect);
-                    
+
                     scrollPosition = GUILayout.BeginScrollView(scrollPosition);
                     screen.DrawGUI(new Rect(3, 3, drawRect.width - 6, drawRect.height - 6));
                     GUILayout.EndScrollView();
@@ -306,7 +306,7 @@ namespace RuniOS.Installer
         {
             if (instance == null || ConfigScriptableObject.config == null)
                 return;
-            
+
             DrawLine(2, 0);
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
@@ -354,7 +354,7 @@ namespace RuniOS.Installer
 
             if (selectedLanguageIndex != languageIndex)
             {
-                ConfigScriptableObject.config.currentLanguage = 
+                ConfigScriptableObject.config.currentLanguage =
 #if RUNI_ENGINE
                 Editor.Localizations.EditorLocalization.currentLanguage =
 #endif
@@ -364,8 +364,8 @@ namespace RuniOS.Installer
                     1 => "ko_kr",
                     2 => "ja_jp",
                     _ => "en_us",
-                }; 
-                
+                };
+
 
                 ConfigScriptableObject.config.SetDirty();
             }
@@ -384,7 +384,7 @@ namespace RuniOS.Installer
 
             float deltaTime = (float)deltaTimeStopwatch.Elapsed.TotalSeconds;
             deltaTimeStopwatch.Restart();
-            
+
             if (ConfigScriptableObject.config.screenIndex == 0)
             {
                 logoPos = Vector2.Lerp(logoPos, WelcomeScreen.logoRect.position, 10f * deltaTime);
@@ -403,7 +403,7 @@ namespace RuniOS.Installer
                 logoSize = Mathf.Lerp(logoSize, 38, 15f * deltaTime);
                 logoRotation = Mathf.LerpAngle(logoRotation, 0, 15f * deltaTime);
             }
-            
+
             GUI.BeginGroup(new Rect(0, 0, Screen.width, Screen.height));
 
             Rect rect = new(logoPos, new Vector2(logoSize, logoSize));

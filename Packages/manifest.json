@@ -1,14 +1,13 @@
 {
   "dependencies": {
-    "com.cysharp.r3": "https://github.com/Rumi727/R3.git?path=src/R3.Unity/Assets/R3.Unity",
-    "com.cysharp.unitask": "https://github.com/Rumi727/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
     "com.quickeye.icon-browser": "https://github.com/ErnSur/unity-editor-icons.git",
     "com.rumi.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.unity.ide.rider": "3.0.40",
     "com.unity.ide.visualstudio": "2.0.27",
     "com.unity.memoryprofiler": "1.1.12",
-    "com.unity.ugui": "2.6.0"
+    "com.unity.ugui": "2.6.0",
+    "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity"
   },
   "scopedRegistries": [
     {
@@ -16,7 +15,8 @@
       "url": "https://package.openupm.com",
       "scopes": [
         "com.realitystop.linkmerge",
-        "com.coffee.softmask-for-ugui"
+        "com.coffee.softmask-for-ugui",
+        "com.cysharp.unitask"
       ]
     }
   ]

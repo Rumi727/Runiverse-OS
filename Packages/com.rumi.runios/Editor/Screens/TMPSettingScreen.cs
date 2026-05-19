@@ -11,7 +11,7 @@ namespace RuniOS.Installer.Screens
 
 
         public InstallerWindow? mainWindow { get; set; }
-        public Vector2? windowSize => new Vector2(584, 333);
+        public Vector2? windowSize => new Vector2(584, 344);
 
         public string label => InstallerWindow.TryGetText("installer.tmp_setting.label");
         public bool headDisable => false;

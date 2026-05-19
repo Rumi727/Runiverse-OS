@@ -22,13 +22,12 @@ namespace RuniOS.Installer.Screens
 
 
 
-
         GUIStyle? largeBoldLabel;
         public void DrawGUI(Rect position)
         {
             if (mainWindow == null || mainWindow.scopedRegistrys == null)
                 return;
-            
+
             largeBoldLabel ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 14 };
 
             const string manifestPath = "Packages/manifest.json";

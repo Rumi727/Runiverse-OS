@@ -10,11 +10,11 @@
     "com.unity.modules.ui": "1.0.0",
     "com.unity.modules.uielements": "1.0.0",
     "com.unity.modules.androidjni": "1.0.0",
-	"com.unity.modules.unitywebrequest": "1.0.0",
+    "com.unity.modules.unitywebrequest": "1.0.0",
     "com.unity.ui": "1.0.0",
     "com.unity.textmeshpro": "3.0.6",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
-    "com.cysharp.unitask": "2.5.10",
+    "com.cysharp.unitask": "2.5.11",
     "com.realitystop.linkmerge": "1.0.0"
   },
   "unity": "6000.3"

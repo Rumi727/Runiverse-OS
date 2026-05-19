@@ -38,6 +38,7 @@ MonoBehaviour:
     m_Scopes:
     - com.realitystop.linkmerge
     - com.coffee.softmask-for-ugui
+    - com.cysharp.unitask
     m_IsDefault: 0
     m_IsUnityRegistry: 0
     m_Capabilities: 0
@@ -51,7 +52,7 @@ MonoBehaviour:
     m_Modified: 0
     m_ErrorMessage: 
     m_UserModificationsEntityId:
-      m_rawData: 568105584918792740
+      m_rawData: 568105584918791471
     m_OriginalEntityId:
-      m_rawData: 568105584918792744
+      m_rawData: 568105584918791473
   m_LoadAssets: 0

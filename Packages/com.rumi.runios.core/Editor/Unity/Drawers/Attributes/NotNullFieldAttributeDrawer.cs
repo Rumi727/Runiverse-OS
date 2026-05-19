@@ -22,7 +22,7 @@ namespace RuniOS.Editor.Unity.Drawers.Attributes
                 Texture icon = EditorGUIUtility.IconContent("console.erroricon").image;
                 string text = GetTextOrKey("gui.field_is_null");
 
-                EditorGUI.LabelField(position, new GUIContent(text, icon), EditorStyles.helpBox);
+                EditorGUI.LabelField(position, new GUIContent(text, icon), RuniStyles.contentBox);
             }
             else
                 EditorGUI.PropertyField(position, property, label, property.IsGeneric());

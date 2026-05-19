@@ -1,20 +1,20 @@
 {
   "dependencies": {
     "com.cysharp.r3": {
-      "version": "https://github.com/Rumi727/R3.git?path=src/R3.Unity/Assets/R3.Unity",
+      "version": "https://github.com/Cysharp/R3.git?path=src/R3.Unity/Assets/R3.Unity",
       "depth": 0,
       "source": "git",
       "dependencies": {
         "com.unity.modules.imgui": "1.0.0"
       },
-      "hash": "f8df46627a6cca87730e77ff7e915fe90faac576"
+      "hash": "f6eed2dd4208dc4ae171c601e799e85f82aca25e"
     },
     "com.cysharp.unitask": {
-      "version": "https://github.com/Rumi727/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask",
-      "depth": 0,
-      "source": "git",
+      "version": "2.5.11",
+      "depth": 1,
+      "source": "registry",
       "dependencies": {},
-      "hash": "cd866a486a33075e3665d48737d5adcc93d7c711"
+      "url": "https://package.openupm.com"
     },
     "com.quickeye.icon-browser": {
       "version": "https://github.com/ErnSur/unity-editor-icons.git",
@@ -52,7 +52,7 @@
         "com.unity.ui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",
         "com.unity.nuget.newtonsoft-json": "3.2.1",
-        "com.cysharp.unitask": "2.5.10",
+        "com.cysharp.unitask": "2.5.11",
         "com.realitystop.linkmerge": "1.0.0"
       }
     },
