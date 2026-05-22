@@ -31,13 +31,13 @@ namespace RuniOS.Resource
         
         /// <summary>
         /// 지정된 <paramref name="resourcePack"/> 내에서 이 레지스트리의 데이터를 포함하는 폴더를 비동기적으로 열거합니다.
-        /// <br/>각 폴더는 네임스페이스와 해당 레지스트리 핸들러를 반환합니다.
+        /// <br/>각 폴더는 네임스페이스와 해당 레지스트리 노드를 반환합니다.
         /// </summary>
         /// <param name="resourcePack">검색할 리소스 팩입니다.</param>
-        /// <returns>비동기적으로 네임스페이스 이름과 레지스트리 핸들러를 반환하는 열거자입니다.</returns>
-        public IUniTaskAsyncEnumerable<(string nameSpace, IONode registryEntry)> GetRegistryFolder(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IONode registryEntry)>(async (write, iterationToken) =>
+        /// <returns>비동기적으로 네임스페이스 이름과 레지스트리 노드를 반환하는 열거자입니다.</returns>
+        public IUniTaskAsyncEnumerable<(string nameSpace, IONode registryNode)> GetRegistryNodes(ResourcePack resourcePack) => UniTaskAsyncEnumerable.Create<(string nameSpace, IONode registryEntry)>(async (write, iterationToken) =>
         {
-            foreach (var namespaceHandler in resourcePack.GetNamespaceHandlers())
+            foreach (var namespaceHandler in resourcePack.GetNamespaceNodes())
             {
                 IONode registryEntry = namespaceHandler.CreateChild(registryName);
                 if (await registryEntry.dir.GetEntry(iterationToken) == null)
@@ -88,11 +88,11 @@ namespace RuniOS.Resource
                 // 모든 리소스 팩을 순회하며 에셋 핸들을 비동기적으로 로드 및 등록
                 foreach (var resourcePack in resourcePacks)
                 {
-                    await foreach ((string nameSpace, IONode registryEntry) in GetRegistryFolder(resourcePack))
+                    await foreach ((string nameSpace, IONode registryNode) in GetRegistryNodes(resourcePack))
                     {
-                        await foreach (IOEntry fileEntry in registryEntry.dir.GetAllFiles(assetFilter))
+                        await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(assetFilter))
                         {
-                            IONode entry = registryEntry.Bind(fileEntry);
+                            IONode entry = registryNode.Bind(fileEntry);
                             IOMetaData metaData = fileEntry.metaData;
                             uniTasks.Add(UniTask.Defer(Method));
 
@@ -100,7 +100,7 @@ namespace RuniOS.Resource
                             {
                                 try
                                 {
-                                    RuniPath path = entry.path.TrimStartPath(registryEntry.path).GetPathWithoutExtension();
+                                    RuniPath path = entry.path.TrimStartPath(registryNode.path).GetPathWithoutExtension();
                                     await OnAssetLoop(new Identifier(nameSpace, path), entry, await CreateHandle(entry, metaData));
                                 }
                                 catch (Exception e)
