@@ -36,6 +36,8 @@ namespace RuniOS.Resource
         IEnumerable<Identifier> keys { get; }
         IEnumerable<IAssetHandle> handles { get; }
 
+        int count { get; }
+
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
         /// </summary>

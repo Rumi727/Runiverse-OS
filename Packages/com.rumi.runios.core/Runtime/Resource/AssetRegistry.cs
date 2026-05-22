@@ -47,7 +47,7 @@ namespace RuniOS.Resource
         public IEnumerable<Identifier> keys => assetHandles.Keys;
         public IEnumerable<THandle> handles => assetHandles.Values;
         
-        public int Count => assetHandles.Count;
+        public int count => assetHandles.Count;
         
         Dictionary<Identifier, THandle> assetHandles = new();
         Dictionary<Identifier, THandle>? trackedHandles = null;
