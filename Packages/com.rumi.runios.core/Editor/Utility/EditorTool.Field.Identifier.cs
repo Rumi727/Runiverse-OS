@@ -32,20 +32,21 @@ namespace RuniOS.Editor
             {
                 position.width = fieldWidth;
 
-                TextDropdown nameSpaceDropdown = new TextDropdown();
                 string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+                
                 if (isPressed)
                 {
+                    TextDropdown nameSpaceDropdown = new TextDropdown();
+                    nameSpaceDropdown.onSelectedItem += x =>
+                    {
+                        identifierFieldLastControlID = lastControlID;
+                        identifierFieldSelectedNamespace = x.value;
+                    };
+
                     nameSpaceDropdown.Rebuild(ResourcePack.loadedResourcePacks.SelectMany(x => x.Value.namespaces));
                     nameSpaceDropdown.Show(position);
                 }
-
-                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-                nameSpaceDropdown.onSelectedItem += x =>
-                {
-                    identifierFieldLastControlID = lastControlID;
-                    identifierFieldSelectedNamespace = x.value;
-                };
 
                 if (identifierFieldLastControlID == lastControlID)
                 {

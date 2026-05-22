@@ -25,7 +25,6 @@ namespace RuniOS.Editor
         static Identifier DoAssetIdField(Rect position, Identifier registryId, Identifier value)
         {
             string currentNamespace = value.nameSpace;
-            RuniPathDropdown dropdown = new RuniPathDropdown();
 
             value = IdentifierField(position, value, x =>
             {
@@ -33,18 +32,20 @@ namespace RuniOS.Editor
                     .Where(x => currentNamespace == x.nameSpace)
                     .Select(x => x.path);
 
-                dropdown.Rebuild(assetPaths ?? Enumerable.Empty<RuniPath>());
+                int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
+
+                RuniPathDropdown dropdown = new RuniPathDropdown();
+                dropdown.onSelectedItem += x =>
+                {
+                    registryTypeFieldLastControlID = lastControlID;
+                    registryTypeFieldSelectedPath = x.path;
+                };
+
+                dropdown.Rebuild(assetPaths ?? []);
                 dropdown.Show(x);
             });
 
-            int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
-            dropdown.onSelectedItem += x =>
-            {
-                registryTypeFieldLastControlID = lastControlID;
-                registryTypeFieldSelectedPath = x.path;
-            };
-
-            if (registryTypeFieldLastControlID == lastControlID)
+            if (registryTypeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
             {
                 value.path = registryTypeFieldSelectedPath;
 
