@@ -18,12 +18,12 @@ namespace RuniOS.IO
         new IOWriteNode rootNode => new IOWriteNode(this);
         IONode IIOProvider.rootNode => rootNode;
 
-        /// <summary>
+        /*/// <summary>
         /// Creates a writable provider rooted at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로를 새 루트로 삼는 쓰기 가능 프로바이더를 생성합니다.
         /// </summary>
         new IWritableIOProvider Recreate(RuniPath path);
-        IIOProvider IIOProvider.Recreate(RuniPath path) => Recreate(path);
+        IIOProvider IIOProvider.Recreate(RuniPath path) => Recreate(path);*/
 
         /// <summary>
         /// Opens a stream for writing to the file at the specified provider-relative path.<br/>

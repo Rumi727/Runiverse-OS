@@ -14,7 +14,7 @@ namespace RuniOS.IO
     /// Android StreamingAssets에 대한 읽기 전용 접근을 <see cref="IIOProvider"/> API로 제공합니다.<br/>
     /// 내부적으로 Android <c>AssetManager</c>를 사용해 에셋을 열고 에셋 디렉터리를 열거합니다.
     /// </summary>
-    public class AndroidStreamingIOProvider(RuniPath rootPath = default) : IIOProvider
+    public class AndroidStreamingIOProvider : IIOProvider
     {
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         static void Init()
@@ -49,16 +49,14 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public IONode rootNode => new IONode(this);
 
-        readonly RuniPath rootPath = rootPath;
-
         /// <inheritdoc/>
         public bool isIndependent => false;
 
-        /// <inheritdoc/>
-        public IIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath.Combine(path));
+        /*/// <inheritdoc/>
+        public IIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new AndroidStreamingIOProvider(rootPath.Combine(path));*/
 
         /// <inheritdoc/>
-        public bool IsSameTarget(IIOProvider other) => other is AndroidStreamingIOProvider otherAndroid && rootPath == otherAndroid.rootPath;
+        public bool IsSameTarget(IIOProvider other) => other is AndroidStreamingIOProvider;
 
         #region Entry
         /// <inheritdoc/>
@@ -66,8 +64,7 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            RuniPath actualPath = rootPath.Combine(path);
-            string relativePath = actualPath.value;
+            string relativePath = path.value;
             string[] children = ListAssets(relativePath);
             string name = path.GetFileName();
 
@@ -104,11 +101,11 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default)
         {
-            return Enumerate(rootPath, path, recursive, cancellationToken).EnumerateOnThreadPool(cancellationToken: cancellationToken);
+            return Enumerate(path, recursive, cancellationToken).EnumerateOnThreadPool(cancellationToken: cancellationToken);
 
-            static IEnumerable<IOEntry> Enumerate(RuniPath rootPath, RuniPath path, bool recursive, CancellationToken cancellationToken)
+            static IEnumerable<IOEntry> Enumerate(RuniPath path, bool recursive, CancellationToken cancellationToken)
             {
-                string[] rootItems = ListAssets(rootPath.Combine(path).value);
+                string[] rootItems = ListAssets(path.value);
                 if (rootItems.Length <= 0)
                     yield break;
 
@@ -125,8 +122,7 @@ namespace RuniOS.IO
                         cancellationToken.ThrowIfCancellationRequested();
 
                         RuniPath entryPath = currentPath.Combine(item);
-                        RuniPath actualEntryPath = rootPath.Combine(entryPath);
-                        string[] childItems = ListAssets(actualEntryPath.value);
+                        string[] childItems = ListAssets(entryPath.value);
                         bool isDirectory = childItems.Length > 0;
 
                         IOEntry entry;
@@ -151,7 +147,7 @@ namespace RuniOS.IO
                                 metaData = new IOMetaData
                                 {
                                     name = item,
-                                    size = TryGetFileSize(actualEntryPath.value),
+                                    size = TryGetFileSize(entryPath.value),
                                     attributes = FileAttributes.ReadOnly
                                 },
                                 isDirectory = false
@@ -174,7 +170,7 @@ namespace RuniOS.IO
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string relativePath = rootPath.Combine(path).value;
+            string relativePath = path.value;
             if (!TryOpenAsset(relativePath, out AndroidJavaObject? inputStream) || inputStream == null)
                 throw new FileNotFoundException($"Streaming asset not found: '{relativePath}'.", relativePath);
 

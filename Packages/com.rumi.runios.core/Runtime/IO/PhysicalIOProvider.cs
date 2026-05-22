@@ -32,8 +32,8 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public bool isIndependent => false;
 
-        /// <inheritdoc/>
-        public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));
+        /*/// <inheritdoc/>
+        public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));*/
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath;

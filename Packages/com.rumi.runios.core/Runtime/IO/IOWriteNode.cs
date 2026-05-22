@@ -95,11 +95,11 @@ namespace RuniOS.IO
         /// </summary>
         public IOWriteNode AddExtension(FileExtension extension) => new IOWriteNode(provider, path.AddExtension(extension));
 
-        /// <summary>
+        /*/// <summary>
         /// Creates a root node from a writable provider recreated at this node's path.<br/>
         /// 이 노드의 경로를 새 루트로 재생성한 쓰기 가능 프로바이더의 루트 노드를 생성합니다.
         /// </summary>
-        public IOWriteNode Recreate() => provider.Recreate(path).rootNode;
+        public IOWriteNode Recreate() => provider.Recreate(path).rootNode;*/
 
         /// <summary>
         /// Determines whether this node and another node refer to the same provider target and path.<br/>

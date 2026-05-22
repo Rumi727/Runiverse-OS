@@ -51,11 +51,11 @@ namespace RuniOS.IO
         /// </remarks>
         bool isIndependent { get; }
 
-        /// <summary>
+        /*/// <summary>
         /// Creates a read-only provider rooted at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로를 새 루트로 삼는 읽기 전용 프로바이더를 생성합니다.
         /// </summary>
-        IIOProvider Recreate(RuniPath path);
+        IIOProvider Recreate(RuniPath path);*/
 
         /// <summary>
         /// Determines whether this provider and another provider refer to the same underlying target.<br/>

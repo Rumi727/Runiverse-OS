@@ -34,7 +34,7 @@ namespace RuniOS.IO.Virtual
         /// <inheritdoc/>
         public bool isIndependent => rootDirectory.isRoot;
 
-        /// <inheritdoc/>
+        /*/// <inheritdoc/>
         public IWritableIOProvider Recreate(RuniPath path)
         {
             if (path.IsEmpty())
@@ -47,7 +47,7 @@ namespace RuniOS.IO.Virtual
             }
 
             return new VirtualIOProvider(directory);
-        }
+        }*/
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is VirtualIOProvider otherVirtual && rootDirectory == otherVirtual.rootDirectory;

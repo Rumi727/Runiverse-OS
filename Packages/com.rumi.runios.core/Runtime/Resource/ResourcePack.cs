@@ -55,7 +55,7 @@ namespace RuniOS.Resource
         /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 입니다.</returns>
         public static async UniTask<ResourcePack> GetDefaultPack()
         {
-            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOProvider.instance.rootNode);
+            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOProvider.instance);
             EnablePack(defaultPackIdentifier);
 
             return defaultPack;
@@ -74,21 +74,21 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="PhysicalIOProvider"/>입니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
-        public static UniTask<ResourcePack> Create(PhysicalIOProvider provider) => Create(PackIdentifier.CreateByPath(provider.targetPath), provider.rootNode);
+        public static UniTask<ResourcePack> Create(PhysicalIOProvider provider) => Create(PackIdentifier.CreateByPath(provider.targetPath), provider);
         
         /// <summary>
         /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성하고 메타데이터를 로드합니다.
         /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
         /// </summary>
         /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
-        /// <param name="node">팩 루트 폴더에 접근하는 <see cref="IOEntry"/>입니다.</param>
+        /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IONode node)
+        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IIOProvider provider)
         {
             if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
                 return loadedPack;
             
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, node.Recreate());
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, provider);
             await resourcePack.Reload();
 
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
@@ -108,9 +108,9 @@ namespace RuniOS.Resource
         {
             identifier = PackIdentifier.empty;
             
-            rootFolder = default(IONode);
-            assetFolder = default(IONode);
-            infoFile = default(IONode);
+            rootFolder = default;
+            assetFolder = default;
+            infoFile = default;
 
             metaData = new PackMetaData(string.Empty);
         }
@@ -119,14 +119,14 @@ namespace RuniOS.Resource
         /// 지정된 식별자와 I/O 폴더 노드를 사용하여 <see cref="ResourcePack"/>의 새 인스턴스를 초기화합니다.
         /// </summary>
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
-        /// <param name="folder">팩의 루트 폴더에 접근하는 <see cref="IONode"/>입니다.</param>
-        ResourcePack(PackIdentifier identifier, IONode folder)
+        /// <param name="provider">팩의 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
+        ResourcePack(PackIdentifier identifier, IIOProvider provider)
         {
             this.identifier = identifier;
-            
-            rootFolder = folder.Recreate();
-            assetFolder = folder.CreateChild(assetsFolderName);
-            infoFile = folder.CreateChild(infoPath);
+
+            rootFolder = provider.rootNode;
+            assetFolder = rootFolder.CreateChild(assetsFolderName);
+            infoFile = rootFolder.CreateChild(infoPath);
         }
         
         /// <summary>
@@ -190,7 +190,7 @@ namespace RuniOS.Resource
                 namespaces = (await assetFolder.dir.GetDirectories().Select(x => x.path.GetFileName()).ToArrayAsync()).ToImmutableArray();
         }
         
-        public IEnumerable<IONode> GetNamespaceHandlers() => namespaces.Select(x => assetFolder.CreateChild(x));
+        public IEnumerable<IONode> GetNamespaceNodes() => namespaces.Select(x => assetFolder.CreateChild(x));
 
         /// <summary>
         /// 이 리소스 팩을 정리하고 내부 리소스 관리자 목록에서 제거합니다.
@@ -199,7 +199,9 @@ namespace RuniOS.Resource
         {
             if (isDisposed)
                 throw new ObjectDisposedException(identifier.ToString());
-            
+
+            rootFolder.provider.Dispose();
+
             isDisposed = true;
             isValid = false;
             
