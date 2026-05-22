@@ -3,7 +3,7 @@ using RuniOS.Editor.Unity.Inspectors;
 using RuniOS.Effects;
 using RuniOS.UI.Effects;
 
-namespace RuniOS.Editor.Effects.IMGUI.Inspectors
+namespace RuniOS.Editor.Effects.Unity.Inspectors
 {
     [CanEditMultipleObjects]
     [CustomEditor(typeof(SimpleMeshOutline))]
