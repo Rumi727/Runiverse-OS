@@ -53,7 +53,7 @@ namespace RuniOS.Resource
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="metaData">에셋 파일의 메타 데이터 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IONode node, IOMetaData metaData);
+        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData metaData);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -93,7 +93,7 @@ namespace RuniOS.Resource
                         await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(assetFilter))
                         {
                             IONode entry = registryNode.Bind(fileEntry);
-                            IOMetaData metaData = fileEntry.metaData;
+                            FileMetaData metaData = fileEntry.metaData;
                             uniTasks.Add(UniTask.Defer(Method));
 
                             async UniTask Method()

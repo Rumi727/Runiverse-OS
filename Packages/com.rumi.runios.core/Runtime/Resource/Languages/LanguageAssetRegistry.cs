@@ -30,7 +30,7 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        protected override async UniTask<LanguageAssetHandle> CreateHandle(IONode node, IOMetaData metaData)
+        protected override async UniTask<LanguageAssetHandle> CreateHandle(IONode node, FileMetaData metaData)
         {
             string json = await node.file.ReadAllText();
             IReadOnlyDictionary<string, string>? assetObject = JsonConvert.DeserializeObject<Dictionary<string, string>?>(json)?.AsReadOnly();

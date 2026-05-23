@@ -6,14 +6,14 @@ namespace RuniOS.Resource.Languages
 {
     sealed class LanguageAssetHandle : InstanceAssetHandle<LocalizationData>
     {
-        internal LanguageAssetHandle(LocalizationData assetObject, IONode node, IOMetaData metaData) : base(assetObject)
+        internal LanguageAssetHandle(LocalizationData assetObject, IONode node, FileMetaData metaData) : base(assetObject)
         {
             this.node = node;
             this.metaData = metaData;
         }
 
         public IONode node { get; }
-        public IOMetaData metaData { get; }
+        public FileMetaData metaData { get; }
 
         public override bool IsSameTarget(IAssetHandle other)
         {

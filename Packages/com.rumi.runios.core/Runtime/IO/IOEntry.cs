@@ -20,5 +20,5 @@ namespace RuniOS.IO
     /// <see langword="true"/> if this entry is a directory; otherwise, <see langword="false"/>.<br/>
     /// 이 엔트리가 디렉터리이면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
     /// </param>
-    public readonly record struct IOEntry(RuniPath path, IOMetaData metaData, bool isDirectory);
+    public readonly record struct IOEntry(RuniPath path, FileMetaData metaData, bool isDirectory);
 }

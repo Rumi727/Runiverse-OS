@@ -34,7 +34,7 @@ namespace RuniOS.IO
     /// The file-system attributes, when available.<br/>
     /// 제공 가능한 경우 파일 시스템 특성입니다.
     /// </param>
-    public readonly partial record struct IOMetaData(string? name, long? size, DateTime? creationTime, DateTime? lastAccessTime, DateTime? lastWriteTime, FileAttributes? attributes)
+    public readonly partial record struct FileMetaData(string? name, long? size, DateTime? creationTime, DateTime? lastAccessTime, DateTime? lastWriteTime, FileAttributes? attributes)
     {
         /// <summary>
         /// Initializes metadata with only a file or directory name.<br/>
@@ -44,7 +44,7 @@ namespace RuniOS.IO
         /// The file or directory name.<br/>
         /// 파일 또는 디렉터리 이름입니다.
         /// </param>
-        public IOMetaData(string name) : this(name, null, null, null, null, null) { }
+        public FileMetaData(string name) : this(name, null, null, null, null, null) { }
 
         /// <summary>
         /// Initializes metadata with a file name and size.<br/>
@@ -58,6 +58,6 @@ namespace RuniOS.IO
         /// The file size in bytes.<br/>
         /// 파일 크기(바이트)입니다.
         /// </param>
-        public IOMetaData(string name, long size) : this(name, size, null, null, null, null) { }
+        public FileMetaData(string name, long size) : this(name, size, null, null, null, null) { }
     }
 }

@@ -20,7 +20,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
-        public IOMetaData metaData { get; private set; }
+        public FileMetaData metaData { get; private set; }
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -50,7 +50,7 @@ namespace RuniOS.Resource
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="metaData">에셋 파일의 초기 메타 데이터입니다.</param>
         /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-        protected AssetHandle(IONode node, IOMetaData metaData, int unloadDelayFrame = 600)
+        protected AssetHandle(IONode node, FileMetaData metaData, int unloadDelayFrame = 600)
         {
             this.node = node;
             this.metaData = metaData;

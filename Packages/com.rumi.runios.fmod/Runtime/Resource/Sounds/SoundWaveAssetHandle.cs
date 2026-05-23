@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class SoundWaveAssetHandle(IONode node, IOMetaData metaData) : AssetHandle<Sound>(node, metaData)
+    public class SoundWaveAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<Sound>(node, metaData)
     {
         protected override async UniTask<Sound> Load()
         {

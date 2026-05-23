@@ -73,7 +73,7 @@ namespace RuniOS.IO
                 return new IOEntry
                 {
                     path = path,
-                    metaData = new IOMetaData
+                    metaData = new FileMetaData
                     {
                         name = name,
                         attributes = FileAttributes.Directory | FileAttributes.ReadOnly
@@ -88,7 +88,7 @@ namespace RuniOS.IO
             return new IOEntry
             {
                 path = path,
-                metaData = new IOMetaData
+                metaData = new FileMetaData
                 {
                     name = name,
                     size = TryGetFileSize(relativePath),
@@ -131,7 +131,7 @@ namespace RuniOS.IO
                             entry = new IOEntry
                             {
                                 path = entryPath,
-                                metaData = new IOMetaData
+                                metaData = new FileMetaData
                                 {
                                     name = item,
                                     attributes = FileAttributes.Directory | FileAttributes.ReadOnly
@@ -144,7 +144,7 @@ namespace RuniOS.IO
                             entry = new IOEntry
                             {
                                 path = entryPath,
-                                metaData = new IOMetaData
+                                metaData = new FileMetaData
                                 {
                                     name = item,
                                     size = TryGetFileSize(entryPath.value),

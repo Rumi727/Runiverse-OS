@@ -54,7 +54,7 @@ namespace RuniOS.IO
                 return UniTask.FromResult<IOEntry?>(new IOEntry
                 {
                     path = path,
-                    metaData = new IOMetaData
+                    metaData = new FileMetaData
                     {
                         name = dirInfo.Name,
                         creationTime = dirInfo.CreationTimeUtc,
@@ -69,7 +69,7 @@ namespace RuniOS.IO
             return UniTask.FromResult<IOEntry?>(new IOEntry
             {
                 path = path,
-                metaData = new IOMetaData
+                metaData = new FileMetaData
                 {
                     name = info.Name,
                     size = info.Length,
@@ -103,7 +103,7 @@ namespace RuniOS.IO
                     return new IOEntry
                     {
                         path = entryPath,
-                        metaData = new IOMetaData
+                        metaData = new FileMetaData
                         {
                             name = entry.FileName.ToString(),
                             size = entry.IsDirectory ? null : entry.Length,

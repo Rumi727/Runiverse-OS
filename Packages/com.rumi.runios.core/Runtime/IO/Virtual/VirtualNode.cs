@@ -50,7 +50,7 @@ namespace RuniOS.IO.Virtual
         /// Gets the metadata associated with this node.<br/>
         /// 이 노드와 연결된 메타 데이터를 가져옵니다.
         /// </summary>
-        public IOMetaData metaData { get; private set; } = new IOMetaData
+        public FileMetaData metaData { get; private set; } = new FileMetaData
         {
             name = null,
             creationTime = DateTime.UtcNow,
