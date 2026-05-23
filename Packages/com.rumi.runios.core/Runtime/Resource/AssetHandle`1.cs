@@ -37,7 +37,11 @@ namespace RuniOS.Resource
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
         /// </summary>
         public bool isLoading { get; private set; }
-        
+
+        /// <inheritdoc cref="IAssetHandle.isSealed"/>
+        public bool isSealed { get; private  set;}
+        bool IAssetHandle.isSealed { get => isSealed; set => isSealed = value; }
+
         // 지연 언로드 감시를 위한 R3 Subject 및 Subscription
         readonly Subject<Unit> _unloadTrigger = new Subject<Unit>();
         IDisposable? _unloadSubscription;
@@ -66,6 +70,12 @@ namespace RuniOS.Resource
         /// </returns>
         public async UniTask<IAssetScope<TAsset>?> GetScope()
         {
+            if (isSealed)
+            {
+                Debug.LogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.");
+                return null;
+            }
+            
             // 중복 로딩 방지 (경합 조건 방지)
             while (isLoading)
                 await UniTask.Yield();
