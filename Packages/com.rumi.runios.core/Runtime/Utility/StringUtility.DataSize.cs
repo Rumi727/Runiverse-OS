@@ -3,8 +3,8 @@ namespace RuniOS.Utility
 {
     public static partial class StringUtility
     {
-        static readonly string[] _iecSpaces = { "B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", "RiB", "QiB" };
-        static readonly string[] _siSpaces = { "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "RB", "QB" };
+        static readonly string[] _iecSpaces = ["B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB", "ZiB", "YiB", "RiB", "QiB"];
+        static readonly string[] _siSpaces = ["B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB", "RB", "QB"];
 
         /// <summary>
         /// 바이트 크기를 사람이 읽기 쉬운 문자열 형식으로 변환합니다.

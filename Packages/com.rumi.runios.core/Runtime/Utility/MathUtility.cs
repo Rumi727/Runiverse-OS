@@ -11,29 +11,29 @@ namespace RuniOS.Utility
     public static class MathUtility
     {
         const int maxRoundingDigits = 15;
-        static readonly float[] roundPower10Float = new float[16]
-        {
+        static readonly float[] roundPower10Float =
+        [
             1E+0f, 1E+1f, 1E+2f, 1E+3f, 1E+4f, 1E+5f, 1E+6f, 1E+7f, 1E+8f, 1E+9f,
             1E+10f, 1E+11f, 1E+12f, 1E+13f, 1E+14f, 1E+15f
-        };
+        ];
 
-        static readonly double[] roundPower10Double = new double[16]
-        {
+        static readonly double[] roundPower10Double =
+        [
             1E+0, 1E+1, 1E+2, 1E+3, 1E+4, 1E+5, 1E+6, 1E+7, 1E+8, 1E+9,
             1E+10, 1E+11, 1E+12, 1E+13, 1E+14, 1E+15
-        };
+        ];
 
-        static readonly decimal[] roundPower10Decimal = new decimal[16]
-        {
+        static readonly decimal[] roundPower10Decimal =
+        [
             1E+0m, 1E+1m, 1E+2m, 1E+3m, 1E+4m, 1E+5m, 1E+6m, 1E+7m, 1E+8m, 1E+9m,
             1E+10m, 1E+11m, 1E+12m, 1E+13m, 1E+14m, 1E+15m
-        };
+        ];
 
-        static readonly BigDecimal[] roundPower10BigDecimal = new BigDecimal[16]
-        {
+        static readonly BigDecimal[] roundPower10BigDecimal =
+        [
             1E+0, 1E+1, 1E+2, 1E+3, 1E+4, 1E+5, 1E+6, 1E+7, 1E+8, 1E+9,
             1E+10, 1E+11, 1E+12, 1E+13, 1E+14, 1E+15
-        };
+        ];
 
         public const float pi = (float)Math.PI;
         public const float e = (float)Math.E;

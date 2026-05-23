@@ -8,9 +8,11 @@ namespace RuniOS.Editor.Windows
 {
     public sealed class ControlPanel : EditorWindow
     {
-        static ControlPanel() => panelTypes = ReflectionUtility.types
-            .Where(x => typeof(IControlPanel).IsAssignableFrom(x) && typeof(ScriptableObject).IsAssignableFrom(x) && x.HasDefaultConstructor())
-            .ToImmutableArray();
+        static ControlPanel() => panelTypes =
+        [
+            ..ReflectionUtility.types
+                .Where(x => typeof(IControlPanel).IsAssignableFrom(x) && typeof(ScriptableObject).IsAssignableFrom(x) && x.HasDefaultConstructor())
+        ];
 
         public static ImmutableArray<Type> panelTypes { get; }
 
@@ -66,7 +68,7 @@ namespace RuniOS.Editor.Windows
             // 도메인 재로드시에도 에디터 창의 데이터가 유지될 수 있게하기 위한 똥꼬쇼
             if (_panels == null || _panels.WhereNotNull().Count() != panelTypes.Length)
                 _panels = panelTypes.Select(CreateInstance).ToArray();
-            panels = _panels.OfType<IControlPanel>().OrderBy(x => x.sort).ToImmutableArray();
+            panels = [.._panels.OfType<IControlPanel>().OrderBy(x => x.sort)];
             
             EditorLocalization.onLanguageUpdate += TitleUpdate;
             TitleUpdate();
@@ -94,7 +96,7 @@ namespace RuniOS.Editor.Windows
                 Repaint();
         }
 
-        string[] toolbarTexts = Array.Empty<string>();
+        string[] toolbarTexts = [];
         [SerializeField] Vector2 scrollPosition;
         void OnGUI()
         {

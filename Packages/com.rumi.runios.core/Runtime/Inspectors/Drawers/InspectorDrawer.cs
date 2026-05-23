@@ -31,7 +31,7 @@ namespace RuniOS.Inspectors.Drawers
             inspectableList = variableElement?.inspectableListElement;
             inspectableDictionary = variableElement?.inspectableDictionaryElement;
             
-            attributes = element.attributes.Concat(inheritedAttributes).ToImmutableArray();
+            attributes = [..element.attributes.Concat(inheritedAttributes)];
 
             this.undoRecorder = undoRecorder;
         }
@@ -41,7 +41,7 @@ namespace RuniOS.Inspectors.Drawers
             inspectable = inspectableList;
             this.inspectableList = inspectableList;
             
-            attributes = inspectableList.attributes.Concat(inheritedAttributes).ToImmutableArray();
+            attributes = [..inspectableList.attributes.Concat(inheritedAttributes)];
             
             this.undoRecorder = undoRecorder;
         }
@@ -51,7 +51,7 @@ namespace RuniOS.Inspectors.Drawers
             inspectable = inspectableDictionary;
             this.inspectableDictionary = inspectableDictionary;
             
-            attributes = inspectableDictionary.attributes.Concat(inheritedAttributes).ToImmutableArray();
+            attributes = [..inspectableDictionary.attributes.Concat(inheritedAttributes)];
             
             this.undoRecorder = undoRecorder;
         }

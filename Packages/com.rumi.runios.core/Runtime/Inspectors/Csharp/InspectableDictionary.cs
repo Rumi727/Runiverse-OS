@@ -14,13 +14,13 @@ namespace RuniOS.Inspectors.Csharp
     {
         public InspectableDictionary(IEnumerable instance, NullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
 
-        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, [], elementNullabilityInfo) { }
 
-        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
+        public InspectableDictionary(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, [..instances], elementNullabilityInfo) { }
 
         public InspectableDictionary(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
 
-        public InspectableDictionary(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableDictionary(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, [], elementNullabilityInfo) { }
         public InspectableDictionary(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
@@ -40,10 +40,11 @@ namespace RuniOS.Inspectors.Csharp
             
             SetInstances(instances);
             
-            attributes = inspectionType.GetCustomAttributes(true)
-                .OfType<IInspectorAttribute>()
-                .InheritFrom(parentElement)
-                .ToImmutableArray();
+            attributes = [
+                ..inspectionType.GetCustomAttributes(true)
+                    .OfType<IInspectorAttribute>()
+                    .InheritFrom(parentElement)
+            ];
         }
 
         public IInspectorVariableElement? parentElement { get; set; }
@@ -173,8 +174,8 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         readonly IReadOnlyList<IEnumerable> readOnlyInstances;
-        readonly List<IEnumerable> _instances = new List<IEnumerable>();
-        readonly List<IEnumerable> staleKeysBuffer = new List<IEnumerable>();
+        readonly List<IEnumerable> _instances = [];
+        readonly List<IEnumerable> staleKeysBuffer = [];
 
         public IReadOnlyList<DictionaryHandlerBase> dictionaryHandlers
         {
@@ -185,7 +186,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         readonly IReadOnlyList<DictionaryHandlerBase> readonlyDictionaryHandlers;
-        readonly List<DictionaryHandlerBase> _dictionaryHandlers = new List<DictionaryHandlerBase>();
+        readonly List<DictionaryHandlerBase> _dictionaryHandlers = [];
         readonly Dictionary<IEnumerable, DictionaryHandlerBase> handlerMap = new Dictionary<IEnumerable, DictionaryHandlerBase>();
 
         [MemberNotNullWhen(false, nameof(instance), nameof(dictionaryHandler))]

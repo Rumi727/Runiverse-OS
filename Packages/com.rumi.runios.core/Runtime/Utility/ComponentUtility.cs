@@ -36,7 +36,7 @@ namespace RuniOS.Utility
             switch (mode)
             {
                 case GetComponentsMode.addZeroLengthIfNull:
-                    return Array.Empty<T>();
+                    return [];
                 case GetComponentsMode.destroyIfNull:
                     Object.DestroyImmediate(component);
                     return null;
@@ -75,7 +75,7 @@ namespace RuniOS.Utility
             switch (mode)
             {
                 case GetComponentsMode.addZeroLengthIfNull:
-                    return Array.Empty<T>();
+                    return [];
                 case GetComponentsMode.destroyIfNull:
                     Object.DestroyImmediate(component);
                     return null;
@@ -114,7 +114,7 @@ namespace RuniOS.Utility
             switch (mode)
             {
                 case GetComponentsMode.addZeroLengthIfNull:
-                    return Array.Empty<T>();
+                    return [];
                 case GetComponentsMode.destroyIfNull:
                     Object.DestroyImmediate(component);
                     return null;

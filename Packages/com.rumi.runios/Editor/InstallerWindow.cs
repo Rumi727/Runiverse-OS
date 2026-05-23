@@ -23,7 +23,7 @@ namespace RuniOS.Installer
         public static readonly System.Diagnostics.Stopwatch stopwatch = new();
         public static readonly System.Diagnostics.Stopwatch deltaTimeStopwatch = new();
 
-        static readonly List<IInstallerScreen> installerScreens = new();
+        static readonly List<IInstallerScreen> installerScreens = [];
 
         static GUIStyle? headStyle;
         static Vector2 scrollPosition;
@@ -346,11 +346,11 @@ namespace RuniOS.Installer
                 _ => 0,
             };
 
-            int selectedLanguageIndex = EditorGUILayout.Popup(languageIndex, new string[] {
-                                $"{TryGetText("language.name", "en_us")} ({TryGetText("language.region", "en_us")})",
+            int selectedLanguageIndex = EditorGUILayout.Popup(languageIndex, [
+                $"{TryGetText("language.name", "en_us")} ({TryGetText("language.region", "en_us")})",
                                 $"{TryGetText("language.name", "ko_kr")} ({TryGetText("language.region", "ko_kr")})",
                                 $"{TryGetText("language.name", "ja_jp")} ({TryGetText("language.region", "ja_jp")})"
-                            }, GUILayout.Width(120));
+            ], GUILayout.Width(120));
 
             if (selectedLanguageIndex != languageIndex)
             {

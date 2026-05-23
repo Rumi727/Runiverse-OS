@@ -137,7 +137,7 @@ namespace RuniOS.Utility
                     : type.GetProperties(allDeclared).FirstOrDefault(property => property.GetIndexParameters().Select(param => param.ParameterType).SequenceEqual(parameters));
 
                 if (indexer is null)
-                    Debug.Log($"AccessTools.DeclaredIndexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+                    Debug.Log($"AccessTools.DeclaredIndexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? [])}");
 
                 return indexer;
             }
@@ -219,7 +219,7 @@ namespace RuniOS.Utility
                 var indexer = FindIncludingBaseTypes(type, func);
 
                 if (indexer is null)
-                    Debug.Log($"AccessTools.Indexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+                    Debug.Log($"AccessTools.Indexer: Could not find indexer for type {type} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? [])}");
 
                 return indexer;
             }
@@ -349,7 +349,7 @@ namespace RuniOS.Utility
             }
             
             MethodInfo? result;
-            ParameterModifier[] modifiers = Array.Empty<ParameterModifier>();
+            ParameterModifier[] modifiers = [];
             if (parameters is null)
                 result = type.GetMethod(name, allDeclared);
             else
@@ -357,7 +357,7 @@ namespace RuniOS.Utility
 
             if (result is null)
             {
-                Debug.Log($"DeclaredMethod: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+                Debug.Log($"DeclaredMethod: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? [])}");
                 return null;
             }
             else if (generics is not null)
@@ -387,7 +387,7 @@ namespace RuniOS.Utility
             }
             
             MethodInfo? result;
-            ParameterModifier[] modifiers = Array.Empty<ParameterModifier>();
+            ParameterModifier[] modifiers = [];
             if (parameters is null)
             {
                 try
@@ -396,7 +396,7 @@ namespace RuniOS.Utility
                 }
                 catch (AmbiguousMatchException ex)
                 {
-                    result = FindIncludingBaseTypes(type, t => t.GetMethod(name, all, null, Array.Empty<Type>(), modifiers));
+                    result = FindIncludingBaseTypes(type, t => t.GetMethod(name, all, null, [], modifiers));
                     if (result is null)
                         throw new AmbiguousMatchException($"Ambiguous match in method for {type}:{name}", ex);
                 }
@@ -406,7 +406,7 @@ namespace RuniOS.Utility
 
             if (result is null)
             {
-                Debug.Log($"Method: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? Enumerable.Empty<string>())}");
+                Debug.Log($"Method: Could not find method for type {type} and name {name} and parameters {string.Join(", ", parameters?.Select(x => x.GetTypeDisplayName()) ?? [])}");
                 return null;
             }
             else if (generics is not null)

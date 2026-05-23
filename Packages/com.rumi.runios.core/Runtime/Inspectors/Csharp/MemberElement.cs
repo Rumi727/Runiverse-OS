@@ -24,10 +24,12 @@ namespace RuniOS.Inspectors.Csharp
             this.inspectable = inspectable;
             this.member = member;
 
-            attributes = member.GetCustomAttributes(true)
-                .OfType<IInspectorAttribute>()
-                .InheritFrom(inspectable)
-                .ToImmutableArray();
+            attributes =
+            [
+                ..member.GetCustomAttributes(true)
+                    .OfType<IInspectorAttribute>()
+                    .InheritFrom(inspectable)
+            ];
         }
 
         /// <summary>

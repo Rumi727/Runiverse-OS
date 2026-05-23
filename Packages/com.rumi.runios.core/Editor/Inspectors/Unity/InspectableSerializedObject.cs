@@ -38,7 +38,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                     if (!property.Next(true))
                         return _elements = ImmutableArray<IInspectorElement>.Empty;
             
-                    List<IInspectorElement> elements = new();
+                    List<IInspectorElement> elements = [];
                     do
                     {
                         if (depth != property.depth)
@@ -50,7 +50,7 @@ namespace RuniOS.Editor.Inspectors.Unity
                     }
                     while (property.Next(false));
 
-                    return _elements = elements.ToImmutableArray();
+                    return _elements = [..elements];
                 }
 
                 return _elements;

@@ -24,9 +24,9 @@ namespace RuniOS.Editor.Resource
             UpdateNamespaceList();
         }
 
-        string[] relativeExistsPaths = Array.Empty<string>();
+        string[] relativeExistsPaths = [];
         
-        List<string> nameSpaces = new List<string>();
+        List<string> nameSpaces = [];
         int orgCount;
 
         ReorderableList? reorderableList;

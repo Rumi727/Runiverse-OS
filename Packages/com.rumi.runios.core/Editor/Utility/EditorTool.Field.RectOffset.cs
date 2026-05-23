@@ -15,10 +15,7 @@ namespace RuniOS.Editor
             return DoRectOffsetField(position, value);
         }
 
-        static readonly GUIContent[] rectOffsetLabels = new GUIContent[]
-        {
-            new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B")
-        };
+        static readonly GUIContent[] rectOffsetLabels = [new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B")];
         static readonly float[] rectOffsetValues = new float[4];
         static RectOffset DoRectOffsetField(Rect position, RectOffset value)
         {

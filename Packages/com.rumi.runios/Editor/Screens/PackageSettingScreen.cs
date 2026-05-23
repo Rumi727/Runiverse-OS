@@ -111,7 +111,7 @@ namespace RuniOS.Installer.Screens
                 GUILayout.Label(InstallerWindow.TryGetText("installer.package_setting.setting_info"));
 
                 foreach (var item in mainWindow.scopedRegistrys.scopedRegistries)
-                    AddScopedRegistry(item.name ?? string.Empty, item.url ?? string.Empty, item.scopes ?? Array.Empty<string>());
+                    AddScopedRegistry(item.name ?? string.Empty, item.url ?? string.Empty, item.scopes ?? []);
                 
                 bool AddScopedRegistry(string name, string url, params string?[] scopes)
                 {

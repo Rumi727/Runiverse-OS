@@ -8,7 +8,7 @@ namespace RuniOS.Editor.IMGUI
 {
     public sealed class RuniPathDropdown : ExtendedAdvancedDropdown<RuniPathDropdownItem>
     {
-        readonly List<RuniPath> cachedPaths = new List<RuniPath>();
+        readonly List<RuniPath> cachedPaths = [];
         RuniPathDropdownItem? imguiSelectedItem;
         
         public void Rebuild(IEnumerable<RuniPath> paths)

@@ -16,7 +16,7 @@ namespace RuniOS.Editor.Unity.Drawers
             EditorGUI.EndProperty();
         }
 
-        static readonly GUIContent[] labels = new GUIContent[] { new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B") };
+        static readonly GUIContent[] labels = [new GUIContent("L"), new GUIContent("R"), new GUIContent("T"), new GUIContent("B")];
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
             property = property.Copy();

@@ -40,7 +40,7 @@ namespace RuniOS.Editor.Inspectors
             if (inheritedAttributes is ImmutableArray<IInspectorAttribute> array)
                 this.inheritedAttributes = array;
             else
-                this.inheritedAttributes = inheritedAttributes.ToImmutableArray();
+                this.inheritedAttributes = [..inheritedAttributes];
             
             this.undoRecorder = undoRecorder;
         }
@@ -66,7 +66,7 @@ namespace RuniOS.Editor.Inspectors
                     ListInspectorDrawer drawer = new ListInspectorDrawer(inspectableList, inheritedAttributes, undoRecorder);
 
                     elements = ImmutableArray<IInspectorElement>.Empty;
-                    drawers = ImmutableArray.Create<IMGUIInspectorDrawer?>(drawer);
+                    drawers = [drawer];
                 }
                 catch (Exception e)
                 {
@@ -80,7 +80,7 @@ namespace RuniOS.Editor.Inspectors
             {
                 try
                 {
-                    elements = inspectable.GetElements(flags).ToImmutableArray();
+                    elements = [..inspectable.GetElements(flags)];
                 }
                 catch (Exception e)
                 {
@@ -90,7 +90,7 @@ namespace RuniOS.Editor.Inspectors
                     return;
                 }
 
-                drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate)).ToImmutableArray();
+                drawers = [..elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate))];
             }
 
             this.inspectable = inspectable;
@@ -107,8 +107,8 @@ namespace RuniOS.Editor.Inspectors
             if (flags.HasFlagFast(InspectorFlags.Debug))
                 predicate = x => x.attribute.allowInDebug;
 
-            elements = ImmutableArray.Create(element);
-            drawers = ImmutableArray.Create(IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate));
+            elements = [element];
+            drawers = [IMGUIInspectorDrawer.FindDrawer(element as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate)];
 
             inspectable = null;
             inspectorFlags = flags;
@@ -125,8 +125,8 @@ namespace RuniOS.Editor.Inspectors
             if (flags.HasFlagFast(InspectorFlags.Debug))
                 predicate = x => x.attribute.allowInDebug;
 
-            this.elements = elements.ToImmutableArray();
-            drawers = elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate)).ToImmutableArray();
+            this.elements = [..elements];
+            drawers = [..elements.Select(x => IMGUIInspectorDrawer.FindDrawer(x as IInspectorVariableElement, inheritedAttributes, undoRecorder, predicate))];
 
             inspectable = null;
             inspectorFlags = flags;

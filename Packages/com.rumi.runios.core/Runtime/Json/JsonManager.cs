@@ -15,7 +15,7 @@ namespace RuniOS.Json
     /// </summary>
     public static class JsonManager
     {
-        static readonly JsonConverter[] _runiConverts = new JsonConverter[] { new SerializableNullableConverter() };
+        static readonly JsonConverter[] _runiConverts = [new SerializableNullableConverter()];
         
         /// <summary>
         /// <see cref="RuniOS"/>에서 기본적으로 사용되는 읽기 전용 <see cref="JsonConverter"/> 목록입니다.

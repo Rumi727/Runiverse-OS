@@ -12,14 +12,16 @@ namespace RuniOS.Editor.Resource
 
         public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
-            contents = relativePaths
-                .Select(x => PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value)
-                .Select(File.ReadAllText)
-                .Select(x => new GUIContent(x))
-                .ToArray();
+            contents =
+            [
+                ..relativePaths
+                    .Select(x => PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value)
+                    .Select(File.ReadAllText)
+                    .Select(x => new GUIContent(x))
+            ];
         }
 
-        GUIContent[] contents = Array.Empty<GUIContent>();
+        GUIContent[] contents = [];
         
         public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {

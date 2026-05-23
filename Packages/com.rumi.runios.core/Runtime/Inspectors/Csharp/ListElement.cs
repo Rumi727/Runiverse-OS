@@ -19,8 +19,7 @@ namespace RuniOS.Inspectors.Csharp
 
             variableType = inspectable.inspectionElementType ?? typeof(object);
 
-            attributes = inspectable.attributes.FilterInheritable()
-                .ToImmutableArray();
+            attributes = [..inspectable.attributes.FilterInheritable()];
 
             inspectableObjectElement = new InspectableObject(this, variableType);
 
@@ -147,7 +146,7 @@ namespace RuniOS.Inspectors.Csharp
         public InspectableDictionary? inspectableDictionaryElement { get; }
         IInspectableDictionary? IInspectorVariableElement.inspectableDictionaryElement => inspectableDictionaryElement;
 
-        readonly List<object?> valuesBuffer = new List<object?>();
+        readonly List<object?> valuesBuffer = [];
 
         public IEnumerable<object?> GetValues(bool noCopy = false)
         {
@@ -231,7 +230,7 @@ namespace RuniOS.Inspectors.Csharp
             return (noInstanceCheck || !inspectable.instancesIsEmpty) && flags.HasFlagFast(InspectorFlags.Public) && !inspectable.isReadOnly;
         }
 
-        readonly List<IEnumerable> collectionsBuffer = new List<IEnumerable>();
+        readonly List<IEnumerable> collectionsBuffer = [];
         public void UpdateChildInspectable()
         {
             if (!IsReadable(InspectorFlags.All))

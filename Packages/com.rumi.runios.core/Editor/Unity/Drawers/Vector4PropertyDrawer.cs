@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Unity.Drawers
 
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) => Draw(position, property, label);
         
-        static readonly GUIContent[] labels = new GUIContent[] { new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z"), new GUIContent("W") };
+        static readonly GUIContent[] labels = [new GUIContent("X"), new GUIContent("Y"), new GUIContent("Z"), new GUIContent("W")];
         public static void Draw(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property.Copy());

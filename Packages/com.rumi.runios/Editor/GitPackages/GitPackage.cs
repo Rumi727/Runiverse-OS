@@ -3,8 +3,8 @@
     //[CreateAssetMenu(fileName = "RuniPackage", menuName = "Scriptable Objects/RuniPackage")]
     class GitPackage : ScriptableObject
     {
-        public GitPackage?[] packages = Array.Empty<GitPackage?>();
-        public string?[] dependencies = Array.Empty<string?>();
+        public GitPackage?[] packages = [];
+        public string?[] dependencies = [];
         
         public string id = string.Empty;
         public string gitUrl = string.Empty;

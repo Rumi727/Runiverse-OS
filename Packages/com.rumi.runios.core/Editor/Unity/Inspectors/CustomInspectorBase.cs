@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Inspectors
                 Repainter().Forget();
             }
             
-            targets = base.targets.OfType<TTarget?>().ToImmutableArray();
+            targets = [..base.targets.OfType<TTarget?>()];
         }
 
         /// <summary>

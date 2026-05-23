@@ -24,7 +24,7 @@ namespace RuniOS.Reflection
             this.writeState = writeState;
             this.elementType = elementType;
             
-            genericTypeArguments = typeArguments.ToImmutableArray();
+            genericTypeArguments = [..typeArguments];
         }
  
         /// <summary>

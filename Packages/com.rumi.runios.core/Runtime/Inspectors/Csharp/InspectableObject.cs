@@ -54,7 +54,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         readonly IReadOnlyList<object?> readOnlyInstances;
-        readonly List<object?> _instances = new List<object?>();
+        readonly List<object?> _instances = [];
 
         [MemberNotNullWhen(false, nameof(instance))]
         public bool instancesIsEmpty => instance.IsNull();
@@ -74,20 +74,21 @@ namespace RuniOS.Inspectors.Csharp
                 if (_elements.IsDefault)
                 {
                     _elements =
-                        inspectionType.GetRuntimeProperties()
-                            .Where(x => x.GetIndexParameters().IsEmpty())
-                            .Select(IInspectorElement (x) => new PropertyElement(this, x))
-                            .Concat
-                            (
-                                inspectionType.GetRuntimeFields()
-                                    .Select(IInspectorElement (x) => new FieldElement(this, x))
-                            )
-                            .Concat
-                            (
-                                inspectionType.GetRuntimeMethods()
-                                    .Select(IInspectorElement (x) => new MethodElement(this, x))
-                            )
-                            .ToImmutableArray();
+                        [
+                            ..inspectionType.GetRuntimeProperties()
+                                .Where(x => x.GetIndexParameters().IsEmpty())
+                                .Select(IInspectorElement (x) => new PropertyElement(this, x))
+                                .Concat
+                                (
+                                    inspectionType.GetRuntimeFields()
+                                        .Select(IInspectorElement (x) => new FieldElement(this, x))
+                                )
+                                .Concat
+                                (
+                                    inspectionType.GetRuntimeMethods()
+                                        .Select(IInspectorElement (x) => new MethodElement(this, x))
+                                )
+                        ];
                 }
                 
                 return _elements;
@@ -117,10 +118,11 @@ namespace RuniOS.Inspectors.Csharp
             
             SetInstances(instances);
 
-            attributes = inspectionType.GetCustomAttributes(true)
-                .OfType<IInspectorAttribute>()
-                .InheritFrom(parentElement)
-                .ToImmutableArray();
+            attributes = [
+                ..inspectionType.GetCustomAttributes(true)
+                    .OfType<IInspectorAttribute>()
+                    .InheritFrom(parentElement)
+            ];
         }
 
         public void SetInstances(IEnumerable instances)
@@ -171,7 +173,7 @@ namespace RuniOS.Inspectors.Csharp
         public IEnumerable<IInspectorElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (flags == InspectorFlags.None)
-                return Array.Empty<IInspectorElement>();
+                return [];
 
             return elements.Where(x => x.HasFlags(flags));
         }

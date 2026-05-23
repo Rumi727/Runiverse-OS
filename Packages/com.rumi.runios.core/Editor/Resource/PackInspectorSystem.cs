@@ -25,11 +25,14 @@ namespace RuniOS.Editor.Resource
         static PackInspectorSystem()
         {
             packRootPath = PhysicalPath.From(Application.streamingAssetsPath).TrimStartPath(projectPath);
-            drawers = ReflectionUtility.types
-                .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
-                .Select(x => (PackDrawer)Activator.CreateInstance(x))
-                .OrderByDescending(x => x.order)
-                .ToImmutableArray();
+            drawers =
+            [
+                ..ReflectionUtility.types
+                    .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
+                    .Select(Activator.CreateInstance)
+                    .Cast<PackDrawer>()
+                    .OrderByDescending(x => x.order)
+            ];
 
             Selection.selectionChanged += RefreshState;
             EditorApplication.update += CheckFolderChange;
@@ -81,7 +84,7 @@ namespace RuniOS.Editor.Resource
                 else
                 {
                     activeFolderPath = RuniPath.empty;
-                    UpdateDrawer(Enumerable.Empty<RuniPath>(), true);
+                    UpdateDrawer([], true);
                 }
             }
         }
@@ -92,7 +95,7 @@ namespace RuniOS.Editor.Resource
             
             if (paths.IsEmpty())
             {
-                SetNewDrawer(null, Enumerable.Empty<RuniPath>());
+                SetNewDrawer(null, []);
                 return;
             }
 
@@ -109,7 +112,7 @@ namespace RuniOS.Editor.Resource
                 activeDrawer = drawer;
             }
             
-            activePaths = paths.ToImmutableArray();
+            activePaths = [..paths];
             activeDrawer?.OnEnable(activePaths);
             
             if (isChanged)

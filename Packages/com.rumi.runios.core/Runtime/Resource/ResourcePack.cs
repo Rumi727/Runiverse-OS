@@ -41,7 +41,7 @@ namespace RuniOS.Resource
          * TODO
          * 임시
          */
-        internal static readonly HashSet<PackIdentifier> _enabledPackIdentifiers = new();
+        internal static readonly HashSet<PackIdentifier> _enabledPackIdentifiers = [];
         public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = _enabledPackIdentifiers.AsReadOnly();
 
         public static IEnumerable<ResourcePack> enabledPacks => loadedResourcePacks
@@ -187,7 +187,7 @@ namespace RuniOS.Resource
             if (!isValid)
                 return;
             else if ((await assetFolder.dir.GetEntry()).HasValue)
-                namespaces = (await assetFolder.dir.GetDirectories().Select(x => x.path.GetFileName()).ToArrayAsync()).ToImmutableArray();
+                namespaces = [..(await assetFolder.dir.GetDirectories().Select(x => x.path.GetFileName()).ToArrayAsync())];
         }
         
         public IEnumerable<IONode> GetNamespaceNodes() => namespaces.Select(x => assetFolder.CreateChild(x));

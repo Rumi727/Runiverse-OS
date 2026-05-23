@@ -237,12 +237,12 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         }
 
         protected IMGUIInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) =>
-            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
+            attributeDrawers = [..attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull()];
         
         protected IMGUIInspectorDrawer(IInspectableList inspectableList, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableList, inheritedAttributes, undoRecorder) =>
-            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
+            attributeDrawers = [..attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull()];
         
         protected IMGUIInspectorDrawer(IInspectableDictionary inspectableDictionary, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(inspectableDictionary, inheritedAttributes, undoRecorder) =>
-            attributeDrawers = attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull().ToImmutableArray();
+            attributeDrawers = [..attributes.Select(x => IMGUIInspectorAttributeDrawer.FindDrawer(x)).WhereNotNull()];
     }
 }

@@ -18,9 +18,9 @@ namespace RuniOS.IO
         public static WildcardPatterns codeFileFilter { get; } = new WildcardPatterns("*.java", "*.php", "*.scss", "*.cs", "*.css", "*.js", "*.py", "*.c", "*.cpp", "*.class", "*.fs", "*.go", "*.rb");
         public static WildcardPatterns jsonFileFilter { get; } = new WildcardPatterns("*.json");
 
-        public WildcardPatterns(string pattern) => patterns = ImmutableArray.Create(pattern);
-        public WildcardPatterns(params string[] patterns) => this.patterns = patterns.ToImmutableArray();
-        public WildcardPatterns(IEnumerable<string> patterns) => this.patterns = patterns.ToImmutableArray();
+        public WildcardPatterns(string pattern) => patterns = [pattern];
+        public WildcardPatterns(params string[] patterns) => this.patterns = [..patterns];
+        public WildcardPatterns(IEnumerable<string> patterns) => this.patterns = [..patterns];
         public WildcardPatterns(ImmutableArray<string> patterns) => this.patterns = patterns;
 
         public string this[int index] => patterns[index];

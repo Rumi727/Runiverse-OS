@@ -50,7 +50,7 @@ namespace RuniOS.Localizations
             this.identifier = identifier;
             _languageCode = languageCode;
 
-            _replaces = replaces.ToImmutableArray();
+            _replaces = [..replaces];
         }
 
         /// <summary>
@@ -74,7 +74,7 @@ namespace RuniOS.Localizations
             this.identifier = identifier;
             _languageCode = languageCode;
 
-            _replaces = replaces.ToImmutableArray();
+            _replaces = [..replaces];
         }
 
         /// <summary>

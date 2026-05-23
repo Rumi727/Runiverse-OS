@@ -380,7 +380,7 @@ namespace RuniOS.Editor.UIElements
                     // Expression을 컴파일하여 델리게이트를 얻습니다.
                     Delegate compiledDelegate = lambda.Compile();
 
-                    registerValueChangedCallback.MakeGenericMethod(targetType).Invoke(null, new object[] { element, compiledDelegate });
+                    registerValueChangedCallback.MakeGenericMethod(targetType).Invoke(null, [element, compiledDelegate]);
                     
                     return true;
                 }

@@ -14,13 +14,13 @@ namespace RuniOS.Inspectors.Csharp
     {
         public InspectableList(IEnumerable instance, NullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, [], elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, instances.ToImmutableArray(), elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, [..instances], elementNullabilityInfo) { }
 
         public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
         
-        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, Enumerable.Empty<IEnumerable>(), elementNullabilityInfo) { }
+        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, [], elementNullabilityInfo) { }
         public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
@@ -38,10 +38,12 @@ namespace RuniOS.Inspectors.Csharp
 
             SetInstances(instances);
 
-            attributes = inspectionType.GetCustomAttributes(true)
-                .OfType<IInspectorAttribute>()
-                .InheritFrom(parentElement)
-                .ToImmutableArray();
+            attributes =
+            [
+                ..inspectionType.GetCustomAttributes(true)
+                    .OfType<IInspectorAttribute>()
+                    .InheritFrom(parentElement)
+            ];
         }
 
         public IInspectorVariableElement? parentElement { get; }
@@ -130,7 +132,7 @@ namespace RuniOS.Inspectors.Csharp
                 if (value != null)
                     SetInstances(Enumerable.Repeat(value, 1));
                 else
-                    SetInstances(Enumerable.Empty<IEnumerable>());
+                    SetInstances([]);
             }
         }
 
@@ -173,8 +175,8 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         readonly IReadOnlyList<IEnumerable> readOnlyInstances;
-        readonly List<IEnumerable> _instances = new List<IEnumerable>();
-        readonly List<IEnumerable> staleKeysBuffer = new List<IEnumerable>();
+        readonly List<IEnumerable> _instances = [];
+        readonly List<IEnumerable> staleKeysBuffer = [];
 
         public IReadOnlyList<ListHandlerBase> listHandlers
         {
@@ -185,7 +187,7 @@ namespace RuniOS.Inspectors.Csharp
             }
         }
         readonly IReadOnlyList<ListHandlerBase> readOnlyListHandlers;
-        readonly List<ListHandlerBase> _listHandlers = new List<ListHandlerBase>();
+        readonly List<ListHandlerBase> _listHandlers = [];
         readonly Dictionary<IEnumerable, ListHandlerBase> handlerMap = new Dictionary<IEnumerable, ListHandlerBase>();
 
         [MemberNotNullWhen(false, nameof(instance), nameof(listHandler))]
@@ -594,12 +596,12 @@ namespace RuniOS.Inspectors.Csharp
 
 
 
-        readonly List<ListElement> cachedElements = new();
+        readonly List<ListElement> cachedElements = [];
         IReadOnlyList<IInspectorListElement>? readOnlyCachedElements;
         public IReadOnlyList<IInspectorListElement> GetElements(InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
             if (!flags.HasFlagFast(InspectorFlags.List) || (isReadOnly && !flags.HasFlagFast(InspectorFlags.ReadOnly)))
-                return Array.Empty<IInspectorListElement>();
+                return [];
 
             readOnlyCachedElements ??= cachedElements.AsReadOnly();
             cachedElements.Resize(count, CreateElement);

@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Patches
 #else
                             nameof(Reset),
 #endif
-                            new Type[] { typeof(SerializedProperty) });
+                            [typeof(SerializedProperty)]);
 
                         public static void Prefix(PropertyField __instance) => UIToolkitUtility.propertyExtensionDatas.Remove(__instance);
 

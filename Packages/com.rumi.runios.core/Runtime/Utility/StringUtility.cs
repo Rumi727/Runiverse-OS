@@ -5,7 +5,7 @@ namespace RuniOS.Utility
 {
     public static partial class StringUtility
     {
-        public static readonly char[] splitQuotes = { '\'', '"' };
+        public static readonly char[] splitQuotes = ['\'', '"'];
 
         /*public static string ConstEnvironmentVariable(this string value)
         {

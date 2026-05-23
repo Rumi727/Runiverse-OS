@@ -78,7 +78,7 @@ namespace RuniOS.Reflection
                 try
                 {
 #if UNITY_6000_6_OR_NEWER
-                    assemblys = UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies().ToImmutableArray();
+                    assemblys = [..UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies()];
 #else
                     assemblys = AppDomain.CurrentDomain.GetAssemblies().ToImmutableArray();
 #endif
@@ -88,30 +88,32 @@ namespace RuniOS.Reflection
                     Debug.LogException(e);
                 }
 
-                types = assemblys
+                types = [
+                    ..assemblys
 #if UNITY_EDITOR
-                    .Where(x => 
-                        /* 브릿지 코드 제외 */ !x.FullName.StartsWith("RuniOS.Editor.APIBridge", StringComparison.Ordinal) &&
-                        /* 병신; */ !x.FullName.StartsWith(nameof(JetBrains), StringComparison.Ordinal))
+                        .Where(x => 
+                            /* 브릿지 코드 제외 */ !x.FullName.StartsWith("RuniOS.Editor.APIBridge", StringComparison.Ordinal) &&
+                            /* 병신; */ !x.FullName.StartsWith(nameof(JetBrains), StringComparison.Ordinal))
 #endif
-                    .SelectMany(static x =>
-                    {
-                        try
+                        .SelectMany(static x =>
                         {
-                            return x.GetTypes();
-                        }
-                        catch (ReflectionTypeLoadException e)
-                        {
-                            Debug.LogException(e);
-                            return e.Types.Where(static x => x != null);
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogException(e);
-                        }
+                            try
+                            {
+                                return x.GetTypes();
+                            }
+                            catch (ReflectionTypeLoadException e)
+                            {
+                                Debug.LogException(e);
+                                return e.Types.Where(static x => x != null);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogException(e);
+                            }
 
-                        return Array.Empty<Type>();
-                    }).ToImmutableArray();
+                            return [];
+                        })
+                ];
             }
             
             lock (onListUpdateLock)
@@ -130,7 +132,7 @@ namespace RuniOS.Reflection
         {
             // Linq 쓰면 코드가 몇배는 깔끔해지겠지만, 메소드 호출이 너무 길어져 대략 2배에서 심하면 10배까지도 성능적인 차이가 나는것을 확인했습니다.
             // 소스 제너레이터를 사용해도 되지만, 모딩 환경을 고려하여 리플렉션으로 결정했습니다.
-            List<MethodInfo> methods = new();
+            List<MethodInfo> methods = [];
 
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
             Stopwatch stopwatch = Stopwatch.StartNew();

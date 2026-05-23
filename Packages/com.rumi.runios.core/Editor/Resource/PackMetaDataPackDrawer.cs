@@ -21,22 +21,24 @@ namespace RuniOS.Editor.Resource
 
         public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
-            relativeExistsPaths = relativePaths
-                .Select(x =>
-                {
-                    if (x.IsEmpty())
-                        return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).Combine((RuniPath)ResourcePack.infoPath).value;
-                    
-                    return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value;
-                })
-                .Where(File.Exists)
-                .ToArray();
+            relativeExistsPaths =
+            [
+                ..relativePaths
+                    .Select(x =>
+                    {
+                        if (x.IsEmpty())
+                            return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).Combine((RuniPath)ResourcePack.infoPath).value;
+
+                        return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value;
+                    })
+                    .Where(File.Exists)
+            ];
 
             DiscardChanges();
         }
 
-        string[] relativeExistsPaths = Array.Empty<string>();
-        PackMetaData[] packMetaDatas = Array.Empty<PackMetaData>();
+        string[] relativeExistsPaths = [];
+        PackMetaData[] packMetaDatas = [];
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
         public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)

@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Localizations
                     continue;
 
                 if (!_registeredDataAssets.TryGetValue(dataAsset.languageKey, out List<EditorLanguageDataAsset> dataList))
-                    _registeredDataAssets.Add(dataAsset.languageKey, dataList = new List<EditorLanguageDataAsset>());
+                    _registeredDataAssets.Add(dataAsset.languageKey, dataList = []);
 
                 if (!dataList.Contains(dataAsset))
                     dataList.Add(dataAsset);
@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Localizations
             if (_registeredDataAssets.TryGetValue(languageKey, out var datas))
                 return datas.Select(static x => x.languages);
 
-            return Enumerable.Empty<Dictionary<string, string>>();
+            return [];
         }
     }
 }
