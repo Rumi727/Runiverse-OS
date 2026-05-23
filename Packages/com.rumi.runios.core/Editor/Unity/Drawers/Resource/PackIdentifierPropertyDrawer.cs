@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Resource;
 
@@ -32,11 +33,11 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
-            packIdentifier = PackIdentifierField(position, label, packIdentifier);
+            packIdentifier = RuniFields.PackIdentifierField(position, label, packIdentifier);
             converter.Write(property, typeof(PackIdentifier), packIdentifier);
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiColumnsFieldHeight(label);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiColumnsFieldHeight(label);
 
         public static (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) GetChildProperty(SerializedProperty property)
         {

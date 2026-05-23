@@ -1,5 +1,5 @@
 #nullable enable
-
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.UIElements;
 using RuniOS.Editor.UIElements.Primitives;
 using UnityEngine.UIElements;
@@ -18,6 +18,6 @@ namespace RuniOS.Editor.Unity.Drawers
             EditorGUI.EndProperty();
         }
 
-        public static void Draw(Rect position, SerializedProperty property, GUIContent label) => property.uintValue = CharField(position, label, (char)property.uintValue);
+        public static void Draw(Rect position, SerializedProperty property, GUIContent label) => property.uintValue = RuniFields.CharField(position, label, (char)property.uintValue);
     }
 }

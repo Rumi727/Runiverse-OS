@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.Inspectors;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
@@ -32,7 +33,7 @@ namespace RuniOS.Editor.Windows
             BeginWideMode();
             BeginHierarchyMode();
 
-            packIdentifier = PackIdentifierFieldLayout("Pack Identifier", packIdentifier);
+            packIdentifier = RuniLayoutFields.PackIdentifierField("Pack Identifier", packIdentifier);
             
             EditorGUI.BeginChangeCheck();
             InspectorFlags flags = (InspectorFlags)EditorGUILayout.EnumFlagsField("Inspector Flags", inspector.inspectorFlags);

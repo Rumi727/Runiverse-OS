@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using Newtonsoft.Json;
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.Localizations;
 using UnityEditor.AnimatedValues;
 
@@ -230,7 +231,7 @@ namespace RuniOS.Editor.Windows
                                 BeginLabelWidth(label);
                                 
                                 EditorGUILayout.BeginVertical(EditorStyles.helpBox);
-                                ObjectPingFieldLayout(label, obj);
+                                RuniLayoutFields.ObjectPingField(label, obj);
 
                                 if (editor != null)
                                 {

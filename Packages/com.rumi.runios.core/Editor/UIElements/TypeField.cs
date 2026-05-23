@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Editor.IMGUI;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
@@ -120,7 +121,7 @@ namespace RuniOS.Editor.UIElements
 #if UNITY_EDITOR
             if (this.IsEditorPanel())
             {
-                ShowTypePicker(x => value = x, baseType);
+                RuniFields.ShowTypePicker(x => value = x, baseType);
                 return;
             }
 #endif

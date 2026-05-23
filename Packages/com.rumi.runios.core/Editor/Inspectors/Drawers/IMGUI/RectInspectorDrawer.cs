@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Editor.IMGUI;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
@@ -11,6 +12,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     {
         protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.RectField(position, label, (Rect)value!);
 
-        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => GetMultiColumnsFieldHeight(label, 2);
+        protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default) => RuniFields.GetMultiColumnsFieldHeight(label, 2);
     }
 }

@@ -346,7 +346,7 @@ namespace RuniOS.Editor.UIElements
         public void SetValueWithoutNotify(bool newValue)
         {
             _value = newValue;
-            this.SetCheckedPseudoState(newValue);
+            SetCheckedPseudoState(newValue);
             animBool.target = newValue;
         }
         

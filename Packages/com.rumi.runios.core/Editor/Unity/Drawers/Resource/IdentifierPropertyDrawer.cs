@@ -1,5 +1,5 @@
 #nullable enable
-
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.Unity.Drawers.IO;
 using RuniOS.IO;
 using RuniOS.Resource;
@@ -32,7 +32,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
             if (Identifier.IsNamespaceValid(nameSpaceValue) && Identifier.IsPathValid(pathValue))
                 value = new Identifier(nameSpace.stringValue, pathValue);
             
-            value = IdentifierField(position, label, value);
+            value = RuniFields.IdentifierField(position, label, value);
             
             if (EditorGUI.EndChangeCheck())
             {
@@ -41,7 +41,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
             }
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiColumnsFieldHeight(label);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiColumnsFieldHeight(label);
         
         public static (SerializedProperty nameSpace, SerializedProperty path) GetChildProperty(SerializedProperty property)
         {

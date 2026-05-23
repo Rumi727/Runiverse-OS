@@ -1,5 +1,5 @@
 #nullable enable
-
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.UIElements;
 using RuniOS.Editor.UIElements.IO;
 using RuniOS.IO;
@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Drawers.IO
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            FileExtension value = FileExtensionField(position, label, (FileExtension)property.stringValue); //boxedValue 쓰면 크래시남..
+            FileExtension value = RuniFields.FileExtensionField(position, label, (FileExtension)property.stringValue); //boxedValue 쓰면 크래시남..
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = value;
         }

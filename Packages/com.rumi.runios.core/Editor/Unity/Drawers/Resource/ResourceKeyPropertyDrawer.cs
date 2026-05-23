@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Resource;
 
@@ -32,11 +33,11 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
-            registryType = ResourceKeyField(position, label, registryType);
+            registryType = RuniFields.ResourceKeyField(position, label, registryType);
             converter.Write(property, typeof(ResourceKey), registryType);
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiRowsFieldHeight(label, 2);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiRowsFieldHeight(label, 2);
 
         public static (SerializedProperty registryId, SerializedProperty assetId) GetChildProperty(SerializedProperty property)
         {

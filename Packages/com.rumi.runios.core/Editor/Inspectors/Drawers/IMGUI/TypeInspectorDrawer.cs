@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Editor.IMGUI;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
@@ -9,6 +10,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
     [CustomInspectorDrawer(typeof(Type))]
     public class TypeInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-        protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => TypeField(position, label, (Type?)value);
+        protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => RuniFields.TypeField(position, label, (Type?)value);
     }
 }

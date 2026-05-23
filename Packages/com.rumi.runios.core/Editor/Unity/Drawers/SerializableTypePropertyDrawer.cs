@@ -1,5 +1,5 @@
 #nullable enable
-
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.UIElements;
 using UnityEngine.UIElements;
 
@@ -22,7 +22,7 @@ namespace RuniOS.Editor.Unity.Drawers
             property = GetChildProperty(property);
             
             EditorGUI.BeginChangeCheck();
-            Type? type = TypeField(position, label, TypeUtility.DeserializeFromString(property.stringValue), baseType);
+            Type? type = RuniFields.TypeField(position, label, TypeUtility.DeserializeFromString(property.stringValue), baseType);
             if (EditorGUI.EndChangeCheck())
                 property.stringValue = type?.SerializeToString() ?? string.Empty;
         }

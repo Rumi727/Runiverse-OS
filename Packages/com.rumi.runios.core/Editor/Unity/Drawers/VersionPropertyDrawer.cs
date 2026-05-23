@@ -1,6 +1,7 @@
 #nullable enable
 
 using RuniOS.Editor.APIBridge.UnityEditor;
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.UIElements;
 using UnityEngine.UIElements;
 
@@ -58,7 +59,7 @@ namespace RuniOS.Editor.Unity.Drawers
             EditorGUI.EndProperty();
         }
 
-        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => GetMultiColumnsFieldHeight(label);
+        public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiColumnsFieldHeight(label);
         
         public static (SerializedProperty major, SerializedProperty minor, SerializedProperty patch) GetChildProperty(SerializedProperty property)
         {

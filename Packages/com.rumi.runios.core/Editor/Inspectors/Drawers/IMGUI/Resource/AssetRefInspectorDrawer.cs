@@ -1,4 +1,5 @@
 ﻿#nullable enable
+using RuniOS.Editor.IMGUI;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
@@ -21,7 +22,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
                 return value;
             }
 
-            AssetRefField(position, label, (IAssetRef)value);
+            RuniFields.AssetRefField(position, label, (IAssetRef)value);
             return value;
         }
 
@@ -33,7 +34,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
             if (value.IsNull())
                 return EditorGUIUtility.singleLineHeight;
             else
-                return GetAssetRefFieldHeight(label, value);
+                return RuniFields.GetAssetRefFieldHeight(label, value);
         }
 
         protected override object CreateSnapshot(object? value) => ((IAssetRef)value!).key;
