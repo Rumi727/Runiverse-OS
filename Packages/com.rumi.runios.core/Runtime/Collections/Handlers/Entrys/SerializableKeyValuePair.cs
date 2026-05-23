@@ -5,10 +5,8 @@ namespace RuniOS.Collections.Handlers.Entrys
 {
     [CustomEntryHandler(typeof(ISerializableKeyValuePair))]
     [CustomCollectionHandler(typeof(SerializableKeyValuePair<,>))]
-    public class SerializableKeyValuePairHandler : EntryHandler
+    public class SerializableKeyValuePairHandler(object targetEntry) : EntryHandler(targetEntry)
     {
-        public SerializableKeyValuePairHandler(object targetEntry) : base(targetEntry) { }
-
         protected override object? key => ((ISerializableKeyValuePair)targetEntry).Key;
         protected override object? value => ((ISerializableKeyValuePair)targetEntry).Value;
 

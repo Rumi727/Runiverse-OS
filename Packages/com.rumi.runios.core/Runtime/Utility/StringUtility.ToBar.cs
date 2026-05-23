@@ -38,18 +38,11 @@ namespace RuniOS.Utility
             return text;
         }
 
-        public struct ToBarSetting
+        public struct ToBarSetting(string fill = "■", string half = "▣", string empty = "□")
         {
-            public ToBarSetting(string fill = "■", string half = "▣", string empty = "□")
-            {
-                this.fill = fill;
-                this.half = half;
-                this.empty = empty;
-            }
-
-            public string fill { get; set; }
-            public string half { get; set; }
-            public string empty { get; set; }
+            public string fill { get; set; } = fill;
+            public string half { get; set; } = half;
+            public string empty { get; set; } = empty;
         }
     }
 }

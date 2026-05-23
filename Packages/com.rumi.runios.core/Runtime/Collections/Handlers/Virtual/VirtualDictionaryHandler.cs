@@ -3,10 +3,8 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual
 {
-    public abstract class VirtualDictionaryHandler : DictionaryHandlerBase
+    public abstract class VirtualDictionaryHandler(IEnumerable targetCollection) : DictionaryHandlerBase(targetCollection)
     {
-        protected VirtualDictionaryHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
         protected Hashtable synchronizedTable { get; } = new();
 
         public override object? this[object key]

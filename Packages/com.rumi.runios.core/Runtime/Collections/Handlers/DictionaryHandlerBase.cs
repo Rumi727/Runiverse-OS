@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    public abstract class DictionaryHandlerBase : CollectionHandlerBase, IDictionary
+    public abstract class DictionaryHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IDictionary
     {
         public static DictionaryHandlerBase FindDictionaryHandler(IEnumerable targetCollection)
         {
@@ -15,8 +15,6 @@ namespace RuniOS.Collections.Handlers
 
             throw new InvalidOperationException($"{targetCollection} is an invalid dictionary type. An dictionary type with an {nameof(DictionaryHandlerBase)} implementation is required.");
         }
-        
-        protected DictionaryHandlerBase(IEnumerable targetCollection) : base(targetCollection) { }
 
         public virtual KeyValuePair<Type, Type>? elementType => CollectionGenericUtility.GetDictionaryElementType(targetCollection.GetType()); 
         

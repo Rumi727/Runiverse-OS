@@ -3,14 +3,12 @@ using Cysharp.Threading.Tasks;
 
 namespace RuniOS.Resource
 {
-    public class InstanceAssetHandle<TAsset> : IAssetHandle<TAsset>
+    public class InstanceAssetHandle<TAsset>(TAsset assetObject) : IAssetHandle<TAsset>
     {
-        public InstanceAssetHandle(TAsset assetObject) => this.assetObject = assetObject;
-
         /// <summary>
         /// 참조한 인스턴스를 가져옵니다.
         /// </summary>
-        public TAsset assetObject { get; }
+        public TAsset assetObject { get; } = assetObject;
         bool IAssetHandle.isLoading => false;
         
         UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(new InstanceAssetScope<TAsset>(this, assetObject));

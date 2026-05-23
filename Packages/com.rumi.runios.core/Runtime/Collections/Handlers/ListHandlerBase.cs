@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    public abstract class ListHandlerBase : CollectionHandlerBase, IList
+    public abstract class ListHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IList
     {
         public static ListHandlerBase FindListHandler(IEnumerable targetCollection)
         {
@@ -14,9 +14,7 @@ namespace RuniOS.Collections.Handlers
 
             return new VirtualListHandler(targetCollection);
         }
-        
-        protected ListHandlerBase(IEnumerable targetCollection) : base(targetCollection) { }
-        
+
         public abstract object? this[int index] { get; set; }
         
         public abstract bool isReadOnly { get; }

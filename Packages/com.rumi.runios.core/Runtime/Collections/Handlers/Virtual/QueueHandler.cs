@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(Queue))]
-    public class QueueHandler : VirtualListHandler
+    public class QueueHandler(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
-        public QueueHandler(IEnumerable targetCollection) : base(targetCollection) { }
-        
         public override bool isReadOnly => false;
         
         public override bool isFixedSize => false;

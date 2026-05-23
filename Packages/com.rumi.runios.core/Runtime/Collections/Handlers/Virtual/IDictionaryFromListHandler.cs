@@ -5,10 +5,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(IDictionary))]
-    public class IDictionaryFromListHandler : VirtualListHandler
+    public class IDictionaryFromListHandler(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
-        public IDictionaryFromListHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
         public override bool isReadOnly => ((IDictionary)targetCollection).IsReadOnly;
         
         public override bool isFixedSize => ((IDictionary)targetCollection).IsFixedSize;

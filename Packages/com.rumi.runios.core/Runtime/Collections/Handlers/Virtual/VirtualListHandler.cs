@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(IEnumerable))]
-    public class VirtualListHandler : ListHandlerBase
+    public class VirtualListHandler(IEnumerable targetCollection) : ListHandlerBase(targetCollection)
     {
-        public VirtualListHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
         protected ArrayList synchronizedList { get; } = new();
 
         public override object? this[int index]

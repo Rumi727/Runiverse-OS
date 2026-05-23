@@ -6,7 +6,7 @@ namespace RuniOS
 {
     public static class DrivenPropertyManager
     {
-        static readonly List<DrivenPropertyData> _drivenProperties = new List<DrivenPropertyData>();
+        static readonly List<DrivenPropertyData> _drivenProperties = [];
         public static IReadOnlyList<DrivenPropertyData> drivenProperties { get; } = _drivenProperties.AsReadOnly();
 
 
@@ -43,20 +43,12 @@ namespace RuniOS
             _drivenProperties.Remove(new DrivenPropertyData(driver, target, propertyPath));
         }
 
-        public readonly struct DrivenPropertyData : IEquatable<DrivenPropertyData>
+        public readonly struct DrivenPropertyData(Object driver, Object target, string propertyPath) : IEquatable<DrivenPropertyData>
         {
-            public readonly Object driver;
-            public readonly Object target;
+            public readonly Object driver = driver;
+            public readonly Object target = target;
 
-            public readonly string propertyPath;
-
-            public DrivenPropertyData(Object driver, Object target, string propertyPath)
-            {
-                this.driver = driver;
-                this.target = target;
-
-                this.propertyPath = propertyPath;
-            }
+            public readonly string propertyPath = propertyPath;
 
             public bool Equals(DrivenPropertyData other) => driver == other.driver && target == other.target && propertyPath == other.propertyPath;
 

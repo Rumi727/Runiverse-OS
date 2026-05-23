@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers.Virtual
 {
     [CustomCollectionHandler(typeof(Stack))]
-    public class StackHandler : VirtualListHandler
+    public class StackHandler(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
-        public StackHandler(IEnumerable targetCollection) : base(targetCollection) { }
-        
         public override bool isReadOnly => false;
         
         public override bool isFixedSize => false;

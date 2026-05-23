@@ -2,13 +2,9 @@
 
 namespace RuniOS.Collections.Generic
 {
-    public sealed class ReadOnlySet<T> : ISet<T>, IReadOnlyCollection<T>
+    public sealed class ReadOnlySet<T>(ISet<T> set) : ISet<T>, IReadOnlyCollection<T>
     {
         public static ReadOnlySet<T> empty { get; } = new ReadOnlySet<T>(new HashSet<T>());
-        
-        public ReadOnlySet(ISet<T> set) => this.set = set;
-
-        readonly ISet<T> set;
 
         public int Count => set.Count;
         

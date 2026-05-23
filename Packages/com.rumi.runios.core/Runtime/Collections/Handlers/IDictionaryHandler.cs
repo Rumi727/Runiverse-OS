@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers
 {
     [CustomCollectionHandler(typeof(IDictionary))]
-    public class IDictionaryHandler : DictionaryHandlerBase
+    public class IDictionaryHandler(IEnumerable targetCollection) : DictionaryHandlerBase(targetCollection)
     {
-        public IDictionaryHandler(IEnumerable targetCollection) : base(targetCollection) { }
-        
         public override object? this[object key]
         {
             get => ((IDictionary)targetCollection)[key];

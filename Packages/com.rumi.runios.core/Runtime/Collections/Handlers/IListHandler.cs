@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers
 {
     [CustomCollectionHandler(typeof(IList))]
-    public class IListHandler : ListHandlerBase
+    public class IListHandler(IEnumerable targetCollection) : ListHandlerBase(targetCollection)
     {
-        public IListHandler(IEnumerable targetCollection) : base(targetCollection) { }
-
         public override object? this[int index]
         {
             get => ((IList)targetCollection)[index];

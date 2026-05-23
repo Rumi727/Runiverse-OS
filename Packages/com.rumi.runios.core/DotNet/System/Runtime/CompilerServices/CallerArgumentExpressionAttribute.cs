@@ -7,10 +7,8 @@ namespace System.Runtime.CompilerServices
 #if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT 
     public
 #endif
-        sealed class CallerArgumentExpressionAttribute : Attribute
+        sealed class CallerArgumentExpressionAttribute(string parameterName) : Attribute
     {
-        public CallerArgumentExpressionAttribute(string parameterName) => ParameterName = parameterName;
-
-        public string ParameterName { get; }
+        public string ParameterName { get; } = parameterName;
     }
 }

@@ -4,10 +4,8 @@ using System.Collections;
 namespace RuniOS.Collections.Handlers.Entrys
 {
     [CustomEntryHandler(typeof(DictionaryEntry))]
-    public class DictionaryEntryHandler : EntryHandler
+    public class DictionaryEntryHandler(object targetEntry) : EntryHandler(targetEntry)
     {
-        public DictionaryEntryHandler(object targetEntry) : base(targetEntry) { }
-
         protected override object key => ((DictionaryEntry)targetEntry).Key;
         protected override object? value => ((DictionaryEntry)targetEntry).Value;
 

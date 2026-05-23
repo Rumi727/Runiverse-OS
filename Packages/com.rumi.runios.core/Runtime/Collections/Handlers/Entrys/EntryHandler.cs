@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Collections.Handlers.Entrys
 {
-    public abstract class EntryHandler : AttributeTypeResolver<EntryHandler, CustomEntryHandlerAttribute>
+    public abstract class EntryHandler(object targetEntry) : AttributeTypeResolver<EntryHandler, CustomEntryHandlerAttribute>
     {
         public static KeyValuePair<object?, object?> FindEntry(object? targetEntry)
         {
@@ -26,10 +26,8 @@ namespace RuniOS.Collections.Handlers.Entrys
 
             throw new InvalidOperationException($"{targetType} is an invalid entry type. An entry type with an {nameof(EntryHandler)} implementation is required.");
         }
-        
-        protected EntryHandler(object targetEntry) => this.targetEntry = targetEntry;
-        
-        public object targetEntry { get; private set; }
+
+        public object targetEntry { get; private set; } = targetEntry;
 
         public KeyValuePair<object?, object?> entry => new KeyValuePair<object?, object?>(key, value);
 

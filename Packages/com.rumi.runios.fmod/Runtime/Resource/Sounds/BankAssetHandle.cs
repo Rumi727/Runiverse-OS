@@ -6,10 +6,8 @@ using RuniOS.IO;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class BankAssetHandle : AssetHandle<Bank>
+    public class BankAssetHandle(IONode node, IOMetaData metaData) : AssetHandle<Bank>(node, metaData)
     {
-        public BankAssetHandle(IONode node, IOMetaData metaData) : base(node, metaData) { }
-        
         protected override async UniTask<Bank> Load()
         {
             byte[] datas = await node.file.ReadAllBytes();

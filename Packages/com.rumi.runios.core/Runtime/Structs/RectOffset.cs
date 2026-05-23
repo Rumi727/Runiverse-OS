@@ -4,24 +4,16 @@ using Newtonsoft.Json;
 namespace RuniOS
 {
     [Serializable]
-    public struct RectOffset : IEquatable<RectOffset>
+    public struct RectOffset(float left, float right, float top, float bottom) : IEquatable<RectOffset>
     {
         public RectOffset(float value) : this(value, value, value, value) { }
 
         public RectOffset(Vector2 min, Vector2 max) : this(min.x, max.x, max.y, min.y) { }
 
-        public RectOffset(float left, float right, float top, float bottom)
-        {
-            this.left = left;
-            this.right = right;
-            this.top = top;
-            this.bottom = bottom;
-        }
-
-        [FieldName("gui.left")] public float left;
-        [FieldName("gui.right")] public float right;
-        [FieldName("gui.top")] public float top;
-        [FieldName("gui.bottom")] public float bottom;
+        [FieldName("gui.left")] public float left = left;
+        [FieldName("gui.right")] public float right = right;
+        [FieldName("gui.top")] public float top = top;
+        [FieldName("gui.bottom")] public float bottom = bottom;
 
         [JsonIgnore]
         public Vector2 min

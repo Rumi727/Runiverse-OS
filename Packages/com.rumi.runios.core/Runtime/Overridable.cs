@@ -1,13 +1,11 @@
 ﻿namespace RuniOS
 {
-    public sealed class Overridable<T>
+    public sealed class Overridable<T>(T value)
     {
-        public Overridable(T value) => rawValue = value;
-        
-        public T rawValue { get; set; }
+        public T rawValue { get; set; } = value;
         public T value => modifiers.Aggregate(rawValue, (current, item) => item.func.Invoke(current));
         
-        readonly LinkedList<Modifier> modifiers = new LinkedList<Modifier>();
+        readonly LinkedList<Modifier> modifiers = [];
 
         public IDisposable Override(Func<T, T> func, int order = 0)
         {
@@ -26,29 +24,18 @@
             return new Token(modifiers, node);
         }
 
-        readonly struct Modifier
+        readonly struct Modifier(Func<T, T> func, int order)
         {
-            public readonly Func<T, T> func;
-            public readonly int order;
-            
-            public Modifier(Func<T, T> func, int order)
-            {
-                this.func = func;
-                this.order = order;
-            }
+            public readonly Func<T, T> func = func;
+            public readonly int order = order;
+
         }
 
-        sealed class Token : IDisposable
+        sealed class Token(LinkedList<Modifier> list, LinkedListNode<Modifier> node) : IDisposable
         {
-            LinkedList<Modifier>? list;
-            LinkedListNode<Modifier>? node;
+            LinkedList<Modifier>? list = list;
+            LinkedListNode<Modifier>? node = node;
 
-            public Token(LinkedList<Modifier> list, LinkedListNode<Modifier> node)
-            {
-                this.list = list;
-                this.node = node;
-            }
-            
             public void Dispose()
             {
                 if (list == null || node == null)

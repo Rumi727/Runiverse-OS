@@ -3,42 +3,24 @@ using System.Runtime.CompilerServices;
 
 namespace RuniOS.Spans
 {
-    public readonly ref struct SpanSingleSplitter<T> where T : IEquatable<T>
+    [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public readonly ref struct SpanSingleSplitter<T>(Span<T> source, T separator) where T : IEquatable<T>
     {
-        readonly Span<T> _source;
-        readonly T _separator;
+        readonly Span<T> _source = source;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public SpanSingleSplitter(Span<T> source, T separator)
+        public Enumerator GetEnumerator() => new Enumerator(_source, separator);
+
+        [method: MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public ref struct Enumerator(Span<T> source, T separator)
         {
-            _source = source;
-            _separator = separator;
-        }
+            int _nextStartIndex = 0;
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() => new Enumerator(_source, _separator);
-
-        public ref struct Enumerator
-        {
-            int _nextStartIndex;
-
-            readonly Span<T> _source;
-            readonly T _separator;
+            readonly Span<T> _source = source;
 
 #pragma warning disable IDE0032 // auto 속성 사용
-            Span<T> _current;
+            Span<T> _current = new Span<T>();
 #pragma warning restore IDE0032 // auto 속성 사용
-
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Enumerator(Span<T> source, T separator)
-            {
-                _nextStartIndex = 0;
-
-                _source = source;
-                _separator = separator;
-
-                _current = new Span<T>();
-            }
 
             public bool MoveNext()
             {
@@ -47,7 +29,7 @@ namespace RuniOS.Spans
 
                 Span<T> nextSource = _source.Slice(_nextStartIndex);
 
-                int foundIndex = nextSource.IndexOf(_separator);
+                int foundIndex = nextSource.IndexOf(separator);
                 int length = foundIndex >= 0 ? foundIndex : nextSource.Length;
 
                 _current = _source.Slice(_nextStartIndex, length);
