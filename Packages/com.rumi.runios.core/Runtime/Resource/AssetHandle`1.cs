@@ -39,8 +39,8 @@ namespace RuniOS.Resource
         public bool isLoading { get; private set; }
 
         /// <inheritdoc cref="IAssetHandle.isSealed"/>
-        public bool isSealed { get; private  set;}
-        bool IAssetHandle.isSealed { get => isSealed; set => isSealed = value; }
+        public bool isSealed { get; private set; }
+        bool IAssetHandle.isSealed => isSealed;
 
         // 지연 언로드 감시를 위한 R3 Subject 및 Subscription
         readonly Subject<Unit> _unloadTrigger = new Subject<Unit>();
@@ -233,5 +233,8 @@ namespace RuniOS.Resource
 
             return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && metaData == otherHandle.metaData;
         }
+
+        /// <inheritdoc/>
+        public void Seal() => isSealed = true;
     }
 }

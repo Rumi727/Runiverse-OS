@@ -11,31 +11,11 @@ namespace RuniOS.Resource
         public TAsset assetObject { get; } = assetObject;
         bool IAssetHandle.isLoading => false;
 
-        /// <inheritdoc cref="IAssetHandle.isSealed"/>
-        public bool isSealed { get; private set; }
-        bool IAssetHandle.isSealed { get => isSealed; set => isSealed = value; }
-        
-        UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope()
-        {
-            if (isSealed)
-            {
-                Debug.LogWarning("Cannot create a new AssetScope from sealed InstanceAssetHandle.");
-                return UniTask.FromResult<IAssetScope<TAsset>?>(null);
-            }
-            
-            return UniTask.FromResult<IAssetScope<TAsset>?>(new InstanceAssetScope<TAsset>(this, assetObject));
-        }
-        
-        UniTask<IAssetScope?> IAssetHandle.GetScope()
-        {
-            if (isSealed)
-            {
-                Debug.LogWarning("Cannot create a new AssetScope from sealed InstanceAssetHandle.");
-                return UniTask.FromResult<IAssetScope?>(null);
-            }
-            
-            return UniTask.FromResult<IAssetScope?>(new InstanceAssetScope<TAsset>(this, assetObject));
-        }
+        bool IAssetHandle.isSealed => false;
+
+        UniTask<IAssetScope<TAsset>?> IAssetHandle<TAsset>.GetScope() => UniTask.FromResult<IAssetScope<TAsset>?>(new InstanceAssetScope<TAsset>(this, assetObject));
+
+        UniTask<IAssetScope?> IAssetHandle.GetScope() => UniTask.FromResult<IAssetScope?>(new InstanceAssetScope<TAsset>(this, assetObject));
 
         public virtual bool IsSameTarget(IAssetHandle other)
         {
@@ -44,5 +24,8 @@ namespace RuniOS.Resource
 
             return EqualityComparer<TAsset>.Default.Equals(assetObject, otherHandle.assetObject);
         }
+
+        /// <inheritdoc/>
+        void IAssetHandle.Seal() { }
     }
 }
