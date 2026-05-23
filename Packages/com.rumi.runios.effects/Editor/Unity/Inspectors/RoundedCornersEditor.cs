@@ -10,13 +10,13 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.corner.header"), boldLabelStyle);
+            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.corner.header"), EditorStyles.boldLabel);
             DrawPropertyLayout("_radius", new GUIContent(GetTextOrKey("inspector.rounded_corners.corner.radius")));
             DrawPropertyLayout("_softness", new GUIContent(GetTextOrKey("inspector.rounded_corners.corner.softness"), GetTextOrKey("inspector.rounded_corners.corner.softness.tooltip")));
             
             Space();
             
-            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.outline.header"), boldLabelStyle);
+            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.outline.header"), EditorStyles.boldLabel);
             DrawPropertyLayout("_outlineColor", new GUIContent(GetTextOrKey("inspector.rounded_corners.outline.outlineColor")));
             DrawPropertyLayout("_outlineWidth", new GUIContent(GetTextOrKey("inspector.rounded_corners.outline.outlineWidth")));
             DrawPropertyLayout("_outlineSoftness", new GUIContent(GetTextOrKey("inspector.rounded_corners.outline.outlineSoftness"), GetTextOrKey("inspector.rounded_corners.outline.outlineSoftness.tooltip")));

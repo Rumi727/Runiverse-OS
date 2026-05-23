@@ -11,7 +11,7 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.appearance.header"), boldLabelStyle);
+            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.appearance.header"), EditorStyles.boldLabel);
             DrawPropertyLayout("_color", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.color")));
             
             Space();
@@ -26,7 +26,7 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
             
             Space();
             
-            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.settings.header"), boldLabelStyle);
+            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.settings.header"), EditorStyles.boldLabel);
             DrawPropertyLayout("_outlineVisibility", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.settings.outlineVisibility"), GetTextOrKey("inspector.simple_mesh_outline.settings.outlineVisibility.tooltip")));
         }
     }
