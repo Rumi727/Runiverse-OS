@@ -105,7 +105,7 @@ namespace RuniOS.Resource
                                 }
                                 catch (Exception e)
                                 {
-                                    Debug.LogError($"An exception occurred while loading {entry.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
+                                    Debug.LogError($"An exception occurred while loading {entry.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}", GetType().Name);
                                 }
 
                                 // UniTask.WhenAll이 대기하는 작업의 진행률 보고
