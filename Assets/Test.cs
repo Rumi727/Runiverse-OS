@@ -19,9 +19,14 @@ public sealed class Test : MonoBehaviour
     public List<string> stringList = new List<string>();
     public List<StringListTest> stringList2 = new List<StringListTest>();
     public List<StringListTestStruct> stringList3 = new List<StringListTestStruct>();
+    // ReSharper disable Unity.RedundantSerializeFieldAttribute
+    [SerializeField] public Dictionary<string, float> unityDictionary = new Dictionary<string, float>();
+    [SerializeField] public Dictionary<string, Test2> unityDictionary2 = new Dictionary<string, Test2>();
+    // ReSharper restore Unity.RedundantSerializeFieldAttribute
     public SerializableDictionary<string, Object> serializableDictionary = new SerializableDictionary<string, Object>();
     public SerializableDictionary<string, int> serializableDictionary2 = new SerializableDictionary<string, int>();
-    public SerializableDictionary<string, SerializableDictionary<string, Test2>> serializableDictionary3 = new();
+    public SerializableDictionary<string, Test2> serializableDictionary3 = new();
+    public SerializableDictionary<string, SerializableDictionary<string, Test2>> serializableDictionary4 = new();
 
     public Test2 test2 = new Test2();
     [SerializeReference] public Test2 test3Ref = new Test2();
