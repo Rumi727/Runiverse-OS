@@ -10,7 +10,6 @@ namespace RuniOS.Resource.Sounds
     public sealed class BankAssetRegistry : SimpleAssetRegistry<BankAssetHandle>
     {
         public override Identifier registryId => new Identifier("runios", "banks");
-        public override string registryName => "banks";
         
         public override bool isDefault => true;
 

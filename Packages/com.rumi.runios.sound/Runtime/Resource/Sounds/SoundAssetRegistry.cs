@@ -3,7 +3,6 @@ using Newtonsoft.Json;
 using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Sounds;
-using System.Text.RegularExpressions;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Sounds
@@ -97,8 +96,5 @@ namespace RuniOS.Resource.Sounds
                 _isLoading = false;
             }
         }
-
-        static readonly Regex pathRegex = new Regex($"^asset/[^/]+/{Regex.Escape(jsonFileName)}$", RegexOptions.Compiled | RegexOptions.ExplicitCapture);
-        public override bool IsMatch(RuniPath relativePath) => pathRegex.IsMatch(relativePath.value);
     }
 }

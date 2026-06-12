@@ -1,6 +1,5 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.IO;
 using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
@@ -145,7 +144,5 @@ namespace RuniOS.Resource
         public bool TryGetHandle(Identifier key, out THandle handle) => assetHandles.TryGetValue(key, out handle);
 
         public IEnumerator<KeyValuePair<Identifier, THandle>> GetEnumerator() => assetHandles.GetEnumerator();
-        
-        public abstract bool IsMatch(RuniPath relativePath);
     }
 }

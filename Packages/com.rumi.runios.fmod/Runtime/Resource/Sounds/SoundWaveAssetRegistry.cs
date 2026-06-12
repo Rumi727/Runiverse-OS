@@ -10,7 +10,7 @@ namespace RuniOS.Resource.Sounds
     public sealed class SoundWaveAssetRegistry : SimpleAssetRegistry<SoundWaveAssetHandle>
     {
         public override Identifier registryId => new Identifier("runios", "waves");
-        public override string registryName => "sounds";
+        public override RuniPath registryName => RuniPath.From("sounds");
         
         public override bool isDefault => true;
 
