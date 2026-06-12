@@ -134,7 +134,7 @@ namespace RuniOS.Reflection
             // 소스 제너레이터를 사용해도 되지만, 모딩 환경을 고려하여 리플렉션으로 결정했습니다.
             List<MethodInfo> methods = [];
 
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || ENABLE_PROFILER
             Stopwatch stopwatch = Stopwatch.StartNew();
 #endif
             await UniTask.RunOnThreadPool(() =>
@@ -149,10 +149,10 @@ namespace RuniOS.Reflection
                         if (!method.IsDefined(typeof(T)))
                             continue;
                         
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
                         if (!method.GetParameters().IsEmpty())
                         {
-                            Debug.LogWarning
+                            Debug.RuntimeLogWarning
                             (
                                 $"A method {method.DeclaringType?.Name}.{method.Name} defined as an attribute has been found with a non-zero number of parameters.\n" +
                                 "This is currently ignored, but the built program will not check the number of parameters, so this will cause problems!"
@@ -160,14 +160,20 @@ namespace RuniOS.Reflection
                             return;
                         }
                         else if (!method.IsDefined(typeof(PreserveAttribute)))
-                            Debug.LogWarning($"The method {method.DeclaringType?.Name}.{method.Name} is invoked via '{nameof(InvokeDefinedMethods)}' but may be subject to code stripping during build.\nConsider adding the 'Preserve' attribute to prevent this method from being removed.");
+                        {
+                            Debug.RuntimeLogWarning
+                            (
+                                $"The method {method.DeclaringType?.Name}.{method.Name} is invoked via '{nameof(InvokeDefinedMethods)}' but may be subject to code stripping during build.\n" +
+                                $"Consider adding the 'Preserve' attribute to prevent this method from being removed."
+                            );
+                        }
 #endif
                         methods.Add(method);
                     }
                 }
             });
             
-#if UNITY_EDITOR || DEVELOPMENT_BUILD
+#if UNITY_EDITOR || ENABLE_PROFILER
             Debug.Log($"It took {stopwatch.Elapsed.TotalSeconds} seconds to create a list of methods that match the condition.", $"{nameof(ReflectionUtility)}.{nameof(InvokeDefinedMethods)}<{typeof(T).Name}>");
 #endif
             

@@ -15,7 +15,7 @@ namespace RuniOS
         public static RESULT LogErrorIfNotOk(this RESULT result, [CallerArgumentExpression("result")] string location = "")
         {
             if (result != RESULT.OK)
-                Debug.LogError($"An error occurred while executing the {location} method : {result} : {Error.String(result)}");
+                Debug.RuntimeLogError($"An error occurred while executing the {location} method : {result} : {Error.String(result)}");
 
             return result;
         }
