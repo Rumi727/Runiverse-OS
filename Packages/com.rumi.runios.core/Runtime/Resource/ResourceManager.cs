@@ -19,10 +19,11 @@ namespace RuniOS.Resource
         public static event Action<AsyncTask>? reloadStartEvent;
         public static event Action? reloadCompletionEvent;
 
-
-
+        static bool reloadRequested;
         public static async UniTask Reload(IProgress<float>? progress = null)
         {
+            reloadRequested = true;
+
             if (isLoading)
             {
                 await UniTask.WaitWhile(() => isLoading);
@@ -34,49 +35,54 @@ namespace RuniOS.Resource
             
             try
             {
-                await ResourcePack.GetDefaultPack();
-                await ResourcePack.ReloadAll();
-
-                ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
-
-                UniTask[] uniTasks = new UniTask[assetRegistries.Count];
-                float[] assetRegistryProgresses = new float[assetRegistries.Count];
-
-                int index = 0;
-                foreach (var assetRegistry in assetRegistries)
+                while (reloadRequested)
                 {
-                    int targetIndex = index;
-                    
-                    uniTasks[index] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
-                    index++;
-                    
-                    async UniTask RegistryReload(IAssetRegistry assetRegistry, int targetIndex)
+                    reloadRequested = false;
+
+                    await ResourcePack.GetDefaultPack();
+                    await ResourcePack.ReloadAll();
+
+                    ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
+
+                    UniTask[] uniTasks = new UniTask[assetRegistries.Count];
+                    float[] assetRegistryProgresses = new float[assetRegistries.Count];
+
+                    int index = 0;
+                    foreach (var assetRegistry in assetRegistries)
                     {
-                        try
+                        int targetIndex = index;
+
+                        uniTasks[index] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
+                        index++;
+
+                        async UniTask RegistryReload(IAssetRegistry assetRegistry, int targetIndex)
                         {
-                            await assetRegistry.Reload
-                            (
-                                ResourcePack.enabledPacks.Where(x => x.isValid),
-                                Progress.Create<float>(x =>
-                                {
-                                    assetRegistryProgresses[targetIndex] = x;
-                                    
-                                    float value = assetRegistryProgresses.Sum() / assetRegistryProgresses.Length;
-                                    if (currentTask != null)
-                                        currentTask.progress.Value = value;
-                                    
-                                    progress?.Report(value);
-                                })
-                            );
-                        }
-                        catch (Exception e)
-                        {
-                            Debug.LogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
+                            try
+                            {
+                                await assetRegistry.Reload
+                                (
+                                    ResourcePack.enabledPacks.Where(x => x.isValid),
+                                    Progress.Create<float>(x =>
+                                    {
+                                        assetRegistryProgresses[targetIndex] = x;
+
+                                        float value = assetRegistryProgresses.Sum() / assetRegistryProgresses.Length;
+                                        if (currentTask != null)
+                                            currentTask.progress.Value = value;
+
+                                        progress?.Report(value);
+                                    })
+                                );
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
+                            }
                         }
                     }
+
+                    await UniTask.WhenAll(uniTasks);
                 }
-                
-                await UniTask.WhenAll(uniTasks);
             }
             catch (Exception e)
             {
