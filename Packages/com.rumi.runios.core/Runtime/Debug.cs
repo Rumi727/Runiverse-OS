@@ -8,28 +8,28 @@ namespace RuniOS
 {
     public static class Debug
     {
-        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [Conditional("UNITY_EDITOR"), Conditional("UNITY_ENABLE_CHECKS")]
         public static void Log(object? message, string? className = null)
         {
             className ??= NameOfCallingClass();
             UnityEngine.Debug.Log(GetLogText(className, message));
         }
 
-        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [Conditional("UNITY_EDITOR"), Conditional("UNITY_ENABLE_CHECKS")]
         public static void LogWarning(object? message, string? className = null)
         {
             className ??= NameOfCallingClass();
             UnityEngine.Debug.LogWarning(GetLogText(className, message));
         }
 
-        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [Conditional("UNITY_EDITOR"), Conditional("UNITY_ENABLE_CHECKS")]
         public static void LogError(object? message, string? className = null)
         {
             className ??= NameOfCallingClass();
             UnityEngine.Debug.LogError(GetLogText(className, message));
         }
 
-        [Conditional("UNITY_EDITOR"), Conditional("DEVELOPMENT_BUILD")]
+        [Conditional("UNITY_EDITOR"), Conditional("UNITY_ENABLE_CHECKS")]
         public static void Assert(bool condition, object? message, string? className = null)
         {
             className ??= NameOfCallingClass();
