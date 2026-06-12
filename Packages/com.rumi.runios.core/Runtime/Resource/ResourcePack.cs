@@ -44,10 +44,6 @@ namespace RuniOS.Resource
         internal static readonly HashSet<PackIdentifier> _enabledPackIdentifiers = [];
         public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = _enabledPackIdentifiers.AsReadOnly();
 
-        public static IEnumerable<ResourcePack> enabledPacks => loadedResourcePacks
-            .Where(x => enabledPackIdentifiers.Contains(x.Key))
-            .Select(x => x.Value);
-
         /// <summary>
         /// 시스템의 기본 리소스 팩을 비동기적으로 가져옵니다.
         /// <br/>기본 팩이 아직 생성되지 않은 경우 <c>"vanilla"</c> 식별자를 사용하여 생성됩니다.
@@ -100,6 +96,12 @@ namespace RuniOS.Resource
         public static void EnablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Add(identifier);
         
         public static void DisablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Remove(identifier);
+
+        public static IEnumerable<ResourcePack> GetEnabledPacks() => loadedResourcePacks
+            .Where(x => enabledPackIdentifiers.Contains(x.Key))
+            .Select(x => x.Value);
+
+        public static ResourcePack[] GetEnabledPacksSnapshot() => GetEnabledPacks().ToArray();
         
         /// <summary>
         /// 빈 <see cref="ResourcePack"/> 인스턴스를 초기화합니다.
