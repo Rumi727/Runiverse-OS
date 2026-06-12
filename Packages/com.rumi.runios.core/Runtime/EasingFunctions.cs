@@ -270,7 +270,7 @@ namespace RuniOS
         public static double EaseInBounce(double start, double end, double value)
         {
             end -= start;
-            return end - EaseOutBounce(0, end, 1 - value) + start;
+            return (end - EaseOutBounce(0, end, 1 - value)) + start;
         }
 
         public static double EaseOutBounce(double start, double end, double value)
@@ -356,9 +356,9 @@ namespace RuniOS
                 s = p / 4;
             }
             else
-                s = p / (2 * Math.PI) * (end / a).Asin();
+                s = (p / (2 * Math.PI)) * (end / a).Asin();
 
-            return -(a * 2d.Pow(10 * (value -= 1)) * (((value * d) - s) * (2 * Math.PI) / p).Sin()) + start;
+            return -(a * 2d.Pow(10 * (value -= 1)) * ((((value * d) - s) * (2 * Math.PI)) / p).Sin()) + start;
         }
 
         public static double EaseOutElastic(double start, double end, double value)
@@ -382,9 +382,9 @@ namespace RuniOS
                 s = p * 0.25;
             }
             else
-                s = p / (2 * Math.PI) * (end / a).Asin();
+                s = (p / (2 * Math.PI)) * (end / a).Asin();
 
-            return ((a * 2d.Pow(-10 * value) * (((value * d) - s) * (2 * Math.PI) / p).Sin()) + end + start);
+            return ((a * 2d.Pow(-10 * value) * ((((value * d) - s) * (2 * Math.PI)) / p).Sin()) + end + start);
         }
 
         public static double EaseInOutElastic(double start, double end, double value)
@@ -408,11 +408,11 @@ namespace RuniOS
                 s = p / 4;
             }
             else
-                s = p / (2 * Math.PI) * (end / a).Asin();
+                s = (p / (2 * Math.PI)) * (end / a).Asin();
 
             if (value < 1)
-                return (-0.5 * (a * 2d.Pow(10 * (value -= 1)) * (((value * d) - s) * (2 * Math.PI) / p).Sin())) + start;
-            return (a * 2d.Pow(-10 * (value -= 1)) * (((value * d) - s) * (2 * Math.PI) / p).Sin() * 0.5) + end + start;
+                return (-0.5 * (a * 2d.Pow(10 * (value -= 1)) * ((((value * d) - s) * (2 * Math.PI)) / p).Sin())) + start;
+            return (a * 2d.Pow(-10 * (value -= 1)) * ((((value * d) - s) * (2 * Math.PI)) / p).Sin() * 0.5) + end + start;
         }
 
         //
@@ -462,11 +462,11 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-                return 3d / 2d * end * value * value;
+                return (3d / 2d) * end * value * value;
 
             value -= 2;
 
-            return 3d / 2d * end * value * value;
+            return (3d / 2d) * end * value * value;
         }
 
         public static double EaseInQuartD(double start, double end, double value) => 4 * (end - start) * value * value * value;
@@ -506,11 +506,11 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-                return 5d / 2d * end * value * value * value * value;
+                return (5d / 2d) * end * value * value * value * value;
 
             value -= 2;
 
-            return 5d / 2d * end * value * value * value * value;
+            return (5d / 2d) * end * value * value * value * value;
         }
 
         public static double EaseInSineD(double start, double end, double value) => (end - start) * 0.5 * Math.PI * (0.5 * Math.PI * value).Sin();
@@ -544,16 +544,16 @@ namespace RuniOS
 
             value--;
 
-            return 5 * NATURAL_LOG_OF_2 * end / 2d.Pow(10d * value);
+            return (5 * NATURAL_LOG_OF_2 * end) / 2d.Pow(10d * value);
         }
 
-        public static double EaseInCircD(double start, double end, double value) => (end - start) * value / (1d - (value * value)).Sqrt();
+        public static double EaseInCircD(double start, double end, double value) => ((end - start) * value) / (1d - (value * value)).Sqrt();
 
         public static double EaseOutCircD(double start, double end, double value)
         {
             value--;
             end -= start;
-            return -end * value / (1 - (value * value)).Sqrt();
+            return (-end * value) / (1 - (value * value)).Sqrt();
         }
 
         public static double EaseInOutCircD(double start, double end, double value)
@@ -562,11 +562,11 @@ namespace RuniOS
             end -= start;
 
             if (value < 1)
-                return end * value / (2 * (1 - (value * value)).Sqrt());
+                return (end * value) / (2 * (1 - (value * value)).Sqrt());
 
             value -= 2;
 
-            return -end * value / (2 * (1 - (value * value)).Sqrt());
+            return (-end * value) / (2 * (1 - (value * value)).Sqrt());
         }
 
         public static double EaseInBounceD(double start, double end, double value)
@@ -660,11 +660,11 @@ namespace RuniOS
                 s = p * 0.25;
             }
             else
-                s = p / (2 * Math.PI) * (end / a).Asin();
+                s = (p / (2 * Math.PI)) * (end / a).Asin();
 
-            return (a * Math.PI * d * 2d.Pow(1 - (10 * value)) *
-                (2 * Math.PI * ((d * value) - s) / p).Cos() / p) - (5 * NATURAL_LOG_OF_2 * a *
-                2d.Pow(1 - (10 * value)) * (2 * Math.PI * ((d * value) - s) / p).Sin());
+            return ((a * Math.PI * d * 2d.Pow(1 - (10 * value)) *
+                ((2 * Math.PI * ((d * value) - s)) / p).Cos()) / p) - (5 * NATURAL_LOG_OF_2 * a *
+                2d.Pow(1 - (10 * value)) * ((2 * Math.PI * ((d * value) - s)) / p).Sin());
         }
 
         public static double EaseInOutElasticD(double start, double end, double value)
@@ -682,20 +682,20 @@ namespace RuniOS
                 s = p / 4;
             }
             else
-                s = p / (2 * Math.PI) * (end / a).Asin();
+                s = (p / (2 * Math.PI)) * (end / a).Asin();
 
             if (value < 1)
             {
                 value -= 1;
 
-                return (-5 * NATURAL_LOG_OF_2 * a * 2d.Pow(10 * value) * (2 * Math.PI * ((d * value) - 2d) / p).Sin()) -
-                    (a * Math.PI * d * 2d.Pow(10d * value) * (2 * Math.PI * ((d * value) - s) / p).Cos() / p);
+                return (-5 * NATURAL_LOG_OF_2 * a * 2d.Pow(10 * value) * ((2 * Math.PI * ((d * value) - 2d)) / p).Sin()) -
+                    ((a * Math.PI * d * 2d.Pow(10d * value) * ((2 * Math.PI * ((d * value) - s)) / p).Cos()) / p);
             }
 
             value -= 1;
 
-            return (a * Math.PI * d * (2 * Math.PI * ((d * value) - s) / p).Cos() / (p * 2d.Pow(10 * value))) -
-                (5 * NATURAL_LOG_OF_2 * a * (2 * Math.PI * ((d * value) - s) / p).Sin() / 2d.Pow(10 * value));
+            return ((a * Math.PI * d * ((2 * Math.PI * ((d * value) - s)) / p).Cos()) / (p * 2d.Pow(10 * value))) -
+                ((5 * NATURAL_LOG_OF_2 * a * ((2 * Math.PI * ((d * value) - s)) / p).Sin()) / 2d.Pow(10 * value));
         }
 
         public static double SpringD(double start, double end, double value)
@@ -705,7 +705,7 @@ namespace RuniOS
 
             // Damn... Thanks http://www.derivative-calculator.net/
             // TODO: And it's a little bit wrong
-            return (end * ((6 * (1 - value) / 5) + 1) * ((-2.2 * (1 - value).Pow(1.2) *
+            return (end * (((6 * (1 - value)) / 5) + 1) * ((-2.2 * (1 - value).Pow(1.2) *
                 (Math.PI * value * ((2.5 * value * value * value) + 0.2)).Sin()) + ((1 - value).Pow(2.2) *
                 ((Math.PI * ((2.5 * value * value * value) + 0.2)) + (7.5 * Math.PI * value * value * value)) *
                 (Math.PI * value * ((2.5 * value * value * value) + 0.2)).Cos()) + 1)) -
