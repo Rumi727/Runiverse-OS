@@ -42,7 +42,7 @@ namespace RuniOS.Resource.Sounds
 
             try
             {
-                progress?.Report(0);
+                progress.SafeReport(0);
                 
                 List<UniTask> uniTasks = new List<UniTask>();
                 int count = 0;
@@ -70,11 +70,11 @@ namespace RuniOS.Resource.Sounds
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError($"An exception occurred while loading {jsonNode.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
+                                Debug.RuntimeLogError($"An exception occurred while loading {jsonNode.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}");
                             }
 
                             // UniTask.WhenAll이 대기하는 작업의 진행률 보고
-                            progress?.Report((float)++count / uniTasks.Count);
+                            progress.SafeReport((float)++count / uniTasks.Count);
                         }
                     }
                 }
@@ -83,14 +83,7 @@ namespace RuniOS.Resource.Sounds
             }
             finally
             {
-                try
-                {
-                    progress?.Report(1);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
+                progress.SafeReport(1);
 
                 EndTracking();
                 _isLoading = false;

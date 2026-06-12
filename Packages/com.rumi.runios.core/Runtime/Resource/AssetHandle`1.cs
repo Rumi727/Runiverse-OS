@@ -91,7 +91,7 @@ namespace RuniOS.Resource
                 }
                 catch (Exception e)
                 {
-                    Debug.LogError($"Failed to load asset at path {entry.path}! The exception is: {e}");
+                    Debug.RuntimeLogError($"Failed to load asset at path {entry.path}! The exception is: {e}");
                     assetObject = GetDefaultAsset();
                 }
                 finally
@@ -209,7 +209,7 @@ namespace RuniOS.Resource
             }
             catch (Exception e)
             {
-                Debug.LogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
+                Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
             }
         
             assetObject = default;

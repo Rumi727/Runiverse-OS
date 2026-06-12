@@ -35,6 +35,8 @@ namespace RuniOS.Resource
             
             try
             {
+                progress.SafeReport(0);
+
                 while (reloadRequested)
                 {
                     reloadRequested = false;
@@ -70,13 +72,13 @@ namespace RuniOS.Resource
                                         if (currentTask != null)
                                             currentTask.progress.Value = value;
 
-                                        progress?.Report(value);
+                                        progress.SafeReport(value);
                                     })
                                 );
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
+                                Debug.RuntimeLogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
                             }
                         }
                     }
@@ -93,7 +95,7 @@ namespace RuniOS.Resource
                 try
                 {
                     currentTask.progress.Value = 1;
-                    progress?.Report(1);
+                    progress.SafeReport(1);
                     
                     currentTask.Dispose();
                     currentTask = null;

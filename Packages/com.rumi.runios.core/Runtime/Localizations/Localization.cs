@@ -282,19 +282,15 @@ namespace RuniOS.Localizations
         public static string? GetText(Identifier identifier, string? languageCode = null)
         {
             LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
-            return registry?.calculatedAsset.GetValueOrDefault(languageCode ?? string.Empty /* TODO : 이거 바꿔라 */)?.GetValueOrDefault(identifier);
-        }
+            IReadOnlyDictionary<string, string>? asset = registry?.GetAsset(new Identifier(identifier.nameSpace, languageCode ?? string.Empty /* TODO : 이거 바꿔라 */));
 
-        public static IEnumerable<string> GetAllText(string languageCode)
-        {
-            LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
-            return registry?.calculatedAsset.GetValueOrDefault(languageCode)?.Values ?? Enumerable.Empty<string>();
+            return asset?.GetValueOrDefault(identifier.path.value);
         }
 
         public static IEnumerable<string> GetAllLanguageCode()
         {
             LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
-            return registry?.calculatedAsset.Keys ?? Enumerable.Empty<string>();
+            return registry?.GetAllLanguageCodes() ?? [];
         }
 
         /// <summary>

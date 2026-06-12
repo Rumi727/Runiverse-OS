@@ -37,11 +37,11 @@ namespace RuniOS.Resource
         {
             foreach (var namespaceNode in resourcePack.GetNamespaceNodes())
             {
-                IONode registryEntry = namespaceNode.CreateChild(registryName);
-                if (await registryEntry.dir.GetEntry(iterationToken) == null)
+                IONode registryNode = namespaceNode.CreateChild(registryName);
+                if (await registryNode.dir.GetEntry(iterationToken) == null)
                     continue;
 
-                await write.YieldAsync((namespaceNode.name, registryEntry));
+                await write.YieldAsync((namespaceNode.name, registryNode));
             }
         });
         
@@ -76,7 +76,7 @@ namespace RuniOS.Resource
 
             try
             {
-                progress?.Report(0);
+                progress.SafeReport(0);
 
                 await OnBeginAssetLoop();
 
@@ -99,7 +99,7 @@ namespace RuniOS.Resource
                             }
                             catch (Exception e)
                             {
-                                Debug.LogError($"An exception occurred while indexing {node.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                                Debug.RuntimeLogError($"An exception occurred while indexing {node.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}", GetType().Name);
                             }
                         }
                     }
@@ -115,25 +115,22 @@ namespace RuniOS.Resource
                     }
                     catch (Exception e)
                     {
-                        Debug.LogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                        Debug.RuntimeLogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.resourcePack.identifier}. The exception is: {e}", GetType().Name);
                     }
 
                     // 로드 대상 처리 진행률 보고
-                    progress?.Report((float)++count / loadTargets.Count);
+                    progress.SafeReport((float)++count / loadTargets.Count);
                 }
 
                 await OnEndAssetLoop();
             }
+            catch (Exception e)
+            {
+                Debug.RuntimeLogError($"An unexpected exception occurred while reloading resources. The exception is: {e}");
+            }
             finally
             {
-                try
-                {
-                    progress?.Report(1);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
+                progress.SafeReport(1);
 
                 EndTracking();
                 _isLoading = false;
