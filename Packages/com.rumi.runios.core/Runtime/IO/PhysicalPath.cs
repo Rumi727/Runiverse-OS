@@ -7,10 +7,10 @@ namespace RuniOS.IO
 {
     /// <summary>
     /// Represents a normalized physical file-system path.<br/>
-    /// The stored value is converted to a full path through <see cref="Path.GetFullPath(string)"/> and uses <see cref="RuniPath.directorySeparatorChar"/> as its separator.
+    /// The stored value is converted to a full path through <see cref="Path.GetFullPath(string)"/>.
     /// <br/><br/>
     /// 정규화된 물리 파일 시스템 경로를 나타냅니다.<br/>
-    /// 저장되는 값은 <see cref="Path.GetFullPath(string)"/>를 통해 전체 경로로 변환되며, 구분자로 <see cref="RuniPath.directorySeparatorChar"/>를 사용합니다.
+    /// 저장되는 값은 <see cref="Path.GetFullPath(string)"/>를 통해 전체 경로로 변환됩니다.
     /// </summary>
     /// <param name="path">
     /// The path string to normalize.<br/>
@@ -149,10 +149,10 @@ namespace RuniOS.IO
 
         /// <summary>
         /// Normalizes a path string into the internal physical path format.<br/>
-        /// The path is first resolved with <see cref="Path.GetFullPath(string)"/>, then trailing separators outside the root are removed and Windows separators are converted to <see cref="RuniPath.directorySeparatorChar"/>.
+        /// The path is first resolved with <see cref="Path.GetFullPath(string)"/>, then trailing separators outside the root are removed.
         /// <br/><br/>
         /// 경로 문자열을 내부 물리 경로 형식으로 정규화합니다.<br/>
-        /// 먼저 <see cref="Path.GetFullPath(string)"/>로 경로를 해석한 뒤, 루트 밖의 끝 구분자를 제거하고 Windows 구분자를 <see cref="RuniPath.directorySeparatorChar"/>로 변환합니다.
+        /// 먼저 <see cref="Path.GetFullPath(string)"/>로 경로를 해석한 뒤, 루트 밖의 끝 구분자를 제거합니다..
         /// </summary>
         /// <param name="path">
         /// The path string to normalize.<br/>
@@ -175,10 +175,10 @@ namespace RuniOS.IO
             int rootLength = Path.GetPathRoot(fullPath.AsSpan()).Length;
 
             int trimmedLength = fullPath.Length;
-            while (trimmedLength > rootLength && fullPath[trimmedLength - 1] is RuniPath.directorySeparatorChar or RuniPath.windowsDirectorySeparatorChar)
+            while (trimmedLength > rootLength && (fullPath[trimmedLength - 1] == Path.DirectorySeparatorChar || fullPath[trimmedLength - 1] == Path.AltDirectorySeparatorChar))
                 trimmedLength--;
 
-            bool needsCopy = trimmedLength != fullPath.Length || fullPath.Contains(RuniPath.windowsDirectorySeparatorChar);
+            bool needsCopy = trimmedLength != fullPath.Length || fullPath.Contains(Path.AltDirectorySeparatorChar);
             if (!needsCopy)
                 return fullPath;
 
@@ -187,8 +187,8 @@ namespace RuniOS.IO
                 for (int i = 0; i < span.Length; i++)
                 {
                     char c = state[i];
-                    if (c == RuniPath.windowsDirectorySeparatorChar)
-                        span[i] = RuniPath.directorySeparatorChar;
+                    if (c == Path.AltDirectorySeparatorChar)
+                        span[i] = Path.DirectorySeparatorChar;
                     else
                         span[i] = c;
                 }

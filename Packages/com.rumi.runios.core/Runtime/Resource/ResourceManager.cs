@@ -92,19 +92,13 @@ namespace RuniOS.Resource
             }
             finally
             {
-                try
-                {
-                    currentTask.progress.Value = 1;
-                    progress.SafeReport(1);
-                    
-                    currentTask.Dispose();
-                    currentTask = null;
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-                
+                progress.SafeReport(1);
+
+                currentTask.progress.Value = 1;
+
+                currentTask.Dispose();
+                currentTask = null;
+
                 isPreloaded = true;
                 reloadCompletionEvent.SafeInvoke();
             }
