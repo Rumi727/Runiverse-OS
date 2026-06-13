@@ -54,7 +54,7 @@ PlayerSettings:
   mipStripping: 0
   numberOfMipsStripped: 0
   numberOfMipsStrippedPerMipmapLimitGroup: {}
-  m_StackTraceTypes: {_typeName: int, _data: 010000000100000001000000010000000100000001000000}
+  m_StackTraceTypes: 010000000100000001000000010000000100000001000000i
   iosShowActivityIndicatorOnLoading: -1
   androidShowActivityIndicatorOnLoading: -1
   iosUseCustomAppBackgroundBehavior: 0
@@ -163,7 +163,7 @@ PlayerSettings:
   allowHDRDisplaySupport: 0
   useHDRDisplay: 0
   hdrBitDepth: 0
-  m_ColorGamuts: {_typeName: int, _data: 00000000}
+  m_ColorGamuts: 00000000i
   targetPixelDensity: 30
   resolutionScalingMode: 0
   resetResolutionOnWindowResize: 0
@@ -444,19 +444,19 @@ PlayerSettings:
     m_GraphicsJobMode: 0
   m_BuildTargetGraphicsAPIs:
   - m_BuildTarget: AndroidPlayer
-    m_APIs: {_typeName: int, _data: 150000000b000000}
+    m_APIs: 150000000b000000i
     m_Automatic: 1
   - m_BuildTarget: iOSSupport
-    m_APIs: {_typeName: int, _data: 10000000}
+    m_APIs: 10000000i
     m_Automatic: 1
   - m_BuildTarget: AppleTVSupport
-    m_APIs: {_typeName: int, _data: 10000000}
+    m_APIs: 10000000i
     m_Automatic: 1
   - m_BuildTarget: WebGLSupport
-    m_APIs: {_typeName: int, _data: 0b000000}
+    m_APIs: 0b000000i
     m_Automatic: 1
   - m_BuildTarget: WindowsStandaloneSupport
-    m_APIs: {_typeName: int, _data: 0200000012000000}
+    m_APIs: 0200000012000000i
     m_Automatic: 0
   m_DefaultShaderChunkSizeInMB: 16
   m_DefaultShaderChunkCount: 0
@@ -491,7 +491,7 @@ PlayerSettings:
   m_BuildTargetDefaultTextureCompressionFormat:
   - serializedVersion: 3
     m_BuildTarget: Android
-    m_Formats: {_typeName: int, _data: 03000000}
+    m_Formats: 03000000i
   playModeTestRunnerEnabled: 0
   runPlayModeTestAsEditModeTest: 0
   actionOnDotNetUnhandledException: 1
@@ -876,7 +876,7 @@ PlayerSettings:
   hmiPlayerDataPath: 
   hmiForceSRGBBlit: 0
   embeddedLinuxEnableGamepadInput: 0
-  hmiCpuConfiguration: {_typeName: int, _data: }
+  hmiCpuConfiguration: 
   hmiLogStartupTiming: 0
   qnxGraphicConfPath: 
   apiCompatibilityLevel: 6
@@ -899,4 +899,5 @@ PlayerSettings:
   androidVulkanAllowFilterList: []
   androidVulkanDeviceFilterListAsset: {fileID: 0}
   d3d12DeviceFilterListAsset: {fileID: 0}
+  webGPUDeviceFilterListAsset: {fileID: 0}
   allowedHttpConnections: 3
