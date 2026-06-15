@@ -58,37 +58,52 @@ namespace RuniOS.Editor.Unity.Drawers
                 return;
             }
 
+            string keyLabel = GetTextOrKey("gui.key");
+            GUIContent keyLabelContent = new GUIContent(keyLabel);
+            float keyHeight = EditorGUI.GetPropertyHeight(key, keyLabelContent);
+
+            string valueLabel = GetTextOrKey("gui.value");
+            GUIContent valueLabelContent = new GUIContent(valueLabel);
+            float valueHeight = EditorGUI.GetPropertyHeight(value, valueLabelContent);
+
+            bool isField = Max(keyHeight, valueHeight) <= EditorGUIUtility.singleLineHeight;
+
             int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
             position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
             
             BeginIndentLevel(0);
-            float fieldWidth = (position.width - 15) / 2f;
+            float fieldWidth = isField ? (position.width - 15) / 2f : position.width;
 
             {
-                string keyLabel = GetTextOrKey("gui.key");
-                GUIContent keyLabelContent = new GUIContent(keyLabel);
-                
                 position.width = fieldWidth;
-                position.height = EditorGUI.GetPropertyHeight(key, keyLabelContent);
+                position.height = keyHeight;
 
+                if (isField)
+                    BeginLabelWidth(keyLabel);
 
-                BeginLabelWidth(keyLabel);
                 EditorGUI.PropertyField(position, key, keyLabelContent);
-                EndLabelWidth();
 
-                position.x += position.width + 15;
+                if (isField)
+                    EndLabelWidth();
+
+                if (isField)
+                    position.x += position.width + 15;
             }
 
-            {
-                string valueLabel = GetTextOrKey("gui.value");
-                GUIContent valueLabelContent = new GUIContent(valueLabel);
-                
-                position.width = fieldWidth.Ceil();
-                position.height = EditorGUI.GetPropertyHeight(value, valueLabelContent);
+            if (!isField)
+                position.y += position.height;
 
-                BeginLabelWidth(valueLabel);
+            {
+                position.width = fieldWidth.Ceil();
+                position.height = valueHeight;
+
+                if (isField)
+                    BeginLabelWidth(valueLabel);
+
                 EditorGUI.PropertyField(position, value, valueLabelContent);
-                EndLabelWidth();
+
+                if (isField)
+                    EndLabelWidth();
             }
 
             EndIndentLevel();
@@ -96,17 +111,29 @@ namespace RuniOS.Editor.Unity.Drawers
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
         {
-            float height;
+            float wideHeight = 0;
+            if (!EditorGUIUtility.wideMode && LabelHasContent(label))
+                wideHeight = EditorGUIUtility.singleLineHeight + EditorGUIUtility.standardVerticalSpacing;
+
             (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null || value == null)
-                height = base.GetPropertyHeight(property, label);
-            else
-                height = Max(EditorGUI.GetPropertyHeight(key), EditorGUI.GetPropertyHeight(value));
+                return EditorGUIUtility.singleLineHeight + wideHeight;
 
-            if (EditorGUIUtility.wideMode || !LabelHasContent(label))
-                return height;
-            else
-                return height + EditorGUIUtility.singleLineHeight + 4;
+            string keyLabel = GetTextOrKey("gui.key");
+            GUIContent keyLabelContent = new GUIContent(keyLabel);
+            float keyHeight = EditorGUI.GetPropertyHeight(key, keyLabelContent);
+
+            string valueLabel = GetTextOrKey("gui.value");
+            GUIContent valueLabelContent = new GUIContent(valueLabel);
+            float valueHeight = EditorGUI.GetPropertyHeight(value, valueLabelContent);
+
+            float fieldHeight = Max(keyHeight, valueHeight);
+            bool isField = Max(keyHeight, valueHeight) <= EditorGUIUtility.singleLineHeight;
+
+            if (!isField)
+                fieldHeight += EditorGUIUtility.singleLineHeight;
+
+            return fieldHeight + wideHeight;
         }
 
         public static (SerializedProperty? key, SerializedProperty? value) GetChildProperty(SerializedProperty property) => (property.FindPropertyRelative(SerializableKeyValuePair.nameOfInternalKey), property.FindPropertyRelative(SerializableKeyValuePair.nameOfInternalValue));
