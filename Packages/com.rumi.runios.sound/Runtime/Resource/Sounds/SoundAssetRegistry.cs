@@ -52,15 +52,15 @@ namespace RuniOS.Resource.Sounds
                     foreach ((string nameSpace, IONode jsonNode) in resourcePack.GetNamespaceNodes()
                                  .Select(x => (x.name, x.CreateChild(jsonFileName))))
                     {
+                        if (await jsonNode.file.GetEntry() == null)
+                            return;
+
                         uniTasks.Add(UniTask.Defer(Method));
                         
                         async UniTask Method()
                         {
                             try
                             {
-                                if (await jsonNode.file.GetEntry() == null)
-                                    return;
-                                
                                 Dictionary<string, ResourceKey>? sounds = JsonConvert.DeserializeObject<Dictionary<string, ResourceKey>>(await jsonNode.file.ReadAllText());
                                 if (sounds == null)
                                     return;
