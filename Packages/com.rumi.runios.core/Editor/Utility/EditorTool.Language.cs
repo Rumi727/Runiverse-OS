@@ -5,9 +5,9 @@ namespace RuniOS.Editor
 {
     public partial class EditorTool
     {
-        public static string GetTextOrKey(string key, string lauguage = "")
+        public static string GetTextOrKey(string key)
         {
-            string? result = GetText(key, lauguage);
+            string? result = GetText(key);
             if (result == null)
                 return key;
 

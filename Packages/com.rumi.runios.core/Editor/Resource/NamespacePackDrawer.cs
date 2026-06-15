@@ -42,8 +42,7 @@ namespace RuniOS.Editor.Resource
             {
                 EditorGUI.BeginChangeCheck();
 
-                string label = GetTextOrKey("gui.element.index");
-                label = new PlaceholderReplacePair("index", index.ToString()).ReplaceAsPlaceholder(label);
+                string label = string.Format(GetTextOrKey("gui.element.index"), index);
                 
                 EditorGUI.BeginDisabledGroup(index < orgCount);
                 string oldText = nameSpaces[index]; 
@@ -53,8 +52,7 @@ namespace RuniOS.Editor.Resource
                 if (EditorGUI.EndChangeCheck())
                 {
                     string undoName = GetTextOrKey("undo.modify.property_in_object");
-                    undoName = new PlaceholderReplacePair("object", typeof(List<string>).Name).ReplaceAsPlaceholder(undoName);
-                    undoName = new PlaceholderReplacePair("property", $"[{index}]").ReplaceAsPlaceholder(undoName);
+                    undoName = string.Format(undoName, typeof(List<string>).Name, $"[{index}]");
                         
                     UndoHandler.instance.Record(() => nameSpaces[index] = oldText, () => nameSpaces[index] = newText, undoName, UndoHandler.instance.GetTokenForCurrentUnityGroup());
                     nameSpaces[index] = newText;

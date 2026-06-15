@@ -93,15 +93,8 @@ namespace RuniOS.Editor
         
         public static string GetDiscardUndoName(object instance) => GetUndoName("undo.discard", instance, string.Empty);
         
-        static string GetUndoName(string key, object instance, string path)
-        {
-            string name = GetTextOrKey(key);
-            name = new PlaceholderReplacePair("object", instance.ToString()).ReplaceAsPlaceholder(name);
-            name = new PlaceholderReplacePair("property", path).ReplaceAsPlaceholder(name);
+        static string GetUndoName(string key, object instance, string path) => string.Format(GetTextOrKey(key), instance, path);
 
-            return name;
-        }
-        
         class SerializableUndoHandler : ScriptableObject
         {
             /// <summary>

@@ -192,9 +192,8 @@ namespace RuniOS.Utility
 
             // 5. ReplacePair 구성
             string formattedValue = totalValue.Floor(digits).ToString("F" + digits, CultureInfo.InvariantCulture);
-            PlaceholderReplacePair replace = new PlaceholderReplacePair("{value}", formattedValue);
-
-            return new Localization(identifier, null, replace);
+            _ = formattedValue;
+            return new Localization(identifier);
         }
         #endregion
 
