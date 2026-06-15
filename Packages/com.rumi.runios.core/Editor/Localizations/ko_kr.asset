@@ -106,49 +106,31 @@ MonoBehaviour:
     - key: gui.version
       value: "\uBC84\uC804"
     - key: gui.element.index
-      value: "\uC694\uC18C {index}"
+      value: "\uC694\uC18C {0}"
     - key: gui.apply
       value: "\uC801\uC6A9"
     - key: gui.revert
       value: "\uB418\uB3CC\uB9AC\uAE30"
     - key: serializable_dictionary_property_drawer.not_found.key
-      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00
-        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
-        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
-        \"serializableKeys\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableKeys\"\uAC00 \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"serializableKeys\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
     - key: serializable_dictionary_property_drawer.not_found.value
-      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableValues\"\uAC00
-        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
-        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
-        \"serializableValues\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"serializableValues\"\uAC00 \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"serializableValues\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
     - key: serializable_key_value_pair_property_drawer.not_found.key
-      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"key\"\uAC00 \uC874\uC7AC\uD558\uC9C0
-        \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74
-        \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"key\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"key\"\uAC00 \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"key\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
     - key: serializable_key_value_pair_property_drawer.not_found.value
-      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"value\"\uAC00
-        \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C
-        \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788
-        \"value\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
+      value: "\uC9C1\uB82C\uD654 \uAC00\uB2A5\uD55C \uD544\uB4DC \"value\"\uAC00 \uC874\uC7AC\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\nGUI\uC5D0 \uC790\uB3D9\uC73C\uB85C \uD45C\uC2DC\uD558\uB824\uBA74 \uD544\uB4DC \uC774\uB984\uC774 \uC815\uD655\uD788 \"value\"\uC5EC\uC57C \uD569\uB2C8\uB2E4."
     - key: serializable_nullable.invalid_serialization_type
       value: "\uC798\uBABB\uB41C \uC9C1\uB82C\uD654 \uD0C0\uC785\uC785\uB2C8\uB2E4"
     - key: identifier.invalid.namespace
-      value: "\uC798\uBABB\uB41C \uB124\uC784\uC2A4\uD398\uC774\uC2A4\uC785\uB2C8\uB2E4:
-        '{value}'.\n\uD5C8\uC6A9\uB418\uB294 \uBB38\uC790\uB294 'a-z', '0-9', '.',
-        '-', '_'\uC785\uB2C8\uB2E4."
+      value: "\uC798\uBABB\uB41C \uB124\uC784\uC2A4\uD398\uC774\uC2A4\uC785\uB2C8\uB2E4: '{0}'.\n\uD5C8\uC6A9\uB418\uB294 \uBB38\uC790\uB294 'a-z', '0-9', '.', '-', '_'\uC785\uB2C8\uB2E4."
     - key: identifier.invalid.path
-      value: "\uC798\uBABB\uB41C \uACBD\uB85C\uC785\uB2C8\uB2E4: '{value}'.\n\uD5C8\uC6A9\uB418\uB294
-        \uBB38\uC790\uB294 'a-z', '0-9', '.', '/', '-', '_'\uC785\uB2C8\uB2E4."
+      value: "\uC798\uBABB\uB41C \uACBD\uB85C\uC785\uB2C8\uB2E4: '{0}'.\n\uD5C8\uC6A9\uB418\uB294 \uBB38\uC790\uB294 'a-z', '0-9', '.', '/', '-', '_'\uC785\uB2C8\uB2E4."
     - key: ui.unclamped_slider.tooltip
-      value: "\uC2AC\uB77C\uC774\uB354 \uBC94\uC704\uC640 \uAD00\uACC4\uC5C6\uC774
-        \uC801\uC6A9\uB418\uB294 \uAC12 \uC81C\uD55C\uC785\uB2C8\uB2E4. null\uC774\uBA74
-        \uD574\uB2F9 \uBC29\uD5A5\uC73C\uB85C \uC81C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
+      value: "\uC2AC\uB77C\uC774\uB354 \uBC94\uC704\uC640 \uAD00\uACC4\uC5C6\uC774 \uC801\uC6A9\uB418\uB294 \uAC12 \uC81C\uD55C\uC785\uB2C8\uB2E4. null\uC774\uBA74 \uD574\uB2F9 \uBC29\uD5A5\uC73C\uB85C \uC81C\uD55C\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: internal.auto_setter.property.info
-      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D
-        {name} \uC18D\uC131 \uAC12\uC744 \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
+      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D {0} \uC18D\uC131 \uAC12\uC744 \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
     - key: internal.auto_setter.property.value_info
-      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D
-        {name} \uC18D\uC131 \uAC12\uC744 {value}\uC73C(\uB85C) \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
+      value: "RuniOS\uAC00 \uC62C\uBC14\uB974\uAC8C \uC791\uB3D9\uD560 \uC218 \uC788\uB3C4\uB85D {0} \uC18D\uC131 \uAC12\uC744 {1}\uC73C(\uB85C) \uBCC0\uACBD\uD588\uC2B5\uB2C8\uB2E4."
     - key: internal.editor_resource_loader.loading
       value: "\uB9AC\uC18C\uC2A4 \uB85C\uB4DC..."
     - key: control_panel.title
@@ -168,14 +150,11 @@ MonoBehaviour:
     - key: control_panel.generic.unscaled_delta_time
       value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uB378\uD0C0 \uD0C0\uC784"
     - key: control_panel.generic.unscaled_smooth_delta_time
-      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uBD80\uB4DC\uB7EC\uC6B4
-        \uB378\uD0C0 \uD0C0\uC784"
+      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uBD80\uB4DC\uB7EC\uC6B4 \uB378\uD0C0 \uD0C0\uC784"
     - key: control_panel.generic.fps_unscaled_delta_time
-      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uB378\uD0C0 \uD0C0\uC784
-        * \uAE30\uC900 \uD504\uB808\uC784"
+      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uB378\uD0C0 \uD0C0\uC784 * \uAE30\uC900 \uD504\uB808\uC784"
     - key: control_panel.generic.fps_unscaled_smooth_delta_time
-      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uBD80\uB4DC\uB7EC\uC6B4
-        \uB378\uD0C0 \uD0C0\uC784 * \uAE30\uC900 \uD504\uB808\uC784"
+      value: "\uC2A4\uCF00\uC77C\uB418\uC9C0 \uC54A\uC740 \uBD80\uB4DC\uB7EC\uC6B4 \uB378\uD0C0 \uD0C0\uC784 * \uAE30\uC900 \uD504\uB808\uC784"
     - key: control_panel.generic.fps
       value: "\uD604\uC7AC \uD504\uB808\uC784"
     - key: control_panel.generic.memory
@@ -183,8 +162,7 @@ MonoBehaviour:
     - key: control_panel.generic.memory.reserved
       value: "\uCD1D \uC608\uC545\uB41C \uBA54\uBAA8\uB9AC (MB)"
     - key: control_panel.generic.memory.unused_reserved
-      value: "\uCD1D \uC0AC\uC6A9\uB418\uC9C0 \uC54A\uC740 \uC608\uC545\uB41C \uBA54\uBAA8\uB9AC
-        (MB)"
+      value: "\uCD1D \uC0AC\uC6A9\uB418\uC9C0 \uC54A\uC740 \uC608\uC545\uB41C \uBA54\uBAA8\uB9AC (MB)"
     - key: control_panel.generic.memory.mono
       value: "\uCD1D \uBAA8\uB178 \uBA54\uBAA8\uB9AC (MB)"
     - key: control_panel.generic.main_thread_id
@@ -250,9 +228,7 @@ MonoBehaviour:
     - key: control_panel.development
       value: "\uAC1C\uBC1C"
     - key: control_panel.development.warning
-      value: "RuniOS \uAC1C\uBC1C\uC744 \uC704\uD55C \uC720\uD2F8\uB9AC\uD2F0 \uD0ED\uC785\uB2C8\uB2E4.\r\n\uC774
-        \uD0ED\uC758 \uAE30\uB2A5\uC744 \uBAA8\uB974\uC2DC\uACA0\uB2E4\uBA74 \uB4A4\uB85C
-        \uB3CC\uC544\uAC00 \uC8FC\uC138\uC694."
+      value: "RuniOS \uAC1C\uBC1C\uC744 \uC704\uD55C \uC720\uD2F8\uB9AC\uD2F0 \uD0ED\uC785\uB2C8\uB2E4.\r\n\uC774 \uD0ED\uC758 \uAE30\uB2A5\uC744 \uBAA8\uB974\uC2DC\uACA0\uB2E4\uBA74 \uB4A4\uB85C \uB3CC\uC544\uAC00 \uC8FC\uC138\uC694."
     - key: control_panel.development.localization
       value: "\uD604\uC9C0\uD654"
     - key: control_panel.development.localization.asset
@@ -262,8 +238,7 @@ MonoBehaviour:
     - key: control_panel.development.localization.json_export
       value: "JSON\uC73C\uB85C \uB0B4\uBCF4\uB0B4\uAE30"
     - key: control_panel.development.localization.overwrite.message
-      value: "\uB36E\uC5B4\uC4F0\uC2DC\uACA0\uC2B5\uB2C8\uAE4C, \uC544\uB2C8\uBA74
-        \uCD94\uAC00\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
+      value: "\uB36E\uC5B4\uC4F0\uC2DC\uACA0\uC2B5\uB2C8\uAE4C, \uC544\uB2C8\uBA74 \uCD94\uAC00\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?"
     - key: control_panel.development.localization.overwrite.ok
       value: "\uBAA8\uB450 \uB36E\uC5B4\uC4F0\uAE30"
     - key: control_panel.development.localization.overwrite.cancel
@@ -281,12 +256,9 @@ MonoBehaviour:
     - key: control_panel.development.driven_property.zero_count
       value: "\uC81C\uC5B4\uB41C \uC18D\uC131\uC774 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: inspector.invalid.collection
-      value: "\uC798\uBABB\uB41C \uCEEC\uB809\uC158\uC785\uB2C8\uB2E4. \uAE30\uBCF8
-        \uC778\uC2A4\uD399\uD130\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.\nIList\uB97C
-        \uC0C1\uC18D\uD558\uACE0 \uC788\uB294\uC9C0 \uD655\uC778\uD574\uC8FC\uC138\uC694."
+      value: "\uC798\uBABB\uB41C \uCEEC\uB809\uC158\uC785\uB2C8\uB2E4. \uAE30\uBCF8 \uC778\uC2A4\uD399\uD130\uAC00 \uD45C\uC2DC\uB429\uB2C8\uB2E4.\nIList\uB97C \uC0C1\uC18D\uD558\uACE0 \uC788\uB294\uC9C0 \uD655\uC778\uD574\uC8FC\uC138\uC694."
     - key: inspector.invalid.collection.duplicate_key
-      value: "\uC911\uBCF5\uB41C \uD0A4\uC785\uB2C8\uB2E4.\n\uBCC0\uACBD \uC0AC\uD56D\uC774
-        \uC800\uC7A5\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
+      value: "\uC911\uBCF5\uB41C \uD0A4\uC785\uB2C8\uB2E4.\n\uBCC0\uACBD \uC0AC\uD56D\uC774 \uC800\uC7A5\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
     - key: inspector.not_readable
       value: "\uC774 \uC694\uC18C\uB294 \uC77D\uC744 \uC218 \uC5C6\uC2B5\uB2C8\uB2E4."
     - key: inspector.no_instance
@@ -298,9 +270,7 @@ MonoBehaviour:
     - key: inspector.rounded_corners.corner.softness
       value: "\uBD80\uB4DC\uB7EC\uC6C0"
     - key: inspector.rounded_corners.corner.softness.tooltip
-      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uAC15\uB3C4\uC785\uB2C8\uB2E4.
-        1.0\uC774 \uD45C\uC900(1\uD53D\uC140)\uC774\uBA70, \uB0AE\uC744\uC218\uB85D
-        \uB0A0\uCE74\uB86D\uACE0 \uB192\uC744\uC218\uB85D \uD750\uB824\uC9D1\uB2C8\uB2E4."
+      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uAC15\uB3C4\uC785\uB2C8\uB2E4. 1.0\uC774 \uD45C\uC900(1\uD53D\uC140)\uC774\uBA70, \uB0AE\uC744\uC218\uB85D \uB0A0\uCE74\uB86D\uACE0 \uB192\uC744\uC218\uB85D \uD750\uB824\uC9D1\uB2C8\uB2E4."
     - key: inspector.rounded_corners.outline.header
       value: "\uC724\uACFD\uC120 \uC124\uC815"
     - key: inspector.rounded_corners.outline.outlineColor
@@ -310,9 +280,7 @@ MonoBehaviour:
     - key: inspector.rounded_corners.outline.outlineSoftness
       value: "\uBD80\uB4DC\uB7EC\uC6C0"
     - key: inspector.rounded_corners.outline.outlineSoftness.tooltip
-      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uAC15\uB3C4\uC785\uB2C8\uB2E4.
-        1.0\uC774 \uD45C\uC900(1\uD53D\uC140)\uC774\uBA70, \uB0AE\uC744\uC218\uB85D
-        \uB0A0\uCE74\uB86D\uACE0 \uB192\uC744\uC218\uB85D \uD750\uB824\uC9D1\uB2C8\uB2E4."
+      value: "\uC548\uD2F0\uC5D0\uC77C\uB9AC\uC5B4\uC2F1 \uAC15\uB3C4\uC785\uB2C8\uB2E4. 1.0\uC774 \uD45C\uC900(1\uD53D\uC140)\uC774\uBA70, \uB0AE\uC744\uC218\uB85D \uB0A0\uCE74\uB86D\uACE0 \uB192\uC744\uC218\uB85D \uD750\uB824\uC9D1\uB2C8\uB2E4."
     - key: inspector.rounded_corners.outline.insideOutline
       value: "\uB0B4\uBD80 \uC724\uACFD\uC120"
     - key: inspector.simple_mesh_outline.appearance.header
@@ -324,8 +292,7 @@ MonoBehaviour:
     - key: inspector.simple_mesh_outline.appearance.useFixedWidth
       value: "\uACE0\uC815 \uB108\uBE44 \uC0AC\uC6A9"
     - key: inspector.simple_mesh_outline.appearance.useFixedWidth.tooltip
-      value: "\uB450\uAED8\uB97C \uD654\uBA74 \uD53D\uC140 \uAE30\uC900\uC73C\uB85C
-        \uACE0\uC815\uD569\uB2C8\uB2E4."
+      value: "\uB450\uAED8\uB97C \uD654\uBA74 \uD53D\uC140 \uAE30\uC900\uC73C\uB85C \uACE0\uC815\uD569\uB2C8\uB2E4."
     - key: inspector.simple_mesh_outline.appearance.gap
       value: "\uAC2D"
     - key: inspector.simple_mesh_outline.appearance.useFixedGap
@@ -337,10 +304,7 @@ MonoBehaviour:
     - key: inspector.simple_mesh_outline.settings.outlineVisibility
       value: "\uAC00\uC2DC\uC131"
     - key: inspector.simple_mesh_outline.settings.outlineVisibility.tooltip
-      value: "\uC724\uACFD\uC120\uC774 \uBCF4\uC5EC\uC9C0\uB294 \uBC29\uC2DD\uC744
-        \uACB0\uC815\uD569\uB2C8\uB2E4.\n- Normal: \uAC00\uB824\uC9C0\uBA74 \uC548
-        \uBCF4\uC784\n- AlwaysOnTop: \uD56D\uC0C1 \uC704\uC5D0 \uBCF4\uC784\n- OccludedOnly:
-        \uAC00\uB824\uC84C\uC744 \uB54C\uB9CC \uBCF4\uC784"
+      value: "\uC724\uACFD\uC120\uC774 \uBCF4\uC5EC\uC9C0\uB294 \uBC29\uC2DD\uC744 \uACB0\uC815\uD569\uB2C8\uB2E4.\n- Normal: \uAC00\uB824\uC9C0\uBA74 \uC548 \uBCF4\uC784\n- AlwaysOnTop: \uD56D\uC0C1 \uC704\uC5D0 \uBCF4\uC784\n- OccludedOnly: \uAC00\uB824\uC84C\uC744 \uB54C\uB9CC \uBCF4\uC784"
     - key: type_search_provider.name
       value: "\uC774\uB984"
     - key: type_search_provider.name.help
@@ -366,12 +330,12 @@ MonoBehaviour:
     - key: file_path.open_file.title
       value: "\uD30C\uC77C \uC5F4\uAE30"
     - key: undo.modify.property_in_object
-      value: "{object}\uC758 {property} \uC218\uC815"
+      value: "{0}\uC758 {1} \uC218\uC815"
     - key: undo.collection.add
-      value: "{object}\uC758 {property}\uC5D0 \uC694\uC18C \uCD94\uAC00"
+      value: "{0}\uC758 {1}\uC5D0 \uC694\uC18C \uCD94\uAC00"
     - key: undo.collection.remove
-      value: "{object}\uC758 {property}\uC5D0\uC11C \uC694\uC18C \uC0AD\uC81C"
+      value: "{0}\uC758 {1}\uC5D0\uC11C \uC694\uC18C \uC0AD\uC81C"
     - key: undo.collection.move
-      value: "{object}\uC758 {property}\uC5D0\uC11C \uC694\uC18C \uC774\uB3D9"
+      value: "{0}\uC758 {1}\uC5D0\uC11C \uC694\uC18C \uC774\uB3D9"
     - key: undo.discard
-      value: "{object}\uC758 \uBCC0\uACBD\uC0AC\uD56D \uBC84\uB9AC\uAE30"
+      value: "{0}\uC758 \uBCC0\uACBD\uC0AC\uD56D \uBC84\uB9AC\uAE30"

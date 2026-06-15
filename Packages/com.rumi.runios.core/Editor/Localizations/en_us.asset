@@ -24,7 +24,7 @@ MonoBehaviour:
     - key: gui.value
       value: Value
     - key: gui.field_is_null
-      value: "This field is required.\r"
+      value: This field is required.
     - key: gui.path
       value: Path
     - key: gui.min
@@ -106,7 +106,7 @@ MonoBehaviour:
     - key: gui.version
       value: Version
     - key: gui.element.index
-      value: Element {index}
+      value: Element {0}
     - key: gui.apply
       value: Apply
     - key: gui.revert
@@ -114,43 +114,35 @@ MonoBehaviour:
     - key: serializable_dictionary_property_drawer.not_found.key
       value: 'The serializable field "serializableKeys" does not exist.
 
-        To
-        be displayed automatically in the GUI, the field name must be exactly "serializableKeys".'
+        To be displayed automatically in the GUI, the field name must be exactly "serializableKeys".'
     - key: serializable_dictionary_property_drawer.not_found.value
       value: 'The serializable field "serializableValues" does not exist.
 
-        To
-        be displayed automatically in the GUI, the field name must be exactly "serializableValues".'
+        To be displayed automatically in the GUI, the field name must be exactly "serializableValues".'
     - key: serializable_key_value_pair_property_drawer.not_found.key
       value: 'The serializable field "key" does not exist.
 
-        To be displayed
-        automatically in the GUI, the field name must be exactly "key".'
+        To be displayed automatically in the GUI, the field name must be exactly "key".'
     - key: serializable_key_value_pair_property_drawer.not_found.value
       value: 'The serializable field "value" does not exist.
 
-        To be displayed
-        automatically in the GUI, the field name must be exactly "value".'
+        To be displayed automatically in the GUI, the field name must be exactly "value".'
     - key: serializable_nullable.invalid_serialization_type
       value: Invalid serialization type
     - key: identifier.invalid.namespace
-      value: 'Invalid namespace: ''{value}''.
+      value: 'Invalid namespace: ''{0}''.
 
-        Allowed characters are ''a-z'',
-        ''0-9'', ''.'', ''-'', and ''_''.'
+        Allowed characters are ''a-z'', ''0-9'', ''.'', ''-'', and ''_''.'
     - key: identifier.invalid.path
-      value: 'Invalid path: ''{value}''.
+      value: 'Invalid path: ''{0}''.
 
-        Allowed characters are ''a-z'',
-        ''0-9'', ''.'', ''/'', ''-'', and ''_''.'
+        Allowed characters are ''a-z'', ''0-9'', ''.'', ''/'', ''-'', and ''_''.'
     - key: ui.unclamped_slider.tooltip
-      value: Clamps the value independently of the slider's range. null removes the
-        limit in that direction.
+      value: Clamps the value independently of the slider's range. null removes the limit in that direction.
     - key: internal.auto_setter.property.info
-      value: Changed the {name} property value to allow RuniOS to work properly
+      value: Changed the {0} property value to allow RuniOS to work properly
     - key: internal.auto_setter.property.value_info
-      value: Changed the {name} property value to {value} to allow RuniOS to work
-        correctly
+      value: Changed the {0} property value to {1} to allow RuniOS to work correctly
     - key: internal.editor_resource_loader.loading
       value: Loading Resource...
     - key: control_panel.title
@@ -244,8 +236,7 @@ MonoBehaviour:
     - key: control_panel.development.warning
       value: 'This is the Utility tab for developing RuniOS.
 
-        If you don''t
-        know what this tab does, please turn back.'
+        If you don''t know what this tab does, please turn back.'
     - key: control_panel.development.localization
       value: Localization
     - key: control_panel.development.localization.asset
@@ -275,8 +266,7 @@ MonoBehaviour:
     - key: inspector.invalid.collection
       value: 'Invalid collection. The default inspector will be displayed.
 
-        Please
-        ensure that it inherits from IList.'
+        Please ensure that it inherits from IList.'
     - key: inspector.invalid.collection.duplicate_key
       value: 'Duplicate key.
 
@@ -292,8 +282,7 @@ MonoBehaviour:
     - key: inspector.rounded_corners.corner.softness
       value: Softness
     - key: inspector.rounded_corners.corner.softness.tooltip
-      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare
-        sharper, higher values \u200B\u200Bare blurrier."
+      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare sharper, higher values \u200B\u200Bare blurrier."
     - key: inspector.rounded_corners.outline.header
       value: Outline Settings
     - key: inspector.rounded_corners.outline.outlineColor
@@ -303,8 +292,7 @@ MonoBehaviour:
     - key: inspector.rounded_corners.outline.outlineSoftness
       value: Softness
     - key: inspector.rounded_corners.outline.outlineSoftness.tooltip
-      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare
-        sharper, higher values \u200B\u200Bare blurrier."
+      value: "Anti-aliasing strength. 1.0 is standard (1 pixel), lower values \u200B\u200Bare sharper, higher values \u200B\u200Bare blurrier."
     - key: inspector.rounded_corners.outline.insideOutline
       value: Inside Outline
     - key: inspector.simple_mesh_outline.appearance.header
@@ -330,13 +318,11 @@ MonoBehaviour:
     - key: inspector.simple_mesh_outline.settings.outlineVisibility.tooltip
       value: 'Determines how the outline is displayed.
 
-        - Normal: Not visible
-        when occluded
+        - Normal: Not visible when occluded
 
         - AlwaysOnTop: Always visible on top
 
-        - OccludedOnly:
-        Visible only when occluded'
+        - OccludedOnly: Visible only when occluded'
     - key: type_search_provider.name
       value: Name
     - key: type_search_provider.name.help
@@ -362,12 +348,12 @@ MonoBehaviour:
     - key: file_path.open_file.title
       value: Open File
     - key: undo.modify.property_in_object
-      value: Modified {property} in {object}
+      value: Modified {0} in {1}
     - key: undo.collection.add
-      value: Add element to {property} of {object}
+      value: Add element to {0} of {1}
     - key: undo.collection.remove
-      value: Remove element from {property} of {object}
+      value: Remove element from {0} of {1}
     - key: undo.collection.move
-      value: Move element from {property} of {object}
+      value: Move element from {0} of {1}
     - key: undo.discard
-      value: Discard changes to {object}
+      value: Discard changes to {0}
