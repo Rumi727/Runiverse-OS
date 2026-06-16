@@ -1,5 +1,7 @@
 #nullable enable
 
+using System.Diagnostics.CodeAnalysis;
+
 namespace RuniOS.Formats
 {
     /// <summary>
@@ -82,6 +84,7 @@ namespace RuniOS.Formats
         /// Gets a value indicating whether this segment represents literal text.<br/>
         /// 이 세그먼트가 literal 텍스트를 나타내는지 여부를 가져옵니다.
         /// </summary>
+        [MemberNotNullWhen(true, nameof(literal))]
         public bool isLiteral => literal != null;
 
         /// <summary>
