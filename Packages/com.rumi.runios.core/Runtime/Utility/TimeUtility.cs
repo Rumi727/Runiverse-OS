@@ -1,6 +1,6 @@
 #nullable enable
-using RuniOS.Localizations;
 using RuniOS.Resource;
+using RuniOS.Texts;
 using System.Globalization;
 using System.Text;
 
@@ -147,7 +147,7 @@ namespace RuniOS.Utility
                 secondsFormat += "." + new string('0', decimalPlaces);
 
             sb.AppendFormat(CultureInfo.InvariantCulture, $"{{0:{secondsFormat}}}", secondAbs % 60);
-            return StringBuilderCache.Release(sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
         #endregion
 
@@ -156,12 +156,12 @@ namespace RuniOS.Utility
         #region Relative Time
         /// <summary>
         /// 지정된 <see cref="TimeSpan"/>을 상대적인 시간 문자열(예: "5 days ago", "2 months later")에 해당하는
-        /// <see cref="Localization"/> 객체로 변환합니다.
+        /// <see cref="LocalizationUtility"/> 객체로 변환합니다.
         /// </summary>
         /// <param name="timeSpan">변환할 <see cref="TimeSpan"/>입니다.</param>
         /// <param name="digits">표시할 소수점 이하 자릿수입니다.</param>
-        /// <returns>상대적인 시간 문자열을 포함하는 <see cref="Localization"/> 객체입니다.</returns>
-        public static Localization ToRelativeString(this TimeSpan timeSpan, int digits = 2)
+        /// <returns>상대적인 시간 문자열을 포함하는 <see cref="LocalizationUtility"/> 객체입니다.</returns>
+        public static Text ToRelativeString(this TimeSpan timeSpan, int digits = 2)
         {
             // 1. 시간 방향 결정 및 절대값 계산
             bool isNegative = timeSpan < TimeSpan.Zero;
@@ -185,15 +185,13 @@ namespace RuniOS.Utility
             };
             
             if (string.IsNullOrEmpty(unitPath))
-                return "runios:gui.now";
+                return Text.Local("runios:gui.now");
 
             // 4. Localization Identifier 구성
             Identifier identifier = "runios:gui." + isAgoOrLater + "." + unitPath;
 
-            // 5. ReplacePair 구성
-            string formattedValue = totalValue.Floor(digits).ToString("F" + digits, CultureInfo.InvariantCulture);
-            _ = formattedValue;
-            return new Localization(identifier);
+            // 5. Text 구성
+            return Text.Local(identifier, Text.Literal(totalValue.Floor(digits), "F" + digits));
         }
         #endregion
 

@@ -1,6 +1,6 @@
 #nullable enable
 using R3;
-using RuniOS.Localizations;
+using RuniOS.Texts;
 using System.Diagnostics;
 using System.Threading;
 
@@ -13,16 +13,16 @@ namespace RuniOS.Tasks
 
 
 
-        static readonly List<AsyncTask> _asyncTasks = new List<AsyncTask>();
+        static readonly List<AsyncTask> _asyncTasks = [];
         public static IReadOnlyList<AsyncTask> asyncTasks { get; } = _asyncTasks.AsReadOnly();
 
 
 
-        public AsyncTask() : this(Localization.empty, Localization.empty) { }
+        public AsyncTask() : this(Text.empty, Text.empty) { }
 
-        public AsyncTask(Localization name) : this(name, Localization.empty) { }
+        public AsyncTask(Text name) : this(name, Text.empty) { }
 
-        public AsyncTask(Localization name, Localization description, bool cancellable = false)
+        public AsyncTask(Text name, Text description, bool cancellable = false)
         {
             this.name = name;
             this.description = description;
@@ -36,8 +36,8 @@ namespace RuniOS.Tasks
 
 
 
-        public override Localization name { get; set; } = Localization.empty;
-        public override Localization description { get; set; } = Localization.empty;
+        public override Text name { get; set; } = Text.empty;
+        public override Text description { get; set; } = Text.empty;
 
         public override ReactiveProperty<float> progress { get; } = new();
 
@@ -60,7 +60,7 @@ namespace RuniOS.Tasks
         public override void Dispose()
         {
             if (isDisposed)
-                throw new ObjectDisposedException(GetType().Name);
+                throw new ObjectDisposedException(nameof(AsyncTask));
 
             cancelEvent.SafeInvoke();
             cancelEvent = null;

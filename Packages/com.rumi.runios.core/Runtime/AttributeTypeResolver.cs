@@ -126,7 +126,7 @@ namespace RuniOS
         public static ImmutableArray<(Type type, TAttribute attribute)> drawerTypes { get; private set; }
         static readonly object drawerTypesLock = new();
 
-        static readonly ConcurrentDictionary<Type, (Type resolvedTargetType, Type drawerType)> cachedDrawerTypes = new();
+        static readonly ConcurrentDictionary<Type, (Type resolvedTargetType, Type drawerType)?> cachedDrawerTypes = new();
 
 
         /// <summary>
@@ -187,10 +187,18 @@ namespace RuniOS
             IEnumerable<(Type type, TAttribute attribute)> enumerable = drawerTypes;
             if (predicate != null)
                 enumerable = enumerable.Where(predicate);
-            else if (cachedDrawerTypes.TryGetValue(targetType, out (Type resolvedTargetType, Type drawerType) value))
+            else if (cachedDrawerTypes.TryGetValue(targetType, out (Type resolvedTargetType, Type drawerType)? value))
             {
-                resolvedTargetType = value.resolvedTargetType;
-                drawerType = value.drawerType;
+                if (value == null)
+                {
+                    resolvedTargetType = null;
+                    drawerType = null;
+
+                    return false;
+                }
+
+                resolvedTargetType = value.Value.resolvedTargetType;
+                drawerType = value.Value.drawerType;
                 
                 return true;
             }
@@ -202,7 +210,7 @@ namespace RuniOS
                 if (targetType == attribute.targetType || (attribute.isSubtypeCompatible && targetType.IsAssignableToAny(attribute.targetType, out resolvedTargetType)))
                 {
                     drawerType = type;
-                    cachedDrawerTypes.TryAdd(drawerType, (resolvedTargetType, drawerType));
+                    cachedDrawerTypes.TryAdd(targetType, (resolvedTargetType, drawerType));
                     
                     return true;
                 }
@@ -210,7 +218,8 @@ namespace RuniOS
 
             resolvedTargetType = null;
             drawerType = null;
-            
+
+            cachedDrawerTypes.TryAdd(targetType, null);
             return false;
         }
     }

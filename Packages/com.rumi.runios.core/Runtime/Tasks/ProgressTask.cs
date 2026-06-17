@@ -1,12 +1,13 @@
-﻿using R3;
-using RuniOS.Localizations;
+﻿#nullable enable
+using R3;
+using RuniOS.Texts;
 
 namespace RuniOS.Tasks
 {
     public abstract class ProgressTask : IProgress<float>, IDisposable
     {
-        public abstract Localization name { get; set; }
-        public abstract Localization description { get; set; }
+        public abstract Text name { get; set; }
+        public abstract Text description { get; set; }
         
         public abstract ReactiveProperty<float> progress { get; }
         public abstract bool cancellable { get; set; }

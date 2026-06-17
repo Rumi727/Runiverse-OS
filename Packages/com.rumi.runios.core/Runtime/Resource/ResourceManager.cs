@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.Collections.Generic;
 using RuniOS.Tasks;
+using RuniOS.Texts;
 
 namespace RuniOS.Resource
 {
@@ -17,6 +18,8 @@ namespace RuniOS.Resource
         public static AsyncTask? currentTask { get; private set; } = null;
         
         public static event Action<AsyncTask>? reloadStartEvent;
+
+        public static event Action? preReloadCompletionEvent;
         public static event Action? reloadCompletionEvent;
 
         static bool reloadRequested;
@@ -30,7 +33,7 @@ namespace RuniOS.Resource
                 return;
             }
             
-            currentTask = new AsyncTask("runios:resource.loading.title", "runios:resource.loading.description");
+            currentTask = new AsyncTask(Text.Local("runios:resource.loading.title"), Text.Local("runios:resource.loading.description"));
             reloadStartEvent?.SafeInvoke(currentTask);
             
             try
@@ -100,6 +103,8 @@ namespace RuniOS.Resource
                 currentTask = null;
 
                 isPreloaded = true;
+
+                preReloadCompletionEvent.SafeInvoke();
                 reloadCompletionEvent.SafeInvoke();
             }
         }

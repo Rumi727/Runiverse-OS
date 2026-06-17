@@ -24,22 +24,70 @@ namespace RuniOS
         /// </summary>
         public const string blackHex = "#000000";
         /// <summary>
+        /// 파란색 16진수 색상 문자열 "#0000ff"을 나타내는 상수입니다.
+        /// </summary>
+        public const string blueHex = "#0000ff";
+        /// <summary>
+        /// 초록색 16진수 색상 문자열 "#00ff00"을 나타내는 상수입니다.
+        /// </summary>
+        public const string greenHex = "#00ff00";
+        /// <summary>
+        /// 주황색 16진수 색상 문자열 "#ffa500"을 나타내는 상수입니다.
+        /// </summary>
+        public const string orangeHex = "#ffa500";
+        /// <summary>
+        /// 보라색 16진수 색상 문자열 "#800080"을 나타내는 상수입니다.
+        /// </summary>
+        public const string purpleHex = "#800080";
+        /// <summary>
+        /// 빨간색 16진수 색상 문자열 "#ff0000"을 나타내는 상수입니다.
+        /// </summary>
+        public const string redHex = "#ff0000";
+        /// <summary>
         /// 흰색 16진수 색상 문자열 "#ffffff"을 나타내는 상수입니다.
         /// </summary>
         public const string whiteHex = "#ffffff";
+        /// <summary>
+        /// 노란색 16진수 색상 문자열 "#ffff00"을 나타내는 상수입니다.
+        /// </summary>
+        public const string yellowHex = "#ffff00";
 
         /// <summary>
         /// 완전히 투명한 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="clearHex"/>와 동일)
         /// </summary>
-        public static HexColor clear = new();
+        public static readonly HexColor clear = new();
         /// <summary>
         /// 검은색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="blackHex"/>와 동일)
         /// </summary>
-        public static HexColor black = new(blackHex);
+        public static readonly HexColor black = new(blackHex);
+        /// <summary>
+        /// 파란색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="blueHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor blue = new(blueHex);
+        /// <summary>
+        /// 초록색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="greenHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor green = new(greenHex);
+        /// <summary>
+        /// 주황색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="orangeHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor orange = new(orangeHex);
+        /// <summary>
+        /// 보라색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="purpleHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor purple = new(purpleHex);
+        /// <summary>
+        /// 빨간색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="redHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor red = new(redHex);
         /// <summary>
         /// 흰색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="whiteHex"/>와 동일)
         /// </summary>
-        public static HexColor white = new(whiteHex);
+        public static readonly HexColor white = new(whiteHex);
+        /// <summary>
+        /// 노란색 <see cref="HexColor"/> 인스턴스를 나타냅니다. (<see cref="yellowHex"/>와 동일)
+        /// </summary>
+        public static readonly HexColor yellow = new(yellowHex);
 
         /// <summary>
         /// <see cref="Color"/> 값으로 <see cref="HexColor"/> 구조체의 새 인스턴스를 초기화합니다.

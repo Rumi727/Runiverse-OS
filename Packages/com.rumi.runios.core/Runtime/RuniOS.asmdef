@@ -5,7 +5,8 @@
         "GUID:c358082e85227cc4f9dee2438a164545",
         "GUID:12b970fc17bdc3041a8cc134ed15f8c6",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:5c01796d064528144a599661eaab93a6"
+        "GUID:5c01796d064528144a599661eaab93a6",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -13,7 +14,6 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "RuniOS.APIBridge.UnityEngine.CoreModule.dll",
-        "System.Collections.Immutable.dll",
         "ExtendedNumerics.BigDecimal.dll",
         "Newtonsoft.Json.dll",
         "R3.dll"

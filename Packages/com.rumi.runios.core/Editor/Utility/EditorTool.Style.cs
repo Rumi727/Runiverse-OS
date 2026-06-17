@@ -231,7 +231,7 @@ namespace RuniOS.Editor
         public static string RichNumberMSpace(object value) => RichNumberMSpace(value, "7.6");
         public static string RichNumberMSpace(object value, string width)
         {
-            System.Text.StringBuilder stringBuilder = StringBuilderCache.Acquire();
+            System.Text.StringBuilder stringBuilder = System.Text.StringBuilderCache.Acquire();
 
             string text = value.ToString();
             for (int i = 0; i < text.Length; i++)
@@ -243,7 +243,7 @@ namespace RuniOS.Editor
                     stringBuilder.Append(c);
             }
 
-            return StringBuilderCache.Release(stringBuilder);
+            return System.Text.StringBuilderCache.GetStringAndRelease(stringBuilder);
         }
 #else
         public static string RichMSpace(object value) => value.ToString();
