@@ -41,6 +41,16 @@ namespace RuniOS.Texts
         public static GroupText Group(GroupTextStringHandler handler) => handler.ToGroupText();
 
         /// <summary>
+        /// Creates an empty grouped text value.<br/>
+        /// 빈 리터럴 텍스트 값을 만듭니다.
+        /// </summary>
+        /// <returns>
+        /// A new empty <see cref="LiteralText"/> instance.<br/>
+        /// 새 빈 <see cref="LiteralText"/> 인스턴스를 반환합니다.
+        /// </returns>
+        public static LiteralText Literal() => new LiteralText(null);
+
+        /// <summary>
         /// Creates a literal text value.<br/>
         /// 리터럴 텍스트 값을 만듭니다.
         /// </summary>
@@ -113,6 +123,16 @@ namespace RuniOS.Texts
         public static LiteralText Literal(object? value, int alignment, string format) => new LiteralText(value, alignment, format);
 
         /// <summary>
+        /// Creates an empty grouped text value.<br/>
+        /// 빈 로컬라이징 텍스트 값을 만듭니다.
+        /// </summary>
+        /// <returns>
+        /// A new empty <see cref="LocalizationText"/> instance.<br/>
+        /// 새 빈 <see cref="LocalizationText"/> 인스턴스를 반환합니다.
+        /// </returns>
+        public static LocalizationText Local() => new LocalizationText(Identifier.empty, []);
+
+        /// <summary>
         /// Creates a localized text value without format arguments.<br/>
         /// format 인수 없는 로컬라이징 텍스트 값을 만듭니다.
         /// </summary>
@@ -128,7 +148,7 @@ namespace RuniOS.Texts
         /// A localized text instance.<br/>
         /// 로컬라이징 텍스트 인스턴스를 반환합니다.
         /// </returns>
-        public static LocalizationText Local(Identifier identifier, string? languageCode = "") => new LocalizationText(identifier, [], languageCode: languageCode);
+        public static LocalizationText Local(Identifier identifier, string? languageCode = "") => new LocalizationText(identifier, [], languageCode);
 
         /// <summary>
         /// Creates a localized text value with enumerable format arguments.<br/>
@@ -172,7 +192,7 @@ namespace RuniOS.Texts
         /// A localized text instance.<br/>
         /// 로컬라이징 텍스트 인스턴스를 반환합니다.
         /// </returns>
-        public static LocalizationText Local(Identifier identifier, IReadOnlyList<Text> args, string? languageCode = "") => new LocalizationText(identifier, args, languageCode);
+        public static LocalizationText Local(Identifier identifier, IList<Text> args, string? languageCode = "") => new LocalizationText(identifier, args, languageCode);
 
         /// <summary>
         /// Creates a localized text value with format arguments.<br/>
