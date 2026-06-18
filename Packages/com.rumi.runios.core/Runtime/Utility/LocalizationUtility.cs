@@ -30,7 +30,7 @@ namespace RuniOS.Utility
         /// </returns>
         public static string? GetText(Identifier identifier, string? languageCode = null)
         {
-            languageCode ??= string.Empty; /* TODO : 이거 바꿔라 */
+            languageCode ??= "ko_kr"; /* TODO : 이거 바꿔라 */
 
             LanguageAssetRegistry? registry = AssetRegistryManager.Get<LanguageAssetRegistry>();
             IReadOnlyDictionary<string, string>? asset = registry?.GetAsset(new Identifier(identifier.nameSpace, languageCode));
@@ -40,13 +40,13 @@ namespace RuniOS.Utility
 
         public static IReadOnlyList<CompositeFormatSegment>? GetFormatSegments(Identifier identifier, string? languageCode = null)
         {
-            languageCode ??= string.Empty; /* TODO : 이거 바꿔라 */
+            languageCode ??= "ko_kr"; /* TODO : 이거 바꿔라 */
 
-            string? value = GetText(identifier, languageCode);
-            if (value == null)
-                return null;
-
-            return cachedParseResult.GetOrAdd((identifier, languageCode), _ => CompositeFormat.Parse(value));
+            return cachedParseResult.GetOrAdd((identifier, languageCode), x =>
+            {
+                string? value = GetText(x.identifier, x.languageCode);
+                return CompositeFormat.Parse(value ?? x.identifier);
+            });
         }
 
         public static IEnumerable<string> GetAllLanguageCode()
