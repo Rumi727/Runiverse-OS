@@ -1,4 +1,6 @@
 #nullable enable
+using RuniOS.Reflection;
+
 namespace RuniOS.Editor.IMGUI
 {
     public static partial class RuniFields
@@ -87,6 +89,14 @@ namespace RuniOS.Editor.IMGUI
                 return CharField(position, (char)value);
             else if (type == typeof(string))
                 return EditorGUI.TextField(position, (string)value);
+            else if (type.IsEnum())
+            {
+                Enum enumValue = (Enum)value;
+                if (enumValue.IsFlags())
+                    return EditorGUI.EnumFlagsField(position, enumValue);
+                else
+                    return EditorGUI.EnumPopup(position, enumValue);
+            }
 
             EditorGUI.LabelField(position, GetTextOrKey("gui.invalid_type"));
             return value;
