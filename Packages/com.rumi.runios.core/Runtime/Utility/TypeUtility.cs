@@ -404,7 +404,7 @@ namespace RuniOS.Utility
                 TypeCode.Int64 => true,
                 TypeCode.UInt64 => true,
                 _ => false,
-            };
+            } && !type.IsEnum();
         }
 
         public static bool IsFractional(this Type type)
@@ -421,6 +421,7 @@ namespace RuniOS.Utility
         public static bool IsNumeric(this Type type) => type.IsInteger() || type.IsFractional();
         public static bool IsText(this Type type) => type == typeof(char) || type == typeof(string);
         public static bool IsTextField(this Type type) => type.IsNumeric() || type.IsText();
+        public static bool IsEnum(this Type type) => type.IsSubclassOf(typeof(Enum));
 
 
 
