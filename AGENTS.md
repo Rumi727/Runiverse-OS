@@ -17,6 +17,12 @@
 - This project is a Unity/C# project.
 - When the user asks a question that requires understanding this project's structure, do not guess the structure from imagination. Inspect the actual files first, usually under the `/Packages` folder.
 
+## Verification
+
+- Do not run .NET build commands such as `dotnet build`, `dotnet test`, or generated `.csproj`/`.sln` builds for verification.
+- Do not run syntax-only compile checks unless the user explicitly asks.
+- For Unity/C# changes, prefer lightweight inspection such as reading the changed files and checking the intended API usage.
+
 ## C# Style
 
 - Put `#nullable enable` at the very top of C# files.
