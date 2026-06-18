@@ -56,24 +56,16 @@ namespace RuniOS.Texts
         /// Appends a formatted value as a literal text segment.<br/>
         /// format 값을 리터럴 텍스트 세그먼트로 추가합니다.
         /// </summary>
-        /// <typeparam name="T">
-        /// The value type to append.<br/>
-        /// 추가할 값 타입입니다.
-        /// </typeparam>
         /// <param name="value">
         /// The value to append.<br/>
         /// 추가할 값입니다.
         /// </param>
-        public void AppendFormatted<T>(T value) => groupText.Add(Text.Literal(value));
+        public void AppendFormatted(object? value) => groupText.Add(Text.Literal(value));
 
         /// <summary>
         /// Appends a formatted value with alignment information.<br/>
         /// 정렬 정보를 가진 format 값을 추가합니다.
         /// </summary>
-        /// <typeparam name="T">
-        /// The value type to append.<br/>
-        /// 추가할 값 타입입니다.
-        /// </typeparam>
         /// <param name="value">
         /// The value to append.<br/>
         /// 추가할 값입니다.
@@ -82,16 +74,12 @@ namespace RuniOS.Texts
         /// The composite-format alignment width to apply when formatting.<br/>
         /// format 처리 시 적용할 복합 format 정렬 너비입니다.
         /// </param>
-        public void AppendFormatted<T>(T value, int alignment) => groupText.Add(Text.Literal(value, alignment));
+        public void AppendFormatted(object? value, int alignment) => groupText.Add(Text.Literal(value, alignment));
 
         /// <summary>
         /// Appends a formatted value with optional format information.<br/>
         /// 선택적 format 정보를 가진 format 값을 추가합니다.
         /// </summary>
-        /// <typeparam name="T">
-        /// The value type to append.<br/>
-        /// 추가할 값 타입입니다.
-        /// </typeparam>
         /// <param name="value">
         /// The value to append.<br/>
         /// 추가할 값입니다.
@@ -100,7 +88,7 @@ namespace RuniOS.Texts
         /// The format string to apply, or <see langword="null"/> to append without a format string.<br/>
         /// 적용할 format 문자열이며, <see langword="null"/>이면 format 문자열 없이 추가합니다.
         /// </param>
-        public void AppendFormatted<T>(T value, string? format)
+        public void AppendFormatted(object? value, string? format)
         {
             Text text;
             if (format != null)
@@ -115,10 +103,6 @@ namespace RuniOS.Texts
         /// Appends a formatted value with alignment and optional format information.<br/>
         /// 정렬 및 선택적 format 정보를 가진 format 값을 추가합니다.
         /// </summary>
-        /// <typeparam name="T">
-        /// The value type to append.<br/>
-        /// 추가할 값 타입입니다.
-        /// </typeparam>
         /// <param name="value">
         /// The value to append.<br/>
         /// 추가할 값입니다.
@@ -131,7 +115,7 @@ namespace RuniOS.Texts
         /// The format string to apply, or <see langword="null"/> to append without a format string.<br/>
         /// 적용할 format 문자열이며, <see langword="null"/>이면 format 문자열 없이 추가합니다.
         /// </param>
-        public void AppendFormatted<T>(T value, int alignment, string? format)
+        public void AppendFormatted(object? value, int alignment, string? format)
         {
             Text text;
             if (format != null)
