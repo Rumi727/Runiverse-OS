@@ -91,5 +91,7 @@ namespace RuniOS.Texts.Styles
             LengthUnit.Percent => value + "%",
             _ => throw new ArgumentOutOfRangeException(nameof(unit))
         };
+
+        public static implicit operator Length(float value) => Pixels(value);
     }
 }
