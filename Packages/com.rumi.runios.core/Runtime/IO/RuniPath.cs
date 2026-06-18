@@ -8,10 +8,10 @@ namespace RuniOS.IO
 {
     /// <summary>
     /// Represents a normalized logical path used by the framework.<br/>
-    /// The path uses <see cref="directorySeparatorChar"/> internally and strips leading and trailing separators during normalization.
+    /// Normalization trims leading and trailing <see cref="directorySeparatorChar"/> values and collapses repeated <see cref="directorySeparatorChar"/> separators.
     /// <br/><br/>
     /// 프레임워크에서 사용하는 정규화된 논리 경로를 나타냅니다.<br/>
-    /// 경로는 내부적으로 <see cref="directorySeparatorChar"/>를 사용하며, 정규화 과정에서 시작과 끝의 구분자를 제거합니다.
+    /// 정규화 과정에서 시작과 끝의 <see cref="directorySeparatorChar"/> 값을 제거하고 반복된 <see cref="directorySeparatorChar"/> 구분자를 합칩니다.
     /// </summary>
     [Serializable]
     [JsonConverter(typeof(RuniPathConverter))]
@@ -22,18 +22,6 @@ namespace RuniOS.IO
         /// <see cref="RuniPath"/>가 정규화된 경로에 사용하는 디렉터리 구분 문자를 나타냅니다.
         /// </summary>
         public const char directorySeparatorChar = '/';
-
-        /// <summary>
-        /// The Windows directory separator character that is accepted during normalization.<br/>
-        /// 정규화 과정에서 허용되는 Windows 디렉터리 구분 문자를 나타냅니다.
-        /// </summary>
-        public const char windowsDirectorySeparatorChar = '\\';
-
-        /// <summary>
-        /// The directory separator characters recognized by normalization.<br/>
-        /// 정규화 과정에서 인식하는 디렉터리 구분 문자 컬렉션입니다.
-        /// </summary>
-        public static readonly char[] directorySeparatorChars = ['/', '\\'];
 
         /// <summary>
         /// The empty <see cref="RuniPath"/> value.<br/>
@@ -66,25 +54,8 @@ namespace RuniOS.IO
 
 
 
-        /// <summary>
-        /// Initializes a new <see cref="RuniPath"/> from the specified path string.<br/>
-        /// 지정된 경로 문자열에서 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
-        /// </summary>
-        /// <param name="path">
-        /// The path string to normalize.<br/>
-        /// 정규화할 경로 문자열입니다.
-        /// </param>
-        public RuniPath(string path) => _value = NormalizePath(path);
-
-        /// <summary>
-        /// Initializes a new <see cref="RuniPath"/> from the specified path string.<br/>
-        /// 지정된 경로 문자열에서 새 <see cref="RuniPath"/> 인스턴스를 초기화합니다.
-        /// </summary>
-        /// <param name="path">
-        /// The path span to normalize.<br/>
-        /// 정규화할 경로 span입니다.
-        /// </param>
-        public RuniPath(ReadOnlySpan<char> path) => _value = NormalizePath(path.ToString());
+        RuniPath(string path) => _value = path;
+        RuniPath(ReadOnlySpan<char> path) => _value = path.ToString();
 
 
 
@@ -100,7 +71,7 @@ namespace RuniOS.IO
         /// A normalized <see cref="RuniPath"/> value.<br/>
         /// 정규화된 <see cref="RuniPath"/> 값을 반환합니다.
         /// </returns>
-        public static RuniPath From(string path) => new RuniPath(path);
+        public static RuniPath From(string path) => new RuniPath(NormalizePath(path));
 
         /// <summary>
         /// Creates a new <see cref="RuniPath"/> from the specified path string.<br/>
@@ -114,7 +85,7 @@ namespace RuniOS.IO
         /// A normalized <see cref="RuniPath"/> value.<br/>
         /// 정규화된 <see cref="RuniPath"/> 값을 반환합니다.
         /// </returns>
-        public static RuniPath From(ReadOnlySpan<char> path) => new RuniPath(path);
+        public static RuniPath From(ReadOnlySpan<char> path) => new RuniPath(NormalizePath(path.ToString()));
 
 
 
@@ -179,10 +150,10 @@ namespace RuniOS.IO
         /// 제거할 접두사 경로입니다.
         /// </param>
         /// <returns>
-        /// The trimmed path when the prefix matches; otherwise, this path.<br/>
+        /// The path with the prefix removed when the prefix matches; otherwise, this path.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath TrimStartPath(RuniPath relativeTo) => new RuniPath(PathUtility.TrimStartPath(value, relativeTo.value));
+        public readonly RuniPath RemoveStartPath(RuniPath relativeTo) => new RuniPath(PathUtility.RemoveStartPath(value, relativeTo.value));
 
         /// <summary>
         /// Attempts to remove the specified prefix path from this path.<br/>
@@ -193,16 +164,16 @@ namespace RuniOS.IO
         /// 제거할 접두사 경로입니다.
         /// </param>
         /// <param name="result">
-        /// When this method returns <see langword="true"/>, contains the trimmed path.<br/>
+        /// When this method returns <see langword="true"/>, contains the path with the prefix removed.<br/>
         /// 이 메서드가 <see langword="true"/>를 반환하면 접두사가 제거된 경로를 포함합니다.
         /// </param>
         /// <returns>
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool TryTrimStartPath(RuniPath relativeTo, out RuniPath result)
+        public readonly bool TryRemoveStartPath(RuniPath relativeTo, out RuniPath result)
         {
-            bool success = PathUtility.TryTrimStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
+            bool success = PathUtility.TryRemoveStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
             result = new RuniPath(span);
             return success;
         }
@@ -279,7 +250,34 @@ namespace RuniOS.IO
         /// The combined path, or the non-empty path when either side is empty.<br/>
         /// 결합된 경로를 반환하며, 한쪽 경로가 비어 있으면 비어 있지 않은 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath Combine(RuniPath path) => (RuniPath)PathUtility.CombineFromNormalizedPath(value, path.value);
+        public readonly RuniPath Combine(RuniPath path)
+        {
+            if (length == 0 && path.length == 0)
+                return empty;
+            else if (length == 0)
+                return path;
+            else if (path.length == 0)
+                return this;
+
+            return new RuniPath(string.Create(length + 1 + path.length, (left: this, right: path), static (span, state) =>
+            {
+                int index = 0;
+                for (int i = 0; i < state.left.length; i++)
+                {
+                    span[index] = state.left.value[i];
+                    index++;
+                }
+
+                span[index] = directorySeparatorChar;
+                index++;
+
+                for (int i = 0; i < state.right.length; i++)
+                {
+                    span[index] = state.right.value[i];
+                    index++;
+                }
+            }));
+        }
 
         /// <summary>
         /// Combines this path with another path string treated as a logical relative path.<br/>
@@ -293,16 +291,16 @@ namespace RuniOS.IO
         /// The combined <see cref="RuniPath"/>.<br/>
         /// 결합된 <see cref="RuniPath"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath Combine(string path) => (RuniPath)PathUtility.CombineFromNormalizedPath(value, NormalizePath(path));
+        public readonly RuniPath Combine(string path) => Combine(new RuniPath(NormalizePath(path)));
 
 
 
         /// <summary>
         /// Normalizes a path string into the <see cref="RuniPath"/> text format.<br/>
-        /// The result uses <see cref="directorySeparatorChar"/>, removes leading and trailing separators, collapses repeated separators, and rejects traversal segments.
+        /// The result trims leading and trailing <see cref="directorySeparatorChar"/> values and collapses repeated <see cref="directorySeparatorChar"/> separators without interpreting dot segments.
         /// <br/><br/>
         /// 경로 문자열을 <see cref="RuniPath"/> 텍스트 형식으로 정규화합니다.<br/>
-        /// 결과는 <see cref="directorySeparatorChar"/>를 사용하고, 시작과 끝의 구분자를 제거하며, 반복된 구분자를 합치고, 경로 이동 세그먼트를 거부합니다.
+        /// 결과는 시작과 끝의 <see cref="directorySeparatorChar"/> 값을 제거하고 반복된 <see cref="directorySeparatorChar"/> 구분자를 합치며, 점 세그먼트를 해석하지 않습니다.
         /// </summary>
         /// <param name="path">
         /// The path string to normalize.<br/>
@@ -312,10 +310,6 @@ namespace RuniOS.IO
         /// The normalized path string, or <see cref="string.Empty"/> when <paramref name="path"/> has no usable segment.<br/>
         /// 정규화된 경로 문자열을 반환하며, <paramref name="path"/>에 사용할 수 있는 세그먼트가 없으면 <see cref="string.Empty"/>를 반환합니다.
         /// </returns>
-        /// <exception cref="ArgumentException">
-        /// Thrown when <paramref name="path"/> contains <c>.</c> or <c>..</c> as a path segment.<br/>
-        /// <paramref name="path"/>가 경로 세그먼트로 <c>.</c> 또는 <c>..</c>를 포함하는 경우 발생합니다.
-        /// </exception>
         public static string NormalizePath(string path) // TODO : 나중에 유니티 닷넷 올라가면 Span으로 바꿀 것 (string.Create에 allows ref struct 붙어있어서 사용 가능)
         {
             if (string.IsNullOrEmpty(path))
@@ -328,7 +322,7 @@ namespace RuniOS.IO
             return string.Create(length, path, static (span, path) =>
             {
                 int dst = 0;
-                foreach (var item in path.AsSpan().Trim(directorySeparatorChars).SplitAny(directorySeparatorChars))
+                foreach (var item in path.AsSpan().Trim(directorySeparatorChar).Split(directorySeparatorChar))
                 {
                     if (item.IsEmpty)
                         continue;
@@ -345,36 +339,20 @@ namespace RuniOS.IO
             });
         }
 
-        public static bool IsNormalized(string? path)
-        {
-            if (string.IsNullOrEmpty(path))
-                return true;
-
-            return path.Length == CalculateNormalizeLength(path.AsSpan());
-        }
-
         static int CalculateNormalizeLength(ReadOnlySpan<char> path)
         {
             if (path.IsEmpty)
                 return 0;
 
-            path = path.Trim(directorySeparatorChars);
+            path = path.Trim(directorySeparatorChar);
             if (path.IsEmpty)
                 return 0;
 
             int length = 0;
-            foreach (var item in path.SplitAny(directorySeparatorChars))
+            foreach (var item in path.Split(directorySeparatorChar))
             {
                 if (item.IsEmpty)
                     continue;
-
-                switch (item)
-                {
-                    case ".":
-                        throw new ArgumentException("Directory traversal ('.') is not allowed for security reasons.");
-                    case "..":
-                        throw new ArgumentException("Directory traversal ('..') is not allowed for security reasons.");
-                }
 
                 length += item.Length + 1;
             }
@@ -503,7 +481,7 @@ namespace RuniOS.IO
         /// The path string to convert.<br/>
         /// 변환할 경로 문자열입니다.
         /// </param>
-        public static explicit operator RuniPath(string path) => new RuniPath(path);
+        public static explicit operator RuniPath(string path) => new RuniPath(NormalizePath(path));
 
         /// <summary>
         /// Converts a string to a normalized <see cref="RuniPath"/>.<br/>
@@ -513,7 +491,7 @@ namespace RuniOS.IO
         /// The path span to convert.<br/>
         /// 변환할 경로 span입니다.
         /// </param>
-        public static explicit operator RuniPath(ReadOnlySpan<char> path) => new RuniPath(path);
+        public static explicit operator RuniPath(ReadOnlySpan<char> path) => new RuniPath(NormalizePath(path.ToString()));
 
 
 

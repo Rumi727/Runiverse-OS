@@ -92,7 +92,7 @@ namespace RuniOS.Resource
 
                             try
                             {
-                                RuniPath path = fileEntry.path.TrimStartPath(registryNode.path).GetPathWithoutExtension();
+                                RuniPath path = fileEntry.path.RemoveStartPath(registryNode.path).GetPathWithoutExtension();
                                 Identifier identifier = new Identifier(nameSpace, path);
 
                                 loadTargets.Add(new AssetLoadTarget(resourcePack, identifier, node, fileEntry.metaData));

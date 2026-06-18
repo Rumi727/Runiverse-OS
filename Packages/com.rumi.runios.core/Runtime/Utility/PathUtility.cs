@@ -61,7 +61,7 @@ namespace RuniOS.Utility
             if (string.IsNullOrEmpty(path))
                 return string.Empty;
 
-            int lastPathIndex = path.LastIndexOfAny(RuniPath.directorySeparatorChars);
+            int lastPathIndex = path.LastIndexOf(RuniPath.directorySeparatorChar);
             if (lastPathIndex < 0) lastPathIndex = path.Length;
 
             ReadOnlySpan<char> pathPart = path.AsSpan(0, lastPathIndex);
@@ -100,7 +100,7 @@ namespace RuniOS.Utility
             if (string.IsNullOrEmpty(path))
                 return string.Empty;
 
-            int lastPathIndex = path.LastIndexOfAny(RuniPath.directorySeparatorChars);
+            int lastPathIndex = path.LastIndexOf(RuniPath.directorySeparatorChar);
             ReadOnlySpan<char> filePart = path.AsSpan(lastPathIndex + 1);
             if (filePart.IndexOfAny(invalidFileNameChars) < 0)
                 return path;
@@ -237,6 +237,9 @@ namespace RuniOS.Utility
             if (extIndex <= separatorIndex)
                 return path;
 
+            if (extIndex == separatorIndex + 1)
+                return separatorIndex < 0 ? ReadOnlySpan<char>.Empty : path.Slice(0, separatorIndex);
+
             return path.Slice(0, extIndex);
         }
 
@@ -277,14 +280,14 @@ namespace RuniOS.Utility
         /// </param>
         /// <returns>
         /// The trimmed path when the prefix matches; otherwise, <paramref name="path"/>.<br/>
-        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 <paramref name="path"/>를 반환합니다.
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 빈 경로를 반환합니다.
         /// </returns>
-        public static ReadOnlySpan<char> TrimStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
+        public static ReadOnlySpan<char> RemoveStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
         {
-            if (TryTrimStartPath(path, relativeTo, out var result))
+            if (TryRemoveStartPath(path, relativeTo, out var result))
                 return result;
 
-            return path;
+            return ReadOnlySpan<char>.Empty;
         }
 
         /// <summary>
@@ -307,7 +310,7 @@ namespace RuniOS.Utility
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool TryTrimStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
+        public static bool TryRemoveStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
         {
             if (path == relativeTo)
             {
@@ -321,7 +324,7 @@ namespace RuniOS.Utility
                 return true;
             }
 
-            result = path;
+            result = ReadOnlySpan<char>.Empty;
             return false;
         }
 
@@ -350,51 +353,6 @@ namespace RuniOS.Utility
 
             // 접두사 뒤에 구분자가 있어야 "folder_A"가 "folder"의 하위 경로로 판정되지 않습니다.
             return path[startPath.Length] == RuniPath.directorySeparatorChar && path.StartsWith(startPath, StringComparison.Ordinal);
-        }
-
-        /// <summary>
-        /// Combines two already-normalized path strings without re-normalizing them.<br/>
-        /// 이미 정규화된 두 경로 문자열을 다시 정규화하지 않고 결합합니다.
-        /// </summary>
-        /// <param name="left">
-        /// The first normalized path string.<br/>
-        /// 첫 번째 정규화 경로 문자열입니다.
-        /// </param>
-        /// <param name="right">
-        /// The second normalized path string.<br/>
-        /// 두 번째 정규화 경로 문자열입니다.
-        /// </param>
-        /// <returns>
-        /// The combined path string, or the non-empty operand when one operand is empty.<br/>
-        /// 결합된 경로 문자열을 반환하며, 한쪽 경로가 비어 있으면 비어 있지 않은 피연산자를 반환합니다.
-        /// </returns>
-        internal static string CombineFromNormalizedPath(string left, string right)
-        {
-            if (left.Length == 0 && right.Length == 0)
-                return string.Empty;
-            else if (left.Length == 0)
-                return right;
-            else if (right.Length == 0)
-                return left;
-
-            return string.Create(left.Length + 1 + right.Length, (left, right), static (span, state) =>
-            {
-                int index = 0;
-                for (int i = 0; i < state.left.Length; i++)
-                {
-                    span[index] = state.left[i];
-                    index++;
-                }
-
-                span[index] = RuniPath.directorySeparatorChar;
-                index++;
-
-                for (int i = 0; i < state.right.Length; i++)
-                {
-                    span[index] = state.right[i];
-                    index++;
-                }
-            });
         }
     }
 }

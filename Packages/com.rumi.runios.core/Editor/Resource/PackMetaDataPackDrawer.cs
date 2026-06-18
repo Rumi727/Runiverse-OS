@@ -55,7 +55,7 @@ namespace RuniOS.Editor.Resource
                 if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
-                    File.WriteAllText(PhysicalPath.From(Application.streamingAssetsPath) + ResourcePack.infoPath, json);
+                    File.WriteAllText(PhysicalPath.From(Application.streamingAssetsPath).Combine(ResourcePack.infoPath).value, json);
                     
                     OnEnable(relativePaths);
                 }

@@ -227,7 +227,7 @@ namespace RuniOS.IO.Virtual
         /// </exception>
         public static void ThrowIfInvalidNodeName(string name)
         {
-            if (string.IsNullOrEmpty(name) || name.IndexOfAny(RuniPath.directorySeparatorChars) >= 0)
+            if (string.IsNullOrEmpty(name) || name.IndexOf(RuniPath.directorySeparatorChar) >= 0)
                 throw new InvalidOperationException($"The node name '{name}' contains invalid characters.");
         }
 
@@ -245,7 +245,7 @@ namespace RuniOS.IO.Virtual
         /// </exception>
         public static void ThrowIfInvalidFileName(string name)
         {
-            if (string.IsNullOrEmpty(name) || name.IndexOfAny(RuniPath.directorySeparatorChars) >= 0)
+            if (string.IsNullOrEmpty(name) || name.IndexOf(RuniPath.directorySeparatorChar) >= 0)
                 throw new InvalidOperationException($"The file name '{name}' contains invalid characters.");
         }
     }

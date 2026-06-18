@@ -12,15 +12,11 @@ namespace RuniOS.IO
     /// 정규화된 물리 파일 시스템 경로를 나타냅니다.<br/>
     /// 저장되는 값은 <see cref="Path.GetFullPath(string)"/>를 통해 전체 경로로 변환됩니다.
     /// </summary>
-    /// <param name="path">
-    /// The path string to normalize.<br/>
-    /// 정규화할 경로 문자열입니다.
-    /// </param>
     [Serializable]
     [JsonConverter(typeof(PhysicalPathConverter))]
-    public struct PhysicalPath(string path) : IEquatable<PhysicalPath>, ISerializationCallbackReceiver
+    public struct PhysicalPath : IEquatable<PhysicalPath>, ISerializationCallbackReceiver
     {
-        public static PhysicalPath currentDirectory => new PhysicalPath(string.Empty);
+        public static PhysicalPath currentDirectory => new PhysicalPath(NormalizePath(string.Empty));
 
         /// <summary>
         /// Gets the normalized string value of this path.<br/>
@@ -31,18 +27,24 @@ namespace RuniOS.IO
             readonly get => _value ?? NormalizePath(string.Empty);
             set => _value = NormalizePath(value);
         }
-        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value = NormalizePath(path);
+        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
 
         /// <summary>
         /// Gets the length of the normalized path string.<br/>
         /// 정규화된 경로 문자열의 길이를 가져옵니다.
         /// </summary>
-        public readonly int length => _value?.Length ?? 0;
+        public readonly int length => value.Length;
 
 
 
         // default로는 여전히 _value가 null이지만, 그래도 일단 value 값 가져올 때 마다 NormalizePath 되는건 안좋으니 매개변수 없는 생성자라도 만들었습니다.
-        public PhysicalPath() : this(string.Empty) { }
+        public PhysicalPath() : this(NormalizePath(string.Empty)) { }
+
+        /// <param name="path">
+        /// The path string to normalize.<br/>
+        /// 정규화할 경로 문자열입니다.
+        /// </param>
+        PhysicalPath(string path) => _value = path;
 
 
 
@@ -58,7 +60,7 @@ namespace RuniOS.IO
         /// A normalized <see cref="PhysicalPath"/> value.<br/>
         /// 정규화된 <see cref="PhysicalPath"/> 값을 반환합니다.
         /// </returns>
-        public static PhysicalPath From(string path) => new PhysicalPath(path);
+        public static PhysicalPath From(string path) => new PhysicalPath(NormalizePath(path));
 
 
 
@@ -71,10 +73,16 @@ namespace RuniOS.IO
         /// 제거할 접두사 경로입니다.
         /// </param>
         /// <returns>
-        /// The trimmed path when the prefix matches; otherwise, this path.<br/>
-        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
+        /// The path with the prefix removed when the prefix matches; otherwise, <see cref="RuniPath.empty"/>.<br/>
+        /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 빈 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath TrimStartPath(PhysicalPath relativeTo) => new RuniPath(PathUtility.TrimStartPath(value, relativeTo.value));
+        public readonly RuniPath RemoveStartPath(PhysicalPath relativeTo)
+        {
+            if (TryRemoveStartPath(relativeTo, out var result))
+                return result;
+
+            return RuniPath.empty;
+        }
 
         /// <summary>
         /// Attempts to remove the specified prefix path from this path.<br/>
@@ -85,18 +93,41 @@ namespace RuniOS.IO
         /// 제거할 접두사 경로입니다.
         /// </param>
         /// <param name="result">
-        /// When this method returns <see langword="true"/>, contains the trimmed path.<br/>
+        /// When this method returns <see langword="true"/>, contains the path with the prefix removed.<br/>
         /// 이 메서드가 <see langword="true"/>를 반환하면 접두사가 제거된 경로를 포함합니다.
         /// </param>
         /// <returns>
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool TryTrimStartPath(PhysicalPath relativeTo, out RuniPath result)
+        public readonly bool TryRemoveStartPath(PhysicalPath relativeTo, out RuniPath result)
         {
-            bool success = PathUtility.TryTrimStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
-            result = new RuniPath(span);
-            return success;
+            if (value == relativeTo.value)
+            {
+                result = RuniPath.empty;
+                return true;
+            }
+
+            if (StartsWith(relativeTo))
+            {
+                int start = relativeTo.IsRootPath() ? relativeTo.length : relativeTo.length + 1;
+                result = (RuniPath)string.Create(length - start, value, (span, path) =>
+                {
+                    for (int i = 0; i < span.Length; i++)
+                    {
+                        char c = path[start + i];
+                        if (c == Path.DirectorySeparatorChar)
+                            span[i] = RuniPath.directorySeparatorChar;
+                        else
+                            span[i] = c;
+                    }
+                });
+
+                return true;
+            }
+
+            result = RuniPath.empty;
+            return false;
         }
 
 
@@ -113,7 +144,25 @@ namespace RuniOS.IO
         /// <see langword="true"/> if this path equals <paramref name="startPath"/> or is under it; otherwise, <see langword="false"/>.<br/>
         /// 이 경로가 <paramref name="startPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool StartsWith(PhysicalPath startPath) => PathUtility.StartsWith(value, startPath.value);
+        public readonly bool StartsWith(PhysicalPath startPath)
+        {
+            if (value == startPath.value)
+                return true;
+            if (length <= startPath.length)
+                return false;
+
+            if (startPath.IsRootPath())
+                return value.StartsWith(startPath.value, StringComparison.Ordinal);
+
+            // 접두사 뒤에 구분자가 있어야 "folder_A"가 "folder"의 하위 경로로 판정되지 않습니다.
+            return value[startPath.length] == Path.DirectorySeparatorChar && value.StartsWith(startPath.value, StringComparison.Ordinal);
+        }
+
+        readonly bool IsRootPath()
+        {
+            ReadOnlySpan<char> rootPath = Path.GetPathRoot(value.AsSpan());
+            return rootPath.Length == length;
+        }
 
 
 
@@ -129,7 +178,35 @@ namespace RuniOS.IO
         /// The normalized physical path produced by combining this path and <paramref name="path"/>.<br/>
         /// 현재 경로와 <paramref name="path"/>를 결합해 만든 정규화된 물리 경로를 반환합니다.
         /// </returns>
-        public readonly PhysicalPath Combine(RuniPath path) => (PhysicalPath)PathUtility.CombineFromNormalizedPath(value, path.value);
+        public readonly PhysicalPath Combine(RuniPath path)
+        {
+            if (path.length == 0)
+                return this;
+
+            return (PhysicalPath)string.Create(length + 1 + path.length, (left: this, right: path), static (span, state) =>
+            {
+                int index = 0;
+                for (int i = 0; i < state.left.length; i++)
+                {
+                    span[index] = state.left.value[i];
+                    index++;
+                }
+
+                span[index] = Path.DirectorySeparatorChar;
+                index++;
+
+                for (int i = 0; i < state.right.length; i++)
+                {
+                    char c = state.right.value[i];
+                    if (c == RuniPath.directorySeparatorChar)
+                        span[index] = Path.DirectorySeparatorChar;
+                    else
+                        span[index] = c;
+
+                    index++;
+                }
+            });
+        }
 
         /// <summary>
         /// Combines this physical path with a path string treated as a logical relative path.<br/>
@@ -143,7 +220,7 @@ namespace RuniOS.IO
         /// The normalized physical path produced by combining this path and <paramref name="path"/>.<br/>
         /// 현재 경로와 <paramref name="path"/>를 결합해 만든 정규화된 물리 경로를 반환합니다.
         /// </returns>
-        public readonly PhysicalPath Combine(string path) => (PhysicalPath)PathUtility.CombineFromNormalizedPath(value, RuniPath.NormalizePath(path));
+        public readonly PhysicalPath Combine(string path) => Combine((RuniPath)path);
 
 
 
@@ -152,7 +229,7 @@ namespace RuniOS.IO
         /// The path is first resolved with <see cref="Path.GetFullPath(string)"/>, then trailing separators outside the root are removed.
         /// <br/><br/>
         /// 경로 문자열을 내부 물리 경로 형식으로 정규화합니다.<br/>
-        /// 먼저 <see cref="Path.GetFullPath(string)"/>로 경로를 해석한 뒤, 루트 밖의 끝 구분자를 제거합니다..
+        /// 먼저 <see cref="Path.GetFullPath(string)"/>로 경로를 해석한 뒤, 루트 밖의 끝 구분자를 제거합니다.
         /// </summary>
         /// <param name="path">
         /// The path string to normalize.<br/>
@@ -178,7 +255,11 @@ namespace RuniOS.IO
             while (trimmedLength > rootLength && (fullPath[trimmedLength - 1] == Path.DirectorySeparatorChar || fullPath[trimmedLength - 1] == Path.AltDirectorySeparatorChar))
                 trimmedLength--;
 
+#if UNITY_EDITOR_WINDOWS || (!UNITY_EDITOR && UNITY_STANDALONE_WINDOWS)
+            bool needsCopy = true;
+#else
             bool needsCopy = trimmedLength != fullPath.Length || fullPath.Contains(Path.AltDirectorySeparatorChar);
+#endif
             if (!needsCopy)
                 return fullPath;
 
@@ -187,6 +268,9 @@ namespace RuniOS.IO
                 for (int i = 0; i < span.Length; i++)
                 {
                     char c = state[i];
+#if UNITY_EDITOR_WINDOWS || (!UNITY_EDITOR && UNITY_STANDALONE_WINDOWS)
+                    c = char.ToLowerInvariant(c);
+#endif
                     if (c == Path.AltDirectorySeparatorChar)
                         span[i] = Path.DirectorySeparatorChar;
                     else
@@ -272,7 +356,7 @@ namespace RuniOS.IO
         /// The path string to convert.<br/>
         /// 변환할 경로 문자열입니다.
         /// </param>
-        public static explicit operator PhysicalPath(string path) => new PhysicalPath(path);
+        public static explicit operator PhysicalPath(string path) => new PhysicalPath(NormalizePath(path));
 
 
 

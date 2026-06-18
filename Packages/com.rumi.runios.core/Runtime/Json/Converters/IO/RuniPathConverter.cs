@@ -36,7 +36,7 @@ namespace RuniOS.Json.Converters.IO
         /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="RuniPath"/>로 변환을 시도할 때 발생합니다.</exception>
         public override RuniPath ReadJson(JsonReader reader, Type objectType, RuniPath existingValue, bool hasExistingValue, JsonSerializer serializer) => reader.TokenType switch
         {
-            JsonToken.String => new RuniPath((string?)reader.Value ?? string.Empty),
+            JsonToken.String => RuniPath.From((string?)reader.Value ?? string.Empty),
             _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing RuniPath.")
         };
     }
