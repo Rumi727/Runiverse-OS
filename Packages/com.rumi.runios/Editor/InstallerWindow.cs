@@ -34,8 +34,11 @@ namespace RuniOS.Installer
 
         static readonly AnimFloat headAnim = new AnimFloat(0);
         static readonly AnimFloat indexAnim = new AnimFloat(0);
-        static readonly AnimVector3 sizeAnim = new AnimVector3(new Vector3(584, 298));
+
+#if !UNITY_EDITOR_LINUX
+        static readonly AnimVector3 sizeAnim = new AnimVector3(new Vector3(584, 348));
         static Vector2? lastAnimSize = null;
+#endif
 
         [MenuItem("RuniOS/Show Installer")]
         public static void ShowInstallerWindow()
@@ -62,7 +65,7 @@ namespace RuniOS.Installer
                 EditorApplication.update -= ShowOnce;
             }
 
-#if RUNI_ENGINE
+#if ENABLE_RUNI_ENGINE
             Editor.Localizations.EditorLocalization.currentLanguage = ConfigScriptableObject.config.currentLanguage;
 #endif
         }
@@ -165,7 +168,7 @@ namespace RuniOS.Installer
         {
             stopwatch.Restart();
 
-            minSize = maxSize = new Vector2(584, 298);
+            minSize = maxSize = new Vector2(584, 348);
 
             scrollPosition = Vector2.zero;
             instance = this;
@@ -173,7 +176,7 @@ namespace RuniOS.Installer
             foreach (var screen in installerScreens)
                 screen.mainWindow = this;
 
-#if RUNI_ENGINE
+#if ENABLE_RUNI_ENGINE
             ConfigScriptableObject.config.currentLanguage = Editor.Localizations.EditorLocalization.currentLanguage;
             ConfigScriptableObject.config.SetDirty();
 #endif
@@ -184,7 +187,10 @@ namespace RuniOS.Installer
         {
             headAnim.value = 0;
             indexAnim.value = 0;
-            sizeAnim.value = new Vector3(584, 298);
+
+#if !UNITY_EDITOR_LINUX
+            sizeAnim.value = new Vector3(584, 348);
+#endif
 
             ConfigScriptableObject.config.screenIndex = 0;
             ConfigScriptableObject.config.SetDirty();
@@ -199,7 +205,7 @@ namespace RuniOS.Installer
 
             indexAnim.target = ConfigScriptableObject.config.screenIndex;
 
-            float headHeight = 50;
+            const float headHeight = 50;
             float headHeightOffset = headAnim.value;
 
             if (ConfigScriptableObject.config.screenIndex >= 0 && ConfigScriptableObject.config.screenIndex < installerScreens.Count)
@@ -207,7 +213,9 @@ namespace RuniOS.Installer
                 var screen = installerScreens[ConfigScriptableObject.config.screenIndex];
 
                 headAnim.target = screen.headDisable ? 0 : headHeight;
-                sizeAnim.target = screen.windowSize ?? new Vector3(584, 298);
+
+#if !UNITY_EDITOR_LINUX
+                sizeAnim.target = screen.windowSize ?? new Vector3(584, 348);
 
                 Vector2 sizeAnimValue = sizeAnim.value;
                 if (lastAnimSize != null)
@@ -224,6 +232,9 @@ namespace RuniOS.Installer
                 }
 
                 lastAnimSize = sizeAnimValue;
+#else
+                instance.minSize = instance.maxSize = screen.windowSize ?? new Vector3(584, 348);
+#endif
 
                 if (headAnim.isAnimating || !screen.headDisable)
                 {
@@ -298,7 +309,13 @@ namespace RuniOS.Installer
             DrawLogo();
             DrawNavigation();
 
-            if (headAnim.isAnimating || indexAnim.isAnimating || sizeAnim.isAnimating)
+            if
+            (
+                headAnim.isAnimating || indexAnim.isAnimating
+#if !UNITY_EDITOR_LINUX
+                || sizeAnim.isAnimating
+#endif
+            )
                 instance.Repaint();
         }
 
@@ -355,7 +372,7 @@ namespace RuniOS.Installer
             if (selectedLanguageIndex != languageIndex)
             {
                 ConfigScriptableObject.config.currentLanguage =
-#if RUNI_ENGINE
+#if ENABLE_RUNI_ENGINE
                 Editor.Localizations.EditorLocalization.currentLanguage =
 #endif
                 selectedLanguageIndex switch

@@ -9,7 +9,7 @@ namespace RuniOS.Installer.Screens
 
 
         public InstallerWindow? mainWindow { get; set; }
-        public Vector2? windowSize => new Vector2(584, 298);
+        public Vector2? windowSize => new Vector2(584, 348);
 
         public string label => InstallerWindow.TryGetText("installer.welcome");
         public bool headDisable => true;

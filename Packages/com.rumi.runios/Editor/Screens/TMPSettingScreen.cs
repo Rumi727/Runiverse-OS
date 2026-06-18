@@ -1,6 +1,4 @@
 #nullable enable
-using TMPro;
-
 namespace RuniOS.Installer.Screens
 {
     sealed class TMPSettingScreen : IInstallerScreen
@@ -11,7 +9,7 @@ namespace RuniOS.Installer.Screens
 
 
         public InstallerWindow? mainWindow { get; set; }
-        public Vector2? windowSize => new Vector2(584, 344);
+        public Vector2? windowSize => new Vector2(584, 348);
 
         public string label => InstallerWindow.TryGetText("installer.tmp_setting.label");
         public bool headDisable => false;
@@ -21,7 +19,7 @@ namespace RuniOS.Installer.Screens
 
 
 #if ENABLE_TEXT_MESH_PRO
-        readonly TMP_PackageResourceImporter importer = new TMP_PackageResourceImporter();
+        readonly TMPro.TMP_PackageResourceImporter importer = new TMPro.TMP_PackageResourceImporter();
         public void DrawGUI(Rect position)
         {
             GUILayout.Label(InstallerWindow.TryGetText("installer.tmp_setting.info"));
