@@ -59,6 +59,12 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath && sandboxPolicy == otherPhysical.sandboxPolicy;
 
+        /// <inheritdoc/>
+        public UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Directory.Exists(ResolveFullPath(path)));
+
+        /// <inheritdoc/>
+        public UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(File.Exists(ResolveFullPath(path)));
+
         #region Entry
         /// <inheritdoc/>
         public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default)

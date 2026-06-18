@@ -52,6 +52,12 @@ namespace RuniOS.IO.Virtual
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is VirtualIOProvider otherVirtual && rootDirectory == otherVirtual.rootDirectory;
 
+        /// <inheritdoc/>
+        public UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(rootDirectory.GetDirectory(path) != null);
+
+        /// <inheritdoc/>
+        public UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(rootDirectory.GetFile(path) != null);
+
         #region Entry
         /// <inheritdoc/>
         public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default)

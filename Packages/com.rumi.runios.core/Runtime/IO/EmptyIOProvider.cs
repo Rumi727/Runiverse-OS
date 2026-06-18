@@ -25,6 +25,9 @@ namespace RuniOS.IO
 
         public bool IsSameTarget(IIOProvider other) => ReferenceEquals(this, other);
 
+        public UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(false);
+        public UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(false);
+
         public UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult<IOEntry?>(null);
         public IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path, bool recursive, CancellationToken cancellationToken = default) => UniTaskAsyncEnumerable.Empty<IOEntry>();
 

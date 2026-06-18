@@ -64,6 +64,42 @@ namespace RuniOS.IO
         bool IsSameTarget(IIOProvider other);
 
         /// <summary>
+        /// Determines whether a directory exists at the specified provider-relative path.<br/>
+        /// 지정된 프로바이더 기준 경로에 디렉터리가 있는지 확인합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The provider-relative directory path to inspect.<br/>
+        /// 확인할 프로바이더 기준 디렉터리 경로입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// When the asynchronous operation completes, returns <see langword="true"/> if the directory exists; otherwise, <see langword="false"/>.<br/>
+        /// 비동기 작업이 완료되면 디렉터리가 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Determines whether a file exists at the specified provider-relative path.<br/>
+        /// 지정된 프로바이더 기준 경로에 파일이 있는지 확인합니다.
+        /// </summary>
+        /// <param name="path">
+        /// The provider-relative file path to inspect.<br/>
+        /// 확인할 프로바이더 기준 파일 경로입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// When the asynchronous operation completes, returns <see langword="true"/> if the file exists; otherwise, <see langword="false"/>.<br/>
+        /// 비동기 작업이 완료되면 파일이 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default);
+
+        /// <summary>
         /// Gets a snapshot of the file or directory entry at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로의 파일 또는 디렉터리 엔트리 스냅샷을 가져옵니다.
         /// </summary>

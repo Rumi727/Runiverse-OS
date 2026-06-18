@@ -67,6 +67,36 @@ namespace RuniOS.IO
         }
 
         /// <inheritdoc/>
+        public async UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default)
+        {
+            foreach (IIOProvider provider in providers)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                bool exists = await provider.DirectoryExists(path, cancellationToken);
+                if (exists)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public async UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default)
+        {
+            foreach (IIOProvider provider in providers)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                bool exists = await provider.FileExists(path, cancellationToken);
+                if (exists)
+                    return true;
+            }
+
+            return false;
+        }
+
+        /// <inheritdoc/>
         public async UniTask<IOEntry?> GetEntry(RuniPath path, CancellationToken cancellationToken = default)
         {
             foreach (IIOProvider provider in providers)
@@ -92,15 +122,20 @@ namespace RuniOS.IO
             {
                 ct.ThrowIfCancellationRequested();
 
-                await foreach (IOEntry entry in provider.EnumerateEntries(path, recursive, ct))
+                try
                 {
-                    ct.ThrowIfCancellationRequested();
+                    await foreach (IOEntry entry in provider.EnumerateEntries(path, recursive, ct))
+                    {
+                        ct.ThrowIfCancellationRequested();
 
-                    if (!yieldedPaths.Add(entry.path))
-                        continue;
+                        if (!yieldedPaths.Add(entry.path))
+                            continue;
 
-                    await writer.YieldAsync(entry);
+                        await writer.YieldAsync(entry);
+                    }
                 }
+                catch (DirectoryNotFoundException) { }
+                catch (FileNotFoundException) { }
             }
         });
 
