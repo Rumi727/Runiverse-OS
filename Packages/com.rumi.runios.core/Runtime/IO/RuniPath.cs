@@ -196,6 +196,11 @@ namespace RuniOS.IO
 
 
 
+        public string[] GetSegments() => value.Split(directorySeparatorChar);
+        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan() => value.AsSpan().Split(directorySeparatorChar);
+
+
+
         /// <summary>
         /// Determines whether this path has an empty value.<br/>
         /// 이 경로가 빈 값을 가지는지 확인합니다.
