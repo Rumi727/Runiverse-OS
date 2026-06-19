@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using Newtonsoft.Json;
 using RuniOS.Json.Converters.IO;
+using RuniOS.Spans;
 using System.IO;
 
 namespace RuniOS.IO
@@ -158,10 +159,28 @@ namespace RuniOS.IO
             return value[startPath.length] == Path.DirectorySeparatorChar && value.StartsWith(startPath.value, StringComparison.Ordinal);
         }
 
-        readonly bool IsRootPath()
+
+
+        public bool IsRootPath() => GetPathRootSpan().Length == length;
+
+        public string GetPathRoot() => GetPathRootSpan().ToString();
+        public ReadOnlySpan<char> GetPathRootSpan() => Path.GetPathRoot(value.AsSpan());
+
+
+
+        public string[] GetSegments()
         {
-            ReadOnlySpan<char> rootPath = Path.GetPathRoot(value.AsSpan());
-            return rootPath.Length == length;
+            ReadOnlySpan<char> root = GetPathRootSpan();
+            ReadOnlySpan<char> relativePath = value.AsSpan().Slice(root.Length);
+
+            return relativePath.ToString().Split(Path.DirectorySeparatorChar);
+        }
+
+        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan()
+        {
+            ReadOnlySpan<char> root = GetPathRootSpan();
+            ReadOnlySpan<char> relativePath = value.AsSpan().Slice(root.Length);
+            return relativePath.Split(Path.DirectorySeparatorChar);
         }
 
 
