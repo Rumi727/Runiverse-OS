@@ -21,8 +21,8 @@ namespace RuniOS.Reflection
         /// <br/><br/>
         /// 이 속성은 스레드에 안전합니다.
         /// </summary>
-        public static ImmutableArray<Assembly> assemblys { get; private set; } = ImmutableArray<Assembly>.Empty;
-        static readonly object assemblysLock = new();
+        public static ImmutableArray<Assembly> assemblies { get; private set; } = ImmutableArray<Assembly>.Empty;
+        static readonly object assembliesLock = new();
 
         /// <summary>
         /// 현재 로드된 모든 형식(<see cref="Type"/>) 목록입니다.<br/>
@@ -35,7 +35,7 @@ namespace RuniOS.Reflection
 
 
         /// <summary>
-        /// <see cref="assemblys"/> 또는 <see cref="types"/> 목록이 <see cref="Refresh"/> 메서드를 통해
+        /// <see cref="assemblies"/> 또는 <see cref="types"/> 목록이 <see cref="Refresh"/> 메서드를 통해
         /// 업데이트되었을 때 발생합니다.<br/>
         /// 이 이벤트 핸들러 추가/제거 및 호출은 내부적으로 잠금(<see langword="lock"/>)을 사용하여
         /// 스레드에 안전하게 보호됩니다.<br/>
@@ -73,12 +73,12 @@ namespace RuniOS.Reflection
         /// </summary>
         public static void Refresh()
         {
-            lock (assemblysLock)
+            lock (assembliesLock)
             {
                 try
                 {
 #if UNITY_6000_6_OR_NEWER
-                    assemblys = [..UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies()];
+                    assemblies = [..UnityEngine.Assemblies.CurrentAssemblies.GetLoadedAssemblies()];
 #else
                     assemblys = AppDomain.CurrentDomain.GetAssemblies().ToImmutableArray();
 #endif
@@ -89,7 +89,7 @@ namespace RuniOS.Reflection
                 }
 
                 types = [
-                    ..assemblys
+                    ..assemblies
 #if UNITY_EDITOR
                         .Where(x => 
                             /* 브릿지 코드 제외 */ !x.FullName.StartsWith("RuniOS.Editor.APIBridge", StringComparison.Ordinal) &&
