@@ -107,7 +107,7 @@ namespace RuniOS.IO
         /// The text after the last <see cref="directorySeparatorChar"/>, or the whole path when it has no separator.<br/>
         /// 마지막 <see cref="directorySeparatorChar"/> 뒤의 문자열을 반환하며, 구분자가 없으면 전체 경로를 반환합니다.
         /// </returns>
-        public readonly string GetFileName() => PathUtility.GetFileName(value).ToString();
+        public readonly string GetFileName() => RuniPathUtility.GetFileName(value).ToString();
 
         /// <summary>
         /// Gets the last path segment without its extension.<br/>
@@ -117,7 +117,7 @@ namespace RuniOS.IO
         /// The last path segment without its extension, or the full segment when no extension exists.<br/>
         /// 확장자를 제외한 마지막 경로 세그먼트를 반환하며, 확장자가 없으면 세그먼트 전체를 반환합니다.
         /// </returns>
-        public readonly string GetFileNameWithoutExtension() => PathUtility.GetFileNameWithoutExtension(value).ToString();
+        public readonly string GetFileNameWithoutExtension() => RuniPathUtility.GetFileNameWithoutExtension(value).ToString();
 
         /// <summary>
         /// Gets a path with the extension removed from the last segment.<br/>
@@ -127,7 +127,7 @@ namespace RuniOS.IO
         /// A path without the last segment extension, or this path when no extension exists.<br/>
         /// 마지막 세그먼트의 확장자가 제거된 경로를 반환하며, 확장자가 없으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath GetPathWithoutExtension() => new RuniPath(PathUtility.GetPathWithoutExtension(value));
+        public readonly RuniPath GetPathWithoutExtension() => new RuniPath(RuniPathUtility.GetPathWithoutExtension(value));
 
         /// <summary>
         /// Gets the path that contains every segment except the last one.<br/>
@@ -137,7 +137,7 @@ namespace RuniOS.IO
         /// The parent path, or <see cref="empty"/> when this path has no parent segment.<br/>
         /// 상위 경로를 반환하며, 상위 세그먼트가 없으면 <see cref="empty"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath GetParentPath() => new RuniPath(PathUtility.GetParentPath(value));
+        public readonly RuniPath GetParentPath() => new RuniPath(RuniPathUtility.GetParentPath(value));
 
 
 
@@ -153,7 +153,7 @@ namespace RuniOS.IO
         /// The path with the prefix removed when the prefix matches; otherwise, this path.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath RemoveStartPath(RuniPath relativeTo) => new RuniPath(PathUtility.RemoveStartPath(value, relativeTo.value));
+        public readonly RuniPath RemoveStartPath(RuniPath relativeTo) => new RuniPath(RuniPathUtility.RemoveStartPath(value, relativeTo.value));
 
         /// <summary>
         /// Attempts to remove the specified prefix path from this path.<br/>
@@ -173,7 +173,7 @@ namespace RuniOS.IO
         /// </returns>
         public readonly bool TryRemoveStartPath(RuniPath relativeTo, out RuniPath result)
         {
-            bool success = PathUtility.TryRemoveStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
+            bool success = RuniPathUtility.TryRemoveStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
             result = new RuniPath(span);
             return success;
         }
@@ -192,7 +192,7 @@ namespace RuniOS.IO
         /// <see langword="true"/> if this path equals <paramref name="startPath"/> or is under it; otherwise, <see langword="false"/>.<br/>
         /// 이 경로가 <paramref name="startPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool StartsWith(RuniPath startPath) => PathUtility.StartsWith(value, startPath.value);
+        public readonly bool StartsWith(RuniPath startPath) => RuniPathUtility.StartsWith(value, startPath.value);
 
 
 

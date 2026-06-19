@@ -9,7 +9,7 @@ namespace RuniOS.Utility
     /// Provides shared helpers for normalized path strings used by <see cref="RuniPath"/> and related path types.<br/>
     /// <see cref="RuniPath"/> 및 관련 경로 타입에서 사용하는 정규화된 경로 문자열 헬퍼를 제공합니다.
     /// </summary>
-    public static class PathUtility
+    public static class RuniPathUtility
     {
         /// <summary>
         /// The replacement character used when invalid name characters are converted to a safe character.<br/>
