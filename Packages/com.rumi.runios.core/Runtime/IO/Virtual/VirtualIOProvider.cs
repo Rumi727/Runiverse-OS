@@ -279,7 +279,7 @@ namespace RuniOS.IO.Virtual
         static RuniPath GetRelativePath(VirtualDirectoryBase directory, VirtualNode node)
         {
             node.ThrowIfNotAttachedException();
-            return node.fullPath.Value.RemoveStartPath(directory.fullPath ?? RuniPath.empty);
+            return node.fullPath.Value.GetRelativePath(directory.fullPath ?? RuniPath.empty);
         }
 
         void IDisposable.Dispose() { }

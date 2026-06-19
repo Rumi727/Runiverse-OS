@@ -77,9 +77,9 @@ namespace RuniOS.IO
         /// The path with the prefix removed when the prefix matches; otherwise, <see cref="RuniPath.empty"/>.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 빈 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath RemoveStartPath(PhysicalPath relativeTo)
+        public readonly RuniPath GetRelativePath(PhysicalPath relativeTo)
         {
-            if (TryRemoveStartPath(relativeTo, out var result))
+            if (TryGetRelativePath(relativeTo, out var result))
                 return result;
 
             return RuniPath.empty;
@@ -101,7 +101,7 @@ namespace RuniOS.IO
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool TryRemoveStartPath(PhysicalPath relativeTo, out RuniPath result)
+        public readonly bool TryGetRelativePath(PhysicalPath relativeTo, out RuniPath result)
         {
             if (value == relativeTo.value)
             {

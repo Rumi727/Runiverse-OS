@@ -66,7 +66,7 @@ namespace RuniOS.Resource.Languages
                                 {
                                     try
                                     {
-                                        RuniPath path = fileEntry.path.RemoveStartPath(registryNode.path).GetPathWithoutExtension();
+                                        RuniPath path = fileEntry.path.GetRelativePath(registryNode.path).GetPathWithoutExtension();
                                         Identifier identifier = new Identifier(namespaceNode.name, path);
 
                                         string json = await registryNode.Bind(fileEntry).file.ReadAllText();

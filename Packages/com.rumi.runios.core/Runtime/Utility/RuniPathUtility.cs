@@ -282,9 +282,9 @@ namespace RuniOS.Utility
         /// The trimmed path when the prefix matches; otherwise, <paramref name="path"/>.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 빈 경로를 반환합니다.
         /// </returns>
-        public static ReadOnlySpan<char> RemoveStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
+        public static ReadOnlySpan<char> GetRelativePath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
         {
-            if (TryRemoveStartPath(path, relativeTo, out var result))
+            if (TryGetRelativePath(path, relativeTo, out var result))
                 return result;
 
             return ReadOnlySpan<char>.Empty;
@@ -310,7 +310,7 @@ namespace RuniOS.Utility
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool TryRemoveStartPath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
+        public static bool TryGetRelativePath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
         {
             if (path == relativeTo)
             {

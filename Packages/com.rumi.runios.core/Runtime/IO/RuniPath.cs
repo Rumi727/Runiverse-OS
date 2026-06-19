@@ -153,7 +153,7 @@ namespace RuniOS.IO
         /// The path with the prefix removed when the prefix matches; otherwise, this path.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath RemoveStartPath(RuniPath relativeTo) => new RuniPath(RuniPathUtility.RemoveStartPath(value, relativeTo.value));
+        public readonly RuniPath GetRelativePath(RuniPath relativeTo) => new RuniPath(RuniPathUtility.GetRelativePath(value, relativeTo.value));
 
         /// <summary>
         /// Attempts to remove the specified prefix path from this path.<br/>
@@ -171,9 +171,9 @@ namespace RuniOS.IO
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public readonly bool TryRemoveStartPath(RuniPath relativeTo, out RuniPath result)
+        public readonly bool TryGetRelativePath(RuniPath relativeTo, out RuniPath result)
         {
-            bool success = RuniPathUtility.TryRemoveStartPath(value, relativeTo.value, out ReadOnlySpan<char> span);
+            bool success = RuniPathUtility.TryGetRelativePath(value, relativeTo.value, out ReadOnlySpan<char> span);
             result = new RuniPath(span);
             return success;
         }

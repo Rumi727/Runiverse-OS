@@ -120,7 +120,7 @@ namespace RuniOS.IO
                     PhysicalPath entryFullPath = (PhysicalPath)entry.ToFullPath();
                     ValidateSandboxPolicy(entryFullPath);
 
-                    if (!entryFullPath.TryRemoveStartPath(targetPath, out RuniPath entryPath))
+                    if (!entryFullPath.TryGetRelativePath(targetPath, out RuniPath entryPath))
                         throw CreateSandboxException(entryFullPath, targetPath);
 
                     return new IOEntry
@@ -251,7 +251,7 @@ namespace RuniOS.IO
             if (sandboxPolicy == SandboxPolicy.Disabled)
                 return;
 
-            if (!fullPath.TryRemoveStartPath(targetPath, out RuniPath relativePath))
+            if (!fullPath.TryGetRelativePath(targetPath, out RuniPath relativePath))
                 throw CreateSandboxException(fullPath, targetPath);
 
             string currentPath = targetPath.value;

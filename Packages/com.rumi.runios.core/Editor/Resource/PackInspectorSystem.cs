@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Resource
 
         static PackInspectorSystem()
         {
-            packRootPath = PhysicalPath.From(Application.streamingAssetsPath).RemoveStartPath(projectPath);
+            packRootPath = PhysicalPath.From(Application.streamingAssetsPath).GetRelativePath(projectPath);
             drawers =
             [
                 ..ReflectionUtility.types
@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Resource
                     .Select(RuniPath.From)
                     .Select(x => 
                     {
-                        bool success = x.TryRemoveStartPath(packRootPath, out RuniPath path);
+                        bool success = x.TryGetRelativePath(packRootPath, out RuniPath path);
                         return (success, path);
                     })
                     .Where(x => x.success)
@@ -76,7 +76,7 @@ namespace RuniOS.Editor.Resource
                 lastCheckPath = currentPath;
                 InspectorWindowBridge.RepaintAllInspectors();
                 
-                if (currentPath.TryRemoveStartPath(packRootPath, out RuniPath relative))
+                if (currentPath.TryGetRelativePath(packRootPath, out RuniPath relative))
                 {
                     activeFolderPath = relative;
                     UpdateDrawer(Enumerable.Repeat(relative, 1), true);
