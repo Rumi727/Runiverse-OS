@@ -118,10 +118,10 @@ namespace RuniOS.IO
                 (ref FileSystemEntry entry) =>
                 {
                     PhysicalPath entryFullPath = (PhysicalPath)entry.ToFullPath();
-                    ValidateEnumeratedPath(entryFullPath.value);
+                    ValidateSandboxPolicy(entryFullPath);
 
                     if (!entryFullPath.TryRemoveStartPath(targetPath, out RuniPath entryPath))
-                        throw new InvalidOperationException($"The enumerated file path '{entryFullPath}' is outside the bounds of the target directory '{targetPath}'. ");
+                        throw CreateSandboxException(entryFullPath, targetPath);
 
                     return new IOEntry
                     {
@@ -142,16 +142,9 @@ namespace RuniOS.IO
                 {
                     RecurseSubdirectories = recursive,
                     IgnoreInaccessible = true,
-                    MatchCasing = MatchCasing.CaseSensitive,
+                    MatchCasing = MatchCasing.PlatformDefault,
                 }
-            )
-            {
-                ShouldRecursePredicate = (ref FileSystemEntry entry) =>
-                {
-                    ValidateEnumeratedPath(entry.ToFullPath());
-                    return true;
-                }
-            };
+            );
 
             return enumerable.EnumerateOnThreadPool(cancellationToken: cancellationToken);
         }
@@ -236,33 +229,15 @@ namespace RuniOS.IO
         /// </exception>
         string ResolveFullPath(RuniPath path)
         {
-            string fullPath = targetPath.Combine(path).value;
-            ValidateSandboxPolicy(path, fullPath);
-            return fullPath;
+            PhysicalPath fullPath = targetPath.Combine(path);
+            ValidateSandboxPolicy(fullPath);
+            return fullPath.value;
         }
-
-        /// <summary>
-        /// Validates an enumerated physical path before it is returned or recursively traversed.<br/>
-        /// 열거된 물리 경로가 반환되거나 재귀 탐색되기 전에 검증합니다.
-        /// </summary>
-        /// <param name="fullPath">
-        /// The physical path reported by the file-system enumerator.<br/>
-        /// 파일 시스템 열거자가 보고한 물리 경로입니다.
-        /// </param>
-        /// <exception cref="UnauthorizedAccessException">
-        /// Thrown when <paramref name="fullPath"/> violates the configured sandbox policy.<br/>
-        /// <paramref name="fullPath"/>가 설정된 샌드박스 정책을 위반한 경우 발생합니다.
-        /// </exception>
-        void ValidateEnumeratedPath(string fullPath) => ValidateSandboxPolicy(null, fullPath);
 
         /// <summary>
         /// Applies the configured sandbox policy to the specified path.<br/>
         /// 지정된 경로에 설정된 샌드박스 정책을 적용합니다.
         /// </summary>
-        /// <param name="path">
-        /// The provider-relative path before physical resolution, or <see langword="null"/> for enumerated paths.<br/>
-        /// 물리 경로로 해석되기 전의 프로바이더 기준 경로이며, 열거된 경로이면 <see langword="null"/>입니다.
-        /// </param>
         /// <param name="fullPath">
         /// The physical path to validate.<br/>
         /// 검증할 물리 경로입니다.
@@ -271,67 +246,26 @@ namespace RuniOS.IO
         /// Thrown when the path violates the configured sandbox policy.<br/>
         /// 경로가 설정된 샌드박스 정책을 위반한 경우 발생합니다.
         /// </exception>
-        void ValidateSandboxPolicy(RuniPath? path, string fullPath)
+        void ValidateSandboxPolicy(PhysicalPath fullPath)
         {
             if (sandboxPolicy == SandboxPolicy.Disabled)
                 return;
 
-            if (path.HasValue && ContainsTraversalSegment(path.Value))
-                throw CreateTraversalSegmentException(path.Value);
+            if (!fullPath.TryRemoveStartPath(targetPath, out RuniPath relativePath))
+                throw CreateSandboxException(fullPath, targetPath);
 
-            if (!IsSameOrChildPath(fullPath, targetPath.value))
-                throw CreateSandboxException(fullPath, targetPath.value);
+            string currentPath = targetPath.value;
 
-            if (ContainsReparsePoint(fullPath))
-                throw CreateReparsePointException(fullPath);
-        }
-
-        static bool ContainsTraversalSegment(RuniPath path)
-        {
-            foreach (var segment in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
-            {
-                if (segment is "." || segment is "..")
-                    return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Determines whether an existing prefix of the specified normalized path contains a reparse point.<br/>
-        /// 지정된 정규화 경로에서 존재하는 접두 경로가 재분석 지점을 포함하는지 확인합니다.
-        /// </summary>
-        /// <param name="fullPath">
-        /// The normalized physical path to inspect.<br/>
-        /// 검사할 정규화된 물리 경로입니다.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if an existing segment has <see cref="FileAttributes.ReparsePoint"/>; otherwise, <see langword="false"/>.<br/>
-        /// 존재하는 세그먼트가 <see cref="FileAttributes.ReparsePoint"/>를 가지면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
-        /// </returns>
-        static bool ContainsReparsePoint(string fullPath)
-        {
-            string? root = Path.GetPathRoot(fullPath);
-            if (string.IsNullOrEmpty(root))
-                return false;
-
-            string currentPath = root;
-            string relativePath = fullPath.Substring(root.Length);
-            if (relativePath.Length == 0)
-                return TryGetAttributes(currentPath, out FileAttributes rootAttributes) && (rootAttributes & FileAttributes.ReparsePoint) != 0;
-
-            ReadOnlySpanSingleSplitter<char> segments = relativePath.AsSpan().Split(Path.DirectorySeparatorChar);
+            ReadOnlySpanSingleSplitter<char> segments = relativePath.GetSegmentsSpan();
             foreach (var segment in segments)
             {
                 currentPath = Path.Combine(currentPath, segment.ToString());
                 if (!TryGetAttributes(currentPath, out FileAttributes attributes))
-                    return false;
+                    continue;
 
                 if ((attributes & FileAttributes.ReparsePoint) != 0)
-                    return true;
+                    throw CreateReparsePointException(fullPath);
             }
-
-            return false;
         }
 
         /// <summary>
@@ -357,48 +291,11 @@ namespace RuniOS.IO
                 attributes = File.GetAttributes(path);
                 return true;
             }
-            catch (FileNotFoundException)
+            catch
             {
                 attributes = default;
                 return false;
             }
-            catch (DirectoryNotFoundException)
-            {
-                attributes = default;
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Determines whether <paramref name="path"/> is equal to or under the normalized <paramref name="rootPath"/> on a segment boundary.<br/>
-        /// <paramref name="path"/>가 정규화된 <paramref name="rootPath"/>와 같거나 세그먼트 경계 기준 하위 경로인지 확인합니다.
-        /// </summary>
-        /// <param name="path">
-        /// The normalized physical path to test.<br/>
-        /// 검사할 정규화된 물리 경로입니다.
-        /// </param>
-        /// <param name="rootPath">
-        /// The normalized physical root path used as the boundary.<br/>
-        /// 경계로 사용할 정규화된 물리 루트 경로입니다.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if <paramref name="path"/> is equal to or under <paramref name="rootPath"/>; otherwise, <see langword="false"/>.<br/>
-        /// <paramref name="path"/>가 <paramref name="rootPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
-        /// </returns>
-        static bool IsSameOrChildPath(string path, string rootPath)
-        {
-            StringComparison comparison = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            if (string.Equals(path, rootPath, comparison))
-                return true;
-
-            string? rootOfRootPath = Path.GetPathRoot(rootPath);
-            if (!string.IsNullOrEmpty(rootOfRootPath) && string.Equals(rootPath, rootOfRootPath, comparison))
-                return path.StartsWith(rootPath, comparison);
-
-            if (path.Length <= rootPath.Length)
-                return false;
-
-            return path[rootPath.Length] == Path.DirectorySeparatorChar && path.StartsWith(rootPath, comparison);
         }
 
         /// <summary>
@@ -417,15 +314,10 @@ namespace RuniOS.IO
         /// An exception describing the sandbox boundary violation.<br/>
         /// 샌드박스 경계 위반을 설명하는 예외를 반환합니다.
         /// </returns>
-        static UnauthorizedAccessException CreateSandboxException(string path, string rootPath) => new UnauthorizedAccessException
+        static UnauthorizedAccessException CreateSandboxException(PhysicalPath path, PhysicalPath rootPath) => new UnauthorizedAccessException
         (
             $"The file path '{path}' is outside the bounds of the target directory '{rootPath}'. " +
             "This may indicate an invalid symbolic link, reparse point, or path traversal violation."
-        );
-
-        static UnauthorizedAccessException CreateTraversalSegmentException(RuniPath path) => new UnauthorizedAccessException
-        (
-            $"Path traversal segments are blocked by policy: '{path}'."
         );
 
         /// <summary>
@@ -440,7 +332,7 @@ namespace RuniOS.IO
         /// An exception describing the blocked reparse-point access.<br/>
         /// 차단된 재분석 지점 접근을 설명하는 예외를 반환합니다.
         /// </returns>
-        static UnauthorizedAccessException CreateReparsePointException(string path) => new UnauthorizedAccessException
+        static UnauthorizedAccessException CreateReparsePointException(PhysicalPath path) => new UnauthorizedAccessException
         (
             $"Reparse point access is blocked by policy: '{path}'."
         );
