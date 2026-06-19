@@ -27,7 +27,7 @@ namespace RuniOS.Editor
             if (didDomainReload || importedAssets
                     .Concat(deletedAssets)
                     .Concat(movedAssets)
-                    .Any(x => x.StartsWith("Assets/StreamingAssets", StringComparison.OrdinalIgnoreCase)))
+                    .Any(x => x.Contains("StreamingAssets", StringComparison.OrdinalIgnoreCase)))
                 ResourceManager.Reload().Forget();
         }
     }
