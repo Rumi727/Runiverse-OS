@@ -131,15 +131,13 @@ fmod_editor.log
 
 /[Aa]ssets/~RumiEngineInstalled~
 
-/[Aa]ssets/[Ss]treamingAssets/assets/test/*
-/[Aa]ssets/[Ss]treamingAssets/assets/test.meta
-/[Aa]ssets/[Ss]treamingAssets/assets/test2/*
-/[Aa]ssets/[Ss]treamingAssets/assets/test2.meta
+/**/[Ss]treaming[Aa]ssets/assets/*test*/*
+/**/[Ss]treaming[Aa]ssets/assets/*test*.meta
 
-/[Aa]ssets/[Aa]sset Bundles/*
-/[Aa]ssets/[Aa]sset Bundles.meta
+/[Aa]ssets/[Aa]sset [Bb]undles/*
+/[Aa]ssets/[Aa]sset [Bb]undles.meta
 
 /[Aa]ssets/89478062_0.png
 /[Aa]ssets/89478062_0.png.meta
 
-/Packages/com.singularitygroup.hotreload
+/[Pa]ackages/com.singularitygroup.hotreload
