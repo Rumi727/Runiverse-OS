@@ -8,8 +8,6 @@ namespace RuniOS.Editor
 {
     public sealed class PackageStreamingAssetsBuildProcessor : BuildPlayerProcessor
     {
-        static readonly string projectStreamingAssetsPath = Application.streamingAssetsPath;
-
         public override int callbackOrder => -1000;
 
         public override void PrepareForBuild(BuildPlayerContext buildPlayerContext)
@@ -36,7 +34,7 @@ namespace RuniOS.Editor
                 if (!addedPaths.Add(relativePath))
                     continue;
 
-                string projectPath = Path.Combine(projectStreamingAssetsPath, relativePath);
+                string projectPath = Path.Combine(Application.streamingAssetsPath, relativePath);
                 if (File.Exists(projectPath) || Directory.Exists(projectPath))
                     continue;
 
