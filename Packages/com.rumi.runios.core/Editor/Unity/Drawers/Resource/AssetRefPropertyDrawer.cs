@@ -43,10 +43,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
             if (converter?.Read(property, typeof(IAssetRef)) is not IAssetRef assetRef)
                 return EditorGUIUtility.singleLineHeight;
 
-            if (AssetRegistryManager.GetAllForAsset(assetRef.targetAssetType).Count > 1 || AssetRegistryManager.GetDefaultForAsset(assetRef.targetAssetType) == null)
-                return RuniFields.GetMultiRowsFieldHeight(label, 2);
-            else
-                return RuniFields.GetMultiColumnsFieldHeight(label);
+            return RuniFields.GetAssetRefFieldHeight(label, assetRef);
         }
 
         public static SerializedProperty GetChildProperty(SerializedProperty property)
