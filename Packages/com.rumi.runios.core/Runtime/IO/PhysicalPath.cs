@@ -366,7 +366,7 @@ namespace RuniOS.IO
         /// The path to convert.<br/>
         /// 변환할 경로입니다.
         /// </param>
-        public static explicit operator string(PhysicalPath path) => path.value;
+        public static implicit operator string(PhysicalPath path) => path.value;
 
         /// <summary>
         /// Converts a string to a normalized <see cref="PhysicalPath"/>.<br/>

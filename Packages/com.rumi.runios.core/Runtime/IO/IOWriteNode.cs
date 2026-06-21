@@ -74,7 +74,7 @@ namespace RuniOS.IO
             if (childPath.IsEmpty())
                 return this;
 
-            return new IOWriteNode(provider, path.Combine(childPath));
+            return new IOWriteNode(provider, path / childPath);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace RuniOS.IO
             if (string.IsNullOrEmpty(childName))
                 return this;
 
-            return new IOWriteNode(provider, path.Combine(childName));
+            return new IOWriteNode(provider, path / childName);
         }
 
         /// <summary>

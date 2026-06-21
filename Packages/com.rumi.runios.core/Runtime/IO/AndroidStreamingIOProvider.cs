@@ -166,7 +166,7 @@ namespace RuniOS.IO
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        RuniPath entryPath = currentPath.Combine(item);
+                        RuniPath entryPath = currentPath / item;
                         string[] childItems = ListAssets(entryPath.value);
                         bool isDirectory = childItems.Length > 0;
 

@@ -74,7 +74,7 @@ namespace RuniOS.IO
             if (childPath.IsEmpty())
                 return this;
 
-            return new IONode(provider, path.Combine(childPath));
+            return new IONode(provider, path / childPath);
         }
 
         /// <summary>
@@ -86,7 +86,7 @@ namespace RuniOS.IO
             if (string.IsNullOrEmpty(childName))
                 return this;
 
-            return new IONode(provider, path.Combine(childName));
+            return new IONode(provider, path / childName);
         }
 
         /// <summary>

@@ -76,7 +76,7 @@ namespace RuniOS.Editor.IMGUI
                 foreach (var span in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
                 {
                     RuniPath splitPath = (RuniPath)span;
-                    splitAllPath = splitAllPath.Combine(splitPath);
+                    splitAllPath /= splitPath;
 
                     if (buildRootPaths.ContainsKey(splitAllPath))
                         continue;

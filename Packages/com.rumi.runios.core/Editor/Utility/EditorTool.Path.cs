@@ -8,6 +8,6 @@ namespace RuniOS.Editor
     {
         public static PhysicalPath projectPath { get; } = (PhysicalPath)Directory.GetCurrentDirectory();
 
-        public static bool IsProjectPath(PhysicalPath path) => path.StartsWith(projectPath.Combine("Assets")) || path.StartsWith(projectPath.Combine("Packages"));
+        public static bool IsProjectPath(PhysicalPath path) => path.StartsWith(projectPath / "Assets") || path.StartsWith(projectPath / "Packages");
     }
 }

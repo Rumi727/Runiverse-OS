@@ -229,7 +229,7 @@ namespace RuniOS.IO
         /// </exception>
         string ResolveFullPath(RuniPath path)
         {
-            PhysicalPath fullPath = targetPath.Combine(path);
+            PhysicalPath fullPath = targetPath / path;
             ValidateSandboxPolicy(fullPath);
             return fullPath.value;
         }

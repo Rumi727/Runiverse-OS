@@ -17,7 +17,7 @@ namespace RuniOS.Editor.Resource
         public override void OnEnable(IEnumerable<RuniPath> relativePaths)
         {
             relativeExistsPaths = relativePaths
-                .Select(x => PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value)
+                .Select<RuniPath, string>(x => (PhysicalPath)Application.streamingAssetsPath / x)
                 .Where(Directory.Exists)
                 .ToArray();
 

@@ -13,7 +13,7 @@ namespace RuniOS.IO
         {
 #if UNITY_EDITOR
             var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
-                .Select(x => new PhysicalIOProvider(PhysicalPath.From(x.resolvedPath).Combine(streamingAssetsFolderName), SandboxPolicy.Disabled))
+                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Disabled))
                 .OfType<IIOProvider>();
 
             instance = new GroupIOProvider([new PhysicalIOProvider((PhysicalPath)Application.streamingAssetsPath, SandboxPolicy.Disabled), .. packages]);

@@ -24,12 +24,12 @@ namespace RuniOS.Editor.Resource
             relativeExistsPaths =
             [
                 ..relativePaths
-                    .Select(x =>
+                    .Select<RuniPath, string>(x =>
                     {
                         if (x.IsEmpty())
-                            return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).Combine((RuniPath)ResourcePack.infoPath).value;
+                            return (PhysicalPath)Application.streamingAssetsPath / x / ResourcePack.infoPath;
 
-                        return PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value;
+                        return (PhysicalPath)Application.streamingAssetsPath / x;
                     })
                     .Where(File.Exists)
             ];
@@ -55,7 +55,7 @@ namespace RuniOS.Editor.Resource
                 if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
-                    File.WriteAllText(PhysicalPath.From(Application.streamingAssetsPath).Combine(ResourcePack.infoPath).value, json);
+                    File.WriteAllText((PhysicalPath)Application.streamingAssetsPath / ResourcePack.infoPath, json);
                     
                     OnEnable(relativePaths);
                 }

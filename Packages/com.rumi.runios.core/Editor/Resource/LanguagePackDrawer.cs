@@ -15,7 +15,8 @@ namespace RuniOS.Editor.Resource
             contents =
             [
                 ..relativePaths
-                    .Select(x => PhysicalPath.From(Application.streamingAssetsPath).Combine(x).value)
+                    .Select(x => (PhysicalPath)Application.streamingAssetsPath / x)
+                    .Select(x => x.value)
                     .Select(File.ReadAllText)
                     .Select(x => new GUIContent(x))
             ];
