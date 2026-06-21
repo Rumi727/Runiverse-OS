@@ -25,7 +25,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 시스템의 기본 리소스 팩을 가져옵니다.
         /// </summary>
-        public static readonly ResourcePack defaultPack = Create(PackIdentifier.CreateByID("vanilla"), StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
+        public static readonly ResourcePack defaultPack = Create("vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
 
         static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks = new();
         public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; } = _loadedResourcePacks.AsReadOnly();
