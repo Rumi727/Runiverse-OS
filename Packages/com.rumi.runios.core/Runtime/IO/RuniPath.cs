@@ -501,6 +501,7 @@ namespace RuniOS.IO
 
 
 
+        #region ==
         /// <summary>
         /// Determines whether two paths are equal.<br/>
         /// 두 경로가 같은지 확인합니다.
@@ -554,7 +555,9 @@ namespace RuniOS.IO
         /// 두 경로가 같으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         public static bool operator ==(string left, RuniPath right) => left.Equals(right.value);
+        #endregion
 
+        #region !=
         /// <summary>
         /// Determines whether two paths are not equal.<br/>
         /// 두 경로가 같지 않은지 확인합니다.
@@ -608,6 +611,14 @@ namespace RuniOS.IO
         /// 두 경로가 같지 않으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
         public static bool operator !=(string left, RuniPath right) => !(left == right);
+        #endregion
+
+
+
+        #region /
+        public static RuniPath operator /(RuniPath left, RuniPath right) => left.Combine(right);
+        public static RuniPath operator /(RuniPath left, string right) => left.Combine(right);
+        #endregion
         #endregion
 
 
