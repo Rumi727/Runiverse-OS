@@ -26,7 +26,7 @@ namespace RuniOS.IO
         /// Gets the provider referenced by this node.<br/>
         /// 이 노드가 참조하는 프로바이더를 가져옵니다.
         /// </summary>
-        public IIOProvider provider => _provider ?? throw new InvalidOperationException("Invalid node! (provider is null)");
+        public IIOProvider provider => _provider ?? EmptyIOProvider.instance;
         readonly IIOProvider? _provider = provider;
 
         /// <summary>

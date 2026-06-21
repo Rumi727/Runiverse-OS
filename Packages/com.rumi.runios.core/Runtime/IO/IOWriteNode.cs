@@ -26,7 +26,7 @@ namespace RuniOS.IO
         /// Gets the writable provider referenced by this node.<br/>
         /// 이 노드가 참조하는 쓰기 가능 프로바이더를 가져옵니다.
         /// </summary>
-        public IWritableIOProvider provider => _provider ?? throw new InvalidOperationException("Invalid Handle! (provider is null)");
+        public IWritableIOProvider provider => _provider ?? EmptyIOProvider.instance;
         readonly IWritableIOProvider? _provider = provider;
 
         /// <summary>

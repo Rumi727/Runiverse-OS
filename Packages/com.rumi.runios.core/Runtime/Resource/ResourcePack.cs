@@ -2,9 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using Newtonsoft.Json;
-using RuniOS.Collections.Generic;
 using RuniOS.IO;
-using RuniOS.Linq;
 using System.Collections.Immutable;
 
 namespace RuniOS.Resource
@@ -13,96 +11,8 @@ namespace RuniOS.Resource
     /// 리소스 팩(Resource Pack)의 정보를 담는 참조 클래스입니다.
     /// <br/>실제 에셋 데이터는 <see cref="IAssetRegistry"/>를 통해 로드 및 관리됩니다.
     /// </summary>
-    public sealed class ResourcePack : IDisposable
+    public sealed partial class ResourcePack : IDisposable
     {
-        /// <summary>
-        /// 에셋이 저장되는 기본 폴더 이름("assets")을 가져옵니다.
-        /// </summary>
-        public const string assetsFolderName = "assets";
-
-        /// <summary>
-        /// 팩의 메타데이터 파일 이름("pack.json")을 가져옵니다.
-        /// </summary>
-        public const string infoPath = "pack.json";
-
-        /// <summary>
-        /// 식별자가 비어 있고 데이터에 접근할 수 없는 빈 <see cref="ResourcePack"/> 인스턴스를 가져옵니다.
-        /// </summary>
-        public static readonly ResourcePack emptyPack = new ResourcePack();
-        static ResourcePack? defaultPack;
-
-        public static readonly PackIdentifier defaultPackIdentifier = PackIdentifier.CreateByID("vanilla");
-        
-        
-        static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks = new();
-        public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; } = _loadedResourcePacks.AsReadOnly();
-        
-        /*
-         * TODO
-         * 임시
-         */
-        internal static readonly HashSet<PackIdentifier> _enabledPackIdentifiers = [];
-        public static ReadOnlySet<PackIdentifier> enabledPackIdentifiers { get; } = _enabledPackIdentifiers.AsReadOnly();
-
-        /// <summary>
-        /// 시스템의 기본 리소스 팩을 비동기적으로 가져옵니다.
-        /// <br/>기본 팩이 아직 생성되지 않은 경우 <c>"vanilla"</c> 식별자를 사용하여 생성됩니다.
-        /// </summary>
-        /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 입니다.</returns>
-        public static async UniTask<ResourcePack> GetDefaultPack()
-        {
-            defaultPack ??= await Create(defaultPackIdentifier, StreamingIOProvider.instance);
-            EnablePack(defaultPackIdentifier);
-
-            return defaultPack;
-        }
-
-        /// <summary>
-        /// 시스템의 기본 리소스팩을 가져오려고 시도합니다.
-        /// <br/>기본 팩이 아직 생성되지 않은 경우, <see langword="null"/>을 반환합니다.
-        /// </summary>
-        /// <returns>기본 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
-        public static ResourcePack? TryGetDefaultPack() => defaultPack;
-
-        /// <summary>
-        /// 지정된 <see cref="PhysicalIOProvider"/>를 사용하여 리소스 팩을 생성합니다.
-        /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
-        /// </summary>
-        /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="PhysicalIOProvider"/>입니다.</param>
-        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스 또는 유효하지 않은 경우 <see langword="null"/>을 반환합니다.</returns>
-        public static UniTask<ResourcePack> Create(PhysicalIOProvider provider) => Create(PackIdentifier.CreateByPath(provider.targetPath), provider);
-        
-        /// <summary>
-        /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성하고 메타데이터를 로드합니다.
-        /// <br/>팩의 정보 파일(<c>pack.json</c>)이 유효하지 않으면 생성이 실패합니다.
-        /// </summary>
-        /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
-        /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
-        /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static async UniTask<ResourcePack> Create(PackIdentifier packIdentifier, IIOProvider provider)
-        {
-            if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
-                return loadedPack;
-            
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, provider);
-            await resourcePack.Reload();
-
-            _loadedResourcePacks.Add(packIdentifier, resourcePack);
-            return resourcePack;
-        }
-
-        public static UniTask ReloadAll() => UniTask.WhenAll(loadedResourcePacks.Select(x => UniTask.Defer(x.Value.Reload)));
-
-        public static void EnablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Add(identifier);
-        
-        public static void DisablePack(PackIdentifier identifier) => _enabledPackIdentifiers.Remove(identifier);
-
-        public static IEnumerable<ResourcePack> GetEnabledPacks() => loadedResourcePacks
-            .Where(x => enabledPackIdentifiers.Contains(x.Key))
-            .Select(x => x.Value);
-
-        public static ResourcePack[] GetEnabledPacksSnapshot() => GetEnabledPacks().ToArray();
-        
         /// <summary>
         /// 빈 <see cref="ResourcePack"/> 인스턴스를 초기화합니다.
         /// </summary>
@@ -122,13 +32,16 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
         /// <param name="provider">팩의 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
-        ResourcePack(PackIdentifier identifier, IIOProvider provider)
+        /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
+        ResourcePack(PackIdentifier identifier, IIOProvider provider, RequiredPackSort requiredSort)
         {
             this.identifier = identifier;
 
             rootFolder = provider.rootNode;
             assetFolder = rootFolder.CreateChild(assetsFolderName);
             infoFile = rootFolder.CreateChild(infoPath);
+
+            this.requiredSort = requiredSort;
         }
         
         /// <summary>
@@ -161,20 +74,22 @@ namespace RuniOS.Resource
         /// </summary>
         public bool isValid { get; private set; }
 
+        public RequiredPackSort requiredSort { get; }
+
         public ImmutableArray<string> namespaces { get; private set; } = ImmutableArray<string>.Empty;
         
         public bool isDisposed { get; private set; }
 
         public async UniTask Reload()
         {
-            metaData = new PackMetaData();
-            namespaces = ImmutableArray<string>.Empty;
-            
-            isValid = false;
-            
             if (await infoFile.file.GetEntry() == null)
+            {
+                metaData = new PackMetaData();
+                namespaces = ImmutableArray<string>.Empty;
+
                 return;
-            
+            }
+
             try
             {
                 metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.file.ReadAllText());

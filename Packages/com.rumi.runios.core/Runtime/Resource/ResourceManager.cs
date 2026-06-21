@@ -44,13 +44,14 @@ namespace RuniOS.Resource
                 {
                     reloadRequested = false;
 
-                    await ResourcePack.GetDefaultPack();
                     await ResourcePack.ReloadAll();
 
                     ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
 
                     UniTask[] uniTasks = new UniTask[assetRegistries.Count];
                     float[] assetRegistryProgresses = new float[assetRegistries.Count];
+
+                    ResourcePack[] resourcePacks = ResourcePack.GetEnabledPacksSnapshot();
 
                     int index = 0;
                     foreach (var assetRegistry in assetRegistries)
@@ -66,7 +67,7 @@ namespace RuniOS.Resource
                             {
                                 await assetRegistry.Reload
                                 (
-                                    ResourcePack.GetEnabledPacksSnapshot(),
+                                    resourcePacks,
                                     Progress.Create<float>(x =>
                                     {
                                         assetRegistryProgresses[targetIndex] = x;

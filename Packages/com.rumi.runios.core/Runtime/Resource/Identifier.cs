@@ -31,14 +31,7 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="path">식별자의 경로 구성 요소입니다.</param>
         /// <exception cref="InvalidIdentifierException">제공된 경로가 유효하지 않은 경우 발생합니다.</exception>
-        public Identifier(RuniPath path)
-        {
-            if (!IsPathValid(path))
-                throw new InvalidIdentifierException($"Invalid path: '{path}'. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'.");
-
-            _nameSpace = defaultNamespace;
-            _path = path;
-        }
+        public Identifier(RuniPath path) : this(defaultNamespace, path) { }
 
         /// <summary>
         /// 지정된 네임스페이스와 경로로 <see cref="Identifier"/> 구조체의 새 인스턴스를 초기화합니다.
@@ -181,7 +174,7 @@ namespace RuniOS.Resource
         public static implicit operator Identifier(string identifier) => Parse(identifier);
         
 
-        
+
         /// <summary>
         /// 식별자의 문자열 표현을 <see cref="Identifier"/> 구조체로 구문 분석합니다.
         /// 문자열은 "namespace:path" 또는 "path" 형식일 수 있습니다 (후자의 경우 기본 네임스페이스가 사용됨).
@@ -189,6 +182,7 @@ namespace RuniOS.Resource
         /// <param name="identifier">구문 분석할 문자열입니다.</param>
         /// <returns>구문 분석된 문자열을 나타내는 <see cref="Identifier"/> 구조체입니다.</returns>
         /// <exception cref="InvalidIdentifierException">식별자 문자열 형식이 유효하지 않은 경우 발생합니다.</exception>
+        // ReSharper restore Unity.ExpensiveCode
         public static Identifier Parse(string identifier)
         {
             // 식별자 문자열을 구분자 (':')를 기준으로 분리합니다.
