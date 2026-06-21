@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RuniOS.Json.Converters;
 using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 namespace RuniOS
 {

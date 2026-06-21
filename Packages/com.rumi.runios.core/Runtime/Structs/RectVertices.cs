@@ -1,5 +1,6 @@
 #nullable enable
 using Newtonsoft.Json;
+using UnityEngine;
 
 namespace RuniOS
 {

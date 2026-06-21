@@ -1,5 +1,6 @@
 #nullable enable
 using System.Globalization;
+using UnityEngine;
 
 namespace RuniOS.Texts.Styles
 {

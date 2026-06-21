@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections;
 using System.Runtime.Serialization;
+using UnityEngine;
 
 namespace RuniOS.Collections.Generic
 {

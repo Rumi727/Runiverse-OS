@@ -2,6 +2,7 @@
 using RuniOS.Booting;
 using RuniOS.LowLevel;
 using System.Diagnostics;
+using UnityEngine;
 using UnityEngine.Scripting;
 
 namespace RuniOS

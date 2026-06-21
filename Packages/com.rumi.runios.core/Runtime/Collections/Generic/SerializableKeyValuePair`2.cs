@@ -3,6 +3,7 @@
 using Newtonsoft.Json;
 using System.ComponentModel;
 using System.Diagnostics;
+using UnityEngine;
 
 namespace RuniOS.Collections.Generic
 {

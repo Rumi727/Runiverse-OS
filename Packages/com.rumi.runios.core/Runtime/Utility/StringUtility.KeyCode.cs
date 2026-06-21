@@ -1,4 +1,6 @@
 #nullable enable
+using UnityEngine;
+
 namespace RuniOS.Utility
 {
     public static partial class StringUtility

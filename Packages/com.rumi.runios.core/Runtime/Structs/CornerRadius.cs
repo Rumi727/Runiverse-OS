@@ -1,4 +1,6 @@
-﻿namespace RuniOS
+﻿using UnityEngine;
+
+namespace RuniOS
 {
     /// <summary>
     /// 직사각형의 각 모서리(Corner) 반경을 정의하는 구조체입니다.

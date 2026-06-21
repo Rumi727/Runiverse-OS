@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using RuniOS.Json.Converters.IO;
 using RuniOS.Spans;
 using System.Diagnostics.CodeAnalysis;
+using UnityEngine;
 
 namespace RuniOS.IO
 {

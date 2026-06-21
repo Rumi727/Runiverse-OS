@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.LowLevel;
+using UnityEngine;
 
 namespace RuniOS.AnimatedValues
 {

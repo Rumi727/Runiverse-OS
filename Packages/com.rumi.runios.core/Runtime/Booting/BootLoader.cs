@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.Reflection;
 using RuniOS.Resource;
+using UnityEngine;
 using UnityEngine.LowLevel;
 
 namespace RuniOS.Booting
