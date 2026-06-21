@@ -1,0 +1,374 @@
+# 리소스 시스템 개요
+
+Language available: \[[**한국어 (대한민국)**](README.md)\] \[[English (US)](README-EN.md)\]  
+
+## 개요
+
+이 프로젝트의 리소스 시스템은 Minecraft의 리소스 팩 구조에서 아이디어를 가져왔습니다.\
+파일은 리소스 팩에 들어 있고, 에셋 레지스트리는 그 파일들을 게임에서 사용할 수 있는 `Identifier`와 에셋 핸들로 등록합니다.
+
+```text
+Resource Pack files
+-> AssetRegistry
+-> AssetHandle
+-> AssetScope
+-> loaded asset object
+```
+
+중요한 점은 레지스트리가 실제 에셋 객체를 항상 즉시 로드하지 않는다는 것입니다.\
+리로드 시점에는 주로 "어떤 에셋이 어디에 있고, 어떤 핸들로 접근해야 하는가"를 다시 계산합니다.\
+실제 에셋 객체는 보통 `AssetHandle<T>.GetScope()` 또는 `AssetRef<T>.LoadAsync()`가 호출될 때 로드됩니다.
+
+## 로드 흐름
+
+초기 로드는 `BootLoader`에서 시작됩니다.
+
+```text
+BootLoader
+-> ResourceManager.Reload
+-> ResourcePack.ReloadAll
+-> AssetRegistryManager.GetAll
+-> AssetRegistry.Reload
+```
+
+런타임 조회는 레지스트리와 키를 통해 이루어집니다.
+
+```text
+ResourceKey
+-> ResourceManager.GetHandle
+-> AssetRegistryManager.Get
+-> AssetRegistry[assetId]
+-> AssetHandle.GetScope
+```
+
+`ResourceManager.Reload()`는 이미 리로드 중일 때 중복 실행하지 않습니다.\
+대신 리로드 요청을 표시하고, 현재 리로드가 끝난 뒤 필요한 경우 한 번 더 리로드합니다.
+
+모든 리소스 팩이 먼저 `ResourcePack.ReloadAll()`로 갱신됩니다.\
+그 다음 현재 활성화된 리소스 팩 스냅샷을 각 에셋 레지스트리에 넘겨서 레지스트리들을 병렬로 리로드합니다.
+
+리로드가 끝나면 `preReloadCompletionEvent`, `reloadCompletionEvent`가 호출됩니다.\
+렌더러나 UI 같은 시스템은 이 시점에 자신이 들고 있던 핸들이 아직 레지스트리의 최신 핸들인지 확인하고, 필요하면 다시 가져올 수 있습니다.
+
+## 리소스 팩 구조
+
+리소스 팩의 루트에는 `pack.json`이 있습니다.\
+에셋은 `assets` 폴더 아래에 네임스페이스별로 들어갑니다.
+
+```text
+pack.json
+assets/
+  runios/
+    lang/
+      ko_kr.json
+      en_us.json
+    sounds.json
+    sounds/
+      ui/click.ogg
+```
+
+기본 식별자 형식은 `namespace:path`입니다.
+
+```text
+runios:lang
+runios:ui/click
+```
+
+네임스페이스가 없으면 기본 네임스페이스인 `runios`가 사용됩니다.
+
+`ResourcePack.defaultPack`은 `vanilla` 팩이며 `StreamingIOProvider.instance`를 사용합니다.\
+`RequiredPackSort.BeforeVanilla`, `RequiredPackSort.AfterVanilla`를 통해 필수 팩의 위치를 `vanilla` 앞뒤로 둘 수 있습니다.
+
+## ResourceKey와 Identifier
+
+`Identifier`는 네임스페이스와 경로로 이루어진 ID입니다.
+
+```csharp
+Identifier id = new Identifier("runios", "ui/click");
+```
+
+`ResourceKey`는 레지스트리 ID와 에셋 ID를 같이 저장합니다.
+
+```csharp
+ResourceKey key = new ResourceKey
+(
+    new Identifier("runios", "sounds"),
+    new Identifier("runios", "ui/click")
+);
+```
+
+즉 `registryId`는 "어떤 레지스트리에서 찾을 것인가"이고, `assetId`는 "그 레지스트리 안의 어떤 에셋인가"입니다.
+
+## AssetRegistryManager
+
+`AssetRegistryManager`는 등록된 모든 레지스트리를 관리합니다.
+
+```csharp
+AssetRegistryManager.Register<MyAssetRegistry>();
+```
+
+레지스트리는 보통 `[Awaken]` 메소드에서 등록됩니다.\
+에디터에서도 보이게 하려면 기존 구현처럼 `[UnityEditor.InitializeOnLoadMethod]`를 같이 사용할 수 있습니다.
+
+레지스트리는 다음 기준으로 조회됩니다.
+
+```text
+registryId       -> AssetRegistryManager.Get(registryId)
+registry type    -> AssetRegistryManager.Get<TRegistry>()
+asset type       -> AssetRegistryManager.GetAllForAsset(assetType)
+default registry -> AssetRegistryManager.GetDefaultForAsset<TAsset>()
+```
+
+`isDefault`가 `true`인 레지스트리는 같은 에셋 타입의 기본 레지스트리가 됩니다.\
+`AssetRef<T>`의 인스펙터 필드도 이 정보를 사용해 호환되는 레지스트리와 에셋을 고를 수 있습니다.
+
+## 빠른 리로드 구조
+
+레지스트리는 리로드 때 전체 인덱스를 다시 만듭니다.\
+하지만 이 작업은 대부분 파일 조회와 핸들 기록입니다. 실제 에셋 객체 전체를 다시 로드하는 구조가 아닙니다.
+
+`AssetRegistry<THandle>`는 리로드 중 임시 추적 테이블을 만듭니다.
+
+```text
+BeginTracking
+-> RecordAssetHandle
+-> EndTracking
+```
+
+`RecordAssetHandle`은 같은 ID의 기존 핸들이 있고, 새 핸들과 같은 대상을 가리킨다면 기존 핸들을 재사용합니다.
+
+```text
+same identifier + same target -> keep old handle
+same identifier + changed target -> replace with new handle
+missing from reload pass -> remove from registry
+```
+
+그래서 레지스트리 자체는 전체 리로드처럼 보이지만, 에셋 핸들은 변경된 것만 교체됩니다.\
+파일이 바뀌지 않은 에셋은 기존 핸들이 유지되고, 이미 로드된 에셋 객체도 그대로 이어질 수 있습니다.
+
+파일이 바뀐 에셋은 레지스트리에서 새 핸들로 교체됩니다.\
+기존 핸들을 들고 있던 렌더러나 시스템은 리로드 완료 이벤트에서 다시 레지스트리를 조회해 새 핸들을 가져오면 됩니다.
+
+이 구조 덕분에 리로드는 Minecraft식 전체 재적재보다 훨씬 가볍습니다.\
+레지스트리 갱신은 빠른 파일 인덱싱에 가깝고, 실제 에셋 로드는 필요한 시점에 핸들과 스코프가 처리합니다.
+
+## AssetHandle과 AssetScope
+
+`AssetHandle<TAsset>`는 단일 에셋의 로드와 언로드를 담당합니다.\
+실제 에셋은 `GetScope()`가 호출될 때 필요하면 로드됩니다.
+
+```csharp
+IAssetScope<MyAsset>? scope = await handle.GetScope();
+if (scope == null)
+    return;
+
+using (scope)
+{
+    MyAsset asset = scope.asset;
+}
+```
+
+`AssetScope<TAsset>`는 에셋 사용권입니다.\
+사용이 끝나면 반드시 `Dispose()`해야 합니다.
+
+스코프가 모두 반환되면 핸들은 `unloadDelayFrame` 뒤에 언로드를 시도합니다.\
+따라서 짧은 시간 안에 같은 에셋이 다시 요청되는 경우 불필요한 언로드와 재로드를 줄일 수 있습니다.
+
+`AssetHandle<TAsset>.IsSameTarget()`은 리로드에서 핸들을 재사용해도 되는지 판단합니다.\
+기본 구현은 핸들 타입, I/O 대상, 메타데이터가 같은지 확인합니다.
+
+## AssetRef
+
+`AssetRef<TAsset>`는 인스펙터에서 특정 타입의 리소스를 고르기 위한 래퍼입니다.\
+내부에는 `ResourceKey`만 저장됩니다.
+
+```csharp
+[SerializeField] AssetRef<MyAsset> assetRef;
+```
+
+사용할 때는 레지스트리, 핸들, 스코프를 직접 찾아다니지 않고 `LoadAsync()`를 호출하면 됩니다.
+
+```csharp
+IAssetScope<MyAsset>? scope = await assetRef.LoadAsync();
+if (scope == null)
+    return;
+
+using (scope)
+{
+    MyAsset asset = scope.asset;
+}
+```
+
+직접 쓰면 다음 흐름을 매번 작성해야 합니다.
+
+```text
+ResourceKey
+-> AssetRegistryManager.Get
+-> registry[assetId]
+-> handle.GetScope
+```
+
+`AssetRef<TAsset>`는 이 흐름을 인스펙터 친화적인 API로 감싸 줍니다.
+
+## SimpleAssetRegistry
+
+일반적인 "폴더 안 파일을 전부 에셋으로 등록"하는 경우에는 `SimpleAssetRegistry<THandle>`를 쓰는 편이 좋습니다.
+
+`SimpleAssetRegistry`는 활성 리소스 팩마다 다음 폴더를 순회합니다.
+
+```text
+assets/{namespace}/{registryName}
+```
+
+여기서 `{namespace}`는 레지스트리가 탐색 중인 리소스 팩 안의 네임스페이스입니다.\
+레지스트리 ID의 네임스페이스가 아닙니다.
+
+`registryId.nameSpace`는 레지스트리끼리 ID가 충돌하지 않게 하는 이름 영역입니다.\
+`SimpleAssetRegistry`의 폴더 탐색 범위를 제한하지 않습니다.
+
+`registryName`의 기본값은 `registryId.path`입니다.\
+즉 `SimpleAssetRegistry`는 모든 리소스 팩 네임스페이스 아래에서 `registryName` 폴더를 찾습니다.
+
+예를 들어 `registryId`가 `example:textures`라면 기본 `registryName`은 `textures`입니다.\
+따라서 리소스 팩에 존재하는 모든 네임스페이스에서 다음 위치를 찾습니다.
+
+```text
+assets/runios/textures
+assets/example/textures
+assets/any_namespace/textures
+```
+
+파일 경로는 확장자를 제외한 에셋 ID가 됩니다.
+
+```text
+assets/runios/textures/ui/button.png
+-> runios:ui/button
+
+assets/any_namespace/textures/ui/button.png
+-> any_namespace:ui/button
+```
+
+개발자는 대부분 `CreateHandle`만 구현하면 됩니다.
+
+```csharp
+#nullable enable
+using Cysharp.Threading.Tasks;
+using RuniOS.Booting;
+using RuniOS.IO;
+using UnityEngine.Scripting;
+
+namespace RuniOS.Resource.Example
+{
+    public sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
+    {
+        public override Identifier registryId => new Identifier("example", "my_assets");
+        public override bool isDefault => true;
+        public override Type assetType => typeof(MyAsset);
+        public override WildcardPatterns assetFilter { get; } = "json";
+
+        [Awaken]
+        [Preserve]
+#if UNITY_EDITOR
+        [UnityEditor.InitializeOnLoadMethod]
+#endif
+        static void Awaken() => AssetRegistryManager.Register<MyAssetRegistry>();
+
+        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData metaData)
+        {
+            return UniTask.FromResult(new MyAssetHandle(node, metaData));
+        }
+    }
+}
+```
+
+더 세밀한 처리가 필요하면 `OnBeginAssetLoop`, `OnAssetLoop`, `OnEndAssetLoop`를 오버라이드할 수 있습니다.
+
+현재 구현 기준으로, 같은 리로드 패스에서 같은 ID가 이미 기록되었다면 뒤에 나온 항목은 무시됩니다.\
+즉 팩 우선순위는 활성 팩 순서와 `RecordAssetHandle`의 중복 처리 규칙을 따릅니다.
+
+## 직접 AssetRegistry 구현
+
+파일을 단순 순회하는 구조가 아니라면 `AssetRegistry<THandle>`를 직접 상속합니다.
+
+예를 들어 다음 같은 경우입니다.
+
+```text
+여러 json 파일의 딕셔너리를 언어별로 병합
+assets/{namespace}/sounds.json 하나를 파싱해 여러 사운드 ID 등록
+파일 경로가 아니라 내부 데이터 키를 에셋 ID로 사용
+```
+
+실제 예시는 `LanguageAssetRegistry`, `SoundAssetRegistry`입니다.
+
+직접 구현할 때는 중복 리로드 방지, 진행도 보고, 트래킹 시작과 종료를 직접 처리해야 합니다.
+
+```csharp
+public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
+{
+    if (isLoading)
+    {
+        await UniTask.WaitWhile(() => isLoading);
+        return;
+    }
+
+    _isLoading = true;
+    BeginTracking();
+
+    try
+    {
+        progress.SafeReport(0);
+
+        foreach (ResourcePack resourcePack in resourcePacks)
+        {
+            // Read files, parse data, and call RecordAssetHandle.
+            // RecordAssetHandle(assetId, handle);
+        }
+    }
+    catch (Exception e)
+    {
+        Debug.RuntimeLogError($"An unexpected exception occurred while reloading resources. The exception is: {e}");
+    }
+    finally
+    {
+        progress.SafeReport(1);
+
+        EndTracking();
+        _isLoading = false;
+    }
+}
+```
+
+이 방식은 번거롭지만 가장 자유롭습니다.\
+진행도 계산, 병렬 작업, 병합 규칙, 어떤 시점에 어떤 핸들을 등록할지 모두 레지스트리 구현이 직접 결정합니다.
+
+## 직접 레지스트리가 필요한 경우
+
+`SimpleAssetRegistry`로 충분한 경우:
+
+```text
+폴더 안 파일 하나 = 에셋 하나
+파일 경로 = 에셋 ID
+확장자 필터로 대상 파일을 고를 수 있음
+CreateHandle만 다르면 됨
+```
+
+직접 `AssetRegistry`가 좋은 경우:
+
+```text
+여러 파일을 합쳐 하나의 에셋으로 만들어야 함
+한 파일에서 여러 에셋 ID가 나와야 함
+리소스 팩별 병합 규칙이 필요함
+폴더 순회가 아니라 고정 json 파일을 읽어야 함
+진행도와 병렬 처리 방식을 직접 제어해야 함
+```
+
+## 요약
+
+리소스 시스템은 리소스 팩의 파일 구조와 게임 내부 에셋 접근을 분리합니다.\
+레지스트리는 파일을 빠르게 인덱싱하고, 핸들은 실제 에셋 로드와 생명주기를 담당합니다.
+
+일반 파일 에셋은 `SimpleAssetRegistry`를 쓰면 됩니다.\
+복잡한 병합이나 커스텀 포맷은 `AssetRegistry`를 직접 구현하면 됩니다.
+
+리로드는 레지스트리 전체를 다시 계산하지만, 에셋 객체 전체를 무조건 버리고 다시 로드하지 않습니다.\
+변경된 핸들만 교체하고, 사용 중인 시스템은 리로드 완료 이벤트에서 최신 핸들을 다시 가져오는 방식으로 동작합니다.
