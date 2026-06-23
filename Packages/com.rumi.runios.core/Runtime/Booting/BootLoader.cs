@@ -21,25 +21,25 @@ namespace RuniOS.Booting
         // ReSharper disable once Unity.IncorrectMethodSignature
         static async UniTaskVoid Boot()
         {
-            Debug.RuntimeLog("UniTask Initialize", nameof(BootLoader));
+            Debug.RuntimeLog("UniTask Initialize");
             
             //UniTask Setting
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
             PlayerLoopHelper.Initialize(ref loop);
 
             //Awaken Invoke
-            Debug.RuntimeLog("Awaken Method Invoke", nameof(BootLoader));
+            Debug.RuntimeLog("Awaken Method Invoke");
             await ReflectionUtility.InvokeDefinedMethods<AwakenAttribute>();
             
-            Debug.RuntimeLog("Loading the resource registry", nameof(BootLoader));
+            Debug.RuntimeLog("Loading the resource registry");
             
             await ResourceManager.Reload();
             
             //Starten Invoke
-            Debug.RuntimeLog("Starten Method Invoke", nameof(BootLoader));
+            Debug.RuntimeLog("Starten Method Invoke");
             await ReflectionUtility.InvokeDefinedMethods<StartenAttribute>();
             
-            Debug.RuntimeLog("Exit bootloader", nameof(BootLoader));
+            Debug.RuntimeLog("Exit bootloader");
         }
     }
 }
