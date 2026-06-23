@@ -14,7 +14,7 @@ namespace RuniOS.Editor.IMGUI
             IAssetRegistry? defaultRegistry = AssetRegistryManager.GetDefaultForAsset(value.targetAssetType);
 
             if (registries.Count > 1 || defaultRegistry == null)
-                value.key = ResourceKeyField(position, label, value.key, x => registries.Contains(x));
+                value.key = ResourceKeyField(position, label, value.key, registries.Contains);
             else
                 value.key = new ResourceKey(defaultRegistry.registryId, AssetIdField(position, label, defaultRegistry.registryId, value.key.assetId));
         }
