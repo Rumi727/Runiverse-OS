@@ -8,10 +8,10 @@ namespace RuniOS.Editor
     /// <summary>
     /// 에디터에서 리소스를 미리 로딩시키는 클래스입니다.
     /// </summary>
+    [InitializeOnLoad]
     public sealed class EditorResourceLoader : AssetPostprocessor
     {
-        [InitializeOnLoadMethod]
-        static void Initialize() => ResourceManager.reloadStartEvent += x => x.progress.Subscribe(x => SetProgress(typeof(EditorResourceLoader).FullName ?? nameof(EditorResourceLoader), x));
+        static EditorResourceLoader() => ResourceManager.reloadStartEvent += x => x.progress.Subscribe(x => SetProgress(typeof(EditorResourceLoader).FullName ?? nameof(EditorResourceLoader), x));
 
         public const string progressText = "internal.editor_resource_loader.loading";
 
