@@ -104,7 +104,25 @@ namespace RuniOS.Resource
             if (!isValid)
                 return;
             else if ((await assetFolder.dir.GetEntry()).HasValue)
-                namespaces = [..(await assetFolder.dir.GetDirectories().Select(x => x.path.GetFileName()).ToArrayAsync())];
+            {
+                namespaces =
+                [
+                    ..
+                    await assetFolder.dir.GetDirectories()
+                    .Select(x => x.path.GetFileName())
+                    .Where(x =>
+                    {
+                        if (!Identifier.IsNamespaceValid(x))
+                        {
+                            Debug.RuntimeLogWarning(Identifier.GetInvalidNamespaceMessage(x));
+                            return false;
+                        }
+
+                        return true;
+                    })
+                    .ToArrayAsync()
+                ];
+            }
         }
         
         public IEnumerable<IONode> GetNamespaceNodes() => namespaces.Select(x => assetFolder.CreateChild(x));
