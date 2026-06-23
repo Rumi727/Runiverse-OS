@@ -72,7 +72,7 @@ namespace RuniOS.Resource
         {
             if (isSealed)
             {
-                Debug.LogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.");
+                Debug.RuntimeLogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.");
                 return null;
             }
             
@@ -145,7 +145,7 @@ namespace RuniOS.Resource
 
             if (!scopeFound)
             {
-                Debug.LogWarning
+                Debug.RuntimeLogWarning
                 (
                     $"Invalid or already-returned AssetScope detected! Scope for asset '{node.path}' was not found in the handle's list.\n" +
                     "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle."
