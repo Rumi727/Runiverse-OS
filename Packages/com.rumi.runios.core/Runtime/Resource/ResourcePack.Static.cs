@@ -109,14 +109,7 @@ namespace RuniOS.Resource
             }));
         }
 
-        public static void EnablePack(PackIdentifier identifier)
-        {
-            int insertIndex = _enabledPackIdentifiers.LastIndexOf(defaultPack.identifier);
-            if (insertIndex < 0)
-                insertIndex = 0;
-
-            EnablePack(identifier, insertIndex);
-        }
+        public static void EnablePack(PackIdentifier identifier) => EnablePack(identifier, 0);
 
         public static void EnablePack(PackIdentifier identifier, int index)
         {
