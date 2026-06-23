@@ -46,11 +46,10 @@ namespace RuniOS.Resource
         public static IReadOnlyList<PackIdentifier> enabledPackIdentifiers { get; } = _enabledPackIdentifiers.AsReadOnly();
 
         /// <summary>
-        /// 지정된 <see cref="PhysicalIOProvider"/>를 사용하여 리소스 팩을 생성합니다.
-        /// <br/>팩 식별자는 핸들러의 경로를 기반으로 생성됩니다.
+        /// 지정된 물리 경로를 사용하여 리소스 팩을 생성합니다.
         /// </summary>
-        /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="PhysicalIOProvider"/>입니다.</param>
-        public static ResourcePack Create(PhysicalIOProvider provider) => Create(PackIdentifier.CreateByPath(provider.targetPath), provider);
+        /// <param name="path">팩 루트 폴더에 접근하는 물리 경로입니다.</param>
+        public static ResourcePack Create(PhysicalPath path) => Create(PackIdentifier.CreateByPath(path), new PhysicalIOProvider(path));
 
         /// <summary>
         /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성합니다.<br/>
