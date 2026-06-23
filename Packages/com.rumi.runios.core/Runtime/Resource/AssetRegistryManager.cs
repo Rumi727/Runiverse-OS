@@ -30,7 +30,7 @@ namespace RuniOS.Resource
             if (registry.isDefault)
             {
                 if (defaultRegistriesByAssetType.TryGetValue(registry.assetType, out var currentDefault))
-                    Debug.LogWarning($"Default registry for {registry.assetType.Name} replaced: {currentDefault.registryId} -> {registry.registryId}");
+                    Debug.RuntimeLogWarning($"Default registry for {registry.assetType.Name} replaced: {currentDefault.registryId} -> {registry.registryId}");
                 
                 defaultRegistriesByAssetType[registry.assetType] = registry;
             }
