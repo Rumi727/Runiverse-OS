@@ -174,7 +174,7 @@ namespace RuniOS.Reflection
             });
             
 #if UNITY_EDITOR || ENABLE_PROFILER
-            Debug.Log($"It took {stopwatch.Elapsed.TotalSeconds} seconds to create a list of methods that match the condition.", $"{nameof(ReflectionUtility)}.{nameof(InvokeDefinedMethods)}<{typeof(T).Name}>");
+            Debug.RuntimeLog($"It took {stopwatch.Elapsed.TotalSeconds} seconds to create a list of methods that match the condition.", $"{nameof(ReflectionUtility)}.{nameof(InvokeDefinedMethods)}<{typeof(T).Name}>");
 #endif
             
             foreach (var item in methods)
