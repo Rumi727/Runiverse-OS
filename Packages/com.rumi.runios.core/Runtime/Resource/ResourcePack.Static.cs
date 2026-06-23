@@ -7,6 +7,14 @@ namespace RuniOS.Resource
 {
     public sealed partial class ResourcePack
     {
+        static ResourcePack()
+        {
+            _loadedResourcePacks = new Dictionary<PackIdentifier, ResourcePack>();
+            loadedResourcePacks = _loadedResourcePacks.AsReadOnly();
+
+            defaultPack = Create("vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
+        }
+
         /// <summary>
         /// 에셋이 저장되는 기본 폴더 이름("assets")을 가져옵니다.
         /// </summary>
@@ -25,10 +33,10 @@ namespace RuniOS.Resource
         /// <summary>
         /// 시스템의 기본 리소스 팩을 가져옵니다.
         /// </summary>
-        public static readonly ResourcePack defaultPack = Create("vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
+        public static readonly ResourcePack defaultPack;
 
-        static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks = new();
-        public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; } = _loadedResourcePacks.AsReadOnly();
+        static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks;
+        public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; }
 
         /*
          * TODO
