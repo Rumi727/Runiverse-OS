@@ -210,8 +210,24 @@ namespace RuniOS
                 if (targetType == attribute.targetType || (attribute.isSubtypeCompatible && targetType.IsAssignableToAny(attribute.targetType, out resolvedTargetType)))
                 {
                     drawerType = type;
+                    if (drawerType.IsGenericTypeDefinition)
+                    {
+                        Type[] genericArguments = resolvedTargetType.GenericTypeArguments;
+                        int drawerTypeGenericParametersLength = drawerType.GetGenericArguments().Length;
+
+                        if (genericArguments.Length != drawerTypeGenericParametersLength)
+                        {
+                            throw new InvalidOperationException
+                            (
+                                $"Cannot close generic handler '{drawerType}' for resolved target type '{resolvedTargetType}'. " +
+                                $"Handler generic parameter count is {drawerTypeGenericParametersLength}, but target generic argument count is {genericArguments.Length}."
+                            );
+                        }
+
+                        drawerType = drawerType.MakeGenericType(genericArguments);
+                    }
+
                     cachedDrawerTypes.TryAdd(targetType, (resolvedTargetType, drawerType));
-                    
                     return true;
                 }
             }
