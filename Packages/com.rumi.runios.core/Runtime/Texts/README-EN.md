@@ -62,17 +62,15 @@ GroupText text = $"HP: {100:0.##}";
 `LocalizationText` stores a localization key and `Text` arguments.\
 Formatted positions such as `{0}` and `{1}` can contain styled text.
 
-## Reusable Factory Assumption
+## Factory Methods
 
-Static factory methods such as `Text.Literal`, `Text.Local`, and `Text.Group` are assumed to reuse internal instances.
-
-Normal user code should prefer factory methods over directly creating text objects.
+Static factory methods such as `Text.Literal`, `Text.Local`, and `Text.Group` are convenience APIs for creating text objects.
 
 ```csharp
 Text text = Text.Literal("HP");
 ```
 
-This reduces object allocation when the same kind of text is created frequently.
+This keeps text tree creation concise compared with direct constructor calls.
 
 ## Structured Text as API Data
 
@@ -237,8 +235,7 @@ Build rich text string
 Update TMP layout
 ```
 
-Reusable factory methods reduce GC from `Text` object creation.\
-Rendering also reduces temporary allocation through `StringBuilderCache`, `TextStyleStateCache`, and builder caching.
+Rendering reduces temporary allocation through `StringBuilderCache`, `TextStyleStateCache`, and builder caching.
 
 However, the final rich text `string` still has to be produced for TMP when the value changes.\
 TMP layout cost can also happen when the displayed string changes.
