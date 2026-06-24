@@ -37,6 +37,6 @@ namespace RuniOS.Texts
         /// Gets the language code used to resolve this translation.<br/>
         /// 이 번역을 해석할 때 사용하는 언어 코드를 가져옵니다.
         /// </summary>
-        public string? languageCode { get; } = languageCode;
+        public string? languageCode { get; set; } = languageCode;
     }
 }
