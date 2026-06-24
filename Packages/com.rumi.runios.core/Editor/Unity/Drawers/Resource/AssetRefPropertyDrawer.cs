@@ -33,7 +33,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
-            RuniFields.AssetRefField(position, label, assetRef);
+            assetRef = RuniFields.AssetRefField(position, label, assetRef);
             converter.Write(property, typeof(ResourceKey), assetRef);
         }
 
