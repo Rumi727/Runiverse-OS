@@ -16,10 +16,12 @@ namespace RuniOS.Resource
         [SerializeField] public ResourceKey key = key;
 
         Type IAssetRef.targetAssetType => typeof(TAsset);
-        ResourceKey IAssetRef.key { get => key; set => key = value; }
+        ResourceKey IAssetRef.key => key;
 
         public readonly void Deconstruct(out Identifier registryId, out Identifier assetId) => key.Deconstruct(out registryId, out assetId);
 
         public async UniTask<IAssetScope<TAsset>?> LoadAsync() => await ResourceManager.LoadScopeAsync<TAsset>(key);
+
+        IAssetRef IAssetRef.WithKey(ResourceKey key) => new AssetRef<TAsset>(key);
     }
 }
