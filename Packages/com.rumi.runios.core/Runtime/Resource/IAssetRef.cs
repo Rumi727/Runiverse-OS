@@ -3,6 +3,8 @@
     public interface IAssetRef
     {
         Type targetAssetType { get; }
-        ResourceKey key { get; set; }
+        ResourceKey key { get; }
+
+        IAssetRef WithKey(ResourceKey key);
     }
 }
