@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Editor.Localizations;
+using RuniOS.Resource;
 
 namespace RuniOS.Editor
 {
@@ -7,25 +8,16 @@ namespace RuniOS.Editor
     {
         static readonly GUIContent tempContent = new GUIContent();
 
-        public static string GetTextOrKey(string key)
+        public static string GetTextOrKey(Identifier identifier)
         {
-            string? result = GetText(key);
+            string? result = GetText(identifier);
             if (result == null)
-                return key;
+                return identifier;
 
             return result;
         }
 
-        public static string? GetText(string key, string language = "")
-        {
-            foreach (var item in EditorLocalization.GetLanguageDictionarys(language))
-            {
-                if (item.TryGetValue(key, out string value))
-                    return value;
-            }
-
-            return null;
-        }
+        public static string? GetText(Identifier key, string? language = "") => EditorLocalization.GetText(key, language);
 
         public static GUIContent TempContent(string text)
         {

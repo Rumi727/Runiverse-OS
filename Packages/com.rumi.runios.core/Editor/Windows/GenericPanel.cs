@@ -1,4 +1,7 @@
 ﻿#nullable enable
+using RuniOS.Texts;
+using RuniOS.Texts.Builders.RichTexts;
+using RuniOS.Texts.Styles.TMPro;
 using UnityEngine.Profiling;
 
 namespace RuniOS.Editor.Windows
@@ -113,7 +116,20 @@ namespace RuniOS.Editor.Windows
 
             Time.timeScale = EditorGUILayout.FloatField(GetTextOrKey("control_panel.generic.game_speed"), Time.timeScale).Clamp(0, 100);
         }
-        
-        static void DrawText(string key, object value) => GUILayout.Label(GetTextOrKey(key) + " - " + RichNumberMSpace(value), RuniStyles.richLabel);
+
+        static readonly LocalizationText labelText = Text.Local();
+        static readonly LiteralText valueText = Text.Literal();
+        static readonly GroupText groupText = Text.Group($"{labelText} - {valueText}");
+        static void DrawText(string key, object value)
+        {
+            labelText.identifier = key;
+            valueText.value = value;
+            if (value.GetType().IsNumeric())
+                valueText.SetStyle(TMPStyles.monoSpacing, 7.6f);
+            else
+                valueText.UnsetStyle(TMPStyles.monoSpacing);
+
+            GUILayout.Label(RichTextBuilder.Build(groupText), RuniStyles.richLabel);
+        }
     }
 }

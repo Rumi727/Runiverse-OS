@@ -1,11 +1,13 @@
 #nullable enable
-using RuniOS.Linq;
-using RuniOS.Reflection;
+using RuniOS.Resource;
 
 namespace RuniOS.Editor.Localizations
 {
+    [InitializeOnLoad]
     public static class EditorLocalization
     {
+        static EditorLocalization() => ResourceManager.reloadCompletionEvent += () => _onLanguageUpdate?.Invoke();
+
         public static string currentLanguage
         {
             get => EditorLanguageConfigAsset.currentLanguage;
@@ -19,40 +21,12 @@ namespace RuniOS.Editor.Localizations
             remove => _onLanguageUpdate -= value;
         }
 
-        static readonly Dictionary<string, List<EditorLanguageDataAsset>> _registeredDataAssets = new();
-        public static IReadOnlyDictionary<string, List<EditorLanguageDataAsset>> registeredDataAssets { get; } = _registeredDataAssets.AsReadOnly();
-
-        public static void RegisterLanguage(params EditorLanguageDataAsset?[] dataAssets)
+        public static string? GetText(Identifier identifier, string? language = "")
         {
-            for (int i = 0; i < dataAssets.Length; i++)
-            {
-                EditorLanguageDataAsset? dataAsset = dataAssets[i];
-                if (dataAsset == null)
-                    continue;
+            if (string.IsNullOrEmpty(language))
+                language = currentLanguage;
 
-                if (!_registeredDataAssets.TryGetValue(dataAsset.languageKey, out List<EditorLanguageDataAsset> dataList))
-                    _registeredDataAssets.Add(dataAsset.languageKey, dataList = []);
-
-                if (!dataList.Contains(dataAsset))
-                    dataList.Add(dataAsset);
-            }
-        }
-
-        public static IEnumerable<IReadOnlyDictionary<string, string>> GetLanguageDictionarys(string languageKey = "")
-        {
-            if (string.IsNullOrEmpty(languageKey))
-                languageKey = currentLanguage;
-
-            if (_registeredDataAssets.Count <= 0)
-            {
-                foreach (var item in ReflectionUtility.types.Where(static x => typeof(ScriptableObject).IsAssignableFrom(x) && typeof(IEditorLocalizationRegister).IsAssignableFrom(x)))
-                    ScriptableObject.CreateInstance(item);
-            }
-
-            if (_registeredDataAssets.TryGetValue(languageKey, out var datas))
-                return datas.Select(static x => x.languages);
-
-            return [];
+            return LocalizationUtility.GetText(identifier, language);
         }
     }
 }
