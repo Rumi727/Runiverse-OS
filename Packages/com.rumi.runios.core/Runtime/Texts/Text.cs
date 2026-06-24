@@ -238,7 +238,7 @@ namespace RuniOS.Texts
         /// This text instance.<br/>
         /// 이 텍스트 인스턴스를 반환합니다.
         /// </returns>
-        public Text SetStyle<T>(StyleKey<T> property, T value) where T : notnull
+        public Text SetStyle<T>(StyleKey<T> property, T value)
         {
             (style ??= new TextStyle()).Set(property, value);
             return this;
@@ -260,9 +260,15 @@ namespace RuniOS.Texts
         /// This text instance.<br/>
         /// 이 텍스트 인스턴스를 반환합니다.
         /// </returns>
-        public Text UnsetStyle<T>(StyleKey<T> property) where T : notnull
+        public Text UnsetStyle<T>(StyleKey<T> property)
         {
             style?.Unset(property);
+            return this;
+        }
+
+        public Text ClearStyle()
+        {
+            style?.Clear();
             return this;
         }
 
