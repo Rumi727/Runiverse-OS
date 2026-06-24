@@ -61,7 +61,7 @@ namespace RuniOS.Editor.Unity.Drawers
 
             if (field == null && toggle != null)
             {
-                EditorGUI.LabelField(position, label, new GUIContent(GetTextOrKey("serializable_nullable.invalid_serialization_type")));
+                EditorGUI.LabelField(position, label, TrTempContent("serializable_nullable.invalid_serialization_type"));
 
                 BeginIndentLevel(0);
                 toggle.boolValue = EditorGUI.Toggle(toggleRect, toggle.boolValue);
@@ -71,7 +71,7 @@ namespace RuniOS.Editor.Unity.Drawers
             }
             else if (field == null || toggle == null)
             {
-                EditorGUI.LabelField(position, label, new GUIContent(GetTextOrKey("serializable_nullable.invalid_serialization_type")));
+                EditorGUI.LabelField(position, label, TrTempContent("serializable_nullable.invalid_serialization_type"));
                 return;
             }
 

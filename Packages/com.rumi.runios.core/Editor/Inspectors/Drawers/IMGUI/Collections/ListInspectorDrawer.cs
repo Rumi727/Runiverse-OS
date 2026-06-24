@@ -147,7 +147,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             
             if (inspectableList.instancesIsEmpty)
             {
-                EditorGUI.LabelField(position, label, new GUIContent(GetTextOrKey("inspector.no_instance")));   
+                EditorGUI.LabelField(position, label, TrTempContent("inspector.no_instance"));
                 return;
             }
             

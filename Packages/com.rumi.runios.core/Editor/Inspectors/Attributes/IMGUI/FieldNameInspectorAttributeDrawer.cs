@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
         {
             FieldNameAttribute attribute = (FieldNameAttribute)this.attribute;
             if (attribute.force || label == null)
-                label = new GUIContent(GetTextOrKey(attribute.name));
+                label = TrTempContent(attribute.name);
             
             drawer.Draw(position, label, flags, context);
         }

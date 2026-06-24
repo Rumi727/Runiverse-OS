@@ -11,23 +11,23 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.appearance.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_color", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.color")));
+            GUILayout.Label(TrTempContent("inspector.simple_mesh_outline.appearance.header"), EditorStyles.boldLabel);
+            DrawPropertyLayout("_color", TrTempContent("inspector.simple_mesh_outline.appearance.color"));
             
             Space();
             
-            DrawPropertyLayout("_width", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.width")));
-            DrawPropertyLayout("_useFixedWidth", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.useFixedWidth"), GetTextOrKey("inspector.simple_mesh_outline.appearance.useFixedWidth.tooltip")));
+            DrawPropertyLayout("_width", TrTempContent("inspector.simple_mesh_outline.appearance.width"));
+            DrawPropertyLayout("_useFixedWidth", TrTempContent("inspector.simple_mesh_outline.appearance.useFixedWidth", "inspector.simple_mesh_outline.appearance.useFixedWidth.tooltip"));
             
             Space();
             
-            DrawPropertyLayout("_gap", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.gap")));
-            DrawPropertyLayout("_useFixedGap", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.appearance.useFixedGap"), GetTextOrKey("inspector.simple_mesh_outline.appearance.useFixedGap.tooltip")));
+            DrawPropertyLayout("_gap", TrTempContent("inspector.simple_mesh_outline.appearance.gap"));
+            DrawPropertyLayout("_useFixedGap", TrTempContent("inspector.simple_mesh_outline.appearance.useFixedGap", "inspector.simple_mesh_outline.appearance.useFixedGap.tooltip"));
             
             Space();
             
             GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.settings.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_outlineVisibility", new GUIContent(GetTextOrKey("inspector.simple_mesh_outline.settings.outlineVisibility"), GetTextOrKey("inspector.simple_mesh_outline.settings.outlineVisibility.tooltip")));
+            DrawPropertyLayout("_outlineVisibility", TrTempContent("inspector.simple_mesh_outline.settings.outlineVisibility", "inspector.simple_mesh_outline.settings.outlineVisibility.tooltip"));
         }
     }
 }

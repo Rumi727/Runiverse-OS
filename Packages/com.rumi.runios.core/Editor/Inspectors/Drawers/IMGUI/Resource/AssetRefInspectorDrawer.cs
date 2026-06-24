@@ -11,7 +11,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
     [CustomInspectorDrawer(typeof(IAssetRef), true)]
     public class AssetRefInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
-
         protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default)
         {
             if (value.IsNull())
@@ -22,8 +21,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
                 return value;
             }
 
-            RuniFields.AssetRefField(position, label, (IAssetRef)value);
-            return value;
+            return RuniFields.AssetRefField(position, label, (IAssetRef)value);
         }
 
         protected override float CalculationHeight(GUIContent label, InspectorFlags flags, DrawerContext context = default)
@@ -35,15 +33,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
                 return EditorGUIUtility.singleLineHeight;
             else
                 return RuniFields.GetAssetRefFieldHeight(label, value);
-        }
-
-        protected override object CreateSnapshot(object? value) => ((IAssetRef)value!).key;
-
-        protected override void ApplySnapshot(IInspectorVariableElement variableElement, object? value, InspectorFlags flags)
-        {
-            IAssetRef? currentValue = (IAssetRef?)variableElement.GetValueOrDefault(flags);
-            if (currentValue != null)
-                currentValue.key = (ResourceKey)value!;
         }
     }
 }

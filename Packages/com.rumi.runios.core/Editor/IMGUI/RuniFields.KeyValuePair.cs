@@ -26,10 +26,10 @@ namespace RuniOS.Editor.IMGUI
             {
                 position.width = fieldWidth;
 
-                string keyLabel = GetTextOrKey("gui.key");
+                GUIContent keyLabel = TrTempContent("gui.key");
 
                 BeginLabelWidth(keyLabel);
-                EditorGUI.PrefixLabel(position, new GUIContent(keyLabel));
+                EditorGUI.PrefixLabel(position, keyLabel);
                 valueKey = drawKeyAction.Invoke(position, valueKey);
                 EndLabelWidth();
 
@@ -39,10 +39,10 @@ namespace RuniOS.Editor.IMGUI
             {
                 position.width = fieldWidth.Ceil();
 
-                string valueLabel = GetTextOrKey("gui.value");
+                GUIContent valueLabel = TrTempContent("gui.value");
 
                 BeginLabelWidth(valueLabel);
-                EditorGUI.PrefixLabel(position, new GUIContent(valueLabel));
+                EditorGUI.PrefixLabel(position, valueLabel);
                 valueValue = drawValueAction.Invoke(position, valueValue);
                 EndLabelWidth();
             }
