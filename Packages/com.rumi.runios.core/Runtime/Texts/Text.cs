@@ -266,6 +266,14 @@ namespace RuniOS.Texts
             return this;
         }
 
+        /// <summary>
+        /// Removes all style values assigned to this text.<br/>
+        /// 이 텍스트에 할당된 모든 스타일 값을 제거합니다.
+        /// </summary>
+        /// <returns>
+        /// This text instance.<br/>
+        /// 이 텍스트 인스턴스를 반환합니다.
+        /// </returns>
         public Text ClearStyle()
         {
             style?.Clear();
