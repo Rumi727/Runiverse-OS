@@ -83,6 +83,10 @@ namespace RuniOS.Texts.Styles
         /// </param>
         public void Unset<T>(StyleKey<T> key) => styles.Remove(key);
 
+        /// <summary>
+        /// Removes all style values stored in this style.<br/>
+        /// 이 스타일에 저장된 모든 스타일 값을 제거합니다.
+        /// </summary>
         public void Clear() => styles.Clear();
 
         /// <inheritdoc/>
