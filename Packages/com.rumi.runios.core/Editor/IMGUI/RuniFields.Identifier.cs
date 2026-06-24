@@ -17,6 +17,8 @@ namespace RuniOS.Editor.IMGUI
 
         static int? identifierFieldLastControlID;
         static string identifierFieldSelectedNamespace = string.Empty;
+
+        // ReSharper disable Unity.PerformanceAnalysis
         static Identifier DoIdentifierField(Rect position, Identifier value, Action<Rect>? dropdownAction)
         {
             position.height = EditorGUIUtility.singleLineHeight;
