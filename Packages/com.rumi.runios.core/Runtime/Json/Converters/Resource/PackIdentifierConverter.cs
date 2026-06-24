@@ -69,7 +69,7 @@ namespace RuniOS.Json.Converters.Resource
         /// </exception>
         /// <exception cref="InvalidIdentifierException">
         /// "identifier" 속성 값을 <see cref="Identifier"/>로 역직렬화하는 과정에서
-        /// <see cref="Identifier.Parse(string)"/> 메서드 내부적으로 발생할 수 있습니다.
+        /// <see cref="Identifier.Parse"/> 메서드 내부적으로 발생할 수 있습니다.
         /// </exception>
         public override PackIdentifier ReadJson(JsonReader reader, Type objectType, PackIdentifier existingValue, bool hasExistingValue, JsonSerializer serializer)
         {

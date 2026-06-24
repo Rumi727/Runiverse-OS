@@ -89,7 +89,7 @@ Callers can pass plain text, styled text, localized text, or grouped text throug
 
 ```csharp
 SetTitle(Text.Literal("Loading").Yellow());
-SetTitle(Text.Local("ui.loading.title"));
+SetTitle(Text.Local(new Identifier("example", "ui.loading.title")));
 SetTitle(Text.Group($"HP: {hp:0.##}"));
 ```
 

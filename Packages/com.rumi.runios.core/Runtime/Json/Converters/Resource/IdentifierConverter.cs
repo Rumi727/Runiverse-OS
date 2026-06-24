@@ -26,7 +26,7 @@ namespace RuniOS.Json.Converters.Resource
         /// JSON 문자열을 <see cref="Identifier"/> 객체로 역직렬화합니다.
         /// <br/>
         /// JSON 토큰이 <see langword="null"/>인 경우, <see cref="Identifier.empty"/>를 반환합니다.
-        /// 그렇지 않으면 JSON 문자열을 읽어 <see cref="Identifier.Parse(string)"/> 메서드를 통해 새로운 <see cref="Identifier"/> 인스턴스를 생성합니다.
+        /// 그렇지 않으면 JSON 문자열을 읽어 <see cref="Identifier.Parse"/> 메서드를 통해 새로운 <see cref="Identifier"/> 인스턴스를 생성합니다.
         /// </summary>
         /// <param name="reader">JSON 읽기를 위한 <see cref="JsonReader"/> 객체입니다.</param>
         /// <param name="objectType">역직렬화할 객체의 <see cref="Type"/>입니다.</param>
@@ -37,13 +37,24 @@ namespace RuniOS.Json.Converters.Resource
         /// <exception cref="JsonReaderException">JSON 토큰이 문자열이 아닌데도 <see cref="Identifier"/>로 변환을 시도할 때 발생합니다.</exception>
         /// <exception cref="InvalidIdentifierException">
         /// JSON 문자열이 <see cref="Identifier"/>의 유효한 형식이 아닐 경우
-        /// <see cref="Identifier.Parse(string)"/> 메서드 내부에서 발생할 수 있습니다.
+        /// <see cref="Identifier.Parse"/> 메서드 내부에서 발생할 수 있습니다.
         /// </exception>
-        public override Identifier ReadJson(JsonReader reader, Type objectType, Identifier existingValue, bool hasExistingValue, JsonSerializer serializer) => reader.TokenType switch
+        public override Identifier ReadJson(JsonReader reader, Type objectType, Identifier existingValue, bool hasExistingValue, JsonSerializer serializer)
         {
-            JsonToken.Null => Identifier.empty,
-            JsonToken.String => Identifier.Parse((string?)reader.Value ?? string.Empty),
-            _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing Identifier.")
-        };
+            return reader.TokenType switch
+            {
+                JsonToken.Null => Identifier.empty,
+                JsonToken.String => Identifier.Parse((string?)reader.Value ?? string.Empty, GetDefaultNamespace(serializer)),
+                _ => throw new JsonReaderException($"Unexpected token type '{reader.TokenType}' when parsing Identifier.")
+            };
+        }
+
+        static string GetDefaultNamespace(JsonSerializer serializer)
+        {
+            if (serializer.Context.Context is IdentifierJsonContext context)
+                return context.defaultNamespace;
+
+            return Identifier.defaultNamespace;
+        }
     }
 }

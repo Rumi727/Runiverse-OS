@@ -74,7 +74,17 @@ runios:lang
 runios:ui/click
 ```
 
-If no namespace is supplied, the default namespace `runios` is used.
+When shorthand form has no namespace, the default namespace depends on the API being used.
+
+- When `defaultNamespace` is omitted in `Identifier.Parse("path")`, or when the `"path"` -> `Identifier` conversion is used, the value from `[assembly: DefaultIdentifierNamespace("...")]` on the calling assembly is used.
+- If the calling assembly has no `DefaultIdentifierNamespaceAttribute`, the system fallback `runios` is used.
+- `Identifier.Parse` and the `"path"` -> `Identifier` conversion are discouraged convenience APIs. They parse text and may inspect the calling assembly, so use them only where convenience matters, such as UI or authoring tools.
+- Constructors do not inspect the calling assembly. When the namespace and path are already known, `new Identifier(nameSpace, path)` is the preferred fast path.
+- Code paths without a meaningful caller, such as JSON loaders, also pass `Identifier.defaultNamespace` explicitly and therefore use `runios` as the fallback.
+- If a JSON loader knows the owner namespace, it can pass `IdentifierJsonContext` through `JsonSerializerSettings.Context` to set the default namespace for shorthand IDs.
+- Resource pack files get their namespace from the `assets/{namespace}/...` folder name, so they do not depend on this default namespace rule.
+
+This rule keeps game and mod shorthand IDs from being locked to the framework namespace even though the framework itself uses `runios`.
 
 `ResourcePack.defaultPack` is the `vanilla` pack and uses `StreamingIOProvider.instance`.\
 `RequiredPackSort.BeforeVanilla` and `RequiredPackSort.AfterVanilla` can place required packs before or after `vanilla`.
@@ -85,6 +95,53 @@ If no namespace is supplied, the default namespace `runios` is used.
 
 ```csharp
 Identifier id = new Identifier("runios", "ui/click");
+```
+
+Game and package assemblies can define their default identifier namespace.
+
+```csharp
+#nullable enable
+using RuniOS.Resource;
+
+[assembly: DefaultIdentifierNamespace("my_game")]
+```
+
+Inside that assembly, omitted namespaces in `Identifier.Parse` or string conversion resolve to `my_game`.
+
+```csharp
+Identifier id = Identifier.Parse("ui/click");
+// my_game:ui/click
+
+Identifier sameId = "ui/click";
+// my_game:ui/click
+```
+
+For runtime code, persisted data, and bulk loading paths, use constructors with an explicit namespace.
+
+```csharp
+Identifier id = new Identifier("my_game", "ui/click");
+```
+
+Prefer explicit namespaces for shared code, persisted data, and documentation examples where the call site should not change the meaning.
+
+JSON deserialization uses the serializer context instead of the calling assembly. When loading JSON with a known owner namespace, pass `IdentifierJsonContext`.
+
+```csharp
+#nullable enable
+using Newtonsoft.Json;
+using RuniOS.Resource;
+using System.Runtime.Serialization;
+
+JsonSerializerSettings settings = new JsonSerializerSettings
+{
+    Context = new StreamingContext
+    (
+        StreamingContextStates.Other,
+        new IdentifierJsonContext("my_game")
+    )
+};
+
+MyData? data = JsonConvert.DeserializeObject<MyData>(json, settings);
 ```
 
 `ResourceKey` stores both the registry ID and the asset ID.
