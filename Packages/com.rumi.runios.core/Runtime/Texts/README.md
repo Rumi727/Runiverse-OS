@@ -62,17 +62,15 @@ GroupText text = $"HP: {100:0.##}";
 `LocalizationText`는 로컬라이징 키와 `Text` 인자를 저장합니다.\
 `{0}`, `{1}` 같은 포맷 위치에도 스타일이 적용된 텍스트를 넣을 수 있습니다.
 
-## 재사용 Factory 가정
+## Factory 메소드
 
-`Text.Literal`, `Text.Local`, `Text.Group` 같은 정적 factory 메소드는 내부 인스턴스를 재사용한다고 가정합니다.
-
-일반 사용 코드는 텍스트 객체를 직접 생성하기보다 factory 메소드를 쓰는 것을 권장합니다.
+`Text.Literal`, `Text.Local`, `Text.Group` 같은 정적 factory 메소드는 텍스트 객체를 만들기 위한 편의 API입니다.
 
 ```csharp
 Text text = Text.Literal("HP");
 ```
 
-이 방식은 같은 종류의 텍스트를 자주 만들 때 객체 할당을 줄입니다.
+직접 생성자 호출보다 짧게 텍스트 구조를 만들 수 있습니다.
 
 ## API 데이터로서의 구조화된 텍스트
 
@@ -237,8 +235,7 @@ rich text 문자열 생성
 TMP 레이아웃 갱신
 ```
 
-재사용 factory 메소드는 `Text` 객체 생성으로 인한 GC를 줄입니다.\
-렌더링 쪽도 `StringBuilderCache`, `TextStyleStateCache`, builder cache를 통해 임시 할당을 줄입니다.
+렌더링 쪽은 `StringBuilderCache`, `TextStyleStateCache`, builder cache를 통해 임시 할당을 줄입니다.
 
 하지만 값이 바뀌면 TMP에 넘길 최종 rich text `string`은 여전히 만들어져야 합니다.\
 표시 문자열이 바뀌면 TMP 레이아웃 비용도 발생할 수 있습니다.
