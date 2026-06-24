@@ -83,6 +83,8 @@ namespace RuniOS.Texts.Styles
         /// </param>
         public void Unset<T>(StyleKey<T> key) => styles.Remove(key);
 
+        public void Clear() => styles.Clear();
+
         /// <inheritdoc/>
         public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => styles.GetEnumerator();
 
