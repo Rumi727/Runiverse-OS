@@ -29,7 +29,7 @@ namespace RuniOS.IO
             readonly get => _value ?? NormalizePath(string.Empty);
             set => _value = NormalizePath(value);
         }
-        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
+        [SerializeField, FieldName("runios-editor:gui.value"), NotNullField, JsonIgnore] string? _value;
 
         /// <summary>
         /// Gets the length of the normalized path string.<br/>

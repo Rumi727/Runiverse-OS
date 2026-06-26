@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Inspectors.Attributes;
+using RuniOS.Resource;
 using UnityEngine;
 
 namespace RuniOS.Utility.Attributes
@@ -12,7 +13,7 @@ namespace RuniOS.Utility.Attributes
             this.force = force;
         }
 
-        public string name { get; } = string.Empty;
+        public Identifier name { get; } = Identifier.empty;
         public bool force { get; } = false;
 
         bool IInspectorAttribute.applyToSelf => true;

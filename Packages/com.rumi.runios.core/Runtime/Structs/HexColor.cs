@@ -188,7 +188,7 @@ namespace RuniOS
                 }
             }
         }
-        [SerializeField, FieldName("gui.value"), NotNullField, Delayed, JsonIgnore] string? _value;
+        [SerializeField, FieldName("runios-editor:gui.value"), NotNullField, Delayed, JsonIgnore] string? _value;
 
         /// <summary>
         /// 이 <see cref="HexColor"/> 인스턴스의 빨간색 구성 요소(byte 값)를 가져오거나 설정합니다.

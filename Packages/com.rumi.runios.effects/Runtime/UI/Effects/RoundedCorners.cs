@@ -6,8 +6,7 @@ namespace RuniOS.UI.Effects
 {
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    [RequireComponent(typeof(Graphic))]
-    [AddComponentMenu("UI/Effects/Rounded Corners")]
+    [AddComponentMenu("UI (Canvas)/Effects/Rounded Corners")]
 #if UNITY_EDITOR
     [UnityEditor.InitializeOnLoad]
 #endif

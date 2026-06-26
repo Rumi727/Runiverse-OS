@@ -127,7 +127,7 @@ namespace RuniOS.Resource
                     throw new InvalidIdentifierException(GetInvalidNamespaceMessage(value));
             }
         }
-        [SerializeField, FieldName("gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
+        [SerializeField, FieldName("runios-editor:gui.namespace"), NotNullField, JsonIgnore] string? _nameSpace;
 
         /// <summary>
         /// 식별자의 경로 구성 요소를 가져오거나 설정합니다.
@@ -143,7 +143,7 @@ namespace RuniOS.Resource
                     throw new InvalidIdentifierException(GetInvalidPathMessage(value));
             }
         }
-        [SerializeField, FieldName("gui.path"), JsonIgnore] RuniPath _path;
+        [SerializeField, FieldName("runios-editor:gui.path"), JsonIgnore] RuniPath _path;
 
 
 

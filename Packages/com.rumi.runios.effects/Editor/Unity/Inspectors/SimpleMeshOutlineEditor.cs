@@ -17,17 +17,17 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
             Space();
             
             DrawPropertyLayout("_width", TrTempContent("inspector.simple_mesh_outline.appearance.width"));
-            DrawPropertyLayout("_useFixedWidth", TrTempContent("inspector.simple_mesh_outline.appearance.useFixedWidth", "inspector.simple_mesh_outline.appearance.useFixedWidth.tooltip"));
+            DrawPropertyLayout("_useFixedWidth", TrTempContent("inspector.simple_mesh_outline.appearance.use_fixed_width", "inspector.simple_mesh_outline.appearance.use_fixed_width.tooltip"));
             
             Space();
             
             DrawPropertyLayout("_gap", TrTempContent("inspector.simple_mesh_outline.appearance.gap"));
-            DrawPropertyLayout("_useFixedGap", TrTempContent("inspector.simple_mesh_outline.appearance.useFixedGap", "inspector.simple_mesh_outline.appearance.useFixedGap.tooltip"));
+            DrawPropertyLayout("_useFixedGap", TrTempContent("inspector.simple_mesh_outline.appearance.use_fixed_gap", "inspector.simple_mesh_outline.appearance.use_fixed_gap.tooltip"));
             
             Space();
             
             GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.settings.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_outlineVisibility", TrTempContent("inspector.simple_mesh_outline.settings.outlineVisibility", "inspector.simple_mesh_outline.settings.outlineVisibility.tooltip"));
+            DrawPropertyLayout("_outlineVisibility", TrTempContent("inspector.simple_mesh_outline.settings.outline_visibility", "inspector.simple_mesh_outline.settings.outline_visibility.tooltip"));
         }
     }
 }

@@ -71,15 +71,15 @@ namespace RuniOS
         /// <summary>
         /// 유니티 직렬화를 위한 메이저 버전 구성 요소의 내부 필드입니다.
         /// </summary>
-        [SerializeField, FieldName("gui.major"), NullableField("*")] SerializableNullable<int> _major;
+        [SerializeField, FieldName("runios-editor:gui.major"), NullableField("*")] SerializableNullable<int> _major;
         /// <summary>
         /// 유니티 직렬화를 위한 마이너 버전 구성 요소의 내부 필드입니다.
         /// </summary>
-        [SerializeField, FieldName("gui.minor"), NullableField("*")] SerializableNullable<int> _minor;
+        [SerializeField, FieldName("runios-editor:gui.minor"), NullableField("*")] SerializableNullable<int> _minor;
         /// <summary>
         /// 유니티 직렬화를 위한 패치 버전 구성 요소의 내부 필드입니다.
         /// </summary>
-        [SerializeField, FieldName("gui.patch"), NullableField("*")] SerializableNullable<int> _patch;
+        [SerializeField, FieldName("runios-editor:gui.patch"), NullableField("*")] SerializableNullable<int> _patch;
 
         /// <summary>
         /// 지정된 문자열을 파싱하여 <see cref="Version"/> 구조체의 새 인스턴스를 초기화합니다.

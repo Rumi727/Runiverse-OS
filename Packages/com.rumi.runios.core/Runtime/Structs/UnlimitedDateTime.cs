@@ -56,31 +56,31 @@ namespace RuniOS
         /// <summary>
         /// 연도 구성 요소를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.year")] public int year;
+        [FieldName("runios-editor:gui.year")] public int year;
         /// <summary>
         /// 월 구성 요소(1-12)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.month")] public int month;
+        [FieldName("runios-editor:gui.month")] public int month;
         /// <summary>
         /// 일 구성 요소(1-31)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.day")] public int day;
+        [FieldName("runios-editor:gui.day")] public int day;
         /// <summary>
         /// 시 구성 요소(0-23)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.hour")] public int hour;
+        [FieldName("runios-editor:gui.hour")] public int hour;
         /// <summary>
         /// 분 구성 요소(0-59)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.minute")] public int minute;
+        [FieldName("runios-editor:gui.minute")] public int minute;
         /// <summary>
         /// 초 구성 요소(0-59)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.second")] public int second;
+        [FieldName("runios-editor:gui.second")] public int second;
         /// <summary>
         /// 밀리초 구성 요소(0-999)를 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.millisecond")] public int millisecond;
+        [FieldName("runios-editor:gui.millisecond")] public int millisecond;
 
         /// <summary>
         /// <see cref="UnlimitedDateTime"/>을 <see cref="DateTime"/>으로 명시적으로 변환합니다.

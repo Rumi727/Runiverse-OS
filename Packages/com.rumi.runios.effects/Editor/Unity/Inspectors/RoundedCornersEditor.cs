@@ -17,10 +17,10 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
             Space();
             
             GUILayout.Label(GetTextOrKey("inspector.rounded_corners.outline.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_outlineColor", TrTempContent("inspector.rounded_corners.outline.outlineColor"));
-            DrawPropertyLayout("_outlineWidth", TrTempContent("inspector.rounded_corners.outline.outlineWidth"));
-            DrawPropertyLayout("_outlineSoftness", TrTempContent("inspector.rounded_corners.outline.outlineSoftness", "inspector.rounded_corners.outline.outlineSoftness.tooltip"));
-            DrawPropertyLayout("_insideOutline", TrTempContent("inspector.rounded_corners.outline.insideOutline"));
+            DrawPropertyLayout("_outlineColor", TrTempContent("inspector.rounded_corners.outline.outline_color"));
+            DrawPropertyLayout("_outlineWidth", TrTempContent("inspector.rounded_corners.outline.outline_width"));
+            DrawPropertyLayout("_outlineSoftness", TrTempContent("inspector.rounded_corners.outline.outline_softness", "inspector.rounded_corners.outline.outline_softness.tooltip"));
+            DrawPropertyLayout("_insideOutline", TrTempContent("inspector.rounded_corners.outline.inside_outline"));
         }
     }
 }

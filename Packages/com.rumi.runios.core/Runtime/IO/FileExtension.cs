@@ -77,7 +77,7 @@ namespace RuniOS.IO
                 _value = value.Substring(extIndex);
             }
         }
-        [SerializeField, FieldName("gui.value"), NotNullField, JsonIgnore] string? _value;
+        [SerializeField, FieldName("runios-editor:gui.value"), NotNullField, JsonIgnore] string? _value;
 
 
 

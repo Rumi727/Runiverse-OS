@@ -11,10 +11,10 @@ namespace RuniOS
 
         public RectOffset(Vector2 min, Vector2 max) : this(min.x, max.x, max.y, min.y) { }
 
-        [FieldName("gui.left")] public float left = left;
-        [FieldName("gui.right")] public float right = right;
-        [FieldName("gui.top")] public float top = top;
-        [FieldName("gui.bottom")] public float bottom = bottom;
+        [FieldName("runios-editor:gui.left")] public float left = left;
+        [FieldName("runios-editor:gui.right")] public float right = right;
+        [FieldName("runios-editor:gui.top")] public float top = top;
+        [FieldName("runios-editor:gui.bottom")] public float bottom = bottom;
 
         [JsonIgnore]
         public Vector2 min

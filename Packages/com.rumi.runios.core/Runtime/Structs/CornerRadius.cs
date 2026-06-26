@@ -39,22 +39,22 @@ namespace RuniOS
         /// <summary>
         /// 좌측 상단(Top-Left) 모서리의 반경입니다.
         /// </summary>
-        [FieldName("gui.top_left"), Min(0)] public float topLeft;
+        [FieldName("runios-editor:gui.top_left"), Min(0)] public float topLeft;
         
         /// <summary>
         /// 우측 상단(Top-Right) 모서리의 반경입니다.
         /// </summary>
-        [FieldName("gui.top_right"), Min(0)] public float topRight;
+        [FieldName("runios-editor:gui.top_right"), Min(0)] public float topRight;
         
         /// <summary>
         /// 우측 하단(Bottom-Right) 모서리의 반경입니다.
         /// </summary>
-        [FieldName("gui.bottom_right"), Min(0)] public float bottomRight;
+        [FieldName("runios-editor:gui.bottom_right"), Min(0)] public float bottomRight;
         
         /// <summary>
         /// 좌측 하단(Bottom-Left) 모서리의 반경입니다.
         /// </summary>
-        [FieldName("gui.bottom_left"), Min(0)] public float bottomLeft;
+        [FieldName("runios-editor:gui.bottom_left"), Min(0)] public float bottomLeft;
         
         /// <summary>
         /// 현재 객체가 다른 <see cref="CornerRadius"/> 객체와 같은지 여부를 나타냅니다.

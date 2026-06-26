@@ -35,11 +35,11 @@ namespace RuniOS.Collections.Generic
         /// <summary>
         /// 유니티 직렬화를 위한 키의 내부 필드입니다.
         /// </summary>
-        [SerializeField, FieldName("gui.key"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TKey key;
+        [SerializeField, FieldName("runios-editor:gui.key"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TKey key;
         /// <summary>
         /// 유니티 직렬화를 위한 값의 내부 필드입니다.
         /// </summary>
-        [SerializeField, FieldName("gui.value"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TValue value;
+        [SerializeField, FieldName("runios-editor:gui.value"), JsonIgnore, DebuggerBrowsable(DebuggerBrowsableState.Never)] TValue value;
 
         /// <summary>
         /// 이 키-값 쌍의 키를 가져오거나 설정합니다.

@@ -7,8 +7,8 @@ namespace RuniOS.Resource
 
         public PackMetaData(string name, Version version) : this(name, version, Version.all, Version.all) { }
 
-        [FieldName("gui.name")] public string name { get; set; } = name;
-        [FieldName("gui.version")] public Version version { get; set; } = version;
+        [FieldName("runios-editor:gui.name")] public string name { get; set; } = name;
+        [FieldName("runios-editor:gui.version")] public Version version { get; set; } = version;
 
         public VersionRange targetVersion { get; set; } = targetVersion;
         public VersionRange targetRuniOSVersion { get; set; } = targetRuniOSVersion;

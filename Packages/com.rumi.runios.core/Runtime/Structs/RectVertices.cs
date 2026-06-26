@@ -68,22 +68,22 @@ namespace RuniOS
         /// <summary>
         /// 좌측 상단(Top-Left) 좌표입니다.
         /// </summary>
-        [FieldName("gui.top_left")] public Vector2 topLeft;
+        [FieldName("runios-editor:gui.top_left")] public Vector2 topLeft;
 
         /// <summary>
         /// 우측 상단(Top-Right) 좌표입니다.
         /// </summary>
-        [FieldName("gui.top_right")] public Vector2 topRight;
+        [FieldName("runios-editor:gui.top_right")] public Vector2 topRight;
 
         /// <summary>
         /// 우측 하단(Bottom-Right) 좌표입니다.
         /// </summary>
-        [FieldName("gui.bottom_right")] public Vector2 bottomRight;
+        [FieldName("runios-editor:gui.bottom_right")] public Vector2 bottomRight;
 
         /// <summary>
         /// 좌측 하단(Bottom-Left) 좌표입니다.
         /// </summary>
-        [FieldName("gui.bottom_left")] public Vector2 bottomLeft;
+        [FieldName("runios-editor:gui.bottom_left")] public Vector2 bottomLeft;
 
 
         /// <summary>

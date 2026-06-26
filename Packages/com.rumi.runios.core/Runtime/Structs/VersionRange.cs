@@ -68,11 +68,11 @@ namespace RuniOS
         /// <summary>
         /// 이 버전 범위의 최소 <see cref="Version"/>을 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.min")] public Version min;
+        [FieldName("runios-editor:gui.min")] public Version min;
         /// <summary>
         /// 이 버전 범위의 최대 <see cref="Version"/>을 가져오거나 설정합니다.
         /// </summary>
-        [FieldName("gui.max")] public Version max;
+        [FieldName("runios-editor:gui.max")] public Version max;
 
 
         /// <summary>
