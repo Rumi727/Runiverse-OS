@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using RuniOS.Texts;
-using RuniOS.Texts.Builders.RichTexts;
 using RuniOS.Texts.Styles.TMPro;
 using UnityEngine.Profiling;
 
@@ -129,7 +128,7 @@ namespace RuniOS.Editor.Windows
             else
                 valueText.UnsetStyle(TMPStyles.monoSpacing);
 
-            GUILayout.Label(RichTextBuilder.Build(groupText), RuniStyles.richLabel);
+            GUILayout.Label(groupText.ToRichText(), RuniStyles.richLabel);
         }
     }
 }
