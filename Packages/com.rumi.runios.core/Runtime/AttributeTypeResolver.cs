@@ -224,7 +224,14 @@ namespace RuniOS
                             );
                         }
 
-                        drawerType = drawerType.MakeGenericType(genericArguments);
+                        try
+                        {
+                            drawerType = drawerType.MakeGenericType(genericArguments);
+                        }
+                        catch (ArgumentException e)
+                        {
+                            throw new InvalidOperationException($"Cannot close generic handler '{drawerType}' for resolved target type '{resolvedTargetType}' because target generic arguments do not satisfy handler generic constraints.", e);
+                        }
                     }
 
                     cachedDrawerTypes.TryAdd(targetType, (resolvedTargetType, drawerType));
