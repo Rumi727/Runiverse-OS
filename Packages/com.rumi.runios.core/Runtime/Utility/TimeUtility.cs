@@ -191,7 +191,7 @@ namespace RuniOS.Utility
             Identifier identifier = "runios:gui." + isAgoOrLater + "." + unitPath;
 
             // 5. Text 구성
-            return Text.Local(identifier, Text.Literal(totalValue.Floor(digits), "F" + digits));
+            return Text.Local(identifier, Text.Value(totalValue.Floor(digits), "F" + digits));
         }
         #endregion
 

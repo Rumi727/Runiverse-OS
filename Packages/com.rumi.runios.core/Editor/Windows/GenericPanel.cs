@@ -118,7 +118,7 @@ namespace RuniOS.Editor.Windows
         }
 
         static readonly LocalizationText labelText = Text.Local();
-        static readonly LiteralText valueText = Text.Literal();
+        static readonly ValueText<object?> valueText = Text.Value();
         static readonly GroupText groupText = Text.Group($"{labelText} - {valueText}");
         static void DrawText(string key, object value)
         {

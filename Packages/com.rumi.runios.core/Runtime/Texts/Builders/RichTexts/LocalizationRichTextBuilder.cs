@@ -13,8 +13,8 @@ namespace RuniOS.Texts.Builders.RichTexts
     {
         /// <inheritdoc/>
         /// <exception cref="FormatException">
-        /// Thrown when a localization format segment refers to a missing argument, or uses alignment or format with a non-formattable text argument.<br/>
-        /// 로컬라이징 format 세그먼트가 없는 인수를 참조하거나 format 불가 텍스트 인수에 정렬 또는 format을 사용하는 경우 발생합니다.
+        /// Thrown when a localization format segment refers to a missing argument, or uses alignment or format with a text argument whose builder cannot consume that information.<br/>
+        /// 로컬라이징 format 세그먼트가 존재하지 않는 인수를 참조하거나 정렬 및 format 정보를 처리할 수 없는 텍스트 인수에 해당 정보를 사용하는 경우 발생합니다.
         /// </exception>
         protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
         {

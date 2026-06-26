@@ -32,7 +32,7 @@ $"<color=yellow>HP: {hp:0.##}</color>"
 ```text
 GroupText
  |- LiteralText("HP: ")
- `- LiteralText(100, format: "0.##").Yellow()
+ `- ValueText(100, format: "0.##").Yellow()
 ```
 
 즉 텍스트를 단순 출력 문자가 아니라 의미 있는 데이터 조각으로 다룰 수 있습니다.
@@ -46,11 +46,17 @@ GroupText
 Text.Literal("Warning").Bold().Red();
 ```
 
-`LiteralText`는 실제 값을 저장합니다.\
-문자열뿐 아니라 숫자, 날짜, 포맷, 정렬도 저장할 수 있습니다.
+`LiteralText`는 리터럴 문자열을 저장합니다.
 
 ```csharp
-Text.Literal(123, 5, "000");
+Text.Literal("Warning");
+```
+
+`ValueText<T>`는 값을 저장하고, 렌더링할 때 사용할 포맷과 정렬 정보도 함께 보존합니다.\
+값이 `IFormattable`을 구현하면 저장된 format 문자열을 사용해 렌더링됩니다.
+
+```csharp
+Text.Value(123, 5, "000");
 ```
 
 `GroupText`는 여러 `Text` 요소를 순서대로 저장합니다.
@@ -64,7 +70,7 @@ GroupText text = $"HP: {100:0.##}";
 
 ## Factory 메소드
 
-`Text.Literal`, `Text.Local`, `Text.Group` 같은 정적 factory 메소드는 텍스트 객체를 만들기 위한 편의 API입니다.
+`Text.Literal`, `Text.Value`, `Text.Local`, `Text.Group` 같은 정적 factory 메소드는 텍스트 객체를 만들기 위한 편의 API입니다.
 
 ```csharp
 Text text = Text.Literal("HP");
@@ -102,7 +108,7 @@ SetTitle(Text.Group($"HP: {hp:0.##}"));
 예를 들어 어떤 시스템에 `Text`를 넘겨주고, 그 시스템은 그 `Text`를 보관한 뒤 렌더링만 한다고 가정할 수 있습니다.
 
 ```csharp
-LiteralText progressText = new LiteralText(0, "0.##");
+ValueText<int> progressText = new ValueText<int>(0, "0.##");
 Text description = Text.Group($"Progress: {progressText}%");
 
 SetDescription(description);
@@ -139,11 +145,11 @@ GroupText
  |- LiteralText("Player ")
  |- Text.Literal("Rumi").Bold()
  |- LiteralText(": ")
- `- LiteralText(100, format: "000")
+ `- ValueText(100, format: "000")
 ```
 
 보간 값이 이미 `Text`라면 그대로 삽입되고 스타일도 유지됩니다.\
-일반 값은 `LiteralText`가 되며, 포맷과 정렬 정보도 보존됩니다.
+일반 값은 `ValueText`가 되며, 포맷과 정렬 정보도 보존됩니다.
 
 ## 렌더링 흐름
 
@@ -157,6 +163,7 @@ string richText = RichTextBuilder.Build(text);
 
 ```text
 LiteralText      -> LiteralRichTextBuilder
+ValueText        -> ValueRichTextBuilder
 GroupText        -> GroupRichTextBuilder
 LocalizationText -> LocalizationRichTextBuilder
 ```

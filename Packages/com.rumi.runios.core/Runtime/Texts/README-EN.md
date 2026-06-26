@@ -32,7 +32,7 @@ After text is concatenated, it is hard to know which part was a value, which par
 ```text
 GroupText
  |- LiteralText("HP: ")
- `- LiteralText(100, format: "0.##").Yellow()
+ `- ValueText(100, format: "0.##").Yellow()
 ```
 
 This makes text behave like meaningful pieces of data, not just output characters.
@@ -46,11 +46,17 @@ Style is also attached to `Text`.
 Text.Literal("Warning").Bold().Red();
 ```
 
-`LiteralText` stores an actual value.\
-It can store strings, numbers, dates, formatting, and alignment.
+`LiteralText` stores a literal string.
 
 ```csharp
-Text.Literal(123, 5, "000");
+Text.Literal("Warning");
+```
+
+`ValueText<T>` stores a value together with formatting and alignment information for rendering.\
+When the value implements `IFormattable`, the stored format string is used during rendering.
+
+```csharp
+Text.Value(123, 5, "000");
 ```
 
 `GroupText` stores multiple `Text` elements in order.
@@ -64,7 +70,7 @@ Formatted positions such as `{0}` and `{1}` can contain styled text.
 
 ## Factory Methods
 
-Static factory methods such as `Text.Literal`, `Text.Local`, and `Text.Group` are convenience APIs for creating text objects.
+Static factory methods such as `Text.Literal`, `Text.Value`, `Text.Local`, and `Text.Group` are convenience APIs for creating text objects.
 
 ```csharp
 Text text = Text.Literal("HP");
@@ -102,7 +108,7 @@ It is a mutable instance whose value can be changed.
 For example, one system can receive a `Text`, store it, and only render it later.
 
 ```csharp
-LiteralText progressText = new LiteralText(0, "0.##");
+ValueText<int> progressText = new ValueText<int>(0, "0.##");
 Text description = Text.Group($"Progress: {progressText}%");
 
 SetDescription(description);
@@ -139,11 +145,11 @@ GroupText
  |- LiteralText("Player ")
  |- Text.Literal("Rumi").Bold()
  |- LiteralText(": ")
- `- LiteralText(100, format: "000")
+ `- ValueText(100, format: "000")
 ```
 
 If an interpolation value is already `Text`, it is inserted as-is and keeps its style.\
-Normal values become `LiteralText`, and their format/alignment information is preserved.
+Normal values become `ValueText`, and their format/alignment information is preserved.
 
 ## Rendering Flow
 
@@ -157,6 +163,7 @@ The builder finds a renderer based on the runtime type of the `Text`.
 
 ```text
 LiteralText      -> LiteralRichTextBuilder
+ValueText        -> ValueRichTextBuilder
 GroupText        -> GroupRichTextBuilder
 LocalizationText -> LocalizationRichTextBuilder
 ```

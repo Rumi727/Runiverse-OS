@@ -71,9 +71,7 @@ namespace RuniOS.Texts.Builders.RichTexts
             CloseRich(TMPStyles.font, builder, styleState);
             CloseRich(TMPStyles.characterSpacing, builder, styleState);
             CloseRich(TMPStyles.alpha, builder, styleState);
-
             CloseRich(TMPStyles.align, builder, styleState);
-
             CloseRich(TextStyles.underline, builder, styleState);
             CloseRich(TextStyles.strikethrough, builder, styleState);
             CloseRich(TextStyles.size, builder, styleState);

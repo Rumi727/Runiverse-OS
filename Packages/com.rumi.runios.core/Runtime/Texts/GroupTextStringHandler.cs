@@ -53,18 +53,18 @@ namespace RuniOS.Texts
         public void AppendFormatted(Text value) => groupText.Add(value);
 
         /// <summary>
-        /// Appends a formatted value as a literal text segment.<br/>
-        /// format 값을 리터럴 텍스트 세그먼트로 추가합니다.
+        /// Appends an interpolated value as a <see cref="ValueText{T}"/> segment.<br/>
+        /// 보간 값을 <see cref="ValueText{T}"/> 세그먼트로 추가합니다.
         /// </summary>
         /// <param name="value">
         /// The value to append.<br/>
         /// 추가할 값입니다.
         /// </param>
-        public void AppendFormatted(object? value) => groupText.Add(Text.Literal(value));
+        public void AppendFormatted(object? value) => groupText.Add(Text.Value(value));
 
         /// <summary>
-        /// Appends a formatted value with alignment information.<br/>
-        /// 정렬 정보를 가진 format 값을 추가합니다.
+        /// Appends an interpolated value with alignment information.<br/>
+        /// 정렬 정보를 가진 보간 값을 추가합니다.
         /// </summary>
         /// <param name="value">
         /// The value to append.<br/>
@@ -74,11 +74,11 @@ namespace RuniOS.Texts
         /// The composite-format alignment width to apply when formatting.<br/>
         /// format 처리 시 적용할 복합 format 정렬 너비입니다.
         /// </param>
-        public void AppendFormatted(object? value, int alignment) => groupText.Add(Text.Literal(value, alignment));
+        public void AppendFormatted(object? value, int alignment) => groupText.Add(Text.Value(value, alignment));
 
         /// <summary>
-        /// Appends a formatted value with optional format information.<br/>
-        /// 선택적 format 정보를 가진 format 값을 추가합니다.
+        /// Appends an interpolated value with optional format information.<br/>
+        /// 선택적 format 정보를 가진 보간 값을 추가합니다.
         /// </summary>
         /// <param name="value">
         /// The value to append.<br/>
@@ -92,16 +92,16 @@ namespace RuniOS.Texts
         {
             Text text;
             if (format != null)
-                text = Text.Literal(value, format);
+                text = Text.Value(value, format);
             else
-                text = Text.Literal(value);
+                text = Text.Value(value);
 
             groupText.Add(text);
         }
 
         /// <summary>
-        /// Appends a formatted value with alignment and optional format information.<br/>
-        /// 정렬 및 선택적 format 정보를 가진 format 값을 추가합니다.
+        /// Appends an interpolated value with alignment and optional format information.<br/>
+        /// 정렬 및 선택적 format 정보를 가진 보간 값을 추가합니다.
         /// </summary>
         /// <param name="value">
         /// The value to append.<br/>
@@ -119,9 +119,9 @@ namespace RuniOS.Texts
         {
             Text text;
             if (format != null)
-                text = Text.Literal(value, alignment, format);
+                text = Text.Value(value, alignment, format);
             else
-                text = Text.Literal(value, alignment);
+                text = Text.Value(value, alignment);
 
             groupText.Add(text);
         }

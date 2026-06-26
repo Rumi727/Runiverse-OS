@@ -1,6 +1,5 @@
 #nullable enable
 using RuniOS.Resource;
-using RuniOS.Texts.Styles;
 
 namespace RuniOS.Texts
 {
@@ -41,18 +40,42 @@ namespace RuniOS.Texts
         public static GroupText Group(GroupTextStringHandler handler) => handler.ToGroupText();
 
         /// <summary>
-        /// Creates an empty grouped text value.<br/>
-        /// 빈 리터럴 텍스트 값을 만듭니다.
+        /// Creates an empty literal text instance.<br/>
+        /// 빈 리터럴 텍스트 인스턴스를 만듭니다.
         /// </summary>
         /// <returns>
         /// A new empty <see cref="LiteralText"/> instance.<br/>
         /// 새 빈 <see cref="LiteralText"/> 인스턴스를 반환합니다.
         /// </returns>
-        public static LiteralText Literal() => new LiteralText(null);
+        public static LiteralText Literal() => new LiteralText();
 
         /// <summary>
         /// Creates a literal text value.<br/>
         /// 리터럴 텍스트 값을 만듭니다.
+        /// </summary>
+        /// <param name="text">
+        /// The literal string represented by the text.<br/>
+        /// 텍스트가 나타낼 리터럴 문자열입니다.
+        /// </param>
+        /// <returns>
+        /// A text instance that renders <paramref name="text"/> directly.<br/>
+        /// <paramref name="text"/>를 직접 렌더링하는 텍스트 인스턴스를 반환합니다.
+        /// </returns>
+        public static LiteralText Literal(string text) => new LiteralText(text);
+
+        /// <summary>
+        /// Creates a <see cref="ValueText{T}"/> instance that contains a <see langword="null"/> value.<br/>
+        /// <see langword="null"/> 값을 담은 <see cref="ValueText{T}"/> 인스턴스를 만듭니다.
+        /// </summary>
+        /// <returns>
+        /// A new <see cref="ValueText{T}"/> instance that contains a <see langword="null"/> value.<br/>
+        /// <see langword="null"/> 값을 담은 새 <see cref="ValueText{T}"/> 인스턴스를 반환합니다.
+        /// </returns>
+        public static ValueText<object?> Value() => new ValueText<object?>(null);
+
+        /// <summary>
+        /// Creates a <see cref="ValueText{T}"/> instance from a value.<br/>
+        /// 값에서 <see cref="ValueText{T}"/> 인스턴스를 만듭니다.
         /// </summary>
         /// <param name="value">
         /// The value represented by the text.<br/>
@@ -62,11 +85,11 @@ namespace RuniOS.Texts
         /// A text instance that renders <paramref name="value"/> directly.<br/>
         /// <paramref name="value"/>를 직접 렌더링하는 텍스트 인스턴스를 반환합니다.
         /// </returns>
-        public static LiteralText Literal(object? value) => new LiteralText(value);
+        public static ValueText<T> Value<T>(T value) => new ValueText<T>(value);
 
         /// <summary>
-        /// Creates a literal text value with alignment information.<br/>
-        /// 정렬 정보를 가진 리터럴 텍스트 값을 만듭니다.
+        /// Creates a <see cref="ValueText{T}"/> instance with alignment information.<br/>
+        /// 정렬 정보를 가진 <see cref="ValueText{T}"/> 인스턴스를 만듭니다.
         /// </summary>
         /// <param name="value">
         /// The value represented by the text.<br/>
@@ -77,14 +100,14 @@ namespace RuniOS.Texts
         /// format 처리 시 적용할 복합 format 정렬 너비입니다.
         /// </param>
         /// <returns>
-        /// A literal text instance with alignment information.<br/>
-        /// 정렬 정보를 가진 리터럴 텍스트 인스턴스를 반환합니다.
+        /// A <see cref="ValueText{T}"/> instance with alignment information.<br/>
+        /// 정렬 정보를 가진 <see cref="ValueText{T}"/> 인스턴스를 반환합니다.
         /// </returns>
-        public static LiteralText Literal(object? value, int alignment) => new LiteralText(value, alignment);
+        public static ValueText<T> Value<T>(T value, int alignment) => new ValueText<T>(value, alignment);
 
         /// <summary>
-        /// Creates a literal text value with a format string.<br/>
-        /// format 문자열을 가진 리터럴 텍스트 값을 만듭니다.
+        /// Creates a <see cref="ValueText{T}"/> instance with a format string.<br/>
+        /// format 문자열을 가진 <see cref="ValueText{T}"/> 인스턴스를 만듭니다.
         /// </summary>
         /// <param name="value">
         /// The value represented by the text.<br/>
@@ -95,14 +118,14 @@ namespace RuniOS.Texts
         /// <paramref name="value"/>가 <see cref="System.IFormattable"/>을 구현할 때 사용할 format 문자열입니다.
         /// </param>
         /// <returns>
-        /// A literal text instance with format information.<br/>
-        /// format 정보를 가진 리터럴 텍스트 인스턴스를 반환합니다.
+        /// A <see cref="ValueText{T}"/> instance with format information.<br/>
+        /// format 정보를 가진 <see cref="ValueText{T}"/> 인스턴스를 반환합니다.
         /// </returns>
-        public static LiteralText Literal(object? value, string format) => new LiteralText(value, format);
+        public static ValueText<T> Value<T>(T value, string format) => new ValueText<T>(value, format);
 
         /// <summary>
-        /// Creates a literal text value with alignment and format information.<br/>
-        /// 정렬 및 format 정보를 가진 리터럴 텍스트 값을 만듭니다.
+        /// Creates a <see cref="ValueText{T}"/> instance with alignment and format information.<br/>
+        /// 정렬 및 format 정보를 가진 <see cref="ValueText{T}"/> 인스턴스를 만듭니다.
         /// </summary>
         /// <param name="value">
         /// The value represented by the text.<br/>
@@ -117,13 +140,13 @@ namespace RuniOS.Texts
         /// <paramref name="value"/>가 <see cref="System.IFormattable"/>을 구현할 때 사용할 format 문자열입니다.
         /// </param>
         /// <returns>
-        /// A literal text instance with alignment and format information.<br/>
-        /// 정렬 및 format 정보를 가진 리터럴 텍스트 인스턴스를 반환합니다.
+        /// A <see cref="ValueText{T}"/> instance with alignment and format information.<br/>
+        /// 정렬 및 format 정보를 가진 <see cref="ValueText{T}"/> 인스턴스를 반환합니다.
         /// </returns>
-        public static LiteralText Literal(object? value, int alignment, string format) => new LiteralText(value, alignment, format);
+        public static ValueText<T> Value<T>(T value, int alignment, string format) => new ValueText<T>(value, alignment, format);
 
         /// <summary>
-        /// Creates an empty grouped text value.<br/>
+        /// Creates an empty localized text value.<br/>
         /// 빈 로컬라이징 텍스트 값을 만듭니다.
         /// </summary>
         /// <returns>
