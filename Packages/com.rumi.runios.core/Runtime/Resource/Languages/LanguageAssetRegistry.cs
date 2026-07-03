@@ -5,6 +5,7 @@ using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Localizations;
+using RuniOS.Tasks;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Resource.Languages
@@ -17,8 +18,7 @@ namespace RuniOS.Resource.Languages
 
         public override Type assetType => typeof(LocalizationData);
 
-        public override bool isLoading => _isLoading;
-        bool _isLoading;
+        public override bool isLoading => reloadGate.isRunning;
 
         Dictionary<Identifier, IReadOnlyDictionary<string, string>> calculatedAsset = new();
 
@@ -29,15 +29,11 @@ namespace RuniOS.Resource.Languages
 #endif
         static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
 
-        public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
-        {
-            if (isLoading)
-            {
-                await UniTask.WaitWhile(() => isLoading);
-                return;
-            }
+        readonly AsyncReloadGate reloadGate = new();
+        public override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null) => reloadGate.Run(progress => ReloadCore(resourcePacks, progress), progress);
 
-            _isLoading = true;
+        async UniTask ReloadCore(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress)
+        {
             BeginTracking();
 
             try
@@ -120,7 +116,6 @@ namespace RuniOS.Resource.Languages
                 progress.SafeReport(1);
 
                 EndTracking();
-                _isLoading = false;
             }
         }
 

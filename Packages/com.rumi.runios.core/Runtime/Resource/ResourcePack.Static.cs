@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using RuniOS.Linq;
+using RuniOS.Tasks;
 
 namespace RuniOS.Resource
 {
@@ -80,7 +81,10 @@ namespace RuniOS.Resource
             return resourcePack;
         }
 
-        public static UniTask ReloadAll()
+        static readonly AsyncReloadGate reloadAllGate = new();
+        public static UniTask ReloadAll() => reloadAllGate.Run(ReloadAllCore);
+
+        static UniTask ReloadAllCore()
         {
             EnablePack(defaultPack.identifier, _enabledPackIdentifiers.Count);
 

@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
+using RuniOS.Tasks;
 
 namespace RuniOS.Resource
 {
@@ -19,14 +20,15 @@ namespace RuniOS.Resource
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
         /// </summary>
-        public sealed override bool isLoading => _isLoading;
-        bool _isLoading;
-        
+        public sealed override bool isLoading => reloadGate.isRunning;
+
         /// <summary>
         /// 에셋 파일 검색에 사용되는 와일드카드 패턴을 가져옵니다.
         /// </summary>
         public abstract WildcardPatterns assetFilter { get; }
-        
+
+        readonly AsyncReloadGate reloadGate = new();
+
         /// <summary>
         /// 지정된 <paramref name="resourcePack"/> 내에서 이 레지스트리의 데이터를 포함하는 폴더를 비동기적으로 열거합니다.
         /// <br/>각 폴더는 네임스페이스와 해당 레지스트리 노드를 반환합니다.
@@ -63,15 +65,10 @@ namespace RuniOS.Resource
         /// <exception cref="Exception">
         /// 로딩 중 발생할 수 있는 모든 예외입니다.
         /// </exception>
-        public sealed override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
-        {
-            if (isLoading)
-            {
-                await UniTask.WaitWhile(() => isLoading);
-                return;
-            }
+        public sealed override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null) => reloadGate.Run(progress => ReloadCore(resourcePacks, progress), progress);
 
-            _isLoading = true;
+        async UniTask ReloadCore(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress)
+        {
             BeginTracking();
 
             try
@@ -133,7 +130,6 @@ namespace RuniOS.Resource
                 progress.SafeReport(1);
 
                 EndTracking();
-                _isLoading = false;
             }
         }
 

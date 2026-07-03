@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using Newtonsoft.Json;
 using RuniOS.IO;
+using RuniOS.Tasks;
 using System.Collections.Immutable;
 
 namespace RuniOS.Resource
@@ -80,7 +81,11 @@ namespace RuniOS.Resource
         
         public bool isDisposed { get; private set; }
 
-        public async UniTask Reload()
+        readonly AsyncReloadGate reloadGate = new();
+
+        public UniTask Reload() => reloadGate.Run(ReloadCore);
+
+        async UniTask ReloadCore()
         {
             if (await infoFile.file.GetEntry() == null)
             {

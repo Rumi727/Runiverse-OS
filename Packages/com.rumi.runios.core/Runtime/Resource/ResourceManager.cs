@@ -14,7 +14,7 @@ namespace RuniOS.Resource
         /// </summary>
         public static bool isPreloaded { get; private set; } = false;
 
-        public static bool isLoading => currentTask != null;
+        public static bool isLoading => reloadGate.isRunning;
         public static AsyncTask? currentTask { get; private set; } = null;
         
         public static event Action<AsyncTask>? reloadStartEvent;
@@ -22,17 +22,12 @@ namespace RuniOS.Resource
         public static event Action? preReloadCompletionEvent;
         public static event Action? reloadCompletionEvent;
 
-        static bool reloadRequested;
-        public static async UniTask Reload(IProgress<float>? progress = null)
-        {
-            reloadRequested = true;
+        static readonly AsyncReloadGate reloadGate = new();
 
-            if (isLoading)
-            {
-                await UniTask.WaitWhile(() => isLoading);
-                return;
-            }
-            
+        public static UniTask Reload(IProgress<float>? progress = null) => reloadGate.Run(ReloadCore, progress);
+
+        static async UniTask ReloadCore(IProgress<float>? progress)
+        {
             currentTask = new AsyncTask(Text.Local("runios:resource.loading.title"), Text.Local("runios:resource.loading.description"));
             reloadStartEvent?.SafeInvoke(currentTask);
             
@@ -40,55 +35,50 @@ namespace RuniOS.Resource
             {
                 progress.SafeReport(0);
 
-                while (reloadRequested)
+                await ResourcePack.ReloadAll();
+
+                ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
+
+                UniTask[] uniTasks = new UniTask[assetRegistries.Count];
+                float[] assetRegistryProgresses = new float[assetRegistries.Count];
+
+                ResourcePack[] resourcePacks = ResourcePack.GetEnabledPacksSnapshot();
+
+                int index = 0;
+                foreach (var assetRegistry in assetRegistries)
                 {
-                    reloadRequested = false;
+                    int targetIndex = index;
 
-                    await ResourcePack.ReloadAll();
+                    uniTasks[index] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
+                    index++;
 
-                    ReadOnlySet<IAssetRegistry> assetRegistries = AssetRegistryManager.GetAll();
-
-                    UniTask[] uniTasks = new UniTask[assetRegistries.Count];
-                    float[] assetRegistryProgresses = new float[assetRegistries.Count];
-
-                    ResourcePack[] resourcePacks = ResourcePack.GetEnabledPacksSnapshot();
-
-                    int index = 0;
-                    foreach (var assetRegistry in assetRegistries)
+                    async UniTask RegistryReload(IAssetRegistry assetRegistry, int targetIndex)
                     {
-                        int targetIndex = index;
-
-                        uniTasks[index] = UniTask.Defer(() => RegistryReload(assetRegistry, targetIndex));
-                        index++;
-
-                        async UniTask RegistryReload(IAssetRegistry assetRegistry, int targetIndex)
+                        try
                         {
-                            try
-                            {
-                                await assetRegistry.Reload
-                                (
-                                    resourcePacks,
-                                    Progress.Create<float>(x =>
-                                    {
-                                        assetRegistryProgresses[targetIndex] = x;
+                            await assetRegistry.Reload
+                            (
+                                resourcePacks,
+                                Progress.Create<float>(x =>
+                                {
+                                    assetRegistryProgresses[targetIndex] = x;
 
-                                        float value = assetRegistryProgresses.Sum() / assetRegistryProgresses.Length;
-                                        if (currentTask != null)
-                                            currentTask.progress.Value = value;
+                                    float value = assetRegistryProgresses.Sum() / assetRegistryProgresses.Length;
+                                    if (currentTask != null)
+                                        currentTask.progress.Value = value;
 
-                                        progress.SafeReport(value);
-                                    })
-                                );
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.RuntimeLogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
-                            }
+                                    progress.SafeReport(value);
+                                })
+                            );
+                        }
+                        catch (Exception e)
+                        {
+                            Debug.RuntimeLogError($"An exception occurred while loading the resource pack registry {assetRegistry.GetType().Name}. The exception is: {e}", nameof(ResourceManager));
                         }
                     }
-
-                    await UniTask.WhenAll(uniTasks);
                 }
+
+                await UniTask.WhenAll(uniTasks);
             }
             catch (Exception e)
             {
