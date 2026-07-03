@@ -700,6 +700,11 @@ namespace RuniOS.Utility
         public static Color32 Clamp(this Color32 value, Color32 min, Color32 max) => new Color32(value.r.Clamp(min.r, max.r), value.g.Clamp(min.g, max.g), value.b.Clamp(min.b, max.b), value.a.Clamp(min.a, max.a));
         #endregion
 
+        #region ClampMagnitude
+        public static Vector2 ClampMagnitude(this Vector2 value, float maxLength) => Vector2.ClampMagnitude(value, maxLength);
+        public static Vector3 ClampMagnitude(this Vector3 value, float maxLength) => Vector3.ClampMagnitude(value, maxLength);
+        #endregion
+
         #region Clamp01
         public static sbyte Clamp01(this sbyte value)
         {
