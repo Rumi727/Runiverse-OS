@@ -18,9 +18,21 @@ namespace RuniOS.Resource
         Type IAssetRef.targetAssetType => typeof(TAsset);
         ResourceKey IAssetRef.key => key;
 
-        public readonly void Deconstruct(out Identifier registryId, out Identifier assetId) => key.Deconstruct(out registryId, out assetId);
+        public bool IsSameTarget(IAssetScope<TAsset>? scope)
+        {
+            IAssetHandle<TAsset>? newHandle = ResourceManager.GetHandle<TAsset>(key);
+            if (newHandle == null)
+                return scope == null;
 
-        public async UniTask<IAssetScope<TAsset>?> LoadAsync() => await ResourceManager.LoadScopeAsync<TAsset>(key);
+            return scope != null && scope.handle.IsSameTarget(newHandle);
+
+        }
+
+        public IAssetHandle<TAsset>? GetHandle() => ResourceManager.GetHandle<TAsset>(key);
+
+        public async UniTask<IAssetScope<TAsset>?> LoadScopeAsync() => await ResourceManager.LoadScopeAsync<TAsset>(key);
+
+        public readonly void Deconstruct(out Identifier registryId, out Identifier assetId) => key.Deconstruct(out registryId, out assetId);
 
         IAssetRef IAssetRef.WithKey(ResourceKey key) => new AssetRef<TAsset>(key);
     }
