@@ -4,50 +4,42 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(ISerializableKeyValuePair<,>), true)]
-    public class SerializableKeyValuePairPropertyConverter : PropertyConverter
+    [CustomPropertyConverter(typeof(SerializableKeyValuePair<,>), true)]
+    public class SerializableKeyValuePairPropertyConverter<TKey, TValue> : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType)
         {
-            (Type? keyType, Type? valueType) = SerializableKeyValuePair.GetUnderlyingType(propertyType);
-
-            object? key = null;
+            TKey key = default!;
             (SerializedProperty? keyProperty, SerializedProperty? valueProperty) = SerializableKeyValuePairPropertyDrawer.GetChildProperty(property);
-            if (keyType != null && keyProperty != null)
+            if (keyProperty != null)
             {
-                PropertyConverter? keyBinder = FindConverter(keyType);
+                PropertyConverter? keyBinder = FindConverter<TKey>();
                 if (keyBinder != null)
-                    key = keyBinder.Read(keyProperty, keyType);
+                    key = (TKey)keyBinder.Read(keyProperty, typeof(TKey))!;
             }
 
-            object? value = null;
-            if (valueType != null && valueProperty != null)
+            TValue value = default!;
+            if (valueProperty != null)
             {
-                PropertyConverter? valueBinder = FindConverter(valueType);
+                PropertyConverter? valueBinder = FindConverter(typeof(TValue));
                 if (valueBinder != null)
-                    value = valueBinder.Read(valueProperty, valueType);
+                    value = (TValue)valueBinder.Read(valueProperty, typeof(TValue))!;
             }
 
-            return Activator.CreateInstance(propertyType, key, value);
+            return new SerializableKeyValuePair<TKey, TValue>(key, value);
         }
         
-        public override void Write(SerializedProperty property, Type propertyType, object? nullable)
+        public override void Write(SerializedProperty property, Type propertyType, object? value)
         {
-            Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
-            if (underlyingType == null)
-                return;
-            
-            (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
-            if (field == null || toggle == null)
+            if (value is not ISerializableKeyValuePair<TKey, TValue> pair)
                 return;
 
-            object? value = null;
-            bool hasValue = (bool)(AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfHasValue)?.GetValue(nullable) ?? false);
-            if (hasValue)
-                value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
-            
-            FindConverter(underlyingType)?.Write(field, underlyingType, value);
-            toggle.boolValue = hasValue;
+            (SerializedProperty? keyProperty, SerializedProperty? valueProperty) = SerializableKeyValuePairPropertyDrawer.GetChildProperty(property);
+            if (keyProperty != null)
+                FindConverter<TKey>()?.Write(keyProperty, typeof(TKey), pair.Key);
+
+            if (valueProperty != null)
+                FindConverter(typeof(TValue))?.Write(valueProperty, typeof(TValue), pair.Value);
         }
     }
 }

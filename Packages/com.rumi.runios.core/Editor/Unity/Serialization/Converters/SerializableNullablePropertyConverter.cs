@@ -3,52 +3,36 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(ISerializableNullable<>), true)]
-    public class SerializableNullablePropertyConverter : PropertyConverter
+    [CustomPropertyConverter(typeof(SerializableNullable<>), true)]
+    public class SerializableNullablePropertyConverter<T> : PropertyConverter where T : struct
     {
         public override object Read(SerializedProperty property, Type propertyType)
         {
-            object instance = Activator.CreateInstance(propertyType);
-            Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
-            if (underlyingType == null)
-                return instance;
-            
             (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
             if (toggle is not { boolValue: true })
-                return instance;
+                return new SerializableNullable<T>();
             
-            PropertyConverter? valueBinder = FindConverter(underlyingType);
+            PropertyConverter? valueBinder = FindConverter<T>();
             if (field == null || valueBinder == null)
-                return Activator.CreateInstance(propertyType, underlyingType.GetDefaultValueNotNull());
+                return new SerializableNullable<T>(default);
 
-            object? value = valueBinder.Read(field, underlyingType);
-            if (value == null)
-                return instance;
-
-            return Activator.CreateInstance(propertyType, value);
+            return new SerializableNullable<T>((T)valueBinder.Read(field, typeof(T))!);
         }
         
-        public override void Write(SerializedProperty property, Type propertyType, object? nullable)
+        public override void Write(SerializedProperty property, Type propertyType, object? value)
         {
-            Type? underlyingType = SerializableNullable.GetUnderlyingType(propertyType);
-            if (underlyingType == null)
+            if (value is not SerializableNullable<T> nullable)
                 return;
-            
+
             (SerializedProperty? field, SerializedProperty? toggle) = SerializableNullablePropertyDrawer.GetChildProperty(property);
             if (toggle == null)
                 return;
             
-            bool hasValue = (bool)(AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfHasValue)?.GetValue(nullable) ?? false);
-            if (field != null)
-            {
-                object? value = Activator.CreateInstance(underlyingType);
-                if (hasValue)
-                    value = AccessUtility.DeclaredProperty(propertyType, SerializableNullable.nameOfValue)?.GetValue(nullable);
-                
-                FindConverter(underlyingType)?.Write(field, underlyingType, value);
-            }
+            toggle.boolValue = nullable.HasValue;
 
-            toggle.boolValue = hasValue;
+            bool hasValue = nullable.HasValue;
+            if (field != null)
+                FindConverter<T>()?.Write(field, typeof(T), hasValue ? nullable.Value : default);
         }
     }
 }

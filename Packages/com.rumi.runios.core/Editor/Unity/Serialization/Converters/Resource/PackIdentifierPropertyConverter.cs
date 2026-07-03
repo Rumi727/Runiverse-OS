@@ -30,8 +30,8 @@ namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
             {
                 (SerializedProperty nullableInternalID, SerializedProperty nullableLocalPath) = PackIdentifierPropertyDrawer.GetChildProperty(property);
                 
-                new SerializableNullablePropertyConverter().Write(nullableInternalID, typeof(SerializableNullable<Identifier>), new SerializableNullable<Identifier>(packIdentifier.identifier));
-                new SerializableNullablePropertyConverter().Write(nullableLocalPath, typeof(SerializableNullable<PhysicalPath>), new SerializableNullable<PhysicalPath>(packIdentifier.path));
+                new SerializableNullablePropertyConverter<Identifier>().Write(nullableInternalID, typeof(SerializableNullable<Identifier>), new SerializableNullable<Identifier>(packIdentifier.identifier));
+                new SerializableNullablePropertyConverter<PhysicalPath>().Write(nullableLocalPath, typeof(SerializableNullable<PhysicalPath>), new SerializableNullable<PhysicalPath>(packIdentifier.path));
             }
         }
     }

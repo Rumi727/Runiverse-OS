@@ -10,9 +10,9 @@ namespace RuniOS.Editor.Unity.Serialization.Converters
         {
             (SerializedProperty majorProperty, SerializedProperty minorProperty, SerializedProperty patchProperty) = VersionPropertyDrawer.GetChildProperty(property);
                 
-            int? major = (SerializableNullable<int>)new SerializableNullablePropertyConverter().Read(majorProperty, typeof(SerializableNullable<int>));
-            int? minor = (SerializableNullable<int>)new SerializableNullablePropertyConverter().Read(minorProperty, typeof(SerializableNullable<int>));
-            int? patch = (SerializableNullable<int>)new SerializableNullablePropertyConverter().Read(patchProperty, typeof(SerializableNullable<int>));
+            int? major = (SerializableNullable<int>)new SerializableNullablePropertyConverter<int>().Read(majorProperty, typeof(SerializableNullable<int>));
+            int? minor = (SerializableNullable<int>)new SerializableNullablePropertyConverter<int>().Read(minorProperty, typeof(SerializableNullable<int>));
+            int? patch = (SerializableNullable<int>)new SerializableNullablePropertyConverter<int>().Read(patchProperty, typeof(SerializableNullable<int>));
 
             return new Version(major, minor, patch);
         }
@@ -23,9 +23,9 @@ namespace RuniOS.Editor.Unity.Serialization.Converters
             {
                 (SerializedProperty majorProperty, SerializedProperty minorProperty, SerializedProperty patchProperty) = VersionPropertyDrawer.GetChildProperty(property);
                 
-                new SerializableNullablePropertyConverter().Write(majorProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.major));
-                new SerializableNullablePropertyConverter().Write(minorProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.minor));
-                new SerializableNullablePropertyConverter().Write(patchProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.patch));
+                new SerializableNullablePropertyConverter<int>().Write(majorProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.major));
+                new SerializableNullablePropertyConverter<int>().Write(minorProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.minor));
+                new SerializableNullablePropertyConverter<int>().Write(patchProperty, typeof(SerializableNullable<int>), new SerializableNullable<int>(version.patch));
             }
         }
     }
