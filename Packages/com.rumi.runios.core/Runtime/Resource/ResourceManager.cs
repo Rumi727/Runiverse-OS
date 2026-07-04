@@ -1,8 +1,10 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Collections.Generic;
+using RuniOS.Linq;
 using RuniOS.Tasks;
 using RuniOS.Texts;
+using System.Collections.Concurrent;
 
 namespace RuniOS.Resource
 {
@@ -22,7 +24,13 @@ namespace RuniOS.Resource
         public static event Action? preReloadCompletionEvent;
         public static event Action? reloadCompletionEvent;
 
+        static readonly HashSet<IReloadable> _reloadables = [];
+        public static ReadOnlySet<IReloadable> reloadables { get; } = _reloadables.AsReadOnly();
+
         static readonly AsyncReloadGate reloadGate = new();
+
+        public static void AttachReloadable(IReloadable reloadable) => _reloadables.Add(reloadable);
+        public static void DetachReloadable(IReloadable reloadable) => _reloadables.Remove(reloadable);
 
         public static UniTask Reload(IProgress<float>? progress = null) => reloadGate.Run(ReloadCore, progress);
 
@@ -30,7 +38,7 @@ namespace RuniOS.Resource
         {
             currentTask = new AsyncTask(Text.Local("runios:resource.loading.title"), Text.Local("runios:resource.loading.description"));
             reloadStartEvent?.SafeInvoke(currentTask);
-            
+
             try
             {
                 progress.SafeReport(0);
@@ -97,6 +105,18 @@ namespace RuniOS.Resource
 
                 preReloadCompletionEvent.SafeInvoke();
                 reloadCompletionEvent.SafeInvoke();
+
+                foreach (var reloadable in reloadables)
+                {
+                    try
+                    {
+                        reloadable.Reload().Forget();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
             }
         }
 
