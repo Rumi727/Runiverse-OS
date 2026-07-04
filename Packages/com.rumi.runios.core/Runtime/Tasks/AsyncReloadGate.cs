@@ -111,7 +111,7 @@ namespace RuniOS.Tasks
 
                     try
                     {
-                        await reload(combinedProgress);
+                        await reload.Invoke(combinedProgress);
                     }
                     catch (Exception exception)
                     {
