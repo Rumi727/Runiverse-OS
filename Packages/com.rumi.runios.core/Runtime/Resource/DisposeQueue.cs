@@ -12,7 +12,7 @@ namespace RuniOS.Resource
         public const int allottedTime = 10;
 
         static readonly Stopwatch stopwatch = new Stopwatch();
-        static readonly ConcurrentQueue<IDisposable> disposables = [];
+        static readonly ConcurrentQueue<Action> scheduledTasks = [];
 
         [Awaken]
         [Preserve]
@@ -60,11 +60,11 @@ namespace RuniOS.Resource
              * 시간 초과 코드가 맨 뒤에 있을 경우 작업 리스트에서는 빠지는데 시간 초과로 인해 코드가 작동하지 않는 경우가 생김!!!
              */
 
-            while (stopwatch.Elapsed.TotalMilliseconds < allottedTime && disposables.TryDequeue(out var disposable))
+            while (stopwatch.Elapsed.TotalMilliseconds < allottedTime && scheduledTasks.TryDequeue(out var disposable))
             {
                 try
                 {
-                    disposable.Dispose();
+                    disposable.Invoke();
                 }
                 catch (Exception e)
                 {
@@ -75,11 +75,11 @@ namespace RuniOS.Resource
 
         static void ForceScheduledTasksExecute()
         {
-            while (disposables.TryDequeue(out var disposable))
+            while (scheduledTasks.TryDequeue(out var disposable))
             {
                 try
                 {
-                    disposable.Dispose();
+                    disposable.Invoke();
                 }
                 catch (Exception e)
                 {
@@ -88,6 +88,14 @@ namespace RuniOS.Resource
             }
         }
 
-        public static void Enqueue(IDisposable disposable) => disposables.Enqueue(disposable);
+        public static void Enqueue(IDisposable? disposable)
+        {
+            if (disposable.IsNull())
+                return;
+
+            scheduledTasks.Enqueue(disposable.Dispose);
+        }
+
+        public static void Enqueue(Action action) => scheduledTasks.Enqueue(action);
     }
 }
