@@ -1,5 +1,12 @@
 # Agent Instructions
 
+## Change Authorization
+
+- Do not modify any file unless the user explicitly asks for a change.
+- Requests to inspect, diagnose, explain, review, or identify a cause authorize read-only investigation only.
+- Do not infer permission to implement a fix from a reported bug or problem.
+- After a read-only investigation, describe the proposed change and wait for explicit user authorization before editing files.
+
 ## Change Disclosure
 
 - Do not make silent behavior changes while fixing or migrating code.
