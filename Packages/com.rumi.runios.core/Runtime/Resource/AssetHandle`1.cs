@@ -203,15 +203,18 @@ namespace RuniOS.Resource
 
         internal void ExecuteUnload()
         {
-            try
+            DisposeQueue.Enqueue(() =>
             {
-                Unload();
-            }
-            catch (Exception e)
-            {
-                Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
-            }
-        
+                try
+                {
+                    Unload();
+                }
+                catch (Exception e)
+                {
+                    Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
+                }
+            });
+
             assetObject = default;
             CancelUnloadWatch();
         }
