@@ -39,6 +39,11 @@ namespace RuniOS.Editor.Sounds
 
         static void UpdateEditorSystem()
         {
+            if (Kernel.isPlaying)
+                SoundWaveManager.currentSystem = RuntimeManager.CoreSystem;
+            else
+                SoundWaveManager.currentSystem = currentSystem;
+
             currentSystem.update().LogErrorIfNotOk();
 
             bool isGameView = PlayModeViewBridge.s_PlayModeViews.Any(x => EditorWindow.focusedWindow == x?.__instance);
