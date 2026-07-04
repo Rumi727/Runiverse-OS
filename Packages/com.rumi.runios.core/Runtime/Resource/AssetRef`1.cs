@@ -25,7 +25,6 @@ namespace RuniOS.Resource
                 return scope == null;
 
             return scope != null && scope.handle.IsSameTarget(newHandle);
-
         }
 
         public IAssetHandle<TAsset>? GetHandle() => ResourceManager.GetHandle<TAsset>(key);
