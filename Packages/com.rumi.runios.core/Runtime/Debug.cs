@@ -96,7 +96,7 @@ namespace RuniOS
                     continue;
                 }
 
-                return GetFullNameWithoutNamespace(type);
+                return type.GetTypeDisplayName();
             }
 
             return nameof(Debug);
@@ -125,15 +125,5 @@ namespace RuniOS
             return type.DeclaringType != null;
         }
 
-        static string GetFullNameWithoutNamespace(Type type)
-        {
-            string fullName = type.FullName ?? type.Name;
-            string? ns = type.Namespace;
-
-            if (!string.IsNullOrEmpty(ns) && fullName.StartsWith(ns + ".", StringComparison.Ordinal))
-                return fullName.Substring(ns.Length + 1);
-
-            return fullName;
-        }
     }
 }
