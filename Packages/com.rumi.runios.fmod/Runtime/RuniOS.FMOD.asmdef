@@ -4,18 +4,31 @@
     "references": [
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:c358082e85227cc4f9dee2438a164545",
+        "GUID:12b970fc17bdc3041a8cc134ed15f8c6",
+        "GUID:e04069b3d121e7b4db324e77dd2a22a4",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
         "GUID:0c752da273b17c547ae705acf0f2adf2"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
-        "System.Collections.Immutable.dll"
+        "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],
-    "versionDefines": [],
+    "versionDefines": [
+        {
+          "name": "com.unity.modules.physics",
+          "expression": "1.0.0",
+          "define": "UNITY_PHYSICS_EXIST"
+        },
+        {
+        "name": "com.unity.modules.physics2d",
+        "expression": "1.0.0",
+        "define": "UNITY_PHYSICS2D_EXIST"
+        }
+    ],
     "noEngineReferences": false
 }

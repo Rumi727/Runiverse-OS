@@ -7,7 +7,7 @@ namespace RuniOS.Resource
     /// 인스펙터에서 특정 타입의 리소스를 지정하기 위한 래퍼입니다.
     /// 실제 저장되는 데이터는 <see cref="ResourceKey"/> 뿐입니다.
     /// </summary>
-    /// <typeparam name="TAsset">목표 리소스 타입 (예: <see cref="Texture2D"/>, <see cref="AudioClip"/>)</typeparam>
+    /// <typeparam name="TAsset">목표 리소스 타입 (예: <see cref="Texture2D"/>)</typeparam>
     [Serializable]
     public record struct AssetRef<TAsset>(ResourceKey key) : IAssetRef
     {
