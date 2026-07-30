@@ -16,5 +16,11 @@ namespace RuniOS.Threading
         [UnityEditor.InitializeOnLoadMethod]
         static void EditorInit() => mainThreadId = Thread.CurrentThread.ManagedThreadId;
 #endif
+
+        public static void ThrowIfNotMainThread()
+        {
+            if (!isMainThread)
+                throw new InvalidOperationException("Work can only be done on the main thread");
+        }
     }
 }
