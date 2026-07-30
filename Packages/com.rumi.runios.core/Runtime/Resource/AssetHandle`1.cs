@@ -213,6 +213,8 @@ namespace RuniOS.Resource
                 {
                     Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
                 }
+
+                Debug.Log($"Unloaded asset at path {node.path}");
             });
 
             assetObject = default;
