@@ -23,6 +23,7 @@
 
 - This project is a Unity/C# project.
 - When the user asks a question that requires understanding this project's structure, do not guess the structure from imagination. Inspect the actual files first, usually under the `/Packages` folder.
+- Before any C# investigation or change, inspect the relevant assembly's `GenericGlobalUsing`, `GenericEditorGlobalUsing`, and `AssemblyInfo` files. Decide whether a namespace may be omitted and whether `internal` access is available only from those live files; never infer either from convention.
 
 ## Verification
 
