@@ -1,45 +1,51 @@
 #nullable enable
 using RuniOS.Booting;
 using RuniOS.LowLevel;
+using RuniOS.Threading;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Threading;
 using UnityEngine.Scripting;
 
 namespace RuniOS.Resource
 {
-    public static class DisposeQueue
+    public static partial class DisposeQueue
     {
         public const int allottedTime = 10;
 
         static readonly Stopwatch stopwatch = new Stopwatch();
         static readonly ConcurrentQueue<Action> scheduledTasks = [];
 
+        static volatile bool shutdownStarted = false;
+
+        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
+        static void ResetShutdownState() => shutdownStarted = false;
+
         [Awaken]
         [Preserve]
-        public static void Awaken()
+        static void Awaken()
         {
             RuniPlayerLoop.onPostLateUpdate += Update;
-            Kernel.quitting += Quitting;
-
-#if UNITY_EDITOR
-            RegisterEditorCallbacks();
-#endif
+            Kernel.quitting += BeginShutdown;
         }
 
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-        static void InitializeOnLoadMethod() => RegisterEditorCallbacks();
+        [Unity.Scripting.LifecycleManagement.OnCodeLoaded]
+        static void OnCodeLoaded()
+        {
+            ResetShutdownState();
 
-        static void RegisterEditorCallbacks()
+            UnityEditor.EditorApplication.update += EditorUpdate;
+            UnityEditor.EditorApplication.quitting += BeginShutdown;
+        }
+
+        [Unity.Scripting.LifecycleManagement.OnCodeUnloading]
+        static void FinishCodeUnloading()
         {
             UnityEditor.EditorApplication.update -= EditorUpdate;
-            UnityEditor.EditorApplication.update += EditorUpdate;
+            UnityEditor.EditorApplication.quitting -= BeginShutdown;
 
-            UnityEditor.EditorApplication.quitting -= ForceScheduledTasksExecute;
-            UnityEditor.EditorApplication.quitting += ForceScheduledTasksExecute;
-
-            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= ForceScheduledTasksExecute;
-            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += ForceScheduledTasksExecute;
+            BeginShutdown();
         }
 
         static void EditorUpdate()
@@ -49,7 +55,11 @@ namespace RuniOS.Resource
         }
 #endif
 
-        static void Quitting() => ForceScheduledTasksExecute();
+        static void BeginShutdown()
+        {
+            shutdownStarted = true;
+            ForceScheduledTasksExecute();
+        }
 
         static void Update()
         {
@@ -93,9 +103,48 @@ namespace RuniOS.Resource
             if (disposable.IsNull())
                 return;
 
-            scheduledTasks.Enqueue(disposable.Dispose);
+            Enqueue(disposable.Dispose);
         }
 
-        public static void Enqueue(Action action) => scheduledTasks.Enqueue(action);
+        public static void Enqueue(Action action)
+        {
+            if (!UnityThread.isMainThread)
+            {
+                try
+                {
+                    action.Invoke();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                return;
+            }
+
+            int executed = 0;
+            void DisposeOnce()
+            {
+                // ReSharper disable once AccessToModifiedClosure
+                if (Interlocked.Exchange(ref executed, 1) != 0)
+                    return;
+
+                action.Invoke();
+            }
+
+            scheduledTasks.Enqueue(DisposeOnce);
+
+            if (shutdownStarted)
+            {
+                try
+                {
+                    DisposeOnce();
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+        }
     }
 }
