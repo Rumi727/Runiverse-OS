@@ -17,29 +17,18 @@ namespace RuniOS.Threading
 
         [Awaken]
         [Preserve]
-        public static void Awaken()
+        static void Awaken()
         {
             RuniPlayerLoop.onUpdate += Update;
-            Kernel.quitting += Quitting;
-
-#if UNITY_EDITOR
-            RegisterEditorCallbacks();
-#endif
+            Kernel.quitting += ForceScheduledTasksExecute;
         }
 
 #if UNITY_EDITOR
         [UnityEditor.InitializeOnLoadMethod]
-        static void InitializeOnLoadMethod() => RegisterEditorCallbacks();
-
-        static void RegisterEditorCallbacks()
+        static void EditorInit()
         {
-            UnityEditor.EditorApplication.update -= EditorUpdate;
             UnityEditor.EditorApplication.update += EditorUpdate;
-
-            UnityEditor.EditorApplication.quitting -= ForceScheduledTasksExecute;
             UnityEditor.EditorApplication.quitting += ForceScheduledTasksExecute;
-
-            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= ForceScheduledTasksExecute;
             UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += ForceScheduledTasksExecute;
         }
 
@@ -49,8 +38,6 @@ namespace RuniOS.Threading
                 Update();
         }
 #endif
-
-        static void Quitting() => ForceScheduledTasksExecute();
 
         static void Update()
         {
