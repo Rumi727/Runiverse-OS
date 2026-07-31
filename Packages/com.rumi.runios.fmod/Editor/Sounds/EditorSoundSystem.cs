@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 namespace RuniOS.Editor.Sounds
 {
     [InitializeOnLoad]
-    public static class EditorSoundWaveManager
+    static class EditorSoundSystem
     {
-        static EditorSoundWaveManager()
+        static EditorSoundSystem()
         {
             EditorApplication.update += UpdateEditorSystem;
 
@@ -48,17 +48,17 @@ namespace RuniOS.Editor.Sounds
                     .Select(x =>
                     {
                         SceneViewExtra extra = sceneViewExtras.GetOrCreateValue(x);
-                        
+
                         Vector3 position = x.camera.transform.position;
                         Vector3 velocity = Vector3.zero;
                         float deltaTime = Time.unscaledDeltaTime;
 
-                        if (float.IsFinite(deltaTime))
+                        if (float.IsNormal(deltaTime))
                         {
                             velocity = (position - extra.lastPosition) / deltaTime;
-                            velocity = Vector3.ClampMagnitude(velocity, 20.0f);
+                            velocity = velocity.ClampMagnitude(20);
                         }
-                        
+
                         return new AudioSpatialState(x.camera.transform, velocity);
                     });
             }
@@ -83,6 +83,12 @@ namespace RuniOS.Editor.Sounds
         }
 
         [MemberNotNull(nameof(studioListeners))]
-        static void UpdateGameView() => studioListeners = Object.FindObjectsByType<StudioListener>();
+        static void UpdateGameView()
+        {
+            if (Kernel.isPlaying)
+                studioListeners = [];
+            else
+                studioListeners = Object.FindObjectsByType<StudioListener>();
+        }
     }
 }
