@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics;
 using UnityEngine;
 
 namespace RuniOS
@@ -26,6 +27,8 @@ namespace RuniOS
         }
 
         public const float fps60Second = 1f / 60f;
+
+        static readonly Stopwatch deltaTimeStopwatch = Stopwatch.StartNew();
 
         static void TimeUpdate()
         {

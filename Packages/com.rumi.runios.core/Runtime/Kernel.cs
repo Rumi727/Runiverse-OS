@@ -1,9 +1,7 @@
 #nullable enable
 using RuniOS.Booting;
 using RuniOS.LowLevel;
-using System.Diagnostics;
 using UnityEngine;
-using UnityEngine.Scripting;
 
 namespace RuniOS
 {
@@ -54,14 +52,13 @@ namespace RuniOS
 
 
         [Awaken]
-        [Preserve]
         static void Awaken()
         {
-            RuniPlayerLoop.onInit += Update;
+            RuniPlayerLoop.onTimeUpdate += TimeUpdate;
             Application.quitting += Quitting;
 
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.update -= Update;
+            UnityEditor.EditorApplication.update -= TimeUpdate;
             UnityEditor.EditorApplication.pauseStateChanged += PauseStateChanged;
 #endif
         }
@@ -71,16 +68,13 @@ namespace RuniOS
         static void InitializeOnLoadMethod()
         {
             if (!isPlaying)
-                UnityEditor.EditorApplication.update += Update;
+                UnityEditor.EditorApplication.update += TimeUpdate;
         }
 #endif
 
 #if UNITY_EDITOR
         static void PauseStateChanged(UnityEditor.PauseState pauseState) => deltaTimeStopwatch.Restart();
 #endif
-
-        static readonly Stopwatch deltaTimeStopwatch = Stopwatch.StartNew();
-        static void Update() => TimeUpdate();
 
 #pragma warning disable IDE0022 // 메서드에 식 본문 사용
         public static void Quit()
@@ -117,7 +111,7 @@ namespace RuniOS
                 BootLoader.globalData.SaveAll(globalDataPath);*/
 
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.update += Update;
+            UnityEditor.EditorApplication.update += TimeUpdate;
             UnityEditor.EditorApplication.pauseStateChanged -= PauseStateChanged;
 #endif
         }

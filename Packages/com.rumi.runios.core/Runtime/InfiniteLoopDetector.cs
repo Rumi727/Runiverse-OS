@@ -1,10 +1,11 @@
 #nullable enable
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS
 {
-    public static class InfiniteLoopDetector
+    public static partial class InfiniteLoopDetector
     {
         public const int detectionThreshold = 1000000;
 
@@ -32,15 +33,22 @@ namespace RuniOS
         public const bool isLoopDetected = false;
 #endif
 
+#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
+        [OnCodeLoaded]
+        static void OnCodeLoaded()
+        {
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-        static void Init() => UnityEditor.EditorApplication.update += Update;
-#elif UNITY_ENABLE_CHECKS
-        [Booting.Awaken]
-        static void Awaken() => LowLevel.RuniPlayerLoop.onInit += Update;
+            UnityEditor.EditorApplication.update += Update;
+#else
+            LowLevel.RuniPlayerLoop.onInit += Update;
+#endif
+        }
+
+#if UNITY_EDITOR
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => UnityEditor.EditorApplication.update -= Update;
 #endif
 
-#if UNITY_EDITOR || UNITY_ENABLE_CHECKS
         static void Update() => detectionCount = 0;
 #endif
     }

@@ -1,4 +1,6 @@
 #nullable enable
+using UnityEngine.Scripting;
+
 namespace RuniOS.Booting
 {
     /// <summary>
@@ -6,5 +8,5 @@ namespace RuniOS.Booting
     /// <see cref="BootLoader"/> 클래스에서 호출됩니다.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method)]
-    public class StartenAttribute : Attribute { }
+    public class StartenAttribute : PreserveAttribute { }
 }

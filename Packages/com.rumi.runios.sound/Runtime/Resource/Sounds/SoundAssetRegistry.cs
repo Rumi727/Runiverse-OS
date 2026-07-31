@@ -1,15 +1,14 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
-using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Sounds;
 using RuniOS.Tasks;
-using UnityEngine.Scripting;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Sounds
 {
-    public sealed class SoundAssetRegistry : AssetRegistry<InstanceAssetHandle<SoundClipRef>>
+    public sealed partial class SoundAssetRegistry : AssetRegistry<InstanceAssetHandle<SoundClipRef>>
     {
         public const string jsonFileName = "sounds.json";
 
@@ -25,12 +24,11 @@ namespace RuniOS.Resource.Sounds
 
         readonly AsyncReloadGate reloadGate = new();
 
-        [Awaken]
-        [Preserve]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        static void Awaken() => AssetRegistryManager.Register<SoundAssetRegistry>();
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => AssetRegistryManager.Register<SoundAssetRegistry>();
+
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => AssetRegistryManager.Unregister<SoundAssetRegistry>();
 
         public override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
         {

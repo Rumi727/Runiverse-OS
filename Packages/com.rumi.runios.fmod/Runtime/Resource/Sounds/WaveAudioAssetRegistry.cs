@@ -1,13 +1,12 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Sounds;
-using UnityEngine.Scripting;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Sounds
 {
-    public sealed class WaveAudioAssetRegistry : SimpleAssetRegistry<WaveAudioAssetHandle>
+    public sealed partial class WaveAudioAssetRegistry : SimpleAssetRegistry<WaveAudioAssetHandle>
     {
         public override Identifier registryId => new Identifier("runios", "waves");
         public override RuniPath registryName => RuniPath.From("sounds");
@@ -18,12 +17,11 @@ namespace RuniOS.Resource.Sounds
 
         public override WildcardPatterns assetFilter => WildcardPatterns.musicFileFilter;
 
-        [Awaken]
-        [Preserve]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        static void Awaken() => AssetRegistryManager.Register<WaveAudioAssetRegistry>();
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => AssetRegistryManager.Register<WaveAudioAssetRegistry>();
+
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => AssetRegistryManager.Unregister<WaveAudioAssetRegistry>();
 
         protected override UniTask<WaveAudioAssetHandle> CreateHandle(IONode node, FileMetaData metaData) => UniTask.FromResult(new WaveAudioAssetHandle(node, metaData));
     }

@@ -5,7 +5,6 @@ using RuniOS.Threading;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
-using UnityEngine.Scripting;
 
 namespace RuniOS.Resource
 {
@@ -22,7 +21,6 @@ namespace RuniOS.Resource
         static void ResetShutdownState() => shutdownStarted = false;
 
         [Awaken]
-        [Preserve]
         static void Awaken()
         {
             RuniPlayerLoop.onPostLateUpdate += Update;
@@ -40,7 +38,7 @@ namespace RuniOS.Resource
         }
 
         [Unity.Scripting.LifecycleManagement.OnCodeUnloading]
-        static void FinishCodeUnloading()
+        static void OnCodeUnloading()
         {
             UnityEditor.EditorApplication.update -= EditorUpdate;
             UnityEditor.EditorApplication.quitting -= BeginShutdown;

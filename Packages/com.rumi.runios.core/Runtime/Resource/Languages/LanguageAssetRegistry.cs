@@ -1,16 +1,15 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Newtonsoft.Json;
-using RuniOS.Booting;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Localizations;
 using RuniOS.Tasks;
-using UnityEngine.Scripting;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Languages
 {
-    sealed class LanguageAssetRegistry : AssetRegistry<InstanceAssetHandle<LocalizationData>>
+    public sealed partial class LanguageAssetRegistry : AssetRegistry<InstanceAssetHandle<LocalizationData>>
     {
         public override Identifier registryId => new Identifier("runios", "lang");
 
@@ -22,12 +21,11 @@ namespace RuniOS.Resource.Languages
 
         Dictionary<Identifier, IReadOnlyDictionary<string, string>> calculatedAsset = new();
 
-        [Awaken]
-        [Preserve]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        static void Awaken() => AssetRegistryManager.Register<LanguageAssetRegistry>();
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => AssetRegistryManager.Register<LanguageAssetRegistry>();
+
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => AssetRegistryManager.Unregister<LanguageAssetRegistry>();
 
         readonly AsyncReloadGate reloadGate = new();
         public override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null) => reloadGate.Run(progress => ReloadCore(resourcePacks, progress), progress);

@@ -4,7 +4,7 @@ using RuniOS.Localizations;
 
 namespace RuniOS.Resource.Languages
 {
-    sealed class LanguageAssetHandle : InstanceAssetHandle<LocalizationData>
+    public sealed class LanguageAssetHandle : InstanceAssetHandle<LocalizationData>
     {
         internal LanguageAssetHandle(LocalizationData assetObject, IONode node, FileMetaData metaData) : base(assetObject)
         {

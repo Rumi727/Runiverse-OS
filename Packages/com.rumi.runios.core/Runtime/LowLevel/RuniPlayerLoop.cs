@@ -2,7 +2,6 @@
 using RuniOS.Booting;
 using UnityEngine.LowLevel;
 using UnityEngine.PlayerLoop;
-using UnityEngine.Scripting;
 
 namespace RuniOS.LowLevel
 {
@@ -87,7 +86,6 @@ namespace RuniOS.LowLevel
         /// 플레이 모드가 종료될 때 등록된 모든 델리게이트를 자동으로 해제합니다.
         /// </summary>
         [Awaken]
-        [Preserve]
         static void Awaken() => Kernel.quitting += Clear;
 #endif
         
@@ -122,6 +120,9 @@ namespace RuniOS.LowLevel
         /// </returns>
         public static bool Register(Type? targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
         {
+            if (!Kernel.isPlaying)
+                throw new InvalidOperationException();
+
             if (targetType == null || updateDelegate == null)
                 return false;
 
@@ -187,6 +188,9 @@ namespace RuniOS.LowLevel
         /// </param>
         public static void Unregister(Type targetType, PlayerLoopSystem.UpdateFunction? updateDelegate)
         {
+            if (!Kernel.isPlaying)
+                throw new InvalidOperationException();
+
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (updateDelegate == null || targetType == null)
                 return;
@@ -209,6 +213,9 @@ namespace RuniOS.LowLevel
         /// <param name="updateDelegate">제거할 델리게이트입니다. 이 델리게이트에 연결된 모든 메소드들이 제거됩니다.</param>
         public static void UnregisterAll(PlayerLoopSystem.UpdateFunction? updateDelegate)
         {
+            if (!Kernel.isPlaying)
+                throw new InvalidOperationException();
+
             if (updateDelegate == null)
                 return;
             

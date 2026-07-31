@@ -127,8 +127,8 @@ namespace RuniOS.Reflection
         /// <b>개발 빌드나 에디터 환경</b>에서만 이루어집니다.<br/>
         /// 메소드 탐색은 백그라운드 스레드풀에서 수행됩니다.
         /// </summary>
-        /// <typeparam name="T">찾을 메소드에 정의된 <see cref="Attribute"/> 타입입니다.</typeparam>
-        public static async UniTask InvokeDefinedMethods<T>() where T : Attribute
+        /// <typeparam name="T">찾을 메소드에 정의된 <see cref="PreserveAttribute"/> 타입입니다.</typeparam>
+        public static async UniTask InvokeDefinedMethods<T>() where T : PreserveAttribute
         {
             // Linq 쓰면 코드가 몇배는 깔끔해지겠지만, 메소드 호출이 너무 길어져 대략 2배에서 심하면 10배까지도 성능적인 차이가 나는것을 확인했습니다.
             // 소스 제너레이터를 사용해도 되지만, 모딩 환경을 고려하여 리플렉션으로 결정했습니다.
@@ -159,24 +159,16 @@ namespace RuniOS.Reflection
                             );
                             return;
                         }
-                        else if (!method.IsDefined(typeof(PreserveAttribute)))
-                        {
-                            Debug.RuntimeLogWarning
-                            (
-                                $"The method {method.DeclaringType?.Name}.{method.Name} is invoked via '{nameof(InvokeDefinedMethods)}' but may be subject to code stripping during build.\n" +
-                                $"Consider adding the 'Preserve' attribute to prevent this method from being removed."
-                            );
-                        }
 #endif
                         methods.Add(method);
                     }
                 }
             });
-            
+
 #if UNITY_EDITOR || ENABLE_PROFILER
             Debug.RuntimeLog($"It took {stopwatch.Elapsed.TotalSeconds} seconds to create a list of methods that match the condition.", $"{nameof(ReflectionUtility)}.{nameof(InvokeDefinedMethods)}<{typeof(T).Name}>");
 #endif
-            
+
             foreach (var item in methods)
             {
                 try

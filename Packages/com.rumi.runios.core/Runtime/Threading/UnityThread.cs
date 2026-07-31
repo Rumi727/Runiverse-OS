@@ -1,21 +1,16 @@
 #nullable enable
 using System.Threading;
-using UnityEngine;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Threading
 {
-    public static class UnityThread
+    public static partial class UnityThread
     {
         public static int mainThreadId { get; private set; }
         public static bool isMainThread => Thread.CurrentThread.ManagedThreadId == mainThreadId;
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        static void RuntimeInit() => mainThreadId = Thread.CurrentThread.ManagedThreadId;
-
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-        static void EditorInit() => mainThreadId = Thread.CurrentThread.ManagedThreadId;
-#endif
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => mainThreadId = Thread.CurrentThread.ManagedThreadId;
 
         public static void ThrowIfNotMainThread()
         {

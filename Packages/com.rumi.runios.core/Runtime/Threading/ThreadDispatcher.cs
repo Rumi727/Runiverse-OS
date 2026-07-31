@@ -4,11 +4,10 @@ using RuniOS.Booting;
 using RuniOS.LowLevel;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using UnityEngine.Scripting;
 
 namespace RuniOS.Threading
 {
-    public static class ThreadDispatcher
+    public static partial class ThreadDispatcher
     {
         public const int allottedTime = 3;
 
@@ -16,20 +15,27 @@ namespace RuniOS.Threading
         static readonly ConcurrentQueue<Action> scheduledTasks = new ConcurrentQueue<Action>();
 
         [Awaken]
-        [Preserve]
         static void Awaken()
         {
             RuniPlayerLoop.onUpdate += Update;
-            Kernel.quitting += ForceScheduledTasksExecute;
+            Kernel.quitting += BeginShutdown;
         }
 
 #if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-        static void EditorInit()
+        [Unity.Scripting.LifecycleManagement.OnCodeLoaded]
+        static void OnCodeLoaded()
         {
             UnityEditor.EditorApplication.update += EditorUpdate;
-            UnityEditor.EditorApplication.quitting += ForceScheduledTasksExecute;
-            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += ForceScheduledTasksExecute;
+            UnityEditor.EditorApplication.quitting += BeginShutdown;
+        }
+
+        [Unity.Scripting.LifecycleManagement.OnCodeUnloading]
+        static void OnCodeUnloading()
+        {
+            UnityEditor.EditorApplication.update -= EditorUpdate;
+            UnityEditor.EditorApplication.quitting -= BeginShutdown;
+
+            BeginShutdown();
         }
 
         static void EditorUpdate()
@@ -38,6 +44,8 @@ namespace RuniOS.Threading
                 Update();
         }
 #endif
+
+        static void BeginShutdown() => ForceScheduledTasksExecute();
 
         static void Update()
         {
