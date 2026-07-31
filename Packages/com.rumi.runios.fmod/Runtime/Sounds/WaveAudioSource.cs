@@ -22,25 +22,47 @@ namespace RuniOS.Sounds
         [SerializeField] AssetRef<WaveAudioClip> _clipRef;
         IAssetScope<WaveAudioClip>? scope;
 
+        /// <remarks>
+        /// The getter delegates to <see cref="RuniAudioSource.time"/> and acquires the read lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// The setter acquires the write lock while synchronizing the interpolated time and seeking the current channel.
+        /// <br/><br/>
+        /// getter는 <see cref="RuniAudioSource.time"/>에 위임하여 <see cref="RuniAudioSource.playingLock"/>의 읽기 잠금을 획득합니다.<br/>
+        /// setter는 보간 시간 동기화 및 현재 채널 탐색 중 쓰기 잠금을 획득합니다.
+        /// </remarks>
         public override double time
         {
             get => base.time;
             set
             {
-                lock (playingLock)
+                playingLock.EnterWriteLock();
+
+                try
                 {
                     SyncInterpolatedTime(value);
                     timeSampleDirty = !TrySeekAliveChannel(channel => channel.time = value);
                 }
+                finally
+                {
+                    playingLock.ExitWriteLock();
+                }
             }
         }
 
+        /// <remarks>
+        /// The getter does not acquire <see cref="RuniAudioSource.playingLock"/> and reads the current channel through its own channel lock.<br/>
+        /// The setter acquires the write lock while synchronizing the interpolated time and seeking the current channel.
+        /// <br/><br/>
+        /// getter는 <see cref="RuniAudioSource.playingLock"/>을 획득하지 않고 별도의 채널 잠금을 통해 현재 채널을 읽습니다.<br/>
+        /// setter는 보간 시간 동기화 및 현재 채널 탐색 중 쓰기 잠금을 획득합니다.
+        /// </remarks>
         public uint timeSample
         {
             get => GetAliveChannelValue(channel => channel.timeSample, 0u);
             set
             {
-                lock (playingLock)
+                playingLock.EnterWriteLock();
+
+                try
                 {
                     if (frequency > 0)
                         SyncInterpolatedTime(value / (double)frequency);
@@ -49,6 +71,10 @@ namespace RuniOS.Sounds
                         return;
 
                     timeSampleDirty = !TrySeekAliveChannel(channel => channel.timeSample = value.Clamp(0, clipSamples - 1));
+                }
+                finally
+                {
+                    playingLock.ExitWriteLock();
                 }
             }
         }
@@ -72,6 +98,13 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <remarks>
+        /// The getter does not acquire <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// The setter delegates to <see cref="RuniAudioSource.tempo"/>, which acquires the write lock, and updates the current channel after that lock is released.
+        /// <br/><br/>
+        /// getter는 <see cref="RuniAudioSource.playingLock"/>을 획득하지 않습니다.<br/>
+        /// setter는 쓰기 잠금을 획득하는 <see cref="RuniAudioSource.tempo"/>에 위임한 후, 해당 잠금이 해제되면 현재 채널을 갱신합니다.
+        /// </remarks>
         public override float tempo
         {
             get => base.tempo;
@@ -230,6 +263,13 @@ namespace RuniOS.Sounds
 
         Vector3 lastPosition;
 
+        /// <remarks>
+        /// <see cref="RuniAudioSource.OnEnable"/> temporarily acquires the write lock while setting the active state.<br/>
+        /// The remaining initialization runs after that lock is released.
+        /// <br/><br/>
+        /// <see cref="RuniAudioSource.OnEnable"/>은 활성 상태 설정 중 쓰기 잠금을 일시적으로 획득합니다.<br/>
+        /// 나머지 초기화는 해당 잠금이 해제된 후 실행됩니다.
+        /// </remarks>
         protected override void OnEnable()
         {
             base.OnEnable();
@@ -247,6 +287,13 @@ namespace RuniOS.Sounds
             ResourceManager.AttachReloadable(this);
         }
 
+        /// <remarks>
+        /// Acquires the upgradeable read lock of <see cref="RuniAudioSource.playingLock"/> only while synchronizing the current channel.<br/>
+        /// Channel synchronization may upgrade it to the write lock when the interpolated time must be corrected.
+        /// <br/><br/>
+        /// 현재 채널을 동기화하는 동안에만 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금을 획득합니다.<br/>
+        /// 보간 시간을 보정해야 하는 경우 채널 동기화 과정에서 쓰기 잠금으로 승격할 수 있습니다.
+        /// </remarks>
         void Update()
         {
             uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
@@ -254,8 +301,16 @@ namespace RuniOS.Sounds
             {
                 lastTimeSamples = timeSample;
 
-                lock (playingLock)
+                playingLock.EnterUpgradeableReadLock();
+
+                try
+                {
                     UnsafeSyncChannel();
+                }
+                finally
+                {
+                    playingLock.ExitUpgradeableReadLock();
+                }
             }
 
             if (spatialBlend > 0)
@@ -291,10 +346,19 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <remarks>
+        /// Acquires the write lock of <see cref="RuniAudioSource.playingLock"/> while disabling playback, detaching reload behavior, and clearing source state.<br/>
+        /// The previous asset scope is queued for disposal after the lock is released.
+        /// <br/><br/>
+        /// 재생 비활성화, 리로드 동작 분리 및 소스 상태 초기화 중 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 획득합니다.<br/>
+        /// 이전 에셋 스코프는 잠금이 해제된 후 폐기 큐에 등록합니다.
+        /// </remarks>
         protected override void OnDisable()
         {
             IAssetScope<WaveAudioClip>? oldScope;
-            lock (playingLock)
+            playingLock.EnterWriteLock();
+
+            try
             {
                 base.OnDisable();
 
@@ -307,6 +371,10 @@ namespace RuniOS.Sounds
                 clipSamples = 0;
                 clipFrequency = 0;
             }
+            finally
+            {
+                playingLock.ExitWriteLock();
+            }
 
             DisposeQueue.Enqueue(oldScope);
         }
@@ -314,10 +382,21 @@ namespace RuniOS.Sounds
         readonly AsyncReloadGate reloadGate = new();
 
         /// <remarks>
-        /// 메인 스레드에서만 사용해야합니다!
+        /// Must be called only from the main thread.<br/>
+        /// The asynchronous load runs without holding <see cref="RuniAudioSource.playingLock"/>; the write lock is acquired only when replacing the scope and synchronizing the channel.
+        /// <br/><br/>
+        /// 메인 스레드에서만 호출해야 합니다.<br/>
+        /// 비동기 로드는 <see cref="RuniAudioSource.playingLock"/>을 보유하지 않고 실행하며, 스코프 교체 및 채널 동기화 시에만 쓰기 잠금을 획득합니다.
         /// </remarks>
         public UniTask Reload() => reloadGate.Run(ReloadCore);
 
+        /// <remarks>
+        /// Performs asynchronous loading without holding <see cref="RuniAudioSource.playingLock"/>, then acquires the write lock while replacing the scope and synchronizing the channel.<br/>
+        /// <see cref="RuniAudioSource.isActiveAndEnabled"/> checks are thread-safe and acquire the read lock independently.
+        /// <br/><br/>
+        /// <see cref="RuniAudioSource.playingLock"/>을 보유하지 않고 비동기 로드를 수행한 후, 스코프 교체 및 채널 동기화 중 쓰기 잠금을 획득합니다.<br/>
+        /// <see cref="RuniAudioSource.isActiveAndEnabled"/> 확인은 thread-safe하며 독립적으로 읽기 잠금을 획득합니다.
+        /// </remarks>
         async UniTask ReloadCore()
         {
             if (this == null || !isActiveAndEnabled)
@@ -335,7 +414,9 @@ namespace RuniOS.Sounds
             }
 
             // 비동기 로드는 lock 밖에서 끝내고, 실제 scope 교체와 채널 재동기화만 하나의 playingLock 구간에서 처리합니다.
-            lock (playingLock)
+            playingLock.EnterWriteLock();
+
+            try
             {
                 StopChannel();
 
@@ -347,6 +428,10 @@ namespace RuniOS.Sounds
                 clipFrequency = scope?.asset.frequency ?? 0;
 
                 UnsafeSyncChannel();
+            }
+            finally
+            {
+                playingLock.ExitWriteLock();
             }
         }
 
@@ -427,18 +512,44 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <remarks>
+        /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
+        /// </remarks>
         protected override void OnPlay() => UnsafeSyncChannel();
+
+        /// <remarks>
+        /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
+        /// </remarks>
         protected override void OnStop() => UnsafeSyncChannel();
 
+        /// <remarks>
+        /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
+        /// </remarks>
         protected override void OnPause() => TryGetAliveChannel(UnsafeUpdateChannelPause);
+
+        /// <remarks>
+        /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
+        /// </remarks>
         protected override void OnUnPause() => TryGetAliveChannel(UnsafeUpdateChannelPause);
 
         /// <remarks>
-        /// 호출 전에 <see cref="RuniAudioSource.playingLock"/>를 먼저 보유야합니다.
+        /// The caller must hold the upgradeable read lock or write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// The method may acquire the write lock through <see cref="SyncInterpolatedTime"/> when correcting the interpolated time.
+        /// <br/><br/>
+        /// 호출자는 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유해야 합니다.<br/>
+        /// 보간 시간을 보정할 때 <see cref="SyncInterpolatedTime"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
         /// </remarks>
         void UnsafeSyncChannel()
         {
-            Debug.Assert(Monitor.IsEntered(playingLock), "호출 전에 playingLock를 먼저 보유해야합니다.");
+            Debug.Assert
+            (
+                playingLock.IsUpgradeableReadLockHeld || playingLock.IsWriteLockHeld,
+                "호출 전에 playingLock의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 먼저 보유해야합니다."
+            );
 
             SoundChannel? lostChannel = null;
             channelLock.EnterUpgradeableReadLock();
@@ -522,11 +633,19 @@ namespace RuniOS.Sounds
         }
 
         /// <remarks>
-        /// 호출 전에 <see cref="RuniAudioSource.playingLock"/>를 먼저 보유야합니다.
+        /// The caller must hold the upgradeable read lock or write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
+        /// Channel state is changed while holding the separate channel write lock; this method does not upgrade <see cref="RuniAudioSource.playingLock"/> itself.
+        /// <br/><br/>
+        /// 호출자는 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유해야 합니다.<br/>
+        /// 채널 상태는 별도의 채널 쓰기 잠금을 보유한 상태에서 변경하며, 이 메서드 자체는 <see cref="RuniAudioSource.playingLock"/>을 승격하지 않습니다.
         /// </remarks>
         void StopChannel()
         {
-            Debug.Assert(Monitor.IsEntered(playingLock), "호출 전에 playingLock를 먼저 보유해야합니다.");
+            Debug.Assert
+            (
+                playingLock.IsUpgradeableReadLockHeld || playingLock.IsWriteLockHeld,
+                "호출 전에 playingLock의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 먼저 보유해야합니다."
+            );
             Debug.Assert(!channelLock.IsReadLockHeld, "업그레이드 락 또는 쓰기 락만 보유해야합니다.");
 
             channelLock.EnterWriteLock();
