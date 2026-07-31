@@ -9,9 +9,9 @@ using System.Runtime.CompilerServices;
 namespace RuniOS.Editor.Sounds
 {
     [InitializeOnLoad]
-    static class EditorSoundSystem
+    static class EditorSoundSystemManager
     {
-        static EditorSoundSystem()
+        static EditorSoundSystemManager()
         {
             EditorApplication.update += UpdateEditorSystem;
 
