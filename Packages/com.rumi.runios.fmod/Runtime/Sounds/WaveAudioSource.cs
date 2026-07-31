@@ -5,7 +5,6 @@ using RuniOS.Resource;
 using RuniOS.Sounds.Processing;
 using RuniOS.Tasks;
 using System.Threading;
-using Channel = RuniOS.Sounds.SoundChannel;
 
 namespace RuniOS.Sounds
 {
@@ -31,15 +30,35 @@ namespace RuniOS.Sounds
                 lock (playingLock)
                 {
                     SyncInterpolatedTime(value);
-                    TryGetAliveChannel(channel => channel.time = value);
+                    timeSampleDirty = !TryGetAliveChannel(channel => channel.time = value);
                 }
             }
         }
 
         public uint timeSample
         {
-            get => GetAliveChannelValue(channel => channel.timeSample, 0u);
-            set => TryGetAliveChannel(channel => channel.timeSample = value);
+            // NONBLOCKING 스트림 시킹 중에는 마지막으로 설정한 보간 시간을 반환합니다.
+            get
+            {
+                try
+                {
+                    return GetAliveChannelValue(channel => channel.timeSample, 0u);
+                }
+                catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
+                {
+                    return interpolatedTimeSample;
+                }
+            }
+            set
+            {
+                lock (playingLock)
+                {
+                    if (frequency > 0)
+                        SyncInterpolatedTime(value / (double)frequency);
+
+                    timeSampleDirty = !TryGetAliveChannel(channel => channel.timeSample = value);
+                }
+            }
         }
 
         public override double length => Volatile.Read(ref clipLength);
@@ -198,7 +217,7 @@ namespace RuniOS.Sounds
         }
         [SerializeField] bool _nonRigidbodyVelocity = false;
 
-        Channel? channel;
+        SoundChannel? channel;
 
         // channel, channelBaseFrequency, pitchDSPList의 수명과 플레이어 소유 FMOD 채널 변경을 보호합니다.
         readonly ReaderWriterLockSlim channelLock = new();
@@ -208,6 +227,19 @@ namespace RuniOS.Sounds
         const float fftSize = 4096;
 
         volatile uint lastTimeSamples = uint.MaxValue;
+        volatile bool timeSampleDirty;
+
+        uint interpolatedTimeSample
+        {
+            get
+            {
+                double currentTime = time;
+                if (!double.IsFinite(currentTime) || frequency <= 0 || samples == 0)
+                    return 0;
+
+                return (currentTime * frequency).RoundToUInt().Clamp(0, samples - 1);
+            }
+        }
 
 #if UNITY_PHYSICS_EXIST
         Rigidbody? rigidbody;
@@ -237,13 +269,20 @@ namespace RuniOS.Sounds
 
         void Update()
         {
-            uint timeSample = this.timeSample;
-            if (lastTimeSamples != timeSample)
+            try
             {
-                lastTimeSamples = timeSample;
+                uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
+                if (timeSampleDirty || lastTimeSamples != timeSample)
+                {
+                    lastTimeSamples = timeSample;
 
-                lock (playingLock)
-                    UnsafeSyncChannel();
+                    lock (playingLock)
+                        UnsafeSyncChannel();
+                }
+            }
+            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
+            {
+                // NONBLOCKING stream seek 중에는 position을 읽을 수 없습니다.
             }
 
             if (spatialBlend > 0)
@@ -332,23 +371,26 @@ namespace RuniOS.Sounds
             }
         }
 
-        void TryGetAliveChannel(Action<Channel> action)
+        bool TryGetAliveChannel(Action<SoundChannel> action)
         {
-            Channel? lostChannel = null;
+            SoundChannel? lostChannel = null;
+            bool success = false;
             channelLock.EnterReadLock();
 
             try
             {
-                Channel? currentChannel = channel;
+                SoundChannel? currentChannel = channel;
                 if (currentChannel == null)
-                    return;
+                    return false;
 
                 action.Invoke(currentChannel);
+                success = true;
             }
             catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
             {
                 lostChannel = channel;
             }
+            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY) { }
             finally
             {
                 channelLock.ExitReadLock();
@@ -356,39 +398,14 @@ namespace RuniOS.Sounds
 
             if (lostChannel != null)
                 HandleChannelLost(lostChannel);
+
+            return success;
         }
 
-        void TryGetAliveChannel<T>(Action<Channel, T> action, T arg)
+        T GetAliveChannelValue<T>(Func<SoundChannel, T> func, T defaultValue)
         {
-            Channel? lostChannel = null;
-            channelLock.EnterReadLock();
-
-            try
-            {
-                Channel? currentChannel = channel;
-                if (currentChannel == null)
-                    return;
-
-                action.Invoke(currentChannel, arg);
-            }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
-            {
-                lostChannel = channel;
-            }
-            finally
-            {
-                channelLock.ExitReadLock();
-            }
-
-            if (lostChannel != null)
-                HandleChannelLost(lostChannel);
-        }
-
-        T GetAliveChannelValue<T>(Func<Channel, T> func, T defaultValue)
-        {
-            Channel? lostChannel = null;
+            SoundChannel? lostChannel = null;
             T result = defaultValue;
-
             channelLock.EnterReadLock();
 
             try
@@ -438,7 +455,7 @@ namespace RuniOS.Sounds
         {
             Debug.Assert(Monitor.IsEntered(playingLock), "호출 전에 playingLock를 먼저 보유해야합니다.");
 
-            Channel? lostChannel = null;
+            SoundChannel? lostChannel = null;
             channelLock.EnterUpgradeableReadLock();
 
             try
@@ -455,7 +472,15 @@ namespace RuniOS.Sounds
                 }
 
                 if (channel != null)
-                    SyncInterpolatedTime(channel.time);
+                {
+                    if (timeSampleDirty)
+                    {
+                        channel.time = currentTime;
+                        timeSampleDirty = false;
+                    }
+                    else
+                        SyncInterpolatedTime(channel.time);
+                }
                 else
                 {
                     channelLock.EnterWriteLock();
@@ -465,10 +490,12 @@ namespace RuniOS.Sounds
                         scope.asset.system.Execute(system =>
                         {
                             channel = system.PlaySound(scope.asset, true);
-                            channel.time = currentTime;
                             channel.onStop += OnChannelStop;
 
                             UnsafeUpdateChannelProperty(channel);
+
+                            channel.time = currentTime;
+                            timeSampleDirty = false;
                         });
                     }
                     finally
@@ -480,6 +507,10 @@ namespace RuniOS.Sounds
             catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE && channel != null) // channel == null에서 ERR_INVALID_HANDLE 에러는 정상 경로가 아님
             {
                 lostChannel = channel;
+            }
+            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
+            {
+                timeSampleDirty = true;
             }
             finally
             {
@@ -511,6 +542,7 @@ namespace RuniOS.Sounds
                 channel = null;
 
                 lastTimeSamples = uint.MaxValue;
+                timeSampleDirty = false;
             }
             finally
             {
@@ -518,9 +550,9 @@ namespace RuniOS.Sounds
             }
         }
 
-        void OnChannelStop(Channel disposing) => HandleChannelLost(disposing);
+        void OnChannelStop(SoundChannel disposing) => HandleChannelLost(disposing);
 
-        void HandleChannelLost(Channel lostChannel)
+        void HandleChannelLost(SoundChannel lostChannel)
         {
             PitchShiftDSP[] pitchDSPs;
 
@@ -537,6 +569,7 @@ namespace RuniOS.Sounds
                 pitchDSPList.Clear();
 
                 lastTimeSamples = uint.MaxValue;
+                timeSampleDirty = false;
             }
             finally
             {
@@ -549,7 +582,7 @@ namespace RuniOS.Sounds
 
         // 아래 UpdateChannel* 메서드는 유효한 channel과 channelLock이 확보된 상태에서만 호출합니다.
         // 각 메서드는 자신의 세부 상태만 스냅샷으로 읽고 FMOD 호출을 즉시 끝내야 합니다.
-        void UnsafeUpdateChannelProperty(Channel channel)
+        void UnsafeUpdateChannelProperty(SoundChannel channel)
         {
             UnsafeUnsafeUpdateChannelLoop(channel);
             UnsafeUnsafeUpdateChannelTempoAndPitch(channel);
@@ -564,7 +597,7 @@ namespace RuniOS.Sounds
             UnsafeUpdateChannelPause(channel);
         }
 
-        void UnsafeUnsafeUpdateChannelLoop(Channel channel)
+        void UnsafeUnsafeUpdateChannelLoop(SoundChannel channel)
         {
             channel.loop = loop;
 
@@ -572,13 +605,13 @@ namespace RuniOS.Sounds
             channel.loopEnd = loopEnd;
         }
 
-        void UnsafeUnsafeUpdateChannelTempoAndPitch(Channel channel)
+        void UnsafeUnsafeUpdateChannelTempoAndPitch(SoundChannel channel)
         {
             channel.frequency = (channel.clip?.frequency ?? channel.frequency) * tempo;
             UnsafeUpdateChannelPitch(channel);
         }
 
-        void UnsafeUpdateChannelPitch(Channel channel)
+        void UnsafeUpdateChannelPitch(SoundChannel channel)
         {
             float tempo = this.tempo;
             if (tempo == 0)
@@ -630,7 +663,7 @@ namespace RuniOS.Sounds
             }
             Debug.Log(pitchDSPList.Count);
 
-            void SetPitchDsp(int index, float value, Channel channel)
+            void SetPitchDsp(int index, float value, SoundChannel channel)
             {
                 while (pitchDSPList.Count <= index)
                 {
@@ -647,7 +680,7 @@ namespace RuniOS.Sounds
         /// <remarks>
         /// channel에 부착된 DSP 목록과 함께 변경되므로 호출자는 channelLock을 보유해야 합니다.
         /// </remarks>
-        void UnsafeReleasePitchDSPList(Channel? channel)
+        void UnsafeReleasePitchDSPList(SoundChannel? channel)
         {
             for (int i = 0; i < pitchDSPList.Count; i++)
             {
@@ -665,22 +698,22 @@ namespace RuniOS.Sounds
             pitchDSPList.Clear();
         }
 
-        void UnsafeUpdateChannelVolume(Channel channel) => channel.volume = volume;
+        void UnsafeUpdateChannelVolume(SoundChannel channel) => channel.volume = volume;
 
-        void UnsafeUpdateChannelPanStereo(Channel channel) => channel.panStereo = panStereo;
+        void UnsafeUpdateChannelPanStereo(SoundChannel channel) => channel.panStereo = panStereo;
 
-        void UnsafeUpdateChannelSpatialBlend(Channel channel) => channel.spatialBlend = spatialBlend;
+        void UnsafeUpdateChannelSpatialBlend(SoundChannel channel) => channel.spatialBlend = spatialBlend;
 
-        void UnsafeUpdateChannelDopplerLevel(Channel channel) => channel.dopplerLevel = dopplerLevel;
+        void UnsafeUpdateChannelDopplerLevel(SoundChannel channel) => channel.dopplerLevel = dopplerLevel;
 
-        void UnsafeUpdateChannelSpread(Channel channel) => channel.spread = spread;
+        void UnsafeUpdateChannelSpread(SoundChannel channel) => channel.spread = spread;
 
-        void UnsafeUpdateChannelMinDistance(Channel channel) => channel.minDistance = minDistance;
+        void UnsafeUpdateChannelMinDistance(SoundChannel channel) => channel.minDistance = minDistance;
 
-        void UnsafeUpdateChannelMaxDistance(Channel channel) => channel.maxDistance = maxDistance;
+        void UnsafeUpdateChannelMaxDistance(SoundChannel channel) => channel.maxDistance = maxDistance;
 
-        void UnsafeUpdateChannelRolloffMode(Channel channel) => channel.rolloffMode = rolloffMode;
+        void UnsafeUpdateChannelRolloffMode(SoundChannel channel) => channel.rolloffMode = rolloffMode;
 
-        void UnsafeUpdateChannelPause(Channel channel) => channel.isPaused = isPaused;
+        void UnsafeUpdateChannelPause(SoundChannel channel) => channel.isPaused = isPaused;
     }
 }

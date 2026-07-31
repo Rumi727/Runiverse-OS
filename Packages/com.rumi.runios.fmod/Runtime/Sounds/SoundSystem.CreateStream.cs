@@ -2,6 +2,7 @@
 using FMOD;
 using RuniOS.Sounds.Streams;
 using System.IO;
+using Thread = System.Threading.Thread;
 
 namespace RuniOS.Sounds
 {
@@ -31,12 +32,19 @@ namespace RuniOS.Sounds
         /// Thrown when <paramref name="stream"/> is not readable, seekable, or representable by FMOD's file-length limit.<br/>
         /// <paramref name="stream"/>이 읽기 또는 탐색할 수 없거나 FMOD 파일 길이 제한으로 표현할 수 없는 경우 발생합니다.
         /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when FMOD cannot finish opening the stream.<br/>
+        /// FMOD가 스트림 열기를 완료할 수 없는 경우 발생합니다.
+        /// </exception>
         /// <exception cref="ObjectDisposedException">
         /// Thrown when this sound system has been disposed.<br/>
         /// 이 사운드 시스템이 해제된 경우 발생합니다.
         /// </exception>
         /// <remarks>
-        /// FMOD accesses <paramref name="stream"/> until the returned <see cref="WaveAudioClip"/> is disposed.<br/>
+        /// FMOD opens the stream with <see cref="MODE.NONBLOCKING"/> and waits until it is ready before returning.<br/>
+        /// FMOD accesses <paramref name="stream"/> until the returned <see cref="WaveAudioClip"/> is disposed.
+        /// <br/><br/>
+        /// FMOD는 스트림을 <see cref="MODE.NONBLOCKING"/>으로 열고 준비될 때까지 기다린 뒤 반환합니다.<br/>
         /// FMOD는 반환된 <see cref="WaveAudioClip"/>이 해제될 때까지 <paramref name="stream"/>에 접근합니다.
         /// </remarks>
         public WaveAudioClip CreateStream(Stream stream, bool leaveOpen = false)
@@ -63,9 +71,32 @@ namespace RuniOS.Sounds
         WaveAudioClip CreateStreamUnsafe(SoundFileStream streamFile)
         {
             CREATESOUNDEXINFO exInfo = streamFile.CreateExInfo();
+            Sound sound = default;
 
-            native.createStream("stream", MODE._3D, ref exInfo, out Sound sound).ThrowIfNotOk();
-            return new WaveAudioClip(this, sound, streamFile);
+            try
+            {
+                native.createStream("stream", MODE._3D | MODE.NONBLOCKING, ref exInfo, out sound).ThrowIfNotOk();
+
+                while (true)
+                {
+                    sound.getOpenState(out OPENSTATE state, out _, out _, out _).ThrowIfNotOk();
+
+                    if (state == OPENSTATE.READY)
+                        return new WaveAudioClip(this, sound, streamFile);
+
+                    if (state == OPENSTATE.ERROR)
+                        throw new InvalidOperationException("FMOD failed to open the stream.");
+
+                    Thread.Sleep(1);
+                }
+            }
+            catch
+            {
+                if (sound.hasHandle())
+                    sound.release().LogErrorIfNotOk();
+
+                throw;
+            }
         }
     }
 }

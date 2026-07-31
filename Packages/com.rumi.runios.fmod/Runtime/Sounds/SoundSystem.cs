@@ -13,6 +13,14 @@ namespace RuniOS.Sounds
 
         SoundSystem()
         {
+#if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
+            const uint stackSize = 1024 * 1024;
+
+            FMOD.Thread.SetAttributes(THREAD_TYPE.NONBLOCKING, THREAD_AFFINITY.GROUP_DEFAULT, THREAD_PRIORITY.DEFAULT, (THREAD_STACK_SIZE)stackSize).ThrowIfNotOk();
+            FMOD.Thread.SetAttributes(THREAD_TYPE.FILE, THREAD_AFFINITY.GROUP_DEFAULT, THREAD_PRIORITY.DEFAULT, (THREAD_STACK_SIZE)stackSize).ThrowIfNotOk();
+            FMOD.Thread.SetAttributes(THREAD_TYPE.STREAM, THREAD_AFFINITY.GROUP_DEFAULT, THREAD_PRIORITY.DEFAULT, (THREAD_STACK_SIZE)stackSize).ThrowIfNotOk();
+#endif
+
             listeners = new Listeners(this);
 
             Factory.System_Create(out native).ThrowIfNotOk();
