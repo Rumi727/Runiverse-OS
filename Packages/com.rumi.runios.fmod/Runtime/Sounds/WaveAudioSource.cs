@@ -453,8 +453,11 @@ namespace RuniOS.Sounds
                     {
                         try
                         {
-                            channel.time = currentTime;
-                            timeSampleDirty = false;
+                            if (scope.asset.openStates.state == SoundOpenState.Ready)
+                            {
+                                channel.time = currentTime;
+                                timeSampleDirty = false;
+                            }
                         }
                         catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY) { }
                     }
@@ -476,8 +479,13 @@ namespace RuniOS.Sounds
 
                             try
                             {
-                                channel.time = currentTime;
-                                timeSampleDirty = false;
+                                if (scope.asset.openStates.state == SoundOpenState.Ready)
+                                {
+                                    channel.time = currentTime;
+                                    timeSampleDirty = false;
+                                }
+                                else
+                                    timeSampleDirty = true;
                             }
                             catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
                             {
