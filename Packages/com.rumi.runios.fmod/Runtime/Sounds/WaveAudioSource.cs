@@ -538,10 +538,10 @@ namespace RuniOS.Sounds
 
         /// <remarks>
         /// The caller must hold the upgradeable read lock or write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
-        /// The method may acquire the write lock through <see cref="SyncInterpolatedTime"/> when correcting the interpolated time.
+        /// The method may acquire the write lock through <see cref="RuniAudioSource.SyncInterpolatedTime"/> when correcting the interpolated time.
         /// <br/><br/>
         /// 호출자는 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유해야 합니다.<br/>
-        /// 보간 시간을 보정할 때 <see cref="SyncInterpolatedTime"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
+        /// 보간 시간을 보정할 때 <see cref="RuniAudioSource.SyncInterpolatedTime"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
         /// </remarks>
         void UnsafeSyncChannel()
         {
@@ -781,7 +781,6 @@ namespace RuniOS.Sounds
 
                 pitchDSPList.RemoveAt(i);
             }
-            Debug.Log(pitchDSPList.Count);
 
             void SetPitchDsp(int index, float value, SoundChannel channel)
             {
