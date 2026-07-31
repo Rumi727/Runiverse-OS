@@ -9,7 +9,7 @@ namespace RuniOS.Editor.IMGUI.Sounds
             EditorGUI.showMixedValue = playables.Count != 1;
 
             EditorGUI.BeginChangeCheck();
-            double value = EditorGUI.DelayedDoubleField(position, TrTempContent("runios-editor:gui.second"), playables.FirstOrDefault()?.time ?? 0);
+            double value = EditorGUI.DoubleField(position, TrTempContent("runios-editor:gui.second"), playables.FirstOrDefault()?.time ?? 0);
             if (EditorGUI.EndChangeCheck())
             {
                 foreach (var playable in playables)
