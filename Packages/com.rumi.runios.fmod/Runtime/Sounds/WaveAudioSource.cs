@@ -45,7 +45,10 @@ namespace RuniOS.Sounds
                     if (frequency > 0)
                         SyncInterpolatedTime(value / (double)frequency);
 
-                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.timeSample = value);
+                    if (clipSamples <= 0)
+                        return;
+
+                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.timeSample = value.Clamp(0, clipSamples - 1));
                 }
             }
         }
@@ -290,16 +293,22 @@ namespace RuniOS.Sounds
 
         protected override void OnDisable()
         {
-            base.OnDisable();
+            IAssetScope<WaveAudioClip>? oldScope;
+            lock (playingLock)
+            {
+                base.OnDisable();
 
-            ResourceManager.DetachReloadable(this);
+                ResourceManager.DetachReloadable(this);
 
-            DisposeQueue.Enqueue(scope);
-            scope = null;
+                oldScope = scope;
+                scope = null;
 
-            Volatile.Write(ref clipLength, 0);
-            clipSamples = 0;
-            clipFrequency = 0;
+                Volatile.Write(ref clipLength, 0);
+                clipSamples = 0;
+                clipFrequency = 0;
+            }
+
+            DisposeQueue.Enqueue(oldScope);
         }
 
         readonly AsyncReloadGate reloadGate = new();
@@ -453,7 +462,7 @@ namespace RuniOS.Sounds
                     {
                         try
                         {
-                            if (scope.asset.openStates.state == SoundOpenState.Ready)
+                            if (scope.asset.openStates.state != SoundOpenState.SetPosition)
                             {
                                 channel.time = currentTime;
                                 timeSampleDirty = false;
@@ -475,11 +484,9 @@ namespace RuniOS.Sounds
                             channel = newChannel;
                             channel.onStop += OnChannelStop;
 
-                            UnsafeUpdateChannelProperty(channel);
-
                             try
                             {
-                                if (scope.asset.openStates.state == SoundOpenState.Ready)
+                                if (scope.asset.openStates.state != SoundOpenState.SetPosition)
                                 {
                                     channel.time = currentTime;
                                     timeSampleDirty = false;
@@ -491,6 +498,8 @@ namespace RuniOS.Sounds
                             {
                                 timeSampleDirty = true;
                             }
+
+                            UnsafeUpdateChannelProperty(channel);
                         }
                         finally
                         {
