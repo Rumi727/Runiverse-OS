@@ -7,7 +7,6 @@ namespace RuniOS.Sounds
     {
         public void Update()
         {
-            ThrowIfSystemLockHeld();
             nativeLock.EnterReadLock();
 
             try
