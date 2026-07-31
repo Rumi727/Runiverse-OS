@@ -1,3 +1,4 @@
+#nullable enable
 using FMOD;
 using FMODUnity;
 
@@ -27,9 +28,24 @@ namespace RuniOS.Sounds
                     VECTOR forward = (value.rotation * Vector3.forward).ToFMODVector();
                     VECTOR up = (value.rotation * Vector3.up).ToFMODVector();
 
+                    ValidateVector(index, nameof(value.position), pos);
+                    ValidateVector(index, nameof(value.velocity), vel);
+                    ValidateVector(index, nameof(forward), forward);
+                    ValidateVector(index, nameof(up), up);
+
                     native.set3DListenerAttributes(index, ref pos, ref vel, ref forward, ref up).ThrowIfNotOk();
                 }, value);
             }
+
+            static void ValidateVector(int index, string name, VECTOR value)
+            {
+                if (IsValid(value.x) && IsValid(value.y) && IsValid(value.z))
+                    return;
+
+                throw new ArgumentException($"Listener {index} {name} contains an invalid float: ({value.x}, {value.y}, {value.z}).", nameof(value));
+            }
+
+            static bool IsValid(float value) => value == 0 || float.IsNormal(value);
 
             public int count
             {
