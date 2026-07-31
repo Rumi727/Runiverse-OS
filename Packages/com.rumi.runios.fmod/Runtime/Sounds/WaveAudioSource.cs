@@ -30,25 +30,14 @@ namespace RuniOS.Sounds
                 lock (playingLock)
                 {
                     SyncInterpolatedTime(value);
-                    timeSampleDirty = !TryGetAliveChannel(channel => channel.time = value);
+                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.time = value);
                 }
             }
         }
 
         public uint timeSample
         {
-            // NONBLOCKING 스트림 시킹 중에는 마지막으로 설정한 보간 시간을 반환합니다.
-            get
-            {
-                try
-                {
-                    return GetAliveChannelValue(channel => channel.timeSample, 0u);
-                }
-                catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
-                {
-                    return interpolatedTimeSample;
-                }
-            }
+            get => GetAliveChannelValue(channel => channel.timeSample, 0u);
             set
             {
                 lock (playingLock)
@@ -56,7 +45,7 @@ namespace RuniOS.Sounds
                     if (frequency > 0)
                         SyncInterpolatedTime(value / (double)frequency);
 
-                    timeSampleDirty = !TryGetAliveChannel(channel => channel.timeSample = value);
+                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.timeSample = value);
                 }
             }
         }
@@ -229,18 +218,6 @@ namespace RuniOS.Sounds
         volatile uint lastTimeSamples = uint.MaxValue;
         volatile bool timeSampleDirty;
 
-        uint interpolatedTimeSample
-        {
-            get
-            {
-                double currentTime = time;
-                if (!double.IsFinite(currentTime) || frequency <= 0 || samples == 0)
-                    return 0;
-
-                return (currentTime * frequency).RoundToUInt().Clamp(0, samples - 1);
-            }
-        }
-
 #if UNITY_PHYSICS_EXIST
         Rigidbody? rigidbody;
 #endif
@@ -269,20 +246,13 @@ namespace RuniOS.Sounds
 
         void Update()
         {
-            try
+            uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
+            if (timeSampleDirty || lastTimeSamples != timeSample)
             {
-                uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
-                if (timeSampleDirty || lastTimeSamples != timeSample)
-                {
-                    lastTimeSamples = timeSample;
+                lastTimeSamples = timeSample;
 
-                    lock (playingLock)
-                        UnsafeSyncChannel();
-                }
-            }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
-            {
-                // NONBLOCKING stream seek 중에는 position을 읽을 수 없습니다.
+                lock (playingLock)
+                    UnsafeSyncChannel();
             }
 
             if (spatialBlend > 0)
@@ -379,18 +349,16 @@ namespace RuniOS.Sounds
 
             try
             {
-                SoundChannel? currentChannel = channel;
-                if (currentChannel == null)
+                if (channel == null)
                     return false;
 
-                action.Invoke(currentChannel);
+                action.Invoke(channel);
                 success = true;
             }
             catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
             {
                 lostChannel = channel;
             }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY) { }
             finally
             {
                 channelLock.ExitReadLock();
@@ -402,25 +370,33 @@ namespace RuniOS.Sounds
             return success;
         }
 
+        bool TrySeekAliveChannel(Action<SoundChannel> action)
+        {
+            try
+            {
+                return TryGetAliveChannel(action);
+            }
+            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
+            {
+                return false;
+            }
+        }
+
         T GetAliveChannelValue<T>(Func<SoundChannel, T> func, T defaultValue)
         {
-            SoundChannel? lostChannel = null;
-            T result = defaultValue;
+            SoundChannel? lostChannel;
             channelLock.EnterReadLock();
 
             try
             {
                 if (channel == null)
-                    return result;
+                    return defaultValue;
 
-                try
-                {
-                    result = func.Invoke(channel);
-                }
-                catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
-                {
-                    lostChannel = channel;
-                }
+                return func.Invoke(channel);
+            }
+            catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
+            {
+                lostChannel = channel;
             }
             finally
             {
@@ -430,7 +406,7 @@ namespace RuniOS.Sounds
             if (lostChannel != null)
                 HandleChannelLost(lostChannel);
 
-            return result;
+            return defaultValue;
         }
 
         public void GetTempoAndPitch(out float tempo, out float pitch)
@@ -475,42 +451,49 @@ namespace RuniOS.Sounds
                 {
                     if (timeSampleDirty)
                     {
-                        channel.time = currentTime;
-                        timeSampleDirty = false;
+                        try
+                        {
+                            channel.time = currentTime;
+                            timeSampleDirty = false;
+                        }
+                        catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY) { }
                     }
                     else
                         SyncInterpolatedTime(channel.time);
                 }
                 else
                 {
-                    channelLock.EnterWriteLock();
-
-                    try
+                    if (scope.asset.system.Execute(system => system.PlaySound(scope.asset, true), out SoundChannel? newChannel) && newChannel != null)
                     {
-                        scope.asset.system.Execute(system =>
+                        channelLock.EnterWriteLock();
+
+                        try
                         {
-                            channel = system.PlaySound(scope.asset, true);
+                            channel = newChannel;
                             channel.onStop += OnChannelStop;
 
                             UnsafeUpdateChannelProperty(channel);
 
-                            channel.time = currentTime;
-                            timeSampleDirty = false;
-                        });
-                    }
-                    finally
-                    {
-                        channelLock.ExitWriteLock();
+                            try
+                            {
+                                channel.time = currentTime;
+                                timeSampleDirty = false;
+                            }
+                            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
+                            {
+                                timeSampleDirty = true;
+                            }
+                        }
+                        finally
+                        {
+                            channelLock.ExitWriteLock();
+                        }
                     }
                 }
             }
             catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE && channel != null) // channel == null에서 ERR_INVALID_HANDLE 에러는 정상 경로가 아님
             {
                 lostChannel = channel;
-            }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
-            {
-                timeSampleDirty = true;
             }
             finally
             {
@@ -563,6 +546,7 @@ namespace RuniOS.Sounds
                 if (!ReferenceEquals(channel, lostChannel))
                     return;
 
+                channel.onStop -= OnChannelStop;
                 channel = null;
 
                 pitchDSPs = pitchDSPList.ToArray();
