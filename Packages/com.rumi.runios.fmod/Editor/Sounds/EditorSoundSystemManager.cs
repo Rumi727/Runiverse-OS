@@ -5,29 +5,30 @@ using RuniOS.Linq;
 using RuniOS.Sounds;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor.Sounds
 {
-    [InitializeOnLoad]
-    static class EditorSoundSystemManager
+    static partial class EditorSoundSystemManager
     {
-        static EditorSoundSystemManager()
-        {
-            EditorApplication.update += UpdateEditorSystem;
-
-            UpdateGameView();
-            ObjectChangeEvents.changesPublished += (ref ObjectChangeEventStream _) => UpdateGameView();
-        }
-
-        static StudioListener?[] studioListeners;
+        static StudioListener?[]? studioListeners;
         static readonly ConditionalWeakTable<SceneView, SceneViewExtra> sceneViewExtras = new();
 
         // ReSharper disable once ClassNeverInstantiated.Local
         class SceneViewExtra { public Vector3 lastPosition; }
 
-        static void UpdateEditorSystem()
+        [OnCodeLoaded]
+        static void OnCodeLoaded()
         {
-            if (Kernel.isPlaying)
+            EditorApplication.update += Update;
+            ObjectChangeEvents.changesPublished += ChangesPublished;
+        }
+
+        static void ChangesPublished(ref ObjectChangeEventStream stream) => UpdateGameView();
+
+        static void Update()
+        {
+            if (Kernel.isPlayingAndNotPaused || studioListeners == null)
                 return;
 
             bool isGameView = PlayModeViewBridge.s_PlayModeViews.Any(x => EditorWindow.focusedWindow == x?.__instance);
@@ -76,12 +77,15 @@ namespace RuniOS.Editor.Sounds
                     system.listeners[i] = state;
                     i++;
                 }
+
+                SoundSystem.main.Update();
             }, attributes);
 
             foreach (var item in SceneView.sceneViews.OfType<SceneView>())
                 sceneViewExtras.GetOrCreateValue(item).lastPosition = item.camera.transform.position;
         }
 
+        [OnCodeInitializing]
         [MemberNotNull(nameof(studioListeners))]
         static void UpdateGameView()
         {
