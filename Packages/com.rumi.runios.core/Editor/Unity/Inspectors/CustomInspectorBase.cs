@@ -1,7 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Editor.IMGUI;
-using RuniOS.Linq;
 using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Unity.Inspectors
@@ -11,6 +10,8 @@ namespace RuniOS.Editor.Unity.Inspectors
         protected new TTarget target => (TTarget)base.target;
         protected new ImmutableArray<TTarget?> targets { get; private set; }
 
+        protected virtual bool repaintInEditor { get; } = false;
+
         [NonSerialized] bool repaint = false;
 
         /// <summary>
@@ -18,12 +19,9 @@ namespace RuniOS.Editor.Unity.Inspectors
         /// </summary>
         protected virtual void OnEnable()
         {
-            if (Kernel.isPlaying)
-            {
-                repaint = true;
-                Repainter().Forget();
-            }
-            
+            repaint = true;
+            Repainter().Forget();
+
             targets = [..base.targets.OfType<TTarget?>()];
         }
 
@@ -36,7 +34,9 @@ namespace RuniOS.Editor.Unity.Inspectors
         {
             while (repaint)
             {
-                Repaint();
+                if (Kernel.isPlaying || repaintInEditor)
+                    Repaint();
+
                 await UniTask.Delay(100, true);
             }
         }
@@ -45,6 +45,14 @@ namespace RuniOS.Editor.Unity.Inspectors
 
         readonly Dictionary<string, SerializedProperty> propertyCache = new();
         readonly Dictionary<string, AnimatedReorderableList> animatedReorderableLists = new();
+
+        public SerializedProperty? GetProperty(string propertyName)
+        {
+            if (!propertyCache.TryGetValue(propertyName, out SerializedProperty? tps))
+                propertyCache[propertyName] = tps = serializedObject.FindProperty(propertyName);
+
+            return tps;
+        }
 
         public SerializedProperty? DrawPropertyLayout(string propertyName, params GUILayoutOption[] options) => InternalDrawPropertyLayout(propertyName, GUIContent.none, options);
         public SerializedProperty? DrawPropertyLayout(string propertyName, GUIContent label, params GUILayoutOption[] options) => InternalDrawPropertyLayout(propertyName, label, options);
@@ -111,14 +119,25 @@ namespace RuniOS.Editor.Unity.Inspectors
         /// </returns>
         public bool HasSameValue<TValue>(Func<TTarget, TValue> readFunc)
         {
-            if (targets.Length <= 0)
-                return true;
+            bool hasFirstValue = false;
+            TValue? firstValue = default;
 
-            // 첫 번째 타겟의 값을 기준값으로 추출
-            TValue? firstValue = targets.WhereNotNull().Select(readFunc).FirstOrDefault();
-            
-            // 모든 타겟의 값이 기준값과 동일한지 검사
-            return targets.WhereNotNull().All(x => Equals(readFunc(x), firstValue));
+            foreach (TTarget? item in targets)
+            {
+                if (item == null)
+                    continue;
+
+                TValue value = readFunc.Invoke(item);
+                if (!hasFirstValue)
+                {
+                    firstValue = value;
+                    hasFirstValue = true;
+                }
+                else if (!EqualityComparer<TValue>.Default.Equals(value, firstValue!))
+                    return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -137,8 +156,13 @@ namespace RuniOS.Editor.Unity.Inspectors
             if (!HasSameValue(readFunc))
                 return "—";
 
-            // 값이 모두 같다면 첫 번째 값을 문자열로 변환
-            return targets.WhereNotNull().Select(readFunc).FirstOrDefault()?.ToString() ?? "null";
+            foreach (TTarget? item in targets)
+            {
+                if (item != null)
+                    return readFunc.Invoke(item)?.ToString() ?? "null";
+            }
+
+            return "null";
         }
 
         /// <summary>
@@ -147,8 +171,11 @@ namespace RuniOS.Editor.Unity.Inspectors
         /// <param name="action">각 타겟에 대해 실행할 작업입니다.</param>
         public void ForEach(Action<TTarget> action)
         {
-            foreach (var item in targets.WhereNotNull())
-                action.Invoke(item);
+            foreach (TTarget? item in targets)
+            {
+                if (item != null)
+                    action.Invoke(item);
+            }
         }
 
         /// <summary>
@@ -177,7 +204,16 @@ namespace RuniOS.Editor.Unity.Inspectors
                 return;
 
             // UI를 그리기 위한 대표 타겟 선정
-            TTarget? target = targets.FirstOrDefault(x => x != null);
+            TTarget? target = null;
+            foreach (TTarget? item in targets)
+            {
+                if (item != null)
+                {
+                    target = item;
+                    break;
+                }
+            }
+
             if (target == null)
                 return;
 
@@ -191,8 +227,11 @@ namespace RuniOS.Editor.Unity.Inspectors
             // 사용자가 값을 변경했다면 모든 타겟에 적용
             if (EditorGUI.EndChangeCheck())
             {
-                foreach (var item in targets.WhereNotNull())
-                    writeFunc.Invoke(item, value);
+                foreach (TTarget? item in targets)
+                {
+                    if (item != null)
+                        writeFunc.Invoke(item, value);
+                }
             }
 
             // Mixed Value 설정 초기화
