@@ -38,17 +38,17 @@ namespace RuniOS.Editor.IMGUI
 
 
 
-        public static T? NullablePrimitiveField<T>(Rect position, T? value, string? nullText = null) where T : struct => DoNullablePrimitiveField(position, GUIContent.none, value, nullText);
+        public static T? NullablePrimitiveField<T>(Rect position, T? value, string? nullText = null) where T : struct => DoNullablePrimitiveField(position, value, nullText);
         public static T? NullablePrimitiveField<T>(Rect position, string label, T? value, string? nullText = null) where T : struct => NullablePrimitiveField(position, new GUIContent(label), value, nullText);
         public static T? NullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
         {
             int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
             position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 4);
         
-            return DoNullablePrimitiveField(position, label, value, nullText);
+            return DoNullablePrimitiveField(position, value, nullText);
         }
 
-        static T? DoNullablePrimitiveField<T>(Rect position, GUIContent label, T? value, string? nullText = null) where T : struct
+        static T? DoNullablePrimitiveField<T>(Rect position, T? value, string? nullText = null) where T : struct
         {
             float fieldWidth = position.width;
             float toggleWidth = GetXSize(EditorStyles.toggle);
@@ -61,15 +61,6 @@ namespace RuniOS.Editor.IMGUI
                 Rect fieldRect = new Rect(position.x, position.y, fieldWidth, position.height);
                 if (toggleRect.Contains(Event.current.mousePosition))
                 {
-                    fieldRect = GetPrefixLabelRect(fieldRect, label, out Rect? labelPosition);
-
-                    if (labelPosition != null)
-                    {
-                        BeginIndentLevel(0);
-                        EditorGUI.LabelField(labelPosition.Value, label);
-                        EndIndentLevel();
-                    }
-
                     if (value != null)
                         GUI.Box(fieldRect, value.ToString(), EditorStyles.textField);
                     else
@@ -81,13 +72,13 @@ namespace RuniOS.Editor.IMGUI
 
                     T primitiveValue;
                     if (typeof(T).IsText())
-                        primitiveValue = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, label, nullText), typeof(T));
+                        primitiveValue = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, nullText), typeof(T));
                     else
                     {
-                        primitiveValue = PrimitiveField(fieldRect, label, default(T));
+                        primitiveValue = PrimitiveField(fieldRect, default(T));
 
                         if (!EditorGUIBridge.HasKeyboardFocus(EditorGUIUtilityBridge.s_LastControlID))
-                            GUI.Box(GetPrefixLabelRect(fieldRect, label, out _), nullText, EditorStyles.textField);
+                            GUI.Box(fieldRect, nullText, EditorStyles.textField);
                         else
                             GUI.Box(Rect.zero, GUIContent.none);
                     }
@@ -98,7 +89,7 @@ namespace RuniOS.Editor.IMGUI
                 else
                 {
                     EditorGUI.BeginChangeCheck();
-                    T primitiveValue = PrimitiveField(fieldRect, label, value.Value);
+                    T primitiveValue = PrimitiveField(fieldRect, value.Value);
                     if (EditorGUI.EndChangeCheck())
                         value = primitiveValue;
                 }
@@ -110,9 +101,9 @@ namespace RuniOS.Editor.IMGUI
                 value = InternalNullableToggleField(value, toggleRect);
 
                 if (value != null)
-                    value = (T)PrimitiveField(position, label, value);
+                    value = (T)PrimitiveField(position, value);
                 else
-                    EditorGUI.LabelField(position, label, new GUIContent(nullText));
+                    EditorGUI.LabelField(position, new GUIContent(nullText));
             }
 
             return value;
