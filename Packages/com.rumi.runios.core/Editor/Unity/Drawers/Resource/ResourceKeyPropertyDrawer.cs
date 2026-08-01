@@ -33,8 +33,10 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
+            EditorGUI.BeginChangeCheck();
             registryType = RuniFields.ResourceKeyField(position, label, registryType);
-            converter.Write(property, typeof(ResourceKey), registryType);
+            if (EditorGUI.EndChangeCheck())
+                converter.Write(property, typeof(ResourceKey), registryType);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiRowsFieldHeight(label, 2);
