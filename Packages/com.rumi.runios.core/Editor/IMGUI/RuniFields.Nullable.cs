@@ -24,7 +24,7 @@ namespace RuniOS.Editor.IMGUI
 
             nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
 
-            InternalNullableToggleField(value, toggleRect);
+            value = InternalNullableToggleField(value, toggleRect);
 
             if (value != null)
                 return drawAction.Invoke(position, value.Value);
