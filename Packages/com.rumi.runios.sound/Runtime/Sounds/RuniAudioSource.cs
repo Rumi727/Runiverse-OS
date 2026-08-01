@@ -152,14 +152,14 @@ namespace RuniOS.Sounds
             get => Volatile.Read(ref _loopStart);
             set => Volatile.Write(ref _loopStart, value);
         }
-        double _loopStart;
+        [SerializeField] double _loopStart;
 
         public virtual double loopEnd
         {
             get => Volatile.Read(ref _loopEnd);
             set => Volatile.Write(ref _loopEnd, value);
         }
-        double _loopEnd = double.MaxValue;
+        [SerializeField] double _loopEnd = double.MaxValue;
 
         public virtual float panStereo
         {
@@ -187,7 +187,7 @@ namespace RuniOS.Sounds
             get => _spread;
             set => _spread = value;
         }
-        [SerializeField] volatile float _spread = 45;
+        [SerializeField] volatile float _spread = 90;
 
         public virtual float minDistance
         {
