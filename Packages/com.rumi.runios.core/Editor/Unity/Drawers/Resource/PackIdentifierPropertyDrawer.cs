@@ -33,8 +33,10 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
+            EditorGUI.BeginChangeCheck();
             packIdentifier = RuniFields.PackIdentifierField(position, label, packIdentifier);
-            converter.Write(property, typeof(PackIdentifier), packIdentifier);
+            if (EditorGUI.EndChangeCheck())
+                converter.Write(property, typeof(PackIdentifier), packIdentifier);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label) => RuniFields.GetMultiColumnsFieldHeight(label);
