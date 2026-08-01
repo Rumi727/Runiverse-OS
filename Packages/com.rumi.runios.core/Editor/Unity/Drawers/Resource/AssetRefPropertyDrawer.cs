@@ -33,8 +33,10 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
                 return;
             }
 
+            EditorGUI.BeginChangeCheck();
             assetRef = RuniFields.AssetRefField(position, label, assetRef);
-            converter.Write(property, typeof(ResourceKey), assetRef);
+            if (EditorGUI.EndChangeCheck())
+                converter.Write(property, typeof(ResourceKey), assetRef);
         }
 
         public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
