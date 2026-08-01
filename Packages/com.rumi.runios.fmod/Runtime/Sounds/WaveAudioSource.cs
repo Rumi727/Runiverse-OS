@@ -734,7 +734,7 @@ namespace RuniOS.Sounds
         void UnsafeUpdateChannelPitch(SoundChannel channel)
         {
             float tempo = this.tempo;
-            if (tempo == 0)
+            if (!float.IsNormal(pitch) || !float.IsNormal(tempo))
             {
                 UnsafeReleasePitchDSPList(channel);
                 return;
@@ -744,7 +744,7 @@ namespace RuniOS.Sounds
             if (float.IsNaN(value))
                 value = 1;
 
-            value = value.Clamp(0.0001f, 100);
+            value = value.Clamp(0.01f, 100);
             if (value.Approximately(1))
             {
                 if (pitchDSPList.Count > 0)

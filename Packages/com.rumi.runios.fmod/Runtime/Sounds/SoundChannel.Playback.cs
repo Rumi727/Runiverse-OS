@@ -218,7 +218,7 @@ namespace RuniOS.Sounds
             set
             {
                 native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(value, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                native.setLoopPoints(value, TIMEUNIT.PCM, end.Clamp(0, end - 1), TIMEUNIT.PCM).ThrowIfNotOk();
             }
         }
 
@@ -236,7 +236,7 @@ namespace RuniOS.Sounds
             set
             {
                 native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(start, TIMEUNIT.PCM, value, TIMEUNIT.PCM).ThrowIfNotOk();
+                native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1), TIMEUNIT.PCM).ThrowIfNotOk();
             }
         }
 
@@ -257,11 +257,11 @@ namespace RuniOS.Sounds
             }
             set
             {
-                if (clip == null || clip.samples <= 0)
+                if (clip == null || clip.samples <= 0 || !float.IsNormal(clip.frequency))
                     return;
 
                 native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints((value * frequency).RoundToUInt().Clamp(0, clip.samples - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                native.setLoopPoints((value * clip.frequency).RoundToUInt().Clamp(0, end - 1).Clamp(0, clip.samples - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
             }
         }
 
@@ -282,11 +282,11 @@ namespace RuniOS.Sounds
             }
             set
             {
-                if (clip == null || clip.samples <= 0)
+                if (clip == null || clip.samples <= 0 ||  !float.IsNormal(clip.frequency))
                     return;
 
                 native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(start, TIMEUNIT.PCM, (value * frequency).RoundToUInt().Clamp(0, clip.samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                native.setLoopPoints(start, TIMEUNIT.PCM, (value * clip.frequency).RoundToUInt().Clamp(start + 1).Clamp(0, clip.samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
             }
         }
 
