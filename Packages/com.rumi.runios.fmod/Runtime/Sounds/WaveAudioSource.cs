@@ -39,7 +39,7 @@ namespace RuniOS.Sounds
                 try
                 {
                     SyncInterpolatedTime(value);
-                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.time = value);
+                    TryGetAliveChannel(channel => channel.time = value);
                 }
                 finally
                 {
@@ -70,7 +70,7 @@ namespace RuniOS.Sounds
                     if (clipSamples <= 0)
                         return;
 
-                    timeSampleDirty = !TrySeekAliveChannel(channel => channel.timeSample = value.Clamp(0, clipSamples - 1));
+                    TryGetAliveChannel(channel => channel.timeSample = value.Clamp(0, clipSamples - 1));
                 }
                 finally
                 {
@@ -252,7 +252,6 @@ namespace RuniOS.Sounds
         const float fftSize = 4096;
 
         volatile uint lastTimeSamples = uint.MaxValue;
-        volatile bool timeSampleDirty;
 
 #if UNITY_PHYSICS_EXIST
         Rigidbody? rigidbody;
@@ -297,7 +296,7 @@ namespace RuniOS.Sounds
         void Update()
         {
             uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
-            if (timeSampleDirty || lastTimeSamples != timeSample)
+            if (lastTimeSamples != timeSample)
             {
                 lastTimeSamples = timeSample;
 
@@ -464,18 +463,6 @@ namespace RuniOS.Sounds
             return success;
         }
 
-        bool TrySeekAliveChannel(Action<SoundChannel> action)
-        {
-            try
-            {
-                return TryGetAliveChannel(action);
-            }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
-            {
-                return false;
-            }
-        }
-
         T GetAliveChannelValue<T>(Func<SoundChannel, T> func, T defaultValue)
         {
             SoundChannel? lostChannel;
@@ -568,22 +555,7 @@ namespace RuniOS.Sounds
                 }
 
                 if (channel != null)
-                {
-                    if (timeSampleDirty)
-                    {
-                        try
-                        {
-                            if (scope.asset.openStates.state != SoundOpenState.SetPosition)
-                            {
-                                channel.time = currentTime;
-                                timeSampleDirty = false;
-                            }
-                        }
-                        catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY) { }
-                    }
-                    else
-                        SyncInterpolatedTime(channel.time);
-                }
+                    SyncInterpolatedTime(channel.time);
                 else
                 {
                     if (scope.asset.system.Execute(system => system.PlaySound(scope.asset, true), out SoundChannel? newChannel) && newChannel != null)
@@ -595,20 +567,7 @@ namespace RuniOS.Sounds
                             channel = newChannel;
                             channel.onStop += OnChannelStop;
 
-                            try
-                            {
-                                if (scope.asset.openStates.state != SoundOpenState.SetPosition)
-                                {
-                                    channel.time = currentTime;
-                                    timeSampleDirty = false;
-                                }
-                                else
-                                    timeSampleDirty = true;
-                            }
-                            catch (FMODException exception) when (exception.result == RESULT.ERR_NOTREADY)
-                            {
-                                timeSampleDirty = true;
-                            }
+                            channel.time = currentTime;
 
                             UnsafeUpdateChannelProperty(channel);
                         }
@@ -661,7 +620,6 @@ namespace RuniOS.Sounds
                 channel = null;
 
                 lastTimeSamples = uint.MaxValue;
-                timeSampleDirty = false;
             }
             finally
             {
@@ -689,7 +647,6 @@ namespace RuniOS.Sounds
                 pitchDSPList.Clear();
 
                 lastTimeSamples = uint.MaxValue;
-                timeSampleDirty = false;
             }
             finally
             {

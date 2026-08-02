@@ -139,6 +139,7 @@ namespace RuniOS.Sounds
             if (channel.hasHandle())
                 channelLists.TryRemove(channel.handle, out _);
 
+            pendingTimeSampleChannels.TryRemove(this, out _);
             native = default;
             return true;
         }

@@ -19,6 +19,7 @@ namespace RuniOS.Sounds
                 nativeLock.ExitReadLock();
             }
 
+            SoundChannel.RetryPendingTimeSamples(this);
             DisposeQueuedResources();
         }
 

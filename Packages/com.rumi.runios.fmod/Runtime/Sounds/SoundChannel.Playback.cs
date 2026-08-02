@@ -1,12 +1,16 @@
 #nullable enable
 using FMOD;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace RuniOS.Sounds
 {
     public sealed partial class SoundChannel
     {
+        static readonly ConcurrentDictionary<SoundChannel, byte> pendingTimeSampleChannels = [];
+
         readonly ReaderWriterLockSlim playbackLock = new();
+        uint? pendingTimeSample;
 
         /// <summary>
         /// Gets or sets the playback rate in hertz.<br/>
@@ -122,6 +126,13 @@ namespace RuniOS.Sounds
         /// Gets or sets the current playback position in PCM samples.<br/>
         /// 현재 재생 위치를 PCM 샘플 단위로 가져오거나 설정합니다.
         /// </summary>
+        /// <remarks>
+        /// For nonblocking sounds, FMOD may report <c>RESULT.ERR_NOTREADY</c> while setting the position.<br/>
+        /// The setter queues the latest requested position for retry during <see cref="SoundSystem.Update"/>, so it may not be applied immediately.
+        /// <br/><br/>
+        /// 논블로킹 사운드는 위치 설정 중 FMOD가 <c>RESULT.ERR_NOTREADY</c>를 반환할 수 있습니다.<br/>
+        /// setter는 마지막으로 요청한 위치를 <see cref="SoundSystem.Update"/>에서 재시도하도록 등록하므로 즉시 적용되지 않을 수 있습니다.
+        /// </remarks>
         public uint timeSample
         {
             get
@@ -144,11 +155,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    double sample = value;
-                    if (!TryNormalizeTimeSampleUnsafe(ref sample))
-                        return;
-
-                    native.setPosition(sample.RoundToUInt(), TIMEUNIT.PCM).ThrowIfNotOk();
+                    SetTimeSampleUnsafe(value);
                 }
                 finally
                 {
@@ -161,6 +168,13 @@ namespace RuniOS.Sounds
         /// Gets or sets the current playback position in seconds.<br/>
         /// 현재 재생 위치를 초 단위로 가져오거나 설정합니다.
         /// </summary>
+        /// <remarks>
+        /// For nonblocking sounds, FMOD may report <c>RESULT.ERR_NOTREADY</c> while setting the position.<br/>
+        /// The setter queues the latest requested position for retry during <see cref="SoundSystem.Update"/>, so it may not be applied immediately.
+        /// <br/><br/>
+        /// 논블로킹 사운드는 위치 설정 중 FMOD가 <c>RESULT.ERR_NOTREADY</c>를 반환할 수 있습니다.<br/>
+        /// setter는 마지막으로 요청한 위치를 <see cref="SoundSystem.Update"/>에서 재시도하도록 등록하므로 즉시 적용되지 않을 수 있습니다.
+        /// </remarks>
         /// <exception cref="ArgumentOutOfRangeException">
         /// Thrown when the assigned value is not finite, is negative, or exceeds FMOD's millisecond range.<br/>
         /// 설정한 값이 유한하지 않거나 음수이거나 FMOD의 밀리초 범위를 초과한 경우 발생합니다.
@@ -187,11 +201,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    double sample = value * GetTimeFrequencyUnsafe().Abs();
-                    if (!TryNormalizeTimeSampleUnsafe(ref sample))
-                        return;
-
-                    native.setPosition(sample.RoundToUInt(), TIMEUNIT.PCM).ThrowIfNotOk();
+                    SetTimeSampleUnsafe(value * GetTimeFrequencyUnsafe().Abs());
                 }
                 finally
                 {
@@ -207,6 +217,78 @@ namespace RuniOS.Sounds
 
             native.getFrequency(out float frequency).ThrowIfNotOk();
             return frequency;
+        }
+
+        void SetTimeSampleUnsafe(double value)
+        {
+            if (!TryNormalizeTimeSampleUnsafe(ref value))
+                return;
+
+            uint sample = value.RoundToUInt();
+            RESULT result = native.setPosition(sample, TIMEUNIT.PCM);
+            if (result == RESULT.ERR_NOTREADY)
+            {
+                pendingTimeSample = sample;
+                pendingTimeSampleChannels.TryAdd(this, 0);
+
+                if (Volatile.Read(ref detached) != 0)
+                    pendingTimeSampleChannels.TryRemove(this, out _);
+
+                return;
+            }
+
+            pendingTimeSample = null;
+            pendingTimeSampleChannels.TryRemove(this, out _);
+            result.ThrowIfNotOk();
+        }
+
+        void RetryPendingTimeSample()
+        {
+            playbackLock.EnterWriteLock();
+
+            try
+            {
+                if (!pendingTimeSample.HasValue)
+                {
+                    pendingTimeSampleChannels.TryRemove(this, out _);
+                    return;
+                }
+
+                RESULT result = native.setPosition(pendingTimeSample.Value, TIMEUNIT.PCM);
+                if (result == RESULT.ERR_NOTREADY)
+                    return;
+
+                pendingTimeSample = null;
+                pendingTimeSampleChannels.TryRemove(this, out _);
+
+                if (result != RESULT.ERR_INVALID_HANDLE)
+                    result.ThrowIfNotOk();
+            }
+            finally
+            {
+                playbackLock.ExitWriteLock();
+            }
+        }
+
+        internal static void RetryPendingTimeSamples(SoundSystem system)
+        {
+            if (pendingTimeSampleChannels.IsEmpty)
+                return;
+
+            foreach (SoundChannel channel in pendingTimeSampleChannels.Keys)
+            {
+                if (!ReferenceEquals(channel.system, system))
+                    continue;
+
+                try
+                {
+                    channel.RetryPendingTimeSample();
+                }
+                catch (Exception exception)
+                {
+                    Debug.LogException(exception);
+                }
+            }
         }
 
         bool TryNormalizeTimeSampleUnsafe(ref double value)
