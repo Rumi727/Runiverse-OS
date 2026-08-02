@@ -434,19 +434,17 @@ namespace RuniOS.Sounds
             }
         }
 
-        bool TryGetAliveChannel(Action<SoundChannel> action)
+        void TryGetAliveChannel(Action<SoundChannel> action)
         {
             SoundChannel? lostChannel = null;
-            bool success = false;
             channelLock.EnterReadLock();
 
             try
             {
                 if (channel == null)
-                    return false;
+                    return;
 
                 action.Invoke(channel);
-                success = true;
             }
             catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
             {
@@ -459,8 +457,6 @@ namespace RuniOS.Sounds
 
             if (lostChannel != null)
                 HandleChannelLost(lostChannel);
-
-            return success;
         }
 
         T GetAliveChannelValue<T>(Func<SoundChannel, T> func, T defaultValue)
