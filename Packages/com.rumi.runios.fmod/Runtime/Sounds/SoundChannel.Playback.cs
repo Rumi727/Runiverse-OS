@@ -1,10 +1,13 @@
 #nullable enable
 using FMOD;
+using System.Threading;
 
 namespace RuniOS.Sounds
 {
     public sealed partial class SoundChannel
     {
+        readonly ReaderWriterLockSlim playbackLock = new();
+
         /// <summary>
         /// Gets or sets the playback rate in hertz.<br/>
         /// 재생 속도를 헤르츠 단위로 가져오거나 설정합니다.
@@ -13,10 +16,31 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getFrequency(out float frequency).ThrowIfNotOk();
-                return frequency;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getFrequency(out float frequency).ThrowIfNotOk();
+                    return frequency;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
-            set => native.setFrequency(value).ThrowIfNotOk();
+            set
+            {
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    native.setFrequency(value).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
+            }
         }
 
         /// <summary>
@@ -102,29 +126,34 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk();
-                return sample;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return sample;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
-                uint samples = this.samples;
-                if (samples <= 0)
-                    return;
+                playbackLock.EnterWriteLock();
 
-                if (loop)
+                try
                 {
-                    uint loopStartSample = this.loopStartSample;
-                    uint loopEndSample = this.loopEndSample;
+                    double sample = value;
+                    if (!TryNormalizeTimeSampleUnsafe(ref sample))
+                        return;
 
-                    if (value >= loopEndSample)
-                        value = value.Repeat(loopStartSample, loopEndSample);
-                    else
-                        value = value.Clamp(0, loopEndSample);
+                    native.setPosition(sample.RoundToUInt(), TIMEUNIT.PCM).ThrowIfNotOk();
                 }
-                else
-                    value = value.Clamp(0, samples - 1);
-
-                native.setPosition(value, TIMEUNIT.PCM).ThrowIfNotOk();
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -138,28 +167,79 @@ namespace RuniOS.Sounds
         /// </exception>
         public double time
         {
-            get => timeSample / (clip?.frequency ?? frequency).Abs();
+            get
+            {
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return sample / GetTimeFrequencyUnsafe().Abs();
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
+            }
             set
             {
-                uint samples = this.samples;
-                if (samples <= 0)
-                    return;
+                playbackLock.EnterWriteLock();
 
-                if (loop)
+                try
                 {
-                    uint loopStartSample = this.loopStartSample;
-                    uint loopEndSample = this.loopEndSample;
+                    double sample = value * GetTimeFrequencyUnsafe().Abs();
+                    if (!TryNormalizeTimeSampleUnsafe(ref sample))
+                        return;
 
-                    if (value >= loopEndSample)
-                        value = value.Repeat(loopStartSample, loopEndSample);
-                    else if (value < 0)
-                        value = value.Repeat(0, loopEndSample);
+                    native.setPosition(sample.RoundToUInt(), TIMEUNIT.PCM).ThrowIfNotOk();
                 }
-                else
-                    value = value.Clamp(0, samples);
-
-                timeSample = (value * (clip?.frequency ?? frequency).Abs()).RoundToUInt();
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
+        }
+
+        float GetTimeFrequencyUnsafe()
+        {
+            if (clip != null)
+                return clip.frequency;
+
+            native.getFrequency(out float frequency).ThrowIfNotOk();
+            return frequency;
+        }
+
+        bool TryNormalizeTimeSampleUnsafe(ref double value)
+        {
+            uint samples = this.samples;
+            if (samples == 0)
+                return false;
+
+            modeLock.EnterReadLock();
+            bool loop;
+
+            try
+            {
+                native.getMode(out MODE mode).ThrowIfNotOk();
+                loop = mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
+            }
+            finally
+            {
+                modeLock.ExitReadLock();
+            }
+
+            if (loop)
+            {
+                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                if (value >= end)
+                    value = value.Repeat(start, end);
+                else if (value < 0)
+                    value = value.Repeat(0, end);
+            }
+            else
+                value = value.Clamp(0, samples - 1);
+
+            return true;
         }
 
         /// <summary>
@@ -189,17 +269,53 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getMode(out MODE mode).ThrowIfNotOk();
-                return mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    modeLock.EnterReadLock();
+
+                    try
+                    {
+                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        return mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
+                    }
+                    finally
+                    {
+                        modeLock.ExitReadLock();
+                    }
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
-                native.getMode(out MODE mode).ThrowIfNotOk();
-                mode &= ~(MODE.LOOP_OFF | MODE.LOOP_NORMAL | MODE.LOOP_BIDI);
-                mode |= value ? MODE.LOOP_NORMAL : MODE.LOOP_OFF;
+                playbackLock.EnterWriteLock();
 
-                native.setMode(mode).ThrowIfNotOk();
-                native.setLoopCount(value ? -1 : 0).ThrowIfNotOk();
+                try
+                {
+                    modeLock.EnterWriteLock();
+
+                    try
+                    {
+                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        mode &= ~(MODE.LOOP_OFF | MODE.LOOP_NORMAL | MODE.LOOP_BIDI);
+                        mode |= value ? MODE.LOOP_NORMAL : MODE.LOOP_OFF;
+
+                        native.setMode(mode).ThrowIfNotOk();
+                        native.setLoopCount(value ? -1 : 0).ThrowIfNotOk();
+                    }
+                    finally
+                    {
+                        modeLock.ExitWriteLock();
+                    }
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -215,10 +331,72 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getLoopCount(out int loopCount).ThrowIfNotOk();
-                return loopCount;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopCount(out int loopCount).ThrowIfNotOk();
+                    return loopCount;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
-            set => native.setLoopCount(value);
+            set
+            {
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    native.setLoopCount(value);
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the loop start and end positions together in PCM samples.<br/>
+        /// 반복 시작 및 종료 위치를 PCM 샘플 단위로 함께 가져오거나 설정합니다.
+        /// </summary>
+        public (uint start, uint end) loopSampleRange
+        {
+            get
+            {
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return (start, end);
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    uint samples = this.samples;
+                    if (samples <= 1)
+                        return;
+
+                    uint start = value.start.Clamp(0, samples - 2);
+                    uint end = value.end.Clamp(start + 1, samples - 1);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
+            }
         }
 
         /// <summary>
@@ -229,13 +407,34 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                return start;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return start;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
-                native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(value, TIMEUNIT.PCM, end.Clamp(0, end - 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    if (end == 0)
+                        return;
+
+                    native.setLoopPoints(value.Clamp(0, end - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -247,16 +446,81 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                return end;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return end;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
-                if (samples <= 0)
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    if (samples <= 1)
+                        return;
+
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
+                    native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1, samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the loop start and end positions together in seconds.<br/>
+        /// 반복 시작 및 종료 위치를 초 단위로 함께 가져오거나 설정합니다.
+        /// </summary>
+        public (double start, double end) loopRange
+        {
+            get
+            {
+                if (clip == null)
+                    return (0, 0);
+
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return (start / clip.frequency, end / clip.frequency);
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                if (clip == null)
                     return;
 
-                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1, samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    uint samples = this.samples;
+                    if (samples <= 1)
+                        return;
+
+                    uint start = (value.start * clip.frequency).RoundToUInt().Clamp(0, samples - 2);
+                    uint end = (value.end * clip.frequency).RoundToUInt().Clamp(start + 1, samples - 1);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -271,14 +535,38 @@ namespace RuniOS.Sounds
                 if (clip == null)
                     return 0;
 
-                return loopStartSample / clip.frequency;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return start / clip.frequency;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
                 if (clip == null)
                     return;
 
-                loopStartSample = (value * clip.frequency).RoundToUInt();
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    if (end == 0)
+                        return;
+
+                    uint start = (value * clip.frequency).RoundToUInt().Clamp(0, end - 1);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -291,16 +579,41 @@ namespace RuniOS.Sounds
             get
             {
                 if (clip == null)
-                    return loopEndSample / frequency;
+                    return 0;
 
-                return 0;
+                playbackLock.EnterReadLock();
+
+                try
+                {
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
+                    return end / clip.frequency;
+                }
+                finally
+                {
+                    playbackLock.ExitReadLock();
+                }
             }
             set
             {
                 if (clip == null)
                     return;
 
-                loopEndSample = (value * clip.frequency).RoundToUInt();
+                playbackLock.EnterWriteLock();
+
+                try
+                {
+                    uint samples = this.samples;
+                    if (samples <= 1)
+                        return;
+
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
+                    uint end = (value * clip.frequency).RoundToUInt().Clamp(start + 1, samples - 1);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                }
+                finally
+                {
+                    playbackLock.ExitWriteLock();
+                }
             }
         }
 
@@ -386,8 +699,19 @@ namespace RuniOS.Sounds
         /// The volume level at <paramref name="dspClock"/>.<br/>
         /// <paramref name="dspClock"/>에서의 볼륨 레벨입니다.
         /// </param>
-        public void AddFadePoint(ulong dspClock, float volume) =>
-            native.addFadePoint(dspClock, volume).ThrowIfNotOk();
+        public void AddFadePoint(ulong dspClock, float volume)
+        {
+            playbackLock.EnterWriteLock();
+
+            try
+            {
+                native.addFadePoint(dspClock, volume).ThrowIfNotOk();
+            }
+            finally
+            {
+                playbackLock.ExitWriteLock();
+            }
+        }
 
         /// <summary>
         /// Schedules a volume ramp that ends at the specified parent DSP clock.<br/>
@@ -401,8 +725,19 @@ namespace RuniOS.Sounds
         /// The target volume level.<br/>
         /// 목표 볼륨 레벨입니다.
         /// </param>
-        public void SetFadePointRamp(ulong dspClock, float volume) =>
-            native.setFadePointRamp(dspClock, volume).ThrowIfNotOk();
+        public void SetFadePointRamp(ulong dspClock, float volume)
+        {
+            playbackLock.EnterWriteLock();
+
+            try
+            {
+                native.setFadePointRamp(dspClock, volume).ThrowIfNotOk();
+            }
+            finally
+            {
+                playbackLock.ExitWriteLock();
+            }
+        }
 
         /// <summary>
         /// Removes every fade point in the inclusive parent-DSP-clock range.<br/>
@@ -416,8 +751,19 @@ namespace RuniOS.Sounds
         /// The last parent DSP clock in the removal range.<br/>
         /// 제거 범위의 마지막 부모 DSP 클록입니다.
         /// </param>
-        public void RemoveFadePoints(ulong startDspClock, ulong endDspClock) =>
-            native.removeFadePoints(startDspClock, endDspClock).ThrowIfNotOk();
+        public void RemoveFadePoints(ulong startDspClock, ulong endDspClock)
+        {
+            playbackLock.EnterWriteLock();
+
+            try
+            {
+                native.removeFadePoints(startDspClock, endDspClock).ThrowIfNotOk();
+            }
+            finally
+            {
+                playbackLock.ExitWriteLock();
+            }
+        }
 
         /// <summary>
         /// Gets the scheduled fade-point clocks and their volume levels.<br/>
@@ -429,17 +775,26 @@ namespace RuniOS.Sounds
         /// </returns>
         public (ulong[] dspClocks, float[] volumes) GetFadePoints()
         {
-            uint pointCount = 0;
-            native.getFadePoints(ref pointCount, null!, null!).ThrowIfNotOk();
+            playbackLock.EnterReadLock();
 
-            if (pointCount == 0)
-                return (Array.Empty<ulong>(), Array.Empty<float>());
+            try
+            {
+                uint pointCount = 0;
+                native.getFadePoints(ref pointCount, null!, null!).ThrowIfNotOk();
 
-            int count = checked((int)pointCount);
-            ulong[] dspClocks = new ulong[count];
-            float[] volumes = new float[count];
-            native.getFadePoints(ref pointCount, dspClocks, volumes).ThrowIfNotOk();
-            return (dspClocks, volumes);
+                if (pointCount == 0)
+                    return (Array.Empty<ulong>(), Array.Empty<float>());
+
+                int count = checked((int)pointCount);
+                ulong[] dspClocks = new ulong[count];
+                float[] volumes = new float[count];
+                native.getFadePoints(ref pointCount, dspClocks, volumes).ThrowIfNotOk();
+                return (dspClocks, volumes);
+            }
+            finally
+            {
+                playbackLock.ExitReadLock();
+            }
         }
     }
 }

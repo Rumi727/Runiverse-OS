@@ -1,10 +1,13 @@
 #nullable enable
 using RuniOS.Sounds.Processing;
+using System.Threading;
 
 namespace RuniOS.Sounds
 {
     public sealed partial class SoundChannel
     {
+        readonly ReaderWriterLockSlim mixingLock = new();
+
         /// <summary>
         /// Gets or sets this channel's volume.<br/>
         /// 이 채널의 볼륨을 가져오거나 설정합니다.
@@ -206,8 +209,19 @@ namespace RuniOS.Sounds
         /// The matrix row width, or zero to use <paramref name="inputChannels"/>.<br/>
         /// 매트릭스 행 너비이며, 0이면 <paramref name="inputChannels"/>를 사용합니다.
         /// </param>
-        public void SetMixMatrix(float[]? matrix, int outputChannels, int inputChannels, int inputChannelHop = 0) =>
-            native.setMixMatrix(matrix!, outputChannels, inputChannels, inputChannelHop).ThrowIfNotOk();
+        public void SetMixMatrix(float[]? matrix, int outputChannels, int inputChannels, int inputChannelHop = 0)
+        {
+            mixingLock.EnterWriteLock();
+
+            try
+            {
+                native.setMixMatrix(matrix!, outputChannels, inputChannels, inputChannelHop).ThrowIfNotOk();
+            }
+            finally
+            {
+                mixingLock.ExitWriteLock();
+            }
+        }
 
         /// <summary>
         /// Gets the current pan matrix and its output and input channel counts.<br/>
@@ -219,14 +233,23 @@ namespace RuniOS.Sounds
         /// </returns>
         public (float[] matrix, int outputChannels, int inputChannels) GetMixMatrix()
         {
-            native.getMixMatrix(null!, out int outputChannels, out int inputChannels).ThrowIfNotOk();
+            mixingLock.EnterReadLock();
 
-            if (outputChannels == 0 || inputChannels == 0)
-                return (Array.Empty<float>(), outputChannels, inputChannels);
+            try
+            {
+                native.getMixMatrix(null!, out int outputChannels, out int inputChannels).ThrowIfNotOk();
 
-            float[] matrix = new float[checked(outputChannels * inputChannels)];
-            native.getMixMatrix(matrix, out _, out _).ThrowIfNotOk();
-            return (matrix, outputChannels, inputChannels);
+                if (outputChannels == 0 || inputChannels == 0)
+                    return (Array.Empty<float>(), outputChannels, inputChannels);
+
+                float[] matrix = new float[checked(outputChannels * inputChannels)];
+                native.getMixMatrix(matrix, out _, out _).ThrowIfNotOk();
+                return (matrix, outputChannels, inputChannels);
+            }
+            finally
+            {
+                mixingLock.ExitReadLock();
+            }
         }
     }
 }

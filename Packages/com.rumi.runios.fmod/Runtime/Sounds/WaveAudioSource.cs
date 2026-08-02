@@ -203,7 +203,7 @@ namespace RuniOS.Sounds
             set
             {
                 base.minDistance = value;
-                TryGetAliveChannel(UnsafeUpdateChannelMinDistance);
+                TryGetAliveChannel(UnsafeUpdateChannelMinMaxDistance);
             }
         }
 
@@ -213,7 +213,7 @@ namespace RuniOS.Sounds
             set
             {
                 base.maxDistance = value;
-                TryGetAliveChannel(UnsafeUpdateChannelMaxDistance);
+                TryGetAliveChannel(UnsafeUpdateChannelMinMaxDistance);
             }
         }
 
@@ -711,8 +711,7 @@ namespace RuniOS.Sounds
             UnsafeUpdateChannelDopplerLevel(channel);
             UnsafeUpdateChannelSpatialBlend(channel);
             UnsafeUpdateChannelSpread(channel);
-            UnsafeUpdateChannelMinDistance(channel);
-            UnsafeUpdateChannelMaxDistance(channel);
+            UnsafeUpdateChannelMinMaxDistance(channel);
             UnsafeUpdateChannelRolloffMode(channel);
             UnsafeUpdateChannelPause(channel);
         }
@@ -720,9 +719,7 @@ namespace RuniOS.Sounds
         void UnsafeUnsafeUpdateChannelLoop(SoundChannel channel)
         {
             channel.loop = loop;
-
-            channel.loopStart = loopStart;
-            channel.loopEnd = loopEnd;
+            channel.loopRange = (loopStart, loopEnd);
         }
 
         void UnsafeUnsafeUpdateChannelTempoAndPitch(SoundChannel channel)
@@ -827,9 +824,7 @@ namespace RuniOS.Sounds
 
         void UnsafeUpdateChannelSpread(SoundChannel channel) => channel.spread = spread;
 
-        void UnsafeUpdateChannelMinDistance(SoundChannel channel) => channel.minDistance = minDistance;
-
-        void UnsafeUpdateChannelMaxDistance(SoundChannel channel) => channel.maxDistance = maxDistance;
+        void UnsafeUpdateChannelMinMaxDistance(SoundChannel channel) => channel.minMaxDistance = (minDistance, maxDistance);
 
         void UnsafeUpdateChannelRolloffMode(SoundChannel channel) => channel.rolloffMode = rolloffMode;
 

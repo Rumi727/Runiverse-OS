@@ -10,10 +10,12 @@ namespace RuniOS.Sounds
     /// <see cref="SoundSystem"/>에서 생성한 FMOD 재생 채널을 래핑합니다.
     /// </summary>
     /// <remarks>
-    /// FMOD owns the native channel lifetime. Native calls are passed through without synchronization and may fail after the channel stops or is stolen.<br/>
+    /// FMOD owns the native channel lifetime. Native calls generally pass through without synchronization and may fail after the channel stops or is stolen.<br/>
+    /// Compound wrapper operations use dedicated state-domain locks. Direct access through <see cref="native"/> bypasses that synchronization.<br/>
     /// FMOD invalidates a stopped channel handle, so callers that need to identify that expected condition must catch <see cref="FMODException"/> and check whether <see cref="FMODException.result"/> is <c>RESULT.ERR_INVALID_HANDLE</c>.<br/>
     /// When FMOD reports that the channel has stopped, this wrapper detaches its managed handle, unregisters itself, and invokes <see cref="onStop"/> once.<br/><br/>
-    /// FMOD가 네이티브 채널 수명을 소유합니다. 네이티브 호출은 동기화 없이 전달되며 채널이 중지되거나 steal된 뒤 실패할 수 있습니다.<br/>
+    /// FMOD가 네이티브 채널 수명을 소유합니다. 네이티브 호출은 일반적으로 동기화 없이 전달되며 채널이 중지되거나 steal된 뒤 실패할 수 있습니다.<br/>
+    /// 복합 래퍼 연산은 전용 상태 도메인 락으로 동기화됩니다. <see cref="native"/>에 직접 접근하면 이 동기화를 우회합니다.<br/>
     /// FMOD는 중지된 채널 핸들을 무효화하므로, 이 예상 상태를 구분해야 하는 호출자는 <see cref="FMODException"/>을 잡고 <see cref="FMODException.result"/>가 <c>RESULT.ERR_INVALID_HANDLE</c>인지 확인해야 합니다.<br/>
     /// FMOD가 채널 종료를 보고하면 이 래퍼는 관리 핸들을 분리하고 등록을 해제한 뒤 <see cref="onStop"/>을 한 번 호출합니다.
     /// </remarks>
@@ -58,6 +60,7 @@ namespace RuniOS.Sounds
         /// 이 래퍼가 분리되면 이 속성은 기본값이 됩니다. 복사한 핸들은 네이티브 채널을 더 이상 사용할 수 없을 때 FMOD 오류를 반환할 수 있습니다.
         /// </remarks>
         public Channel native { get; private set; }
+        readonly ReaderWriterLockSlim modeLock = new();
 
         /// <summary>
         /// Occurs once when this wrapper detaches from its FMOD channel.<br/>

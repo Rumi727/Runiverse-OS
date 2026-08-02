@@ -2,11 +2,14 @@
 using FMOD;
 using FMODUnity;
 using RuniOS.Sounds.Processing;
+using System.Threading;
 
 namespace RuniOS.Sounds
 {
     public sealed partial class SoundChannel
     {
+        readonly ReaderWriterLockSlim spatialLock = new();
+
         /// <summary>
         /// Gets or sets the position and velocity used for 3D spatial audio processing.<br/>
         /// 3D 공간 오디오 처리에 사용할 위치와 속도를 가져오거나 설정합니다.
@@ -27,6 +30,41 @@ namespace RuniOS.Sounds
         }
 
         /// <summary>
+        /// Gets or sets the minimum and maximum distances for 3D attenuation together.<br/>
+        /// 3D 감쇠에 사용할 최소 및 최대 거리를 함께 가져오거나 설정합니다.
+        /// </summary>
+        public (float min, float max) minMaxDistance
+        {
+            get
+            {
+                spatialLock.EnterReadLock();
+
+                try
+                {
+                    native.get3DMinMaxDistance(out float min, out float max).ThrowIfNotOk();
+                    return (min, max);
+                }
+                finally
+                {
+                    spatialLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                spatialLock.EnterWriteLock();
+
+                try
+                {
+                    native.set3DMinMaxDistance(value.min, value.max.Clamp(value.min)).ThrowIfNotOk();
+                }
+                finally
+                {
+                    spatialLock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets or sets the minimum distance for 3D attenuation.<br/>
         /// 3D 감쇠에 사용할 최소 거리를 가져오거나 설정합니다.
         /// </summary>
@@ -34,13 +72,31 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
-                return minimum;
+                spatialLock.EnterReadLock();
+
+                try
+                {
+                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
+                    return minimum;
+                }
+                finally
+                {
+                    spatialLock.ExitReadLock();
+                }
             }
             set
             {
-                native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
-                native.set3DMinMaxDistance(value, maximum.Clamp(value)).ThrowIfNotOk();
+                spatialLock.EnterWriteLock();
+
+                try
+                {
+                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
+                    native.set3DMinMaxDistance(value, maximum.Clamp(value)).ThrowIfNotOk();
+                }
+                finally
+                {
+                    spatialLock.ExitWriteLock();
+                }
             }
         }
 
@@ -52,13 +108,31 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
-                return maximum;
+                spatialLock.EnterReadLock();
+
+                try
+                {
+                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
+                    return maximum;
+                }
+                finally
+                {
+                    spatialLock.ExitReadLock();
+                }
             }
             set
             {
-                native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
-                native.set3DMinMaxDistance(minimum, value.Clamp(minimum)).ThrowIfNotOk();
+                spatialLock.EnterWriteLock();
+
+                try
+                {
+                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
+                    native.set3DMinMaxDistance(minimum, value.Clamp(minimum)).ThrowIfNotOk();
+                }
+                finally
+                {
+                    spatialLock.ExitWriteLock();
+                }
             }
         }
 
@@ -70,15 +144,51 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getMode(out MODE mode).ThrowIfNotOk();
-                return GetRolloffMode(mode);
+                spatialLock.EnterReadLock();
+
+                try
+                {
+                    modeLock.EnterReadLock();
+
+                    try
+                    {
+                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        return GetRolloffMode(mode);
+                    }
+                    finally
+                    {
+                        modeLock.ExitReadLock();
+                    }
+                }
+                finally
+                {
+                    spatialLock.ExitReadLock();
+                }
             }
             set
             {
-                native.getMode(out MODE mode).ThrowIfNotOk();
-                mode &= ~(MODE._3D_INVERSEROLLOFF | MODE._3D_LINEARROLLOFF | MODE._3D_LINEARSQUAREROLLOFF | MODE._3D_INVERSETAPEREDROLLOFF | MODE._3D_CUSTOMROLLOFF);
-                mode |= GetFMODRolloffMode(value);
-                native.setMode(mode).ThrowIfNotOk();
+                spatialLock.EnterWriteLock();
+
+                try
+                {
+                    modeLock.EnterWriteLock();
+
+                    try
+                    {
+                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        mode &= ~(MODE._3D_INVERSEROLLOFF | MODE._3D_LINEARROLLOFF | MODE._3D_LINEARSQUAREROLLOFF | MODE._3D_INVERSETAPEREDROLLOFF | MODE._3D_CUSTOMROLLOFF);
+                        mode |= GetFMODRolloffMode(value);
+                        native.setMode(mode).ThrowIfNotOk();
+                    }
+                    finally
+                    {
+                        modeLock.ExitWriteLock();
+                    }
+                }
+                finally
+                {
+                    spatialLock.ExitWriteLock();
+                }
             }
         }
 
