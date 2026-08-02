@@ -56,7 +56,7 @@ namespace RuniOS.Editor.IMGUI
                 {
                     EditorGUI.BeginChangeCheck();
 
-                    float floatValue = EditorGUI.FloatField(position, Convert.ToInt32(value));
+                    float floatValue = EditorGUI.FloatField(position, Convert.ToSingle(value));
 
                     float minValue = Convert.ToSingle(type.GetMinValue());
                     float maxValue = Convert.ToSingle(type.GetMaxValue());
@@ -72,7 +72,7 @@ namespace RuniOS.Editor.IMGUI
                 {
                     EditorGUI.BeginChangeCheck();
 
-                    double doubleValue = EditorGUI.DoubleField(position, Convert.ToInt32(value));
+                    double doubleValue = EditorGUI.DoubleField(position, Convert.ToDouble(value));
 
                     double minValue = Convert.ToDouble(type.GetMinValue());
                     double maxValue = Convert.ToDouble(type.GetMaxValue());
