@@ -105,7 +105,27 @@ namespace RuniOS.Sounds
                 native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk();
                 return sample;
             }
-            set => native.setPosition(value, TIMEUNIT.PCM).ThrowIfNotOk();
+            set
+            {
+                uint samples = this.samples;
+                if (samples <= 0)
+                    return;
+
+                if (loop)
+                {
+                    uint loopStartSample = this.loopStartSample;
+                    uint loopEndSample = this.loopEndSample;
+
+                    if (value >= loopEndSample)
+                        value = value.Repeat(loopStartSample, loopEndSample);
+                    else
+                        value = value.Clamp(0, loopEndSample);
+                }
+                else
+                    value = value.Clamp(0, samples - 1);
+
+                native.setPosition(value, TIMEUNIT.PCM).ThrowIfNotOk();
+            }
         }
 
         /// <summary>
@@ -118,30 +138,27 @@ namespace RuniOS.Sounds
         /// </exception>
         public double time
         {
-            get
-            {
-                native.getPosition(out uint pcm, TIMEUNIT.PCM).ThrowIfNotOk();
-
-                float frequency;
-                if (clip != null)
-                    frequency = clip.frequency;
-                else
-                    native.getFrequency(out frequency).ThrowIfNotOk();
-
-                return pcm / frequency.Abs();
-            }
+            get => timeSample / (clip?.frequency ?? frequency).Abs();
             set
             {
-                if (clip == null)
+                uint samples = this.samples;
+                if (samples <= 0)
+                    return;
+
+                if (loop)
                 {
-                    timeSample = (value * frequency).RoundToUInt();
-                    return;
+                    uint loopStartSample = this.loopStartSample;
+                    uint loopEndSample = this.loopEndSample;
+
+                    if (value >= loopEndSample)
+                        value = value.Repeat(loopStartSample, loopEndSample);
+                    else if (value < 0)
+                        value = value.Repeat(0, loopEndSample);
                 }
+                else
+                    value = value.Clamp(0, samples);
 
-                if (clip.samples <= 0)
-                    return;
-
-                timeSample = (value * clip.frequency).RoundToUInt().Clamp(0, clip.samples - 1);
+                timeSample = (value * (clip?.frequency ?? frequency).Abs()).RoundToUInt();
             }
         }
 
@@ -235,8 +252,11 @@ namespace RuniOS.Sounds
             }
             set
             {
+                if (samples <= 0)
+                    return;
+
                 native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1, samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
             }
         }
 
@@ -244,24 +264,21 @@ namespace RuniOS.Sounds
         /// Gets or sets the loop start position in seconds.<br/>
         /// 반복 시작 위치를 초 단위로 가져오거나 설정합니다.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the assigned value is not finite, is negative, or exceeds FMOD's millisecond range.<br/>
-        /// 설정한 값이 유한하지 않거나 음수이거나 FMOD의 밀리초 범위를 초과한 경우 발생합니다.
-        /// </exception>
         public double loopStart
         {
             get
             {
-                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                return start / frequency;
+                if (clip == null)
+                    return 0;
+
+                return loopStartSample / clip.frequency;
             }
             set
             {
-                if (clip == null || clip.samples <= 0 || !float.IsNormal(clip.frequency))
+                if (clip == null)
                     return;
 
-                native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints((value * clip.frequency).RoundToUInt().Clamp(0, end - 1).Clamp(0, clip.samples - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk();
+                loopStartSample = (value * clip.frequency).RoundToUInt();
             }
         }
 
@@ -269,24 +286,21 @@ namespace RuniOS.Sounds
         /// Gets or sets the loop end position in seconds.<br/>
         /// 반복 종료 위치를 초 단위로 가져오거나 설정합니다.
         /// </summary>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when the assigned value is not finite, is negative, or exceeds FMOD's millisecond range.<br/>
-        /// 설정한 값이 유한하지 않거나 음수이거나 FMOD의 밀리초 범위를 초과한 경우 발생합니다.
-        /// </exception>
         public double loopEnd
         {
             get
             {
-                native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk();
-                return end / frequency;
+                if (clip == null)
+                    return loopEndSample / frequency;
+
+                return 0;
             }
             set
             {
-                if (clip == null || clip.samples <= 0 ||  !float.IsNormal(clip.frequency))
+                if (clip == null)
                     return;
 
-                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk();
-                native.setLoopPoints(start, TIMEUNIT.PCM, (value * clip.frequency).RoundToUInt().Clamp(start + 1).Clamp(0, clip.samples - 1), TIMEUNIT.PCM).ThrowIfNotOk();
+                loopEndSample = (value * clip.frequency).RoundToUInt();
             }
         }
 
