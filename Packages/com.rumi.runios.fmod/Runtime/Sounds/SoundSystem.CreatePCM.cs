@@ -13,7 +13,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return CreatePCMUnsafe(pcm, channel, frequency, (SOUND_FORMAT)format);
             }
             finally

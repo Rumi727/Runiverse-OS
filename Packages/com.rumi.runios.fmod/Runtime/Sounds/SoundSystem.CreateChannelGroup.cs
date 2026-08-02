@@ -27,7 +27,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 native.createChannelGroup(name, out ChannelGroup channelGroup).ThrowIfNotOk();
 
                 try

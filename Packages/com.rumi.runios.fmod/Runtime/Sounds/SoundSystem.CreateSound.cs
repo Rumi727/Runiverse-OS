@@ -13,7 +13,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return CreateSoundUnsafe(data, keepCompressed);
             }
             finally
@@ -28,7 +28,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return CreateSoundUnsafe(stream.ReadToEnd(), keepCompressed);
             }
             finally

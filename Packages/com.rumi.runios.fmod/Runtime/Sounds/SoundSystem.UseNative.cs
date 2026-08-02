@@ -9,7 +9,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 action.Invoke(native);
             }
             finally
@@ -24,7 +24,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 action.Invoke(native, state);
             }
             finally
@@ -39,7 +39,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return action.Invoke(native);
             }
             finally
@@ -54,7 +54,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return action.Invoke(native, state);
             }
             finally

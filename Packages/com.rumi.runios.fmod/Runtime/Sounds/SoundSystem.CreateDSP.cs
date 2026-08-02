@@ -51,7 +51,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
 
                 if (type == null)
                     throw new ArgumentNullException(nameof(type));

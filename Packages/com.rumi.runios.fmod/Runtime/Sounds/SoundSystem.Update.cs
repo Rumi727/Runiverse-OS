@@ -11,7 +11,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 native.update().LogErrorIfNotOk();
             }
             finally

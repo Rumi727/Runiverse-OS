@@ -54,7 +54,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return CreateStreamUnsafe(streamFile);
             }
             catch

@@ -11,7 +11,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                     return false;
 
                 action.Invoke(this);
@@ -29,7 +29,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                     return false;
 
                 action.Invoke(this, state);
@@ -47,7 +47,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                     return false;
 
                 action.Invoke(this, arg1, arg2);
@@ -65,7 +65,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                 {
                     result = default;
                     return false;
@@ -86,7 +86,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                 {
                     result = default;
                     return false;
@@ -107,7 +107,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (_isDisposed)
+                if (lifecycleState != LifecycleState.Active)
                 {
                     result = default;
                     return false;

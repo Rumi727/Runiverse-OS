@@ -96,7 +96,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                ThrowIfDisposedUnsafe();
+                ThrowIfUnavailableUnsafe();
                 return clip.UseNative(sound =>
                 {
                     native.playSound(sound, channelGroup, true, out Channel channel).ThrowIfNotOk();

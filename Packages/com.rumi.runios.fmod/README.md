@@ -90,13 +90,33 @@ FMOD CHANNELCONTROL_CALLBACK_TYPE.END
 자연 종료 뒤의 명시적 `channel.Dispose()`는 안전하지만 보통 필요하지 않습니다. 중복 요청은 첫 번째
 해제권 확보 뒤 no-op이 됩니다.
 
+### `SoundSystem` 생성과 `Reset()`
+
+`SoundSystem.main`은 `maxChannels = 4095`, `INITFLAGS.NORMAL`로 생성됩니다. 별도 시스템은 public
+생성자에서 init 전 설정을 지정할 수 있으며, 소유자가 직접 `Update()`와 `Dispose()`를 호출해야 합니다.
+
+```csharp
+using SoundSystem system = new(new SoundSystemSettings
+{
+    softwareChannels = 256,
+    softwareFormat = new SoundSystemSoftwareFormat(48000, FMOD.SPEAKERMODE.STEREO),
+    dspBuffer = new SoundSystemDSPBuffer(512, 4)
+});
+```
+
+`Reset(settings)`은 non-null field만 현재 저장 설정에 병합한 뒤, 시스템이 소유한 리소스를 해제하고
+같은 native system을 `close()`/`init()` 합니다. 리소스 해제 예외는 로그로 출력하고 남은 리소스 정리와
+네이티브 재초기화를 계속합니다. native close, 설정 적용 또는 init 실패 뒤에는 병합 설정을 보존하므로,
+잘못된 field만 바꾼 다음 `Reset()`을 다시 호출할 수 있습니다. Reset이 해제한 리소스의 재로드는 수행하지 않습니다.
+`onResetting`은 lifecycle 상태 변경 및 소유 리소스 해제 직전에, `onReset`은 재초기화 성공 및 활성 상태 복귀 직후 발생합니다.
+
 ### `SoundSystem.Dispose()`
 
 시스템 종료는 resource 구현 코드를 `nativeLock` 안에서 호출하지 않습니다.
 
 ```text
 write lock 획득                         // 기존 read 작업과 resource 해제권 확보가 끝날 때까지 대기
--> isDisposed = true                    // 새 등록·해제권 확보 차단
+-> lifecycleState = Disposed            // 새 등록·해제권 확보 차단
 -> queuedDisposals 분리
 -> 남은 ownedResources snapshot 후 Clear
 -> write lock 해제
@@ -107,6 +127,8 @@ write lock 획득                         // 기존 read 작업과 resource 해�
 -> native handle 제거
 -> write lock 해제
 ```
+
+리소스 해제 예외와 마지막 `FMOD.System.release()` 실패는 로그로 출력하고, 남은 종료 절차를 계속합니다.
 
 `ownedResources` snapshot은 동시성 락 자체가 아니라 소유권 전이입니다. static `SoundSystem.main`이
 계속 살아 있어도 종료된 resource wrapper를 dictionary가 계속 참조하지 않게 하고, 외부 resource 구현을
