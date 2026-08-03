@@ -366,6 +366,7 @@ namespace RuniOS.NBS
     public sealed class NBSPlaybackSchedule
     {
         readonly record struct PendingEntry(double anchorTime, int mapOrder, NBSPlaybackEntry source, NBSPreparedNote note);
+        readonly record struct NBSPreparedSoundStop(double anchorTime, int startLayer, int endLayer, int momentIndex, int entryIndex);
 
         internal NBSPlaybackSchedule(IReadOnlyList<NBSPlaybackEntry> mapEntries, float tempo, float pitch, INBSClipMetadataProvider clipMetadata)
         {
@@ -427,6 +428,7 @@ namespace RuniOS.NBS
 
             List<NBSPlaybackMoment> momentList = [];
             List<NBSPreparedNote> noteList = [];
+            List<NBSPreparedSoundStop> soundStopList = [];
             int pendingIndex = 0;
             while (pendingIndex < pending.Count)
             {
@@ -457,6 +459,17 @@ namespace RuniOS.NBS
                             item.source.specialEvent.startLayer,
                             item.source.specialEvent.endLayer
                         );
+                        soundStopList.Add
+                        (
+                            new NBSPreparedSoundStop
+                            (
+                                anchor,
+                                item.source.specialEvent.startLayer,
+                                item.source.specialEvent.endLayer,
+                                momentIndex,
+                                entryIndex
+                            )
+                        );
                     }
                 }
 
@@ -466,6 +479,23 @@ namespace RuniOS.NBS
 
             moments = momentList.AsReadOnly();
             preparedNotes = noteList.OrderBy(static x => x.originalStartTime).ThenBy(static x => x.mapEntryId).ToArray();
+            Dictionary<int, List<NBSPreparedSoundStop>> soundStopListsByLayer = [];
+            for (int i = 0; i < noteList.Count; i++)
+            {
+                int layer = noteList[i].layer;
+                if (!soundStopListsByLayer.ContainsKey(layer))
+                    soundStopListsByLayer.Add(layer, []);
+            }
+            for (int stopIndex = 0; stopIndex < soundStopList.Count; stopIndex++)
+            {
+                NBSPreparedSoundStop soundStop = soundStopList[stopIndex];
+                foreach (KeyValuePair<int, List<NBSPreparedSoundStop>> pair in soundStopListsByLayer)
+                {
+                    if (pair.Key >= soundStop.startLayer && pair.Key <= soundStop.endLayer)
+                        pair.Value.Add(soundStop);
+                }
+            }
+            soundStopsByLayer = soundStopListsByLayer.ToDictionary(static x => x.Key, static x => x.Value.ToArray());
             maximumTimelineDuration = preparedNotes.Length == 0 ? 0 : preparedNotes.Max(static x => x.timelineDuration);
 
             intervalTreeBase = 1;
@@ -481,6 +511,7 @@ namespace RuniOS.NBS
         }
 
         readonly NBSPreparedNote[] preparedNotes;
+        readonly Dictionary<int, NBSPreparedSoundStop[]> soundStopsByLayer;
         readonly int intervalTreeBase;
         readonly double[] intervalMaximumEnds;
 
@@ -623,8 +654,7 @@ namespace RuniOS.NBS
 
                     if (wallDelay >= 0)
                         sourceOffset = entry.note.reverseSource ? entry.note.sourceLength : 0;
-                    else if (WasStopped(entry.note, working.loopIteration, currentUnwrapped, loopInfo) ||
-                        !TryGetSourceOffset(entry.note, working.loopIteration, currentUnwrapped, loopInfo, out sourceOffset))
+                    else if (!TryGetSourceOffset(entry.note, working.loopIteration, currentUnwrapped, loopInfo, out sourceOffset))
                         continue;
 
                     output.Add(new NBSPlaybackCommand
@@ -729,38 +759,139 @@ namespace RuniOS.NBS
 
         bool WasStopped(NBSPreparedNote note, long noteIteration, double currentUnwrapped, NBSLoopInfo loopInfo)
         {
+            if (!soundStopsByLayer.TryGetValue(note.layer, out NBSPreparedSoundStop[]? soundStops) || soundStops.Length == 0)
+                return false;
+
             double noteAnchor = note.anchorTime + GetIterationShift(noteIteration, loopInfo, direction);
             long currentIteration = GetIterationFromUnwrapped(currentUnwrapped, loopInfo, direction, noteIteration);
-            for (long iteration = noteIteration; iteration <= currentIteration; iteration++)
+            if (!loopInfo.IsUsable || currentIteration == noteIteration)
             {
-                double shift = GetIterationShift(iteration, loopInfo, direction);
-                for (int momentIndex = 0; momentIndex < moments.Count; momentIndex++)
-                {
-                    NBSPlaybackMoment moment = moments[momentIndex];
-                    double stopperAnchor = moment.anchorTime + shift;
-                    double fromNote = direction == NBSPlaybackDirection.forward ? stopperAnchor - noteAnchor : noteAnchor - stopperAnchor;
-                    double toCurrent = direction == NBSPlaybackDirection.forward ? currentUnwrapped - stopperAnchor : stopperAnchor - currentUnwrapped;
-                    if (fromNote < 0 || toCurrent < 0)
-                        continue;
+                double shift = GetIterationShift(noteIteration, loopInfo, direction);
+                return HasSoundStopInRange
+                (
+                    soundStops,
+                    note,
+                    noteAnchor,
+                    currentUnwrapped,
+                    noteIteration,
+                    loopInfo,
+                    Math.Min(noteAnchor, currentUnwrapped) - shift,
+                    Math.Max(noteAnchor, currentUnwrapped) - shift
+                );
+            }
 
-                    for (int entryIndex = 0; entryIndex < moment.entries.Count; entryIndex++)
-                    {
-                        NBSPreparedEntry entry = moment.entries[entryIndex];
-                        if (entry.kind != NBSPlaybackEntryKind.soundStop ||
-                            !IsEntryAllowed(entry, moment.anchorTime, iteration, loopInfo) ||
-                            note.layer < entry.stopStartLayer || note.layer > entry.stopEndLayer)
-                            continue;
+            if (direction == NBSPlaybackDirection.forward)
+            {
+                if (HasSoundStopInRange(soundStops, note, noteAnchor, currentUnwrapped, noteIteration, loopInfo, note.anchorTime, loopInfo.endTime))
+                    return true;
+                if (currentIteration - noteIteration > 1 &&
+                    HasSoundStopInRange(soundStops, note, noteAnchor, currentUnwrapped, noteIteration + 1, loopInfo, loopInfo.startTime, loopInfo.endTime))
+                    return true;
 
-                        if (fromNote > 0 || momentIndex != note.momentIndex || entryIndex > note.entryIndex)
-                            return true;
-                    }
-                }
+                double currentShift = GetIterationShift(currentIteration, loopInfo, direction);
+                return HasSoundStopInRange
+                (
+                    soundStops,
+                    note,
+                    noteAnchor,
+                    currentUnwrapped,
+                    currentIteration,
+                    loopInfo,
+                    loopInfo.startTime,
+                    currentUnwrapped - currentShift
+                );
+            }
 
-                if (iteration == long.MaxValue)
+            if (HasSoundStopInRange(soundStops, note, noteAnchor, currentUnwrapped, noteIteration, loopInfo, loopInfo.startTime, note.anchorTime))
+                return true;
+            if (currentIteration - noteIteration > 1 &&
+                HasSoundStopInRange(soundStops, note, noteAnchor, currentUnwrapped, noteIteration + 1, loopInfo, loopInfo.startTime, loopInfo.endTime))
+                return true;
+
+            double reverseCurrentShift = GetIterationShift(currentIteration, loopInfo, direction);
+            return HasSoundStopInRange
+            (
+                soundStops,
+                note,
+                noteAnchor,
+                currentUnwrapped,
+                currentIteration,
+                loopInfo,
+                currentUnwrapped - reverseCurrentShift,
+                loopInfo.endTime
+            );
+        }
+
+        bool HasSoundStopInRange
+        (
+            NBSPreparedSoundStop[] soundStops,
+            NBSPreparedNote note,
+            double noteAnchor,
+            double currentUnwrapped,
+            long iteration,
+            NBSLoopInfo loopInfo,
+            double lowerAnchor,
+            double upperAnchor
+        )
+        {
+            if (upperAnchor < lowerAnchor)
+                return false;
+
+            int stopIndex = FindFirstSoundStopAtOrAfter(soundStops, lowerAnchor);
+            if (stopIndex > 0)
+                stopIndex--;
+
+            double shift = GetIterationShift(iteration, loopInfo, direction);
+            for (; stopIndex < soundStops.Length; stopIndex++)
+            {
+                NBSPreparedSoundStop soundStop = soundStops[stopIndex];
+                if (soundStop.anchorTime > upperAnchor)
                     break;
+
+                double stopperAnchor = soundStop.anchorTime + shift;
+                double fromNote = direction == NBSPlaybackDirection.forward ? stopperAnchor - noteAnchor : noteAnchor - stopperAnchor;
+                double toCurrent = direction == NBSPlaybackDirection.forward ? currentUnwrapped - stopperAnchor : stopperAnchor - currentUnwrapped;
+                if (fromNote < 0 || toCurrent < 0 || !IsSoundStopAllowed(soundStop, iteration, loopInfo))
+                    continue;
+
+                if (fromNote > 0 || soundStop.momentIndex != note.momentIndex || soundStop.entryIndex > note.entryIndex)
+                    return true;
             }
 
             return false;
+        }
+
+        static int FindFirstSoundStopAtOrAfter(NBSPreparedSoundStop[] soundStops, double anchorTime)
+        {
+            int low = 0;
+            int high = soundStops.Length;
+            while (low < high)
+            {
+                int middle = (low + high) / 2;
+                if (soundStops[middle].anchorTime < anchorTime)
+                    low = middle + 1;
+                else
+                    high = middle;
+            }
+
+            return low;
+        }
+
+        bool IsSoundStopAllowed(NBSPreparedSoundStop soundStop, long iteration, NBSLoopInfo loopInfo)
+        {
+            if (!loopInfo.IsUsable)
+                return iteration == 0;
+            if (!loopInfo.CanUseIteration(iteration))
+                return false;
+
+            if (iteration == 0)
+                return direction == NBSPlaybackDirection.forward
+                    ? soundStop.anchorTime < loopInfo.endTime
+                    : soundStop.anchorTime > loopInfo.startTime;
+
+            return direction == NBSPlaybackDirection.forward
+                ? soundStop.anchorTime >= loopInfo.startTime && soundStop.anchorTime < loopInfo.endTime
+                : soundStop.anchorTime > loopInfo.startTime && soundStop.anchorTime <= loopInfo.endTime;
         }
 
         long GetIterationFromUnwrapped(double currentUnwrapped, NBSLoopInfo loopInfo, NBSPlaybackDirection playbackDirection, long minimum)
