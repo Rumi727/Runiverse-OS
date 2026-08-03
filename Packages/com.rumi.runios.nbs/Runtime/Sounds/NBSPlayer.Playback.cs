@@ -6,35 +6,44 @@ namespace RuniOS.Sounds
 {
     public sealed partial class NBSPlayer
     {
-        sealed class Voice
-        (
-            SoundChannel channel,
-            int layer,
-            long deadlineTimestamp,
-            ulong startDspClock,
-            bool isPendingReservation
-        )
+        sealed class Voice(SoundChannel channel, NBSOccurrenceId occurrence, NBSPreparedNote preparedNote, float clipFrequency, ulong startDspClock, bool isPendingStart)
         {
+
             public readonly SoundChannel channel = channel;
-            public readonly int layer = layer;
-            public readonly long deadlineTimestamp = deadlineTimestamp;
+            public readonly NBSOccurrenceId occurrence = occurrence;
+            public readonly NBSPreparedNote preparedNote = preparedNote;
+            public readonly float clipFrequency = clipFrequency;
             public readonly ulong startDspClock = startDspClock;
-            public bool isPendingReservation = isPendingReservation;
+            public bool isPendingStart = isPendingStart;
+            public Action<SoundChannel>? stopHandler;
         }
 
-        readonly record struct DSPClockSnapshot(ulong dspClock, int sampleRate);
-        readonly record struct DSPClockAnchor(long timestamp, ulong dspClock, int sampleRate);
-        readonly record struct LoopInfo
+        readonly record struct PendingSubmission(ulong targetDspClock, NBSPlaybackCursor cursorBeforeMoment);
+
+        readonly record struct DSPClockSnapshot(ulong dspClock, int sampleRate, long timestamp);
+
+        readonly record struct VoiceCancellationPlan(Voice[]? voicesToStop, Voice[]? voicesToClearEndDelay);
+
+        readonly record struct VoiceSettings
         (
-            double startTime,
-            double endTime,
-            double range,
-            double startTick,
-            double endTick
+            float pitch,
+            float volume,
+            float panStereo,
+            float spatialBlend,
+            float dopplerLevel,
+            float spread,
+            float minDistance,
+            float maxDistance,
+            SoundRolloffMode rolloffMode,
+            AudioSpatialState spatialState,
+            long revision
         );
 
         readonly object voiceLock = new object();
+        readonly object voiceSettingsApplyLock = new object();
         readonly List<Voice> voices = [];
+        readonly List<NBSPlaybackCommand> commandBuffer = [];
+        readonly List<PendingSubmission> pendingSubmissionBuffer = [];
 
         readonly object spatialSnapshotLock = new object();
         AudioSpatialState spatialSnapshot;
@@ -45,487 +54,781 @@ namespace RuniOS.Sounds
 #if UNITY_PHYSICS2D_EXIST
         Rigidbody2D? rigidbody2D;
 #endif
-
         Vector3 lastSpatialPosition;
 
         internal void WorkerUpdate()
         {
-            playingLock.EnterWriteLock();
+            playingLock.EnterReadLock();
+            try
+            {
+                if (!isActiveAndEnabled || !isPlaying || isPaused || nbsScope == null || instrumentBank == null)
+                    return;
+            }
+            finally
+            {
+                playingLock.ExitReadLock();
+            }
+
+            if (!TryGetDSPClockSnapshot(out DSPClockSnapshot dspSnapshot))
+                return;
+
+            NBSInstrumentBank? retainedBank = null;
+            NBSFile? capturedFile;
+            NBSPlaybackSchedule? capturedSchedule;
+            NBSPlaybackCursor capturedCursor = default;
+            NBSLoopInfo capturedLoopInfo = default;
+            bool includePreviousNotes = false;
+            long capturedRevision;
+            long capturedSchedulingRevision = 0;
+            long capturedCompletedLoops = 0;
+            float capturedTempo;
+            float capturedPitch;
+            double capturedTime = 0;
+            long transportTimestampBefore = 0;
+            long transportTimestampAfter = 0;
+            bool invalidTransport;
+            bool invalidTime = false;
+            bool scheduleMismatch = false;
+            bool pitchChanged = false;
+            bool schedulingRevisionChanged = false;
+            playingLock.EnterReadLock();
             try
             {
                 NBSFile? file = nbsScope?.asset;
                 NBSInstrumentBank? bank = instrumentBank;
-                float transportTempo = base.tempo;
-                if (!isActiveAndEnabled || !isPlaying || isPaused || file == null || bank == null ||
-                    !float.IsFinite(transportTempo) || transportTempo == 0)
+                float currentTempo = base.tempo;
+                float currentPitch = base.pitch;
+                if (!isActiveAndEnabled || !isPlaying || isPaused || file == null || bank == null)
                     return;
 
-                long transportTimestampBefore = Stopwatch.GetTimestamp();
-                double currentTime = base.time;
-                long transportTimestampAfter = Stopwatch.GetTimestamp();
-                if (!double.IsFinite(currentTime))
-                    return;
-
-                long transportTimestamp = GetMidpointTimestamp(transportTimestampBefore, transportTimestampAfter);
-
-                long schedulingRevision = NBSPlaybackSettings.schedulingRevision;
-                if (observedSchedulingRevision != schedulingRevision)
+                NBSPlaybackSchedule? schedule = playbackSchedule;
+                capturedFile = file;
+                capturedSchedule = schedule;
+                capturedRevision = playbackRevision;
+                capturedTempo = currentTempo;
+                capturedPitch = currentPitch;
+                invalidTransport = !float.IsFinite(currentTempo) || currentTempo == 0 ||
+                    !float.IsFinite(currentPitch) || currentPitch == 0;
+                if (!invalidTransport)
                 {
-                    CancelFutureReservationsUnsafe();
-                    ResetCursorUnsafe(currentTime, false);
+                    if (!bank.TryRetain())
+                        return;
+
+                    retainedBank = bank;
+                    scheduleMismatch = schedule == null || !schedule.tempo.Equals(currentTempo) || !schedule.pitch.Equals(currentPitch);
+                    pitchChanged = schedule != null && !schedule.pitch.Equals(currentPitch);
+                    if (!scheduleMismatch)
+                    {
+                        transportTimestampBefore = Stopwatch.GetTimestamp();
+                        capturedTime = base.time;
+                        transportTimestampAfter = Stopwatch.GetTimestamp();
+                        invalidTime = !double.IsFinite(capturedTime);
+                        if (!invalidTime)
+                        {
+                            capturedCursor = playbackCursor;
+                            capturedLoopInfo = GetLoopInfoUnsafe(file);
+                            capturedCompletedLoops = completedLoops;
+                            includePreviousNotes = restoreSnapshot;
+                            capturedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+                            schedulingRevisionChanged = observedSchedulingRevision != capturedSchedulingRevision;
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                playingLock.ExitReadLock();
+            }
+
+            if (invalidTransport)
+            {
+                HandleInvalidWorkerTransport(capturedRevision, capturedTempo, capturedPitch, dspSnapshot);
+                return;
+            }
+            if (retainedBank == null)
+                return;
+
+            try
+            {
+                if (invalidTime)
+                    return;
+
+                if (scheduleMismatch)
+                {
+                    RebuildWorkerSchedule
+                    (
+                        capturedFile,
+                        retainedBank,
+                        capturedSchedule,
+                        capturedRevision,
+                        capturedTempo,
+                        capturedPitch,
+                        pitchChanged,
+                        dspSnapshot
+                    );
+                    return;
                 }
 
-                if (TryApplyLoopUnsafe(file, ref currentTime))
-                    transportTimestamp = Stopwatch.GetTimestamp();
+                if (capturedSchedule == null)
+                    return;
 
-                double lateTolerance = NBSPlaybackSettings.lateTolerance;
-                CancelStaleReservationsUnsafe(transportTimestamp, lateTolerance);
-                ProcessScheduleUnsafe
+                long transportTimestamp = transportTimestampBefore + ((transportTimestampAfter - transportTimestampBefore) / 2);
+                dspSnapshot = dspSnapshot with
+                {
+                    dspClock = GetDSPClockAtTimestamp(dspSnapshot, transportTimestamp),
+                    timestamp = transportTimestamp
+                };
+                TryApplyLoop(ref capturedTime, ref capturedCompletedLoops, capturedTempo, capturedLoopInfo);
+                CleanupStartedVoices(dspSnapshot.dspClock);
+
+                if (schedulingRevisionChanged)
+                {
+                    ResetWorkerSchedulingRevision
+                    (
+                        retainedBank,
+                        capturedSchedule,
+                        capturedRevision,
+                        dspSnapshot
+                    );
+                    return;
+                }
+
+                commandBuffer.Clear();
+                NBSPlaybackQueryContext capturedContext = new NBSPlaybackQueryContext
                 (
-                    file,
-                    bank,
-                    currentTime,
-                    transportTempo,
-                    transportTimestamp,
+                    new NBSPlaybackPosition(capturedTime, capturedCompletedLoops),
                     NBSPlaybackSettings.schedulingLookahead,
-                    lateTolerance
+                    capturedTempo,
+                    capturedPitch,
+                    capturedLoopInfo
                 );
+                capturedSchedule.Query
+                (
+                    capturedCursor,
+                    capturedContext,
+                    includePreviousNotes,
+                    commandBuffer,
+                    out NBSPlaybackCursor nextCursor
+                );
+                pendingSubmissionBuffer.Clear();
+                BuildPendingSubmissions
+                (
+                    commandBuffer,
+                    dspSnapshot,
+                    capturedSchedule.direction,
+                    pendingSubmissionBuffer
+                );
+
+                playingLock.EnterWriteLock();
+                try
+                {
+                    if (!IsPlaybackContextCurrentUnsafe(capturedRevision, retainedBank, capturedSchedule) ||
+                        NBSPlaybackSettings.schedulingRevision != capturedSchedulingRevision)
+                        return;
+
+                    if (completedLoops != capturedCompletedLoops)
+                    {
+                        completedLoops = capturedCompletedLoops;
+                        SyncInterpolatedTime(capturedTime);
+                    }
+                    CleanupStartedPendingSubmissionsUnsafe(dspSnapshot.dspClock);
+                    pendingSubmissions.AddRange(pendingSubmissionBuffer);
+                    playbackCursor = nextCursor;
+                    restoreSnapshot = false;
+                }
+                finally
+                {
+                    playingLock.ExitWriteLock();
+                }
+
+                ProcessCommandsUnsafe(retainedBank, capturedSchedule, capturedRevision, commandBuffer, dspSnapshot);
+            }
+            finally
+            {
+                retainedBank.Release();
+            }
+        }
+
+        void HandleInvalidWorkerTransport
+        (
+            long revision,
+            float tempo,
+            float pitch,
+            DSPClockSnapshot dspSnapshot
+        )
+        {
+            VoiceCancellationPlan cancellationPlan = default;
+            Voice[] voicesToStop = [];
+            bool changed;
+            playingLock.EnterWriteLock();
+            try
+            {
+                if (playbackRevision != revision || !base.tempo.Equals(tempo) || !base.pitch.Equals(pitch) ||
+                    !isActiveAndEnabled || !isPlaying || isPaused)
+                    return;
+                if (playbackSchedule == null && !playbackCursor.initialized && pendingSubmissions.Count == 0)
+                    return;
+
+                if (!float.IsFinite(pitch) || pitch == 0)
+                {
+                    voicesToStop = DetachAllVoicesUnsafe();
+                    pendingSubmissions.Clear();
+                }
+                else
+                {
+                    cancellationPlan = PrepareCancelFutureSubmissionsUnsafe(dspSnapshot.dspClock, true);
+                }
+
+                scheduleGeneration++;
+                playbackSchedule = null;
+                ResetCursorUnsafe(false);
+                restoreSnapshot = false;
+                changed = true;
             }
             finally
             {
                 playingLock.ExitWriteLock();
             }
+
+            ExecuteCancellationPlan(cancellationPlan);
+            StopVoices(voicesToStop);
+            if (changed)
+                NBSPlaybackWorker.Signal();
         }
 
-        void ProcessScheduleUnsafe
+        void RebuildWorkerSchedule
         (
             NBSFile file,
             NBSInstrumentBank bank,
-            double currentTime,
-            float transportTempo,
-            long transportTimestamp,
-            double schedulingLookahead,
-            double lateTolerance
+            NBSPlaybackSchedule? expectedSchedule,
+            long revision,
+            float tempo,
+            float pitch,
+            bool pitchChanged,
+            DSPClockSnapshot dspSnapshot
         )
         {
-            int direction = transportTempo < 0 ? -1 : 1;
-            bool hasLoop = TryGetLoopInfoUnsafe(file, out LoopInfo loopInfo);
-            if (hasLoop && scheduledFileLoops < completedFileLoops)
-            {
-                scheduledFileLoops = completedFileLoops;
-                SetScheduleLoopCursorUnsafe(file, loopInfo, direction);
-            }
-
-            DSPClockAnchor dspClockAnchor = default;
-            bool hasDspClockAnchor = false;
-            int loopSafety = 0;
-
-            while (true)
-            {
-                if (nextTickIndex < 0 || nextTickIndex >= file.ticks.Count)
-                {
-                    if (!hasLoop || loopSafety++ >= 1024 ||
-                        !TryAdvanceScheduleLoopUnsafe(file, loopInfo, direction))
-                        return;
-
-                    continue;
-                }
-
-                NBSTick tickColumn = file.ticks[nextTickIndex];
-                double tickTime = file.tempoMap.TickToTime(tickColumn.tick);
-                if (hasLoop && IsScheduleLoopBoundaryReached(tickColumn.tick, loopInfo, direction))
-                {
-                    if (loopSafety++ >= 1024 || !TryAdvanceScheduleLoopUnsafe(file, loopInfo, direction))
-                        return;
-
-                    continue;
-                }
-
-                double scheduleCurrentTime = hasLoop
-                    ? currentTime + (((double)completedFileLoops - scheduledFileLoops) * direction * loopInfo.range)
-                    : currentTime;
-                if (!double.IsFinite(scheduleCurrentTime))
-                    return;
-
-                double wallDelay = (tickTime - scheduleCurrentTime) / transportTempo;
-
-                if (wallDelay < -lateTolerance)
-                {
-                    SkipExpiredTickColumnsUnsafe(file, scheduleCurrentTime, transportTempo, lateTolerance, direction);
-                    continue;
-                }
-
-                long deadline = AddStopwatchSeconds(transportTimestamp, wallDelay);
-                if (wallDelay <= 0)
-                {
-                    ProcessTickColumnUnsafe(file, bank, tickColumn, deadline, null, lateTolerance);
-                    nextTickIndex += direction;
-                    continue;
-                }
-
-                if (schedulingLookahead <= 0 || wallDelay > schedulingLookahead)
-                    return;
-
-                if (!hasDspClockAnchor)
-                {
-                    if (!TryGetDSPClockAnchor(out dspClockAnchor))
-                        return;
-
-                    hasDspClockAnchor = true;
-                }
-
-                ulong startDspClock = ConvertToDSPClock(dspClockAnchor, deadline);
-                ProcessTickColumnUnsafe(file, bank, tickColumn, deadline, startDspClock, lateTolerance);
-                nextTickIndex += direction;
-            }
-        }
-
-        void SkipExpiredTickColumnsUnsafe
-        (
-            NBSFile file,
-            double currentTime,
-            float transportTempo,
-            double lateTolerance,
-            int direction
-        )
-        {
-            double oldestAllowedTime = currentTime - (lateTolerance * transportTempo);
-            double oldestAllowedTick = file.tempoMap.TimeToTick(oldestAllowedTime);
-            int oldIndex = nextTickIndex;
-            int allowedIndex = direction < 0
-                ? FindReverseCursor(file, oldestAllowedTick, true)
-                : FindForwardCursor(file, oldestAllowedTick, true);
-
-            nextTickIndex = direction < 0
-                ? Math.Min(nextTickIndex, allowedIndex)
-                : Math.Max(nextTickIndex, allowedIndex);
-
-            if (nextTickIndex == oldIndex)
-                nextTickIndex += direction;
-        }
-
-        void ProcessTickColumnUnsafe
-        (
-            NBSFile file,
-            NBSInstrumentBank bank,
-            NBSTick tickColumn,
-            long deadlineTimestamp,
-            ulong? scheduledDspClock,
-            double lateTolerance
-        )
-        {
-            foreach (NBSNote note in tickColumn.notes)
-            {
-                if (specialEventMap.TryGetValue((note.tick, note.layer), out NBSSpecialEvent specialEvent))
-                {
-                    if (specialEvent.kind == NBSSpecialEventKind.soundStop)
-                        ApplySoundStopperUnsafe(specialEvent, scheduledDspClock);
-
-                    continue;
-                }
-
-                if (note.velocity == 0 || note.layer < 0 || note.layer >= file.layers.Count ||
-                    bank[note.instrument] is not { } binding)
-                    continue;
-
-                ScheduleNoteUnsafe(note, file.layers[note.layer], binding, deadlineTimestamp, scheduledDspClock, lateTolerance);
-            }
-        }
-
-        void ScheduleNoteUnsafe
-        (
-            NBSNote note,
-            NBSLayer layer,
-            NBSInstrumentBank.InstrumentBinding binding,
-            long deadlineTimestamp,
-            ulong? scheduledDspClock,
-            double lateTolerance
-        )
-        {
-            long latestStartTimestamp = AddStopwatchSeconds(deadlineTimestamp, lateTolerance);
-            if (Stopwatch.GetTimestamp() > latestStartTimestamp)
-                return;
-
-            WaveAudioClip clip = binding.clip;
-            double semitones = ((note.key + binding.keyOffset) - 45) + (note.pitch / 100d);
-            float noteVolume = note.velocity / 100f;
-            float layerVolume = layer.volume / 100f;
-            float finalVolume = noteVolume * layerVolume * base.volume;
-
-            float combinedNbsPan = layer.panning == 100 ? note.panning : (layer.panning + note.panning) * 0.5f;
-            float combinedPan = (combinedNbsPan - 100) / 100f;
-            combinedPan = Mathf.Lerp(combinedPan, base.panStereo, Mathf.Abs(base.panStereo));
-
-            SoundChannel? channel = null;
-            double frequency = 0;
+            NBSPlaybackSchedule preparedSchedule = file.playbackMap.CreateSchedule(tempo, pitch, bank);
+            VoiceCancellationPlan cancellationPlan;
+            Voice[] frequencySnapshot = [];
+            bool changed;
+            playingLock.EnterWriteLock();
             try
             {
-                bool playable = clip.Execute(validClip =>
-                {
-                    frequency = validClip.frequency * Math.Pow(2, semitones / 12d) * base.pitch;
-                    if (!double.IsFinite(frequency) || frequency == 0 || frequency < float.MinValue || frequency > float.MaxValue)
-                        return false;
-
-                    channel = validClip.system.PlaySound(validClip, true);
-                    return true;
-                }, out bool clipResult) && clipResult;
-
-                if (!playable || channel == null || channel.isDisposed)
+                if (playbackRevision != revision || !ReferenceEquals(nbsScope?.asset, file) ||
+                    !ReferenceEquals(instrumentBank, bank) || !ReferenceEquals(playbackSchedule, expectedSchedule) ||
+                    !base.tempo.Equals(tempo) || !base.pitch.Equals(pitch) ||
+                    !isActiveAndEnabled || !isPlaying || isPaused)
                     return;
 
-                SoundChannel activeChannel = channel;
-                activeChannel.frequency = (float)frequency;
-                activeChannel.volume = finalVolume;
-                activeChannel.panStereo = combinedPan;
-                activeChannel.spatialBlend = base.spatialBlend;
-                activeChannel.dopplerLevel = base.dopplerLevel;
-                activeChannel.spread = base.spread;
-                activeChannel.minMaxDistance = (base.minDistance, base.maxDistance);
-                activeChannel.rolloffMode = rolloffMode;
+                cancellationPlan = PrepareCancelFutureSubmissionsUnsafe(dspSnapshot.dspClock, true);
+                if (pitchChanged)
+                    frequencySnapshot = GetVoiceSnapshot();
 
-                lock (spatialSnapshotLock)
-                    activeChannel.spatialState = spatialSnapshot;
+                scheduleGeneration++;
+                playbackSchedule = preparedSchedule;
+                ResetCursorUnsafe(false);
+                restoreSnapshot = false;
+                changed = true;
+            }
+            finally
+            {
+                playingLock.ExitWriteLock();
+            }
 
-                ulong startDspClock = GetImmediateParentClock(activeChannel);
-                bool isPendingReservation = false;
-                if (scheduledDspClock is { } targetDspClock && targetDspClock > startDspClock)
+            ExecuteCancellationPlan(cancellationPlan);
+            if (pitchChanged)
+                UpdateVoiceFrequenciesUnsafe(frequencySnapshot, pitch);
+            if (changed)
+                NBSPlaybackWorker.Signal();
+        }
+
+        void ResetWorkerSchedulingRevision
+        (
+            NBSInstrumentBank bank,
+            NBSPlaybackSchedule schedule,
+            long revision,
+            DSPClockSnapshot dspSnapshot
+        )
+        {
+            VoiceCancellationPlan cancellationPlan;
+            bool changed;
+            playingLock.EnterWriteLock();
+            try
+            {
+                if (!IsPlaybackContextCurrentUnsafe(revision, bank, schedule) ||
+                    observedSchedulingRevision == NBSPlaybackSettings.schedulingRevision)
+                    return;
+
+                cancellationPlan = PrepareCancelFutureSubmissionsUnsafe(dspSnapshot.dspClock, true);
+                ResetCursorUnsafe(false);
+                changed = true;
+            }
+            finally
+            {
+                playingLock.ExitWriteLock();
+            }
+
+            ExecuteCancellationPlan(cancellationPlan);
+            if (changed)
+                NBSPlaybackWorker.Signal();
+        }
+
+        void ProcessCommandsUnsafe
+        (
+            NBSInstrumentBank bank,
+            NBSPlaybackSchedule schedule,
+            long revision,
+            List<NBSPlaybackCommand> commands,
+            DSPClockSnapshot dspSnapshot
+        )
+        {
+            for (int i = 0; i < commands.Count; i++)
+            {
+                if (!IsPlaybackContextCurrent(revision, bank, schedule))
+                    return;
+
+                NBSPlaybackCommand command = commands[i];
+                ulong targetClock = AddDSPSeconds(dspSnapshot.dspClock, dspSnapshot.sampleRate, command.wallDelay);
+                try
                 {
-                    startDspClock = targetDspClock;
-                    isPendingReservation = true;
-                    activeChannel.SetDelay(startDspClock);
+                    if (command.kind == NBSPlaybackCommandKind.note)
+                        CreateVoiceUnsafe(bank, schedule, revision, command, dspSnapshot.dspClock, targetClock);
+                    else
+                        ApplySoundStopperUnsafe(command, dspSnapshot.dspClock, targetClock);
                 }
-
-                if (activeChannel.isDisposed)
-                    return;
-
-                if (Stopwatch.GetTimestamp() > latestStartTimestamp)
+                catch (Exception exception)
                 {
-                    RemoveAndStopVoice(activeChannel);
-                    return;
+                    Debug.LogException(exception);
                 }
+            }
+        }
 
+        static void BuildPendingSubmissions
+        (
+            List<NBSPlaybackCommand> commands,
+            DSPClockSnapshot dspSnapshot,
+            NBSPlaybackDirection direction,
+            List<PendingSubmission> output
+        )
+        {
+            long pendingLoop = long.MinValue;
+            int pendingMoment = int.MinValue;
+            for (int i = 0; i < commands.Count; i++)
+            {
+                NBSPlaybackCommand command = commands[i];
+                if (command.wallDelay <= 0 ||
+                    (command.occurrence.loopIteration == pendingLoop && command.occurrence.momentIndex == pendingMoment))
+                    continue;
+
+                NBSPlaybackCursor cursorBefore = new NBSPlaybackCursor
+                {
+                    momentIndex = command.occurrence.momentIndex,
+                    loopIteration = command.occurrence.loopIteration,
+                    scheduleGeneration = command.occurrence.scheduleGeneration,
+                    direction = direction,
+                    initialized = true
+                };
+                ulong targetClock = AddDSPSeconds(dspSnapshot.dspClock, dspSnapshot.sampleRate, command.wallDelay);
+                output.Add(new PendingSubmission(targetClock, cursorBefore));
+                pendingLoop = command.occurrence.loopIteration;
+                pendingMoment = command.occurrence.momentIndex;
+            }
+        }
+
+        bool IsPlaybackContextCurrent(long revision, NBSInstrumentBank bank, NBSPlaybackSchedule schedule)
+        {
+            playingLock.EnterReadLock();
+            try
+            {
+                return IsPlaybackContextCurrentUnsafe(revision, bank, schedule);
+            }
+            finally
+            {
+                playingLock.ExitReadLock();
+            }
+        }
+
+        bool IsPlaybackContextCurrentUnsafe(long revision, NBSInstrumentBank bank, NBSPlaybackSchedule schedule) =>
+            playbackRevision == revision && ReferenceEquals(instrumentBank, bank) && ReferenceEquals(playbackSchedule, schedule) &&
+            isActiveAndEnabled && isPlaying && !isPaused;
+
+        void CreateVoiceUnsafe
+        (
+            NBSInstrumentBank bank,
+            NBSPlaybackSchedule schedule,
+            long revision,
+            NBSPlaybackCommand command,
+            ulong currentDspClock,
+            ulong targetDspClock
+        )
+        {
+            lock (voiceLock)
+            {
+                for (int i = 0; i < voices.Count; i++)
+                {
+                    if (voices[i].occurrence == command.occurrence)
+                        return;
+                }
+            }
+
+            NBSPreparedNote note = command.note;
+            if (!bank.TryGetClip(note.instrument, out WaveAudioClip clip) || clip.samples == 0)
+                return;
+
+            double samplePosition = command.sourceOffset * clip.frequency;
+            if (!double.IsFinite(samplePosition))
+                return;
+            uint sourceSample = samplePosition <= 0
+                ? 0
+                : samplePosition >= clip.samples - 1d
+                    ? clip.samples - 1
+                    : (uint)Math.Round(samplePosition);
+
+            if (!clip.system.Execute((system, clip) => system.PlaySound(clip, true), clip, out SoundChannel? channel) || channel == null)
+                return;
+
+            try
+            {
+                channel.timeSample = sourceSample;
+
+                ulong startClock = Math.Max(currentDspClock, targetDspClock);
+                channel.SetDelay(startClock);
                 Voice voice = new Voice
                 (
-                    activeChannel,
-                    note.layer,
-                    deadlineTimestamp,
-                    startDspClock,
-                    isPendingReservation
+                    channel,
+                    command.occurrence,
+                    note,
+                    clip.frequency,
+                    startClock,
+                    startClock > currentDspClock
                 );
+                Action<SoundChannel> stopHandler = stoppedChannel => OnVoiceStopped(stoppedChannel, command.occurrence);
+                voice.stopHandler = stopHandler;
 
-                bool attached = true;
-                lock (voiceLock)
+                bool attached = false;
+                while (true)
                 {
-                    activeChannel.onStop += OnVoiceStopped;
-                    voices.Add(voice);
+                    if (!TryCaptureVoiceSettings(revision, bank, schedule, out VoiceSettings settings) ||
+                        !ApplyVoiceSettings(channel, note, clip.frequency, settings))
+                        break;
 
-                    if (activeChannel.isDisposed)
+                    playingLock.EnterReadLock();
+                    try
                     {
-                        voices.Remove(voice);
-                        activeChannel.onStop -= OnVoiceStopped;
-                        attached = false;
+                        if (!IsPlaybackContextCurrentUnsafe(revision, bank, schedule))
+                            break;
+                        if (voiceSettingsRevision != settings.revision)
+                            continue;
+
+                        attached = true;
+                        lock (voiceLock)
+                        {
+                            for (int i = 0; i < voices.Count; i++)
+                            {
+                                if (voices[i].occurrence == command.occurrence)
+                                {
+                                    attached = false;
+                                    break;
+                                }
+                            }
+
+                            if (attached)
+                            {
+                                channel.onStop += stopHandler;
+                                voices.Add(voice);
+                                if (channel.isDisposed)
+                                {
+                                    voices.Remove(voice);
+                                    channel.onStop -= stopHandler;
+                                    attached = false;
+                                }
+                            }
+                        }
                     }
+                    finally
+                    {
+                        playingLock.ExitReadLock();
+                    }
+
+                    break;
                 }
 
                 if (!attached)
+                {
+                    StopChannel(channel);
                     return;
+                }
 
-                activeChannel.UnPause();
+                channel.UnPause();
             }
-            catch (ObjectDisposedException)
+            catch
             {
-                if (channel != null)
-                    RemoveAndStopVoice(channel);
-            }
-            catch (Exception exception)
-            {
-                if (channel != null)
-                    RemoveAndStopVoice(channel);
-
-                Debug.LogException(exception);
+                RemoveAndStopVoice(channel, command.occurrence);
+                throw;
             }
         }
 
-        void ApplySoundStopperUnsafe(NBSSpecialEvent specialEvent, ulong? scheduledDspClock)
+        bool TryCaptureVoiceSettings
+        (
+            long revision,
+            NBSInstrumentBank bank,
+            NBSPlaybackSchedule schedule,
+            out VoiceSettings settings
+        )
+        {
+            playingLock.EnterReadLock();
+            try
+            {
+                if (!IsPlaybackContextCurrentUnsafe(revision, bank, schedule))
+                {
+                    settings = default;
+                    return false;
+                }
+
+                AudioSpatialState state;
+                lock (spatialSnapshotLock)
+                    state = spatialSnapshot;
+                settings = new VoiceSettings
+                (
+                    base.pitch,
+                    base.volume,
+                    base.panStereo,
+                    base.spatialBlend,
+                    base.dopplerLevel,
+                    base.spread,
+                    base.minDistance,
+                    base.maxDistance,
+                    rolloffMode,
+                    state,
+                    // ReSharper disable once InconsistentlySynchronizedField
+                    voiceSettingsRevision
+                );
+                return true;
+            }
+            finally
+            {
+                playingLock.ExitReadLock();
+            }
+        }
+
+        static bool ApplyVoiceSettings(SoundChannel channel, NBSPreparedNote note, float clipFrequency, VoiceSettings settings)
+        {
+            double frequency = clipFrequency * note.staticPitchRatio * Math.Abs((double)settings.pitch);
+            if (settings.pitch < 0)
+                frequency = -frequency;
+            if (!double.IsFinite(frequency) || frequency == 0 || frequency < float.MinValue || frequency > float.MaxValue)
+                return false;
+
+            channel.frequency = (float)frequency;
+            channel.volume = note.staticVolume * settings.volume;
+            channel.panStereo = Mathf.Lerp(note.staticPan, settings.panStereo, Mathf.Abs(settings.panStereo));
+            channel.spatialBlend = settings.spatialBlend;
+            channel.dopplerLevel = settings.dopplerLevel;
+            channel.spread = settings.spread;
+            channel.minMaxDistance = (settings.minDistance, settings.maxDistance);
+            channel.rolloffMode = settings.rolloffMode;
+            channel.spatialState = settings.spatialState;
+            return true;
+        }
+
+        void ApplySoundStopperUnsafe(NBSPlaybackCommand command, ulong currentDspClock, ulong targetDspClock)
         {
             Voice[] targets;
             lock (voiceLock)
             {
-                targets = voices
-                    .Where(x => x.layer >= specialEvent.startLayer && x.layer <= specialEvent.endLayer)
-                    .ToArray();
+                List<Voice> result = [];
+                for (int i = 0; i < voices.Count; i++)
+                {
+                    Voice voice = voices[i];
+                    if (voice.occurrence.scheduleGeneration == command.occurrence.scheduleGeneration &&
+                        voice.preparedNote.layer >= command.stopStartLayer && voice.preparedNote.layer <= command.stopEndLayer)
+                        result.Add(voice);
+                }
+                targets = result.ToArray();
             }
 
-            foreach (Voice voice in targets)
+            for (int i = 0; i < targets.Length; i++)
             {
+                Voice voice = targets[i];
                 try
                 {
-                    ulong parentClock = GetImmediateParentClock(voice.channel);
-                    bool scheduled = scheduledDspClock > parentClock;
-                    if (scheduled)
-                        voice.channel.SetDelay(voice.startDspClock, scheduledDspClock!.Value);
-
-                    if (!scheduled)
-                        RemoveAndStopVoice(voice.channel);
-                }
-                catch (ObjectDisposedException)
-                {
-                    RemoveAndStopVoice(voice.channel);
+                    if (targetDspClock > currentDspClock)
+                        voice.channel.SetDelay(voice.startDspClock, targetDspClock);
+                    else
+                        RemoveAndStopVoice(voice.channel, voice.occurrence);
                 }
                 catch (Exception exception)
                 {
                     Debug.LogException(exception);
-                    RemoveAndStopVoice(voice.channel);
+                    RemoveAndStopVoice(voice.channel, voice.occurrence);
                 }
             }
         }
 
-        bool TryGetLoopInfoUnsafe(NBSFile file, out LoopInfo loopInfo)
+        NBSLoopInfo GetLoopInfoUnsafe(NBSFile? file)
         {
-            bool fileLoop = useFileLoopSettings && file.header.loopEnabled;
-            if (!base.loop)
+            if (file == null || !base.loop)
+                return default;
+
+            bool useFileLoop = useFileLoopSettings && file.header.loopEnabled;
+            double startTime;
+            double endTime;
+            long maximumLoops;
+            if (useFileLoop)
             {
-                loopInfo = default;
-                return false;
+                startTime = file.tempoMap.TickToTime(file.header.loopStartTick);
+                endTime = file.duration;
+                maximumLoops = file.header.maxLoopCount;
+            }
+            else
+            {
+                startTime = Math.Clamp(base.loopStart, 0, file.duration);
+                endTime = Math.Clamp(base.loopEnd, startTime, file.duration);
+                maximumLoops = 0;
             }
 
-            double loopStartTime = fileLoop ? file.tempoMap.TickToTime(file.header.loopStartTick) : base.loopStart;
-            double loopEndTime = fileLoop ? file.duration : base.loopEnd.Clamp(loopStartTime, file.duration);
-            double range = loopEndTime - loopStartTime;
-            if (!double.IsFinite(range) || range <= 0)
-            {
-                loopInfo = default;
-                return false;
-            }
-
-            double loopStartTick = fileLoop ? file.header.loopStartTick : file.tempoMap.TimeToTick(loopStartTime);
-            double loopEndTick = fileLoop ? file.tickLength : file.tempoMap.TimeToTick(loopEndTime);
-            loopInfo = new LoopInfo(loopStartTime, loopEndTime, range, loopStartTick, loopEndTick);
-            return true;
+            double range = endTime - startTime;
+            return double.IsFinite(startTime) && double.IsFinite(endTime) && range > 0
+                ? new NBSLoopInfo(true, startTime, endTime, maximumLoops)
+                : default;
         }
 
-        bool TryApplyLoopUnsafe(NBSFile file, ref double currentTime)
+        static void TryApplyLoop
+        (
+            ref double currentTime,
+            ref long completedLoops,
+            float tempo,
+            NBSLoopInfo loopInfo
+        )
         {
-            if (!TryGetLoopInfoUnsafe(file, out LoopInfo loopInfo))
-                return false;
+            if (!loopInfo.enabled || loopInfo.range <= 0)
+                return;
 
-            bool changed = false;
             int safety = 0;
-            if (base.tempo >= 0)
+            if (tempo > 0)
             {
-                while (currentTime >= loopInfo.endTime && safety++ < 1024)
+                while (currentTime >= loopInfo.endTime && loopInfo.CanUseIteration(completedLoops + 1) && safety++ < 1024)
                 {
                     currentTime = loopInfo.startTime + (currentTime - loopInfo.endTime);
-                    completedFileLoops++;
-                    changed = true;
+                    completedLoops++;
                 }
             }
             else
             {
-                while (currentTime <= loopInfo.startTime && safety++ < 1024)
+                while (currentTime <= loopInfo.startTime && loopInfo.CanUseIteration(completedLoops + 1) && safety++ < 1024)
                 {
                     currentTime = loopInfo.endTime - (loopInfo.startTime - currentTime);
-                    completedFileLoops++;
-                    changed = true;
-                }
-            }
-
-            if (changed)
-                SyncInterpolatedTime(currentTime);
-
-            return changed;
-        }
-
-        bool TryAdvanceScheduleLoopUnsafe(NBSFile file, LoopInfo loopInfo, int direction)
-        {
-            int nextLoopIndex = GetScheduleLoopCursor(file, loopInfo, direction);
-            if (nextLoopIndex < 0 || nextLoopIndex >= file.ticks.Count)
-                return false;
-
-            if (!IsInsideScheduleLoop(file.ticks[nextLoopIndex].tick, loopInfo, direction))
-                return false;
-
-            scheduledFileLoops++;
-            nextTickIndex = nextLoopIndex;
-            return true;
-        }
-
-        void SetScheduleLoopCursorUnsafe(NBSFile file, LoopInfo loopInfo, int direction) =>
-            nextTickIndex = GetScheduleLoopCursor(file, loopInfo, direction);
-
-        static int GetScheduleLoopCursor(NBSFile file, LoopInfo loopInfo, int direction) => direction < 0
-            ? FindReverseCursor(file, loopInfo.endTick, true)
-            : FindForwardCursor(file, loopInfo.startTick, true);
-
-        static bool IsScheduleLoopBoundaryReached(double tick, LoopInfo loopInfo, int direction) => direction < 0
-            ? tick <= loopInfo.startTick
-            : tick >= loopInfo.endTick;
-
-        static bool IsInsideScheduleLoop(double tick, LoopInfo loopInfo, int direction) => direction < 0
-            ? tick > loopInfo.startTick && tick <= loopInfo.endTick
-            : tick >= loopInfo.startTick && tick < loopInfo.endTick;
-
-        void CancelFutureReservationsUnsafe()
-        {
-            Voice[] snapshot;
-            lock (voiceLock)
-                snapshot = voices.Where(x => x.isPendingReservation).ToArray();
-
-            foreach (Voice voice in snapshot)
-            {
-                try
-                {
-                    bool isFuture = !voice.channel.isDisposed &&
-                                    voice.startDspClock > GetImmediateParentClock(voice.channel);
-                    if (isFuture)
-                        RemoveAndStopVoice(voice.channel);
-                    else
-                        voice.isPendingReservation = false;
-                }
-                catch (ObjectDisposedException)
-                {
-                    RemoveAndStopVoice(voice.channel);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
+                    completedLoops++;
                 }
             }
         }
 
-        void CancelStaleReservationsUnsafe(long currentTimestamp, double lateTolerance)
+        void CleanupStartedPendingSubmissionsUnsafe(ulong currentDspClock)
         {
-            long oldestAllowedTimestamp = AddStopwatchSeconds(currentTimestamp, -lateTolerance);
-            List<Voice>? candidates = null;
+            int writeIndex = 0;
+            for (int readIndex = 0; readIndex < pendingSubmissions.Count; readIndex++)
+            {
+                PendingSubmission submission = pendingSubmissions[readIndex];
+                if (submission.targetDspClock > currentDspClock)
+                    pendingSubmissions[writeIndex++] = submission;
+            }
+
+            if (writeIndex < pendingSubmissions.Count)
+                pendingSubmissions.RemoveRange(writeIndex, pendingSubmissions.Count - writeIndex);
+        }
+
+        void CleanupStartedVoices(ulong currentDspClock)
+        {
             lock (voiceLock)
             {
-                foreach (Voice voice in voices)
+                for (int i = 0; i < voices.Count; i++)
                 {
-                    if (!voice.isPendingReservation || voice.deadlineTimestamp >= oldestAllowedTimestamp)
+                    if (voices[i].isPendingStart && voices[i].startDspClock <= currentDspClock)
+                        voices[i].isPendingStart = false;
+                }
+            }
+        }
+
+        void CancelFutureSubmissionsUnsafe()
+        {
+            bool hasClock = TryGetDSPClockSnapshot(out DSPClockSnapshot snapshot);
+            ulong currentClock = hasClock ? snapshot.dspClock : 0;
+            CancelFutureSubmissionsUnsafe(currentClock, hasClock);
+        }
+
+        void CancelFutureSubmissionsUnsafe(ulong currentClock, bool hasClock)
+        {
+            VoiceCancellationPlan cancellationPlan = PrepareCancelFutureSubmissionsUnsafe(currentClock, hasClock);
+            ExecuteCancellationPlan(cancellationPlan);
+        }
+
+        VoiceCancellationPlan PrepareCancelFutureSubmissionsUnsafe(ulong currentClock, bool hasClock)
+        {
+            NBSPlaybackCursor? rewindCursor = null;
+            for (int i = 0; i < pendingSubmissions.Count; i++)
+            {
+                PendingSubmission submission = pendingSubmissions[i];
+                if (hasClock && submission.targetDspClock <= currentClock)
+                    continue;
+
+                rewindCursor ??= submission.cursorBeforeMoment;
+            }
+
+            Voice[] futureVoices;
+            Voice[] activeVoices;
+            lock (voiceLock)
+            {
+                List<Voice> futureResult = [];
+                List<Voice> activeResult = [];
+                for (int i = 0; i < voices.Count; i++)
+                {
+                    Voice voice = voices[i];
+                    if (voice.isPendingStart && (!hasClock || voice.startDspClock > currentClock))
+                    {
+                        futureResult.Add(voice);
                         continue;
+                    }
 
-                    candidates ??= [];
-                    candidates.Add(voice);
+                    if (voice.isPendingStart)
+                        voice.isPendingStart = false;
+                    activeResult.Add(voice);
                 }
+                futureVoices = futureResult.ToArray();
+                activeVoices = activeResult.ToArray();
             }
 
-            if (candidates == null)
+            pendingSubmissions.Clear();
+            if (rewindCursor is { } cursor && cursor.scheduleGeneration == scheduleGeneration)
+                playbackCursor = cursor;
+            return new VoiceCancellationPlan(futureVoices, activeVoices);
+        }
+
+        void ExecuteCancellationPlan(VoiceCancellationPlan cancellationPlan)
+        {
+            Voice[]? voicesToStop = cancellationPlan.voicesToStop;
+            if (voicesToStop != null)
+            {
+                for (int i = 0; i < voicesToStop.Length; i++)
+                    RemoveAndStopVoice(voicesToStop[i].channel, voicesToStop[i].occurrence);
+            }
+
+            ClearVoiceEndDelays(cancellationPlan.voicesToClearEndDelay);
+        }
+
+        void ClearVoiceEndDelaysUnsafe() => ClearVoiceEndDelays(GetVoiceSnapshot());
+
+        void ClearVoiceEndDelays(Voice[]? snapshot)
+        {
+            if (snapshot == null)
                 return;
 
-            foreach (Voice voice in candidates)
+            for (int i = 0; i < snapshot.Length; i++)
             {
+                Voice voice = snapshot[i];
                 try
                 {
-                    bool isFuture = !voice.channel.isDisposed &&
-                                    voice.startDspClock > GetImmediateParentClock(voice.channel);
-                    if (isFuture)
-                        RemoveAndStopVoice(voice.channel);
-                    else
-                        voice.isPendingReservation = false;
-                }
-                catch (ObjectDisposedException)
-                {
-                    RemoveAndStopVoice(voice.channel);
+                    voice.channel.SetDelay(voice.startDspClock);
                 }
                 catch (Exception exception)
                 {
@@ -533,32 +836,136 @@ namespace RuniOS.Sounds
                 }
             }
         }
+
+        void PauseVoicesUnsafe() => ApplyToVoicesUnsafe(static voice => voice.channel.Pause());
+        void UnPauseVoicesUnsafe() => ApplyToVoicesUnsafe(static voice => voice.channel.UnPause());
 
         void StopAllVoicesUnsafe()
         {
-            SoundChannel[] channels;
-            lock (voiceLock)
-                channels = voices.Select(x => x.channel).ToArray();
-
-            foreach (SoundChannel channel in channels)
-                RemoveAndStopVoice(channel);
+            Voice[] snapshot = DetachAllVoicesUnsafe();
+            StopVoices(snapshot);
         }
 
-        void UpdateVoiceRolloffModeUnsafe(SoundRolloffMode value)
+        Voice[] DetachAllVoicesUnsafe()
         {
-            Voice[] snapshot;
             lock (voiceLock)
-                snapshot = voices.ToArray();
-
-            foreach (Voice voice in snapshot)
             {
+                Voice[] snapshot = voices.ToArray();
+                voices.Clear();
+                for (int i = 0; i < snapshot.Length; i++)
+                {
+                    Voice voice = snapshot[i];
+                    if (voice.stopHandler != null)
+                        voice.channel.onStop -= voice.stopHandler;
+                }
+                return snapshot;
+            }
+        }
+
+        static void StopVoices(Voice[] voicesToStop)
+        {
+            for (int i = 0; i < voicesToStop.Length; i++)
+                StopChannel(voicesToStop[i].channel);
+        }
+
+        void UpdateVoiceFrequenciesUnsafe()
+        {
+            float playerPitch = base.pitch;
+            UpdateVoiceFrequenciesUnsafe(GetVoiceSnapshot(), playerPitch);
+        }
+
+        void UpdateVoiceFrequenciesUnsafe(Voice[] snapshot, float playerPitch)
+        {
+            ApplyToVoicesUnsafe(snapshot, voice =>
+            {
+                double frequency = voice.clipFrequency * voice.preparedNote.staticPitchRatio * Math.Abs((double)playerPitch);
+                if (playerPitch < 0)
+                    frequency = -frequency;
+                if (double.IsFinite(frequency) && frequency != 0 && frequency >= float.MinValue && frequency <= float.MaxValue)
+                    voice.channel.frequency = (float)frequency;
+            });
+        }
+
+        void UpdateVoiceVolumesUnsafe(Voice[] snapshot, float value) =>
+            ApplyToVoicesUnsafe(snapshot, voice => voice.channel.volume = voice.preparedNote.staticVolume * value);
+
+        void UpdateVoicePansUnsafe(Voice[] snapshot, float value) => ApplyToVoicesUnsafe(snapshot, voice =>
+            voice.channel.panStereo = Mathf.Lerp(voice.preparedNote.staticPan, value, Mathf.Abs(value)));
+
+        void UpdateVoiceRolloffModeUnsafe(Voice[] snapshot, SoundRolloffMode value) =>
+            ApplyToVoicesUnsafe(snapshot, voice => voice.channel.rolloffMode = value);
+
+        void SetSpatialProperty
+        (
+            float value,
+            Action<SoundChannel, float> channelSetter,
+            Action<NBSPlayer, float> baseSetter
+        )
+        {
+            lock (voiceSettingsApplyLock)
+            {
+                Voice[] snapshot;
+                playingLock.EnterWriteLock();
                 try
                 {
-                    voice.channel.rolloffMode = value;
+                    baseSetter(this, value);
+                    voiceSettingsRevision++;
+                    snapshot = GetVoiceSnapshot();
                 }
-                catch (ObjectDisposedException)
+                finally
                 {
-                    RemoveAndStopVoice(voice.channel);
+                    playingLock.ExitWriteLock();
+                }
+
+                ApplyToVoicesUnsafe(snapshot, voice => channelSetter(voice.channel, value));
+            }
+        }
+
+        void SetBaseSpatialBlend(float value) => base.spatialBlend = value;
+        void SetBaseDopplerLevel(float value) => base.dopplerLevel = value;
+        void SetBaseSpread(float value) => base.spread = value;
+
+        void SetDistanceProperty(float value, bool minimum)
+        {
+            lock (voiceSettingsApplyLock)
+            {
+                Voice[] snapshot;
+                (float min, float max) distance;
+                playingLock.EnterWriteLock();
+                try
+                {
+                    if (minimum)
+                        base.minDistance = value;
+                    else
+                        base.maxDistance = value;
+
+                    voiceSettingsRevision++;
+                    distance = (base.minDistance, base.maxDistance);
+                    snapshot = GetVoiceSnapshot();
+                }
+                finally
+                {
+                    playingLock.ExitWriteLock();
+                }
+
+                ApplyToVoicesUnsafe(snapshot, voice => voice.channel.minMaxDistance = distance);
+            }
+        }
+
+        void ApplyToVoicesUnsafe(Action<Voice> action)
+        {
+            Voice[] snapshot = GetVoiceSnapshot();
+            ApplyToVoicesUnsafe(snapshot, action);
+        }
+
+        static void ApplyToVoicesUnsafe(Voice[] snapshot, Action<Voice> action)
+        {
+            for (int i = 0; i < snapshot.Length; i++)
+            {
+                Voice voice = snapshot[i];
+                try
+                {
+                    action(voice);
                 }
                 catch (Exception exception)
                 {
@@ -567,46 +974,45 @@ namespace RuniOS.Sounds
             }
         }
 
-        void RemoveAndStopVoice(SoundChannel channel)
+        Voice[] GetVoiceSnapshot()
+        {
+            lock (voiceLock)
+                return voices.ToArray();
+        }
+
+        void RemoveAndStopVoice(SoundChannel channel, NBSOccurrenceId occurrence)
+        {
+            RemoveVoice(channel, occurrence);
+            StopChannel(channel);
+        }
+
+        void RemoveVoice(SoundChannel channel, NBSOccurrenceId occurrence)
         {
             lock (voiceLock)
             {
-                int index = voices.FindIndex(x => ReferenceEquals(x.channel, channel));
-                if (index >= 0)
-                {
-                    voices.RemoveAt(index);
-                    channel.onStop -= OnVoiceStopped;
-                }
-            }
+                int index = voices.FindIndex(x => ReferenceEquals(x.channel, channel) && x.occurrence == occurrence);
+                if (index < 0)
+                    return;
 
-            try
-            {
+                Voice voice = voices[index];
+                voices.RemoveAt(index);
+                if (voice.stopHandler != null)
+                    channel.onStop -= voice.stopHandler;
+            }
+        }
+
+        static void StopChannel(SoundChannel channel)
+        {
+            if (!channel.isDisposed)
                 channel.Stop();
-            }
-            catch (Exception exception)
-            {
-                Debug.LogException(exception);
-            }
         }
 
-        void OnVoiceStopped(SoundChannel channel)
-        {
-            lock (voiceLock)
-            {
-                int index = voices.FindIndex(x => ReferenceEquals(x.channel, channel));
-                if (index >= 0)
-                {
-                    voices.RemoveAt(index);
-                    channel.onStop -= OnVoiceStopped;
-                }
-            }
-        }
+        void OnVoiceStopped(SoundChannel channel, NBSOccurrenceId occurrence) => RemoveVoice(channel, occurrence);
 
         void Update()
         {
             Vector3 position = transform.position;
             Vector3 velocity = Vector3.zero;
-
 #if UNITY_PHYSICS_EXIST
             if (rigidbody != null)
                 velocity = rigidbody.linearVelocity;
@@ -626,92 +1032,64 @@ namespace RuniOS.Sounds
 
             if (!IsFinite(velocity))
                 velocity = Vector3.zero;
-
             lastSpatialPosition = position;
 
             AudioSpatialState state = new AudioSpatialState(position, velocity, transform.rotation);
             lock (spatialSnapshotLock)
                 spatialSnapshot = state;
 
-            Voice[] snapshot;
-            lock (voiceLock)
-                snapshot = voices.ToArray();
-
-            foreach (Voice voice in snapshot)
+            Voice[] snapshot = GetVoiceSnapshot();
+            for (int i = 0; i < snapshot.Length; i++)
             {
-                try
+                Voice voice = snapshot[i];
+                if (voice.channel.isDisposed)
                 {
-                    voice.channel.spatialState = state;
+                    RemoveVoice(voice.channel, voice.occurrence);
+                    continue;
                 }
-                catch (ObjectDisposedException)
-                {
-                    RemoveAndStopVoice(voice.channel);
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
-                }
+
+                voice.channel.spatialState = state;
             }
         }
 
-        static ulong GetImmediateParentClock(SoundChannel channel)
+        static bool TryGetDSPClockSnapshot(out DSPClockSnapshot snapshot)
         {
-            (_, ulong parentClock) = channel.GetDSPClock();
-            return parentClock;
-        }
-
-        static bool TryGetDSPClockAnchor(out DSPClockAnchor anchor)
-        {
-            DSPClockSnapshot snapshot = default;
+            DSPClockSnapshot result = default;
             long timestampBefore = Stopwatch.GetTimestamp();
             bool success = SoundSystem.main.Execute(system =>
             {
-                snapshot = new DSPClockSnapshot(system.GetMasterDSPClock(), system.outputSampleRate);
+                result = new DSPClockSnapshot(system.GetMasterDSPClock(), system.outputSampleRate, 0);
             });
             long timestampAfter = Stopwatch.GetTimestamp();
+            snapshot = result with { timestamp = timestampBefore + ((timestampAfter - timestampBefore) / 2) };
+            return success && result.sampleRate > 0;
+        }
 
-            if (!success || snapshot.sampleRate <= 0)
+        static ulong GetDSPClockAtTimestamp(DSPClockSnapshot snapshot, long timestamp)
+        {
+            double samples = ((timestamp - snapshot.timestamp) / (double)Stopwatch.Frequency) * snapshot.sampleRate;
+            if (samples >= 0)
             {
-                anchor = default;
-                return false;
+                if (samples >= ulong.MaxValue - snapshot.dspClock)
+                    return ulong.MaxValue;
+                return snapshot.dspClock + (ulong)Math.Round(samples);
             }
 
-            anchor = new DSPClockAnchor
-            (
-                GetMidpointTimestamp(timestampBefore, timestampAfter),
-                snapshot.dspClock,
-                snapshot.sampleRate
-            );
-            return true;
-        }
-
-        static long GetMidpointTimestamp(long before, long after) => before + ((after - before) / 2);
-
-        static long AddStopwatchSeconds(long timestamp, double seconds)
-        {
-            double ticks = seconds * Stopwatch.Frequency;
-            if (ticks >= (double)long.MaxValue - timestamp)
-                return long.MaxValue;
-            if (ticks <= (double)long.MinValue - timestamp)
-                return long.MinValue;
-
-            return timestamp + (long)Math.Round(ticks);
-        }
-
-        static ulong ConvertToDSPClock(DSPClockAnchor anchor, long timestamp)
-        {
-            double samples = (((double)timestamp - anchor.timestamp) / Stopwatch.Frequency) * anchor.sampleRate;
-            if (samples >= ulong.MaxValue - anchor.dspClock)
-                return ulong.MaxValue;
-
-            if (samples >= 0)
-                return anchor.dspClock + (ulong)Math.Round(samples);
-
             double magnitude = -samples;
-            if (magnitude >= anchor.dspClock)
+            if (magnitude >= snapshot.dspClock)
                 return 0;
+            return snapshot.dspClock - (ulong)Math.Round(magnitude);
+        }
 
-            return anchor.dspClock - (ulong)Math.Round(magnitude);
+        static ulong AddDSPSeconds(ulong dspClock, int sampleRate, double seconds)
+        {
+            if (seconds <= 0)
+                return dspClock;
+
+            double samples = seconds * sampleRate;
+            if (!double.IsFinite(samples) || samples >= ulong.MaxValue - dspClock)
+                return ulong.MaxValue;
+            return dspClock + (ulong)Math.Round(samples);
         }
 
         static bool IsFinite(Vector3 value) => float.IsFinite(value.x) && float.IsFinite(value.y) && float.IsFinite(value.z);

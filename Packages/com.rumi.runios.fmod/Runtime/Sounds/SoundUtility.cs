@@ -19,13 +19,17 @@ namespace RuniOS.Sounds
             [CallerArgumentExpression("result")] string location = ""
         )
         {
-            if (result == RESULT.ERR_INVALID_HANDLE)
+            switch (result)
             {
-                channel.HandleInvalidHandle();
-                return;
+                case RESULT.ERR_INVALID_HANDLE:
+                    channel.HandleInvalidHandle();
+                    return;
+                case RESULT.ERR_INVALID_PARAM when channel.isDisposed:
+                    return;
+                default:
+                    result.ThrowIfNotOk(location);
+                    break;
             }
-
-            result.ThrowIfNotOk(location);
         }
 
         // ReSharper disable Unity.PerformanceAnalysis

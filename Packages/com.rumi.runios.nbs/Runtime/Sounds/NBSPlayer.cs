@@ -8,46 +8,41 @@ using System.Threading;
 namespace RuniOS.Sounds
 {
     /// <summary>
-    /// Plays scoped NBS resources through FMOD from a shared background scheduling worker.<br/>
-    /// 공유 백그라운드 예약 워커에서 스코프 기반 NBS 리소스를 FMOD로 재생합니다.
+    /// Plays scoped NBS resources through precomputed schedules and a shared background worker.<br/>
+    /// 미리 계산된 스케줄과 공유 백그라운드 워커를 통해 스코프 기반 NBS 리소스를 재생합니다.
     /// </summary>
     [ExecuteAlways]
     public sealed partial class NBSPlayer : RuniAudioSource, IReloadable
     {
-        /// <summary>
-        /// Gets or sets the NBS resource reference.
-        /// NBS 리소스 참조를 가져오거나 설정합니다.
-        /// </summary>
+        /// <summary>Gets or sets the NBS resource reference.<br/>NBS 리소스 참조를 가져오거나 설정합니다.</summary>
         public AssetRef<NBSFile> nbsFileRef
         {
             get
             {
-                playingLock.EnterReadLock();
+                nbsFileRefLock.EnterReadLock();
                 try
                 {
                     return _nbsFileRef;
                 }
                 finally
                 {
-                    playingLock.ExitReadLock();
+                    nbsFileRefLock.ExitReadLock();
                 }
             }
             set
             {
-                playingLock.EnterWriteLock();
+                nbsFileRefLock.EnterWriteLock();
                 try
                 {
-                    if (_nbsFileRef == value)
-                        return;
-
                     _nbsFileRef = value;
                 }
                 finally
                 {
-                    playingLock.ExitWriteLock();
+                    nbsFileRefLock.ExitWriteLock();
                 }
             }
         }
+        readonly ReaderWriterLockSlim nbsFileRefLock = new ReaderWriterLockSlim();
         [SerializeField] AssetRef<NBSFile> _nbsFileRef;
 
         /// <summary>Gets the currently scoped NBS file, or <see langword="null"/> while unavailable.<br/>현재 스코프된 NBS 파일을 가져오며, 사용할 수 없으면 <see langword="null"/>입니다.</summary>
@@ -66,44 +61,38 @@ namespace RuniOS.Sounds
                 }
             }
         }
+
         IAssetScope<NBSFile>? nbsScope;
         NBSInstrumentBank? instrumentBank;
+        NBSPlaybackSchedule? playbackSchedule;
+        NBSPlaybackCursor playbackCursor;
+        readonly List<PendingSubmission> pendingSubmissions = [];
+        long scheduleGeneration;
+        long completedLoops;
+        bool restoreSnapshot;
+        long playbackRevision;
+        long voiceSettingsRevision;
+        long observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+        readonly AsyncReloadGate reloadGate = new AsyncReloadGate();
 
         /// <summary>
-        /// Gets or sets the transport position in seconds. The value is intentionally not clamped to the song range.<br/>
-        /// 초 단위 트랜스포트 위치를 가져오거나 설정합니다. 값은 의도적으로 곡 범위에 제한되지 않습니다.
+        /// Gets or sets the loop-relative transport position in seconds.<br/>
+        /// 루프 기준 트랜스포트 위치를 초 단위로 가져오거나 설정합니다.
         /// </summary>
-        /// <remarks>
-        /// Resource loading never pauses, rewinds, or rebases this transport.<br/>
-        /// When resources become available after playback starts, note scheduling begins from the current transport position.
-        /// <br/><br/>
-        /// 리소스 로딩은 이 트랜스포트를 정지하거나 되감거나 재기준화하지 않습니다.<br/>
-        /// 재생 시작 후 리소스가 준비되면 현재 트랜스포트 위치부터 노트 예약을 시작합니다.
-        /// </remarks>
         public override double time
         {
-            get
-            {
-                playingLock.EnterReadLock();
-                try
-                {
-                    return base.time;
-                }
-                finally
-                {
-                    playingLock.ExitReadLock();
-                }
-            }
+            get => base.time;
             set
             {
                 playingLock.EnterWriteLock();
                 try
                 {
-                    CancelFutureReservationsUnsafe();
+                    StopAllVoicesUnsafe();
+                    pendingSubmissions.Clear();
                     base.time = value;
-
-                    completedFileLoops = 0;
-                    ResetCursorUnsafe(value, true);
+                    completedLoops = 0;
+                    ResetCursorUnsafe(true);
+                    restoreSnapshot = isPlaying;
                 }
                 finally
                 {
@@ -114,10 +103,7 @@ namespace RuniOS.Sounds
             }
         }
 
-        /// <summary>
-        /// Gets or sets the unbounded logical NBS tick position.<br/>
-        /// 범위 제한 없는 논리적 NBS 틱 위치를 가져오거나 설정합니다.
-        /// </summary>
+        /// <summary>Gets or sets the unbounded logical NBS tick position.<br/>범위 제한 없는 논리적 NBS 틱 위치를 가져오거나 설정합니다.</summary>
         public double tick
         {
             get
@@ -139,10 +125,7 @@ namespace RuniOS.Sounds
             }
         }
 
-        /// <summary>
-        /// Gets or sets the nearest active tick-column index. Ties choose the lower tick.<br/>
-        /// 가장 가까운 활성 틱 열 인덱스를 가져오거나 설정합니다. 거리가 같으면 더 낮은 틱을 선택합니다.
-        /// </summary>
+        /// <summary>Gets or sets the nearest active tick-column index. Ties choose the lower tick.<br/>가장 가까운 활성 틱 열 인덱스를 가져오거나 설정합니다. 거리가 같으면 더 낮은 틱을 선택합니다.</summary>
         public int index
         {
             get
@@ -164,15 +147,14 @@ namespace RuniOS.Sounds
                 if (file == null || file.ticks.Count == 0)
                     return;
 
-                int clamped = Math.Clamp(value, 0, file.ticks.Count - 1);
-                tick = file.ticks[clamped].tick;
+                tick = file.ticks[Math.Clamp(value, 0, file.ticks.Count - 1)].tick;
             }
         }
 
         /// <summary>Gets the logical song length in NBS ticks.<br/>NBS 틱 단위의 논리적 곡 길이를 가져옵니다.</summary>
         public int tickLength => nbsFile?.tickLength ?? 0;
 
-        /// <summary>Gets the number of active tick columns addressable by <see cref="index"/>.<br/><see cref="index"/>로 접근 가능한 활성 틱 열 수를 가져옵니다.</summary>
+        /// <summary>Gets the number of active tick columns.<br/>활성 틱 열 수를 가져옵니다.</summary>
         public int indexLength => nbsFile?.ticks.Count ?? 0;
 
         /// <summary>Gets the file tempo in ticks per second at the current position.<br/>현재 위치의 파일 템포를 초당 틱 수로 가져옵니다.</summary>
@@ -184,17 +166,14 @@ namespace RuniOS.Sounds
         /// <inheritdoc/>
         public override double length => nbsFile?.duration ?? 0;
 
-        /// <summary>
-        /// Gets or sets whether the loop flag, start tick, and maximum loop count stored in the file are honored.<br/>
-        /// 파일에 저장된 루프 플래그, 시작 틱 및 최대 루프 횟수를 사용할지 가져오거나 설정합니다.
-        /// </summary>
+        /// <summary>Gets or sets whether loop metadata stored in the NBS file is used.<br/>NBS 파일에 저장된 루프 메타데이터를 사용할지 가져오거나 설정합니다.</summary>
         public bool useFileLoopSettings
         {
             get => Volatile.Read(ref _useFileLoopSettings);
             set
             {
                 Volatile.Write(ref _useFileLoopSettings, value);
-                InvalidateFutureSchedule(false);
+                InvalidateLoopSchedule();
             }
         }
         [SerializeField] bool _useFileLoopSettings = true;
@@ -208,9 +187,12 @@ namespace RuniOS.Sounds
                 playingLock.EnterWriteLock();
                 try
                 {
-                    CancelFutureReservationsUnsafe();
+                    if (base.tempo.Equals(value))
+                        return;
+
+                    CancelFutureSubmissionsUnsafe();
                     base.tempo = value;
-                    ResetCursorUnsafe(false);
+                    RebuildScheduleUnsafe(false, false);
                 }
                 finally
                 {
@@ -227,8 +209,29 @@ namespace RuniOS.Sounds
             get => base.pitch;
             set
             {
-                base.pitch = value;
-                InvalidateFutureSchedule(false);
+                playingLock.EnterWriteLock();
+                try
+                {
+                    float previous = base.pitch;
+                    if (previous.Equals(value))
+                        return;
+
+                    CancelFutureSubmissionsUnsafe();
+                    base.pitch = value;
+                    bool restoringFromZero = previous == 0 && value != 0;
+                    if (!float.IsFinite(value) || value == 0)
+                        StopAllVoicesUnsafe();
+                    else
+                        UpdateVoiceFrequenciesUnsafe();
+
+                    RebuildScheduleUnsafe(restoringFromZero, restoringFromZero);
+                }
+                finally
+                {
+                    playingLock.ExitWriteLock();
+                }
+
+                NBSPlaybackWorker.Signal();
             }
         }
 
@@ -238,8 +241,23 @@ namespace RuniOS.Sounds
             get => base.volume;
             set
             {
-                base.volume = value;
-                InvalidateFutureSchedule(false);
+                lock (voiceSettingsApplyLock)
+                {
+                    Voice[] snapshot;
+                    playingLock.EnterWriteLock();
+                    try
+                    {
+                        base.volume = value;
+                        voiceSettingsRevision++;
+                        snapshot = GetVoiceSnapshot();
+                    }
+                    finally
+                    {
+                        playingLock.ExitWriteLock();
+                    }
+
+                    UpdateVoiceVolumesUnsafe(snapshot, value);
+                }
             }
         }
 
@@ -249,8 +267,23 @@ namespace RuniOS.Sounds
             get => base.panStereo;
             set
             {
-                base.panStereo = value;
-                InvalidateFutureSchedule(false);
+                lock (voiceSettingsApplyLock)
+                {
+                    Voice[] snapshot;
+                    playingLock.EnterWriteLock();
+                    try
+                    {
+                        base.panStereo = value;
+                        voiceSettingsRevision++;
+                        snapshot = GetVoiceSnapshot();
+                    }
+                    finally
+                    {
+                        playingLock.ExitWriteLock();
+                    }
+
+                    UpdateVoicePansUnsafe(snapshot, value);
+                }
             }
         }
 
@@ -258,84 +291,65 @@ namespace RuniOS.Sounds
         public override float spatialBlend
         {
             get => base.spatialBlend;
-            set
-            {
-                base.spatialBlend = value;
-                InvalidateFutureSchedule(false);
-            }
+            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.spatialBlend = propertyValue, static (player, propertyValue) => player.SetBaseSpatialBlend(propertyValue));
         }
 
         /// <inheritdoc/>
         public override float dopplerLevel
         {
             get => base.dopplerLevel;
-            set
-            {
-                base.dopplerLevel = value;
-                InvalidateFutureSchedule(false);
-            }
+            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.dopplerLevel = propertyValue, static (player, propertyValue) => player.SetBaseDopplerLevel(propertyValue));
         }
 
         /// <inheritdoc/>
         public override float spread
         {
             get => base.spread;
-            set
-            {
-                base.spread = value;
-                InvalidateFutureSchedule(false);
-            }
+            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.spread = propertyValue, static (player, propertyValue) => player.SetBaseSpread(propertyValue));
         }
 
         /// <inheritdoc/>
         public override float minDistance
         {
             get => base.minDistance;
-            set
-            {
-                base.minDistance = value;
-                InvalidateFutureSchedule(false);
-            }
+            set => SetDistanceProperty(value, true);
         }
 
         /// <inheritdoc/>
         public override float maxDistance
         {
             get => base.maxDistance;
-            set
-            {
-                base.maxDistance = value;
-                InvalidateFutureSchedule(false);
-            }
+            set => SetDistanceProperty(value, false);
         }
 
-        /// <summary>
-        /// Gets or sets the 3D distance attenuation curve used by every note voice.<br/>
-        /// 모든 노트 Voice에 사용할 3D 거리 감쇠 곡선을 가져오거나 설정합니다.
-        /// </summary>
+        /// <summary>Gets or sets the 3D distance attenuation curve used by every Voice.<br/>모든 Voice에 사용할 3D 거리 감쇠 곡선을 가져오거나 설정합니다.</summary>
         public SoundRolloffMode rolloffMode
         {
             get => _rolloffMode;
             set
             {
-                playingLock.EnterWriteLock();
-                try
+                lock (voiceSettingsApplyLock)
                 {
-                    _rolloffMode = value;
-                    UpdateVoiceRolloffModeUnsafe(value);
-                }
-                finally
-                {
-                    playingLock.ExitWriteLock();
+                    Voice[] snapshot;
+                    playingLock.EnterWriteLock();
+                    try
+                    {
+                        _rolloffMode = value;
+                        voiceSettingsRevision++;
+                        snapshot = GetVoiceSnapshot();
+                    }
+                    finally
+                    {
+                        playingLock.ExitWriteLock();
+                    }
+
+                    UpdateVoiceRolloffModeUnsafe(snapshot, value);
                 }
             }
         }
         [SerializeField] volatile SoundRolloffMode _rolloffMode = SoundRolloffMode.inverse;
 
-        /// <summary>
-        /// Gets or sets whether source velocity is estimated from Transform changes when no physics body supplies it.<br/>
-        /// 물리 바디가 속도를 제공하지 않을 때 Transform 변화량으로 소스 속도를 추정할지 가져오거나 설정합니다.
-        /// </summary>
+        /// <summary>Gets or sets whether Transform changes estimate velocity when no physics body supplies it.<br/>물리 바디가 속도를 제공하지 않을 때 Transform 변화로 속도를 추정할지 가져오거나 설정합니다.</summary>
         public bool nonRigidbodyVelocity
         {
             get => _nonRigidbodyVelocity;
@@ -350,7 +364,7 @@ namespace RuniOS.Sounds
             set
             {
                 base.loop = value;
-                InvalidateFutureSchedule(false);
+                InvalidateLoopSchedule();
             }
         }
 
@@ -361,7 +375,7 @@ namespace RuniOS.Sounds
             set
             {
                 base.loopStart = value;
-                InvalidateFutureSchedule(false);
+                InvalidateLoopSchedule();
             }
         }
 
@@ -372,43 +386,21 @@ namespace RuniOS.Sounds
             set
             {
                 base.loopEnd = value;
-                InvalidateFutureSchedule(false);
+                InvalidateLoopSchedule();
             }
         }
 
-        Dictionary<(int tick, int layer), NBSSpecialEvent> specialEventMap = [];
-        int nextTickIndex;
-        int completedFileLoops;
-        int scheduledFileLoops;
-        bool includeCurrentOnUnPause;
-        long observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
-        readonly AsyncReloadGate reloadGate = new AsyncReloadGate();
-
-        /// <summary>
-        /// Reloads the NBS scope and all instrument scopes through the resource registries, stopping active voices when replacing them.<br/>
-        /// 리소스 레지스트리를 통해 NBS 스코프와 모든 악기 스코프를 다시 로드하며, 교체할 때 재생 중인 Voice를 정지합니다.
-        /// </summary>
-        /// <returns>
-        /// An asynchronous operation that completes after the scope generation has been swapped.<br/>
-        /// 스코프 세대 교체가 끝나면 완료되는 비동기 작업입니다.
-        /// </returns>
-        /// <remarks>
-        /// Call this method from the Unity main thread.<br/>
-        /// Unity 메인 스레드에서 호출하세요.
-        /// </remarks>
+        /// <summary>Reloads the NBS scope and all unique instrument scopes.<br/>NBS 스코프와 모든 고유 악기 스코프를 다시 로드합니다.</summary>
+        /// <returns>An asynchronous operation that represents completion of the generation swap.<br/>세대 교체 완료를 나타내는 비동기 작업입니다.</returns>
         public UniTask Reload() => reloadGate.Run(ReloadCore);
 
         async UniTask ReloadCore()
         {
-            if (this == null || !isActiveAndEnabled)
-                return;
-
-            if (nbsFileRef.IsSameTarget(nbsScope))
-                return;
-
             AssetRef<NBSFile> target = nbsFileRef;
-            IAssetScope<NBSFile>? newScope = await target.LoadScopeAsync();
+            if (this == null || !isActiveAndEnabled || target.IsSameTarget(nbsScope))
+                return;
 
+            IAssetScope<NBSFile>? newScope = await target.LoadScopeAsync();
             if (this == null || !isActiveAndEnabled)
             {
                 DisposeQueue.Enqueue(newScope);
@@ -419,7 +411,7 @@ namespace RuniOS.Sounds
             try
             {
                 if (newScope != null)
-                    newBank = await NBSInstrumentBank.Create(newScope.asset, target.key.assetId);
+                    newBank = await NBSInstrumentBank.Create(newScope.asset.playbackMap, target.key.assetId);
             }
             catch
             {
@@ -436,24 +428,57 @@ namespace RuniOS.Sounds
 
             IAssetScope<NBSFile>? oldScope;
             NBSInstrumentBank? oldBank;
-            playingLock.EnterWriteLock();
-            try
+            Voice[] oldVoices;
+            while (true)
             {
-                StopAllVoicesUnsafe();
+                float preparedTempo = base.tempo;
+                float preparedPitch = base.pitch;
+                NBSPlaybackSchedule? preparedSchedule;
+                try
+                {
+                    preparedSchedule = newScope != null && newBank != null &&
+                        float.IsFinite(preparedTempo) && preparedTempo != 0 &&
+                        float.IsFinite(preparedPitch) && preparedPitch != 0
+                        ? newScope.asset.playbackMap.CreateSchedule(preparedTempo, preparedPitch, newBank)
+                        : null;
+                }
+                catch
+                {
+                    DisposeQueue.Enqueue(newScope);
+                    DisposeQueue.Enqueue(newBank);
+                    throw;
+                }
 
-                oldScope = nbsScope;
-                oldBank = instrumentBank;
-                nbsScope = newScope;
-                instrumentBank = newBank;
-                specialEventMap = newScope?.asset.specialEvents.ToDictionary(x => (x.tick, x.layer)) ?? [];
-                completedFileLoops = 0;
-                ResetCursorUnsafe(true);
-            }
-            finally
-            {
-                playingLock.ExitWriteLock();
+                bool swapped;
+                playingLock.EnterWriteLock();
+                try
+                {
+                    if (!base.tempo.Equals(preparedTempo) || !base.pitch.Equals(preparedPitch))
+                        continue;
+
+                    oldVoices = DetachAllVoicesUnsafe();
+                    pendingSubmissions.Clear();
+                    oldScope = nbsScope;
+                    oldBank = instrumentBank;
+                    nbsScope = newScope;
+                    instrumentBank = newBank;
+                    completedLoops = 0;
+                    scheduleGeneration++;
+                    playbackSchedule = preparedSchedule;
+                    ResetCursorUnsafe(true);
+                    restoreSnapshot = isPlaying;
+                    swapped = true;
+                }
+                finally
+                {
+                    playingLock.ExitWriteLock();
+                }
+
+                if (swapped)
+                    break;
             }
 
+            StopVoices(oldVoices);
             DisposeQueue.Enqueue(oldScope);
             DisposeQueue.Enqueue(oldBank);
             NBSPlaybackWorker.Signal();
@@ -462,32 +487,25 @@ namespace RuniOS.Sounds
         protected override void OnEnable()
         {
             base.OnEnable();
-
 #if UNITY_PHYSICS_EXIST
             rigidbody = GetComponent<Rigidbody>();
 #endif
 #if UNITY_PHYSICS2D_EXIST
             rigidbody2D = GetComponent<Rigidbody2D>();
 #endif
-
-            var transform = this.transform;
-
-            AudioSpatialState initialSpatialState = new AudioSpatialState(transform);
+            Transform currentTransform = transform;
             lock (spatialSnapshotLock)
-                spatialSnapshot = initialSpatialState;
-
-            lastSpatialPosition = transform.position;
+                spatialSnapshot = new AudioSpatialState(currentTransform);
+            lastSpatialPosition = currentTransform.position;
 
             ResourceManager.AttachReloadable(this);
             NBSPlaybackWorker.Register(this);
-
             Reload().Forget();
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-
             ResourceManager.DetachReloadable(this);
             NBSPlaybackWorker.Unregister(this);
 
@@ -496,11 +514,15 @@ namespace RuniOS.Sounds
             playingLock.EnterWriteLock();
             try
             {
+                StopAllVoicesUnsafe();
+                pendingSubmissions.Clear();
                 oldScope = nbsScope;
                 oldBank = instrumentBank;
                 nbsScope = null;
                 instrumentBank = null;
-                specialEventMap = [];
+                playbackSchedule = null;
+                playbackCursor = default;
+                restoreSnapshot = false;
             }
             finally
             {
@@ -513,42 +535,50 @@ namespace RuniOS.Sounds
 
         protected override void OnPlay()
         {
-            completedFileLoops = 0;
-            includeCurrentOnUnPause = isPaused;
+            StopAllVoicesUnsafe();
+            pendingSubmissions.Clear();
+            completedLoops = 0;
+            ResetCursorUnsafe(true);
+            restoreSnapshot = true;
             NBSPlaybackWorker.Signal();
         }
 
         protected override void OnStop()
         {
             StopAllVoicesUnsafe();
-            completedFileLoops = 0;
-            includeCurrentOnUnPause = false;
+            pendingSubmissions.Clear();
+            completedLoops = 0;
+            restoreSnapshot = false;
             ResetCursorUnsafe(true);
         }
 
         protected override void OnPause()
         {
-            CancelFutureReservationsUnsafe();
-            ResetCursorUnsafe(false);
+            playbackRevision++;
+            CancelFutureSubmissionsUnsafe();
+            ClearVoiceEndDelaysUnsafe();
+            PauseVoicesUnsafe();
         }
 
         protected override void OnUnPause()
         {
-            ResetCursorUnsafe(includeCurrentOnUnPause);
-            includeCurrentOnUnPause = false;
-
+            UnPauseVoicesUnsafe();
+            if (!playbackCursor.initialized)
+                ResetCursorUnsafe(false);
             NBSPlaybackWorker.Signal();
         }
 
         void OnValidate() => NBSPlaybackWorker.Signal();
 
-        void InvalidateFutureSchedule(bool includeCurrent)
+        void InvalidateLoopSchedule()
         {
             playingLock.EnterWriteLock();
             try
             {
-                CancelFutureReservationsUnsafe();
-                ResetCursorUnsafe(includeCurrent);
+                CancelFutureSubmissionsUnsafe();
+                scheduleGeneration++;
+                completedLoops = 0;
+                ResetCursorUnsafe(false);
             }
             finally
             {
@@ -558,58 +588,40 @@ namespace RuniOS.Sounds
             NBSPlaybackWorker.Signal();
         }
 
-        void ResetCursorUnsafe(bool includeCurrent) => ResetCursorUnsafe(base.time, includeCurrent);
-
-        void ResetCursorUnsafe(double currentTime, bool includeCurrent)
+        void RebuildScheduleUnsafe(bool includeCurrent, bool includePreviousNotes)
         {
-            observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
-            scheduledFileLoops = completedFileLoops;
-
+            scheduleGeneration++;
             NBSFile? file = nbsScope?.asset;
-            if (file == null || file.ticks.Count == 0 || !double.IsFinite(currentTime))
+            NBSInstrumentBank? bank = instrumentBank;
+            float currentTempo = base.tempo;
+            float currentPitch = base.pitch;
+            playbackSchedule = file != null && bank != null &&
+                float.IsFinite(currentTempo) && currentTempo != 0 &&
+                float.IsFinite(currentPitch) && currentPitch != 0
+                ? file.playbackMap.CreateSchedule(currentTempo, currentPitch, bank)
+                : null;
+            ResetCursorUnsafe(includeCurrent);
+            restoreSnapshot = includePreviousNotes && isPlaying;
+        }
+
+        void ResetCursorUnsafe(bool includeCurrent)
+        {
+            playbackRevision++;
+            observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+            NBSPlaybackSchedule? schedule = playbackSchedule;
+            if (schedule == null || !double.IsFinite(base.time))
             {
-                nextTickIndex = 0;
+                playbackCursor = default;
                 return;
             }
 
-            double currentTick = file.tempoMap.TimeToTick(currentTime);
-            nextTickIndex = base.tempo < 0
-                ? FindReverseCursor(file, currentTick, includeCurrent)
-                : FindForwardCursor(file, currentTick, includeCurrent);
-        }
-
-        static int FindForwardCursor(NBSFile file, double tick, bool includeCurrent)
-        {
-            int low = 0;
-            int high = file.ticks.Count;
-            while (low < high)
-            {
-                int middle = (low + high) / 2;
-                bool before = includeCurrent ? file.ticks[middle].tick < tick : file.ticks[middle].tick <= tick;
-                if (before)
-                    low = middle + 1;
-                else
-                    high = middle;
-            }
-
-            return low;
-        }
-
-        static int FindReverseCursor(NBSFile file, double tick, bool includeCurrent)
-        {
-            int low = 0;
-            int high = file.ticks.Count;
-            while (low < high)
-            {
-                int middle = (low + high) / 2;
-                bool accepted = includeCurrent ? file.ticks[middle].tick <= tick : file.ticks[middle].tick < tick;
-                if (accepted)
-                    low = middle + 1;
-                else
-                    high = middle;
-            }
-
-            return low - 1;
+            playbackCursor = schedule.CreateCursor
+            (
+                new NBSPlaybackPosition(base.time, completedLoops),
+                GetLoopInfoUnsafe(nbsScope?.asset),
+                scheduleGeneration,
+                includeCurrent
+            );
         }
 
         static int FindNearestIndex(NBSFile file, double tick)
@@ -617,15 +629,25 @@ namespace RuniOS.Sounds
             if (file.ticks.Count == 0)
                 return 0;
 
-            int upper = FindForwardCursor(file, tick, true);
-            if (upper <= 0)
+            int low = 0;
+            int high = file.ticks.Count;
+            while (low < high)
+            {
+                int middle = (low + high) / 2;
+                if (file.ticks[middle].tick < tick)
+                    low = middle + 1;
+                else
+                    high = middle;
+            }
+
+            if (low <= 0)
                 return 0;
-            if (upper >= file.ticks.Count)
+            if (low >= file.ticks.Count)
                 return file.ticks.Count - 1;
 
-            double lowerDistance = Math.Abs(file.ticks[upper - 1].tick - tick);
-            double upperDistance = Math.Abs(file.ticks[upper].tick - tick);
-            return lowerDistance <= upperDistance ? upper - 1 : upper;
+            double lowerDistance = Math.Abs(file.ticks[low - 1].tick - tick);
+            double upperDistance = Math.Abs(file.ticks[low].tick - tick);
+            return lowerDistance <= upperDistance ? low - 1 : low;
         }
     }
 }

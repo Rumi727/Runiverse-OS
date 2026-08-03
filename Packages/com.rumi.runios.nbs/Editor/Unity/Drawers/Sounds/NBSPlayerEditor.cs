@@ -117,6 +117,55 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             return true;
         }
 
+        protected override void DrawPlaybackLayout()
+        {
+            GUILayout.Label(GetTextOrKey("runios-editor:inspector.runi_audio_source.playback.header"), EditorStyles.boldLabel);
+
+            EditPropertyValue
+            (
+                "_volume",
+                x => x.volume,
+                (position, x) => EditorGUI.Slider(position, TrTempContent("runios-editor:inspector.runi_audio_source.playback.volume"), x.volume, 0, 2),
+                (x, value) => x.volume = value
+            );
+            EditPropertyValue
+            (
+                "_tempo",
+                x => x.tempo,
+                (position, x) => EditorGUI.Slider
+                (
+                    position,
+                    TrTempContent
+                    (
+                        "runios-editor:inspector.runi_audio_source.playback.tempo",
+                        "runios-editor:inspector.nbs_player.playback.tempo.tooltip"
+                    ),
+                    x.tempo,
+                    -3,
+                    3
+                ),
+                (x, value) => x.tempo = value
+            );
+            EditPropertyValue
+            (
+                "_pitch",
+                x => x.pitch,
+                (position, x) => EditorGUI.Slider
+                (
+                    position,
+                    TrTempContent
+                    (
+                        "runios-editor:inspector.runi_audio_source.playback.pitch",
+                        "runios-editor:inspector.nbs_player.playback.pitch.tooltip"
+                    ),
+                    x.pitch,
+                    -3,
+                    3
+                ),
+                (x, value) => x.pitch = value
+            );
+        }
+
         protected override void DrawTransportLayout()
         {
             EditorGUI.BeginChangeCheck();
@@ -152,18 +201,6 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value >= 0)
                 NBSPlaybackSettings.schedulingLookahead = value;
 
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.DoubleField
-            (
-                TrTempContent
-                (
-                    "runios-editor:inspector.nbs_player.transport.late_tolerance",
-                    "runios-editor:inspector.nbs_player.transport.late_tolerance.tooltip"
-                ),
-                NBSPlaybackSettings.lateTolerance
-            );
-            if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value >= 0)
-                NBSPlaybackSettings.lateTolerance = value;
         }
 
         protected override void DrawInformationLayout()

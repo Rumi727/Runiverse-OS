@@ -5,81 +5,46 @@ using RuniOS.Resource;
 
 namespace RuniOS.Sounds
 {
-    public sealed class NBSInstrumentBank : IDisposable
+    /// <summary>
+    /// Owns the unique instrument scopes required by one NBS Player generation.<br/>
+    /// NBS Player 세대 하나에 필요한 고유 악기 스코프를 소유합니다.
+    /// </summary>
+    public sealed class NBSInstrumentBank : IDisposable, INBSClipMetadataProvider
     {
-        static readonly string[] vanillaInstrumentPaths =
-        [
-            "block.note_block.harp",
-            "block.note_block.bass",
-            "block.note_block.bassdrum",
-            "block.note_block.snare",
-            "block.note_block.hat",
-            "block.note_block.guitar",
-            "block.note_block.flute",
-            "block.note_block.bell",
-            "block.note_block.chime",
-            "block.note_block.xylophone",
-            "block.note_block.iron_xylophone",
-            "block.note_block.cow_bell",
-            "block.note_block.didgeridoo",
-            "block.note_block.bit",
-            "block.note_block.banjo",
-            "block.note_block.pling",
-            "block.note_block.trumpet",
-            "block.note_block.trumpet_exposed",
-            "block.note_block.trumpet_weathered",
-            "block.note_block.trumpet_oxidized"
-        ];
-
-        readonly IAssetScope<WaveAudioClip>?[] scopes;
-        readonly InstrumentBinding?[] instruments;
+        readonly Dictionary<NBSInstrumentReference, IAssetScope<WaveAudioClip>> scopes = [];
+        readonly object lifetimeLock = new object();
+        int activeUsers;
+        bool disposeRequested;
         bool isDisposed;
 
-        NBSInstrumentBank(int bankLength)
-        {
-            scopes = new IAssetScope<WaveAudioClip>?[bankLength];
-            instruments = new InstrumentBinding?[bankLength];
-        }
+        NBSInstrumentBank() { }
 
-        public InstrumentBinding? this[byte instrument] => instrument < instruments.Length ? instruments[instrument] : null;
-
-        public static async UniTask<NBSInstrumentBank> Create(NBSFile file, Identifier nbsAssetId)
+        /// <summary>
+        /// Loads every unique audio instrument used by <paramref name="playbackMap"/>.<br/>
+        /// <paramref name="playbackMap"/>에서 사용하는 모든 고유 오디오 악기를 로드합니다.
+        /// </summary>
+        /// <param name="playbackMap">The clip-independent playback map.<br/>클립 독립적 재생 맵입니다.</param>
+        /// <param name="nbsAssetId">The owning NBS asset identifier used for custom instruments.<br/>커스텀 악기에 사용할 소유 NBS 에셋 식별자입니다.</param>
+        /// <returns>When loading completes, returns the instrument bank.<br/>로드가 완료되면 악기 bank를 반환합니다.</returns>
+        public static async UniTask<NBSInstrumentBank> Create(NBSPlaybackMap playbackMap, Identifier nbsAssetId)
         {
-            int vanillaInstrumentCount = file.header.vanillaInstrumentCount;
-            NBSInstrumentBank bank = new NBSInstrumentBank(vanillaInstrumentCount + file.customInstruments.Count);
+            if (playbackMap == null)
+                throw new ArgumentNullException(nameof(playbackMap));
+
+            NBSInstrumentBank bank = new NBSInstrumentBank();
+            HashSet<NBSInstrumentReference> instruments = [];
+            for (int i = 0; i < playbackMap.entries.Count; i++)
+            {
+                NBSPlaybackEntry entry = playbackMap.entries[i];
+                if (entry.kind == NBSPlaybackEntryKind.note && entry.instrument.isValid)
+                    instruments.Add(entry.instrument);
+            }
 
             try
             {
-                for (int instrument = 0; instrument < bank.instruments.Length; instrument++)
+                foreach (NBSInstrumentReference instrument in instruments)
                 {
-                    ResourceKey key;
-                    int keyOffset;
-                    if (instrument < vanillaInstrumentCount)
-                    {
-                        if (instrument >= vanillaInstrumentPaths.Length)
-                            continue;
-
-                        key = new ResourceKey
-                        (
-                            new Identifier("runios", "waves"),
-                            new Identifier("runios", vanillaInstrumentPaths[instrument])
-                        );
-                        keyOffset = 0;
-                    }
-                    else
-                    {
-                        NBSCustomInstrument custom = file.customInstruments[instrument - vanillaInstrumentCount];
-                        if (custom.IsFunctionalInstrument() || !TryNormalizeCustomPath(custom.soundFile, out string path))
-                            continue;
-
-                        key = new ResourceKey
-                        (
-                            new Identifier("runios", "waves"),
-                            new Identifier(nbsAssetId.nameSpace, path)
-                        );
-                        keyOffset = custom.key - 45;
-                    }
-
+                    ResourceKey key = instrument.Resolve(nbsAssetId);
                     IAssetScope<WaveAudioClip>? scope = await ResourceManager.LoadScopeAsync<WaveAudioClip>(key);
                     if (scope == null)
                     {
@@ -87,8 +52,7 @@ namespace RuniOS.Sounds
                         continue;
                     }
 
-                    bank.scopes[instrument] = scope;
-                    bank.instruments[instrument] = new InstrumentBinding(scope.asset, keyOffset);
+                    bank.scopes.Add(instrument, scope);
                 }
             }
             catch
@@ -100,37 +64,101 @@ namespace RuniOS.Sounds
             return bank;
         }
 
+        /// <inheritdoc/>
+        public bool TryGetLength(NBSInstrumentReference instrument, out double length)
+        {
+            lock (lifetimeLock)
+            {
+                if (!isDisposed && scopes.TryGetValue(instrument, out IAssetScope<WaveAudioClip>? scope))
+                {
+                    length = scope.asset.length;
+                    return double.IsFinite(length) && length > 0;
+                }
+            }
+
+            length = 0;
+            return false;
+        }
+
+        internal bool TryGetClip(NBSInstrumentReference instrument, out WaveAudioClip clip)
+        {
+            lock (lifetimeLock)
+            {
+                if (!isDisposed && scopes.TryGetValue(instrument, out IAssetScope<WaveAudioClip>? scope) && !scope.asset.isDisposed)
+                {
+                    clip = scope.asset;
+                    return true;
+                }
+            }
+
+            clip = null!;
+            return false;
+        }
+
+        internal bool TryRetain()
+        {
+            lock (lifetimeLock)
+            {
+                if (disposeRequested)
+                    return false;
+
+                activeUsers++;
+                return true;
+            }
+        }
+
+        internal void Release()
+        {
+            IAssetScope<WaveAudioClip>[]? scopesToDispose;
+            lock (lifetimeLock)
+            {
+                if (activeUsers <= 0)
+                    throw new InvalidOperationException("NBS instrument bank lease count is already zero.");
+
+                activeUsers--;
+                scopesToDispose = TakeScopesForDisposalUnsafe();
+            }
+
+            DisposeScopes(scopesToDispose);
+        }
+
+        /// <summary>
+        /// Requests disposal of every owned instrument scope after active playback users finish.<br/>
+        /// 활성 재생 사용자가 끝난 뒤 소유한 모든 악기 스코프의 해제를 요청합니다.
+        /// </summary>
         public void Dispose()
         {
-            if (isDisposed)
-                return;
+            IAssetScope<WaveAudioClip>[]? scopesToDispose;
+            lock (lifetimeLock)
+            {
+                if (disposeRequested)
+                    return;
+
+                disposeRequested = true;
+                scopesToDispose = TakeScopesForDisposalUnsafe();
+            }
+
+            DisposeScopes(scopesToDispose);
+        }
+
+        IAssetScope<WaveAudioClip>[]? TakeScopesForDisposalUnsafe()
+        {
+            if (!disposeRequested || activeUsers != 0 || isDisposed)
+                return null;
 
             isDisposed = true;
-            for (int i = 0; i < scopes.Length; i++)
-                scopes[i]?.Dispose();
+            IAssetScope<WaveAudioClip>[] result = scopes.Values.ToArray();
+            scopes.Clear();
+            return result;
         }
 
-        static bool TryNormalizeCustomPath(string soundFile, out string path)
+        static void DisposeScopes(IAssetScope<WaveAudioClip>[]? scopesToDispose)
         {
-            path = soundFile.Trim().Replace('\\', '/');
-            if (path.StartsWith('/') || path.Contains(':'))
-                return false;
+            if (scopesToDispose == null)
+                return;
 
-            if (path.StartsWith("sounds/", StringComparison.OrdinalIgnoreCase))
-                path = path.Substring("sounds/".Length);
-
-            string[] parts = path.Split('/');
-            if (parts.Length == 0 || parts.Any(x => string.IsNullOrWhiteSpace(x) || x == "." || x == ".."))
-                return false;
-
-            int lastSlash = path.LastIndexOf('/');
-            int lastDot = path.LastIndexOf('.');
-            if (lastDot > lastSlash)
-                path = path.Substring(0, lastDot);
-
-            return path.Length > 0;
+            for (int i = 0; i < scopesToDispose.Length; i++)
+                scopesToDispose[i].Dispose();
         }
-
-        public readonly record struct InstrumentBinding(WaveAudioClip clip, int keyOffset);
     }
 }

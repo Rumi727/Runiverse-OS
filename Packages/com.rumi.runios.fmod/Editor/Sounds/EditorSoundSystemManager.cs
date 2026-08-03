@@ -77,8 +77,6 @@ namespace RuniOS.Editor.Sounds
                     system.listeners[i] = state;
                     i++;
                 }
-
-                SoundSystem.main.Update();
             }, attributes);
 
             foreach (var item in SceneView.sceneViews.OfType<SceneView>())

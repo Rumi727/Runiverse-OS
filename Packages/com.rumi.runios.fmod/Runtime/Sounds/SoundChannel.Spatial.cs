@@ -25,9 +25,27 @@ namespace RuniOS.Sounds
             {
                 VECTOR position = value.position.ToFMODVector();
                 VECTOR velocity = value.velocity.ToFMODVector();
+
+                ValidateVector(nameof(value.position), position);
+                ValidateVector(nameof(value.velocity), velocity);
+
                 native.set3DAttributes(ref position, ref velocity).ThrowIfNotOk(this);
             }
         }
+
+        static void ValidateVector(string name, VECTOR value)
+        {
+            if (IsValid(value.x) && IsValid(value.y) && IsValid(value.z))
+                return;
+
+            throw new ArgumentException
+            (
+                $"Channel {name} contains an invalid float: ({value.x}, {value.y}, {value.z}).",
+                nameof(value)
+            );
+        }
+
+        static bool IsValid(float value) => value == 0 || float.IsNormal(value);
 
         /// <summary>
         /// Gets or sets the minimum and maximum distances for 3D attenuation together.<br/>
