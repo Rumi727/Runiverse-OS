@@ -54,8 +54,8 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
 
         protected override void DrawAdditionalInformationLayout()
         {
-            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.samples"), TempContent(GetCommonValueString(x => x.samples)));
-            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.frequency"), TempContent(GetCommonValueString(x => x.frequency)));
+            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.samples"), new GUIContent(GetCommonValueString(x => x.samples)));
+            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.frequency"), new GUIContent(GetCommonValueString(x => x.frequency)));
         }
 
         async UniTask ReloadAndRepaint(WaveAudioSource item)
