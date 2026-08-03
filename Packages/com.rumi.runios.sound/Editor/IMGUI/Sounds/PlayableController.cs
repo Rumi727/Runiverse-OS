@@ -22,6 +22,7 @@ namespace RuniOS.Editor.IMGUI.Sounds
         }
 
         static readonly int loopRangeHash = "PlayableControllerLoopRange".GetHashCode();
+        const double skipSeconds = 1;
 
         public PlayableController() => timeUnits = [];
         public PlayableController(params ITimeUnit[] timeUnits) => this.timeUnits = timeUnits.ToList();
@@ -54,7 +55,7 @@ namespace RuniOS.Editor.IMGUI.Sounds
         public void Draw(Rect position)
         {
             float orgWidth = position.width;
-            position.width = 150;
+            position.width = EditorGUIUtility.labelWidth;
 
             DrawControl(position);
 
@@ -66,29 +67,24 @@ namespace RuniOS.Editor.IMGUI.Sounds
 
         public void DrawControl(Rect position)
         {
+            GUIStyle buttonLeft = GUI.skin.FindStyle("buttonleft");
+            GUIStyle buttonMid = GUI.skin.FindStyle("buttonmid");
+            GUIStyle buttonRight = GUI.skin.FindStyle("buttonright");
+
             float orgX = position.x;
             float orgWidth = position.width;
 
             position.height = GetYSize(GUI.skin.button);
-            position.width = (orgWidth - (3 * 2)) / 3;
+            position.width = (orgWidth * (2f / 3f)) / 3f;
 
             bool play = false;
-            bool anyPlaying = false;
-            for (int i = 0; i < targets.Count; i++)
-            {
-                if (targets[i].isPlaying)
-                {
-                    anyPlaying = true;
-                    break;
-                }
-            }
-
+            bool anyPlaying = targets.Any(t => t.isPlaying);
             if (anyPlaying)
             {
-                if (GUI.Button(position, "▶↻"))
+                if (GUI.Button(position, "▶↻", buttonLeft))
                     play = true;
             }
-            else if (GUI.Button(position, "▶"))
+            else if (GUI.Button(position, "▶", buttonLeft))
                 play = true;
 
             if (play)
@@ -97,38 +93,58 @@ namespace RuniOS.Editor.IMGUI.Sounds
                     target.Play();
             }
 
-            position.x += position.width + 3;
+            position.x += position.width;
 
-            bool allPaused = true;
-            for (int i = 0; i < targets.Count; i++)
-            {
-                if (!targets[i].isPaused)
-                {
-                    allPaused = false;
-                    break;
-                }
-            }
-
+            bool allPaused = targets.All(t => t.isPaused);
             if (allPaused)
             {
-                if (GUI.Button(position, "▶▮"))
+                if (GUI.Button(position, "▶▮", buttonMid))
                 {
                     foreach (var target in targets)
                         target.UnPause();
                 }
             }
-            else if (GUI.Button(position, "▮▮"))
+            else if (GUI.Button(position, "▮▮", buttonMid))
             {
                 foreach (var target in targets)
                     target.Pause();
             }
 
-            position.x += position.width + 3;
+            position.x += position.width;
+            position.width = position.width.Floor();
 
-            if (GUI.Button(position, "■"))
+            if (GUI.Button(position, "■", buttonRight))
             {
                 foreach (var target in targets)
                     target.Stop();
+            }
+
+            position.x += position.width + 2;
+
+            {
+                float allButtonWidth = (orgWidth * (1f / 3f)) - 2;
+                float buttonWidth = (allButtonWidth / 2f).Round();
+
+                position.width = buttonWidth;
+
+                EditorGUI.BeginDisabledGroup(!anyPlaying);
+
+                BeginFontSize(10, buttonLeft);
+                BeginFontSize(10, buttonRight);
+
+                if (GUI.Button(position, "◀◀", buttonLeft))
+                    Skip(-skipSeconds);
+
+                position.x += buttonWidth;
+                position.width = (orgWidth - (position.x - orgX)).Round();
+
+                if (GUI.Button(position, "▶▶", buttonRight))
+                    Skip(skipSeconds);
+
+                EndFontSize(buttonRight);
+                EndFontSize(buttonLeft);
+
+                EditorGUI.EndDisabledGroup();
             }
 
             position.x = orgX;
@@ -153,6 +169,12 @@ namespace RuniOS.Editor.IMGUI.Sounds
             EndLabelWidth();
 
             EditorGUI.EndDisabledGroup();
+        }
+
+        void Skip(double seconds)
+        {
+            foreach (var playable in targets)
+                playable.time += seconds;
         }
 
         public void DrawSlider(Rect position)
