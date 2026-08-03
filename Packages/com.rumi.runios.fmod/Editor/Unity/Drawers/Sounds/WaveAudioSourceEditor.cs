@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.Sounds;
 
@@ -15,40 +16,46 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         {
             GUILayout.Label(GetTextOrKey("runios-editor:inspector.wave_audio_source.source.header"), EditorStyles.boldLabel);
 
-            EditorGUI.BeginChangeCheck();
-            SerializedProperty? clipProperty = DrawPropertyLayout("_clipRef", TrTempContent("runios-editor:inspector.wave_audio_source.source.clip"));
-            if (EditorGUI.EndChangeCheck() && clipProperty != null)
+            if (EditPropertyValue
+            (
+                "_clipRef",
+                x => x.clipRef,
+                (position, x) => RuniFields.AssetRefField(position, TrTempContent("runios-editor:inspector.wave_audio_source.source.clip"), x.clipRef),
+                (x, value) => x.clipRef = value,
+                x => RuniFields.GetAssetRefFieldHeight(TrTempContent("runios-editor:inspector.wave_audio_source.source.clip"), x.clipRef)
+            ))
                 ForEach(x => ReloadAndRepaint(x).Forget());
 
-            DrawPropertyLayout("_nonRigidbodyVelocity", TrTempContent("runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity", "runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity.tooltip"));
+            EditPropertyValue
+            (
+                "_nonRigidbodyVelocity",
+                x => x.nonRigidbodyVelocity,
+                (position, x) => EditorGUI.Toggle
+                (
+                    position,
+                    TrTempContent("runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity", "runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity.tooltip"),
+                    x.nonRigidbodyVelocity
+                ),
+                (x, value) => x.nonRigidbodyVelocity = value
+            );
             return true;
         }
 
         protected override void DrawAdditionalSpatialLayout()
         {
-            DrawPropertyLayoutAndSync
+            EditPropertyValue
             (
                 "_rolloffMode",
-                TrTempContent("runios-editor:inspector.wave_audio_source.spatial.rolloff_mode"),
-                static x => x.rolloffMode,
-                static (x, value) => x.rolloffMode = value
+                x => x.rolloffMode,
+                (position, x) => (SoundRolloffMode)EditorGUI.EnumPopup(position, TrTempContent("runios-editor:inspector.wave_audio_source.spatial.rolloff_mode"), x.rolloffMode),
+                (x, value) => x.rolloffMode = value
             );
         }
 
         protected override void DrawAdditionalInformationLayout()
         {
-            DrawReadOnlyValue
-            (
-                TrTempContent("runios-editor:inspector.wave_audio_source.information.samples"),
-                static x => x.samples,
-                static (label, value) => { EditorGUILayout.LongField(label, value); }
-            );
-            DrawReadOnlyValue
-            (
-                TrTempContent("runios-editor:inspector.wave_audio_source.information.frequency"),
-                static x => x.frequency,
-                static (label, value) => { EditorGUILayout.FloatField(label, value); }
-            );
+            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.samples"), TempContent(GetCommonValueString(x => x.samples)));
+            EditorGUILayout.LabelField(TrTempContent("runios-editor:inspector.wave_audio_source.information.frequency"), TempContent(GetCommonValueString(x => x.frequency)));
         }
 
         async UniTask ReloadAndRepaint(WaveAudioSource item)

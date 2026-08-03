@@ -198,24 +198,14 @@ namespace RuniOS.Editor.Unity.Inspectors
         /// EditorGUI.EndProperty();
         /// </code>
         /// </example>
-        public void EditValue<TValue>(Func<TTarget, TValue> readFunc, Func<TTarget, TValue> drawFunc, Action<TTarget, TValue> writeFunc)
+        public bool EditValue<TValue>(Func<TTarget, TValue> readFunc, Func<TTarget, TValue> drawFunc, Action<TTarget, TValue> writeFunc)
         {
             if (targets.Length <= 0)
-                return;
+                return false;
 
             // UI를 그리기 위한 대표 타겟 선정
-            TTarget? target = null;
-            foreach (TTarget? item in targets)
-            {
-                if (item != null)
-                {
-                    target = item;
-                    break;
-                }
-            }
-
             if (target == null)
-                return;
+                return false;
 
             // 값이 서로 다르면 UI에 Mixed Value(회색 처리 등)를 표시하도록 설정
             EditorGUI.showMixedValue = !HasSameValue(readFunc);
@@ -225,17 +215,70 @@ namespace RuniOS.Editor.Unity.Inspectors
             TValue value = drawFunc.Invoke(target);
 
             // 사용자가 값을 변경했다면 모든 타겟에 적용
-            if (EditorGUI.EndChangeCheck())
+            bool changed = EditorGUI.EndChangeCheck();
+            if (changed)
             {
-                foreach (TTarget? item in targets)
-                {
-                    if (item != null)
-                        writeFunc.Invoke(item, value);
-                }
+                foreach (TTarget? item in targets.OfType<TTarget>())
+                    writeFunc.Invoke(item, value);
             }
 
             // Mixed Value 설정 초기화
             EditorGUI.showMixedValue = false;
+            return changed;
+        }
+
+        /// <summary>
+        /// Draws a C# property value while retaining Unity's serialized-property decoration.<br/>
+        /// Unity의 직렬화 프로퍼티 장식을 유지하면서 C# 프로퍼티 값을 그립니다.
+        /// </summary>
+        /// <remarks>
+        /// The serialized property is used only by <see cref="EditorGUI.BeginProperty(Rect, GUIContent, SerializedProperty)"/> and
+        /// <see cref="EditorGUI.EndProperty"/>. The actual value is read and written through <paramref name="readFunc"/> and
+        /// <paramref name="writeFunc"/>.<br/>
+        /// 직렬화 프로퍼티는 <see cref="EditorGUI.BeginProperty(Rect, GUIContent, SerializedProperty)"/>와
+        /// <see cref="EditorGUI.EndProperty"/>에만 사용됩니다. 실제 값은 <paramref name="readFunc"/>와
+        /// <paramref name="writeFunc"/>를 통해 읽고 씁니다.
+        /// </remarks>
+        /// <typeparam name="TValue">The type of the edited value.<br/>편집할 값의 타입입니다.</typeparam>
+        /// <param name="propertyName">The backing serialized field name used for Unity decoration.<br/>Unity 장식에 사용할 직렬화된 백킹 필드 이름입니다.</param>
+        /// <param name="readFunc">The getter used to read each target's current value.<br/>각 타겟의 현재 값을 읽는 getter입니다.</param>
+        /// <param name="drawFunc">
+        /// The function that draws the control in the allocated position and returns its edited value.<br/>
+        /// 할당된 위치에 컨트롤을 그리고 편집된 값을 반환하는 함수입니다.
+        /// </param>
+        /// <param name="writeFunc">The setter used to write a changed value to each target.<br/>변경된 값을 각 타겟에 쓰는 setter입니다.</param>
+        /// <param name="getHeightFunc">
+        /// The optional function that returns the control height. The single-line height is used when omitted.<br/>
+        /// 컨트롤 높이를 반환하는 선택적 함수입니다. 생략하면 단일 행 높이를 사용합니다.
+        /// </param>
+        /// <returns><see langword="true"/> when the control changed; otherwise, <see langword="false"/>.<br/>컨트롤이 변경되었으면 <see langword="true"/>, 아니면 <see langword="false"/>입니다.</returns>
+        public bool EditPropertyValue<TValue>
+        (
+            string propertyName,
+            Func<TTarget, TValue> readFunc,
+            Func<Rect, TTarget, TValue> drawFunc,
+            Action<TTarget, TValue> writeFunc,
+            Func<TTarget, float>? getHeightFunc = null
+        )
+        {
+            float height = getHeightFunc?.Invoke(target) ?? EditorGUIUtility.singleLineHeight;
+            Rect position = EditorGUILayout.GetControlRect(true, height);
+            SerializedProperty? property = GetProperty(propertyName);
+            if (property == null)
+            {
+                EditorGUI.LabelField(position, GetTextOrKey("inspector.property_none").Replace("{name}", propertyName));
+                return false;
+            }
+
+            EditorGUI.BeginProperty(position, null, property);
+            try
+            {
+                return EditValue(readFunc, x => drawFunc.Invoke(position, x), writeFunc);
+            }
+            finally
+            {
+                EditorGUI.EndProperty();
+            }
         }
     }
 }

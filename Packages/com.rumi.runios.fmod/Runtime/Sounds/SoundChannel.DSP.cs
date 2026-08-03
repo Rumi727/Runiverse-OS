@@ -27,7 +27,7 @@ namespace RuniOS.Sounds
             if (dsp.system != system)
                 throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));
 
-            dsp.UseNative((nativeDSP, native) => native.addDSP((int)index, nativeDSP).ThrowIfNotOk(), native);
+            dsp.UseNative((nativeDSP, native) => native.addDSP((int)index, nativeDSP).ThrowIfNotOk(this), native);
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace RuniOS.Sounds
             if (dsp.system != system)
                 throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));
 
-            dsp.UseNative((nativeDSP, native) => native.removeDSP(nativeDSP).ThrowIfNotOk(), native);
+            dsp.UseNative((nativeDSP, native) => native.removeDSP(nativeDSP).ThrowIfNotOk(this), native);
         }
     }
 }

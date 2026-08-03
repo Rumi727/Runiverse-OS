@@ -28,7 +28,7 @@ namespace RuniOS.Sounds
             if (group == null)
                 throw new ArgumentNullException(nameof(group));
 
-            group.UseNative((channelGroup, native) => native.setChannelGroup(channelGroup).ThrowIfNotOk(), native);
+            group.UseNative((channelGroup, native) => native.setChannelGroup(channelGroup).ThrowIfNotOk(this), native);
         }
     }
 }

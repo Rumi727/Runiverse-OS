@@ -18,14 +18,14 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DAttributes(out VECTOR position, out VECTOR velocity).ThrowIfNotOk();
+                native.get3DAttributes(out VECTOR position, out VECTOR velocity).ThrowIfNotOk(this);
                 return new AudioSpatialState(position.ToUnityVector(), velocity.ToUnityVector());
             }
             set
             {
                 VECTOR position = value.position.ToFMODVector();
                 VECTOR velocity = value.velocity.ToFMODVector();
-                native.set3DAttributes(ref position, ref velocity).ThrowIfNotOk();
+                native.set3DAttributes(ref position, ref velocity).ThrowIfNotOk(this);
             }
         }
 
@@ -41,7 +41,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.get3DMinMaxDistance(out float min, out float max).ThrowIfNotOk();
+                    native.get3DMinMaxDistance(out float min, out float max).ThrowIfNotOk(this);
                     return (min, max);
                 }
                 finally
@@ -55,7 +55,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.set3DMinMaxDistance(value.min, value.max.Clamp(value.min)).ThrowIfNotOk();
+                    native.set3DMinMaxDistance(value.min, value.max.Clamp(value.min)).ThrowIfNotOk(this);
                 }
                 finally
                 {
@@ -76,7 +76,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
+                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk(this);
                     return minimum;
                 }
                 finally
@@ -90,8 +90,8 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
-                    native.set3DMinMaxDistance(value, maximum.Clamp(value)).ThrowIfNotOk();
+                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk(this);
+                    native.set3DMinMaxDistance(value, maximum.Clamp(value)).ThrowIfNotOk(this);
                 }
                 finally
                 {
@@ -112,7 +112,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk();
+                    native.get3DMinMaxDistance(out _, out float maximum).ThrowIfNotOk(this);
                     return maximum;
                 }
                 finally
@@ -126,8 +126,8 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk();
-                    native.set3DMinMaxDistance(minimum, value.Clamp(minimum)).ThrowIfNotOk();
+                    native.get3DMinMaxDistance(out float minimum, out _).ThrowIfNotOk(this);
+                    native.set3DMinMaxDistance(minimum, value.Clamp(minimum)).ThrowIfNotOk(this);
                 }
                 finally
                 {
@@ -152,7 +152,7 @@ namespace RuniOS.Sounds
 
                     try
                     {
-                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        native.getMode(out MODE mode).ThrowIfNotOk(this);
                         return GetRolloffMode(mode);
                     }
                     finally
@@ -175,10 +175,10 @@ namespace RuniOS.Sounds
 
                     try
                     {
-                        native.getMode(out MODE mode).ThrowIfNotOk();
+                        native.getMode(out MODE mode).ThrowIfNotOk(this);
                         mode &= ~(MODE._3D_INVERSEROLLOFF | MODE._3D_LINEARROLLOFF | MODE._3D_LINEARSQUAREROLLOFF | MODE._3D_INVERSETAPEREDROLLOFF | MODE._3D_CUSTOMROLLOFF);
                         mode |= GetFMODRolloffMode(value);
-                        native.setMode(mode).ThrowIfNotOk();
+                        native.setMode(mode).ThrowIfNotOk(this);
                     }
                     finally
                     {
@@ -221,10 +221,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DLevel(out float level).ThrowIfNotOk();
+                native.get3DLevel(out float level).ThrowIfNotOk(this);
                 return level;
             }
-            set => native.set3DLevel(value.Clamp01()).ThrowIfNotOk();
+            set => native.set3DLevel(value.Clamp01()).ThrowIfNotOk(this);
         }
 
         /// <summary>
@@ -235,10 +235,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DDopplerLevel(out float level).ThrowIfNotOk();
+                native.get3DDopplerLevel(out float level).ThrowIfNotOk(this);
                 return level;
             }
-            set => native.set3DDopplerLevel(value.Clamp(0, 5)).ThrowIfNotOk();
+            set => native.set3DDopplerLevel(value.Clamp(0, 5)).ThrowIfNotOk(this);
         }
 
         /// <summary>
@@ -249,10 +249,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DSpread(out float spread).ThrowIfNotOk();
+                native.get3DSpread(out float spread).ThrowIfNotOk(this);
                 return spread;
             }
-            set => native.set3DSpread(value.Clamp(0, 360)).ThrowIfNotOk();
+            set => native.set3DSpread(value.Clamp(0, 360)).ThrowIfNotOk(this);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace RuniOS.Sounds
         /// </returns>
         public (float insideAngle, float outsideAngle, float outsideVolume) GetConeSettings()
         {
-            native.get3DConeSettings(out float insideAngle, out float outsideAngle, out float outsideVolume).ThrowIfNotOk();
+            native.get3DConeSettings(out float insideAngle, out float outsideAngle, out float outsideVolume).ThrowIfNotOk(this);
             return (insideAngle, outsideAngle, outsideVolume);
         }
 
@@ -286,7 +286,7 @@ namespace RuniOS.Sounds
         /// 외부 콘 밖에서의 볼륨입니다.
         /// </param>
         public void SetConeSettings(float insideAngle, float outsideAngle, float outsideVolume) =>
-            native.set3DConeSettings(insideAngle, outsideAngle, outsideVolume).ThrowIfNotOk();
+            native.set3DConeSettings(insideAngle, outsideAngle, outsideVolume).ThrowIfNotOk(this);
 
         /// <summary>
         /// Gets or sets the 3D cone orientation.<br/>
@@ -296,13 +296,13 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.get3DConeOrientation(out VECTOR orientation).ThrowIfNotOk();
+                native.get3DConeOrientation(out VECTOR orientation).ThrowIfNotOk(this);
                 return orientation.ToUnityVector();
             }
             set
             {
                 VECTOR orientation = value.ToFMODVector();
-                native.set3DConeOrientation(ref orientation).ThrowIfNotOk();
+                native.set3DConeOrientation(ref orientation).ThrowIfNotOk(this);
             }
         }
 
@@ -316,7 +316,7 @@ namespace RuniOS.Sounds
         /// </returns>
         public (float direct, float reverb) GetOcclusion()
         {
-            native.get3DOcclusion(out float direct, out float reverb).ThrowIfNotOk();
+            native.get3DOcclusion(out float direct, out float reverb).ThrowIfNotOk(this);
             return (direct, reverb);
         }
 
@@ -339,6 +339,6 @@ namespace RuniOS.Sounds
         /// The reverb-path occlusion factor.<br/>
         /// 리버브 경로 오클루전 계수입니다.
         /// </param>
-        public void SetOcclusion(float direct, float reverb) => native.set3DOcclusion(direct.Clamp01(), reverb.Clamp01());
+        public void SetOcclusion(float direct, float reverb) => native.set3DOcclusion(direct.Clamp01(), reverb.Clamp01()).ThrowIfNotOk(this);
     }
 }

@@ -1,0 +1,30 @@
+{
+    "name": "RuniOS.Editor.NBS",
+    "rootNamespace": "RuniOS.Editor",
+    "references": [
+        "RuniOS.NBS",
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:c358082e85227cc4f9dee2438a164545",
+        "GUID:e04069b3d121e7b4db324e77dd2a22a4",
+        "GUID:6c3753e26ffe4fd896cae3910657ff25",
+        "GUID:539740484accacd4292d8460e00aac39",
+        "GUID:ff01685829a83e44bbf12e8bac9c5a96",
+        "GUID:2751993238ca40e092862ff44b23f887",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:0c752da273b17c547ae705acf0f2adf2"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "ExtendedNumerics.BigDecimal.dll",
+        "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll"
+    ],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

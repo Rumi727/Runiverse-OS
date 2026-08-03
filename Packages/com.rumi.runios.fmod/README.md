@@ -92,7 +92,7 @@ FMOD CHANNELCONTROL_CALLBACK_TYPE.END
 
 ### `SoundSystem` 생성과 `Reset()`
 
-`SoundSystem.main`은 `maxChannels = 4095`, `INITFLAGS.NORMAL`로 생성됩니다. 별도 시스템은 public
+`SoundSystem.main`은 `maxChannels = 4095`, `softwareChannels = 1024`, `INITFLAGS.NORMAL`로 생성됩니다. 즉 가상 채널은 최대 4095개, 동시에 소프트웨어 믹싱되는 실제 채널은 최대 1024개입니다. 별도 시스템은 public
 생성자에서 init 전 설정을 지정할 수 있으며, 소유자가 직접 `Update()`와 `Dispose()`를 호출해야 합니다.
 
 ```csharp

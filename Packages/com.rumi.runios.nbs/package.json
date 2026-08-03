@@ -1,0 +1,15 @@
+{
+  "name": "com.rumi.runios.nbs",
+  "version": "0.0.0",
+  "displayName": "Runiverse OS NBS",
+  "description": "Note Block Studio file loading and FMOD playback for Runiverse OS",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "com.rumi.runios.core": "1.0.0",
+    "com.rumi.runios.sound": "0.0.0",
+    "com.rumi.runios.fmod": "0.0.0"
+  },
+  "unity": "6000.3"
+}

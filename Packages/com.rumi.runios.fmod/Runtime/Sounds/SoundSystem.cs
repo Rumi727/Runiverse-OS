@@ -28,9 +28,16 @@ namespace RuniOS.Sounds
             FMOD.Thread.SetAttributes(THREAD_TYPE.STREAM, THREAD_AFFINITY.GROUP_DEFAULT, THREAD_PRIORITY.DEFAULT, (THREAD_STACK_SIZE)stackSize).ThrowIfNotOk();
 #endif
 
-            main = new SoundSystem();
+            main = new SoundSystem(new SoundSystemSettings
+            {
+                softwareChannels = 1024
+            });
         }
 
+        /// <summary>
+        /// Gets the automatically updated main system configured with 4095 virtual channels and 1024 real channels.<br/>
+        /// 가상 채널 4095개와 실제 채널 1024개로 구성되어 자동으로 갱신되는 메인 시스템을 가져옵니다.
+        /// </summary>
         public static SoundSystem main { get; }
 
         /// <summary>
@@ -90,6 +97,46 @@ namespace RuniOS.Sounds
         int activeResourceDisposals = 0;
 
         volatile LifecycleState lifecycleState;
+
+        /// <summary>
+        /// Gets the sample rate used by the FMOD software mixer output.<br/>
+        /// FMOD 소프트웨어 믹서 출력에 사용되는 샘플 레이트를 가져옵니다.
+        /// </summary>
+        public int outputSampleRate => Volatile.Read(ref _outputSampleRate);
+        int _outputSampleRate;
+
+        /// <summary>
+        /// Gets the current tail DSP clock of the master channel group in samples.<br/>
+        /// 마스터 채널 그룹 tail의 현재 DSP 클록을 샘플 단위로 가져옵니다.
+        /// </summary>
+        /// <returns>
+        /// The master channel group's current DSP clock.<br/>
+        /// 마스터 채널 그룹의 현재 DSP 클록입니다.
+        /// </returns>
+        /// <exception cref="ObjectDisposedException">
+        /// Thrown when this sound system has been disposed.<br/>
+        /// 이 사운드 시스템이 해제된 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when this sound system is resetting or faulted.<br/>
+        /// 이 사운드 시스템이 재설정 중이거나 오류 상태인 경우 발생합니다.
+        /// </exception>
+        public ulong GetMasterDSPClock()
+        {
+            nativeLock.EnterReadLock();
+
+            try
+            {
+                ThrowIfUnavailableUnsafe();
+                native.getMasterChannelGroup(out ChannelGroup masterGroup).ThrowIfNotOk();
+                masterGroup.getDSPClock(out ulong dspClock, out _).ThrowIfNotOk();
+                return dspClock;
+            }
+            finally
+            {
+                nativeLock.ExitReadLock();
+            }
+        }
 
         public bool isDisposed => lifecycleState == LifecycleState.Disposed;
 
@@ -259,6 +306,9 @@ namespace RuniOS.Sounds
 
             native.init(settings.maxChannels ?? 4095, settings.initFlags ?? INITFLAGS.NORMAL, IntPtr.Zero).ThrowIfNotOk();
             nativeInitialized = true;
+
+            native.getSoftwareFormat(out int sampleRate, out _, out _).ThrowIfNotOk();
+            Volatile.Write(ref _outputSampleRate, sampleRate);
         }
 
         List<ISoundSystemResource> BeginResourceRelease(LifecycleState nextState)

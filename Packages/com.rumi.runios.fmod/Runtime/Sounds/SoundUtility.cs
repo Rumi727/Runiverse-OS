@@ -12,6 +12,22 @@ namespace RuniOS.Sounds
                 throw new FMODException(result, location);
         }
 
+        internal static void ThrowIfNotOk
+        (
+            this RESULT result,
+            SoundChannel channel,
+            [CallerArgumentExpression("result")] string location = ""
+        )
+        {
+            if (result == RESULT.ERR_INVALID_HANDLE)
+            {
+                channel.HandleInvalidHandle();
+                return;
+            }
+
+            result.ThrowIfNotOk(location);
+        }
+
         // ReSharper disable Unity.PerformanceAnalysis
         public static RESULT LogErrorIfNotOk(this RESULT result, [CallerArgumentExpression("result")] string location = "")
         {
