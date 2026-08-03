@@ -31,15 +31,16 @@ namespace RuniOS.Sounds
         /// </remarks>
         public override double time
         {
-            get => base.time;
+            get => base.time - pitchDSPTimeOffset;
             set
             {
                 playingLock.EnterWriteLock();
 
                 try
                 {
-                    SyncInterpolatedTime(value);
-                    TryGetAliveChannel(channel => channel.time = value);
+                    double channelTime = value + (isPlaying ? pitchDSPTimeOffset : 0);
+                    SyncInterpolatedTime(channelTime);
+                    TryGetAliveChannel(channel => channel.time = channelTime);
                 }
                 finally
                 {
@@ -249,7 +250,22 @@ namespace RuniOS.Sounds
 
         // pitch DSP는 현재 channel에 부착되므로 반드시 channelLock 안에서 생성, 변경, 해제합니다.
         readonly List<PitchShiftDSP> pitchDSPList = [];
-        const float fftSize = 4096;
+        const float pitchDSPFFTSize = 4096;
+        volatile int pitchDSPCount;
+
+        double pitchDSPTimeOffset
+        {
+            get
+            {
+                float frequency = clipFrequency;
+                float tempo = this.tempo;
+                if (frequency <= 0 || !float.IsNormal(tempo))
+                    return 0;
+
+                double offset = pitchDSPCount * (pitchDSPFFTSize / frequency);
+                return tempo < 0 ? -offset : offset;
+            }
+        }
 
         volatile uint lastTimeSamples = uint.MaxValue;
 
@@ -539,7 +555,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                double currentTime = time;
+                double currentTime = time + pitchDSPTimeOffset;
                 if
                 (
                     scope == null || !isPlaying || !double.IsFinite(currentTime) ||
@@ -641,6 +657,7 @@ namespace RuniOS.Sounds
 
                 pitchDSPs = pitchDSPList.ToArray();
                 pitchDSPList.Clear();
+                pitchDSPCount = 0;
 
                 lastTimeSamples = uint.MaxValue;
             }
@@ -737,13 +754,15 @@ namespace RuniOS.Sounds
                 while (pitchDSPList.Count <= index)
                 {
                     PitchShiftDSP pitchDsp = channel.system.CreateDSP<PitchShiftDSP>();
-                    pitchDsp.fftSize = fftSize;
+                    pitchDsp.fftSize = pitchDSPFFTSize;
                     pitchDSPList.Add(pitchDsp);
                     channel.AddDSP(pitchDsp);
                 }
 
                 pitchDSPList[index].pitch = value;
             }
+
+            pitchDSPCount = pitchDSPList.Count;
         }
 
         /// <remarks>
@@ -765,6 +784,7 @@ namespace RuniOS.Sounds
             }
 
             pitchDSPList.Clear();
+            pitchDSPCount = 0;
         }
 
         void UnsafeUpdateChannelVolume(SoundChannel channel) => channel.volume = volume;
