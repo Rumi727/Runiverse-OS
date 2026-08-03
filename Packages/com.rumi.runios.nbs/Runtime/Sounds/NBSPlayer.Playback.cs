@@ -674,23 +674,20 @@ namespace RuniOS.Sounds
             bool useFileLoop = useFileLoopSettings && file.header.loopEnabled;
             double startTime;
             double endTime;
-            long maximumLoops;
             if (useFileLoop)
             {
                 startTime = file.tempoMap.TickToTime(file.header.loopStartTick);
                 endTime = file.duration;
-                maximumLoops = file.header.maxLoopCount;
             }
             else
             {
                 startTime = Math.Clamp(base.loopStart, 0, file.duration);
                 endTime = Math.Clamp(base.loopEnd, startTime, file.duration);
-                maximumLoops = 0;
             }
 
             double range = endTime - startTime;
             return double.IsFinite(startTime) && double.IsFinite(endTime) && range > 0
-                ? new NBSLoopInfo(true, startTime, endTime, maximumLoops)
+                ? new NBSLoopInfo(true, startTime, endTime)
                 : default;
         }
 
