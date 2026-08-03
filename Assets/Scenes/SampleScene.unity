@@ -687,6 +687,135 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: RuniOS.Effects::RuniOS.Effects.MergeOutline
   _profileId: 0
+--- !u!1 &548284940
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 548284941}
+  - component: {fileID: 548284942}
+  m_Layer: 0
+  m_Name: Audio Source
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &548284941
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548284940}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!82 &548284942
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 548284940}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 0
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
 --- !u!1 &551969644
 GameObject:
   m_ObjectHideFlags: 0
@@ -2535,8 +2664,8 @@ MonoBehaviour:
   _loopEnd: 1.7976931348623157e+308
   _panStereo: 0
   _spatialBlend: 0
-  _dopplerLevel: 5
-  _spread: 45
+  _dopplerLevel: 1
+  _spread: 90
   _minDistance: 10000
   _maxDistance: 16
   _clipRef:
@@ -2548,7 +2677,7 @@ MonoBehaviour:
       assetId:
         _nameSpace: test
         _path:
-          _value: je_al_ou_sy
+          _value: override
   _rolloffMode: 1
   _nonRigidbodyVelocity: 0
 --- !u!4 &1060755443
@@ -4531,7 +4660,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268938d9054946b12bbee3468e400d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: RuniOS.NBS::RuniOS.Sounds.NBSPlayer
-  _volume: 0.38
+  _volume: 0.244
   _tempo: 1
   _pitch: 1
   _loop: 1
@@ -4540,8 +4669,8 @@ MonoBehaviour:
   _panStereo: 0
   _spatialBlend: 0
   _dopplerLevel: 1
-  _spread: 90
-  _minDistance: 0
+  _spread: 0
+  _minDistance: 100000
   _maxDistance: 16
   _nbsFileRef:
     key:
@@ -4552,7 +4681,7 @@ MonoBehaviour:
       assetId:
         _nameSpace: test
         _path:
-          _value: candy_cookie_chocolate
+          _value: black_knife
   _useFileLoopSettings: 1
   _rolloffMode: 1
   _nonRigidbodyVelocity: 0
@@ -4723,5 +4852,6 @@ SceneRoots:
   - {fileID: 403932573}
   - {fileID: 1893003031}
   - {fileID: 1925898570}
+  - {fileID: 548284941}
   - {fileID: 1060755443}
   - {fileID: 2019768490}

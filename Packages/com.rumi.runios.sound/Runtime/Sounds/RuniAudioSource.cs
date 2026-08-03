@@ -180,14 +180,14 @@ namespace RuniOS.Sounds
             get => _dopplerLevel;
             set => _dopplerLevel = value;
         }
-        [SerializeField] volatile float _dopplerLevel = 0;
+        [SerializeField] volatile float _dopplerLevel = 1;
 
         public virtual float spread
         {
             get => _spread;
             set => _spread = value;
         }
-        [SerializeField] volatile float _spread = 90;
+        [SerializeField] volatile float _spread = 0;
 
         public virtual float minDistance
         {
