@@ -14,6 +14,11 @@
 - This includes changes that look obviously correct, such as changing file-system operations to use a provider root (`targetPath + path`) instead of the raw path.
 - Explain why the change was made, what behavior it changes, and that it can be reverted if the previous behavior was intentional.
 
+## Public API Compatibility
+
+- This project is under active development. Public API contracts do not need to be preserved solely for compatibility; break them when necessary.
+- When breaking or materially changing a public API contract, explicitly explain the decision, the changed contract, and the resulting impact in the response.
+
 ## Language
 
 - Unless the user explicitly asks for another language, respond in Korean by default.
