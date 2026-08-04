@@ -41,7 +41,9 @@ namespace RuniOS.NBS
             try
             {
                 using BinaryReader reader = new BinaryReader(stream, strictUtf8, true);
-                ushort firstValue = ReadNonNegativeShort(reader, "format marker or classic song length");
+                // OpenNBS writes this with buffer_u16. A non-zero classic length is not used to build its timeline,
+                // but preserve its raw unsigned value in the header for callers that need the original metadata.
+                ushort firstValue = reader.ReadUInt16();
 
                 byte version;
                 byte vanillaInstrumentCount;
@@ -62,7 +64,7 @@ namespace RuniOS.NBS
 
                     vanillaInstrumentCount = reader.ReadByte();
                     declaredSongLength = version >= 3
-                        ? ReadNonNegativeShort(reader, "song length")
+                        ? reader.ReadUInt16()
                         : (ushort)0;
                     layerCount = ReadNonNegativeShort(reader, "layer count");
                 }
@@ -94,11 +96,8 @@ namespace RuniOS.NBS
                 {
                     loopEnabled = reader.ReadByte() != 0;
                     maxLoopCount = reader.ReadByte();
-                    short rawLoopStartTick = reader.ReadInt16();
-                    if (rawLoopStartTick < 0)
-                        throw new InvalidDataException($"NBS loop start tick cannot be negative: {rawLoopStartTick}.");
-
-                    loopStartTick = (ushort)rawLoopStartTick;
+                    // OpenNBS lets its loop-start editor reach the full song length and writes it with buffer_u16.
+                    loopStartTick = reader.ReadUInt16();
                 }
 
                 List<NBSNote> notes = ReadNotes(reader, version);
@@ -118,7 +117,8 @@ namespace RuniOS.NBS
                     lastNoteTick = maximumNoteTick + 1;
                 }
 
-                int tickLength = MathUtility.Max(declaredSongLength, lastNoteTick);
+                // OpenNBS reads the declared length but derives the actual song size from note coordinates.
+                int tickLength = lastNoteTick;
 
                 NBSTick[] ticks = notes
                     .GroupBy(x => x.tick)
