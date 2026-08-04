@@ -22,6 +22,7 @@ namespace RuniOS.Sounds
             switch (result)
             {
                 case RESULT.ERR_INVALID_HANDLE:
+                case RESULT.ERR_CHANNEL_STOLEN:
                     channel.HandleInvalidHandle();
                     return;
                 case RESULT.ERR_INVALID_PARAM when channel.isDisposed:
