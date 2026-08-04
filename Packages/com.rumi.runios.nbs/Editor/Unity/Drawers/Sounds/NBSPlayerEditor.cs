@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using RuniOS.Editor.IMGUI;
 using RuniOS.NBS;
 using RuniOS.Sounds;
+using RuniOS.Utility;
 
 namespace RuniOS.Editor.Unity.Drawers.Sounds
 {
@@ -15,9 +16,11 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
     public sealed class NBSPlayerEditor : RuniAudioSourceEditor<NBSPlayer>
     {
         const float visualEffectCardHeight = 44;
+        const float tempoChangeMarkerWidth = 2;
         const double savePopupHoldDuration = 1;
         const double savePopupFadeDuration = 0.25;
         static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
+        static readonly Color tempoChangeMarkerColor = new Color(1, 0.65f, 0.15f, 0.9f);
 
         readonly Dictionary<EntityId, SavePopupTracker> savePopupTrackers = [];
         double savePopupStartedAt = double.NegativeInfinity;
@@ -28,6 +31,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         {
             playableController.timeUnits.Add(new NBSTickTimeUnit());
             playableController.timeUnits.Add(new NBSIndexTimeUnit());
+            playableController.timelineOverlay = DrawTempoChangeMarkers;
         }
 
         protected override bool repaintInEditor
@@ -396,6 +400,29 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             loopStartTick = useFileLoop ? file.header.loopStartTick : file.tempoMap.TimeToTick(loopStartTime);
             loopEndTick = useFileLoop ? file.tickLength : file.tempoMap.TimeToTick(loopEndTime);
             return double.IsFinite(loopStartTick) && double.IsFinite(loopEndTick) && loopEndTick > loopStartTick;
+        }
+
+        static void DrawTempoChangeMarkers(Rect trackPosition, IPlayable playable, double length)
+        {
+            if (playable is not NBSPlayer player || player.nbsFile is not { } file || trackPosition.width <= 0)
+                return;
+
+            foreach (NBSTempoMap.Segment segment in file.tempoMap.segments)
+            {
+                if (segment.startTick <= 0 || !double.IsFinite(segment.startTime) || segment.startTime <= 0 || segment.startTime >= length)
+                    continue;
+
+                float x = trackPosition.xMin.Lerp(trackPosition.xMax, (segment.startTime / length).ClampToFloat());
+                Rect markerPosition = new Rect
+                (
+                    x - (tempoChangeMarkerWidth * 0.5f),
+                    trackPosition.y + 2,
+                    tempoChangeMarkerWidth,
+                    trackPosition.height - 8
+                );
+                EditorGUI.DrawRect(markerPosition, tempoChangeMarkerColor);
+                GUI.Label(markerPosition, TempContent(string.Empty, $"BPM {segment.ticksPerSecond * 15:0.##}"), GUIStyle.none);
+            }
         }
 
         static Color GetAccentColor(NBSVisualEffectMap.State state)

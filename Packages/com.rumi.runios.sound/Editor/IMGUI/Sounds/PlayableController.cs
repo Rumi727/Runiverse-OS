@@ -44,6 +44,7 @@ namespace RuniOS.Editor.IMGUI.Sounds
         public List<ITimeUnit> timeUnits { get; }
 
         public Action<ILoopablePlayer, double, double>? loopRangeSetter { private get; set; }
+        public Action<Rect, IPlayable, double>? timelineOverlay { private get; set; }
 
         LoopHandle draggedLoopHandle;
         readonly Vector3[] startHandleVertices = new Vector3[3];
@@ -213,6 +214,9 @@ namespace RuniOS.Editor.IMGUI.Sounds
             float sliderValue = GUI.HorizontalSlider(position, sliderTime, 0, sliderLength);
             if (EditorGUI.EndChangeCheck() && playable != null)
                 playable.time = sliderValue;
+
+            if (isTimelineValid && playable != null)
+                timelineOverlay?.Invoke(timelineTrackPosition, playable, length);
 
             if (loopHandlesEnabled)
                 DrawLoopHandles(loopRangeControlID, position, timelineTrackPosition, loopablePlayer!, length);
