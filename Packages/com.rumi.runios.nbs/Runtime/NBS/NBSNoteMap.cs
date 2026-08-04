@@ -1,4 +1,6 @@
 #nullable enable
+using System.Threading.Tasks;
+
 namespace RuniOS.NBS
 {
     /// <summary>
@@ -32,6 +34,8 @@ namespace RuniOS.NBS
     /// </summary>
     public sealed class NBSNoteMap
     {
+        const int parallelThreshold = 1024;
+
         internal NBSNoteMap
         (
             IReadOnlyList<NBSTick> ticks,
@@ -39,45 +43,54 @@ namespace RuniOS.NBS
             NBSTempoMap tempoMap
         )
         {
-            List<NBSMappedNote> mappedNotes = [];
-            int noteId = 0;
+            int[] noteOffsets = new int[ticks.Count];
+            int noteCount = 0;
+            for (int tickIndex = 0; tickIndex < ticks.Count; tickIndex++)
+            {
+                noteOffsets[tickIndex] = noteCount;
+                noteCount += ticks[tickIndex].notes.Count;
+            }
+
+            int[] noteTickIndices = new int[noteCount];
+            double[] tickTimes = new double[ticks.Count];
             for (int tickIndex = 0; tickIndex < ticks.Count; tickIndex++)
             {
                 NBSTick tick = ticks[tickIndex];
-                double time = tempoMap.TickToTime(tick.tick);
+                tickTimes[tickIndex] = tempoMap.TickToTime(tick.tick);
                 for (int noteIndex = 0; noteIndex < tick.notes.Count; noteIndex++)
-                    mappedNotes.Add(new NBSMappedNote(noteId++, time, tick.notes[noteIndex]));
+                    noteTickIndices[noteOffsets[tickIndex] + noteIndex] = tickIndex;
             }
 
-            mappedNotes.Sort(static (left, right) =>
+            NBSMappedNote[] mappedNotes = new NBSMappedNote[noteCount];
+            Action<int> mapNote = noteId =>
             {
-                int timeComparison = left.time.CompareTo(right.time);
-                if (timeComparison != 0)
-                    return timeComparison;
+                int tickIndex = noteTickIndices[noteId];
+                NBSTick tick = ticks[tickIndex];
+                int noteIndex = noteId - noteOffsets[tickIndex];
+                mappedNotes[noteId] = new NBSMappedNote(noteId, tickTimes[tickIndex], tick.notes[noteIndex]);
+            };
 
-                int layerComparison = left.note.layer.CompareTo(right.note.layer);
-                return layerComparison != 0 ? layerComparison : left.id.CompareTo(right.id);
-            });
+            if (mappedNotes.Length >= parallelThreshold)
+                Parallel.For(0, mappedNotes.Length, mapNote);
+            else
+                for (int noteId = 0; noteId < mappedNotes.Length; noteId++)
+                    mapNote(noteId);
 
-            List<NBSMappedSpecialEvent> mappedEvents = new List<NBSMappedSpecialEvent>(specialEvents.Count);
-            for (int i = 0; i < specialEvents.Count; i++)
+            NBSMappedSpecialEvent[] mappedEvents = new NBSMappedSpecialEvent[specialEvents.Count];
+            Action<int> mapSpecialEvent = i =>
             {
                 NBSSpecialEvent specialEvent = specialEvents[i];
-                mappedEvents.Add(new NBSMappedSpecialEvent(i, tempoMap.TickToTime(specialEvent.tick), specialEvent));
-            }
+                mappedEvents[i] = new NBSMappedSpecialEvent(i, tempoMap.TickToTime(specialEvent.tick), specialEvent);
+            };
 
-            mappedEvents.Sort(static (left, right) =>
-            {
-                int timeComparison = left.time.CompareTo(right.time);
-                if (timeComparison != 0)
-                    return timeComparison;
+            if (mappedEvents.Length >= parallelThreshold)
+                Parallel.For(0, mappedEvents.Length, mapSpecialEvent);
+            else
+                for (int i = 0; i < mappedEvents.Length; i++)
+                    mapSpecialEvent(i);
 
-                int layerComparison = left.specialEvent.layer.CompareTo(right.specialEvent.layer);
-                return layerComparison != 0 ? layerComparison : left.id.CompareTo(right.id);
-            });
-
-            notes = mappedNotes.AsReadOnly();
-            this.specialEvents = mappedEvents.AsReadOnly();
+            notes = Array.AsReadOnly(mappedNotes);
+            this.specialEvents = Array.AsReadOnly(mappedEvents);
         }
 
         /// <summary>Gets notes ordered by time, layer, and stable identifier.<br/>시간, 레이어, 안정적인 식별자순 음표를 가져옵니다.</summary>

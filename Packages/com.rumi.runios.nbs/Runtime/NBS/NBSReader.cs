@@ -120,11 +120,7 @@ namespace RuniOS.NBS
                 // OpenNBS reads the declared length but derives the actual song size from note coordinates.
                 int tickLength = lastNoteTick;
 
-                NBSTick[] ticks = notes
-                    .GroupBy(x => x.tick)
-                    .OrderBy(x => x.Key)
-                    .Select(x => new NBSTick(x.Key, x.OrderBy(y => y.layer).ToArray().AsReadOnly()))
-                    .ToArray();
+                NBSTick[] ticks = GroupNotesByTick(notes);
 
                 NBSHeader header = new NBSHeader
                 (
@@ -157,7 +153,7 @@ namespace RuniOS.NBS
                     ticks.AsReadOnly(),
                     layers.AsReadOnly(),
                     customInstruments.AsReadOnly(),
-                    specialEvents.OrderBy(x => x.tick).ThenBy(x => x.layer).ToArray().AsReadOnly(),
+                    specialEvents.AsReadOnly(),
                     tickLength
                 );
             }
@@ -169,6 +165,28 @@ namespace RuniOS.NBS
             {
                 throw new InvalidDataException($"The NBS file contains an out-of-range length or coordinate{GetStreamPositionDescription(stream)}.", exception);
             }
+        }
+
+        static NBSTick[] GroupNotesByTick(IReadOnlyList<NBSNote> notes)
+        {
+            List<NBSTick> result = [];
+            int startIndex = 0;
+            while (startIndex < notes.Count)
+            {
+                int tick = notes[startIndex].tick;
+                int endIndex = startIndex + 1;
+                while (endIndex < notes.Count && notes[endIndex].tick == tick)
+                    endIndex++;
+
+                NBSNote[] tickNotes = new NBSNote[endIndex - startIndex];
+                for (int i = startIndex; i < endIndex; i++)
+                    tickNotes[i - startIndex] = notes[i];
+
+                result.Add(new NBSTick(tick, Array.AsReadOnly(tickNotes)));
+                startIndex = endIndex;
+            }
+
+            return result.ToArray();
         }
 
         static List<NBSNote> ReadNotes

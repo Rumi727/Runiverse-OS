@@ -1,4 +1,6 @@
 #nullable enable
+using System.Threading.Tasks;
+
 using RuniOS.Resource;
 // ReSharper disable NotAccessedPositionalProperty.Global
 
@@ -142,6 +144,8 @@ namespace RuniOS.NBS
     /// </summary>
     public sealed class NBSPlaybackMap
     {
+        const int parallelThreshold = 1024;
+
         static readonly string[] vanillaInstrumentPaths =
         [
             "block.note_block.harp",
@@ -181,8 +185,9 @@ namespace RuniOS.NBS
                 eventsByCoordinate[(specialEvent.tick, specialEvent.layer)] = specialEvent;
             }
 
-            List<NBSPlaybackEntry> result = [];
-            for (int i = 0; i < noteMap.notes.Count; i++)
+            NBSPlaybackEntry[] preparedEntries = new NBSPlaybackEntry[noteMap.notes.Count];
+            bool[] includedEntries = new bool[preparedEntries.Length];
+            void MapNote(int i)
             {
                 NBSMappedNote mapped = noteMap.notes[i];
                 NBSNote note = mapped.note;
@@ -190,22 +195,11 @@ namespace RuniOS.NBS
                 {
                     if (specialEvent.kind == NBSSpecialEventKind.soundStop)
                     {
-                        result.Add(new NBSPlaybackEntry
-                        (
-                            mapped.id,
-                            mapped.time,
-                            note.layer,
-                            NBSPlaybackEntryKind.soundStop,
-                            NBSInstrumentReference.Functional(),
-                            0,
-                            0,
-                            0,
-                            note,
-                            specialEvent
-                        ));
+                        preparedEntries[i] = new NBSPlaybackEntry(mapped.id, mapped.time, note.layer, NBSPlaybackEntryKind.soundStop, NBSInstrumentReference.Functional(), 0, 0, 0, note, specialEvent);
+                        includedEntries[i] = true;
                     }
 
-                    continue;
+                    return;
                 }
 
                 NBSInstrumentReference instrument;
@@ -221,11 +215,11 @@ namespace RuniOS.NBS
                 {
                     int customIndex = note.instrument - header.vanillaInstrumentCount;
                     if (customIndex < 0 || customIndex >= customInstruments.Count)
-                        continue;
+                        return;
 
                     NBSCustomInstrument custom = customInstruments[customIndex];
                     if (custom.IsFunctionalInstrument())
-                        continue;
+                        return;
 
                     instrumentKeyOffset = custom.key - 45;
                     instrument = NBSInstrumentReference.TryNormalizeCustomPath(custom.soundFile, out string path)
@@ -240,26 +234,51 @@ namespace RuniOS.NBS
                 float combinedNbsPan = layer.panning == 100 ? note.panning : (layer.panning + note.panning) * 0.5f;
                 float staticPan = (combinedNbsPan - 100) / 100f;
 
-                result.Add(new NBSPlaybackEntry
-                (
-                    mapped.id,
-                    mapped.time,
-                    note.layer,
-                    NBSPlaybackEntryKind.note,
-                    instrument,
-                    staticPitchRatio,
-                    staticVolume,
-                    staticPan,
-                    note,
-                    default
-                ));
+                preparedEntries[i] = new NBSPlaybackEntry(mapped.id, mapped.time, note.layer, NBSPlaybackEntryKind.note, instrument, staticPitchRatio, staticVolume, staticPan, note, default);
+                includedEntries[i] = true;
+            }
+
+            if (preparedEntries.Length >= parallelThreshold)
+                Parallel.For(0, preparedEntries.Length, (Action<int>)MapNote);
+            else
+                for (int i = 0; i < preparedEntries.Length; i++)
+                    MapNote(i);
+
+            List<NBSPlaybackEntry> result = new List<NBSPlaybackEntry>(preparedEntries.Length);
+            List<NBSInstrumentReference> instrumentReferences = [];
+            Dictionary<NBSInstrumentReference, int> instrumentIndicesByReference = [];
+            List<int> resultInstrumentIndices = new List<int>(preparedEntries.Length);
+            for (int i = 0; i < preparedEntries.Length; i++)
+            {
+                if (!includedEntries[i])
+                    continue;
+
+                NBSPlaybackEntry entry = preparedEntries[i];
+                result.Add(entry);
+                int instrumentIndex = -1;
+                if (entry.kind == NBSPlaybackEntryKind.note && entry.instrument.isValid)
+                {
+                    if (!instrumentIndicesByReference.TryGetValue(entry.instrument, out instrumentIndex))
+                    {
+                        instrumentIndex = instrumentReferences.Count;
+                        instrumentIndicesByReference.Add(entry.instrument, instrumentIndex);
+                        instrumentReferences.Add(entry.instrument);
+                    }
+                }
+
+                resultInstrumentIndices.Add(instrumentIndex);
             }
 
             entries = result.AsReadOnly();
+            this.instrumentReferences = instrumentReferences.ToArray();
+            instrumentIndices = resultInstrumentIndices.ToArray();
         }
 
         /// <summary>Gets playback entries in stable original order.<br/>안정적인 원본 순서의 재생 항목을 가져옵니다.</summary>
         public IReadOnlyList<NBSPlaybackEntry> entries { get; }
+
+        readonly NBSInstrumentReference[] instrumentReferences;
+        readonly int[] instrumentIndices;
 
         /// <summary>
         /// Creates a Player-specific schedule using current transport rates and clip metadata.<br/>
@@ -275,7 +294,7 @@ namespace RuniOS.NBS
             if (clipMetadata == null)
                 throw new ArgumentNullException(nameof(clipMetadata));
 
-            return new NBSPlaybackSchedule(entries, tempo, pitch, clipMetadata);
+            return new NBSPlaybackSchedule(entries, instrumentReferences, instrumentIndices, tempo, pitch, clipMetadata);
         }
     }
 
@@ -368,15 +387,17 @@ namespace RuniOS.NBS
         readonly record struct PendingEntry(double anchorTime, int mapOrder, NBSPlaybackEntry source, NBSPreparedNote note);
         readonly record struct NBSPreparedSoundStop(double anchorTime, int startLayer, int endLayer, int momentIndex, int entryIndex);
 
-        internal NBSPlaybackSchedule(IReadOnlyList<NBSPlaybackEntry> mapEntries, float tempo, float pitch, INBSClipMetadataProvider clipMetadata)
+        internal NBSPlaybackSchedule(IReadOnlyList<NBSPlaybackEntry> mapEntries, NBSInstrumentReference[] instrumentReferences, int[] instrumentIndices, float tempo, float pitch, INBSClipMetadataProvider clipMetadata)
         {
             this.tempo = tempo;
             this.pitch = pitch;
             direction = tempo < 0 ? NBSPlaybackDirection.reverse : NBSPlaybackDirection.forward;
 
-            List<PendingEntry> pending = [];
             double absoluteTempo = Math.Abs((double)tempo);
             double absolutePitch = Math.Abs((double)pitch);
+            double[] sourceLengths = new double[instrumentReferences.Length];
+            bool[] resolvedLengths = new bool[instrumentReferences.Length];
+            List<PendingEntry> pending = new List<PendingEntry>(mapEntries.Count);
             for (int i = 0; i < mapEntries.Count; i++)
             {
                 NBSPlaybackEntry entry = mapEntries[i];
@@ -386,12 +407,22 @@ namespace RuniOS.NBS
                     continue;
                 }
 
-                if (!entry.instrument.isValid || entry.staticVolume <= 0 ||
-                    !double.IsFinite(entry.staticPitchRatio) || entry.staticPitchRatio <= 0 ||
-                    !double.IsFinite(absoluteTempo) || absoluteTempo <= 0 ||
-                    !double.IsFinite(absolutePitch) || absolutePitch <= 0 ||
-                    !clipMetadata.TryGetLength(entry.instrument, out double sourceLength) ||
-                    !double.IsFinite(sourceLength) || sourceLength <= 0)
+                if (entry.staticVolume <= 0 || !double.IsFinite(entry.staticPitchRatio) || entry.staticPitchRatio <= 0 || !double.IsFinite(absoluteTempo) || absoluteTempo <= 0 || !double.IsFinite(absolutePitch) || absolutePitch <= 0)
+                    continue;
+
+                int instrumentIndex = instrumentIndices[i];
+                if ((uint)instrumentIndex >= (uint)sourceLengths.Length)
+                    continue;
+
+                if (!resolvedLengths[instrumentIndex])
+                {
+                    resolvedLengths[instrumentIndex] = true;
+                    if (clipMetadata.TryGetLength(instrumentReferences[instrumentIndex], out double resolvedLength) && double.IsFinite(resolvedLength) && resolvedLength > 0)
+                        sourceLengths[instrumentIndex] = resolvedLength;
+                }
+
+                double sourceLength = sourceLengths[instrumentIndex];
+                if (sourceLength <= 0)
                     continue;
 
                 double timelineDuration = (sourceLength * absoluteTempo) / (entry.staticPitchRatio * absolutePitch);
@@ -400,31 +431,18 @@ namespace RuniOS.NBS
                     continue;
 
                 double anchor = direction == NBSPlaybackDirection.reverse ? endTime : entry.originalTime;
-                NBSPreparedNote note = new NBSPreparedNote
-                (
-                    entry.id,
-                    entry.originalTime,
-                    endTime,
-                    anchor,
-                    timelineDuration,
-                    sourceLength,
-                    pitch < 0,
-                    entry.layer,
-                    entry.instrument,
-                    entry.staticPitchRatio,
-                    entry.staticVolume,
-                    entry.staticPan,
-                    -1,
-                    -1
-                );
+                NBSPreparedNote note = new NBSPreparedNote(entry.id, entry.originalTime, endTime, anchor, timelineDuration, sourceLength, pitch < 0, entry.layer, entry.instrument, entry.staticPitchRatio, entry.staticVolume, entry.staticPan, -1, -1);
                 pending.Add(new PendingEntry(anchor, entry.id, entry, note));
             }
 
-            pending.Sort(static (left, right) =>
+            if (direction == NBSPlaybackDirection.reverse && pending.Count > 1)
             {
-                int anchorComparison = left.anchorTime.CompareTo(right.anchorTime);
-                return anchorComparison != 0 ? anchorComparison : left.mapOrder.CompareTo(right.mapOrder);
-            });
+                pending.Sort(static (left, right) =>
+                {
+                    int anchorComparison = left.anchorTime.CompareTo(right.anchorTime);
+                    return anchorComparison != 0 ? anchorComparison : left.mapOrder.CompareTo(right.mapOrder);
+                });
+            }
 
             List<NBSPlaybackMoment> momentList = [];
             List<NBSPreparedNote> noteList = [];
@@ -478,7 +496,16 @@ namespace RuniOS.NBS
             }
 
             moments = momentList.AsReadOnly();
-            preparedNotes = noteList.OrderBy(static x => x.originalStartTime).ThenBy(static x => x.mapEntryId).ToArray();
+            if (direction == NBSPlaybackDirection.reverse && noteList.Count > 1)
+            {
+                noteList.Sort(static (left, right) =>
+                {
+                    int timeComparison = left.originalStartTime.CompareTo(right.originalStartTime);
+                    return timeComparison != 0 ? timeComparison : left.mapEntryId.CompareTo(right.mapEntryId);
+                });
+            }
+
+            preparedNotes = noteList.ToArray();
             Dictionary<int, List<NBSPreparedSoundStop>> soundStopListsByLayer = [];
             for (int i = 0; i < noteList.Count; i++)
             {
