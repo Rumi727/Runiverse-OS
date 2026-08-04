@@ -93,6 +93,17 @@ T < 0: anchor = E
 - tempo 0: transport와 새 제출만 멈춥니다. 이미 시작한 Voice는 계속 재생합니다.
 - volume, pan, spatial blend, doppler, spread, distance, rolloff 변경: active/pending Voice에 즉시 반영합니다.
 
+## 호출 스레드 비용 및 lock 주의
+
+공유 background Worker가 일반적인 schedule query를 담당하지만 `NBSPlayer`의 모든 API가 Worker로 전달되는 것은 아닙니다. 현재 구현은 다음 비용을 호출 경로에서 즉시 수행할 수 있습니다.
+
+- 일부 property get/set이 `playingLock`, `voiceLock`, `voiceSettingsApplyLock`을 획득합니다. 일부 경로는 lock이 실제 상태 변경에 필요한 범위보다 넓은 작업을 감싸므로 Worker 또는 FMOD callback과 경합할 수 있습니다.
+- volume, pan, spatial/distance/rolloff property setter는 기존 active/pending Voice snapshot을 만든 뒤 각 Voice의 FMOD 채널에 즉시 적용합니다. Voice 수가 많으면 호출 시간이 함께 늘어납니다.
+- tempo/pitch 변경은 큰 playback map을 순회하고 clip metadata를 조회하며 정렬과 interval index 생성을 포함한 `NBSPlaybackSchedule` 재생성을 수행할 수 있습니다.
+- `Reload`의 resource load와 instrument load는 비동기지만, load 이후 schedule 생성과 generation swap은 별도 Worker로 강제 분리되지 않습니다. 준비된 schedule 생성은 곡의 entry 수에 따라 커질 수 있습니다.
+
+따라서 큰 곡에서는 property get/set, seek/loop 변경, `Reload` 등이 호출 스레드 또는 `Reload` continuation에 frame hitch을 만들거나 Worker lock contention을 유발할 수 있습니다. 지연에 민감한 루프에서 매 프레임 반복 호출하지 말고, 설정 변경은 가능한 한 묶어서 적용하며, 대형 곡 reload는 여유 있는 시점에 수행해야 합니다. 실제 비용은 note/entry 수, Voice 수, clip metadata 수, 동시 Worker 작업량에 따라 달라집니다.
+
 ## Loop
 
 공개 `time`은 현재 loop 구간의 file time이며 내부 occurrence는 loop iteration을 함께 사용합니다. file loop는 header의 start tick, score duration, maximum loop count를 사용합니다. manual loop는 `loopStart`와 `loopEnd`를 무한 반복합니다.
