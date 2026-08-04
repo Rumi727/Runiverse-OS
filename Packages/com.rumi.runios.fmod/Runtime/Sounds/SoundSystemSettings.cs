@@ -45,15 +45,6 @@ namespace RuniOS.Sounds
         /// DSP 믹서 버퍼 구성을 가져오며, 현재 설정을 사용하려면 <see langword="null"/>입니다.
         /// </summary>
         public SoundSystemDSPBuffer? dspBuffer { get; init; }
-
-        internal SoundSystemSettings Merge(SoundSystemSettings overrides) => new()
-        {
-            maxChannels = overrides.maxChannels ?? maxChannels,
-            initFlags = overrides.initFlags ?? initFlags,
-            softwareChannels = overrides.softwareChannels ?? softwareChannels,
-            softwareFormat = overrides.softwareFormat ?? softwareFormat,
-            dspBuffer = overrides.dspBuffer ?? dspBuffer
-        };
     }
 
     /// <summary>

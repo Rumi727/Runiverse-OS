@@ -205,6 +205,22 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value >= 0)
                 NBSPlaybackSettings.schedulingLookahead = value;
 
+            Space();
+
+            SoundSystem.main.Execute(system => system.playingChannelCount, out int playingChannelCount);
+            int softwareChannelCount = SoundSystem.main.softwareChannelCount;
+            int maxChannelCount = SoundSystem.main.maxChannels;
+
+            EditorGUILayout.LabelField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.information.playing_channels"),
+                new GUIContent(playingChannelCount.ToString())
+            );
+            EditorGUILayout.LabelField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.information.max_channels"),
+                new GUIContent($"{softwareChannelCount} + {maxChannelCount - softwareChannelCount}")
+            );
         }
 
         protected override void DrawInformationLayout()
@@ -252,6 +268,16 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             (
                 TrTempContent("runios-editor:inspector.nbs_player.information.bpm"),
                 new GUIContent(GetCommonValueString(x => x.beatsPerMinute))
+            );
+            EditorGUILayout.LabelField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.information.vanilla_instruments"),
+                new GUIContent(GetCommonValueString(x => x.nbsFile?.header.vanillaInstrumentCount ?? 0))
+            );
+            EditorGUILayout.LabelField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.information.custom_instruments"),
+                new GUIContent(GetCommonValueString(x => x.nbsFile?.customInstruments.Count ?? 0))
             );
         }
 

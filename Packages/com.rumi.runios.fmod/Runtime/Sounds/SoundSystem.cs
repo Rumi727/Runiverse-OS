@@ -30,7 +30,8 @@ namespace RuniOS.Sounds
 
             main = new SoundSystem(new SoundSystemSettings
             {
-                softwareChannels = 1024
+                softwareChannels = 1047,
+                initFlags = INITFLAGS.VOL0_BECOMES_VIRTUAL
             });
         }
 
@@ -104,6 +105,30 @@ namespace RuniOS.Sounds
         /// </summary>
         public int outputSampleRate => Volatile.Read(ref _outputSampleRate);
         int _outputSampleRate;
+
+        /// <summary>
+        /// Gets the maximum number of virtual channels configured for this FMOD system.<br/>
+        /// 이 FMOD 시스템에 설정된 최대 가상 채널 수를 가져옵니다.
+        /// </summary>
+        public int maxChannels => Volatile.Read(ref _maxChannels);
+        int _maxChannels;
+
+        /// <summary>
+        /// Gets the maximum number of software-mixed real channels configured for this FMOD system.<br/>
+        /// 이 FMOD 시스템에 설정된 최대 소프트웨어 믹싱 실제 채널 수를 가져옵니다.
+        /// </summary>
+        public int softwareChannelCount => Volatile.Read(ref _softwareChannelCount);
+        int _softwareChannelCount;
+
+        /// <summary>
+        /// Gets the number of virtual channels currently playing in this FMOD system.<br/>
+        /// 이 FMOD 시스템에서 현재 재생 중인 가상 채널 수를 가져옵니다.
+        /// </summary>
+        public int playingChannelCount => UseNative(system =>
+        {
+            system.getChannelsPlaying(out int channels).ThrowIfNotOk();
+            return channels;
+        });
 
         /// <summary>
         /// Gets the current tail DSP clock of the master channel group in samples.<br/>
@@ -304,8 +329,13 @@ namespace RuniOS.Sounds
             if (settings.dspBuffer is { } dspBuffer)
                 native.setDSPBufferSize(dspBuffer.length, dspBuffer.count).ThrowIfNotOk();
 
-            native.init(settings.maxChannels ?? 4095, settings.initFlags ?? INITFLAGS.NORMAL, IntPtr.Zero).ThrowIfNotOk();
+            int maxChannels = settings.maxChannels ?? 4095;
+            native.init(maxChannels, settings.initFlags ?? INITFLAGS.NORMAL, IntPtr.Zero).ThrowIfNotOk();
             nativeInitialized = true;
+            Volatile.Write(ref _maxChannels, maxChannels);
+
+            native.getSoftwareChannels(out int softwareChannelCount).ThrowIfNotOk();
+            Volatile.Write(ref _softwareChannelCount, softwareChannelCount);
 
             native.getSoftwareFormat(out int sampleRate, out _, out _).ThrowIfNotOk();
             Volatile.Write(ref _outputSampleRate, sampleRate);
