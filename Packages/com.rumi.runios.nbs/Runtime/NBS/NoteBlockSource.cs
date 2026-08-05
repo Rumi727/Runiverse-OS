@@ -15,7 +15,7 @@ namespace RuniOS.NBS
     public sealed partial class NoteBlockSource : RuniAudioSource, IReloadable
     {
         /// <summary>Gets or sets the NBS resource reference.<br/>NBS 리소스 참조를 가져오거나 설정합니다.</summary>
-        public AssetRef<NBSFile> nbsFileRef
+        public AssetRef<NoteBlockClip> nbsFileRef
         {
             get
             {
@@ -43,10 +43,10 @@ namespace RuniOS.NBS
             }
         }
         readonly ReaderWriterLockSlim nbsFileRefLock = new ReaderWriterLockSlim();
-        [SerializeField] AssetRef<NBSFile> _nbsFileRef;
+        [SerializeField] AssetRef<NoteBlockClip> _nbsFileRef;
 
         /// <summary>Gets the currently scoped NBS file, or <see langword="null"/> while unavailable.<br/>현재 스코프된 NBS 파일을 가져오며, 사용할 수 없으면 <see langword="null"/>입니다.</summary>
-        public NBSFile? nbsFile
+        public NoteBlockClip? nbsFile
         {
             get
             {
@@ -62,7 +62,7 @@ namespace RuniOS.NBS
             }
         }
 
-        IAssetScope<NBSFile>? nbsScope;
+        IAssetScope<NoteBlockClip>? nbsScope;
         NoteBlockInstrumentBank? instrumentBank;
         NBSPlaybackSchedule? playbackSchedule;
         NBSPlaybackCursor playbackCursor;
@@ -120,7 +120,7 @@ namespace RuniOS.NBS
             }
             set
             {
-                NBSFile? file = nbsFile;
+                NoteBlockClip? file = nbsFile;
                 time = file?.tempoMap.TickToTime(value) ?? 0;
             }
         }
@@ -133,7 +133,7 @@ namespace RuniOS.NBS
                 playingLock.EnterReadLock();
                 try
                 {
-                    NBSFile? file = nbsScope?.asset;
+                    NoteBlockClip? file = nbsScope?.asset;
                     return file == null ? 0 : FindNearestIndex(file, file.tempoMap.TimeToTick(base.time));
                 }
                 finally
@@ -143,7 +143,7 @@ namespace RuniOS.NBS
             }
             set
             {
-                NBSFile? file = nbsFile;
+                NoteBlockClip? file = nbsFile;
                 if (file == null || file.ticks.Count == 0)
                     return;
 
@@ -164,7 +164,7 @@ namespace RuniOS.NBS
         public double beatsPerMinute => ticksPerSecond * 15;
 
         /// <inheritdoc/>
-        public override double length => nbsFile?.duration ?? 0;
+        public override double length => nbsFile?.length ?? 0;
 
         /// <summary>Gets or sets whether loop metadata stored in the NBS file is used.<br/>NBS 파일에 저장된 루프 메타데이터를 사용할지 가져오거나 설정합니다.</summary>
         public bool useFileLoopSettings
@@ -396,11 +396,11 @@ namespace RuniOS.NBS
 
         async UniTask ReloadCore()
         {
-            AssetRef<NBSFile> target = nbsFileRef;
+            AssetRef<NoteBlockClip> target = nbsFileRef;
             if (this == null || !isActiveAndEnabled || target.IsSameTarget(nbsScope))
                 return;
 
-            IAssetScope<NBSFile>? newScope = await target.LoadScopeAsync();
+            IAssetScope<NoteBlockClip>? newScope = await target.LoadScopeAsync();
             if (this == null || !isActiveAndEnabled)
             {
                 DisposeQueue.Enqueue(newScope);
@@ -426,7 +426,7 @@ namespace RuniOS.NBS
                 return;
             }
 
-            IAssetScope<NBSFile>? oldScope;
+            IAssetScope<NoteBlockClip>? oldScope;
             NoteBlockInstrumentBank? oldBank;
             Voice[] oldVoices;
             while (true)
@@ -509,7 +509,7 @@ namespace RuniOS.NBS
             ResourceManager.DetachReloadable(this);
             NoteBlockPlaybackWorker.Unregister(this);
 
-            IAssetScope<NBSFile>? oldScope;
+            IAssetScope<NoteBlockClip>? oldScope;
             NoteBlockInstrumentBank? oldBank;
             playingLock.EnterWriteLock();
             try
@@ -591,7 +591,7 @@ namespace RuniOS.NBS
         void RebuildScheduleUnsafe(bool includeCurrent, bool includePreviousNotes)
         {
             scheduleGeneration++;
-            NBSFile? file = nbsScope?.asset;
+            NoteBlockClip? file = nbsScope?.asset;
             NoteBlockInstrumentBank? bank = instrumentBank;
             float currentTempo = base.tempo;
             float currentPitch = base.pitch;
@@ -624,7 +624,7 @@ namespace RuniOS.NBS
             );
         }
 
-        static int FindNearestIndex(NBSFile file, double tick)
+        static int FindNearestIndex(NoteBlockClip file, double tick)
         {
             if (file.ticks.Count == 0)
                 return 0;

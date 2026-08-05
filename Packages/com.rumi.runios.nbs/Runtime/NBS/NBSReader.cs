@@ -33,7 +33,7 @@ namespace RuniOS.NBS
         /// Thrown when the file is truncated, corrupt, or uses version 7 or newer.<br/>
         /// 파일이 잘렸거나 손상되었거나 버전 7 이상이면 발생합니다.
         /// </exception>
-        public static NBSFile Read(Stream stream)
+        public static NoteBlockClip Read(Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -147,7 +147,7 @@ namespace RuniOS.NBS
                     loopStartTick
                 );
 
-                return new NBSFile
+                return new NoteBlockClip
                 (
                     header,
                     ticks.AsReadOnly(),

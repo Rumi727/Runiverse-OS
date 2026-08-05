@@ -9,9 +9,9 @@ namespace RuniOS.Resource.NBS
     /// Loads and scope-tracks one NBS resource file.<br/>
     /// NBS 리소스 파일 하나를 로드하고 스코프를 추적합니다.
     /// </summary>
-    public sealed class NBSAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<NBSFile>(node, metaData)
+    public sealed class NBSAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<NoteBlockClip>(node, metaData)
     {
-        protected override async UniTask<NBSFile> Load()
+        protected override async UniTask<NoteBlockClip> Load()
         {
             await using Stream stream = await node.file.OpenRead();
             return await UniTask.RunOnThreadPool(() => NBSReader.Read(stream));

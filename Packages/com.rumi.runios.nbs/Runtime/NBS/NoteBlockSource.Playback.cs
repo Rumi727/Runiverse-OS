@@ -73,7 +73,7 @@ namespace RuniOS.NBS
                 return;
 
             NoteBlockInstrumentBank? retainedBank = null;
-            NBSFile? capturedFile;
+            NoteBlockClip? capturedFile;
             NBSPlaybackSchedule? capturedSchedule;
             NBSPlaybackCursor capturedCursor = default;
             NBSLoopInfo capturedLoopInfo = default;
@@ -94,7 +94,7 @@ namespace RuniOS.NBS
             playingLock.EnterReadLock();
             try
             {
-                NBSFile? file = nbsScope?.asset;
+                NoteBlockClip? file = nbsScope?.asset;
                 NoteBlockInstrumentBank? bank = instrumentBank;
                 float currentTempo = base.tempo;
                 float currentPitch = base.pitch;
@@ -298,7 +298,7 @@ namespace RuniOS.NBS
 
         void RebuildWorkerSchedule
         (
-            NBSFile file,
+            NoteBlockClip file,
             NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule? expectedSchedule,
             long revision,
@@ -666,7 +666,7 @@ namespace RuniOS.NBS
             }
         }
 
-        NBSLoopInfo GetLoopInfoUnsafe(NBSFile? file)
+        NBSLoopInfo GetLoopInfoUnsafe(NoteBlockClip? file)
         {
             if (file == null || !base.loop)
                 return default;
@@ -677,12 +677,12 @@ namespace RuniOS.NBS
             if (useFileLoop)
             {
                 startTime = file.tempoMap.TickToTime(file.header.loopStartTick);
-                endTime = file.duration;
+                endTime = file.length;
             }
             else
             {
-                startTime = Math.Clamp(base.loopStart, 0, file.duration);
-                endTime = Math.Clamp(base.loopEnd, startTime, file.duration);
+                startTime = Math.Clamp(base.loopStart, 0, file.length);
+                endTime = Math.Clamp(base.loopEnd, startTime, file.length);
             }
 
             double range = endTime - startTime;

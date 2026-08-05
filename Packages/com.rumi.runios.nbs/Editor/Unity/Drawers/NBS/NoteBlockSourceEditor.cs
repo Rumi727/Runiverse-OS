@@ -296,7 +296,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 if (player == null)
                     continue;
 
-                NBSFile? file = player.nbsFile;
+                NoteBlockClip? file = player.nbsFile;
                 UpdateSavePopupTracking(player, file);
 
                 if (file?.visualEffectMap.hasEvents == true)
@@ -353,7 +353,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             return true;
         }
 
-        void UpdateSavePopupTracking(NoteBlockSource player, NBSFile? file)
+        void UpdateSavePopupTracking(NoteBlockSource player, NoteBlockClip? file)
         {
             EntityId instanceId = player.GetEntityId();
             double currentTick = file == null ? 0 : player.tick;
@@ -374,7 +374,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             tracker.wasPlaying = isContinuouslyPlaying;
         }
 
-        static bool TryGetSavePopupCrossing(NoteBlockSource player, NBSFile file, double previousTick, double currentTick)
+        static bool TryGetSavePopupCrossing(NoteBlockSource player, NoteBlockClip file, double previousTick, double currentTick)
         {
             NBSVisualEffectMap map = file.visualEffectMap;
             if (map.savePopupTicks.Count == 0 || !double.IsFinite(previousTick) || !double.IsFinite(currentTick))
@@ -411,7 +411,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             return false;
         }
 
-        static bool TryGetLoopTickRange(NoteBlockSource player, NBSFile file, out double loopStartTick, out double loopEndTick)
+        static bool TryGetLoopTickRange(NoteBlockSource player, NoteBlockClip file, out double loopStartTick, out double loopEndTick)
         {
             loopStartTick = 0;
             loopEndTick = 0;
@@ -421,8 +421,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             bool useFileLoop = player.useFileLoopSettings && file.header.loopEnabled;
             double loopStartTime = useFileLoop ? file.tempoMap.TickToTime(file.header.loopStartTick) : player.loopStart;
             double loopEndTime = useFileLoop
-                ? file.duration
-                : Math.Min(Math.Max(player.loopEnd, loopStartTime), file.duration);
+                ? file.length
+                : Math.Min(Math.Max(player.loopEnd, loopStartTime), file.length);
             if (!double.IsFinite(loopStartTime) || !double.IsFinite(loopEndTime) || loopEndTime <= loopStartTime)
                 return false;
 
@@ -551,9 +551,9 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 Repaint();
         }
 
-        sealed class SavePopupTracker(NBSFile? file, double tick, bool wasPlaying)
+        sealed class SavePopupTracker(NoteBlockClip? file, double tick, bool wasPlaying)
         {
-            public NBSFile? file = file;
+            public NoteBlockClip? file = file;
             public double tick = tick;
             public bool wasPlaying = wasPlaying;
         }

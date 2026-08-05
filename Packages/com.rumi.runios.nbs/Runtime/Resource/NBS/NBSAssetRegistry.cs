@@ -7,8 +7,8 @@ using Unity.Scripting.LifecycleManagement;
 namespace RuniOS.Resource.NBS
 {
     /// <summary>
-    /// Registers files below <c>assets/&lt;namespace&gt;/nbs</c> as scoped <see cref="NBSFile"/> resources.<br/>
-    /// <c>assets/&lt;namespace&gt;/nbs</c> 아래 파일을 스코프 기반 <see cref="NBSFile"/> 리소스로 등록합니다.
+    /// Registers files below <c>assets/&lt;namespace&gt;/nbs</c> as scoped <see cref="NoteBlockClip"/> resources.<br/>
+    /// <c>assets/&lt;namespace&gt;/nbs</c> 아래 파일을 스코프 기반 <see cref="NoteBlockClip"/> 리소스로 등록합니다.
     /// </summary>
     public sealed partial class NBSAssetRegistry : SimpleAssetRegistry<NBSAssetHandle>
     {
@@ -25,7 +25,7 @@ namespace RuniOS.Resource.NBS
         public override bool isDefault => true;
 
         /// <inheritdoc/>
-        public override Type assetType => typeof(NBSFile);
+        public override Type assetType => typeof(NoteBlockClip);
 
         /// <inheritdoc/>
         public override WildcardPatterns assetFilter => WildcardPatterns.nbsFileFilter;
