@@ -33,6 +33,8 @@ namespace RuniOS.Editor.Resource
         
         public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
+            List<string> nameSpaces = this.nameSpaces;
+
             reorderableList ??= new ReorderableList(nameSpaces, typeof(string), false, false, true, true)
             { multiSelect = true };
 
