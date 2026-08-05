@@ -38,9 +38,7 @@ namespace RuniOS.Reflection
         /// <see cref="assemblies"/> 또는 <see cref="types"/> 목록이 <see cref="Refresh"/> 메서드를 통해
         /// 업데이트되었을 때 발생합니다.<br/>
         /// 이 이벤트 핸들러 추가/제거 및 호출은 내부적으로 잠금(<see langword="lock"/>)을 사용하여
-        /// 스레드에 안전하게 보호됩니다.<br/>
-        /// <b>경고:</b> 이 이벤트의 핸들러 내에서 <see cref="onListUpdate"/>에 접근하거나 호출하는 것은
-        /// <b>데드락(Deadlock)</b>을 유발할 수 있으므로, <b>절대</b> 사용하지 않아야 합니다.
+        /// 스레드에 안전하게 보호됩니다.
         /// </summary>
         public static event Action? onListUpdate
         {
