@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.Editor.APIMarshal.UnityEditor;
+using RuniOS.IO;
 
 namespace RuniOS.Editor.Resource
 {
@@ -88,7 +89,7 @@ namespace RuniOS.Editor.Resource
                     if (drawer.title != null)
                         GUILayout.Label(GetTextOrKey(drawer.title), largeLabel);
                     
-                    drawer.OnGUI(PackInspectorSystem.activePaths, isDebug);
+                    drawer.OnGUI((PhysicalPath)Application.streamingAssetsPath, PackInspectorSystem.activePaths, isDebug);
                     if (drawer.needsApplyRevert)
                         DrawFooter();
                 }

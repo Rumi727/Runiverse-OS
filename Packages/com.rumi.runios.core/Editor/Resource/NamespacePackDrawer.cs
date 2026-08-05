@@ -14,7 +14,7 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
-        public override void OnEnable(IEnumerable<RuniPath> relativePaths)
+        public override void OnEnable(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths)
         {
             relativeExistsPaths = relativePaths
                 .Select<RuniPath, string>(x => (PhysicalPath)Application.streamingAssetsPath / x)
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Resource
 
         ReorderableList? reorderableList;
         
-        public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
+        public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
             List<string> nameSpaces = this.nameSpaces;
 
@@ -144,7 +144,7 @@ namespace RuniOS.Editor.Resource
         public override void SaveChanges()
         {
             for (int i = orgCount; i < nameSpaces.Count; i++)
-                AssetDatabase.CreateFolder(PackInspectorSystem.packRootPath + ResourcePack.assetsFolderName, nameSpaces[i]);
+                AssetDatabase.CreateFolder((PackInspectorSystem.packRootPath / ResourcePack.assetsFolderName).value, nameSpaces[i]);
             
             UpdateNamespaceList();
             base.SaveChanges();

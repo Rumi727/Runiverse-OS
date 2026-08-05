@@ -19,17 +19,18 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
 
-        public override void OnEnable(IEnumerable<RuniPath> relativePaths)
+        public override void OnEnable(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths)
         {
             relativeExistsPaths =
             [
                 ..relativePaths
+                    .Where(x => x.GetFileName() == ResourcePack.infoPath)
                     .Select<RuniPath, string>(x =>
                     {
                         if (x.IsEmpty())
-                            return (PhysicalPath)Application.streamingAssetsPath / x / ResourcePack.infoPath;
+                            return rootPath / ResourcePack.infoPath;
 
-                        return (PhysicalPath)Application.streamingAssetsPath / x;
+                        return rootPath / x;
                     })
                     .Where(File.Exists)
             ];
@@ -41,7 +42,7 @@ namespace RuniOS.Editor.Resource
         PackMetaData[] packMetaDatas = [];
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
-        public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
+        public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
             InspectorFlags flags = InspectorFlags.InstanceAccess | InspectorFlags.Variable;
             if (isDebug)
@@ -55,9 +56,9 @@ namespace RuniOS.Editor.Resource
                 if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
-                    File.WriteAllText((PhysicalPath)Application.streamingAssetsPath / ResourcePack.infoPath, json);
+                    File.WriteAllText(rootPath / ResourcePack.infoPath, json);
                     
-                    OnEnable(relativePaths);
+                    OnEnable(rootPath, relativePaths);
                 }
                 
                 return;

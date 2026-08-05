@@ -4,15 +4,15 @@ using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Reflection;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor.Resource
 {
-    [InitializeOnLoad]
-    public static class PackInspectorSystem
+    public static partial class PackInspectorSystem
     {
         public static readonly RuniPath packRootPath;
         
-        static readonly ImmutableArray<PackDrawer> drawers;
+        static ImmutableArray<PackDrawer> drawers;
 
         public static PackDrawer? activeDrawer { get; private set; }
         public static ImmutableArray<RuniPath> activePaths { get; private set; } = ImmutableArray<RuniPath>.Empty;
@@ -22,22 +22,40 @@ namespace RuniOS.Editor.Resource
 
         public static event Action? onActiveDrawerChanged;
 
-        static PackInspectorSystem()
+        static PackInspectorSystem() => packRootPath = PhysicalPath.From(Application.streamingAssetsPath).GetRelativePath(projectPath);
+
+        [OnCodeInitializing]
+        static void OnCodeInitializing()
         {
-            packRootPath = PhysicalPath.From(Application.streamingAssetsPath).GetRelativePath(projectPath);
-            drawers =
-            [
-                ..ReflectionUtility.types
-                    .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
-                    .Select(Activator.CreateInstance)
-                    .Cast<PackDrawer>()
-                    .OrderByDescending(x => x.order)
-            ];
+            ReflectionUtility.onListUpdate += UpdateDrawers;
+            UpdateDrawers();
+
+            static void UpdateDrawers()
+            {
+                drawers =
+                [
+                    ..ReflectionUtility.types
+                        .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
+                        .Select(Activator.CreateInstance)
+                        .Cast<PackDrawer>()
+                        .OrderByDescending(x => x.order)
+                ];
+            }
 
             Selection.selectionChanged += RefreshState;
             EditorApplication.update += CheckFolderChange;
-            
+
             RefreshState();
+        }
+
+        [OnCodeDeinitializing]
+        static void OnCodeDeinitializing()
+        {
+            Selection.selectionChanged -= RefreshState;
+            EditorApplication.update -= CheckFolderChange;
+
+            activeDrawer?.OnDisable();
+            activeDrawer = null;
         }
 
         static void CheckFolderChange() => CheckFolder(false);
@@ -75,7 +93,7 @@ namespace RuniOS.Editor.Resource
             {
                 lastCheckPath = currentPath;
                 InspectorWindowBridge.RepaintAllInspectors();
-                
+
                 if (currentPath.TryGetRelativePath(packRootPath, out RuniPath relative))
                 {
                     activeFolderPath = relative;
@@ -105,18 +123,13 @@ namespace RuniOS.Editor.Resource
 
         static void SetNewDrawer(PackDrawer? drawer, IEnumerable<RuniPath> paths)
         {
-            bool isChanged = activeDrawer != drawer;
-            if (isChanged)
-            {
-                activeDrawer?.OnDisable();
-                activeDrawer = drawer;
-            }
-            
+            activeDrawer?.OnDisable();
+            activeDrawer = drawer;
+
             activePaths = [..paths];
-            activeDrawer?.OnEnable(activePaths);
-            
-            if (isChanged)
-                onActiveDrawerChanged?.Invoke();
+            activeDrawer?.OnEnable((PhysicalPath)Application.streamingAssetsPath, activePaths);
+
+            onActiveDrawerChanged?.Invoke();
         }
     }
 }

@@ -10,12 +10,12 @@ namespace RuniOS.Editor.Resource
     {
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => Regex.IsMatch(x.value, "^assets/.*/lang/.*\\.json$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
 
-        public override void OnEnable(IEnumerable<RuniPath> relativePaths)
+        public override void OnEnable(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths)
         {
             contents =
             [
                 ..relativePaths
-                    .Select(x => (PhysicalPath)Application.streamingAssetsPath / x)
+                    .Select(x => rootPath / x)
                     .Select(x => x.value)
                     .Select(File.ReadAllText)
                     .Select(x => new GUIContent(x))
@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Resource
 
         GUIContent[] contents = [];
         
-        public override void OnGUI(IEnumerable<RuniPath> relativePaths, bool isDebug = false)
+        public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
             if (relativePaths.TwoOrMore())
                 return;
