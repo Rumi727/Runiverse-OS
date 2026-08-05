@@ -18,7 +18,8 @@
     "allowUnsafeCode": false,
     "overrideReferences": true,
     "precompiledReferences": [
-        "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll"
+        "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll",
+        "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": true,
     "defineConstraints": [],

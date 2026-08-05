@@ -11,13 +11,14 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class PackMetaDataPackDrawer : PackDrawer
     {
+        public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
         public override int order => int.MinValue;
 
         public override bool needsApplyRevert => true;
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
 
-        public override void OnEnable(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths)
+        protected internal override void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths)
         {
             relativeExistsPaths =
             [
@@ -40,7 +41,7 @@ namespace RuniOS.Editor.Resource
         PackMetaData[] packMetaDatas = [];
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
-        public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
+        protected internal override void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false)
         {
             GUILayout.Label(TrTempContent("runios-editor:pack_drawer.generic.title"), RuniStyles.largeLabel);
 

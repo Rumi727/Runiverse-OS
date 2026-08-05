@@ -9,6 +9,27 @@ namespace RuniOS.Editor.Resource
     [CanEditMultipleObjects]
     class DefaultAssetHook : EditorMarshal
     {
+        public override string targetTitle
+        {
+            get
+            {
+                if (PackInspectorSystem.activeDrawer != null)
+                {
+                    if (PackInspectorSystem.activeDrawer.targetTitle != null)
+                        return PackInspectorSystem.activeDrawer.targetTitle;
+
+                    string typeName = PackInspectorSystem.activeDrawer.targetTypeName;
+                    string settingsText = GetTextOrKey("runios-editor:gui.settings");
+                    if (targets.Length > 1)
+                        return $"{targets.Length} {typeName} {settingsText}";
+                    else
+                        return $"{target.name} ({typeName}) {settingsText}";
+                }
+                else
+                    return base.targetTitle;
+            }
+        }
+
         static GUIStyle? _paddingStyle;
         public static GUIStyle paddingStyle => _paddingStyle ??= new GUIStyle { padding = new RectOffset(15, 0, 3, 0) };
         
@@ -56,7 +77,7 @@ namespace RuniOS.Editor.Resource
             if (subscribedDrawer != null)
             {
                 hasUnsavedChanges = subscribedDrawer.isDirty;
-                saveChangesMessage = "asdf";
+                saveChangesMessage = "파일의 임포트 설정 적용되지 않음";
             }
         }
 
@@ -98,7 +119,35 @@ namespace RuniOS.Editor.Resource
             else
                 base.OnInspectorGUI();
         }
-        
+
+        public override bool HasPreviewGUI() => PackInspectorSystem.activeDrawer != null ? PackInspectorSystem.activeDrawer.HasPreviewGUI() : base.HasPreviewGUI();
+
+        public override GUIContent GetPreviewTitle() => PackInspectorSystem.activeDrawer != null ? PackInspectorSystem.activeDrawer.GetPreviewTitle() : base.GetPreviewTitle();
+
+        public override void OnPreviewGUI(Rect r, GUIStyle background)
+        {
+            if (PackInspectorSystem.activeDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out RuniPath path))
+                PackInspectorSystem.activeDrawer.OnPreviewGUI(r, (PhysicalPath)Application.streamingAssetsPath, path, background);
+            else
+                base.OnPreviewGUI(r, background);
+        }
+
+        public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
+        {
+            if (PackInspectorSystem.activeDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out RuniPath path))
+                PackInspectorSystem.activeDrawer.OnInteractivePreviewGUI(r, (PhysicalPath)Application.streamingAssetsPath, path, background);
+            else
+                base.OnInteractivePreviewGUI(r, background);
+        }
+
+        public override void OnPreviewSettings()
+        {
+            if (PackInspectorSystem.activeDrawer != null)
+                PackInspectorSystem.activeDrawer.OnPreviewSettings();
+            else
+                base.OnPreviewSettings();
+        }
+
         static void DrawFooter()
         {
             EditorGUI.BeginDisabledGroup(!PackInspectorSystem.activeDrawer?.isDirty ?? true);

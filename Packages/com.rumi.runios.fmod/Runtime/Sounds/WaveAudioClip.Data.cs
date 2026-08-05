@@ -3,7 +3,7 @@ namespace RuniOS.Sounds
 {
     public sealed partial class WaveAudioClip
     {
-        public delegate void GetDataAction(PCMDoubleView samples, int channelCount);
+        public delegate void GetDataAction(PCMDoubleView pcmView, int channel);
 
         public int subSoundCount => UseNative(sound =>
         {

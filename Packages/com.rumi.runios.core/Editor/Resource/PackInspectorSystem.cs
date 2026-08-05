@@ -56,6 +56,15 @@ namespace RuniOS.Editor.Resource
             activeDrawer = null;
         }
 
+        public static bool TryGetRelativePathFrom(Object obj, out RuniPath path)
+        {
+            path = RuniPath.From(AssetDatabase.GetAssetPath(obj));
+            if (path.TryGetRelativePath(packRootPath, out path))
+                return true;
+
+            return false;
+        }
+
         static void CheckFolderChange() => CheckFolder(false);
 
         static void RefreshState()
