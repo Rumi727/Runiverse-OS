@@ -133,10 +133,7 @@ namespace RuniOS.IO
         /// 해시 코드는 <see cref="value"/> 문자열의 해시 코드와 동일합니다.
         /// </summary>
         /// <returns>현재 <see cref="FileExtension"/> 인스턴스의 해시 코드입니다.</returns>
-        public override readonly int GetHashCode()
-        {
-            return (_value != null ? _value.GetHashCode() : 0);
-        }
+        public override readonly int GetHashCode() => _value != null ? _value.GetHashCode() : 0;
 
 
 
