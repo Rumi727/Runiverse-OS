@@ -1,9 +1,9 @@
 #nullable enable
 using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.Linq;
-using RuniOS.Sounds;
+using RuniOS.NBS;
 
-namespace RuniOS.Editor.Unity.Drawers.Sounds
+namespace RuniOS.Editor.IMGUI.NBS
 {
     public sealed class NBSTickTimeUnit : ITimeUnit<NoteBlockSource>
     {

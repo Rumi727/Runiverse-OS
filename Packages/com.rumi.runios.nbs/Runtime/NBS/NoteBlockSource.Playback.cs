@@ -1,8 +1,8 @@
 #nullable enable
-using RuniOS.NBS;
+using RuniOS.Sounds;
 using System.Diagnostics;
 
-namespace RuniOS.Sounds
+namespace RuniOS.NBS
 {
     public sealed partial class NoteBlockSource
     {

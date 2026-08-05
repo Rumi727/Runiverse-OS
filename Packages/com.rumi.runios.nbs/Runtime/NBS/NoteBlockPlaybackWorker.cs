@@ -2,7 +2,7 @@
 using System.Threading;
 using Unity.Scripting.LifecycleManagement;
 
-namespace RuniOS.Sounds
+namespace RuniOS.NBS
 {
     static partial class NoteBlockPlaybackWorker
     {

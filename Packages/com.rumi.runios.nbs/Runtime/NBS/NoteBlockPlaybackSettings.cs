@@ -1,7 +1,7 @@
 #nullable enable
 using System.Threading;
 
-namespace RuniOS.Sounds
+namespace RuniOS.NBS
 {
     /// <summary>
     /// Provides runtime-wide timing settings for the shared NBS playback worker.<br/>

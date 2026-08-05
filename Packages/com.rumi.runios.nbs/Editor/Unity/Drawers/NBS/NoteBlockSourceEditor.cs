@@ -1,11 +1,13 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Editor.IMGUI;
+using RuniOS.Editor.IMGUI.NBS;
+using RuniOS.Editor.Unity.Drawers.Sounds;
 using RuniOS.NBS;
 using RuniOS.Sounds;
 using RuniOS.Utility;
 
-namespace RuniOS.Editor.Unity.Drawers.Sounds
+namespace RuniOS.Editor.Unity.Drawers.NBS
 {
     /// <summary>
     /// Draws NBS resource, scheduling, transport, visual-effect preview, and timing information for <see cref="NoteBlockSource"/>.<br/>

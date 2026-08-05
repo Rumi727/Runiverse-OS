@@ -1,9 +1,9 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.NBS;
 using RuniOS.Resource;
+using RuniOS.Sounds;
 
-namespace RuniOS.Sounds
+namespace RuniOS.NBS
 {
     /// <summary>
     /// Owns the unique instrument scopes required by one NBS Player generation.<br/>

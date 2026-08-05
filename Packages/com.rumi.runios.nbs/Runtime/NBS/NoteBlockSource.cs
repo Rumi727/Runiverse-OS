@@ -1,11 +1,11 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.NBS;
 using RuniOS.Resource;
+using RuniOS.Sounds;
 using RuniOS.Tasks;
 using System.Threading;
 
-namespace RuniOS.Sounds
+namespace RuniOS.NBS
 {
     /// <summary>
     /// Plays scoped NBS resources through precomputed schedules and a shared background worker.<br/>
