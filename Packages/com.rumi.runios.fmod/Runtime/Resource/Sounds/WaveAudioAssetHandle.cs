@@ -7,7 +7,7 @@ namespace RuniOS.Resource.Sounds
 {
     public class WaveAudioAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<WaveAudioClip>(node, metaData)
     {
-        protected override async UniTask<WaveAudioClip> Load() => await SoundSystem.main.CreateSoundAsync(node);
+        protected override async UniTask<WaveAudioClip?> Load() => await SoundSystem.main.CreateSoundAsync(node);
 
         protected override void Unload() => assetObject?.Dispose();
 

@@ -11,7 +11,7 @@ namespace RuniOS.Resource.NBS
     /// </summary>
     public sealed class NBSAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<NoteBlockClip>(node, metaData)
     {
-        protected override async UniTask<NoteBlockClip> Load()
+        protected override async UniTask<NoteBlockClip?> Load()
         {
             await using Stream stream = await node.file.OpenRead();
             return await UniTask.RunOnThreadPool(() => NBSReader.Read(stream));

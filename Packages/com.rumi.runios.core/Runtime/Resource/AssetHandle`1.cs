@@ -191,7 +191,7 @@ namespace RuniOS.Resource
         /// <exception cref="Exception">
         /// 로드 중 발생할 수 있는 모든 예외입니다.
         /// </exception>
-        protected abstract UniTask<TAsset> Load();
+        protected abstract UniTask<TAsset?> Load();
         
         /// <summary>
         /// 로드된 에셋을 언로드하고 관련된 시스템 리소스를 해제합니다.

@@ -7,10 +7,14 @@ namespace RuniOS.Sounds
 {
     public sealed partial class SoundSystem
     {
-        public UniTask<WaveAudioClip> CreateStreamAsync(PhysicalPath path)
+        public UniTask<WaveAudioClip?> CreateStreamAsync(PhysicalPath path)
         {
             ThrowIfSystemLockHeld();
-            return UniTask.RunOnThreadPool(() => CreateStream(path));
+            return UniTask.RunOnThreadPool(() =>
+            {
+                Execute(system => system.CreateStream(path), out WaveAudioClip? clip);
+                return clip;
+            });
         }
 
         /// <summary>
@@ -41,7 +45,7 @@ namespace RuniOS.Sounds
         /// The returned clip owns the stream opened from <paramref name="node"/> and disposes it when the clip is disposed.<br/>
         /// 반환된 클립은 <paramref name="node"/>에서 연 스트림을 소유하며 클립을 해제할 때 함께 해제합니다.
         /// </remarks>
-        public async UniTask<WaveAudioClip> CreateStreamAsync(IONode node)
+        public async UniTask<WaveAudioClip?> CreateStreamAsync(IONode node)
         {
             ThrowIfSystemLockHeld();
 
@@ -90,10 +94,14 @@ namespace RuniOS.Sounds
         /// FMOD accesses <paramref name="stream"/> until the returned <see cref="WaveAudioClip"/> is disposed.<br/>
         /// FMOD는 반환된 <see cref="WaveAudioClip"/>이 해제될 때까지 <paramref name="stream"/>에 접근합니다.
         /// </remarks>
-        public UniTask<WaveAudioClip> CreateStreamAsync(Stream stream, bool leaveOpen = false)
+        public UniTask<WaveAudioClip?> CreateStreamAsync(Stream stream, bool leaveOpen = false)
         {
             ThrowIfSystemLockHeld();
-            return UniTask.RunOnThreadPool(() => CreateStream(stream, leaveOpen));
+            return UniTask.RunOnThreadPool(() =>
+            {
+                Execute(system => system.CreateStream(stream, leaveOpen), out WaveAudioClip? clip);
+                return clip;
+            });
         }
     }
 }
