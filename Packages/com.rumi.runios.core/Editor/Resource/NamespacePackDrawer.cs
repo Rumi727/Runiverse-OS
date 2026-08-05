@@ -8,8 +8,6 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class NamespacePackDrawer : PackDrawer
     {
-        public override string title => "pack_drawer.namespace.title";
-
         public override bool needsApplyRevert => true;
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
@@ -33,6 +31,8 @@ namespace RuniOS.Editor.Resource
         
         public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
+            GUILayout.Label(TrTempContent("runios-editor:pack_drawer.namespace.title"), RuniStyles.largeLabel);
+
             List<string> nameSpaces = this.nameSpaces;
 
             reorderableList ??= new ReorderableList(nameSpaces, typeof(string), false, false, true, true)

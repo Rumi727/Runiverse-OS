@@ -11,8 +11,6 @@ namespace RuniOS.Editor.Resource
 {
     public sealed class PackMetaDataPackDrawer : PackDrawer
     {
-        public override string title => "pack_drawer.generic.title";
-
         public override int order => int.MinValue;
 
         public override bool needsApplyRevert => true;
@@ -44,6 +42,8 @@ namespace RuniOS.Editor.Resource
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
         public override void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false)
         {
+            GUILayout.Label(TrTempContent("runios-editor:pack_drawer.generic.title"), RuniStyles.largeLabel);
+
             InspectorFlags flags = InspectorFlags.InstanceAccess | InspectorFlags.Variable;
             if (isDebug)
                 flags |= InspectorFlags.Debug;

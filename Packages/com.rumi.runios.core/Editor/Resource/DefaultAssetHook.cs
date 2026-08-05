@@ -9,9 +9,6 @@ namespace RuniOS.Editor.Resource
     [CanEditMultipleObjects]
     class DefaultAssetHook : EditorMarshal
     {
-        public static GUIStyle largeLabel => _largeLabel ??= new GUIStyle(GUI.skin.label) { fontSize = 16, fontStyle = FontStyle.Bold };
-        static GUIStyle? _largeLabel;
-        
         static GUIStyle? _paddingStyle;
         public static GUIStyle paddingStyle => _paddingStyle ??= new GUIStyle { padding = new RectOffset(15, 0, 3, 0) };
         
@@ -90,9 +87,6 @@ namespace RuniOS.Editor.Resource
                 
                 EditorGUILayout.BeginVertical(paddingStyle);
                 {
-                    if (drawer.title != null)
-                        GUILayout.Label(GetTextOrKey(drawer.title), largeLabel);
-                    
                     drawer.OnGUI((PhysicalPath)Application.streamingAssetsPath, PackInspectorSystem.activePaths, isDebug);
                     if (drawer.needsApplyRevert)
                         DrawFooter();

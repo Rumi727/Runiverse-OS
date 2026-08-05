@@ -8,8 +8,6 @@ namespace RuniOS.Editor.Resource
     {
         public bool isEnabled { get; internal set; } = false;
 
-        public virtual string? title => null;
-
         public virtual int order => 0;
 
         public virtual bool needsApplyRevert => false;
