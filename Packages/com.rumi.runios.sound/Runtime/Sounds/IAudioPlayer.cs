@@ -1,12 +1,9 @@
 namespace RuniOS.Sounds
 {
-    public interface IAudioPlayer : ILoopablePlayer
+    public interface IAudioPlayer
     {
+        public bool isPlaying { get; }
+
         public float volume { get; set; }
-        public float pitch { get; set; }
-
-        public float panStereo { get; set; }
-
-        public bool isPitchSupported { get; }
     }
 }

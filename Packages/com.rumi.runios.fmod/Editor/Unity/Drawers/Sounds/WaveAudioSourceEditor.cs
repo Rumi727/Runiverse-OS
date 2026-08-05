@@ -10,7 +10,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
     [CustomEditor(typeof(WaveAudioSource), true)]
     public class WaveAudioSourceEditor : RuniAudioSourceEditor<WaveAudioSource>
     {
-        public WaveAudioSourceEditor() => playableController.timeUnits.Add(new WaveAudioTimeUnit());
+        public WaveAudioSourceEditor() => controller.timeUnits.Add(new WaveAudioTimeUnit());
 
         protected override bool DrawSourceLayout()
         {

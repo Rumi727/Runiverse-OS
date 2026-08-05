@@ -17,7 +17,7 @@ namespace RuniOS.Sounds
     /// 복합 래퍼 연산은 전용 상태 도메인 락으로 동기화됩니다. <see cref="native"/>에 직접 접근하면 이 동기화를 우회합니다.<br/>
     /// FMOD가 채널 종료를 보고하면 이 래퍼는 관리 핸들을 분리하고 등록을 해제한 뒤 <see cref="onStop"/>을 한 번 호출합니다.
     /// </remarks>
-    public sealed partial class SoundChannel : ISoundSystemResource
+    public sealed partial class SoundChannel : IPausable, IStoppable, ISeekable, ILoopControl, IPitchControl, IAudioEmitter, ISoundSystemResource
     {
         static readonly ConcurrentDictionary<IntPtr, SoundChannel> channelLists = [];
         static readonly CHANNELCONTROL_CALLBACK nativeCallback = OnNativeCallback;

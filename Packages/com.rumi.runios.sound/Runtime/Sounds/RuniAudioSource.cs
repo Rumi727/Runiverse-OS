@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace RuniOS.Sounds
 {
-    public abstract class RuniAudioSource : MonoBehaviour, IAudioSource
+    public abstract class RuniAudioSource : MonoBehaviour, IPlayControl, IPausable, IStoppable, ISeekable, ILoopControl, ITempoControl, IPitchControl, IAudioEmitter
     {
         /// <remarks>
         /// Coordinates access to active, playback, pause, and interpolated-time state.<br/>
@@ -202,8 +202,6 @@ namespace RuniOS.Sounds
             set => _maxDistance = value;
         }
         [SerializeField] volatile float _maxDistance = 16;
-
-        bool IAudioPlayer.isPitchSupported => true;
 
         /// <remarks>
         /// Returns without acquiring the write lock when this source is inactive.<br/>

@@ -1,6 +1,6 @@
 namespace RuniOS.Sounds
 {
-    public interface ILoopablePlayer : IPlayable
+    public interface ILoopControl : IAudioPlayer
     {
         public bool loop { get; set; }
         public double loopStart { get; set; }

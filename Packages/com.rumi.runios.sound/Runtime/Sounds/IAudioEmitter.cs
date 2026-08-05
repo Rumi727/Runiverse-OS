@@ -1,7 +1,9 @@
 namespace RuniOS.Sounds
 {
-    public interface IAudioSource : IAudioPlayer
+    public interface IAudioEmitter : IAudioPlayer
     {
+        public float panStereo { set; }
+
         public float spatialBlend { get; set; }
         public float dopplerLevel { get; set; }
         public float spread { get; set; }

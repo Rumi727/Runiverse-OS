@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
     /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(NoteBlockSource), true)]
-    public sealed class NBSPlayerEditor : RuniAudioSourceEditor<NoteBlockSource>
+    public sealed class NoteBlockSourceEditor : RuniAudioSourceEditor<NoteBlockSource>
     {
         const float visualEffectCardHeight = 44;
         const float tempoChangeMarkerWidth = 2;
@@ -27,11 +27,12 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         GUIStyle? visualEffectStatusStyle;
         GUIStyle? savePopupStyle;
 
-        public NBSPlayerEditor()
+        public NoteBlockSourceEditor()
         {
-            playableController.timeUnits.Add(new NBSTickTimeUnit());
-            playableController.timeUnits.Add(new NBSIndexTimeUnit());
-            playableController.timelineOverlay = DrawTempoChangeMarkers;
+            controller.timeUnits.Add(new NBSTickTimeUnit());
+            controller.timeUnits.Add(new NBSIndexTimeUnit());
+
+            controller.timelineOverlay = DrawTempoChangeMarkers;
         }
 
         protected override bool repaintInEditor
@@ -428,9 +429,9 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             return double.IsFinite(loopStartTick) && double.IsFinite(loopEndTick) && loopEndTick > loopStartTick;
         }
 
-        static void DrawTempoChangeMarkers(Rect trackPosition, IPlayable playable, double length)
+        static void DrawTempoChangeMarkers(Rect trackPosition, ISeekable seekable, double length)
         {
-            if (playable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0)
+            if (seekable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0)
                 return;
 
             foreach (NBSTempoMap.Segment segment in file.tempoMap.segments)

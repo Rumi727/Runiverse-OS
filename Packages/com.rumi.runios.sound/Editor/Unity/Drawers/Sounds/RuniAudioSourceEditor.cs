@@ -8,34 +8,14 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
 {
     public abstract class RuniAudioSourceEditor<TTarget> : CustomInspectorBase<TTarget> where TTarget : RuniAudioSource
     {
-        public PlayableController playableController { get; } = new PlayableController(new GenericTimeUnit());
+        public PlaybackController controller { get; } = new PlaybackController(new GenericTimeUnit());
 
-        protected override bool repaintInEditor
-        {
-            get
-            {
-                for (int i = 0; i < playableController.targets.Count; i++)
-                {
-                    if (playableController.targets[i].isPlaying)
-                        return true;
-                }
-
-                return false;
-            }
-        }
+        protected override bool repaintInEditor => controller.targets.Any(t => t.isPlaying);
 
         protected override void OnEnable()
         {
             base.OnEnable();
-
-            playableController.targets.Clear();
-            foreach (TTarget? item in targets)
-            {
-                if (item != null)
-                    playableController.targets.Add(item);
-            }
-
-            playableController.loopRangeSetter = SetLoopRange;
+            controller.targets.SyncWithEnumerable(targets);
         }
 
         public override void OnInspectorGUI()
@@ -178,7 +158,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         protected virtual void DrawTransportLayout()
         {
             GUILayout.Label(GetTextOrKey("runios-editor:inspector.runi_audio_source.transport.header"), EditorStyles.boldLabel);
-            playableController.DrawLayout();
+            controller.DrawLayout();
         }
 
         protected virtual void DrawInformationLayout()
@@ -190,12 +170,6 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         }
 
         protected virtual void DrawAdditionalInformationLayout() { }
-
-        static void SetLoopRange(ILoopablePlayer loopablePlayer, double loopStart, double loopEnd)
-        {
-            loopablePlayer.loopStart = loopStart;
-            loopablePlayer.loopEnd = loopEnd;
-        }
     }
 
     [CanEditMultipleObjects]

@@ -5,11 +5,11 @@ namespace RuniOS.Editor.IMGUI.Sounds
 {
     public interface ITimeUnit
     {
-        public void DrawField(Rect position, IReadOnlyList<IPlayable> playables);
+        public void DrawField(Rect position, IEnumerable<IAudioPlayer> values);
         public float GetHeight();
 
-        public string TimeToString(IPlayable? playable);
-        public string RemainingTimeToString(IPlayable? playable);
-        public string LengthToString(IPlayable? playable);
+        public string TimeToString(IAudioPlayer? value);
+        public string RemainingTimeToString(IAudioPlayer? value);
+        public string LengthToString(IAudioPlayer? value);
     }
 }

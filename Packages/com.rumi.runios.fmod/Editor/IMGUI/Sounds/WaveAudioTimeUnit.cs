@@ -1,20 +1,21 @@
+using RuniOS.Linq;
 using RuniOS.Sounds;
 
 namespace RuniOS.Editor.IMGUI.Sounds
 {
-    public class WaveAudioTimeUnit : ITimeUnit
+    public class WaveAudioTimeUnit : ITimeUnit<WaveAudioSource>
     {
-        public void DrawField(Rect position, IReadOnlyList<IPlayable> playables)
+        public void DrawField(Rect position, IEnumerable<WaveAudioSource> sources)
         {
-            EditorGUI.showMixedValue = playables.Count != 1;
+            EditorGUI.showMixedValue = sources.IsEmpty() || sources.TwoOrMore();
 
-            WaveAudioSource? waveAudioSource = playables.FirstOrDefault() as WaveAudioSource;
+            WaveAudioSource? source = sources.FirstOrDefault();
 
             EditorGUI.BeginChangeCheck();
-            uint value = EditorGUI.LongField(position, TrTempContent("runios-editor:gui.sample"), waveAudioSource != null ? waveAudioSource.timeSample : 0).ClampToUInt();
+            uint value = EditorGUI.LongField(position, TrTempContent("runios-editor:gui.sample"), source != null ? source.timeSample : 0).ClampToUInt();
             if (EditorGUI.EndChangeCheck())
             {
-                foreach (var playable in playables.OfType<WaveAudioSource>())
+                foreach (var playable in sources)
                     playable.timeSample = value;
             }
 
@@ -23,22 +24,8 @@ namespace RuniOS.Editor.IMGUI.Sounds
 
         public float GetHeight() => EditorGUIUtility.singleLineHeight;
 
-        public string TimeToString(IPlayable? playable)
-        {
-            WaveAudioSource? waveAudioSource = playable as WaveAudioSource;
-            return waveAudioSource != null ? waveAudioSource.timeSample.ToString() : "—";
-        }
-
-        public string RemainingTimeToString(IPlayable? playable)
-        {
-            WaveAudioSource? waveAudioSource = playable as WaveAudioSource;
-            return waveAudioSource != null ? (waveAudioSource.samples - waveAudioSource.timeSample).ToString() : "—";
-        }
-
-        public string LengthToString(IPlayable? playable)
-        {
-            WaveAudioSource? waveAudioSource = playable as WaveAudioSource;
-            return waveAudioSource != null ? waveAudioSource.samples.ToString() : "—";
-        }
+        public string TimeToString(WaveAudioSource? source) => source != null ? source.timeSample.ToString() : "—";
+        public string RemainingTimeToString(WaveAudioSource? source) => source != null ? (source.samples - source.timeSample).ToString() : "—";
+        public string LengthToString(WaveAudioSource? source) => source != null ? source.samples.ToString() : "—";
     }
 }

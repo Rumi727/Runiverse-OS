@@ -7,6 +7,13 @@
 - Do not infer permission to implement a fix from a reported bug or problem.
 - After a read-only investigation, describe the proposed change and wait for explicit user authorization before editing files.
 
+## Change Scope and Rationale
+
+- Even though this project is under active development, do not casually change anything the user did not explicitly request. Preserve existing behavior, structure, APIs, and surrounding code unless the requested work makes a change necessary or there is a clear, concrete reason for it.
+- Avoid unrelated refactoring, cleanup, style changes, or opportunistic behavior changes. Keep changes minimal and within the user's requested scope.
+- This is not an absolute prohibition: when the user's request necessarily requires a structural change, make that necessary change directly. Do not force an unnecessary workaround merely to avoid changing the structure.
+- If a change outside the explicit request is necessary, explain what changed and why. Always tell the user about structural, behavioral, or contract changes, especially any public API or other contract change, including the rationale and impact.
+
 ## Change Disclosure
 
 - Do not make silent behavior changes while fixing or migrating code.

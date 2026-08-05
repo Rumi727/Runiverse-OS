@@ -2330,6 +2330,11 @@ namespace RuniOS.Utility
         /// <param name="targetDictionary">키를 동기화할 대상 Dictionary입니다.</param>
         /// <param name="source">동기화의 기준이 되는 List입니다.</param>
         /// <param name="valueFactory">새로운 키가 추가될 때 사용할 기본 값을 생성하는 함수입니다.</param>
+        /// <remarks>
+        /// Add, Remove, Clear 메소드들을 <b>이벤트로 사용하는</b> 인스펙터 시스템 때문에 Clear 후에 Add 하는 것과 지금의 방식과 <b>결과 값이 달라집니다.</b><br/>
+        /// 이 코드는 <b>동기화</b>가 목적이기 때문에 Add, RemoveAt를 각각 따로 해줘야 올바르게 동작합니다.<br/><br/>
+        /// 또한, 기존에 있는 값은 그 인덱스도 유지해야하기 때문에 이런 보수적인 코드로 가야만 올바르게 동작합니다.
+        /// </remarks>
         public static void SyncKeysWithEnumerable<TKey, TValue>(this IDictionary<TKey, TValue> targetDictionary, IEnumerable<TKey> source, Func<TKey, TValue>? valueFactory = null) where TKey : notnull
         {
             // 1. 제거: List에는 없지만 Dictionary에는 있는 키 제거
@@ -2352,6 +2357,10 @@ namespace RuniOS.Utility
             }
         }
 
+        /// <remarks>
+        /// Add, RemoveAt, Clear 메소드들을 <b>이벤트로 사용하는</b> 인스펙터 시스템 때문에 Clear 후에 Add 하는 것과 지금의 방식과 <b>결과 값이 달라집니다.</b><br/>
+        /// 이 코드는 <b>동기화</b>가 목적이기 때문에 Add, RemoveAt를 각각 따로 해줘야 올바르게 동작합니다.
+        /// </remarks>
         public static void SyncWithEnumerable(this IList target, IEnumerable source)
         {
             int index = 0;
@@ -2368,7 +2377,11 @@ namespace RuniOS.Utility
             while (index < target.Count)
                 target.RemoveAt(index);
         }
-        
+
+        /// <remarks>
+        /// Add, RemoveAt, Clear 메소드들을 <b>이벤트로 사용하는</b> 인스펙터 시스템 때문에 Clear 후에 Add 하는 것과 지금의 방식과 <b>결과 값이 달라집니다.</b><br/>
+        /// 이 코드는 <b>동기화</b>가 목적이기 때문에 Add, RemoveAt를 각각 따로 해줘야 올바르게 동작합니다.
+        /// </remarks>
         public static void SyncWithEnumerable<T>(this IList<T> target, IEnumerable<T> source)
         {
             int index = 0;
