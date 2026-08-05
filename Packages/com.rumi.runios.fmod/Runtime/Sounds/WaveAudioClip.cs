@@ -76,7 +76,7 @@ namespace RuniOS.Sounds
         public bool isDisposed => Volatile.Read(ref _isDisposed);
         bool _isDisposed = false;
 
-        public WaveAudioClip? GetManaged(IntPtr handle) => clipLists.GetValueOrDefault(handle);
+        public static WaveAudioClip? GetManaged(IntPtr handle) => clipLists.GetValueOrDefault(handle);
 
         /// <summary>
         /// Releases this clip and its owned native lifetime.<br/>

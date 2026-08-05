@@ -48,6 +48,7 @@ namespace RuniOS.Sounds
             {
                 SOUND_FORMAT.PCM8 => PCMFormat.PCM8,
                 SOUND_FORMAT.PCM16 => PCMFormat.PCM16,
+                SOUND_FORMAT.PCM24 => PCMFormat.PCM24,
                 SOUND_FORMAT.PCM32 => PCMFormat.PCM32,
                 SOUND_FORMAT.PCMFLOAT => PCMFormat.Float,
                 _ => null
