@@ -16,7 +16,7 @@
         /// <param name="collapseKey">
         /// 병합을 위한 키 객체입니다.<br/>
         /// <see langword="string"/>, <see cref="UnityEngine.Object"/>, 또는 임의의 클래스 인스턴스를 사용할 수 있습니다.<br/>
-        /// 이전 기록과 GroupToken이 같고, CollapseKey가 같은 객체라면(참조 비교) 덮어씁니다.
+        /// 이전 기록과 GroupToken이 같고, CollapseKey가 같은 객체라면 덮어씁니다.
         /// </param>
         void Record(Action undoAction, Action redoAction, string name, UndoGroupToken? groupToken = null, object? collapseKey = null);
     }
