@@ -30,7 +30,7 @@ namespace RuniOS.Sounds
 
             main = new SoundSystem(new SoundSystemSettings
             {
-                softwareChannels = 1047,
+                softwareChannels = 1023,
                 initFlags = INITFLAGS.VOL0_BECOMES_VIRTUAL
             });
         }
