@@ -43,7 +43,7 @@ namespace RuniOS.Sounds
             };
 
             native.createSound(pcm, MODE.OPENMEMORY | MODE.OPENRAW | MODE.CREATESAMPLE | MODE._3D, ref exInfo, out Sound sound).ThrowIfNotOk();
-            return new WaveAudioClip(this, sound);
+            return WaveAudioClip.Unsafe.CreateInstance(this, sound);
         }
     }
 }

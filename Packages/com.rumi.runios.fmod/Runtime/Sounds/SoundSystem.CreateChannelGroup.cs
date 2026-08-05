@@ -32,7 +32,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    return new SoundChannelGroup(this, channelGroup);
+                    return SoundChannelGroup.Unsafe.CreateInstance(this, channelGroup);
                 }
                 catch
                 {

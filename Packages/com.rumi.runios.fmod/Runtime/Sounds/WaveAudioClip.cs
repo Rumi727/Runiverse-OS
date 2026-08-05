@@ -7,9 +7,14 @@ namespace RuniOS.Sounds
 {
     public sealed partial class WaveAudioClip : RuniAudioClip, IDisposable, ISoundSystemResource
     {
+        public static class Unsafe
+        {
+            public static WaveAudioClip CreateInstance(SoundSystem system, Sound sound, IDisposable? nativeLifetime = null) => new WaveAudioClip(system, sound, nativeLifetime);
+        }
+
         static readonly ConcurrentDictionary<IntPtr, WaveAudioClip> clipLists = [];
 
-        internal WaveAudioClip(SoundSystem system, Sound sound, IDisposable? nativeLifetime = null)
+        WaveAudioClip(SoundSystem system, Sound sound, IDisposable? nativeLifetime = null)
         {
             this.system = system;
 
@@ -117,7 +122,6 @@ namespace RuniOS.Sounds
             {
                 Debug.LogException(exception);
             }
-
         }
     }
 }

@@ -7,6 +7,12 @@ namespace RuniOS.Sounds
 {
     public sealed partial class SoundSystem
     {
+        public UniTask<WaveAudioClip> CreateStreamAsync(PhysicalPath path)
+        {
+            ThrowIfSystemLockHeld();
+            return UniTask.RunOnThreadPool(() => CreateStream(path));
+        }
+
         /// <summary>
         /// Asynchronously opens the encoded audio at the specified <paramref name="node"/> and creates an FMOD stream.<br/>
         /// 지정된 <paramref name="node"/>의 인코딩된 오디오를 비동기로 열어 FMOD 스트림을 만듭니다.
@@ -39,8 +45,13 @@ namespace RuniOS.Sounds
         {
             ThrowIfSystemLockHeld();
 
-            Stream stream = await node.file.OpenRead();
-            return await CreateStreamAsync(stream);
+            if (node.provider is PhysicalIOProvider physicalProvider)
+                return await CreateStreamAsync(physicalProvider.targetPath / node.path);
+            else
+            {
+                Stream stream = await node.file.OpenRead();
+                return await CreateStreamAsync(stream);
+            }
         }
 
         /// <summary>

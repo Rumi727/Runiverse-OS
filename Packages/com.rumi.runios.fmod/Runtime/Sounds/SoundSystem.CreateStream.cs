@@ -1,5 +1,6 @@
 #nullable enable
 using FMOD;
+using RuniOS.IO;
 using RuniOS.Sounds.Streams;
 using System.IO;
 using Thread = System.Threading.Thread;
@@ -8,6 +9,21 @@ namespace RuniOS.Sounds
 {
     public sealed partial class SoundSystem
     {
+        public WaveAudioClip CreateStream(PhysicalPath path)
+        {
+            nativeLock.EnterReadLock();
+
+            try
+            {
+                ThrowIfUnavailableUnsafe();
+                return CreateStreamUnsafe(path);
+            }
+            finally
+            {
+                nativeLock.ExitReadLock();
+            }
+        }
+
         /// <summary>
         /// Creates an FMOD stream that reads encoded audio directly from the specified <see cref="Stream"/>.<br/>
         /// 지정된 <see cref="Stream"/>에서 인코딩된 오디오를 직접 읽는 FMOD 스트림을 만듭니다.
@@ -57,14 +73,40 @@ namespace RuniOS.Sounds
                 ThrowIfUnavailableUnsafe();
                 return CreateStreamUnsafe(streamFile);
             }
-            catch
-            {
-                streamFile.Dispose();
-                throw;
-            }
             finally
             {
                 nativeLock.ExitReadLock();
+                streamFile.Dispose();
+            }
+        }
+
+        WaveAudioClip CreateStreamUnsafe(string path)
+        {
+            Sound sound = default;
+
+            try
+            {
+                native.createStream(path, MODE._3D | MODE.NONBLOCKING, out sound).ThrowIfNotOk();
+
+                while (true)
+                {
+                    sound.getOpenState(out OPENSTATE state, out _, out _, out _).ThrowIfNotOk();
+
+                    if (state == OPENSTATE.READY)
+                        return WaveAudioClip.Unsafe.CreateInstance(this, sound);
+
+                    if (state == OPENSTATE.ERROR)
+                        throw new InvalidOperationException("FMOD failed to open the stream.");
+
+                    Thread.Sleep(1);
+                }
+            }
+            catch
+            {
+                if (sound.hasHandle())
+                    sound.release().LogErrorIfNotOk();
+
+                throw;
             }
         }
 
@@ -82,7 +124,7 @@ namespace RuniOS.Sounds
                     sound.getOpenState(out OPENSTATE state, out _, out _, out _).ThrowIfNotOk();
 
                     if (state == OPENSTATE.READY)
-                        return new WaveAudioClip(this, sound, streamFile);
+                        return WaveAudioClip.Unsafe.CreateInstance(this, sound, streamFile);
 
                     if (state == OPENSTATE.ERROR)
                         throw new InvalidOperationException("FMOD failed to open the stream.");

@@ -15,9 +15,14 @@ namespace RuniOS.Sounds
     /// </remarks>
     public sealed partial class SoundChannelGroup : IDisposable, ISoundSystemResource
     {
+        public static class Unsafe
+        {
+            public static SoundChannelGroup CreateInstance(SoundSystem system, ChannelGroup channelGroup) => new SoundChannelGroup(system, channelGroup);
+        }
+
         static readonly ConcurrentDictionary<IntPtr, SoundChannelGroup> groupLists = [];
 
-        internal SoundChannelGroup(SoundSystem system, ChannelGroup channelGroup)
+        SoundChannelGroup(SoundSystem system, ChannelGroup channelGroup)
         {
             this.system = system;
             native = channelGroup;
