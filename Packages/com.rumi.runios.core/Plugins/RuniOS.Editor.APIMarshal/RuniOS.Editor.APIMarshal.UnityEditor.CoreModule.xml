@@ -4,9 +4,6 @@
         <name>RuniOS.Editor.APIMarshal.UnityEditor.CoreModule</name>
     </assembly>
     <members>
-        <member name="T:RuniOS.Editor.APIMarshal.UnityEditor.EditorMarshal">
-            <inheritdoc />
-        </member>
         <member name="T:RuniOS.Editor.APIMarshal.UnityEditor.MainToolbarElementMarshal">
             <inheritdoc />
         </member>
