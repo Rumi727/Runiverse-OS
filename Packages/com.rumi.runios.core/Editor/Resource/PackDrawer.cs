@@ -6,6 +6,8 @@ namespace RuniOS.Editor.Resource
 {
     public abstract class PackDrawer
     {
+        public bool isEnabled { get; internal set; } = false;
+
         public virtual string? title => null;
 
         public virtual int order => 0;
@@ -32,7 +34,7 @@ namespace RuniOS.Editor.Resource
         
         public virtual void OnEnable(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths) { }
         public virtual void OnDisable() { }
-        
+
         public abstract void OnGUI(PhysicalPath rootPath, IEnumerable<RuniPath> relativePaths, bool isDebug = false);
 
         protected void SetDirty() => isDirty = true;

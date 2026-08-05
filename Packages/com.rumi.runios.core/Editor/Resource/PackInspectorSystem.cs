@@ -123,11 +123,20 @@ namespace RuniOS.Editor.Resource
 
         static void SetNewDrawer(PackDrawer? drawer, IEnumerable<RuniPath> paths)
         {
-            activeDrawer?.OnDisable();
-            activeDrawer = drawer;
+            if (activeDrawer != null)
+            {
+                activeDrawer.OnDisable();
+                activeDrawer.isEnabled = false;
+            }
 
+            activeDrawer = drawer;
             activePaths = [..paths];
-            activeDrawer?.OnEnable((PhysicalPath)Application.streamingAssetsPath, activePaths);
+
+            if (activeDrawer != null)
+            {
+                activeDrawer.isEnabled = true;
+                activeDrawer.OnEnable((PhysicalPath)Application.streamingAssetsPath, activePaths);
+            }
 
             onActiveDrawerChanged?.Invoke();
         }
