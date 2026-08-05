@@ -48,7 +48,7 @@ namespace RuniOS.Sounds
                     IAssetScope<WaveAudioClip>? scope = await ResourceManager.LoadScopeAsync<WaveAudioClip>(key);
                     if (scope == null)
                     {
-                        Debug.RuntimeLogWarning($"NBS instrument resource '{key.assetId}' is unavailable. Notes using it will be silent.", nameof(NBSPlayer));
+                        Debug.RuntimeLogWarning($"NBS instrument resource '{key.assetId}' is unavailable. Notes using it will be silent.", nameof(NoteBlockSource));
                         continue;
                     }
 

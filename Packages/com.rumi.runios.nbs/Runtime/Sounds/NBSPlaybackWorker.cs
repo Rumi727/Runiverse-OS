@@ -7,13 +7,13 @@ namespace RuniOS.Sounds
     static partial class NBSPlaybackWorker
     {
         static readonly object gate = new object();
-        static readonly HashSet<NBSPlayer> players = [];
+        static readonly HashSet<NoteBlockSource> players = [];
         static readonly AutoResetEvent wakeEvent = new AutoResetEvent(false);
 
         static Thread? thread;
         static bool stopping;
 
-        public static void Register(NBSPlayer player)
+        public static void Register(NoteBlockSource player)
         {
             lock (gate)
             {
@@ -33,7 +33,7 @@ namespace RuniOS.Sounds
             wakeEvent.Set();
         }
 
-        public static void Unregister(NBSPlayer player)
+        public static void Unregister(NoteBlockSource player)
         {
             lock (gate)
                 players.Remove(player);
@@ -63,7 +63,7 @@ namespace RuniOS.Sounds
         {
             while (true)
             {
-                NBSPlayer[] snapshot;
+                NoteBlockSource[] snapshot;
                 lock (gate)
                 {
                     if (stopping)
@@ -72,7 +72,7 @@ namespace RuniOS.Sounds
                     snapshot = players.ToArray();
                 }
 
-                foreach (NBSPlayer player in snapshot)
+                foreach (NoteBlockSource player in snapshot)
                 {
                     try
                     {

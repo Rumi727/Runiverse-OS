@@ -12,7 +12,7 @@ namespace RuniOS.Sounds
     /// 미리 계산된 스케줄과 공유 백그라운드 워커를 통해 스코프 기반 NBS 리소스를 재생합니다.
     /// </summary>
     [ExecuteAlways]
-    public sealed partial class NBSPlayer : RuniAudioSource, IReloadable
+    public sealed partial class NoteBlockSource : RuniAudioSource, IReloadable
     {
         /// <summary>Gets or sets the NBS resource reference.<br/>NBS 리소스 참조를 가져오거나 설정합니다.</summary>
         public AssetRef<NBSFile> nbsFileRef

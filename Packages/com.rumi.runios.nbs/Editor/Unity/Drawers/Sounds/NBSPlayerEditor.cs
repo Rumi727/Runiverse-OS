@@ -8,12 +8,12 @@ using RuniOS.Utility;
 namespace RuniOS.Editor.Unity.Drawers.Sounds
 {
     /// <summary>
-    /// Draws NBS resource, scheduling, transport, visual-effect preview, and timing information for <see cref="NBSPlayer"/>.<br/>
-    /// <see cref="NBSPlayer"/>의 NBS 리소스, 예약, 트랜스포트, 시각 효과 미리보기 및 타이밍 정보를 그립니다.
+    /// Draws NBS resource, scheduling, transport, visual-effect preview, and timing information for <see cref="NoteBlockSource"/>.<br/>
+    /// <see cref="NoteBlockSource"/>의 NBS 리소스, 예약, 트랜스포트, 시각 효과 미리보기 및 타이밍 정보를 그립니다.
     /// </summary>
     [CanEditMultipleObjects]
-    [CustomEditor(typeof(NBSPlayer), true)]
-    public sealed class NBSPlayerEditor : RuniAudioSourceEditor<NBSPlayer>
+    [CustomEditor(typeof(NoteBlockSource), true)]
+    public sealed class NBSPlayerEditor : RuniAudioSourceEditor<NoteBlockSource>
     {
         const float visualEffectCardHeight = 44;
         const float tempoChangeMarkerWidth = 2;
@@ -44,7 +44,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
                 if (targets.IsDefaultOrEmpty)
                     return false;
 
-                foreach (NBSPlayer? player in targets)
+                foreach (NoteBlockSource? player in targets)
                 {
                     if (player != null && player.nbsFile != null && player.nbsFile.visualEffectMap.GetState(player.tick).rainbowEnabled)
                         return true;
@@ -288,7 +288,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             bool hasMixedState = false;
             NBSVisualEffectMap.State? commonState = null;
 
-            foreach (NBSPlayer? player in targets)
+            foreach (NoteBlockSource? player in targets)
             {
                 if (player == null)
                     continue;
@@ -350,7 +350,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             return true;
         }
 
-        void UpdateSavePopupTracking(NBSPlayer player, NBSFile? file)
+        void UpdateSavePopupTracking(NoteBlockSource player, NBSFile? file)
         {
             EntityId instanceId = player.GetEntityId();
             double currentTick = file == null ? 0 : player.tick;
@@ -371,7 +371,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             tracker.wasPlaying = isContinuouslyPlaying;
         }
 
-        static bool TryGetSavePopupCrossing(NBSPlayer player, NBSFile file, double previousTick, double currentTick)
+        static bool TryGetSavePopupCrossing(NoteBlockSource player, NBSFile file, double previousTick, double currentTick)
         {
             NBSVisualEffectMap map = file.visualEffectMap;
             if (map.savePopupTicks.Count == 0 || !double.IsFinite(previousTick) || !double.IsFinite(currentTick))
@@ -408,7 +408,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             return false;
         }
 
-        static bool TryGetLoopTickRange(NBSPlayer player, NBSFile file, out double loopStartTick, out double loopEndTick)
+        static bool TryGetLoopTickRange(NoteBlockSource player, NBSFile file, out double loopStartTick, out double loopEndTick)
         {
             loopStartTick = 0;
             loopEndTick = 0;
@@ -430,7 +430,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
 
         static void DrawTempoChangeMarkers(Rect trackPosition, IPlayable playable, double length)
         {
-            if (playable is not NBSPlayer player || player.nbsFile is not { } file || trackPosition.width <= 0)
+            if (playable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0)
                 return;
 
             foreach (NBSTempoMap.Segment segment in file.tempoMap.segments)
@@ -541,7 +541,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             savePopupStartedAt = double.NegativeInfinity;
         }
 
-        async UniTask ReloadAndRepaint(NBSPlayer player)
+        async UniTask ReloadAndRepaint(NoteBlockSource player)
         {
             await player.Reload();
             if (this != null)

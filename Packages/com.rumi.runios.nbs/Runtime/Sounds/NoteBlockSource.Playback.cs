@@ -4,7 +4,7 @@ using System.Diagnostics;
 
 namespace RuniOS.Sounds
 {
-    public sealed partial class NBSPlayer
+    public sealed partial class NoteBlockSource
     {
         sealed class Voice(SoundChannel channel, NBSOccurrenceId occurrence, NBSPreparedNote preparedNote, float clipFrequency, ulong startDspClock, bool isPendingStart)
         {
@@ -896,7 +896,7 @@ namespace RuniOS.Sounds
         (
             float value,
             Action<SoundChannel, float> channelSetter,
-            Action<NBSPlayer, float> baseSetter
+            Action<NoteBlockSource, float> baseSetter
         )
         {
             lock (voiceSettingsApplyLock)

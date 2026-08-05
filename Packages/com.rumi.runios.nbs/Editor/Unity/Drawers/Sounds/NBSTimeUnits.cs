@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         public void DrawField(Rect position, IReadOnlyList<IPlayable> playables)
         {
             EditorGUI.showMixedValue = playables.Count != 1;
-            NBSPlayer? player = playables.FirstOrDefault() as NBSPlayer;
+            NoteBlockSource? player = playables.FirstOrDefault() as NoteBlockSource;
 
             EditorGUI.BeginChangeCheck();
             double value = EditorGUI.DoubleField
@@ -20,7 +20,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             );
             if (EditorGUI.EndChangeCheck())
             {
-                foreach (NBSPlayer target in playables.OfType<NBSPlayer>())
+                foreach (NoteBlockSource target in playables.OfType<NoteBlockSource>())
                     target.tick = value;
             }
 
@@ -28,9 +28,9 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         }
 
         public float GetHeight() => EditorGUIUtility.singleLineHeight;
-        public string TimeToString(IPlayable? playable) => playable is NBSPlayer player ? player.tick.ToString("0.###") : "—";
-        public string RemainingTimeToString(IPlayable? playable) => playable is NBSPlayer player ? (player.tickLength - player.tick).ToString("0.###") : "—";
-        public string LengthToString(IPlayable? playable) => playable is NBSPlayer player ? player.tickLength.ToString() : "—";
+        public string TimeToString(IPlayable? playable) => playable is NoteBlockSource player ? player.tick.ToString("0.###") : "—";
+        public string RemainingTimeToString(IPlayable? playable) => playable is NoteBlockSource player ? (player.tickLength - player.tick).ToString("0.###") : "—";
+        public string LengthToString(IPlayable? playable) => playable is NoteBlockSource player ? player.tickLength.ToString() : "—";
     }
 
     sealed class NBSIndexTimeUnit : ITimeUnit
@@ -38,7 +38,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         public void DrawField(Rect position, IReadOnlyList<IPlayable> playables)
         {
             EditorGUI.showMixedValue = playables.Count != 1;
-            NBSPlayer? player = playables.FirstOrDefault() as NBSPlayer;
+            NoteBlockSource? player = playables.FirstOrDefault() as NoteBlockSource;
 
             EditorGUI.BeginChangeCheck();
             int value = EditorGUI.IntField
@@ -49,7 +49,7 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
             );
             if (EditorGUI.EndChangeCheck())
             {
-                foreach (NBSPlayer target in playables.OfType<NBSPlayer>())
+                foreach (NoteBlockSource target in playables.OfType<NoteBlockSource>())
                     target.index = value;
             }
 
@@ -57,8 +57,8 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
         }
 
         public float GetHeight() => EditorGUIUtility.singleLineHeight;
-        public string TimeToString(IPlayable? playable) => playable is NBSPlayer player ? player.index.ToString() : "—";
-        public string RemainingTimeToString(IPlayable? playable) => playable is NBSPlayer player ? Math.Max(0, player.indexLength - player.index - 1).ToString() : "—";
-        public string LengthToString(IPlayable? playable) => playable is NBSPlayer player ? player.indexLength.ToString() : "—";
+        public string TimeToString(IPlayable? playable) => playable is NoteBlockSource player ? player.index.ToString() : "—";
+        public string RemainingTimeToString(IPlayable? playable) => playable is NoteBlockSource player ? Math.Max(0, player.indexLength - player.index - 1).ToString() : "—";
+        public string LengthToString(IPlayable? playable) => playable is NoteBlockSource player ? player.indexLength.ToString() : "—";
     }
 }
