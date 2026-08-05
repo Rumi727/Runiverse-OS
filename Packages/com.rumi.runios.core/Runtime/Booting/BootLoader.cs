@@ -3,7 +3,6 @@ using Cysharp.Threading.Tasks;
 using RuniOS.Reflection;
 using RuniOS.Resource;
 using UnityEngine;
-using UnityEngine.LowLevel;
 
 namespace RuniOS.Booting
 {
@@ -21,11 +20,11 @@ namespace RuniOS.Booting
         // ReSharper disable once Unity.IncorrectMethodSignature
         static async UniTaskVoid Boot()
         {
-            Debug.RuntimeLog("UniTask Initialize");
-            
+            /*Debug.RuntimeLog("UniTask Initialize");
+
             //UniTask Setting
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
-            PlayerLoopHelper.Initialize(ref loop);
+            PlayerLoopHelper.Initialize(ref loop);*/
 
             //Awaken Invoke
             Debug.RuntimeLog("Awaken Method Invoke");

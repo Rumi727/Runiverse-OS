@@ -36,7 +36,9 @@ namespace RuniOS.Editor.Resource
             subscribedDrawer = PackInspectorSystem.activeDrawer;
             if (subscribedDrawer != null)
             {
+                subscribedDrawer.repaintAction += Repaint;
                 subscribedDrawer.onDirtyStateChanged += SyncDirtyState;
+
                 SyncDirtyState();
             }
         }
@@ -45,7 +47,9 @@ namespace RuniOS.Editor.Resource
         {
             if (subscribedDrawer != null)
             {
+                subscribedDrawer.repaintAction -= Repaint;
                 subscribedDrawer.onDirtyStateChanged -= SyncDirtyState;
+
                 subscribedDrawer = null;
             }
         }

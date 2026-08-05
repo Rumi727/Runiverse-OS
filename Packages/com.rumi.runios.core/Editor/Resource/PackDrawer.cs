@@ -29,6 +29,8 @@ namespace RuniOS.Editor.Resource
         bool _isDirty;
         
         public event Action? onDirtyStateChanged;
+
+        internal Action? repaintAction;
         
         public abstract bool IsMatch(IEnumerable<RuniPath> relativePaths);
         
@@ -50,5 +52,7 @@ namespace RuniOS.Editor.Resource
 
             return patterns.IsMatch(path);
         }
+
+        public void Repaint() => repaintAction?.Invoke();
     }
 }

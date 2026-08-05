@@ -44,8 +44,6 @@ namespace RuniOS.Editor.Resource
 
             Selection.selectionChanged += RefreshState;
             EditorApplication.update += CheckFolderChange;
-
-            RefreshState();
         }
 
         [OnCodeDeinitializing]
@@ -117,7 +115,7 @@ namespace RuniOS.Editor.Resource
                 return;
             }
 
-            PackDrawer? drawer = drawers.FirstOrDefault(d => d.IsMatch(paths));
+            PackDrawer? drawer = drawers.Where(x => x.IsMatch(paths)).Select(x => (PackDrawer)Activator.CreateInstance(x.GetType())).FirstOrDefault();
             SetNewDrawer(drawer, paths);
         }
 
