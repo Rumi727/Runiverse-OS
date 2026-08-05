@@ -9,7 +9,7 @@ namespace RuniOS.Sounds
     /// Owns the unique instrument scopes required by one NBS Player generation.<br/>
     /// NBS Player 세대 하나에 필요한 고유 악기 스코프를 소유합니다.
     /// </summary>
-    public sealed class NBSInstrumentBank : IDisposable, INBSClipMetadataProvider
+    public sealed class NoteBlockInstrumentBank : IDisposable, INBSClipMetadataProvider
     {
         readonly Dictionary<NBSInstrumentReference, IAssetScope<WaveAudioClip>> scopes = [];
         readonly object lifetimeLock = new object();
@@ -17,7 +17,7 @@ namespace RuniOS.Sounds
         bool disposeRequested;
         bool isDisposed;
 
-        NBSInstrumentBank() { }
+        NoteBlockInstrumentBank() { }
 
         /// <summary>
         /// Loads every unique audio instrument used by <paramref name="playbackMap"/>.<br/>
@@ -26,12 +26,12 @@ namespace RuniOS.Sounds
         /// <param name="playbackMap">The clip-independent playback map.<br/>클립 독립적 재생 맵입니다.</param>
         /// <param name="nbsAssetId">The owning NBS asset identifier used for custom instruments.<br/>커스텀 악기에 사용할 소유 NBS 에셋 식별자입니다.</param>
         /// <returns>When loading completes, returns the instrument bank.<br/>로드가 완료되면 악기 bank를 반환합니다.</returns>
-        public static async UniTask<NBSInstrumentBank> Create(NBSPlaybackMap playbackMap, Identifier nbsAssetId)
+        public static async UniTask<NoteBlockInstrumentBank> Create(NBSPlaybackMap playbackMap, Identifier nbsAssetId)
         {
             if (playbackMap == null)
                 throw new ArgumentNullException(nameof(playbackMap));
 
-            NBSInstrumentBank bank = new NBSInstrumentBank();
+            NoteBlockInstrumentBank bank = new NoteBlockInstrumentBank();
             HashSet<NBSInstrumentReference> instruments = [];
             for (int i = 0; i < playbackMap.entries.Count; i++)
             {

@@ -63,7 +63,7 @@ namespace RuniOS.Sounds
         }
 
         IAssetScope<NBSFile>? nbsScope;
-        NBSInstrumentBank? instrumentBank;
+        NoteBlockInstrumentBank? instrumentBank;
         NBSPlaybackSchedule? playbackSchedule;
         NBSPlaybackCursor playbackCursor;
         readonly List<PendingSubmission> pendingSubmissions = [];
@@ -72,7 +72,7 @@ namespace RuniOS.Sounds
         bool restoreSnapshot;
         long playbackRevision;
         long voiceSettingsRevision;
-        long observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+        long observedSchedulingRevision = NoteBlockPlaybackSettings.schedulingRevision;
         readonly AsyncReloadGate reloadGate = new AsyncReloadGate();
 
         /// <summary>
@@ -99,7 +99,7 @@ namespace RuniOS.Sounds
                     playingLock.ExitWriteLock();
                 }
 
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
             }
         }
 
@@ -199,7 +199,7 @@ namespace RuniOS.Sounds
                     playingLock.ExitWriteLock();
                 }
 
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
             }
         }
 
@@ -231,7 +231,7 @@ namespace RuniOS.Sounds
                     playingLock.ExitWriteLock();
                 }
 
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
             }
         }
 
@@ -407,11 +407,11 @@ namespace RuniOS.Sounds
                 return;
             }
 
-            NBSInstrumentBank? newBank = null;
+            NoteBlockInstrumentBank? newBank = null;
             try
             {
                 if (newScope != null)
-                    newBank = await NBSInstrumentBank.Create(newScope.asset.playbackMap, target.key.assetId);
+                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, target.key.assetId);
             }
             catch
             {
@@ -427,7 +427,7 @@ namespace RuniOS.Sounds
             }
 
             IAssetScope<NBSFile>? oldScope;
-            NBSInstrumentBank? oldBank;
+            NoteBlockInstrumentBank? oldBank;
             Voice[] oldVoices;
             while (true)
             {
@@ -481,7 +481,7 @@ namespace RuniOS.Sounds
             StopVoices(oldVoices);
             DisposeQueue.Enqueue(oldScope);
             DisposeQueue.Enqueue(oldBank);
-            NBSPlaybackWorker.Signal();
+            NoteBlockPlaybackWorker.Signal();
         }
 
         protected override void OnEnable()
@@ -499,7 +499,7 @@ namespace RuniOS.Sounds
             lastSpatialPosition = currentTransform.position;
 
             ResourceManager.AttachReloadable(this);
-            NBSPlaybackWorker.Register(this);
+            NoteBlockPlaybackWorker.Register(this);
             Reload().Forget();
         }
 
@@ -507,10 +507,10 @@ namespace RuniOS.Sounds
         {
             base.OnDisable();
             ResourceManager.DetachReloadable(this);
-            NBSPlaybackWorker.Unregister(this);
+            NoteBlockPlaybackWorker.Unregister(this);
 
             IAssetScope<NBSFile>? oldScope;
-            NBSInstrumentBank? oldBank;
+            NoteBlockInstrumentBank? oldBank;
             playingLock.EnterWriteLock();
             try
             {
@@ -540,7 +540,7 @@ namespace RuniOS.Sounds
             completedLoops = 0;
             ResetCursorUnsafe(true);
             restoreSnapshot = true;
-            NBSPlaybackWorker.Signal();
+            NoteBlockPlaybackWorker.Signal();
         }
 
         protected override void OnStop()
@@ -565,10 +565,10 @@ namespace RuniOS.Sounds
             UnPauseVoicesUnsafe();
             if (!playbackCursor.initialized)
                 ResetCursorUnsafe(false);
-            NBSPlaybackWorker.Signal();
+            NoteBlockPlaybackWorker.Signal();
         }
 
-        void OnValidate() => NBSPlaybackWorker.Signal();
+        void OnValidate() => NoteBlockPlaybackWorker.Signal();
 
         void InvalidateLoopSchedule()
         {
@@ -585,14 +585,14 @@ namespace RuniOS.Sounds
                 playingLock.ExitWriteLock();
             }
 
-            NBSPlaybackWorker.Signal();
+            NoteBlockPlaybackWorker.Signal();
         }
 
         void RebuildScheduleUnsafe(bool includeCurrent, bool includePreviousNotes)
         {
             scheduleGeneration++;
             NBSFile? file = nbsScope?.asset;
-            NBSInstrumentBank? bank = instrumentBank;
+            NoteBlockInstrumentBank? bank = instrumentBank;
             float currentTempo = base.tempo;
             float currentPitch = base.pitch;
             playbackSchedule = file != null && bank != null &&
@@ -607,7 +607,7 @@ namespace RuniOS.Sounds
         void ResetCursorUnsafe(bool includeCurrent)
         {
             playbackRevision++;
-            observedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+            observedSchedulingRevision = NoteBlockPlaybackSettings.schedulingRevision;
             NBSPlaybackSchedule? schedule = playbackSchedule;
             if (schedule == null || !double.IsFinite(base.time))
             {

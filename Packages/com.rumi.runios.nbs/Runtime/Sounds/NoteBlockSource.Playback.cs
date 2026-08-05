@@ -72,7 +72,7 @@ namespace RuniOS.Sounds
             if (!TryGetDSPClockSnapshot(out DSPClockSnapshot dspSnapshot))
                 return;
 
-            NBSInstrumentBank? retainedBank = null;
+            NoteBlockInstrumentBank? retainedBank = null;
             NBSFile? capturedFile;
             NBSPlaybackSchedule? capturedSchedule;
             NBSPlaybackCursor capturedCursor = default;
@@ -95,7 +95,7 @@ namespace RuniOS.Sounds
             try
             {
                 NBSFile? file = nbsScope?.asset;
-                NBSInstrumentBank? bank = instrumentBank;
+                NoteBlockInstrumentBank? bank = instrumentBank;
                 float currentTempo = base.tempo;
                 float currentPitch = base.pitch;
                 if (!isActiveAndEnabled || !isPlaying || isPaused || file == null || bank == null)
@@ -129,7 +129,7 @@ namespace RuniOS.Sounds
                             capturedLoopInfo = GetLoopInfoUnsafe(file);
                             capturedCompletedLoops = completedLoops;
                             includePreviousNotes = restoreSnapshot;
-                            capturedSchedulingRevision = NBSPlaybackSettings.schedulingRevision;
+                            capturedSchedulingRevision = NoteBlockPlaybackSettings.schedulingRevision;
                             schedulingRevisionChanged = observedSchedulingRevision != capturedSchedulingRevision;
                         }
                     }
@@ -197,7 +197,7 @@ namespace RuniOS.Sounds
                 NBSPlaybackQueryContext capturedContext = new NBSPlaybackQueryContext
                 (
                     new NBSPlaybackPosition(capturedTime, capturedCompletedLoops),
-                    NBSPlaybackSettings.schedulingLookahead,
+                    NoteBlockPlaybackSettings.schedulingLookahead,
                     capturedTempo,
                     capturedPitch,
                     capturedLoopInfo
@@ -223,7 +223,7 @@ namespace RuniOS.Sounds
                 try
                 {
                     if (!IsPlaybackContextCurrentUnsafe(capturedRevision, retainedBank, capturedSchedule) ||
-                        NBSPlaybackSettings.schedulingRevision != capturedSchedulingRevision)
+                        NoteBlockPlaybackSettings.schedulingRevision != capturedSchedulingRevision)
                         return;
 
                     if (completedLoops != capturedCompletedLoops)
@@ -293,13 +293,13 @@ namespace RuniOS.Sounds
             ExecuteCancellationPlan(cancellationPlan);
             StopVoices(voicesToStop);
             if (changed)
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
         }
 
         void RebuildWorkerSchedule
         (
             NBSFile file,
-            NBSInstrumentBank bank,
+            NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule? expectedSchedule,
             long revision,
             float tempo,
@@ -340,12 +340,12 @@ namespace RuniOS.Sounds
             if (pitchChanged)
                 UpdateVoiceFrequenciesUnsafe(frequencySnapshot, pitch);
             if (changed)
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
         }
 
         void ResetWorkerSchedulingRevision
         (
-            NBSInstrumentBank bank,
+            NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule schedule,
             long revision,
             DSPClockSnapshot dspSnapshot
@@ -357,7 +357,7 @@ namespace RuniOS.Sounds
             try
             {
                 if (!IsPlaybackContextCurrentUnsafe(revision, bank, schedule) ||
-                    observedSchedulingRevision == NBSPlaybackSettings.schedulingRevision)
+                    observedSchedulingRevision == NoteBlockPlaybackSettings.schedulingRevision)
                     return;
 
                 cancellationPlan = PrepareCancelFutureSubmissionsUnsafe(dspSnapshot.dspClock, true);
@@ -371,12 +371,12 @@ namespace RuniOS.Sounds
 
             ExecuteCancellationPlan(cancellationPlan);
             if (changed)
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
         }
 
         void ProcessCommandsUnsafe
         (
-            NBSInstrumentBank bank,
+            NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule schedule,
             long revision,
             List<NBSPlaybackCommand> commands,
@@ -436,7 +436,7 @@ namespace RuniOS.Sounds
             }
         }
 
-        bool IsPlaybackContextCurrent(long revision, NBSInstrumentBank bank, NBSPlaybackSchedule schedule)
+        bool IsPlaybackContextCurrent(long revision, NoteBlockInstrumentBank bank, NBSPlaybackSchedule schedule)
         {
             playingLock.EnterReadLock();
             try
@@ -449,13 +449,13 @@ namespace RuniOS.Sounds
             }
         }
 
-        bool IsPlaybackContextCurrentUnsafe(long revision, NBSInstrumentBank bank, NBSPlaybackSchedule schedule) =>
+        bool IsPlaybackContextCurrentUnsafe(long revision, NoteBlockInstrumentBank bank, NBSPlaybackSchedule schedule) =>
             playbackRevision == revision && ReferenceEquals(instrumentBank, bank) && ReferenceEquals(playbackSchedule, schedule) &&
             isActiveAndEnabled && isPlaying && !isPaused;
 
         void CreateVoiceUnsafe
         (
-            NBSInstrumentBank bank,
+            NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule schedule,
             long revision,
             NBSPlaybackCommand command,
@@ -572,7 +572,7 @@ namespace RuniOS.Sounds
         bool TryCaptureVoiceSettings
         (
             long revision,
-            NBSInstrumentBank bank,
+            NoteBlockInstrumentBank bank,
             NBSPlaybackSchedule schedule,
             out VoiceSettings settings
         )

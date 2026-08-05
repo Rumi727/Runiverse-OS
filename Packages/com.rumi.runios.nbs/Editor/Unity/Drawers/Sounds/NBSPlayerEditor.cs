@@ -187,10 +187,10 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
                     "runios-editor:inspector.nbs_player.transport.worker_interval",
                     "runios-editor:inspector.nbs_player.transport.worker_interval.tooltip"
                 ),
-                NBSPlaybackSettings.workerInterval
+                NoteBlockPlaybackSettings.workerInterval
             );
             if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value > 0)
-                NBSPlaybackSettings.workerInterval = value;
+                NoteBlockPlaybackSettings.workerInterval = value;
 
             EditorGUI.BeginChangeCheck();
             value = EditorGUILayout.DoubleField
@@ -200,10 +200,10 @@ namespace RuniOS.Editor.Unity.Drawers.Sounds
                     "runios-editor:inspector.nbs_player.transport.scheduling_lookahead",
                     "runios-editor:inspector.nbs_player.transport.scheduling_lookahead.tooltip"
                 ),
-                NBSPlaybackSettings.schedulingLookahead
+                NoteBlockPlaybackSettings.schedulingLookahead
             );
             if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value >= 0)
-                NBSPlaybackSettings.schedulingLookahead = value;
+                NoteBlockPlaybackSettings.schedulingLookahead = value;
 
             Space();
 

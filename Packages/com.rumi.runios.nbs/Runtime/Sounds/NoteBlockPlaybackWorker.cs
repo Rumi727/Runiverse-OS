@@ -4,7 +4,7 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Sounds
 {
-    static partial class NBSPlaybackWorker
+    static partial class NoteBlockPlaybackWorker
     {
         static readonly object gate = new object();
         static readonly HashSet<NoteBlockSource> players = [];
@@ -87,7 +87,7 @@ namespace RuniOS.Sounds
                 if (snapshot.Length == 0)
                     wakeEvent.WaitOne();
                 else
-                    wakeEvent.WaitOne(TimeSpan.FromSeconds(NBSPlaybackSettings.workerInterval));
+                    wakeEvent.WaitOne(TimeSpan.FromSeconds(NoteBlockPlaybackSettings.workerInterval));
             }
 
             lock (gate)

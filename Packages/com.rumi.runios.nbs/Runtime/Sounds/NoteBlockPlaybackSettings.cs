@@ -7,7 +7,7 @@ namespace RuniOS.Sounds
     /// Provides runtime-wide timing settings for the shared NBS playback worker.<br/>
     /// 공유 NBS 재생 워커의 런타임 전역 타이밍 설정을 제공합니다.
     /// </summary>
-    public static class NBSPlaybackSettings
+    public static class NoteBlockPlaybackSettings
     {
         /// <summary>
         /// Gets or sets how long the worker waits after each scan, in seconds. The default is <c>0.1</c> seconds.<br/>
@@ -26,7 +26,7 @@ namespace RuniOS.Sounds
                     throw new ArgumentOutOfRangeException(nameof(value), value, "The NBS worker interval must be finite and greater than zero.");
 
                 Volatile.Write(ref _workerInterval, value);
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
             }
         }
         static double _workerInterval = 0.1;
@@ -52,7 +52,7 @@ namespace RuniOS.Sounds
 
                 Volatile.Write(ref _schedulingLookahead, value);
                 Interlocked.Increment(ref _schedulingRevision);
-                NBSPlaybackWorker.Signal();
+                NoteBlockPlaybackWorker.Signal();
             }
         }
         static double _schedulingLookahead = 0.2;
