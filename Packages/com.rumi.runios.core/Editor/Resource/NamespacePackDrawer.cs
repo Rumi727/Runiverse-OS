@@ -7,8 +7,18 @@ using UnityEditorInternal;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class NamespacePackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths)
+    public sealed class NamespacePackDrawer : PackDrawer
     {
+        public NamespacePackDrawer(ImmutableArray<PathPair> targets) : base(targets)
+        {
+            relativeExistsPaths = targets
+                .Select<PathPair, string>(x => x.rootPath / x.relativePath)
+                .Where(Directory.Exists)
+                .ToArray();
+
+            UpdateNamespaceList();
+        }
+
         public override string targetTypeName => targetTitle;
         public override string targetTitle => GetTextOrKey("runios-editor:gui.namespace");
 
@@ -18,16 +28,11 @@ namespace RuniOS.Editor.Resource
 
         protected internal override void OnEnable()
         {
-            relativeExistsPaths = relativePaths
-                .Select<RuniPath, string>(x => (PhysicalPath)Application.streamingAssetsPath / x)
-                .Where(Directory.Exists)
-                .ToArray();
 
-            UpdateNamespaceList();
         }
 
-        string[] relativeExistsPaths = [];
-        
+        readonly string[] relativeExistsPaths = [];
+
         List<string> nameSpaces = [];
         int orgCount;
 

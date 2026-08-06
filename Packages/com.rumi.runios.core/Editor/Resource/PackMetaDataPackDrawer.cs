@@ -10,27 +10,20 @@ using System.IO;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class PackMetaDataPackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths)
+    public sealed class PackMetaDataPackDrawer : PackDrawer
     {
-        public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
-        public override int order => int.MinValue;
-
-        public override bool needsApplyRevert => true;
-
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
-
-        protected internal override void OnEnable()
+        public PackMetaDataPackDrawer(ImmutableArray<PathPair> targets) : base(targets)
         {
             relativeExistsPaths =
             [
-                ..relativePaths
-                    .Where(x => x.GetFileName() == ResourcePack.infoPath)
-                    .Select<RuniPath, string>(x =>
+                ..targets
+                    .Where(x => x.relativePath.GetFileName() == ResourcePack.infoPath)
+                    .Select<PathPair, string>(x =>
                     {
-                        if (x.IsEmpty())
-                            return rootPath / ResourcePack.infoPath;
+                        if (x.relativePath.IsEmpty())
+                            return x.rootPath / ResourcePack.infoPath;
 
-                        return rootPath / x;
+                        return x.rootPath / x.relativePath;
                     })
                     .Where(File.Exists)
             ];
@@ -38,8 +31,16 @@ namespace RuniOS.Editor.Resource
             DiscardChanges();
         }
 
-        string[] relativeExistsPaths = [];
+        public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
+        public override int order => int.MinValue;
+
+        public override bool needsApplyRevert => true;
+
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
+
+        readonly string[] relativeExistsPaths = [];
         PackMetaData[] packMetaDatas = [];
+
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
         protected internal override void OnGUI(bool isDebug = false)
@@ -58,8 +59,9 @@ namespace RuniOS.Editor.Resource
                 if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
-                    File.WriteAllText(rootPath / ResourcePack.infoPath, json);
-                    
+                    foreach (var target in targets)
+                        File.WriteAllText(target.rootPath / ResourcePack.infoPath, json);
+
                     OnEnable();
                 }
                 

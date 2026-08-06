@@ -2,7 +2,6 @@
 using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.Editor.Sounds;
 using RuniOS.IO;
-using RuniOS.Linq;
 using RuniOS.Sounds;
 using System.Collections.Immutable;
 using System.Globalization;
@@ -15,12 +14,12 @@ namespace RuniOS.Editor.Resource.Sounds
         public static GUIStyle shadowLabelStyle => _shadowLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _shadowLabelStyle;
 
-        public WaveAudioClipPackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : base(rootPath, relativePaths)
+        public WaveAudioClipPackDrawer(ImmutableArray<PathPair> targets) : base(targets)
         {
-            if (relativePaths.IsEmpty() || relativePaths.TwoOrMore())
+            if (target == null)
                 return;
 
-            PhysicalPath soundPath = rootPath / relativePaths.First();
+            PhysicalPath soundPath = target.Value.rootPath / target.Value.relativePath;
             if (!File.Exists(soundPath))
                 return;
 

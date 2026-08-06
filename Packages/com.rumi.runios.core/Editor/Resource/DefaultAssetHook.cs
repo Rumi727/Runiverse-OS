@@ -13,12 +13,12 @@ namespace RuniOS.Editor.Resource
         {
             get
             {
-                if (PackInspectorSystem.activeDrawer != null)
+                if (targetDrawer != null)
                 {
-                    if (PackInspectorSystem.activeDrawer.targetTitle != null)
-                        return PackInspectorSystem.activeDrawer.targetTitle;
+                    if (targetDrawer.targetTitle != null)
+                        return targetDrawer.targetTitle;
 
-                    string typeName = PackInspectorSystem.activeDrawer.targetTypeName;
+                    string typeName = targetDrawer.targetTypeName;
                     string settingsText = GetTextOrKey("runios-editor:gui.settings");
                     if (targets.Length > 1)
                         return $"{targets.Length} {typeName} {settingsText}";
@@ -33,70 +33,60 @@ namespace RuniOS.Editor.Resource
         static GUIStyle? _paddingStyle;
         public static GUIStyle paddingStyle => _paddingStyle ??= new GUIStyle { padding = new RectOffset(15, 0, 3, 0) };
         
-        PackDrawer? subscribedDrawer;
+        PackDrawer? targetDrawer;
 
         void OnEnable()
         {
-            PackInspectorSystem.onActiveDrawerChanged += BindActiveDrawer;
-            BindActiveDrawer();
-        }
+            targetDrawer = PackInspectorSystem.CreateDrawer(targets);
 
-        void OnDisable()
-        {
-            PackInspectorSystem.onActiveDrawerChanged -= BindActiveDrawer;
-            UnsubscribeDrawer();
-        }
-
-        void BindActiveDrawer()
-        {
-            UnsubscribeDrawer();
-
-            subscribedDrawer = PackInspectorSystem.activeDrawer;
-            if (subscribedDrawer != null)
+            if (targetDrawer != null)
             {
-                subscribedDrawer.repaintAction += Repaint;
-                subscribedDrawer.onDirtyStateChanged += SyncDirtyState;
+                targetDrawer.OnEnable();
+
+                targetDrawer.repaintAction += Repaint;
+                targetDrawer.onDirtyStateChanged += SyncDirtyState;
 
                 SyncDirtyState();
             }
         }
 
-        void UnsubscribeDrawer()
+        void OnDisable()
         {
-            if (subscribedDrawer != null)
+            if (targetDrawer != null)
             {
-                subscribedDrawer.repaintAction -= Repaint;
-                subscribedDrawer.onDirtyStateChanged -= SyncDirtyState;
+                targetDrawer.OnDisable();
 
-                subscribedDrawer = null;
+                targetDrawer.repaintAction -= Repaint;
+                targetDrawer.onDirtyStateChanged -= SyncDirtyState;
+
+                targetDrawer = null;
             }
         }
 
         void SyncDirtyState()
         {
-            if (subscribedDrawer != null)
+            if (targetDrawer != null)
             {
-                hasUnsavedChanges = subscribedDrawer.isDirty;
+                hasUnsavedChanges = targetDrawer.isDirty;
                 saveChangesMessage = "파일의 임포트 설정 적용되지 않음";
             }
         }
 
         public override void SaveChanges()
         {
-            subscribedDrawer?.SaveChanges();
+            targetDrawer?.SaveChanges();
             base.SaveChanges();
         }
 
         public override void DiscardChanges()
         {
-            subscribedDrawer?.DiscardChanges();
+            targetDrawer?.DiscardChanges();
             base.DiscardChanges();
         }
 
         public override void OnInspectorGUI()
         {
-            var drawer = PackInspectorSystem.activeDrawer;
-            if (drawer != null)
+            if (targetDrawer != null)
             {
                 bool isDebug = EditorBridge.__GetInstanceFrom(this).inspectorMode != InspectorMode.Normal;
             
@@ -108,8 +98,8 @@ namespace RuniOS.Editor.Resource
                 
                 EditorGUILayout.BeginVertical(paddingStyle);
                 {
-                    drawer.OnGUI(isDebug);
-                    if (drawer.needsApplyRevert)
+                    targetDrawer.OnGUI(isDebug);
+                    if (targetDrawer.needsApplyRevert)
                         DrawFooter();
                 }
                 EditorGUILayout.EndVertical();
@@ -120,47 +110,55 @@ namespace RuniOS.Editor.Resource
                 base.OnInspectorGUI();
         }
 
-        public override bool HasPreviewGUI() => PackInspectorSystem.activeDrawer != null ? PackInspectorSystem.activeDrawer.HasPreviewGUI() : base.HasPreviewGUI();
+        public override Texture2D? RenderStaticPreview(string assetPath, Object[] subAssets, int width, int height)
+        {
+            if (targetDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out PhysicalPath rootPath, out RuniPath path))
+                return targetDrawer.RenderStaticPreview(rootPath, path, width, height);
+            else
+                return base.RenderStaticPreview(assetPath, subAssets, width, height);
+        }
 
-        public override GUIContent GetPreviewTitle() => PackInspectorSystem.activeDrawer != null ? PackInspectorSystem.activeDrawer.GetPreviewTitle() : base.GetPreviewTitle();
+        public override bool HasPreviewGUI() => targetDrawer?.HasPreviewGUI() ?? base.HasPreviewGUI();
+
+        public override GUIContent GetPreviewTitle() => targetDrawer != null ? targetDrawer.GetPreviewTitle() : base.GetPreviewTitle();
 
         public override void OnPreviewGUI(Rect r, GUIStyle background)
         {
-            if (PackInspectorSystem.activeDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out RuniPath path))
-                PackInspectorSystem.activeDrawer.OnPreviewGUI(r, (PhysicalPath)Application.streamingAssetsPath, path, background);
+            if (targetDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out PhysicalPath rootPath, out RuniPath path))
+                targetDrawer.OnPreviewGUI(r, rootPath, path, background);
             else
                 base.OnPreviewGUI(r, background);
         }
 
         public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
         {
-            if (PackInspectorSystem.activeDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out RuniPath path))
-                PackInspectorSystem.activeDrawer.OnInteractivePreviewGUI(r, (PhysicalPath)Application.streamingAssetsPath, path, background);
+            if (targetDrawer != null && PackInspectorSystem.TryGetRelativePathFrom(target, out PhysicalPath rootPath, out RuniPath path))
+                targetDrawer.OnInteractivePreviewGUI(r, rootPath, path, background);
             else
                 base.OnInteractivePreviewGUI(r, background);
         }
 
         public override void OnPreviewSettings()
         {
-            if (PackInspectorSystem.activeDrawer != null)
-                PackInspectorSystem.activeDrawer.OnPreviewSettings();
+            if (targetDrawer != null)
+                targetDrawer.OnPreviewSettings();
             else
                 base.OnPreviewSettings();
         }
 
-        static void DrawFooter()
+        void DrawFooter()
         {
-            EditorGUI.BeginDisabledGroup(!PackInspectorSystem.activeDrawer?.isDirty ?? true);
+            EditorGUI.BeginDisabledGroup(!targetDrawer?.isDirty ?? true);
             
             GUILayout.Space(10);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
             if (GUILayout.Button(GetTextOrKey("gui.apply")))
-                PackInspectorSystem.activeDrawer?.SaveChanges();
+                targetDrawer?.SaveChanges();
             
             if (GUILayout.Button(GetTextOrKey("gui.revert")))
-                PackInspectorSystem.activeDrawer?.DiscardChanges();
+                targetDrawer?.DiscardChanges();
 
             EditorGUILayout.EndHorizontal();
             EditorGUI.EndDisabledGroup();

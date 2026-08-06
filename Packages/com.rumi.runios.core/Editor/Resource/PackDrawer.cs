@@ -5,10 +5,12 @@ using System.Text.RegularExpressions;
 
 namespace RuniOS.Editor.Resource
 {
-    public abstract class PackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths)
+    public abstract class PackDrawer(ImmutableArray<PackDrawer.PathPair> targets)
     {
-        public PhysicalPath rootPath { get; } = rootPath;
-        public ImmutableArray<RuniPath> relativePaths { get; } = relativePaths;
+        public record struct PathPair(PhysicalPath rootPath, RuniPath relativePath);
+
+        public ImmutableArray<PathPair> targets { get; } = targets;
+        public PathPair? target { get; } = targets.Length == 1 ? targets[0] : null;
 
         public bool isEnabled { get; internal set; } = false;
 
@@ -49,6 +51,8 @@ namespace RuniOS.Editor.Resource
         public virtual void SaveChanges() => isDirty = false;
         
         public virtual void DiscardChanges() => isDirty = false;
+
+        public virtual Texture2D? RenderStaticPreview(PhysicalPath rootPath, RuniPath relativePath, int width, int height) => null;
 
         protected internal virtual bool HasPreviewGUI() => false;
         protected internal virtual GUIContent GetPreviewTitle() => new GUIContent("Preview");
