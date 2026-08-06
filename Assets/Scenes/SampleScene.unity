@@ -2677,7 +2677,7 @@ MonoBehaviour:
       assetId:
         _nameSpace: test
         _path:
-          _value: override
+          _value: flawed_plan
   _rolloffMode: 1
   _nonRigidbodyVelocity: 0
 --- !u!4 &1060755443
@@ -4660,7 +4660,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 268938d9054946b12bbee3468e400d4c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: RuniOS.NBS::RuniOS.Sounds.NBSPlayer
-  _volume: 0.244
+  _volume: 0.2
   _tempo: 1
   _pitch: 1
   _loop: 1
@@ -4681,7 +4681,7 @@ MonoBehaviour:
       assetId:
         _nameSpace: test
         _path:
-          _value: black_knife
+          _value: ievan_polkka
   _useFileLoopSettings: 1
   _rolloffMode: 1
   _nonRigidbodyVelocity: 0

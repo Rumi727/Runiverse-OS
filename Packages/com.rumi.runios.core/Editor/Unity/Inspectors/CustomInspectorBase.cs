@@ -273,7 +273,22 @@ namespace RuniOS.Editor.Unity.Inspectors
             EditorGUI.BeginProperty(position, null, property);
             try
             {
-                return EditValue(readFunc, x => drawFunc.Invoke(position, x), writeFunc);
+                return EditValue(readFunc, x => drawFunc.Invoke(position, x), (target, newValue) =>
+                {
+                    string undoText;
+                    if (targets.Length > 1)
+                        undoText = $"Modified {property.displayName} in {targets.Length} Objects";
+                    else
+                        undoText = $"Modified {property.displayName} in {target.name}";
+
+                    Undo.RecordObject(target, undoText);
+                    writeFunc.Invoke(target, newValue);
+
+                    if (PrefabUtility.IsPartOfPrefabInstance(target))
+                        PrefabUtility.RecordPrefabInstancePropertyModifications(target);
+
+                    EditorUtility.SetDirty(target);
+                });
             }
             finally
             {
