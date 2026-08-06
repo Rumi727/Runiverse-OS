@@ -105,7 +105,7 @@ namespace RuniOS.Sounds
 
                     try
                     {
-                        soundChannel = new SoundChannel(this, channel, clip);
+                        soundChannel = new SoundChannel(this, channel, clip) { spatialBlend = 0 };
                         if (!paused)
                             channel.setPaused(false).ThrowIfNotOkOfChannel();
 
