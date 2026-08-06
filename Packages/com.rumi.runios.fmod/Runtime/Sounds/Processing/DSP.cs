@@ -182,6 +182,8 @@ namespace RuniOS.Sounds.Processing
         /// </summary>
         protected virtual void OnNativeReleaseAccepted() { }
 
+        ~DSP() => SoundSystem.LogUndisposedResource(this);
+
         void ThrowIfDisposedUnsafe()
         {
             Debug.Assert(nativeLock.IsReadLockHeld || nativeLock.IsWriteLockHeld, "The DSP native lock must be held.");

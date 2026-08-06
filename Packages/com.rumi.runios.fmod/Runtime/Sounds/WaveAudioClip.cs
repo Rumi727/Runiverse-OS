@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using FMOD;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace RuniOS.Sounds
@@ -12,8 +11,6 @@ namespace RuniOS.Sounds
             public static WaveAudioClip CreateInstance(SoundSystem system, Sound sound, IDisposable? nativeLifetime = null) => new WaveAudioClip(system, sound, nativeLifetime);
         }
 
-        static readonly ConcurrentDictionary<IntPtr, WaveAudioClip> clipLists = [];
-
         WaveAudioClip(SoundSystem system, Sound sound, IDisposable? nativeLifetime = null)
         {
             this.system = system;
@@ -21,7 +18,6 @@ namespace RuniOS.Sounds
             native = sound;
             this.nativeLifetime = nativeLifetime;
 
-            clipLists[native.handle] = this;
             system.Register(this);
 
             sound.getDefaults(out float frequency, out _).ThrowIfNotOk();
@@ -76,8 +72,6 @@ namespace RuniOS.Sounds
         public bool isDisposed => Volatile.Read(ref _isDisposed);
         bool _isDisposed = false;
 
-        public static WaveAudioClip? GetManaged(IntPtr handle) => clipLists.GetValueOrDefault(handle);
-
         /// <summary>
         /// Releases this clip and its owned native lifetime.<br/>
         /// 이 클립과 소유한 네이티브 수명을 해제합니다.
@@ -87,6 +81,8 @@ namespace RuniOS.Sounds
         /// 이 클립이 해제된 뒤의 반복 호출은 무시됩니다.
         /// </remarks>
         public void Dispose() => system.Dispose(this);
+
+        ~WaveAudioClip() => SoundSystem.LogUndisposedResource(this);
 
         void ISoundSystemResource.ReleaseUnmanagedResources()
         {
@@ -104,7 +100,6 @@ namespace RuniOS.Sounds
                     result.ThrowIfNotOk();
 
                 _isDisposed = true;
-                clipLists.TryRemove(native.handle, out _);
 
                 lifetime = nativeLifetime;
                 nativeLifetime = null;

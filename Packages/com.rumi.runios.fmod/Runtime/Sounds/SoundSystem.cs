@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using FMOD;
 using System.Collections.Concurrent;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace RuniOS.Sounds
@@ -15,7 +16,8 @@ namespace RuniOS.Sounds
             Disposed
         }
 
-        static readonly ConcurrentDictionary<IntPtr, SoundSystem> systemLists = [];
+        static readonly object resourceMarker = new();
+
         static readonly object systemLifetimeLock = new();
 
         static SoundSystem()
@@ -67,7 +69,6 @@ namespace RuniOS.Sounds
             try
             {
                 InitializeNative(settings);
-                systemLists[native.handle] = this;
             }
             catch
             {
@@ -90,7 +91,7 @@ namespace RuniOS.Sounds
 
         bool nativeInitialized;
 
-        readonly ConcurrentDictionary<ISoundSystemResource, byte> ownedResources = [];
+        readonly ConditionalWeakTable<ISoundSystemResource, object> ownedResources = [];
         ConcurrentQueue<ISoundSystemResource>? queuedDisposals = [];
 
         // nativeLock 밖에서 실행 중인 리소스 해제 호출 수입니다.
@@ -165,8 +166,6 @@ namespace RuniOS.Sounds
 
         public bool isDisposed => lifecycleState == LifecycleState.Disposed;
 
-        public static SoundSystem GetManaged(IntPtr handle) => systemLists.GetValueOrDefault(handle);
-
         public void Register(ISoundSystemResource resource)
         {
             if (resource.system != this)
@@ -177,7 +176,7 @@ namespace RuniOS.Sounds
             try
             {
                 ThrowIfUnavailableUnsafe();
-                ownedResources.TryAdd(resource, 0);
+                ownedResources.AddOrUpdate(resource, resourceMarker);
             }
             finally
             {
@@ -210,7 +209,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (lifecycleState != LifecycleState.Active || !ownedResources.TryRemove(resource, out _))
+                if (lifecycleState != LifecycleState.Active || !ownedResources.Remove(resource))
                     return;
 
                 lock (resourceDisposalLock)
@@ -225,11 +224,14 @@ namespace RuniOS.Sounds
             {
                 // 네이티브 잠금은 소유권 확보만 보호하며 구현 코드는 잠그지 않습니다.
                 resource.ReleaseUnmanagedResources();
+
+                // ReSharper disable once GCSuppressFinalizeForTypeWithoutDestructor
+                GC.SuppressFinalize(resource);
             }
             catch
             {
                 // 일반 해제 실패는 소유권을 복구해 호출자가 원인을 정리한 뒤 재시도할 수 있게 합니다.
-                ownedResources.TryAdd(resource, 0);
+                ownedResources.AddOrUpdate(resource, resourceMarker);
                 throw;
             }
             finally
@@ -316,7 +318,11 @@ namespace RuniOS.Sounds
                     nativeLock.ExitWriteLock();
                 }
             }
+
+            GC.SuppressFinalize(this);
         }
+
+        ~SoundSystem() => Debug.RuntimeLogError("The FMOD system was removed from managed memory without a Dispose call!\nThe actual native FMOD system was not released to protect resources.\nBefore discarding the FMOD system, please call the Dispose method of this instance to release the native system and resources.");
 
         void InitializeNative(SoundSystemSettings settings)
         {
@@ -352,10 +358,7 @@ namespace RuniOS.Sounds
                 lifecycleState = nextState;
                 Interlocked.Exchange(ref queuedDisposals, null);
 
-                if (nextState == LifecycleState.Disposed)
-                    systemLists.TryRemove(native.handle, out _);
-
-                List<ISoundSystemResource> resources = new(ownedResources.Keys);
+                List<ISoundSystemResource> resources = new(ownedResources.Select(x => x.Key));
                 ownedResources.Clear();
                 return resources;
             }
@@ -383,7 +386,7 @@ namespace RuniOS.Sounds
             }
 
             // 진행 중이던 즉시 해제가 실패해 되돌린 소유권까지 현재 lifecycle 작업으로 넘깁니다.
-            resources.AddRange(ownedResources.Keys);
+            resources.AddRange(ownedResources.Select(x => x.Key));
             ownedResources.Clear();
             resources.Sort((left, right) => GetReleaseOrder(left).CompareTo(GetReleaseOrder(right)));
 
@@ -405,6 +408,9 @@ namespace RuniOS.Sounds
                 {
                     Debug.LogException(exception);
                 }
+
+                // ReSharper disable once GCSuppressFinalizeForTypeWithoutDestructor
+                GC.SuppressFinalize(resource);
 
                 previousOrder = currentOrder;
                 hasPreviousOrder = true;

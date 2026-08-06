@@ -1,6 +1,5 @@
 #nullable enable
 using FMOD;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace RuniOS.Sounds
@@ -20,15 +19,12 @@ namespace RuniOS.Sounds
             public static SoundChannelGroup CreateInstance(SoundSystem system, ChannelGroup channelGroup) => new SoundChannelGroup(system, channelGroup);
         }
 
-        static readonly ConcurrentDictionary<IntPtr, SoundChannelGroup> groupLists = [];
-
         SoundChannelGroup(SoundSystem system, ChannelGroup channelGroup)
         {
             this.system = system;
             native = channelGroup;
             nativeHandle = native.handle;
 
-            groupLists[native.handle] = this;
             system.Register(this);
         }
 
@@ -49,8 +45,6 @@ namespace RuniOS.Sounds
         public bool isDisposed => Volatile.Read(ref _isDisposed);
         bool _isDisposed;
 
-        public static SoundChannelGroup GetManaged(IntPtr handle) => groupLists.GetValueOrDefault(handle);
-
         /// <summary>
         /// Releases this channel group and unregisters it from its <see cref="SoundChannelGroup.system"/>.<br/>
         /// 이 채널 그룹을 해제하고 <see cref="SoundChannelGroup.system"/>의 소유 리소스에서 제거합니다.
@@ -60,6 +54,8 @@ namespace RuniOS.Sounds
         /// 이 채널 그룹이 해제된 뒤의 반복 호출은 무시됩니다.
         /// </remarks>
         public void Dispose() => system.Dispose(this);
+
+        ~SoundChannelGroup() => SoundSystem.LogUndisposedResource(this);
 
         void ISoundSystemResource.ReleaseUnmanagedResources()
         {
@@ -71,8 +67,6 @@ namespace RuniOS.Sounds
                     return;
 
                 _isDisposed = true;
-
-                groupLists.TryRemove(native.handle, out _);
 
                 RESULT result = native.release();
                 if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
