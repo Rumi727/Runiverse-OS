@@ -254,5 +254,34 @@ namespace RuniOS.Editor
 #endif
 
         public static bool LabelHasContent(GUIContent? label) => label != null && (!string.IsNullOrEmpty(label.text) || label.image != null);
+
+        static readonly Dictionary<GUIStyle, Stack<bool>> richTextStacks = new Dictionary<GUIStyle, Stack<bool>>();
+        public static void BeginRichText(GUIStyle style, bool richText = true)
+        {
+            if (!richTextStacks.ContainsKey(style))
+                richTextStacks.Add(style, new Stack<bool>());
+
+            richTextStacks[style].Push(style.richText);
+            style.richText = richText;
+        }
+
+        public static void EndRichText(GUIStyle style)
+        {
+            if (richTextStacks.ContainsKey(style))
+            {
+                Stack<bool> stack = richTextStacks[style];
+                if (stack.TryPop(out bool result))
+                    style.richText = result;
+                else
+                    style.richText = false;
+
+                if (stack.Count <= 0)
+                    richTextStacks.Remove(style);
+
+                return;
+            }
+            else
+                style.richText = false;
+        }
     }
 }
