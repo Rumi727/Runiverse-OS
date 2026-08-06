@@ -25,10 +25,10 @@ namespace RuniOS.Sounds
             {
                 get
                 {
-                    channel.native.getReverbProperties(instance, out float wet).ThrowIfNotOk(channel);
+                    channel.native.getReverbProperties(instance, out float wet).ThrowIfNotOkOfChannel();
                     return wet;
                 }
-                set => channel.native.setReverbProperties(instance, value).ThrowIfNotOk(channel);
+                set => channel.native.setReverbProperties(instance, value).ThrowIfNotOkOfChannel();
             }
         }
     }

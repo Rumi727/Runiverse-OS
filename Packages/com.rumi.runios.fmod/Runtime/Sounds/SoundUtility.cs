@@ -12,21 +12,13 @@ namespace RuniOS.Sounds
                 throw new FMODException(result, location);
         }
 
-        internal static void ThrowIfNotOk
-        (
-            this RESULT result,
-            SoundChannel channel,
-            [CallerArgumentExpression("result")] string location = ""
-        )
+        public static void ThrowIfNotOkOfChannel(this RESULT result, [CallerArgumentExpression("result")] string location = "")
         {
             switch (result)
             {
                 case RESULT.ERR_INVALID_HANDLE:
                 case RESULT.ERR_CHANNEL_STOLEN:
-                    channel.HandleInvalidHandle();
-                    return;
-                case RESULT.ERR_INVALID_PARAM when channel.isDisposed:
-                    return;
+                    throw new ObjectDisposedException(nameof(SoundChannel));
                 default:
                     result.ThrowIfNotOk(location);
                     break;

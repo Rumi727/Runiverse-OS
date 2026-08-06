@@ -16,10 +16,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getVolume(out float volume).ThrowIfNotOk(this);
+                native.getVolume(out float volume).ThrowIfNotOkOfChannel();
                 return volume;
             }
-            set => native.setVolume(value).ThrowIfNotOk(this);
+            set => native.setVolume(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -30,10 +30,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getPitch(out float pitch).ThrowIfNotOk(this);
+                native.getPitch(out float pitch).ThrowIfNotOkOfChannel();
                 return pitch;
             }
-            set => native.setPitch(value).ThrowIfNotOk(this);
+            set => native.setPitch(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -44,10 +44,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getMute(out bool mute).ThrowIfNotOk(this);
+                native.getMute(out bool mute).ThrowIfNotOkOfChannel();
                 return mute;
             }
-            set => native.setMute(value).ThrowIfNotOk(this);
+            set => native.setMute(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -58,10 +58,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getVolumeRamp(out bool volumeRamp).ThrowIfNotOk(this);
+                native.getVolumeRamp(out bool volumeRamp).ThrowIfNotOkOfChannel();
                 return volumeRamp;
             }
-            set => native.setVolumeRamp(value).ThrowIfNotOk(this);
+            set => native.setVolumeRamp(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getAudibility(out float audibility).ThrowIfNotOk(this);
+                native.getAudibility(out float audibility).ThrowIfNotOkOfChannel();
                 return audibility;
             }
         }
@@ -92,10 +92,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getLowPassGain(out float gain).ThrowIfNotOk(this);
+                native.getLowPassGain(out float gain).ThrowIfNotOkOfChannel();
                 return gain;
             }
-            set => native.setLowPassGain(value).ThrowIfNotOk(this);
+            set => native.setLowPassGain(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace RuniOS.Sounds
         /// </summary>
         public float panStereo
         {
-            set => native.setPan(value).ThrowIfNotOk(this);
+            set => native.setPan(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace RuniOS.Sounds
             if (levels == null)
                 throw new ArgumentNullException(nameof(levels));
 
-            native.setMixLevelsInput(levels, levels.Length).ThrowIfNotOk(this);
+            native.setMixLevelsInput(levels, levels.Length).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -187,7 +187,7 @@ namespace RuniOS.Sounds
             surroundRight,
             backLeft,
             backRight
-        ).ThrowIfNotOk(this);
+        ).ThrowIfNotOkOfChannel();
 
         /// <summary>
         /// Sets a pan matrix that maps input channels to output speakers.<br/>
@@ -215,7 +215,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.setMixMatrix(matrix!, outputChannels, inputChannels, inputChannelHop).ThrowIfNotOk(this);
+                native.setMixMatrix(matrix!, outputChannels, inputChannels, inputChannelHop).ThrowIfNotOkOfChannel();
             }
             finally
             {
@@ -237,13 +237,13 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.getMixMatrix(null!, out int outputChannels, out int inputChannels).ThrowIfNotOk(this);
+                native.getMixMatrix(null!, out int outputChannels, out int inputChannels).ThrowIfNotOkOfChannel();
 
                 if (outputChannels == 0 || inputChannels == 0)
                     return (Array.Empty<float>(), outputChannels, inputChannels);
 
                 float[] matrix = new float[checked(outputChannels * inputChannels)];
-                native.getMixMatrix(matrix, out _, out _).ThrowIfNotOk(this);
+                native.getMixMatrix(matrix, out _, out _).ThrowIfNotOkOfChannel();
                 return (matrix, outputChannels, inputChannels);
             }
             finally

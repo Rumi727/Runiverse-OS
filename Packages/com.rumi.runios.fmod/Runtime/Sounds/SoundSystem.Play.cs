@@ -106,9 +106,8 @@ namespace RuniOS.Sounds
                     try
                     {
                         soundChannel = new SoundChannel(this, channel, clip);
-
-                        if (!paused && !soundChannel.isDisposed)
-                            channel.setPaused(false).ThrowIfNotOk(soundChannel);
+                        if (!paused)
+                            channel.setPaused(false).ThrowIfNotOkOfChannel();
 
                         return soundChannel;
                     }

@@ -5,6 +5,22 @@ namespace RuniOS.Sounds
 {
     public sealed partial class SoundSystem
     {
+        public event Action onUpdate
+        {
+            add
+            {
+                lock (onUpdateLock)
+                    _onUpdate += value;
+            }
+            remove
+            {
+                lock (onUpdateLock)
+                    _onUpdate -= value;
+            }
+        }
+        Action? _onUpdate = null;
+        readonly object onUpdateLock = new object();
+
         public void Update()
         {
             nativeLock.EnterReadLock();
@@ -21,6 +37,9 @@ namespace RuniOS.Sounds
 
             SoundChannel.RetryPendingTimeSamples(this);
             DisposeQueuedResources();
+
+            lock (onUpdateLock)
+                _onUpdate?.SafeInvoke();
         }
 
         void DisposeQueuedResources()

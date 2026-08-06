@@ -24,7 +24,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getFrequency(out float frequency).ThrowIfNotOk(this);
+                    native.getFrequency(out float frequency).ThrowIfNotOkOfChannel();
                     return frequency;
                 }
                 finally
@@ -38,7 +38,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.setFrequency(value).ThrowIfNotOk(this);
+                    native.setFrequency(value).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -55,10 +55,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getPriority(out int priority).ThrowIfNotOk(this);
+                native.getPriority(out int priority).ThrowIfNotOkOfChannel();
                 return priority;
             }
-            set => native.setPriority(value.Clamp(0, 256)).ThrowIfNotOk(this);
+            set => native.setPriority(value.Clamp(0, 256)).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.isVirtual(out bool isVirtual).ThrowIfNotOk(this);
+                native.isVirtual(out bool isVirtual).ThrowIfNotOkOfChannel();
                 return isVirtual;
             }
         }
@@ -82,7 +82,7 @@ namespace RuniOS.Sounds
         {
             get
             {
-                native.getIndex(out int index).ThrowIfNotOk(this);
+                native.getIndex(out int index).ThrowIfNotOkOfChannel();
                 return index;
             }
         }
@@ -96,13 +96,10 @@ namespace RuniOS.Sounds
             get
             {
                 RESULT result = native.isPlaying(out bool isPlaying);
-                if (result == RESULT.ERR_INVALID_HANDLE)
-                {
-                    HandleInvalidHandle();
+                if (result == RESULT.ERR_INVALID_HANDLE || result == RESULT.ERR_CHANNEL_STOLEN)
                     return false;
-                }
 
-                result.ThrowIfNotOk(this);
+                result.ThrowIfNotOkOfChannel();
                 return isPlaying;
             }
         }
@@ -115,17 +112,10 @@ namespace RuniOS.Sounds
         {
             get
             {
-                RESULT result = native.getPaused(out bool isPaused);
-                if (result == RESULT.ERR_INVALID_HANDLE)
-                {
-                    HandleInvalidHandle();
-                    return false;
-                }
-
-                result.ThrowIfNotOk(this);
+                native.getPaused(out bool isPaused).ThrowIfNotOkOfChannel();
                 return isPaused;
             }
-            set => native.setPaused(value).ThrowIfNotOk(this);
+            set => native.setPaused(value).ThrowIfNotOkOfChannel();
         }
 
         /// <summary>
@@ -147,7 +137,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return sample;
                 }
                 finally
@@ -193,7 +183,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return sample / GetTimeFrequencyUnsafe().Abs();
                 }
                 finally
@@ -221,7 +211,7 @@ namespace RuniOS.Sounds
             if (clip != null)
                 return clip.frequency;
 
-            native.getFrequency(out float frequency).ThrowIfNotOk(this);
+            native.getFrequency(out float frequency).ThrowIfNotOkOfChannel();
             return frequency;
         }
 
@@ -237,7 +227,7 @@ namespace RuniOS.Sounds
                 pendingTimeSample = sample;
                 pendingTimeSampleChannels.TryAdd(this, 0);
 
-                if (Volatile.Read(ref detached) != 0)
+                if (Volatile.Read(ref _isDisposed) != 0)
                     pendingTimeSampleChannels.TryRemove(this, out _);
 
                 return;
@@ -245,7 +235,7 @@ namespace RuniOS.Sounds
 
             pendingTimeSample = null;
             pendingTimeSampleChannels.TryRemove(this, out _);
-            result.ThrowIfNotOk(this);
+            result.ThrowIfNotOkOfChannel();
         }
 
         void RetryPendingTimeSample()
@@ -267,7 +257,7 @@ namespace RuniOS.Sounds
                 pendingTimeSample = null;
                 pendingTimeSampleChannels.TryRemove(this, out _);
 
-                result.ThrowIfNotOk(this);
+                result.ThrowIfNotOkOfChannel();
             }
             finally
             {
@@ -307,7 +297,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.getMode(out MODE mode).ThrowIfNotOk(this);
+                native.getMode(out MODE mode).ThrowIfNotOkOfChannel();
                 loop = mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
             }
             finally
@@ -317,7 +307,7 @@ namespace RuniOS.Sounds
 
             if (loop)
             {
-                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 if (value >= end)
                     value = value.Repeat(start, end);
                 else if (value < 0)
@@ -364,7 +354,7 @@ namespace RuniOS.Sounds
 
                     try
                     {
-                        native.getMode(out MODE mode).ThrowIfNotOk(this);
+                        native.getMode(out MODE mode).ThrowIfNotOkOfChannel();
                         return mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
                     }
                     finally
@@ -387,12 +377,12 @@ namespace RuniOS.Sounds
 
                     try
                     {
-                        native.getMode(out MODE mode).ThrowIfNotOk(this);
+                        native.getMode(out MODE mode).ThrowIfNotOkOfChannel();
                         mode &= ~(MODE.LOOP_OFF | MODE.LOOP_NORMAL | MODE.LOOP_BIDI);
                         mode |= value ? MODE.LOOP_NORMAL : MODE.LOOP_OFF;
 
-                        native.setMode(mode).ThrowIfNotOk(this);
-                        native.setLoopCount(value ? -1 : 0).ThrowIfNotOk(this);
+                        native.setMode(mode).ThrowIfNotOkOfChannel();
+                        native.setLoopCount(value ? -1 : 0).ThrowIfNotOkOfChannel();
                     }
                     finally
                     {
@@ -422,7 +412,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopCount(out int loopCount).ThrowIfNotOk(this);
+                    native.getLoopCount(out int loopCount).ThrowIfNotOkOfChannel();
                     return loopCount;
                 }
                 finally
@@ -436,7 +426,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.setLoopCount(value).ThrowIfNotOk(this);
+                    native.setLoopCount(value).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -457,7 +447,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return (start, end);
                 }
                 finally
@@ -477,7 +467,7 @@ namespace RuniOS.Sounds
 
                     uint start = value.start.Clamp(0, samples - 2);
                     uint end = value.end.Clamp(start + 1, samples - 1);
-                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -498,7 +488,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return start;
                 }
                 finally
@@ -512,11 +502,11 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     if (end == 0)
                         return;
 
-                    native.setLoopPoints(value.Clamp(0, end - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.setLoopPoints(value.Clamp(0, end - 1), TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -537,7 +527,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return end;
                 }
                 finally
@@ -554,8 +544,8 @@ namespace RuniOS.Sounds
                     if (samples <= 1)
                         return;
 
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk(this);
-                    native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1, samples - 1), TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
+                    native.setLoopPoints(start, TIMEUNIT.PCM, value.Clamp(start + 1, samples - 1), TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -579,7 +569,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return (start / clip.frequency, end / clip.frequency);
                 }
                 finally
@@ -602,7 +592,7 @@ namespace RuniOS.Sounds
 
                     uint start = (value.start * clip.frequency).RoundToUInt().Clamp(0, samples - 2);
                     uint end = (value.end * clip.frequency).RoundToUInt().Clamp(start + 1, samples - 1);
-                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -626,7 +616,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return start / clip.frequency;
                 }
                 finally
@@ -643,12 +633,12 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     if (end == 0)
                         return;
 
                     uint start = (value * clip.frequency).RoundToUInt().Clamp(0, end - 1);
-                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -672,7 +662,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out _, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     return end / clip.frequency;
                 }
                 finally
@@ -693,9 +683,9 @@ namespace RuniOS.Sounds
                     if (samples <= 1)
                         return;
 
-                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.getLoopPoints(out uint start, TIMEUNIT.PCM, out _, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                     uint end = (value * clip.frequency).RoundToUInt().Clamp(start + 1, samples - 1);
-                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOk(this);
+                    native.setLoopPoints(start, TIMEUNIT.PCM, end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
                 }
                 finally
                 {
@@ -723,7 +713,10 @@ namespace RuniOS.Sounds
         public void Stop()
         {
             RESULT result = native.stop();
-            result.ThrowIfNotOk(this);
+            if (result == RESULT.ERR_INVALID_HANDLE || result == RESULT.ERR_CHANNEL_STOLEN)
+                return;
+
+            result.LogErrorIfNotOk();
         }
 
         /// <summary>
@@ -736,7 +729,7 @@ namespace RuniOS.Sounds
         /// </returns>
         public (ulong dspClock, ulong parentClock) GetDSPClock()
         {
-            native.getDSPClock(out ulong dspClock, out ulong parentClock).ThrowIfNotOk(this);
+            native.getDSPClock(out ulong dspClock, out ulong parentClock).ThrowIfNotOkOfChannel();
             return (dspClock, parentClock);
         }
 
@@ -757,7 +750,7 @@ namespace RuniOS.Sounds
         /// 종료 클록에서 중지하려면 <see langword="true"/>, 일시 정지하려면 <see langword="false"/>입니다.
         /// </param>
         public void SetDelay(ulong startDspClock = 0, ulong endDspClock = 0, bool stopChannel = true) =>
-            native.setDelay(startDspClock, endDspClock, stopChannel).ThrowIfNotOk(this);
+            native.setDelay(startDspClock, endDspClock, stopChannel).ThrowIfNotOkOfChannel();
 
         /// <summary>
         /// Gets the scheduled playback start and end clocks relative to the parent channel group.<br/>
@@ -769,7 +762,7 @@ namespace RuniOS.Sounds
         /// </returns>
         public (ulong startDspClock, ulong endDspClock, bool stopChannel) GetDelay()
         {
-            native.getDelay(out ulong startDspClock, out ulong endDspClock, out bool stopChannel).ThrowIfNotOk(this);
+            native.getDelay(out ulong startDspClock, out ulong endDspClock, out bool stopChannel).ThrowIfNotOkOfChannel();
             return (startDspClock, endDspClock, stopChannel);
         }
 
@@ -791,7 +784,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.addFadePoint(dspClock, volume).ThrowIfNotOk(this);
+                native.addFadePoint(dspClock, volume).ThrowIfNotOkOfChannel();
             }
             finally
             {
@@ -817,7 +810,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.setFadePointRamp(dspClock, volume).ThrowIfNotOk(this);
+                native.setFadePointRamp(dspClock, volume).ThrowIfNotOkOfChannel();
             }
             finally
             {
@@ -843,7 +836,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                native.removeFadePoints(startDspClock, endDspClock).ThrowIfNotOk(this);
+                native.removeFadePoints(startDspClock, endDspClock).ThrowIfNotOkOfChannel();
             }
             finally
             {
@@ -866,7 +859,7 @@ namespace RuniOS.Sounds
             try
             {
                 uint pointCount = 0;
-                native.getFadePoints(ref pointCount, null!, null!).ThrowIfNotOk(this);
+                native.getFadePoints(ref pointCount, null!, null!).ThrowIfNotOkOfChannel();
 
                 if (pointCount == 0)
                     return (Array.Empty<ulong>(), Array.Empty<float>());
@@ -874,7 +867,7 @@ namespace RuniOS.Sounds
                 int count = checked((int)pointCount);
                 ulong[] dspClocks = new ulong[count];
                 float[] volumes = new float[count];
-                native.getFadePoints(ref pointCount, dspClocks, volumes).ThrowIfNotOk(this);
+                native.getFadePoints(ref pointCount, dspClocks, volumes).ThrowIfNotOkOfChannel();
                 return (dspClocks, volumes);
             }
             finally

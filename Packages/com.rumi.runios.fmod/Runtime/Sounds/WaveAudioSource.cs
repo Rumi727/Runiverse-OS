@@ -1,6 +1,5 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using FMOD;
 using RuniOS.Resource;
 using RuniOS.Sounds.Processing;
 using RuniOS.Tasks;
@@ -300,18 +299,13 @@ namespace RuniOS.Sounds
 
             Reload().Forget();
             ResourceManager.AttachReloadable(this);
+
+            SoundSystem.main.onUpdate += TimeUpdate;
         }
 
-        /// <remarks>
-        /// Acquires the upgradeable read lock of <see cref="RuniAudioSource.playingLock"/> only while synchronizing the current channel.<br/>
-        /// Channel synchronization may upgrade it to the write lock when the interpolated time must be corrected.
-        /// <br/><br/>
-        /// 현재 채널을 동기화하는 동안에만 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금을 획득합니다.<br/>
-        /// 보간 시간을 보정해야 하는 경우 채널 동기화 과정에서 쓰기 잠금으로 승격할 수 있습니다.
-        /// </remarks>
-        void Update()
+        void TimeUpdate()
         {
-            uint timeSample = GetAliveChannelValue(channel => channel.timeSample, 0u);
+            uint timeSample = this.timeSample;
             if (lastTimeSamples != timeSample)
             {
                 lastTimeSamples = timeSample;
@@ -327,7 +321,17 @@ namespace RuniOS.Sounds
                     playingLock.ExitUpgradeableReadLock();
                 }
             }
+        }
 
+        /// <remarks>
+        /// Acquires the upgradeable read lock of <see cref="RuniAudioSource.playingLock"/> only while synchronizing the current channel.<br/>
+        /// Channel synchronization may upgrade it to the write lock when the interpolated time must be corrected.
+        /// <br/><br/>
+        /// 현재 채널을 동기화하는 동안에만 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금을 획득합니다.<br/>
+        /// 보간 시간을 보정해야 하는 경우 채널 동기화 과정에서 쓰기 잠금으로 승격할 수 있습니다.
+        /// </remarks>
+        void Update()
+        {
             if (spatialBlend > 0)
             {
                 TryGetAliveChannel(channel =>
@@ -392,6 +396,7 @@ namespace RuniOS.Sounds
             }
 
             DisposeQueue.Enqueue(oldScope);
+            SoundSystem.main.onUpdate -= TimeUpdate;
         }
 
         readonly AsyncReloadGate reloadGate = new();
@@ -433,7 +438,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                StopChannel();
+                TryGetAliveChannel(channel => channel.Stop());
 
                 DisposeQueue.Enqueue(scope);
                 scope = newScope;
@@ -462,7 +467,7 @@ namespace RuniOS.Sounds
 
                 action.Invoke(channel);
             }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
+            catch (ObjectDisposedException)
             {
                 lostChannel = channel;
             }
@@ -487,7 +492,7 @@ namespace RuniOS.Sounds
 
                 return func.Invoke(channel);
             }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE)
+            catch (ObjectDisposedException)
             {
                 lostChannel = channel;
             }
@@ -562,7 +567,7 @@ namespace RuniOS.Sounds
                     (!loop && (currentTime < 0 || currentTime > scope.asset.length))
                 )
                 {
-                    StopChannel();
+                    channel?.Stop();
                     return;
                 }
 
@@ -577,7 +582,7 @@ namespace RuniOS.Sounds
                         try
                         {
                             channel = newChannel;
-                            channel.onStop += OnChannelStop;
+                            channel.onStop += HandleChannelLost;
 
                             channel.time = currentTime;
 
@@ -590,7 +595,7 @@ namespace RuniOS.Sounds
                     }
                 }
             }
-            catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE && channel != null) // channel == null에서 ERR_INVALID_HANDLE 에러는 정상 경로가 아님
+            catch (ObjectDisposedException) when (channel != null) // channel == null에서 ERR_INVALID_HANDLE 에러는 정상 경로가 아님
             {
                 lostChannel = channel;
             }
@@ -603,44 +608,6 @@ namespace RuniOS.Sounds
                 HandleChannelLost(lostChannel);
         }
 
-        /// <remarks>
-        /// The caller must hold the upgradeable read lock or write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
-        /// Channel state is changed while holding the separate channel write lock; this method does not upgrade <see cref="RuniAudioSource.playingLock"/> itself.
-        /// <br/><br/>
-        /// 호출자는 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유해야 합니다.<br/>
-        /// 채널 상태는 별도의 채널 쓰기 잠금을 보유한 상태에서 변경하며, 이 메서드 자체는 <see cref="RuniAudioSource.playingLock"/>을 승격하지 않습니다.
-        /// </remarks>
-        void StopChannel()
-        {
-            Debug.Assert
-            (
-                playingLock.IsUpgradeableReadLockHeld || playingLock.IsWriteLockHeld,
-                "호출 전에 playingLock의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 먼저 보유해야합니다."
-            );
-            Debug.Assert(!channelLock.IsReadLockHeld, "업그레이드 락 또는 쓰기 락만 보유해야합니다.");
-
-            channelLock.EnterWriteLock();
-
-            try
-            {
-                if (channel != null)
-                    channel.onStop -= OnChannelStop;
-
-                UnsafeReleasePitchDSPList(channel);
-
-                channel?.Stop();
-                channel = null;
-
-                lastTimeSamples = uint.MaxValue;
-            }
-            finally
-            {
-                channelLock.ExitWriteLock();
-            }
-        }
-
-        void OnChannelStop(SoundChannel disposing) => HandleChannelLost(disposing);
-
         void HandleChannelLost(SoundChannel lostChannel)
         {
             PitchShiftDSP[] pitchDSPs;
@@ -649,10 +616,11 @@ namespace RuniOS.Sounds
 
             try
             {
-                if (!ReferenceEquals(channel, lostChannel))
+                // 채널이 새롭게 교채된 후에도 기존 채널이 onStop을 호출할 수 있기 때문에 확인해야합니다.
+                if (channel != lostChannel)
                     return;
 
-                channel.onStop -= OnChannelStop;
+                channel.onStop -= HandleChannelLost;
                 channel = null;
 
                 pitchDSPs = pitchDSPList.ToArray();
@@ -778,7 +746,7 @@ namespace RuniOS.Sounds
                 {
                     channel?.RemoveDSP(dsp);
                 }
-                catch (FMODException exception) when (exception.result == RESULT.ERR_INVALID_HANDLE) { }
+                catch (ObjectDisposedException) { }
 
                 dsp.Dispose();
             }

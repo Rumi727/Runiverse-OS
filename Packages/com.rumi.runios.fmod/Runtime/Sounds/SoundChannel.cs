@@ -34,7 +34,7 @@ namespace RuniOS.Sounds
             RESULT callbackResult = channel.setCallback(nativeCallback);
             if (callbackResult == RESULT.ERR_INVALID_HANDLE)
             {
-                detached = 1;
+                _isDisposed = 1;
                 native = default;
                 return;
             }
@@ -65,14 +65,16 @@ namespace RuniOS.Sounds
         /// This property becomes the default value when this wrapper detaches. A copied handle may return an FMOD error after the native channel is no longer available.<br/><br/>
         /// 이 래퍼가 분리되면 이 속성은 기본값이 됩니다. 복사한 핸들은 네이티브 채널을 더 이상 사용할 수 없을 때 FMOD 오류를 반환할 수 있습니다.
         /// </remarks>
-        public Channel native { get; private set; }
+        public Channel native { get; }
         readonly ReaderWriterLockSlim modeLock = new();
 
         /// <summary>
         /// Gets a value indicating whether this wrapper has detached from its native FMOD channel.<br/>
         /// 이 래퍼가 네이티브 FMOD 채널에서 분리되었는지 여부를 가져옵니다.
         /// </summary>
-        public bool isDisposed => Volatile.Read(ref detached) != 0;
+        /// <remarks>FMOD는 외부 스레드에서 실행되기 때문에 이 프로퍼티로 오브젝트가 안전하다고 신뢰하면 안됩니다! 예외만 신뢰가능합니다.</remarks>
+        public bool isDisposed => Volatile.Read(ref _isDisposed) != 0;
+        int _isDisposed;
 
         /// <summary>
         /// Occurs once when this wrapper detaches from its FMOD channel.<br/>
@@ -97,21 +99,10 @@ namespace RuniOS.Sounds
         }
         Action<SoundChannel>? _onStop;
         readonly object onStopLock = new();
-        int detached;
 
         public static SoundChannel? GetManaged(IntPtr handle) => channelLists.GetValueOrDefault(handle);
 
-        void ISoundSystemResource.ReleaseUnmanagedResources()
-        {
-            if (!TryDetach(out Channel channel))
-                return;
-
-            RESULT result = channel.stop();
-            if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
-                result.ThrowIfNotOk();
-
-            InvokeStopHandlers();
-        }
+        void ISoundSystemResource.ReleaseUnmanagedResources() => Stop();
 
         [AOT.MonoPInvokeCallback(typeof(CHANNELCONTROL_CALLBACK))]
         static RESULT OnNativeCallback
@@ -130,48 +121,20 @@ namespace RuniOS.Sounds
             if (channel == null)
                 return RESULT.OK;
 
-            if (!channel.TryDetach(out _))
+            channelLists.TryRemove(channel.native.handle, out _);
+            pendingTimeSampleChannels.TryRemove(channel, out _);
+
+            if (Interlocked.CompareExchange(ref channel._isDisposed, 1, 0) != 0)
                 return RESULT.OK;
 
             channel.system.Dispose(channel);
-            channel.InvokeStopHandlers();
 
-            return RESULT.OK;
-        }
-
-        bool TryDetach(out Channel channel)
-        {
-            if (Interlocked.CompareExchange(ref detached, 1, 0) != 0)
-            {
-                channel = default;
-                return false;
-            }
-
-            channel = native;
-            if (channel.hasHandle())
-                channelLists.TryRemove(channel.handle, out _);
-
-            pendingTimeSampleChannels.TryRemove(this, out _);
-            native = default;
-            return true;
-        }
-
-        void InvokeStopHandlers()
-        {
             Action<SoundChannel>? handlers;
-            lock (onStopLock)
-                handlers = _onStop;
+            lock (channel.onStopLock)
+                handlers = channel._onStop;
 
-            handlers.SafeInvoke(this);
-        }
-
-        internal void HandleInvalidHandle()
-        {
-            if (!TryDetach(out _))
-                return;
-
-            system.Dispose(this);
-            InvokeStopHandlers();
+            handlers.SafeInvoke(channel);
+            return RESULT.OK;
         }
     }
 }

@@ -537,12 +537,6 @@ namespace RuniOS.NBS
                             {
                                 channel.onStop += stopHandler;
                                 voices.Add(voice);
-                                if (channel.isDisposed)
-                                {
-                                    voices.Remove(voice);
-                                    channel.onStop -= stopHandler;
-                                    attached = false;
-                                }
                             }
                         }
                     }
@@ -556,7 +550,7 @@ namespace RuniOS.NBS
 
                 if (!attached)
                 {
-                    StopChannel(channel);
+                    channel.Stop();
                     return;
                 }
 
@@ -657,6 +651,10 @@ namespace RuniOS.NBS
                         voice.channel.SetDelay(voice.startDspClock, targetDspClock);
                     else
                         RemoveAndStopVoice(voice.channel, voice.occurrence);
+                }
+                catch (ObjectDisposedException)
+                {
+                    RemoveAndStopVoice(voice.channel, voice.occurrence);
                 }
                 catch (Exception exception)
                 {
@@ -827,6 +825,7 @@ namespace RuniOS.NBS
                 {
                     voice.channel.SetDelay(voice.startDspClock);
                 }
+                catch (ObjectDisposedException) { }
                 catch (Exception exception)
                 {
                     Debug.LogException(exception);
@@ -862,7 +861,7 @@ namespace RuniOS.NBS
         static void StopVoices(Voice[] voicesToStop)
         {
             for (int i = 0; i < voicesToStop.Length; i++)
-                StopChannel(voicesToStop[i].channel);
+                voicesToStop[i].channel.Stop();
         }
 
         void UpdateVoiceFrequenciesUnsafe()
@@ -964,6 +963,7 @@ namespace RuniOS.NBS
                 {
                     action(voice);
                 }
+                catch (ObjectDisposedException) { }
                 catch (Exception exception)
                 {
                     Debug.LogException(exception);
@@ -980,7 +980,7 @@ namespace RuniOS.NBS
         void RemoveAndStopVoice(SoundChannel channel, NBSOccurrenceId occurrence)
         {
             RemoveVoice(channel, occurrence);
-            StopChannel(channel);
+            channel.Stop();
         }
 
         void RemoveVoice(SoundChannel channel, NBSOccurrenceId occurrence)
@@ -996,12 +996,6 @@ namespace RuniOS.NBS
                 if (voice.stopHandler != null)
                     channel.onStop -= voice.stopHandler;
             }
-        }
-
-        static void StopChannel(SoundChannel channel)
-        {
-            if (!channel.isDisposed)
-                channel.Stop();
         }
 
         void OnVoiceStopped(SoundChannel channel, NBSOccurrenceId occurrence) => RemoveVoice(channel, occurrence);
@@ -1039,13 +1033,14 @@ namespace RuniOS.NBS
             for (int i = 0; i < snapshot.Length; i++)
             {
                 Voice voice = snapshot[i];
-                if (voice.channel.isDisposed)
+                try
+                {
+                    voice.channel.spatialState = state;
+                }
+                catch (ObjectDisposedException)
                 {
                     RemoveVoice(voice.channel, voice.occurrence);
-                    continue;
                 }
-
-                voice.channel.spatialState = state;
             }
         }
 

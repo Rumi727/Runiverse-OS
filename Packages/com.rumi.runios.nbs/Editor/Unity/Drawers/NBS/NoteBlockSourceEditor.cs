@@ -217,7 +217,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             EditorGUILayout.LabelField
             (
                 TrTempContent("runios-editor:inspector.nbs_player.information.playing_channels"),
-                new GUIContent(playingChannelCount.ToString())
+                new GUIContent(playingChannelCount <= softwareChannelCount ? playingChannelCount.ToString() : $"{playingChannelCount.Clamp(0, softwareChannelCount)} + {playingChannelCount - softwareChannelCount}")
             );
             EditorGUILayout.LabelField
             (
