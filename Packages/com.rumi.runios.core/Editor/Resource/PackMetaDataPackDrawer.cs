@@ -10,9 +10,19 @@ using System.IO;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class PackMetaDataPackDrawer : PackDrawer
+    public sealed class PackMetaDataPackDrawer(ImmutableArray<PackDrawer.PathPair> targets) : PackDrawer(targets)
     {
-        public PackMetaDataPackDrawer(ImmutableArray<PathPair> targets) : base(targets)
+        public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
+        public override int order => int.MinValue;
+
+        public override bool needsApplyRevert => true;
+
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
+
+        string[] relativeExistsPaths = [];
+        PackMetaData[] packMetaDatas = [];
+
+        protected internal override void OnEnable()
         {
             relativeExistsPaths =
             [
@@ -30,16 +40,6 @@ namespace RuniOS.Editor.Resource
 
             DiscardChanges();
         }
-
-        public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
-        public override int order => int.MinValue;
-
-        public override bool needsApplyRevert => true;
-
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
-
-        readonly string[] relativeExistsPaths = [];
-        PackMetaData[] packMetaDatas = [];
 
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);

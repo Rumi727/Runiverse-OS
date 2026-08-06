@@ -41,9 +41,15 @@ namespace RuniOS.Editor.Sounds
         {
             previews.Remove(this);
             GarbageCleanup();
+
+            GC.SuppressFinalize(this);
         }
 
-        ~AudioPreview() => ThreadDispatcher.ExecuteForget(GarbageCleanup);
+        ~AudioPreview()
+        {
+            Debug.RuntimeLogWarning($"{nameof(AudioPreview)} was destroyed without calling the Dispose method.\nNative garbage is currently being cleaned up on the main thread, but this cannot be guaranteed to be completely resolved.\nPlease call the Dispose method before discarding {nameof(AudioPreview)}.");
+            ThreadDispatcher.ExecuteForget(GarbageCleanup);
+        }
 
         static async UniTaskVoid LoadAudio(PhysicalPath path)
         {

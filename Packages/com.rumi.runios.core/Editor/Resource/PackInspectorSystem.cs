@@ -35,7 +35,10 @@ namespace RuniOS.Editor.Resource
                         {
                             try
                             {
-                                return Activator.CreateInstance(x, ImmutableArray<PackDrawer.PathPair>.Empty);
+                                PackDrawer drawer = (PackDrawer)Activator.CreateInstance(x, ImmutableArray<PackDrawer.PathPair>.Empty);
+                                drawer.OnEnable();
+
+                                return drawer;
                             }
                             catch (Exception e)
                             {
@@ -45,7 +48,6 @@ namespace RuniOS.Editor.Resource
                             return null;
                         })
                         .WhereNotNull()
-                        .Cast<PackDrawer>()
                         .OrderByDescending(x => x.order)
                 ];
             }
@@ -57,6 +59,9 @@ namespace RuniOS.Editor.Resource
         [OnCodeDeinitializing]
         static void OnCodeDeinitializing()
         {
+            for (int i = 0; i < drawers.Length; i++)
+                drawers[i].OnDisable();
+
             Selection.selectionChanged -= CheckFolder;
             EditorApplication.update -= CheckFolder;
         }

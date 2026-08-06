@@ -26,11 +26,6 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
-        protected internal override void OnEnable()
-        {
-
-        }
-
         readonly string[] relativeExistsPaths = [];
 
         List<string> nameSpaces = [];
