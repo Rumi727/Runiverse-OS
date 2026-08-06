@@ -2,16 +2,17 @@
 using RuniOS.IO;
 using RuniOS.Resource;
 using RuniOS.Sounds;
+using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
-    public abstract class RuniAudioClipPackDrawer<T> : PackDrawer where T : RuniAudioClip
+    public abstract class RuniAudioClipPackDrawer<T>(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths) where T : RuniAudioClip
     {
         public override string targetTypeName => typeof(T).GetTypeDisplayName();
 
         public abstract T? targetClip { get; }
 
-        protected override void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false)
+        protected override void OnGUI(bool isDebug = false)
         {
             if (DrawSettingLayout())
                 Space();

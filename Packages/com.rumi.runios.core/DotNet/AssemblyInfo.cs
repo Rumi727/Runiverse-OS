@@ -7,6 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("RuniOS.UI")]
 [assembly: InternalsVisibleTo("RuniOS.NBS")]
 [assembly: InternalsVisibleTo("RuniOS.Editor")]
+[assembly: InternalsVisibleTo("RuniOS.Editor.Sounds")]
 [assembly: InternalsVisibleTo("RuniOS.Editor.FMOD")]
 [assembly: InternalsVisibleTo("RuniOS.Editor.Effects")]
 [assembly: InternalsVisibleTo("RuniOS.Editor.UI")]

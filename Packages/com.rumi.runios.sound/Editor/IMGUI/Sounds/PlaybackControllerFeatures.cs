@@ -8,6 +8,8 @@ namespace RuniOS.Editor.IMGUI.Sounds
         timeline = 1 << 2,
         skip = 1 << 3,
         loopRange = 1 << 4,
-        all = pause | timeline | skip | loopRange
+        timeUnit = 1 << 5,
+        groupedButtons = 1 << 6,
+        all = pause | timeline | skip | loopRange | timeUnit | groupedButtons
     }
 }

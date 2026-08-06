@@ -2,18 +2,19 @@
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Localizations;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.RegularExpressions;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class LanguagePackDrawer : PackDrawer
+    public sealed class LanguagePackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths)
     {
         public override string targetTypeName => typeof(LocalizationData).GetTypeDisplayName();
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => Regex.IsMatch(x.value, "^assets/.*/lang/.*\\.json$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
 
-        protected internal override void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths)
+        protected internal override void OnEnable()
         {
             contents =
             [
@@ -27,7 +28,7 @@ namespace RuniOS.Editor.Resource
 
         GUIContent[] contents = [];
 
-        protected internal override void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false)
+        protected internal override void OnGUI(bool isDebug = false)
         {
             if (relativePaths.TwoOrMore())
                 return;

@@ -1,11 +1,15 @@
 ﻿#nullable enable
 using RuniOS.IO;
+using System.Collections.Immutable;
 using System.Text.RegularExpressions;
 
 namespace RuniOS.Editor.Resource
 {
-    public abstract class PackDrawer
+    public abstract class PackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths)
     {
+        public PhysicalPath rootPath { get; } = rootPath;
+        public ImmutableArray<RuniPath> relativePaths { get; } = relativePaths;
+
         public bool isEnabled { get; internal set; } = false;
 
         public virtual string? targetTitle => null;
@@ -35,10 +39,10 @@ namespace RuniOS.Editor.Resource
         
         public abstract bool IsMatch(IEnumerable<RuniPath> relativePaths);
         
-        protected internal virtual void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths) { }
+        protected internal virtual void OnEnable() { }
         protected internal virtual void OnDisable() { }
 
-        protected internal abstract void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false);
+        protected internal abstract void OnGUI(bool isDebug = false);
 
         protected void SetDirty() => isDirty = true;
 

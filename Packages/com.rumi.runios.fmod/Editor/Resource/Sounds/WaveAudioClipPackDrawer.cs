@@ -4,12 +4,96 @@ using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Sounds;
+using RuniOS.Threading;
+using System.Collections.Immutable;
 using System.IO;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
-    public class WaveAudioClipPackDrawer : RuniAudioClipPackDrawer<WaveAudioClip>
+    public sealed class WaveAudioClipPackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : RuniAudioClipPackDrawer<WaveAudioClip>(rootPath, relativePaths)
     {
+        public static GUIStyle shadowLabelStyle => _shadowLabelStyle ??= "PreOverlayLabel";
+        static GUIStyle? _shadowLabelStyle;
+
+        public bool isPlaying => _isPlaying;
+        bool _isPlaying;
+
+        public bool loop
+        {
+            get => _loop;
+            set
+            {
+                if (_loop == value)
+                    return;
+
+                _loop = value;
+                try
+                {
+                    if (channel != null)
+                        channel.loop = value;
+                }
+                catch (ObjectDisposedException)
+                {
+                    Stop();
+                }
+            }
+        }
+        static bool _loop;
+
+        public float volume
+        {
+            get => _volume;
+            set
+            {
+                if (_volume.Approximately(value))
+                    return;
+
+                _volume = value;
+
+                try
+                {
+                    if (channel != null)
+                        channel.volume = value;
+                }
+                catch (ObjectDisposedException)
+                {
+                    Stop();
+                }
+            }
+        }
+        static float _volume = 0.5f;
+
+        public double time
+        {
+            get
+            {
+                try
+                {
+                    return channel?.time ?? 0;
+                }
+                catch (ObjectDisposedException)
+                {
+                    Stop();
+                    return 0;
+                }
+            }
+            set
+            {
+                try
+                {
+                    if (channel != null)
+                        channel.time = value;
+                    else
+                        Play(value);
+                }
+                catch (ObjectDisposedException)
+                {
+                    Stop();
+                    Play(value);
+                }
+            }
+        }
+
         readonly Dictionary<PhysicalPath, WaveAudioClip> loadedClips = [];
         readonly Dictionary<PhysicalPath, Texture2D> loadedTextures = [];
         readonly HashSet<PhysicalPath> loadingClips = [];
@@ -18,9 +102,11 @@ namespace RuniOS.Editor.Resource.Sounds
         public override WaveAudioClip? targetClip => _targetClip;
         WaveAudioClip? _targetClip;
 
+        SoundChannel? channel;
+
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => IsMatch(x, "sounds", WildcardPatterns.musicFileFilter));
 
-        protected override void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths)
+        protected override void OnEnable()
         {
             if (relativePaths.IsEmpty() || relativePaths.TwoOrMore())
                 return;
@@ -48,7 +134,16 @@ namespace RuniOS.Editor.Resource.Sounds
             if (!loadingClips.Add(soundPath))
                 return;
 
-            WaveAudioClip? clip = await SoundSystem.main.CreateSoundAsync(soundPath);
+            WaveAudioClip? clip = null;
+            try
+            {
+                clip = await SoundSystem.main.CreateSoundAsync(soundPath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
             loadingClips.Remove(soundPath);
 
             if (!isEnabled)
@@ -134,6 +229,140 @@ namespace RuniOS.Editor.Resource.Sounds
             }
 
             GUI.DrawTexture(r, texture, ScaleMode.StretchToFill, true);
+
+            if (targetClip == null || relativePaths.Length > 1)
+                return;
+
+            BeginAlignment(TextAnchor.UpperLeft, shadowLabelStyle);
+            Rect channelTextRect = r;
+            channelTextRect.xMin += 3;
+            channelTextRect.height = r.height / targetClip.channel;
+            for (int i = 0; i < targetClip.channel; i++)
+            {
+                channelTextRect.y = r.y + (channelTextRect.height * i);
+                EditorGUI.DropShadowLabel(channelTextRect, $"{GetTextOrKey("runios-editor:gui.channel")} {i}");
+            }
+            EndAlignment(shadowLabelStyle);
+
+            if (!isPlaying)
+                return;
+
+            BeginRichText(shadowLabelStyle);
+            BeginAlignment(TextAnchor.UpperCenter, shadowLabelStyle);
+            EditorGUI.DropShadowLabel(r, RichNumberMSpace(TimeUtility.ToTimeString(time)));
+            EndAlignment(shadowLabelStyle);
+            EndRichText(shadowLabelStyle);
+
+            Rect cursorRect = r;
+            cursorRect.x = r.x.Lerp(r.width, (time / targetClip.length).ClampToFloat());
+            cursorRect.width = 2;
+
+            EditorGUI.DrawRect(cursorRect, Color.white);
+            Repaint();
+        }
+
+        protected override void OnInteractivePreviewGUI(Rect r, PhysicalPath rootPath, RuniPath relativePath, GUIStyle background)
+        {
+            OnPreviewGUI(r, rootPath, relativePath, background);
+
+            if (targetClip == null || relativePaths.Length > 1)
+                return;
+
+            if (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag)
+                time = r.x.InverseLerp(r.width, Event.current.mousePosition.x) * targetClip.length;
+        }
+
+        protected override void OnPreviewSettings()
+        {
+            if (targetClip == null || relativePaths.Length > 1)
+                return;
+
+            EditorGUI.BeginChangeCheck();
+            bool isPlaying = GUILayout.Toggle(this.isPlaying, PlaybackController.playButtonText, EditorStyles.toolbarButton);
+            if (EditorGUI.EndChangeCheck())
+            {
+                if (isPlaying)
+                    Play();
+                else
+                    Stop();
+            }
+
+            loop = GUILayout.Toggle(loop, PlaybackController.loopButtonText, EditorStyles.toolbarButton);
+
+            Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
+            volume = GUI.HorizontalSlider(sliderRect, volume, 0, 1);
+            GUI.Box(sliderRect, TempContent("", $"{GetTextOrKey("runios-editor:gui.volume")}: {(volume * 100).Floor()}"), GUIStyle.none);
+        }
+
+        public void Play(double startTime = 0)
+        {
+            if (targetClip == null)
+                return;
+
+            if (!isPlaying)
+            {
+                try
+                {
+                    SoundSystem.main.Execute(system => system.PlaySound(targetClip, true), out channel);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+
+                if (channel == null)
+                    return;
+
+                channel.volume = volume;
+                channel.loop = loop;
+
+                channel.onStop += OnStop;
+            }
+
+            _isPlaying = true;
+
+            if (channel != null)
+            {
+                try
+                {
+                    channel.time = startTime;
+                    channel.isPaused = false;
+                }
+                catch (ObjectDisposedException)
+                {
+                    Stop();
+                    Play(startTime);
+
+                    return;
+                }
+            }
+        }
+
+        void OnStop(SoundChannel channel)
+        {
+            channel.onStop -= OnStop;
+
+            ThreadDispatcher.ExecuteForget(() =>
+            {
+                // onStop 이벤트는 FMOD 스레드에서 호출되기 때문에 메인 스레드로 이동하기 전에 새 채널이 만들어질 수 있습니다.
+                if (channel != this.channel)
+                    return;
+
+                Stop();
+            });
+        }
+
+        public void Stop()
+        {
+            _isPlaying = false;
+
+            if (channel != null)
+            {
+                channel.onStop -= OnStop;
+                channel.Stop();
+            }
+
+            channel = null;
         }
     }
 }

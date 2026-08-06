@@ -55,6 +55,7 @@
   "gui.channel": "채널",
   "gui.bits": "비트 수",
   "gui.settings": "설정",
+  "gui.volume": "볼륨",
   "serializable_dictionary_property_drawer.not_found.key": "직렬화 가능한 필드 \"serializableKeys\"가 존재하지 않습니다.\nGUI에 자동으로 표시하려면 필드 이름이 정확히 \"serializableKeys\"여야 합니다.",
   "serializable_dictionary_property_drawer.not_found.value": "직렬화 가능한 필드 \"serializableValues\"가 존재하지 않습니다.\nGUI에 자동으로 표시하려면 필드 이름이 정확히 \"serializableValues\"여야 합니다.",
   "serializable_key_value_pair_property_drawer.not_found.key": "직렬화 가능한 필드 \"key\"가 존재하지 않습니다.\nGUI에 자동으로 표시하려면 필드 이름이 정확히 \"key\"여야 합니다.",

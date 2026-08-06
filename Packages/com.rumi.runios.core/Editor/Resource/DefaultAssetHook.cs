@@ -108,7 +108,7 @@ namespace RuniOS.Editor.Resource
                 
                 EditorGUILayout.BeginVertical(paddingStyle);
                 {
-                    drawer.OnGUI((PhysicalPath)Application.streamingAssetsPath, PackInspectorSystem.activePaths, isDebug);
+                    drawer.OnGUI(isDebug);
                     if (drawer.needsApplyRevert)
                         DrawFooter();
                 }

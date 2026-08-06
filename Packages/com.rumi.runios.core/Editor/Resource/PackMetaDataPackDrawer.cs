@@ -5,11 +5,12 @@ using RuniOS.Inspectors;
 using RuniOS.Inspectors.Csharp;
 using RuniOS.IO;
 using RuniOS.Resource;
+using System.Collections.Immutable;
 using System.IO;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class PackMetaDataPackDrawer : PackDrawer
+    public sealed class PackMetaDataPackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths)
     {
         public override string targetTypeName => typeof(PackMetaData).GetTypeDisplayName();
         public override int order => int.MinValue;
@@ -18,7 +19,7 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
 
-        protected internal override void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths)
+        protected internal override void OnEnable()
         {
             relativeExistsPaths =
             [
@@ -41,7 +42,7 @@ namespace RuniOS.Editor.Resource
         PackMetaData[] packMetaDatas = [];
         static readonly InspectableObject inspectableObject = new InspectableObject(typeof(PackMetaData));
         static readonly Inspector inspector = new Inspector(UndoHandler.instance);
-        protected internal override void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false)
+        protected internal override void OnGUI(bool isDebug = false)
         {
             GUILayout.Label(TrTempContent("runios-editor:pack_drawer.generic.title"), RuniStyles.largeLabel);
 
@@ -59,7 +60,7 @@ namespace RuniOS.Editor.Resource
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
                     File.WriteAllText(rootPath / ResourcePack.infoPath, json);
                     
-                    OnEnable(rootPath, relativePaths);
+                    OnEnable();
                 }
                 
                 return;

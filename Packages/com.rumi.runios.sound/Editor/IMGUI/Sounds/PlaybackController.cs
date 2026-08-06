@@ -15,6 +15,16 @@ namespace RuniOS.Editor.IMGUI.Sounds
     /// </remarks>
     public sealed class PlaybackController
     {
+        public const string playButtonText = "▶";
+        public const string replayButtonText = "▶↻";
+        public const string restartButtonText = "↻";
+        public const string pauseButtonText = "▮▮";
+        public const string unpauseButtonText = "▶▮";
+        public const string stopButtonText = "■";
+        public const string leftSkipButtonText = "◀◀";
+        public const string rightSkipButtonText = "▶▶";
+        public const string loopButtonText = "⇄";
+
         enum LoopHandle
         {
             none,
@@ -150,6 +160,55 @@ namespace RuniOS.Editor.IMGUI.Sounds
         /// </remarks>
         public Action<Rect, ISeekable, double>? timelineOverlay { private get; set; }
 
+        public GUIStyle buttonStyle
+        {
+            get => _buttonStyle ??= GUI.skin.button;
+            set
+            {
+                _buttonStyle = value;
+                _buttonLeft = null;
+                _buttonMid = null;
+                _buttonRight = null;
+            }
+        }
+        GUIStyle? _buttonStyle;
+
+        GUIStyle buttonLeftStyle
+        {
+            get
+            {
+                if (!features.HasFlag(PlaybackControllerFeatures.groupedButtons))
+                    return buttonStyle;
+
+                return _buttonLeft ??= GUI.skin.FindStyle(buttonStyle.name + "left");
+            }
+        }
+        GUIStyle? _buttonLeft;
+
+        GUIStyle buttonMidStyle
+        {
+            get
+            {
+                if (!features.HasFlag(PlaybackControllerFeatures.groupedButtons))
+                    return buttonStyle;
+
+                return _buttonMid ??= GUI.skin.FindStyle(buttonStyle.name + "mid");
+            }
+        }
+        GUIStyle? _buttonMid;
+
+        GUIStyle buttonRightStyle
+        {
+            get
+            {
+                if (!features.HasFlag(PlaybackControllerFeatures.groupedButtons))
+                    return buttonStyle;
+
+                return _buttonRight ??= GUI.skin.FindStyle(buttonStyle.name + "right");
+            }
+        }
+        GUIStyle? _buttonRight;
+
         LoopHandle draggedLoopHandle;
         readonly Vector3[] startHandleVertices = new Vector3[3];
         readonly Vector3[] endHandleVertices = new Vector3[3];
@@ -226,14 +285,10 @@ namespace RuniOS.Editor.IMGUI.Sounds
         /// </param>
         public void DrawControl(Rect position)
         {
-            GUIStyle buttonLeft = GUI.skin.FindStyle("buttonleft");
-            GUIStyle buttonMid = GUI.skin.FindStyle("buttonmid");
-            GUIStyle buttonRight = GUI.skin.FindStyle("buttonright");
-
             float orgX = position.x;
             float orgWidth = position.width;
 
-            position.height = GetYSize(GUI.skin.button);
+            position.height = GetYSize(buttonStyle);
 
             bool anyPlaying = targets.Any(t => t.isPlaying);
 
@@ -249,10 +304,10 @@ namespace RuniOS.Editor.IMGUI.Sounds
                 bool click = false;
                 if (anyPlaying)
                 {
-                    if (GUI.Button(position, "▶↻", buttonLeft))
+                    if (GUI.Button(position, replayButtonText, buttonLeftStyle))
                         click = true;
                 }
-                else if (GUI.Button(position, "▶", buttonLeft))
+                else if (GUI.Button(position, playButtonText, buttonLeftStyle))
                     click = true;
 
                 if (click)
@@ -273,13 +328,13 @@ namespace RuniOS.Editor.IMGUI.Sounds
                 bool allPaused = targets.OfType<IPausable>().All(t => t.isPaused);
                 if (allPaused)
                 {
-                    if (GUI.Button(position, "▶▮", buttonMid))
+                    if (GUI.Button(position, unpauseButtonText, buttonMidStyle))
                     {
                         foreach (var target in targets.OfType<IPausable>())
                             target.UnPause();
                     }
                 }
-                else if (GUI.Button(position, "▮▮", buttonMid))
+                else if (GUI.Button(position, pauseButtonText, buttonMidStyle))
                 {
                     foreach (var target in targets.OfType<IPausable>())
                         target.Pause();
@@ -294,7 +349,7 @@ namespace RuniOS.Editor.IMGUI.Sounds
                 position.x += position.width;
                 position.width = position.width.Floor();
 
-                if (GUI.Button(position, "■", buttonRight))
+                if (GUI.Button(position, stopButtonText, buttonRightStyle))
                 {
                     foreach (var target in targets.OfType<IStoppable>())
                         target.Stop();
@@ -314,20 +369,20 @@ namespace RuniOS.Editor.IMGUI.Sounds
 
                 EditorGUI.BeginDisabledGroup(!anyPlaying || targets.OfType<ISeekable>().IsEmpty());
 
-                BeginFontSize(10, buttonLeft);
-                BeginFontSize(10, buttonRight);
+                BeginFontSize((int)(buttonLeftStyle.fontSize * 0.85f), buttonLeftStyle);
+                BeginFontSize((int)(buttonRightStyle.fontSize * 0.85f), buttonRightStyle);
 
-                if (GUI.Button(position, "◀◀", buttonLeft))
+                if (GUI.Button(position, leftSkipButtonText, buttonLeftStyle))
                     Skip(-skipSeconds);
 
                 position.x += buttonWidth;
                 position.width = (orgWidth - (position.x - orgX)).Round();
 
-                if (GUI.Button(position, "▶▶", buttonRight))
+                if (GUI.Button(position, rightSkipButtonText, buttonRightStyle))
                     Skip(skipSeconds);
 
-                EndFontSize(buttonRight);
-                EndFontSize(buttonLeft);
+                EndFontSize(buttonRightStyle);
+                EndFontSize(buttonLeftStyle);
 
                 EditorGUI.EndDisabledGroup();
             }
@@ -375,6 +430,9 @@ namespace RuniOS.Editor.IMGUI.Sounds
         /// </param>
         public void DrawSlider(Rect position)
         {
+            if (!features.HasFlag(PlaybackControllerFeatures.timeline))
+                return;
+
             position.height = GetYSize(GUI.skin.button);
 
             ISeekable? timeControllable = GetTarget<ISeekable>();
@@ -407,6 +465,9 @@ namespace RuniOS.Editor.IMGUI.Sounds
 
             if (loopHandlesEnabled)
                 DrawLoopHandles(loopRangeControlID, position, timelineTrackPosition, loopablePlayer!, length);
+
+            if (!features.HasFlag(PlaybackControllerFeatures.timeUnit))
+                return;
 
             position.y += position.height;
             position.y += EditorGUIUtility.standardVerticalSpacing;
@@ -598,8 +659,8 @@ namespace RuniOS.Editor.IMGUI.Sounds
         /// </returns>
         public float GetHeight()
         {
-            float height = GetYSize(GUI.skin.button);
-            if (!features.HasFlag(PlaybackControllerFeatures.timeline))
+            float height = GetYSize(buttonStyle);
+            if (!features.HasFlag(PlaybackControllerFeatures.timeline) || !features.HasFlag(PlaybackControllerFeatures.timeUnit))
                 return height;
 
             height += EditorGUIUtility.standardVerticalSpacing;

@@ -8,6 +8,7 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor.Resource
 {
+    // TODO: activeDrawer, activePaths 시스템 제거. (에디터 인스턴스의 타겟 오브젝트로 관리하기)
     public static partial class PackInspectorSystem
     {
         public static readonly RuniPath packRootPath;
@@ -35,8 +36,21 @@ namespace RuniOS.Editor.Resource
                 drawers =
                 [
                     ..ReflectionUtility.types
-                        .Where(x => x.HasDefaultConstructor() && x.IsSubclassOf(typeof(PackDrawer)))
-                        .Select(Activator.CreateInstance)
+                        .Where(x => !x.IsAbstract && !x.IsConstructedGenericType && x.IsSubclassOf(typeof(PackDrawer)))
+                        .Select(x =>
+                        {
+                            try
+                            {
+                                return Activator.CreateInstance(x, (PhysicalPath)Application.streamingAssetsPath, ImmutableArray<RuniPath>.Empty);
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.LogException(e);
+                            }
+
+                            return null;
+                        })
+                        .WhereNotNull()
                         .Cast<PackDrawer>()
                         .OrderByDescending(x => x.order)
                 ];
@@ -124,7 +138,11 @@ namespace RuniOS.Editor.Resource
                 return;
             }
 
-            PackDrawer? drawer = drawers.Where(x => x.IsMatch(paths)).Select(x => (PackDrawer)Activator.CreateInstance(x.GetType())).FirstOrDefault();
+            PackDrawer? drawer = drawers
+                .Where(x => x.IsMatch(paths))
+                .Select(x => (PackDrawer)Activator.CreateInstance(x.GetType(), (PhysicalPath)Application.streamingAssetsPath, paths.ToImmutableArray()))
+                .FirstOrDefault();
+
             SetNewDrawer(drawer, paths);
         }
 
@@ -142,7 +160,7 @@ namespace RuniOS.Editor.Resource
             if (activeDrawer != null)
             {
                 activeDrawer.isEnabled = true;
-                activeDrawer.OnEnable((PhysicalPath)Application.streamingAssetsPath, activePaths);
+                activeDrawer.OnEnable();
             }
 
             onActiveDrawerChanged?.Invoke();

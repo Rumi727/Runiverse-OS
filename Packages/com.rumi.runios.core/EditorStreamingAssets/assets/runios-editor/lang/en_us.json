@@ -55,6 +55,7 @@
   "gui.channel": "Channel",
   "gui.bits": "Bits",
   "gui.settings": "Settings",
+  "gui.volume": "Volume",
   "serializable_dictionary_property_drawer.not_found.key": "The serializable field \"serializableKeys\" does not exist.\nTo be displayed automatically in the GUI, the field name must be exactly \"serializableKeys\".",
   "serializable_dictionary_property_drawer.not_found.value": "The serializable field \"serializableValues\" does not exist.\nTo be displayed automatically in the GUI, the field name must be exactly \"serializableValues\".",
   "serializable_key_value_pair_property_drawer.not_found.key": "The serializable field \"key\" does not exist.\nTo be displayed automatically in the GUI, the field name must be exactly \"key\".",

@@ -1,12 +1,13 @@
 ﻿#nullable enable
 using RuniOS.IO;
 using RuniOS.Resource;
+using System.Collections.Immutable;
 using System.IO;
 using UnityEditorInternal;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class NamespacePackDrawer : PackDrawer
+    public sealed class NamespacePackDrawer(PhysicalPath rootPath, ImmutableArray<RuniPath> relativePaths) : PackDrawer(rootPath, relativePaths)
     {
         public override string targetTypeName => targetTitle;
         public override string targetTitle => GetTextOrKey("runios-editor:gui.namespace");
@@ -15,7 +16,7 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
-        protected internal override void OnEnable(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths)
+        protected internal override void OnEnable()
         {
             relativeExistsPaths = relativePaths
                 .Select<RuniPath, string>(x => (PhysicalPath)Application.streamingAssetsPath / x)
@@ -32,7 +33,7 @@ namespace RuniOS.Editor.Resource
 
         ReorderableList? reorderableList;
 
-        protected internal override void OnGUI(PhysicalPath rootPath, IReadOnlyList<RuniPath> relativePaths, bool isDebug = false)
+        protected internal override void OnGUI(bool isDebug = false)
         {
             GUILayout.Label(TrTempContent("runios-editor:pack_drawer.namespace.title"), RuniStyles.largeLabel);
 
