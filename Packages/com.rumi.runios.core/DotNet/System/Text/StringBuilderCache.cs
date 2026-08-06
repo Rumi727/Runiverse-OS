@@ -5,7 +5,7 @@
 namespace System.Text
 {
     /// <summary>Provide a cached reusable instance of stringbuilder per thread.</summary>
-#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_STRING_BUILDER_CACHE
     public
 #endif
         static class StringBuilderCache
