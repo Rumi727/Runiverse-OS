@@ -1,11 +1,90 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
+using RuniOS.IO;
 using RuniOS.Sounds;
+using RuniOS.Threading;
+using System.Runtime.CompilerServices;
 
-namespace RuniOS.Editor.IMGUI.Sounds
+namespace RuniOS.Editor.Sounds
 {
-    public static class WaveformTextureGenerator
+    public sealed partial class AudioPreview : IDisposable
     {
-        public static Texture2D Create(WaveAudioClip clip, int width, int height, Color color)
+        static readonly object resourceMarker = new();
+
+        static readonly ConditionalWeakTable<AudioPreview, object> previews = [];
+        static readonly Dictionary<PhysicalPath, WaveAudioClip> loadedClips = [];
+
+        readonly HashSet<PhysicalPath> requestedAudios = [];
+
+        public static event Action? onLoadedAudio;
+
+        // ReSharper disable once MemberCanBeMadeStatic.Global
+        public WaveAudioClip? GetAudio(PhysicalPath path)
+        {
+            previews.AddOrUpdate(this, resourceMarker);
+            if (loadedClips.TryGetValue(path, out WaveAudioClip? clip))
+                return clip;
+
+            if (requestedAudios.Add(path))
+                LoadAudio(path).Forget();
+
+            return null;
+        }
+
+        public void ReturnAudio(PhysicalPath path)
+        {
+            requestedAudios.Remove(path);
+            GarbageCleanup();
+        }
+
+        public void Dispose()
+        {
+            previews.Remove(this);
+            GarbageCleanup();
+        }
+
+        ~AudioPreview() => ThreadDispatcher.ExecuteForget(GarbageCleanup);
+
+        static async UniTaskVoid LoadAudio(PhysicalPath path)
+        {
+            WaveAudioClip? clip = null;
+            try
+            {
+                clip = await SoundSystem.main.CreateSoundAsync(path);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+
+            if (clip == null)
+                return;
+
+            loadedClips.TryAdd(path, clip);
+            onLoadedAudio?.Invoke();
+
+            GarbageCleanup();
+        }
+
+        static void GarbageCleanup()
+        {
+            List<PhysicalPath> removeList = [];
+
+            // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
+            foreach (var loadedClip in loadedClips)
+            {
+                if (previews.Any(token => token.Key.requestedAudios.Contains(loadedClip.Key)))
+                    continue;
+
+                loadedClip.Value.Dispose();
+                removeList.Add(loadedClip.Key);
+            }
+
+            foreach (var item in removeList)
+                loadedClips.Remove(item);
+        }
+
+        public static Texture2D WaveformTextureGenerate(WaveAudioClip clip, int width, int height, Color color)
         {
             /*
              * Sample : 채널 수에 영향 받지 않는 샘플 단위
