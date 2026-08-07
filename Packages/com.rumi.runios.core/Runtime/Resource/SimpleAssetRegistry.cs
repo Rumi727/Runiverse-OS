@@ -47,9 +47,9 @@ namespace RuniOS.Resource
             }
         });
 
-        public static UniTask<AssetImportSettings<T>> GetImportSetting<T>(IONode assetNode) => GetImportSetting<T>(assetNode, (FileExtension)".json");
+        public static UniTask<AssetImportSettings<T>> GetImportSettings<T>(IONode assetNode) => GetImportSettings<T>(assetNode, (FileExtension)".json");
 
-        public static async UniTask<AssetImportSettings<T>> GetImportSetting<T>(IONode assetNode, FileExtension ext)
+        public static async UniTask<AssetImportSettings<T>> GetImportSettings<T>(IONode assetNode, FileExtension ext)
         {
             IONode settingsNode = assetNode.AddExtension(ext);
             IOEntry? settingsEntry = await settingsNode.file.GetEntry();
