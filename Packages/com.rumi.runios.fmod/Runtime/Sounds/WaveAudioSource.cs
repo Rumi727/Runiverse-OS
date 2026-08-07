@@ -438,7 +438,7 @@ namespace RuniOS.Sounds
 
             try
             {
-                TryGetAliveChannel(channel => channel.Stop());
+                StopChannel();
 
                 DisposeQueue.Enqueue(scope);
                 scope = newScope;
@@ -567,7 +567,7 @@ namespace RuniOS.Sounds
                     (!loop && (currentTime < 0 || currentTime > scope.asset.length))
                 )
                 {
-                    channel?.Stop();
+                    StopChannel();
                     return;
                 }
 
@@ -608,10 +608,38 @@ namespace RuniOS.Sounds
                 HandleChannelLost(lostChannel);
         }
 
+        // 그냥 Stop 하면 onStop 이벤트가 즉시 호출되기 때문에 미리 해제해주어야합니다.
+        void StopChannel()
+        {
+            Debug.Assert
+            (
+                !channelLock.IsReadLockHeld && !channelLock.IsWriteLockHeld,
+                "channelLock의 읽기 잠금 또는 쓰기 잠금을 보유한 상태로 StopChannel 메소드를 호출하면 안됩니다."
+            );
+
+            channelLock.EnterWriteLock();
+
+            try
+            {
+                if (channel == null)
+                    return;
+
+                UnsafeReleasePitchDSPList(channel);
+
+                channel.onStop -= HandleChannelLost;
+                channel.Stop();
+                channel = null;
+
+                lastTimeSamples = uint.MaxValue;
+            }
+            finally
+            {
+                channelLock.ExitWriteLock();
+            }
+        }
+
         void HandleChannelLost(SoundChannel lostChannel)
         {
-            PitchShiftDSP[] pitchDSPs;
-
             channelLock.EnterWriteLock();
 
             try
@@ -620,12 +648,10 @@ namespace RuniOS.Sounds
                 if (channel != lostChannel)
                     return;
 
+                UnsafeReleasePitchDSPList(channel);
+
                 channel.onStop -= HandleChannelLost;
                 channel = null;
-
-                pitchDSPs = pitchDSPList.ToArray();
-                pitchDSPList.Clear();
-                pitchDSPCount = 0;
 
                 lastTimeSamples = uint.MaxValue;
             }
@@ -633,9 +659,6 @@ namespace RuniOS.Sounds
             {
                 channelLock.ExitWriteLock();
             }
-
-            foreach (PitchShiftDSP dsp in pitchDSPs)
-                dsp.Dispose();
         }
 
         // 아래 UpdateChannel* 메서드는 유효한 channel과 channelLock이 확보된 상태에서만 호출합니다.
