@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.Sounds;
 using RuniOS.IO;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource.Sounds
 {
@@ -9,9 +10,9 @@ namespace RuniOS.Resource.Sounds
     {
         protected override async UniTask<WaveAudioClip?> Load() => await SoundSystem.main.CreateSoundAsync(node);
 
-        protected override void Unload() => assetObject?.Dispose();
+        protected override void Unload(WaveAudioClip unloadedAsset) => unloadedAsset.Dispose();
 
-        protected override bool IsDefaultAsset(WaveAudioClip? asset) => asset == null || asset.isDisposed;
+        protected override bool IsDefaultAsset([NotNullWhen(false)] WaveAudioClip? asset) => asset == null || asset.isDisposed;
 
         public override bool IsSameTarget(IAssetHandle other)
         {

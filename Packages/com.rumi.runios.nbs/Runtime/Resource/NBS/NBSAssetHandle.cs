@@ -17,6 +17,6 @@ namespace RuniOS.Resource.NBS
             return await UniTask.RunOnThreadPool(() => NBSReader.Read(stream));
         }
 
-        protected override void Unload() { }
+        protected override void Unload(NoteBlockClip unloadedAsset) { }
     }
 }

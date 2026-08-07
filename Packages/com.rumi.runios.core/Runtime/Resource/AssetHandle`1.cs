@@ -45,8 +45,8 @@ namespace RuniOS.Resource
         // 지연 언로드 감시를 위한 R3 Subject 및 Subscription
         readonly Subject<Unit> _unloadTrigger = new Subject<Unit>();
         IDisposable? _unloadSubscription;
-        
-        internal readonly List<WeakReference<AssetScope<TAsset>>> assetScopes = new List<WeakReference<AssetScope<TAsset>>>();
+
+        internal readonly List<WeakReference<AssetScope<TAsset>>> assetScopes = [];
 
         /// <summary>
         /// <see cref="AssetHandle{T}"/> 클래스의 새 인스턴스를 초기화합니다.
@@ -79,8 +79,8 @@ namespace RuniOS.Resource
             // 중복 로딩 방지 (경합 조건 방지)
             while (isLoading)
                 await UniTask.Yield();
-            
-            if (IsDefaultAsset(assetObject) && await node.file.GetEntry() is { } entry)
+
+            if ((assetObject == null || IsDefaultAsset(assetObject)) && await node.file.GetEntry() is { } entry)
             {
                 isLoading = true;
 
@@ -100,7 +100,7 @@ namespace RuniOS.Resource
                 }
             }
 
-            if (!IsDefaultAsset(assetObject))
+            if (assetObject != null && !IsDefaultAsset(assetObject))
             {
                 AssetScope<TAsset> scope = new AssetScope<TAsset>(this, assetObject);
                 assetScopes.Add(new WeakReference<AssetScope<TAsset>>(scope));
@@ -196,28 +196,35 @@ namespace RuniOS.Resource
         /// <summary>
         /// 로드된 에셋을 언로드하고 관련된 시스템 리소스를 해제합니다.
         /// </summary>
+        /// <param name="unloadedAsset">
+        /// 언로드 될 에셋입니다.
+        /// </param>
         /// <exception cref="Exception">
         /// 언로드 중 발생할 수 있는 모든 예외입니다.
         /// </exception>
-        protected abstract void Unload();
+        protected abstract void Unload(TAsset unloadedAsset);
 
         internal void ExecuteUnload()
         {
-            DisposeQueue.Enqueue(() =>
+            TAsset? assetObject = this.assetObject;
+            if (assetObject != null && !IsDefaultAsset(assetObject))
             {
-                try
+                DisposeQueue.Enqueue(() =>
                 {
-                    Unload();
-                }
-                catch (Exception e)
-                {
-                    Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
-                }
+                    try
+                    {
+                        Unload(assetObject);
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
+                    }
 
-                Debug.Log($"Unloaded asset at path {node.path}");
-            });
+                    Debug.Log($"Unloaded asset at path {node.path}");
+                });
+            }
 
-            assetObject = default;
+            this.assetObject = default;
             CancelUnloadWatch();
         }
         
