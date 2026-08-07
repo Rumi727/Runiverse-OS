@@ -240,7 +240,7 @@ namespace RuniOS.Resource
         /// <returns>동일한 에셋을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
         public virtual bool IsSameTarget(IAssetHandle other)
         {
-            if (other is not AssetHandle<TAsset> otherHandle)
+            if (isSealed || other is not AssetHandle<TAsset> otherHandle)
                 return false;
 
             return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && metaData == otherHandle.metaData;
