@@ -29,7 +29,7 @@ namespace RuniOS.Editor.Resource
 
         protected internal override void OnGUI(bool isDebug = false)
         {
-            if (targets.Length == 1)
+            if (targets.Length != 1)
                 return;
 
             GUIStyle style = "ScriptText";
