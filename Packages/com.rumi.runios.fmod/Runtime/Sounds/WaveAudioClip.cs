@@ -20,6 +20,9 @@ namespace RuniOS.Sounds
 
             system.Register(this);
 
+            sound.getName(out string name, 1024).ThrowIfNotOk();
+            this.name = name;
+
             sound.getDefaults(out float frequency, out _).ThrowIfNotOk();
             this.frequency = frequency;
 
@@ -38,13 +41,21 @@ namespace RuniOS.Sounds
             this.samples = samples;
 
             length = samples / frequency;
+
+#if UNITY_ENABLE_CHECKS
+            constructorStackTrace = new System.Diagnostics.StackTrace(true).ToString();
+#endif
         }
+
+        readonly string? constructorStackTrace;
 
         public SoundSystem system { get; }
 
         Sound native { get; }
         readonly ReaderWriterLockSlim nativeLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
         IDisposable? nativeLifetime;
+
+        public string name { get; }
 
         public override double length { get; }
 
@@ -82,7 +93,7 @@ namespace RuniOS.Sounds
         /// </remarks>
         public void Dispose() => system.Dispose(this);
 
-        ~WaveAudioClip() => SoundSystem.LogUndisposedResource(this);
+        ~WaveAudioClip() => SoundSystem.LogUndisposedResource(this, name, constructorStackTrace);
 
         void ISoundSystemResource.ReleaseUnmanagedResources()
         {

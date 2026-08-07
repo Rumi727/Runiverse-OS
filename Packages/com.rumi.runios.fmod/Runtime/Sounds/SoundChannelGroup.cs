@@ -25,14 +25,25 @@ namespace RuniOS.Sounds
             native = channelGroup;
             nativeHandle = native.handle;
 
+            channelGroup.getName(out string name, 1024).ThrowIfNotOk();
+            this.name = name;
+
             system.Register(this);
+
+#if UNITY_ENABLE_CHECKS
+            constructorStackTrace = new System.Diagnostics.StackTrace(true).ToString();
+#endif
         }
+
+        readonly string? constructorStackTrace;
 
         /// <summary>
         /// Gets the sound system that created this channel group.<br/>
         /// 이 채널 그룹을 생성한 사운드 시스템을 가져옵니다.
         /// </summary>
         public SoundSystem system { get; }
+
+        public string name { get; }
 
         ChannelGroup native;
         readonly IntPtr nativeHandle;
@@ -55,7 +66,7 @@ namespace RuniOS.Sounds
         /// </remarks>
         public void Dispose() => system.Dispose(this);
 
-        ~SoundChannelGroup() => SoundSystem.LogUndisposedResource(this);
+        ~SoundChannelGroup() => SoundSystem.LogUndisposedResource(this, name, constructorStackTrace);
 
         void ISoundSystemResource.ReleaseUnmanagedResources()
         {
