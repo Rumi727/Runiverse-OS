@@ -87,7 +87,7 @@ namespace RuniOS.Resource
 
         async UniTask ReloadCore()
         {
-            if (await infoFile.file.GetEntry() == null)
+            if (!await infoFile.file.Exists())
             {
                 metaData = new PackMetaData();
                 namespaces = ImmutableArray<string>.Empty;
@@ -108,7 +108,7 @@ namespace RuniOS.Resource
             
             if (!isValid)
                 return;
-            else if ((await assetFolder.dir.GetEntry()).HasValue)
+            else if (await assetFolder.dir.Exists())
             {
                 namespaces =
                 [

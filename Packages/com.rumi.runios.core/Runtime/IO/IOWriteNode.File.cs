@@ -19,6 +19,9 @@ namespace RuniOS.IO
         {
             IONode.File readOnlyFile => ((IONode)node).file;
 
+            /// <inheritdoc cref="IONode.File.Exists(CancellationToken)"/>
+            public UniTask<bool> Exists(CancellationToken cancellationToken = default) => readOnlyFile.Exists(cancellationToken);
+
             /// <inheritdoc cref="IONode.File.GetEntry(CancellationToken)"/>
             public UniTask<IOEntry?> GetEntry(CancellationToken cancellationToken = default) => readOnlyFile.GetEntry(cancellationToken);
 

@@ -17,6 +17,8 @@ namespace RuniOS.IO
         /// </param>
         public readonly struct File(IONode node)
         {
+            public UniTask<bool> Exists(CancellationToken cancellationToken = default) => node.provider.FileExists(node.path, cancellationToken);
+
             /// <summary>
             /// Gets the file entry represented by this node.<br/>
             /// 이 노드가 나타내는 파일 엔트리를 가져옵니다.

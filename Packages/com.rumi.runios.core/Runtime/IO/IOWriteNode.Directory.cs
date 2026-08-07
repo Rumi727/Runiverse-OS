@@ -18,6 +18,9 @@ namespace RuniOS.IO
         {
             IONode.Directory readOnlyDir => ((IONode)node).dir;
 
+            /// <inheritdoc cref="IONode.Directory.Exists(CancellationToken)"/>
+            public UniTask<bool> Exists(CancellationToken cancellationToken = default) => readOnlyDir.Exists(cancellationToken);
+
             /// <inheritdoc cref="IONode.Directory.GetEntry(CancellationToken)"/>
             public UniTask<IOEntry?> GetEntry(CancellationToken cancellationToken = default) => readOnlyDir.GetEntry(cancellationToken);
 

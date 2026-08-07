@@ -49,7 +49,7 @@ namespace RuniOS.Resource.Languages
                         foreach (var namespaceNode in resourcePack.GetNamespaceNodes())
                         {
                             IONode registryNode = namespaceNode.CreateChild(registryId.path);
-                            if (await registryNode.dir.GetEntry() == null)
+                            if (!await registryNode.dir.Exists())
                                 continue;
 
                             await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(WildcardPatterns.jsonFileFilter))

@@ -40,7 +40,7 @@ namespace RuniOS.Resource
             foreach (var namespaceNode in resourcePack.GetNamespaceNodes())
             {
                 IONode registryNode = namespaceNode.CreateChild(registryName);
-                if (await registryNode.dir.GetEntry(iterationToken) == null)
+                if (!await registryNode.dir.Exists(iterationToken))
                     continue;
 
                 await write.YieldAsync((namespaceNode.name, registryNode));

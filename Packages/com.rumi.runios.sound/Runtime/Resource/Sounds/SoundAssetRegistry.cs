@@ -52,7 +52,7 @@ namespace RuniOS.Resource.Sounds
                     foreach ((string nameSpace, IONode jsonNode) in resourcePack.GetNamespaceNodes()
                                  .Select(x => (x.name, x.CreateChild(jsonFileName))))
                     {
-                        if (await jsonNode.file.GetEntry() == null)
+                        if (!await jsonNode.file.Exists())
                             return;
 
                         uniTasks.Add(UniTask.Defer(Method));

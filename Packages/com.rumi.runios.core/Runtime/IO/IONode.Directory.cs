@@ -17,6 +17,8 @@ namespace RuniOS.IO
         /// </param>
         public readonly struct Directory(IONode node)
         {
+            public UniTask<bool> Exists(CancellationToken cancellationToken = default) => node.provider.DirectoryExists(node.path, cancellationToken);
+
             /// <summary>
             /// Gets the directory entry represented by this node.<br/>
             /// 이 노드가 나타내는 디렉터리 엔트리를 가져옵니다.
