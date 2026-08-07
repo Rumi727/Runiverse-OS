@@ -125,8 +125,6 @@ namespace RuniOS.Sounds
             }
         }
 
-        readonly object tempoAndPitchLock = new();
-
         public override bool loop
         {
             get => base.loop;
@@ -251,6 +249,7 @@ namespace RuniOS.Sounds
         readonly List<PitchShiftDSP> pitchDSPList = [];
         const float pitchDSPFFTSize = 4096;
         volatile int pitchDSPCount;
+        readonly object pitchDSPListLock = new object();
 
         double pitchDSPTimeOffset
         {
@@ -507,15 +506,6 @@ namespace RuniOS.Sounds
             return defaultValue;
         }
 
-        public void GetTempoAndPitch(out float tempo, out float pitch)
-        {
-            lock (tempoAndPitchLock)
-            {
-                tempo = this.tempo;
-                pitch = this.pitch;
-            }
-        }
-
         /// <remarks>
         /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
@@ -691,7 +681,9 @@ namespace RuniOS.Sounds
 
         void UnsafeUpdateChannelPitch(SoundChannel channel)
         {
+            float pitch = this.pitch;
             float tempo = this.tempo;
+
             if (!float.IsNormal(pitch) || !float.IsNormal(tempo))
             {
                 UnsafeReleasePitchDSPList(channel);
@@ -705,55 +697,56 @@ namespace RuniOS.Sounds
             value = value.Clamp(0.01f, 100);
             if (value.Approximately(1))
             {
-                if (pitchDSPList.Count > 0)
-                    UnsafeReleasePitchDSPList(channel);
-
+                UnsafeReleasePitchDSPList(channel);
                 return;
             }
 
-            int index = 0;
-            while (value < 0.5f)
+            lock (pitchDSPListLock)
             {
-                SetPitchDsp(index, 0.5f, channel);
-
-                index++;
-                value *= 2;
-            }
-
-            while (value > 2)
-            {
-                SetPitchDsp(index, 2, channel);
-
-                index++;
-                value *= 0.5f;
-            }
-
-            SetPitchDsp(index, value, channel);
-            index++;
-
-            for (int i = pitchDSPList.Count - 1; i >= index; i--)
-            {
-                PitchShiftDSP dsp = pitchDSPList[i];
-                channel.dsps.Remove(dsp);
-                dsp.Dispose();
-
-                pitchDSPList.RemoveAt(i);
-            }
-
-            void SetPitchDsp(int index, float value, SoundChannel channel)
-            {
-                while (pitchDSPList.Count <= index)
+                int index = 0;
+                while (value < 0.5f)
                 {
-                    PitchShiftDSP pitchDsp = channel.system.CreateDSP<PitchShiftDSP>();
-                    pitchDsp.fftSize = pitchDSPFFTSize;
-                    pitchDSPList.Add(pitchDsp);
-                    channel.dsps.Add(pitchDsp);
+                    SetPitchDsp(index, 0.5f, channel);
+
+                    index++;
+                    value *= 2;
                 }
 
-                pitchDSPList[index].pitch = value;
-            }
+                while (value > 2)
+                {
+                    SetPitchDsp(index, 2, channel);
 
-            pitchDSPCount = pitchDSPList.Count;
+                    index++;
+                    value *= 0.5f;
+                }
+
+                SetPitchDsp(index, value, channel);
+                index++;
+
+                for (int i = pitchDSPList.Count - 1; i >= index; i--)
+                {
+                    PitchShiftDSP dsp = pitchDSPList[i];
+                    channel.dsps.Remove(dsp);
+                    dsp.Dispose();
+
+                    pitchDSPList.RemoveAt(i);
+                }
+
+                void SetPitchDsp(int index, float value, SoundChannel channel)
+                {
+                    while (pitchDSPList.Count <= index)
+                    {
+                        PitchShiftDSP pitchDsp = channel.system.CreateDSP<PitchShiftDSP>();
+                        pitchDsp.fftSize = pitchDSPFFTSize;
+                        pitchDSPList.Add(pitchDsp);
+                        channel.dsps.Add(pitchDsp);
+                    }
+
+                    pitchDSPList[index].pitch = value;
+                }
+
+                pitchDSPCount = pitchDSPList.Count;
+            }
         }
 
         /// <remarks>
@@ -761,21 +754,38 @@ namespace RuniOS.Sounds
         /// </remarks>
         void UnsafeReleasePitchDSPList(SoundChannel? channel)
         {
-            for (int i = 0; i < pitchDSPList.Count; i++)
+            lock (pitchDSPListLock)
             {
-                PitchShiftDSP dsp = pitchDSPList[i];
-
-                try
+                for (int i = 0; i < pitchDSPList.Count; i++)
                 {
-                    channel?.dsps.Remove(dsp);
+                    PitchShiftDSP dsp = pitchDSPList[i];
+
+                    try
+                    {
+                        channel?.dsps.Remove(dsp);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        channel = null;
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+
+                    try
+                    {
+                        dsp.Dispose();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
                 }
-                catch (ObjectDisposedException) { }
 
-                dsp.Dispose();
+                pitchDSPList.Clear();
+                pitchDSPCount = 0;
             }
-
-            pitchDSPList.Clear();
-            pitchDSPCount = 0;
         }
 
         void UnsafeUpdateChannelVolume(SoundChannel channel) => channel.volume = volume;
