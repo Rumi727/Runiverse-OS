@@ -711,7 +711,7 @@ namespace RuniOS.Sounds
             for (int i = pitchDSPList.Count - 1; i >= index; i--)
             {
                 PitchShiftDSP dsp = pitchDSPList[i];
-                channel.RemoveDSP(dsp);
+                channel.dsps.Remove(dsp);
                 dsp.Dispose();
 
                 pitchDSPList.RemoveAt(i);
@@ -724,7 +724,7 @@ namespace RuniOS.Sounds
                     PitchShiftDSP pitchDsp = channel.system.CreateDSP<PitchShiftDSP>();
                     pitchDsp.fftSize = pitchDSPFFTSize;
                     pitchDSPList.Add(pitchDsp);
-                    channel.AddDSP(pitchDsp);
+                    channel.dsps.Add(pitchDsp);
                 }
 
                 pitchDSPList[index].pitch = value;
@@ -744,7 +744,7 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    channel?.RemoveDSP(dsp);
+                    channel?.dsps.Remove(dsp);
                 }
                 catch (ObjectDisposedException) { }
 

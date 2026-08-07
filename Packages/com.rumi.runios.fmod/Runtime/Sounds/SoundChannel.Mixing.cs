@@ -83,10 +83,10 @@ namespace RuniOS.Sounds
         /// </summary>
         /// <remarks>
         /// <see cref="SoundSystem.main"/> uses <c>INITFLAGS.NORMAL</c>, so FMOD's built-in per-channel low-pass filter is not enabled.<br/>
-        /// Create <see cref="LowPassDSP"/> through <see cref="SoundSystem.CreateDSP{LowPassDSP}"/> and attach it with <see cref="AddDSP(DSP, DSPIndex)"/> when filtering is needed.
+        /// Create <see cref="LowPassDSP"/> through <see cref="SoundSystem.CreateDSP{LowPassDSP}"/> and attach it with <see cref="DSP.Add(Processing.DSP, DSPIndex)"/> when filtering is needed.
         /// <br/><br/>
         /// <see cref="SoundSystem.main"/>은 <c>INITFLAGS.NORMAL</c>을 사용하므로 FMOD 내장 채널별 저역통과 필터를 활성화하지 않습니다.<br/>
-        /// 필터링이 필요하면 <see cref="SoundSystem.CreateDSP{LowPassDSP}"/>로 <see cref="LowPassDSP"/>를 생성하고 <see cref="AddDSP(DSP, DSPIndex)"/>로 부착하세요.
+        /// 필터링이 필요하면 <see cref="SoundSystem.CreateDSP{LowPassDSP}"/>로 <see cref="LowPassDSP"/>를 생성하고 <see cref="DSP.Add(Processing.DSP, DSPIndex)"/>로 부착하세요.
         /// </remarks>
         public float lowPassGain
         {

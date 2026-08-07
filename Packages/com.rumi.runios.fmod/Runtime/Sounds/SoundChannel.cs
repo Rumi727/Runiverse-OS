@@ -29,6 +29,7 @@ namespace RuniOS.Sounds
 
             native = channel;
 
+            dsps = new DSP(this);
             reverbWetLevel = new ReverbWetLevel(this);
 
             RESULT callbackResult = channel.setCallback(nativeCallback);

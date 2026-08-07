@@ -1,5 +1,6 @@
 #nullable enable
 using FMOD;
+using System.Collections.Concurrent;
 using System.Threading;
 
 namespace RuniOS.Sounds.Processing
@@ -16,6 +17,8 @@ namespace RuniOS.Sounds.Processing
     /// </remarks>
     public abstract partial class DSP : IDisposable, ISoundSystemResource
     {
+        static readonly ConcurrentDictionary<IntPtr, DSP> dspLists = [];
+
         protected DSP()
         {
             boolParameters = new BoolParameters(this);
@@ -42,6 +45,7 @@ namespace RuniOS.Sounds.Processing
             nativeHandle = native.handle;
 
             system.Register(this);
+            dspLists.TryAdd(nativeHandle, this);
         }
 
         /// <summary>
@@ -106,6 +110,8 @@ namespace RuniOS.Sounds.Processing
             set => UseNative(dsp => dsp.setWetDryMix(value.preWet, value.postWet, value.dry).ThrowIfNotOk());
         }
 
+        public static DSP? GetManaged(IntPtr handle) => dspLists.GetValueOrDefault(handle);
+
         /// <summary>
         /// Requests release of this DSP from <see cref="system"/>.<br/>
         /// <see cref="system"/>에 이 DSP의 해제를 요청합니다.
@@ -161,6 +167,8 @@ namespace RuniOS.Sounds.Processing
                 if (_isDisposed)
                     return;
 
+                dspLists.TryRemove(nativeHandle, out _);
+
                 RESULT result = native.release();
                 if (result != RESULT.OK && result != RESULT.ERR_INVALID_HANDLE)
                     result.ThrowIfNotOk();
@@ -181,8 +189,6 @@ namespace RuniOS.Sounds.Processing
         /// FMOD가 네이티브 DSP 해제를 수락한 뒤 실행합니다.
         /// </summary>
         protected virtual void OnNativeReleaseAccepted() { }
-
-        ~DSP() => SoundSystem.LogUndisposedResource(this);
 
         void ThrowIfDisposedUnsafe()
         {

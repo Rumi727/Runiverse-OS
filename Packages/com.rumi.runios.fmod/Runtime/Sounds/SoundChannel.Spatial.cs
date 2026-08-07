@@ -344,10 +344,10 @@ namespace RuniOS.Sounds
         /// </summary>
         /// <remarks>
         /// <see cref="SoundSystem.main"/> uses <c>INITFLAGS.NORMAL</c>, so its built-in channel occlusion path is not enabled.<br/>
-        /// For manual direct-signal occlusion, create <see cref="LowPassDSP"/> through <see cref="SoundSystem.CreateDSP{LowPassDSP}"/> and attach it with <see cref="AddDSP(Processing.DSP, DSPIndex)"/>.
+        /// For manual direct-signal occlusion, create <see cref="LowPassDSP"/> through <see cref="SoundSystem.CreateDSP{LowPassDSP}"/> and attach it with <see cref="DSP.Add(Processing.DSP, DSPIndex)"/>.
         /// <br/><br/>
         /// <see cref="SoundSystem.main"/>은 <c>INITFLAGS.NORMAL</c>을 사용하므로 내장 채널 오클루전 경로를 활성화하지 않습니다.<br/>
-        /// 직접음 오클루전을 수동으로 처리하려면 <see cref="SoundSystem.CreateDSP{LowPassDSP}"/>로 <see cref="LowPassDSP"/>를 생성하고 <see cref="AddDSP(Processing.DSP, DSPIndex)"/>로 부착하세요.
+        /// 직접음 오클루전을 수동으로 처리하려면 <see cref="SoundSystem.CreateDSP{LowPassDSP}"/>로 <see cref="LowPassDSP"/>를 생성하고 <see cref="DSP.Add(Processing.DSP, DSPIndex)"/>로 부착하세요.
         /// </remarks>
         /// <param name="direct">
         /// The direct-path occlusion factor.<br/>
