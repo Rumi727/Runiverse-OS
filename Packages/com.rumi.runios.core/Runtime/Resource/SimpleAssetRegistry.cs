@@ -46,7 +46,17 @@ namespace RuniOS.Resource
                 await write.YieldAsync((namespaceNode.name, registryNode));
             }
         });
-        
+
+        public static UniTask<AssetImportSettings<T>> GetImportSetting<T>(IONode assetNode) => GetImportSetting<T>(assetNode, (FileExtension)".json");
+
+        public static async UniTask<AssetImportSettings<T>> GetImportSetting<T>(IONode assetNode, FileExtension ext)
+        {
+            IONode settingsNode = assetNode.AddExtension(ext);
+            IOEntry? settingsEntry = await settingsNode.file.GetEntry();
+
+            return new AssetImportSettings<T>(settingsNode, settingsEntry?.metaData);
+        }
+
         /// <summary>
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
