@@ -9,7 +9,7 @@ namespace RuniOS.Resource
     /// </summary>
     /// <typeparam name="TAsset">목표 리소스 타입 (예: <see cref="Texture2D"/>)</typeparam>
     [Serializable]
-    public record struct AssetRef<TAsset>(ResourceKey key) : IAssetRef
+    public record struct AssetRef<TAsset>(ResourceKey key) : IAssetRef where TAsset : notnull
     {
         public AssetRef(Identifier registryId, Identifier valueId) : this(new ResourceKey(registryId, valueId)) { }
 

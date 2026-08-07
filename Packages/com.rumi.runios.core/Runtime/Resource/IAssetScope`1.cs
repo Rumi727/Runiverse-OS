@@ -1,7 +1,7 @@
 #nullable enable
 namespace RuniOS.Resource
 {
-    public interface IAssetScope<TAsset> : IAssetScope
+    public interface IAssetScope<TAsset> : IAssetScope where TAsset : notnull
     {
         /// <summary>
         /// 이 스코프가 참조하는 <see cref="AssetHandle{T}"/>을 가져옵니다.
@@ -10,6 +10,6 @@ namespace RuniOS.Resource
         IAssetHandle IAssetScope.handle => handle;
         
         new TAsset asset { get; }
-        object? IAssetScope.asset => asset;
+        object IAssetScope.asset => asset;
     }
 }

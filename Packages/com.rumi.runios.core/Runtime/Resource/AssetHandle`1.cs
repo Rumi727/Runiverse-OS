@@ -10,13 +10,13 @@ namespace RuniOS.Resource
     /// 단일 에셋에 대한 참조와 로드/언로드 로직을 관리하는 추상 핸들러입니다.
     /// <br/>에셋의 실제 로드는 <see cref="GetScope"/>를 통해 참조될 때 수행됩니다.
     /// </summary>
-    public abstract class AssetHandle<TAsset> : IAssetHandle<TAsset>
+    public abstract class AssetHandle<TAsset> : IAssetHandle<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
         /// </summary>
         public IONode node { get; }
-        
+
         /// <summary>
         /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
@@ -26,13 +26,13 @@ namespace RuniOS.Resource
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
         /// </summary>
         public int unloadDelayFrame { get; }
-        
+
         /// <summary>
         /// 로드된 실제 에셋 객체를 가져오거나 설정합니다.
         /// <br/>에셋이 언로드되었거나 아직 로드되지 않은 경우 <see langword="null"/>입니다.
         /// </summary>
         public TAsset? assetObject { get; private set; }
-        
+
         /// <summary>
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
         /// </summary>
@@ -75,7 +75,7 @@ namespace RuniOS.Resource
                 Debug.RuntimeLogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.");
                 return null;
             }
-            
+
             // 중복 로딩 방지 (경합 조건 방지)
             while (isLoading)
                 await UniTask.Yield();
@@ -123,7 +123,7 @@ namespace RuniOS.Resource
             for (int i = assetScopes.Count - 1; i >= 0; i--)
             {
                 WeakReference<AssetScope<TAsset>> weakRef = assetScopes[i];
-        
+
                 if (weakRef.TryGetTarget(out AssetScope<TAsset> outAssetScope))
                 {
                     // 1. 현재 제거하려는 Scope를 찾았을 경우
@@ -131,8 +131,8 @@ namespace RuniOS.Resource
                     {
                         assetScopes.RemoveAt(i);
                         scopeFound = true;
-                        
-                        break; 
+
+                        break;
                     }
                 }
                 else
@@ -150,17 +150,17 @@ namespace RuniOS.Resource
                     $"Invalid or already-returned AssetScope detected! Scope for asset '{node.path}' was not found in the handle's list.\n" +
                     "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle."
                 );
-                
+
                 return;
             }
-            
+
             if (assetScopes.Count <= 0)
             {
                 StartUnloadWatch();
                 _unloadTrigger.OnNext(Unit.Default);
             }
         }
-        
+
         /// <summary>
         /// 언로드 감시 구독을 시작합니다. <see cref="unloadDelayFrame"/> 동안 추가 참조가 없으면 언로드를 수행합니다.
         /// </summary>
@@ -169,12 +169,12 @@ namespace RuniOS.Resource
             // 이미 구독 중이면 무시
             if (_unloadSubscription != null)
                 return;
-            
+
             _unloadSubscription = _unloadTrigger
-                .DebounceFrame(unloadDelayFrame) 
+                .DebounceFrame(unloadDelayFrame)
                 .Subscribe(_ => ExecuteUnload());
         }
-        
+
         /// <summary>
         /// 언로드 감시 구독을 취소하고 정리합니다.
         /// </summary>
@@ -192,7 +192,7 @@ namespace RuniOS.Resource
         /// 로드 중 발생할 수 있는 모든 예외입니다.
         /// </exception>
         protected abstract UniTask<TAsset?> Load();
-        
+
         /// <summary>
         /// 로드된 에셋을 언로드하고 관련된 시스템 리소스를 해제합니다.
         /// </summary>
@@ -227,9 +227,9 @@ namespace RuniOS.Resource
             this.assetObject = default;
             CancelUnloadWatch();
         }
-        
+
         protected virtual bool IsDefaultAsset([NotNullWhen(false)] TAsset? asset) => asset == null;
-        
+
         protected virtual TAsset? GetDefaultAsset() => default;
 
         /// <summary>

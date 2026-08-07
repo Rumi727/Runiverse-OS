@@ -5,7 +5,7 @@ namespace RuniOS.Resource
     /// 에셋 핸들에 대한 사용(참조)을 추적하고, 사용 완료 시 자동으로 핸들에 반환되도록 하는 래퍼 클래스입니다.
     /// <br/>이 클래스는 <see cref="IDisposable"/> 패턴을 사용하여 에셋의 생명주기를 관리합니다.
     /// </summary>
-    public sealed class AssetScope<TAsset> : IAssetScope<TAsset>
+    public sealed class AssetScope<TAsset> : IAssetScope<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 이 스코프가 참조하는 <see cref="AssetHandle{T}"/>을 가져옵니다.

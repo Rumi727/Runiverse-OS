@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 
 namespace RuniOS.Resource
 {
-    public class InstanceAssetHandle<TAsset>(TAsset assetObject) : IAssetHandle<TAsset>
+    public class InstanceAssetHandle<TAsset>(TAsset assetObject) : IAssetHandle<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 참조한 인스턴스를 가져옵니다.

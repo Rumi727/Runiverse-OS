@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 
 namespace RuniOS.Resource
 {
-    public interface IAssetHandle<TAsset> : IAssetHandle
+    public interface IAssetHandle<TAsset> : IAssetHandle where TAsset : notnull
     {
         /// <summary>
         /// 로드된 실제 에셋 객체를 가져오거나 설정합니다.
