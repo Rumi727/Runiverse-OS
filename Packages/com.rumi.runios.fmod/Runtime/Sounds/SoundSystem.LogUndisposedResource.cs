@@ -17,9 +17,9 @@ namespace RuniOS.Sounds
 
                 Debug.RuntimeLogError(logText);
             }
-            catch
+            catch (Exception e)
             {
-                // Finalizers must never propagate exceptions.
+                Debug.LogException(e);
             }
         }
     }
