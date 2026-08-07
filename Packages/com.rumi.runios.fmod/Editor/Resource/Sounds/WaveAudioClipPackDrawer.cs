@@ -109,7 +109,7 @@ namespace RuniOS.Editor.Resource.Sounds
             for (int i = 0; i < clip.channel; i++)
             {
                 channelTextRect.y = r.y + (channelTextRect.height * i);
-                EditorGUI.DropShadowLabel(channelTextRect, $"{GetTextOrKey("runios-editor:gui.channel")} {i}");
+                EditorGUI.DropShadowLabel(channelTextRect, $"{GetTextOrKey("runios-editor:gui.channel")} {i + 1}");
             }
             EndAlignment(shadowLabelStyle);
         }
