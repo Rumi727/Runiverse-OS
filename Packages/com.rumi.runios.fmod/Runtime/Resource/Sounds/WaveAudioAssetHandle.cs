@@ -6,9 +6,23 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class WaveAudioAssetHandle(IONode node, FileMetaData metaData) : AssetHandle<WaveAudioClip>(node, metaData)
+    public class WaveAudioAssetHandle(IONode node, FileMetaData metaData, AssetImportSettings<WaveAudioAssetImportSettings> importSettings) : AssetHandle<WaveAudioClip>(node, metaData)
     {
-        protected override async UniTask<WaveAudioClip?> Load() => await SoundSystem.main.CreateSoundAsync(node);
+        public AssetImportSettings<WaveAudioAssetImportSettings> importSettings { get; } = importSettings;
+
+        protected override async UniTask<WaveAudioClip?> Load()
+        {
+            await importSettings.Reload();
+
+            WaveAudioAssetImportSettings data = importSettings.value;
+            return data.loadMode switch
+            {
+                WaveAudioAssetLoadMode.normal => await SoundSystem.main.CreateSoundAsync(node),
+                WaveAudioAssetLoadMode.keepCompressed => await SoundSystem.main.CreateSoundAsync(node, true),
+                WaveAudioAssetLoadMode.stream => await SoundSystem.main.CreateStreamAsync(node),
+                _ => null
+            };
+        }
 
         protected override void Unload(WaveAudioClip unloadedAsset) => unloadedAsset.Dispose();
 
@@ -16,10 +30,10 @@ namespace RuniOS.Resource.Sounds
 
         public override bool IsSameTarget(IAssetHandle other)
         {
-            if (!base.IsSameTarget(other))
+            if (!base.IsSameTarget(other) || other is not WaveAudioAssetHandle otherHandle)
                 return false;
 
-            if (assetObject == null || assetObject.isDisposed)
+            if (assetObject == null || assetObject.isDisposed || !importSettings.IsSameTarget(otherHandle.importSettings))
                 return false;
 
             return true;
