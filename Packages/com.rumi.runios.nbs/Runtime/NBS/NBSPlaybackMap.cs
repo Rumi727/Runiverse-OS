@@ -430,8 +430,29 @@ namespace RuniOS.NBS
                 if (!double.IsFinite(timelineDuration) || timelineDuration <= 0 || !double.IsFinite(endTime))
                     continue;
 
-                double anchor = direction == NBSPlaybackDirection.reverse ? endTime : entry.originalTime;
-                NBSPreparedNote note = new NBSPreparedNote(entry.id, entry.originalTime, endTime, anchor, timelineDuration, sourceLength, pitch < 0, entry.layer, entry.instrument, entry.staticPitchRatio, entry.staticVolume, entry.staticPan, -1, -1);
+                bool reverseSource = pitch < 0;
+                double originalAnchor = direction == NBSPlaybackDirection.reverse ? endTime : entry.originalTime;
+                double anchor = originalAnchor - (reverseSource ? timelineDuration : 0);
+                if (!double.IsFinite(anchor))
+                    continue;
+
+                NBSPreparedNote note = new NBSPreparedNote
+                (
+                    entry.id,
+                    entry.originalTime,
+                    endTime,
+                    anchor,
+                    timelineDuration,
+                    sourceLength,
+                    reverseSource,
+                    entry.layer,
+                    entry.instrument,
+                    entry.staticPitchRatio,
+                    entry.staticVolume,
+                    entry.staticPan,
+                    -1,
+                    -1
+                );
                 pending.Add(new PendingEntry(anchor, entry.id, entry, note));
             }
 
@@ -496,11 +517,11 @@ namespace RuniOS.NBS
             }
 
             moments = momentList.AsReadOnly();
-            if (direction == NBSPlaybackDirection.reverse && noteList.Count > 1)
+            if (noteList.Count > 1)
             {
-                noteList.Sort(static (left, right) =>
+                noteList.Sort((left, right) =>
                 {
-                    int timeComparison = left.originalStartTime.CompareTo(right.originalStartTime);
+                    int timeComparison = GetPlaybackStartTime(left).CompareTo(GetPlaybackStartTime(right));
                     return timeComparison != 0 ? timeComparison : left.mapEntryId.CompareTo(right.mapEntryId);
                 });
             }
@@ -532,7 +553,7 @@ namespace RuniOS.NBS
             intervalMaximumEnds = new double[intervalTreeBase * 2];
             Array.Fill(intervalMaximumEnds, double.NegativeInfinity);
             for (int i = 0; i < preparedNotes.Length; i++)
-                intervalMaximumEnds[intervalTreeBase + i] = preparedNotes[i].originalEndTime;
+                intervalMaximumEnds[intervalTreeBase + i] = GetPlaybackEndTime(preparedNotes[i]);
             for (int i = intervalTreeBase - 1; i > 0; i--)
                 intervalMaximumEnds[i] = Math.Max(intervalMaximumEnds[i * 2], intervalMaximumEnds[(i * 2) + 1]);
         }
@@ -541,6 +562,12 @@ namespace RuniOS.NBS
         readonly Dictionary<int, NBSPreparedSoundStop[]> soundStopsByLayer;
         readonly int intervalTreeBase;
         readonly double[] intervalMaximumEnds;
+
+        double GetPlaybackStartTime(NBSPreparedNote note) =>
+            direction == NBSPlaybackDirection.forward ? note.anchorTime : note.anchorTime - note.timelineDuration;
+
+        double GetPlaybackEndTime(NBSPreparedNote note) =>
+            direction == NBSPlaybackDirection.forward ? note.anchorTime + note.timelineDuration : note.anchorTime;
 
         /// <summary>Gets prepared moments in ascending anchor order.<br/>anchor 오름차순으로 준비된 moment를 가져옵니다.</summary>
         public IReadOnlyList<NBSPlaybackMoment> moments { get; }
@@ -768,13 +795,13 @@ namespace RuniOS.NBS
 
         void CollectNotesAtTime(int node, int rangeStart, int rangeEnd, double time, List<NBSPreparedNote> output)
         {
-            if (rangeStart >= preparedNotes.Length || intervalMaximumEnds[node] < time || preparedNotes[rangeStart].originalStartTime > time)
+            if (rangeStart >= preparedNotes.Length || intervalMaximumEnds[node] < time || GetPlaybackStartTime(preparedNotes[rangeStart]) > time)
                 return;
 
             if (rangeEnd - rangeStart == 1)
             {
                 NBSPreparedNote note = preparedNotes[rangeStart];
-                if (note.originalStartTime <= time && time < note.originalEndTime)
+                if (GetPlaybackStartTime(note) <= time && time < GetPlaybackEndTime(note))
                     output.Add(note);
                 return;
             }
@@ -947,8 +974,8 @@ namespace RuniOS.NBS
         {
             double shift = GetIterationShift(loopIteration, loopInfo, direction);
             double progress = direction == NBSPlaybackDirection.forward
-                ? currentUnwrapped - (note.originalStartTime + shift)
-                : (note.originalEndTime + shift) - currentUnwrapped;
+                ? currentUnwrapped - (GetPlaybackStartTime(note) + shift)
+                : (GetPlaybackEndTime(note) + shift) - currentUnwrapped;
             if (!double.IsFinite(progress) || progress < 0 || progress >= note.timelineDuration)
             {
                 sourceOffset = 0;

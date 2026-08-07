@@ -31,7 +31,7 @@ assets/
 - `NBSPlaybackMap`: clip 독립적인 instrument reference, pitch ratio, volume, pan, Sound Stopper
 - `NBSVisualEffectMap`: Editor preview용 지속 상태와 transient event
 
-`NBSPlaybackMap`에는 `WaveAudioClip`이나 scope가 없습니다. 각 Player는 현재 instrument metadata, tempo, pitch로 `NBSPlaybackSchedule`을 생성합니다. 스케줄은 note의 원본 시작 `S`, 끝 `E`, 발생 anchor, source 방향, interval index를 보유합니다. Worker hot path는 raw tick을 다시 시간으로 변환하지 않습니다.
+`NBSPlaybackMap`에는 `WaveAudioClip`이나 scope가 없습니다. 각 Player는 현재 instrument metadata, tempo, pitch로 `NBSPlaybackSchedule`을 생성합니다. 스케줄은 note의 원본 시작 `S`, 끝 `E`, 원래 발생 시점, 실제 Voice 시작 anchor, playback interval, source 방향, interval index를 보유합니다. Worker hot path는 raw tick을 다시 시간으로 변환하지 않습니다.
 
 ## TPS와 BPM
 
@@ -60,12 +60,20 @@ sourceRate      = Q × abs(P)
 wallDuration    = L / sourceRate
 timelineDuration = L × abs(T) / (Q × abs(P))
 E               = S + timelineDuration
-
-T > 0: anchor = S
-T < 0: anchor = E
+originalAnchor  = T > 0 ? S : E
+actualAnchor(^)  = originalAnchor - (P < 0 ? timelineDuration : 0)
 ```
 
-중간 재생, seek, 늦은 resource load, reload는 현재 위치 `X`에 걸쳐 있는 모든 interval을 찾습니다. 이미 진행한 wall-clock 시간만큼 source offset을 옮겨 살아 있는 tail부터 즉시 시작합니다. 이미 끝난 짧은 음은 소급 출력하지 않습니다.
+`*`는 note가 원래 발생해야 하는 시간이며, `^`는 실제 Voice가 시작하는 시간입니다. tempo 부호는 타임라인 진행 방향과 재생 속도만 결정합니다. pitch가 음수이면 `^`를 숫자 타임라인 기준으로 clip 재생시간만큼 앞당기고, clip 끝에서 PCM을 시작합니다.
+
+| tempo | pitch | `*` 원래 발생 시점 | `^` 실제 시작 시점 |
+|---|---|---:|---:|
+| 양수 | 양수 | `S` | `S` |
+| 양수 | 음수 | `S` | `S - timelineDuration` |
+| 음수 | 양수 | `E` | `E` |
+| 음수 | 음수 | `E` | `E - timelineDuration = S` |
+
+실제 playback interval은 tempo 방향에 따라 `^`부터 진행되며, 중간 재생·seek·늦은 resource load·reload는 이 interval을 기준으로 현재 위치에 걸쳐 있는 모든 tail을 찾습니다. 이미 끝난 짧은 음은 소급 출력하지 않습니다.
 
 ## Worker와 DSP 예약
 

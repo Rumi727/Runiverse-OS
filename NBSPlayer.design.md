@@ -75,7 +75,7 @@ NBSPlayer가 NBS scope 로드
 
 NBSPlaybackMap + clip metadata + tempo/pitch
   └─ NBSPlaybackSchedule
-      ├─ 계산된 원본 시작/끝/발생 anchor
+      ├─ 계산된 원본 시작/끝/원래 발생 시점/실제 Voice anchor
       ├─ anchor별 NBSPlaybackMoment
       └─ 중간 재생용 interval index
 
@@ -98,7 +98,7 @@ NBS 파일만으로 계산할 수 있는 원본 악보 시간 맵이다. 불변�
 
 ### `NBSPlaybackSchedule`
 
-Player가 보유한 clip 길이 metadata와 현재 tempo/pitch를 결합해 생성하는 경량 계산 결과다. 실제 clip 참조는 포함하지 않는다. note의 시작점, 끝점, 발생 anchor 및 중간 재생 offset 계산에 필요한 값을 확정한다.
+Player가 보유한 clip 길이 metadata와 현재 tempo/pitch를 결합해 생성하는 경량 계산 결과다. 실제 clip 참조는 포함하지 않는다. note의 원본 시작/끝, 원래 발생 시점, 실제 Voice 시작 anchor, playback interval 및 중간 재생 offset 계산에 필요한 값을 확정한다.
 
 ### `NBSPlaybackCursor`
 
@@ -425,25 +425,39 @@ timelineDuration = wallDuration * abs(T)
 E = S + timelineDuration
 ```
 
-`[S, E]`는 현재 tempo/pitch 크기를 적용했을 때 note가 차지하는 NBS timeline 구간이다.
+`[S, E]`는 pitch 방향 보정 전 원본 note가 차지하는 NBS timeline 구간이다.
 
-## 방향별 발생 anchor
+## 원래 발생 시점과 실제 Voice 시작 시점
 
-tempo 방향이 note가 어느 끝에서 먼저 발생해야 하는지를 결정한다.
+`*`는 note가 원래 발생해야 하는 시간이다. tempo 방향은 `*`가 어느 끝인지 결정한다.
 
 ```text
-T > 0 : anchor = S
-T < 0 : anchor = E
+T > 0 : originalAnchor(*) = S
+T < 0 : originalAnchor(*) = E
 ```
 
-pitch 방향이 clip의 어느 PCM 끝에서 시작하는지를 결정한다.
+`^`는 실제 Voice가 시작하는 시간이다. tempo 부호는 숫자 타임라인에서 offset 방향을 바꾸지 않는다. pitch가 음수일 때만 `timelineDuration`만큼 `^`를 숫자 타임라인 기준으로 앞당긴다.
+
+```text
+P > 0 : actualAnchor(^) = originalAnchor
+P < 0 : actualAnchor(^) = originalAnchor - timelineDuration
+```
+
+실제 interval은 tempo 진행 방향에 맞춰 `^`에서 `timelineDuration`만큼 차지한다.
+
+```text
+T > 0 : [actualAnchor, actualAnchor + timelineDuration]
+T < 0 : [actualAnchor - timelineDuration, actualAnchor]
+```
+
+pitch 방향은 clip의 어느 PCM 끝에서 시작하는지를 결정한다.
 
 ```text
 P > 0 : sourceStart = 0
 P < 0 : sourceStart = clip의 마지막 유효 sample
 ```
 
-따라서 tempo가 음수면 단순히 원본 note start `S`에서 Voice를 시작하면 안 된다. forward 재생에서 note가 끝났을 `E`에서 먼저 Voice를 발생시켜야 timeline이 `S`에 도달할 때 PCM 반대편 끝에 정확히 도달한다.
+tempo가 음수인 경우 `*`는 `E`에 있지만, pitch가 음수이면 `^`는 `E - timelineDuration = S`가 된다. 따라서 tempo 음수는 offset을 반전시키지 않고, pitch 음수만 실제 Voice 시작 시점을 이동시킨다.
 
 ## 네 부호 조합 예제
 
@@ -456,28 +470,28 @@ abs(P) = 1
 E = 1.5
 ```
 
-| tempo | pitch | 발생 anchor | PCM 시작점 | timeline 종료점 |
-|---|---|---:|---|---:|
-| 양수 | 양수 | 1.0 | clip 시작 | 1.5 |
-| 양수 | 음수 | 1.0 | clip 끝 | 1.5 |
-| 음수 | 양수 | 1.5 | clip 시작 | 1.0 |
-| 음수 | 음수 | 1.5 | clip 끝 | 1.0 |
+| tempo | pitch | `*` 원래 발생 | `^` 실제 시작 | PCM 시작점 | timeline 종료점 |
+|---|---|---:|---:|---|---:|
+| 양수 | 양수 | 1.0 | 1.0 | clip 시작 | 1.5 |
+| 양수 | 음수 | 1.0 | 0.5 | clip 끝 | 0.0 |
+| 음수 | 양수 | 1.5 | 1.5 | clip 시작 | 1.0 |
+| 음수 | 음수 | 1.5 | 1.0 | clip 끝 | 0.5 |
 
-완전 역재생에서는 forward 재생 시 `[1.0, 1.5]`를 차지하던 clip이 1.5에서 clip 끝부터 시작해 1.0에서 clip 시작에 도달하며 끝난다.
+`T > 0, P < 0`에서는 clip이 0.5에서 clip 끝부터 시작해 1.0(`*`)에서 clip 시작에 도달한다.
 
-tempo 양수, pitch 음수에서는 1.0에서 clip 끝부터 시작하고 timeline이 앞으로 진행해 1.5에서 clip 시작에 도달한다.
+`T < 0, P > 0`에서는 1.5(`* = ^`)에서 clip 시작부터 재생하지만 timeline은 뒤로 진행해 1.0에서 clip 끝에 도달한다.
 
-tempo 음수, pitch 양수에서는 1.5에서 clip 시작부터 재생하지만 timeline은 뒤로 진행해 1.0에서 clip 끝에 도달한다.
+`T < 0, P < 0`에서는 1.0(`^`)에서 clip 끝부터 재생하고 timeline은 뒤로 진행해 0.5에서 clip 시작에 도달한다. 원래 발생 시점 `*`는 1.5다.
 
 ## 중간 위치 source offset
 
 현재 transport 위치를 `X`라고 한다.
 
-anchor부터 진행한 timeline 거리:
+실제 Voice 시작점 `^`부터 진행한 timeline 거리:
 
 ```text
-T > 0 : progress = X - S
-T < 0 : progress = E - X
+T > 0 : progress = X - actualAnchor
+T < 0 : progress = actualAnchor - X
 ```
 
 경과 wall-clock 시간:
@@ -499,10 +513,11 @@ P > 0 : sourceOffset = sourceTravel
 P < 0 : sourceOffset = L - sourceTravel
 ```
 
-활성 조건:
+실제 playback interval 활성 조건:
 
 ```text
-S <= X <= E
+T > 0 : actualAnchor <= X < actualAnchor + timelineDuration
+T < 0 : actualAnchor - timelineDuration < X <= actualAnchor
 ```
 
 실제 PCM 설정 시 다음을 적용한다.
@@ -571,7 +586,7 @@ Sound Stopper는 길이가 없는 timeline 이벤트다.
 - anchor는 원본 event time
 - `startLayer`, `endLayer` 보존
 - loop occurrence마다 다른 occurrence ID 사용
-- snapshot 계산 시 note anchor에서 현재 위치까지 진행 방향으로 Stopper를 통과했는지 판정
+- snapshot 계산 시 실제 Voice anchor에서 현재 위치까지 진행 방향으로 Stopper를 통과했는지 판정
 
 ### Moment
 
@@ -592,11 +607,11 @@ public readonly record struct NBSPlaybackMoment
 
 ### Snapshot interval index
 
-schedule은 `includePreviousNotes` 조회를 위해 note interval `[S, E]` 검색 index를 함께 만든다.
+schedule은 `includePreviousNotes` 조회를 위해 실제 playback interval `[playbackStart, playbackEnd]` 검색 index를 함께 만든다.
 
 요구사항:
 
-- `S <= X <= E`인 note 후보를 전체 note 선형 순회 없이 찾는다.
+- `playbackStart <= X < playbackEnd`인 note 후보를 전체 note 선형 순회 없이 찾는다.
 - 정방향과 역방향 모두 같은 interval을 사용한다.
 - source offset은 조회 시 위 수식으로 계산한다.
 - Sound Stopper 경계와 loop occurrence를 적용한 뒤 최종 결과를 만든다.
@@ -887,7 +902,7 @@ cursor가 현재 위치보다 뒤처졌다면 cursor부터 현재까지의 momen
 
 각 note command:
 
-- 현재도 `[S, E]` 안에 있으면 source offset을 계산해 즉시 재생한다.
+- 현재 playback interval 안에 있으면 source offset을 계산해 즉시 재생한다.
 - Sound Stopper를 이미 통과했다면 생성하지 않는다.
 - natural end를 이미 통과했다면 Voice를 만들지 않고 cursor만 전진한다.
 - clip을 찾을 수 없거나 velocity가 0이면 Voice를 만들지 않고 cursor만 전진한다.
@@ -1235,7 +1250,7 @@ schedule 재생성은 하지 않는다.
 - loop 시작 이전 intro note는 첫 회차에만 존재한다.
 - loop 구간 안에서 시작하는 note는 iteration마다 반복한다.
 - loop 구간 안의 Sound Stopper도 iteration마다 반복한다.
-- note interval `[S, E]`가 loop 경계를 넘으면 다음 iteration과 겹칠 수 있다.
+- 실제 playback interval `[playbackStart, playbackEnd]`가 loop 경계를 넘으면 다음 iteration과 겹칠 수 있다.
 - tail은 loop 경계에서 중지하지 않는다.
 
 ### Forward loop
@@ -1250,7 +1265,7 @@ schedule 재생성은 하지 않는다.
 - transport가 loop start에 도달하면 file time을 loop end로 이동
 - loop iteration 증가
 - schedule cursor는 다음 reverse occurrence로 이동
-- 역방향 note anchor는 `E`
+- 역방향 note의 원래 발생 시점은 `E`이며, pitch가 음수이면 실제 anchor는 `E - timelineDuration`이다.
 - 이전 iteration Voice는 자연 종료까지 유지
 
 ### 인접 iteration snapshot
@@ -1301,7 +1316,7 @@ Sound Stopper는 진행 방향에서 event anchor를 통과할 때 대상 layer 
 
 역방향 snapshot:
 
-- note anchor `E`에서 현재 위치까지 감소 방향으로 Stopper를 검사
+- 실제 Voice anchor `^`에서 현재 위치까지 감소 방향으로 Stopper를 검사
 
 같은 tick의 기존 layer ordering 의미를 보존한다. 동적으로 이동된 reverse note anchor와 Stopper anchor가 우연히 같으면 schedule의 안정적 원본 entry 순서로 처리한다.
 
@@ -1547,7 +1562,7 @@ callback은 native handle이 이미 detach된 뒤 들어올 수 있으므로 `pl
 ### 3. Playback schedule
 
 - 네 tempo/pitch 부호 조합 수식 구현
-- `[S, E]`, anchor, source 방향 계산
+- `[S, E]`, 실제 playback interval, anchor, source 방향 계산
 - prepared moments 생성
 - interval snapshot index 생성
 - Sound Stopper projection
@@ -1605,10 +1620,10 @@ abs(P) = 1
 
 검증:
 
-- `T>0,P>0`: anchor 1.0, source 0, end 1.5
-- `T>0,P<0`: anchor 1.0, source 0.5, end 1.5
-- `T<0,P>0`: anchor 1.5, source 0, end 1.0 방향
-- `T<0,P<0`: anchor 1.5, source 0.5, end 1.0 방향
+- `T>0,P>0`: `* = 1.0`, `^ = 1.0`, source 0, end 1.5
+- `T>0,P<0`: `* = 1.0`, `^ = 0.5`, source 0.5, end 0.0
+- `T<0,P>0`: `* = 1.5`, `^ = 1.5`, source 0, end 1.0 방향
+- `T<0,P<0`: `* = 1.5`, `^ = 1.0`, source 0.5, end 0.5 방향
 - tempo 2배 시 timeline duration 2배
 - pitch magnitude 2배 시 timeline duration 절반
 - static note pitch ratio 2배 시 duration 절반
@@ -1725,7 +1740,7 @@ abs(P) = 1
 - past/current occurrence는 동일한 SetDelay 경로와 source offset으로 시작한다.
 - seek와 늦은 load가 살아 있는 모든 tail을 복원한다.
 - tempo 부호와 pitch 부호가 독립적으로 동작한다.
-- 완전 역재생 note가 원본 `E`에서 시작해 `S`에서 끝난다.
+- 네 tempo/pitch 부호 조합에서 원래 발생 시점과 실제 Voice 시작 시점이 분리되어 동작한다.
 - Pause가 active Voice를 실제로 정지하고 같은 PCM 위치에서 재개한다.
 - tempo/pitch/lookahead 변경 후 future 예약 중복이 없다.
 - loop tail이 경계에서 잘리지 않는다.
