@@ -8,14 +8,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public sealed class AssetImportData(IONode node, FileMetaData? fileMetaData = null) : IReadOnlyDictionary<Identifier, JObject>
+    public sealed class AssetImportData(IONode node, FileMetaData? metaData = null) : IReadOnlyDictionary<Identifier, JObject>
     {
         public static readonly AssetImportData empty = new AssetImportData();
 
         public AssetImportData() : this(IONode.empty) { }
 
         public IONode node { get; } = node;
-        public FileMetaData? fileMetaData { get; private set; } = fileMetaData;
+        public FileMetaData? metaData { get; private set; } = metaData;
 
         public int count => value.Count;
         int IReadOnlyCollection<KeyValuePair<Identifier, JObject>>.Count => count;
@@ -59,7 +59,7 @@ namespace RuniOS.Resource
             if (await node.file.GetEntry() is not { } entry)
             {
                 value = [];
-                fileMetaData = null;
+                metaData = null;
 
                 return;
             }
@@ -68,18 +68,18 @@ namespace RuniOS.Resource
             {
                 string text = await node.file.ReadAllText();
                 value = JsonConvert.DeserializeObject<Dictionary<Identifier, JObject>>(text) ?? [];
-                fileMetaData = entry.metaData;
+                metaData = entry.metaData;
             }
             catch (Exception e)
             {
                 value = [];
-                fileMetaData = null;
+                metaData = null;
 
                 Debug.LogError($"Failed to load import settings at path {entry.path}! The exception is: {e}");
             }
         }
 
-        public bool IsSameTarget(AssetImportData other) => node.IsSameTarget(other.node) && fileMetaData == other.fileMetaData;
+        public bool IsSameTarget(AssetImportData other) => node.IsSameTarget(other.node) && metaData == other.metaData;
 
         public IEnumerator<KeyValuePair<Identifier, JObject>> GetEnumerator() => value.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

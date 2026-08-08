@@ -168,7 +168,19 @@ namespace RuniOS.Utility
         /// The extension represented by the last segment of <paramref name="path"/>.<br/>
         /// <paramref name="path"/>의 마지막 세그먼트에서 얻은 확장자를 반환합니다.
         /// </returns>
-        public static FileExtension GetExtension(string path) => new FileExtension(path);
+        public static ReadOnlySpan<char> GetExtension(ReadOnlySpan<char> path)
+        {
+            if (path.IsEmpty)
+                return ReadOnlySpan<char>.Empty;
+
+            int separatorIndex = path.LastIndexOf(RuniPath.directorySeparatorChar);
+            int extIndex = path.LastIndexOf(FileExtension.extensionSeparatorChar);
+
+            if (extIndex <= separatorIndex)
+                return ReadOnlySpan<char>.Empty;
+
+            return path.Slice(extIndex);
+        }
 
 
 

@@ -101,6 +101,11 @@ namespace RuniOS.IO
         /// </summary>
         public IONode AddExtension(string extension) => new IONode(provider, path.AddExtension(extension));
 
+        public IONode SetExtension(FileExtension extension) => new IONode(provider, path.SetExtension(extension));
+        public IONode SetExtension(string extension) => new IONode(provider, path.SetExtension(extension));
+
+        public IONode RemoveExtension() => new IONode(provider, path.GetPathWithoutExtension());
+
         /*/// <summary>
         /// Creates a root node from a provider recreated at this node's path.<br/>
         /// 이 노드의 경로를 새 루트로 재생성한 프로바이더의 루트 노드를 생성합니다.

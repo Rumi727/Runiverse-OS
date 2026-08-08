@@ -239,11 +239,11 @@ using (scope)
 `AssetImportData`는 `FileMetaData`와 별개인 확장 가능한 임포트 데이터 컨테이너입니다.\
 `FileMetaData`가 파일 크기나 수정 시간 같은 파일 시스템 정보를 나타낸다면, `AssetImportData`는 개발자가 에셋별 추가 정보를 저장하는 sidecar JSON 파일을 나타냅니다.
 
-`SimpleAssetRegistry<THandle>`는 에셋 파일 경로에 `.json`을 덧붙인 파일을 임포트 데이터 파일로 연결합니다.
+`SimpleAssetRegistry<THandle>`는 에셋 파일과 같은 경로에서 마지막 확장자를 `.json`으로 바꾼 파일을 임포트 데이터 파일로 연결합니다.
 
 ```text
 assets/runios/sounds/ui/click.ogg
-assets/runios/sounds/ui/click.ogg.json
+assets/runios/sounds/ui/click.json
 ```
 
 임포트 데이터 JSON의 최상위 키는 `Identifier`이고, 각 값은 `JObject`입니다.\

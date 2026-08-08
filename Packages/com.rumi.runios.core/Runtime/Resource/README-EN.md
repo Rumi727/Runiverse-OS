@@ -239,11 +239,11 @@ The default implementation checks handle type, I/O target, file metadata, and th
 `AssetImportData` is an extensible import-data container separate from `FileMetaData`.\
 `FileMetaData` describes file-system information such as file size or write time, while `AssetImportData` represents the sidecar JSON file used to store developer-defined per-asset information.
 
-`SimpleAssetRegistry<THandle>` associates the file obtained by appending `.json` to an asset path as its import-data file.
+`SimpleAssetRegistry<THandle>` uses the file at the same path with the asset's final extension replaced by `.json` as its import-data sidecar.
 
 ```text
 assets/runios/sounds/ui/click.ogg
-assets/runios/sounds/ui/click.ogg.json
+assets/runios/sounds/ui/click.json
 ```
 
 The top-level keys in an import-data JSON file are `Identifier` values, and each value is a `JObject`.\

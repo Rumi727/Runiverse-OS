@@ -242,6 +242,9 @@ namespace RuniOS.IO
         /// </returns>
         public readonly RuniPath AddExtension(string ext) => new RuniPath(value + (FileExtension)ext);
 
+        public readonly RuniPath SetExtension(FileExtension ext) => GetPathWithoutExtension().AddExtension(ext);
+        public readonly RuniPath SetExtension(string ext) => GetPathWithoutExtension().AddExtension(ext);
+
 
 
         /// <summary>

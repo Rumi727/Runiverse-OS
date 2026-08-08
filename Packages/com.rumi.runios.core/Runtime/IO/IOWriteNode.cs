@@ -99,7 +99,12 @@ namespace RuniOS.IO
         /// Creates a new node by appending the specified extension to this node's path.<br/>
         /// 이 노드의 경로에 지정된 확장자를 덧붙인 새 노드를 생성합니다.
         /// </summary>
-        public IONode AddExtension(string extension) => new IONode(provider, path.AddExtension(extension));
+        public IOWriteNode AddExtension(string extension) => new IOWriteNode(provider, path.AddExtension(extension));
+
+        public IOWriteNode SetExtension(FileExtension extension) => new IOWriteNode(provider, path.SetExtension(extension));
+        public IOWriteNode SetExtension(string extension) => new IOWriteNode(provider, path.SetExtension(extension));
+
+        public IOWriteNode RemoveExtension() => new IOWriteNode(provider, path.GetPathWithoutExtension());
 
         /*/// <summary>
         /// Creates a root node from a writable provider recreated at this node's path.<br/>

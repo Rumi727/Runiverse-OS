@@ -81,47 +81,55 @@ namespace RuniOS.Resource
 
                 await OnBeginAssetLoop();
 
+                WildcardPatterns patterns = new WildcardPatterns(assetFilter.Concat(WildcardPatterns.jsonFileFilter));
+
                 // 모든 리소스 팩을 순회하며 로드할 에셋을 비동기적으로 인덱싱
-                List<AssetLoadTarget> loadTargets = [];
+                Dictionary<Identifier, AssetLoadTarget> loadTargetDict = [];
+                Dictionary<Identifier, AssetImportData> importDataDict = [];
                 foreach (var resourcePack in resourcePacks)
                 {
                     await foreach ((string nameSpace, IONode registryNode) in GetRegistryNodes(resourcePack))
                     {
-                        await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(assetFilter))
+                        await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(patterns))
                         {
-                            IONode node = registryNode.Bind(fileEntry);
-
                             try
                             {
-                                RuniPath path = fileEntry.path.GetRelativePath(registryNode.path).GetPathWithoutExtension();
-                                Identifier identifier = new Identifier(nameSpace, path);
+                                RuniPath path = fileEntry.path.GetRelativePath(registryNode.path);
+                                Identifier identifier = new Identifier(nameSpace, path.GetPathWithoutExtension());
+                                IONode node = registryNode.Bind(fileEntry);
 
-                                loadTargets.Add(new AssetLoadTarget(resourcePack, identifier, node, fileEntry.metaData));
+                                if (RuniPathUtility.GetExtension(path.value) is ".json")
+                                    importDataDict.TryAdd(identifier, new AssetImportData(node, fileEntry.metaData));
+                                else
+                                    loadTargetDict.TryAdd(identifier, new AssetLoadTarget(resourcePack, node, fileEntry.metaData));
                             }
                             catch (Exception e)
                             {
-                                Debug.RuntimeLogError($"An exception occurred while indexing {node.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                                Debug.RuntimeLogError($"An exception occurred while indexing {fileEntry.path} resources from the resource pack {resourcePack.identifier}. The exception is: {e}", GetType().Name);
                             }
                         }
                     }
                 }
 
-                // 인덱싱한 모든 에셋을 에셋 핸들로 순서대로 등록함 (중복 문제는 OnAssetLoop 또는 RecordAssetHandle 메소드가 책임짐)
+                // 인덱싱한 모든 에셋을 에셋 핸들로 순서대로 등록함
                 int count = 0;
-                foreach (AssetLoadTarget target in loadTargets)
+                foreach (var target in loadTargetDict)
                 {
                     try
                     {
-                        AssetImportData importData = await GetAssetImportData(target.node);
-                        await OnAssetLoop(target.identifier, target.node, await CreateHandle(target.node, target.fileMetaData, importData));
+                        if (!importDataDict.TryGetValue(target.Key, out AssetImportData importData))
+                            importData = new AssetImportData(target.Value.node.SetExtension(".json"));
+
+                        THandle handle = await CreateHandle(target.Value.node, target.Value.fileMetaData, importData);
+                        await OnAssetLoop(target.Key, target.Value.node, handle);
                     }
                     catch (Exception e)
                     {
-                        Debug.RuntimeLogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                        Debug.RuntimeLogError($"An exception occurred while loading {target.Value.node.path} resources from the resource pack {target.Value.resourcePack.identifier}. The exception is: {e}", GetType().Name);
                     }
 
                     // 로드 대상 처리 진행률 보고
-                    progress.SafeReport((float)++count / loadTargets.Count);
+                    progress.SafeReport((float)++count / loadTargetDict.Count);
                 }
 
                 await OnEndAssetLoop();
@@ -155,14 +163,6 @@ namespace RuniOS.Resource
             return UniTask.CompletedTask;
         }
 
-        protected virtual async UniTask<AssetImportData> GetAssetImportData(IONode assetNode)
-        {
-            IONode settingsNode = assetNode.AddExtension((FileExtension)".json");
-            IOEntry? settingsEntry = await settingsNode.file.GetEntry();
-
-            return new AssetImportData(settingsNode, settingsEntry?.metaData);
-        }
-
-        readonly record struct AssetLoadTarget(ResourcePack resourcePack, Identifier identifier, IONode node, FileMetaData fileMetaData);
+        readonly record struct AssetLoadTarget(ResourcePack resourcePack, IONode node, FileMetaData fileMetaData);
     }
 }
