@@ -120,7 +120,6 @@ namespace RuniOS.Editor.Windows
             bool previousDriverProfiling = ProfilerDriver.enabled;
             bool previousProfileEditor = ProfilerDriver.profileEditor;
             bool previousBinaryLog = Profiler.enableBinaryLog;
-            bool previousAllocationCallstacks = Profiler.enableAllocationCallstacks;
             int previousMaxUsedMemory = Profiler.maxUsedMemory;
             string previousLogFile = Profiler.logFile;
             string capturePath = string.Empty;
@@ -138,7 +137,6 @@ namespace RuniOS.Editor.Windows
 
                 Profiler.logFile = capturePath;
                 ProfilerDriver.profileEditor = true;
-                Profiler.enableAllocationCallstacks = false;
                 Profiler.enableBinaryLog = true;
 
                 Profiler.enabled = true;
@@ -164,7 +162,6 @@ namespace RuniOS.Editor.Windows
                 Profiler.maxUsedMemory = previousMaxUsedMemory;
                 Profiler.logFile = previousLogFile;
                 Profiler.enableBinaryLog = previousBinaryLog;
-                Profiler.enableAllocationCallstacks = previousAllocationCallstacks;
                 ProfilerDriver.profileEditor = previousProfileEditor;
 
                 Profiler.enabled = previousProfilerEnabled;
