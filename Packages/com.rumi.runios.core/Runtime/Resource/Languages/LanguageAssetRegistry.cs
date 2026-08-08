@@ -17,6 +17,8 @@ namespace RuniOS.Resource.Languages
 
         public override Type assetType => typeof(LocalizationData);
 
+        public override bool isSupportedImportData => false;
+
         public override bool isLoading => reloadGate.isRunning;
 
         Dictionary<Identifier, IReadOnlyDictionary<string, string>> calculatedAsset = new();

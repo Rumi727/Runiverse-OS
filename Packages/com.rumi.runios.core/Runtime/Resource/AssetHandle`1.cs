@@ -10,32 +10,34 @@ namespace RuniOS.Resource
     /// 단일 에셋에 대한 참조와 로드/언로드 로직을 관리하는 추상 핸들러입니다.
     /// <br/>에셋의 실제 로드는 <see cref="GetScope"/>를 통해 참조될 때 수행됩니다.
     /// </summary>
-    public abstract class AssetHandle<TAsset> : IAssetHandle<TAsset> where TAsset : notnull
+    /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
+    /// <param name="fileMetaData">에셋 파일의 초기 메타 데이터입니다.</param>
+    /// <param name="importData">에셋의 초기 임포트 설정입니다.</param>
+    /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
+    public abstract class AssetHandle<TAsset>(IONode node, FileMetaData fileMetaData, AssetImportData importData, int unloadDelayFrame = 600) : IAssetHandle<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
         /// </summary>
-        public IONode node { get; }
+        public IONode node { get; } = node;
 
         /// <summary>
         /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
-        public FileMetaData metaData { get; private set; }
+        public FileMetaData fileMetaData { get; private set; } = fileMetaData;
+
+        /// <inheritdoc/>
+        public AssetImportData importData { get; } = importData;
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
         /// </summary>
-        public int unloadDelayFrame { get; }
+        public int unloadDelayFrame { get; } = unloadDelayFrame;
 
-        /// <summary>
-        /// 로드된 실제 에셋 객체를 가져오거나 설정합니다.
-        /// <br/>에셋이 언로드되었거나 아직 로드되지 않은 경우 <see langword="null"/>입니다.
-        /// </summary>
+        /// <inheritdoc/>
         public TAsset? assetObject { get; private set; }
 
-        /// <summary>
-        /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
-        /// </summary>
+        /// <inheritdoc/>
         public bool isLoading { get; private set; }
 
         /// <inheritdoc cref="IAssetHandle.isSealed"/>
@@ -47,20 +49,6 @@ namespace RuniOS.Resource
         IDisposable? _unloadSubscription;
 
         internal readonly List<WeakReference<AssetScope<TAsset>>> assetScopes = [];
-
-        /// <summary>
-        /// <see cref="AssetHandle{T}"/> 클래스의 새 인스턴스를 초기화합니다.
-        /// </summary>
-        /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
-        /// <param name="metaData">에셋 파일의 초기 메타 데이터입니다.</param>
-        /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-        protected AssetHandle(IONode node, FileMetaData metaData, int unloadDelayFrame = 600)
-        {
-            this.node = node;
-            this.metaData = metaData;
-
-            this.unloadDelayFrame = unloadDelayFrame;
-        }
 
         /// <summary>
         /// 에셋을 비동기적으로 로드하고, 로드된 에셋 객체에 대한 참조를 포함하는 새 <see cref="AssetScope{T}"/>를 생성합니다.
@@ -86,7 +74,9 @@ namespace RuniOS.Resource
 
                 try
                 {
-                    metaData = entry.metaData;
+                    fileMetaData = entry.metaData;
+                    await importData.Reload();
+
                     assetObject = await Load();
                 }
                 catch (Exception e)
@@ -243,7 +233,7 @@ namespace RuniOS.Resource
             if (isSealed || other is not AssetHandle<TAsset> otherHandle)
                 return false;
 
-            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && metaData == otherHandle.metaData;
+            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && fileMetaData == otherHandle.fileMetaData && importData.IsSameTarget(otherHandle.importData);
         }
 
         /// <inheritdoc/>

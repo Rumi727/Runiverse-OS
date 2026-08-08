@@ -16,11 +16,16 @@ namespace RuniOS.Resource
         /// 에셋 타입이 겹칠 때 이 레지스트리를 기본으로 사용할 지 여부를 나타내는 상수 값입니다.
         /// </summary>
         bool isDefault { get; }
-        
+
         Type assetType { get; }
-        
+
         Type handleType { get; }
-        
+
+        /// <summary>
+        /// 이 레지스트리가 임포트 설정을 지원하는지 여부를 나타내는 상수 값입니다.
+        /// </summary>
+        bool isSupportedImportData { get; }
+
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
         /// </summary>

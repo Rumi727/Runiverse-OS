@@ -36,6 +36,6 @@ namespace RuniOS.Resource.NBS
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<NBSAssetRegistry>();
 
-        protected override UniTask<NBSAssetHandle> CreateHandle(IONode node, FileMetaData metaData) => UniTask.FromResult(new NBSAssetHandle(node, metaData));
+        protected override UniTask<NBSAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData) => UniTask.FromResult(new NBSAssetHandle(node, fileMetaData, importData));
     }
 }

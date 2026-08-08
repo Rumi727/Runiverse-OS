@@ -17,6 +17,9 @@ namespace RuniOS.Resource
         /// </summary>
         public virtual RuniPath registryName => registryId.path;
 
+        /// <inheritdoc/>
+        public override bool isSupportedImportData => true;
+
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
         /// </summary>
@@ -47,23 +50,14 @@ namespace RuniOS.Resource
             }
         });
 
-        public static UniTask<AssetImportSettings<T>> GetImportSettings<T>(IONode assetNode) => GetImportSettings<T>(assetNode, (FileExtension)".json");
-
-        public static async UniTask<AssetImportSettings<T>> GetImportSettings<T>(IONode assetNode, FileExtension ext)
-        {
-            IONode settingsNode = assetNode.AddExtension(ext);
-            IOEntry? settingsEntry = await settingsNode.file.GetEntry();
-
-            return new AssetImportSettings<T>(settingsNode, settingsEntry?.metaData);
-        }
-
         /// <summary>
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
-        /// <param name="metaData">에셋 파일의 메타 데이터 값입니다.</param>
+        /// <param name="fileMetaData">에셋 파일의 메타 데이터 값입니다.</param>
+        /// <param name="importData">에셋 파일의 초기 임포트 설정입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData metaData);
+        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData);
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -118,7 +112,8 @@ namespace RuniOS.Resource
                 {
                     try
                     {
-                        await OnAssetLoop(target.identifier, target.node, await CreateHandle(target.node, target.metaData));
+                        AssetImportData importData = await GetAssetImportData(target.node);
+                        await OnAssetLoop(target.identifier, target.node, await CreateHandle(target.node, target.fileMetaData, importData));
                     }
                     catch (Exception e)
                     {
@@ -160,6 +155,14 @@ namespace RuniOS.Resource
             return UniTask.CompletedTask;
         }
 
-        readonly record struct AssetLoadTarget(ResourcePack resourcePack, Identifier identifier, IONode node, FileMetaData metaData);
+        protected virtual async UniTask<AssetImportData> GetAssetImportData(IONode assetNode)
+        {
+            IONode settingsNode = assetNode.AddExtension((FileExtension)".json");
+            IOEntry? settingsEntry = await settingsNode.file.GetEntry();
+
+            return new AssetImportData(settingsNode, settingsEntry?.metaData);
+        }
+
+        readonly record struct AssetLoadTarget(ResourcePack resourcePack, Identifier identifier, IONode node, FileMetaData fileMetaData);
     }
 }

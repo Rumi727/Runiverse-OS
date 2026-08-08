@@ -232,7 +232,63 @@ When all scopes are returned, the handle tries to unload after `unloadDelayFrame
 This reduces unnecessary unload and reload work when the same asset is requested again soon.
 
 `AssetHandle<TAsset>.IsSameTarget()` decides whether a handle can be reused during reload.\
-The default implementation checks handle type, I/O target, and metadata.
+The default implementation checks handle type, I/O target, file metadata, and the import-data sidecar's target and metadata.
+
+## Asset Import Data
+
+`AssetImportData` is an extensible import-data container separate from `FileMetaData`.\
+`FileMetaData` describes file-system information such as file size or write time, while `AssetImportData` represents the sidecar JSON file used to store developer-defined per-asset information.
+
+`SimpleAssetRegistry<THandle>` associates the file obtained by appending `.json` to an asset path as its import-data file.
+
+```text
+assets/runios/sounds/ui/click.ogg
+assets/runios/sounds/ui/click.ogg.json
+```
+
+The top-level keys in an import-data JSON file are `Identifier` values, and each value is a `JObject`.\
+Use the key as the identifier of the registry or feature that interprets the data. It does not have to match the file asset's identifier.
+
+```json
+{
+  "runios:waves": {
+    "loadMode": "stream"
+  },
+  "my_game:music": {
+    "bpm": 128,
+    "artist": "Example Artist"
+  }
+}
+```
+
+Identifiers and fields unknown to a package or a particular asset implementation remain in memory as `JObject` values.\
+This lets developers add new per-asset data without modifying the existing package code.\
+Consumer code is still required if the new value should affect runtime behavior.
+
+Handles read and deserialize the import-data JSON immediately before loading the real asset.\
+During registry reload, the registry checks only the sidecar's existence and file metadata; actual JSON deserialization occurs in the `AssetHandle<TAsset>.GetScope()` load path.\
+This is not read every frame, but it is read again when an unloaded asset is loaded again.
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+Identifier key = new Identifier("my_game", "music");
+JObject? rawData = handle.importData[key];
+MusicImportData? typedData = handle.importData.GetValue<MusicImportData>(key);
+
+if (handle.importData.TryGetValue<MusicImportData>(key, out MusicImportData? data))
+{
+    // MusicImportData is an application-defined type.
+    // Use data.
+}
+```
+
+When a key is missing, `GetValue<T>()` returns the default value for that type.\
+Use `TryGetValue<T>()` when missing data must be distinguished from a valid default value.\
+If the JSON cannot be read, the import data is cleared and an error is logged. The original sidecar file is not deleted or overwritten.
+
+When implementing `AssetRegistry<THandle>` directly, the registry must locate the sidecar file, create `AssetImportData`, and pass it to the handle itself.\
+For instance handles without a sidecar file, `InstanceAssetHandle<TAsset>` can use the shared empty `AssetImportData` instance.
 
 ## AssetRef
 
@@ -330,9 +386,9 @@ namespace RuniOS.Resource.Example
 #endif
         static void Awaken() => AssetRegistryManager.Register<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData metaData)
+        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData)
         {
-            return UniTask.FromResult(new MyAssetHandle(node, metaData));
+            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData, importData));
         }
     }
 }

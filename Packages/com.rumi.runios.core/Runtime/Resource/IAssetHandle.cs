@@ -10,7 +10,12 @@ namespace RuniOS.Resource
         /// <br/>에셋이 언로드되었거나 아직 로드되지 않은 경우 <see langword="null"/>입니다.
         /// </summary>
         object? assetObject { get; }
-        
+
+        /// <summary>
+        /// 에셋의 임포트 설정을 가져옵니다.
+        /// </summary>
+        AssetImportData importData { get; }
+
         /// <summary>
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
         /// </summary>

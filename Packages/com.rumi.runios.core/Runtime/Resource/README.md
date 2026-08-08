@@ -232,7 +232,63 @@ using (scope)
 따라서 짧은 시간 안에 같은 에셋이 다시 요청되는 경우 불필요한 언로드와 재로드를 줄일 수 있습니다.
 
 `AssetHandle<TAsset>.IsSameTarget()`은 리로드에서 핸들을 재사용해도 되는지 판단합니다.\
-기본 구현은 핸들 타입, I/O 대상, 메타데이터가 같은지 확인합니다.
+기본 구현은 핸들 타입, I/O 대상, 파일 메타데이터, 임포트 데이터 파일의 대상과 메타데이터가 같은지 확인합니다.
+
+## 에셋 임포트 데이터
+
+`AssetImportData`는 `FileMetaData`와 별개인 확장 가능한 임포트 데이터 컨테이너입니다.\
+`FileMetaData`가 파일 크기나 수정 시간 같은 파일 시스템 정보를 나타낸다면, `AssetImportData`는 개발자가 에셋별 추가 정보를 저장하는 sidecar JSON 파일을 나타냅니다.
+
+`SimpleAssetRegistry<THandle>`는 에셋 파일 경로에 `.json`을 덧붙인 파일을 임포트 데이터 파일로 연결합니다.
+
+```text
+assets/runios/sounds/ui/click.ogg
+assets/runios/sounds/ui/click.ogg.json
+```
+
+임포트 데이터 JSON의 최상위 키는 `Identifier`이고, 각 값은 `JObject`입니다.\
+키는 데이터를 해석하는 레지스트리나 기능의 식별자로 사용합니다. 파일 에셋의 식별자와 반드시 같을 필요는 없습니다.
+
+```json
+{
+  "runios:waves": {
+    "loadMode": "stream"
+  },
+  "my_game:music": {
+    "bpm": 128,
+    "artist": "Example Artist"
+  }
+}
+```
+
+패키지나 특정 에셋 구현이 알지 못하는 식별자와 필드도 `JObject` 형태로 함께 보존됩니다.\
+따라서 새로운 에셋별 데이터를 추가하기 위해 기존 패키지 코드를 수정할 필요가 없습니다.\
+단, 저장된 값을 실제 동작에 사용하려면 해당 식별자의 데이터를 읽는 소비자 코드가 필요합니다.
+
+핸들은 실제 에셋을 로드하기 직전에 임포트 데이터 JSON을 읽습니다.\
+레지스트리 리로드 시에는 sidecar 파일의 존재 여부와 파일 메타데이터만 확인하고, 실제 JSON 역직렬화는 `AssetHandle<TAsset>.GetScope()`의 로드 경로에서 수행합니다.\
+프레임마다 읽는 구조는 아니며, 에셋이 언로드된 뒤 다시 로드되면 다시 읽습니다.
+
+```csharp
+using Newtonsoft.Json.Linq;
+
+Identifier key = new Identifier("my_game", "music");
+JObject? rawData = handle.importData[key];
+MusicImportData? typedData = handle.importData.GetValue<MusicImportData>(key);
+
+if (handle.importData.TryGetValue<MusicImportData>(key, out MusicImportData? data))
+{
+    // MusicImportData는 애플리케이션이 정의한 타입입니다.
+    // data 사용
+}
+```
+
+키가 없으면 `GetValue<T>()`는 해당 타입의 기본값을 반환합니다.\
+필수 데이터 여부를 구분해야 하면 `TryGetValue<T>()`를 사용하세요.\
+JSON을 읽지 못하면 임포트 데이터는 비워지고 오류가 기록됩니다. 원본 sidecar 파일 자체가 삭제되거나 덮어써지는 것은 아닙니다.
+
+`AssetRegistry<THandle>`를 직접 구현하는 경우에는 sidecar 파일을 레지스트리에서 직접 찾아 `AssetImportData`를 생성한 뒤 핸들에 전달해야 합니다.\
+`InstanceAssetHandle<TAsset>`처럼 별도 파일이 없는 인스턴스 핸들은 공유된 빈 `AssetImportData`를 사용할 수 있습니다.
 
 ## AssetRef
 
@@ -330,9 +386,9 @@ namespace RuniOS.Resource.Example
 #endif
         static void Awaken() => AssetRegistryManager.Register<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData metaData)
+        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData)
         {
-            return UniTask.FromResult(new MyAssetHandle(node, metaData));
+            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData, importData));
         }
     }
 }

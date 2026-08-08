@@ -6,15 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class WaveAudioAssetHandle(IONode node, FileMetaData metaData, AssetImportSettings<WaveAudioAssetImportSettings> importSettings) : AssetHandle<WaveAudioClip>(node, metaData)
+    public class WaveAudioAssetHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData) : AssetHandle<WaveAudioClip>(node, fileMetaData, importData)
     {
-        public AssetImportSettings<WaveAudioAssetImportSettings> importSettings { get; } = importSettings;
-
         protected override async UniTask<WaveAudioClip?> Load()
         {
-            await importSettings.Reload();
-
-            WaveAudioAssetImportSettings data = importSettings.value;
+            WaveAudioAssetImportData data = importData.GetValue<WaveAudioAssetImportData>(new Identifier("runios", "waves"));
             return data.loadMode switch
             {
                 WaveAudioAssetLoadMode.normal => await SoundSystem.main.CreateSoundAsync(node),
@@ -30,10 +26,10 @@ namespace RuniOS.Resource.Sounds
 
         public override bool IsSameTarget(IAssetHandle other)
         {
-            if (!base.IsSameTarget(other) || other is not WaveAudioAssetHandle otherHandle)
+            if (!base.IsSameTarget(other) || other is not WaveAudioAssetHandle)
                 return false;
 
-            if (assetObject == null || assetObject.isDisposed || !importSettings.IsSameTarget(otherHandle.importSettings))
+            if (assetObject == null || assetObject.isDisposed)
                 return false;
 
             return true;
