@@ -1,6 +1,10 @@
 ﻿#nullable enable
+using System.IO;
+using Cysharp.Threading.Tasks;
 using RuniOS.Editor.IMGUI;
 using UnityEditor.AnimatedValues;
+using UnityEditorInternal;
+using UnityEngine.Profiling;
 
 namespace RuniOS.Editor.Windows
 {
@@ -13,8 +17,11 @@ namespace RuniOS.Editor.Windows
         public bool allowUpdate => true;
         public bool allowUpdateInEditor => true;
 
+        const int DeepProfileMaxUsedMemory = 2_000_000_000;
+
         readonly Dictionary<DrivenPropertyManager.DrivenPropertyData, DrivenPropertyDataExtension> drivenPropertyDatas = new();
         [SerializeField] Vector2 drivenPropertyScrollPosition;
+        bool reloadingWithDeepProfile;
         
         public void OnGUI()
         {
@@ -94,6 +101,105 @@ namespace RuniOS.Editor.Windows
                 
                 EditorGUILayout.EndScrollView();
             }
+
+            using (new EditorGUI.DisabledScope(reloadingWithDeepProfile))
+            {
+                if (GUILayout.Button(reloadingWithDeepProfile ? "리로드 중..." : "리로드"))
+                    ReloadWithDeepProfile().Forget();
+            }
+        }
+
+        async UniTask ReloadWithDeepProfile()
+        {
+            if (reloadingWithDeepProfile)
+                return;
+
+            reloadingWithDeepProfile = true;
+
+            bool previousProfilerEnabled = Profiler.enabled;
+            bool previousDriverProfiling = ProfilerDriver.enabled;
+            bool previousProfileEditor = ProfilerDriver.profileEditor;
+            bool previousBinaryLog = Profiler.enableBinaryLog;
+            bool previousAllocationCallstacks = Profiler.enableAllocationCallstacks;
+            int previousMaxUsedMemory = Profiler.maxUsedMemory;
+            string previousLogFile = Profiler.logFile;
+            string capturePath = string.Empty;
+            bool captureStarted = false;
+            bool reloadCompleted = false;
+            bool profilerStopped = false;
+
+            try
+            {
+                capturePath = CreateProfilerCapturePath();
+
+                ProfilerDriver.enabled = false;
+                Profiler.enabled = false;
+                Profiler.maxUsedMemory = DeepProfileMaxUsedMemory;
+
+                Profiler.logFile = capturePath;
+                ProfilerDriver.profileEditor = true;
+                Profiler.enableAllocationCallstacks = false;
+                Profiler.enableBinaryLog = true;
+
+                Profiler.enabled = true;
+                ProfilerDriver.enabled = true;
+                captureStarted = true;
+
+                Debug.Log($"Started Deep Profile raw capture: {capturePath}");
+                await RuniOS.Resource.ResourceManager.Reload();
+                profilerStopped = captureStarted && (!Profiler.enabled || !ProfilerDriver.enabled);
+                reloadCompleted = true;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+            }
+            finally
+            {
+                profilerStopped |= captureStarted && (!Profiler.enabled || !ProfilerDriver.enabled);
+
+                ProfilerDriver.enabled = false;
+                Profiler.enabled = false;
+
+                Profiler.maxUsedMemory = previousMaxUsedMemory;
+                Profiler.logFile = previousLogFile;
+                Profiler.enableBinaryLog = previousBinaryLog;
+                Profiler.enableAllocationCallstacks = previousAllocationCallstacks;
+                ProfilerDriver.profileEditor = previousProfileEditor;
+
+                Profiler.enabled = previousProfilerEnabled;
+                if (previousDriverProfiling)
+                    ProfilerDriver.enabled = true;
+
+                reloadingWithDeepProfile = false;
+
+                if (capturePath.Length > 0)
+                {
+                    if (profilerStopped && !reloadCompleted)
+                        Debug.LogWarning($"Deep Profile raw capture stopped before ResourceManager.Reload completed: {capturePath}");
+                    else if (profilerStopped)
+                        Debug.LogWarning($"Deep Profile raw capture stopped, but ResourceManager.Reload completed: {capturePath}");
+                    else if (reloadCompleted)
+                        Debug.Log($"Finished Deep Profile raw capture: {capturePath}");
+                    else
+                        Debug.LogWarning($"Deep Profile raw capture did not complete: {capturePath}");
+                }
+            }
+        }
+
+        static string CreateProfilerCapturePath()
+        {
+            string projectDirectory = Path.GetFullPath(Path.Combine(Application.dataPath, ".."));
+            string projectName = new DirectoryInfo(projectDirectory).Name;
+            string userDirectory = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+            string captureDirectory = Path.Combine(userDirectory, "ProfilerCaptures");
+            Directory.CreateDirectory(captureDirectory);
+
+            return Path.Combine
+            (
+                captureDirectory,
+                $"{projectName}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss-fff}_DeepProfile.raw"
+            );
         }
 
         void OnDestroy()
