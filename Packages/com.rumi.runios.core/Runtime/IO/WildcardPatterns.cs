@@ -1,8 +1,6 @@
 #nullable enable
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Text.RegularExpressions;
 
 namespace RuniOS.IO
 {
@@ -34,8 +32,6 @@ namespace RuniOS.IO
         IEnumerator<string> IEnumerable<string>.GetEnumerator() => ((IEnumerable<string>)patterns).GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)patterns).GetEnumerator();
 
-        static readonly ConcurrentDictionary<string, Regex> _regexCache = new();
-
         public bool IsMatch(string text) => IsMatch(text, this);
         public bool IsMatch(string text, bool ignoreCase) => IsMatch(text, this, ignoreCase);
         
@@ -52,25 +48,47 @@ namespace RuniOS.IO
         /// <returns>문자열이 패턴과 일치하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>.</returns>
         public static bool IsMatch(string text, string pattern, bool ignoreCase = false)
         {
-            // 캐시 키 생성 (패턴 + 대소문자 옵션)
-            string cacheKey = pattern + (ignoreCase ? ":i" : ":s");
+            int textIndex = 0;
+            int patternIndex = 0;
+            int starIndex = -1;
+            int starTextIndex = -1;
 
-            // 캐시에 있으면 가져오고, 없으면 새로 생성 (스레드 안전)
-            Regex regex = _regexCache.GetOrAdd(cacheKey, _ =>
+            while (textIndex < text.Length)
             {
-                string regexPattern = "^" + Regex.Escape(pattern)
-                    .Replace("\\*", ".*")
-                    .Replace("\\?", ".") + "$";
+                if (patternIndex < pattern.Length &&
+                    pattern[patternIndex] != '*' &&
+                    (pattern[patternIndex] == '?' || AreEqual(text[textIndex], pattern[patternIndex], ignoreCase)))
+                {
+                    textIndex++;
+                    patternIndex++;
+                    continue;
+                }
 
-                RegexOptions options = RegexOptions.Compiled | RegexOptions.ExplicitCapture;
-                if (ignoreCase)
-                    options |= RegexOptions.IgnoreCase;
+                if (patternIndex < pattern.Length && pattern[patternIndex] == '*')
+                {
+                    starIndex = patternIndex++;
+                    starTextIndex = textIndex;
+                    continue;
+                }
 
-                return new Regex(regexPattern, options);
-            });
+                if (starIndex >= 0)
+                {
+                    patternIndex = starIndex + 1;
+                    textIndex = ++starTextIndex;
+                    continue;
+                }
 
-            return regex.IsMatch(text);
+                return false;
+            }
+
+            while (patternIndex < pattern.Length && pattern[patternIndex] == '*')
+                patternIndex++;
+
+            return patternIndex == pattern.Length;
         }
+
+        static bool AreEqual(char textCharacter, char patternCharacter, bool ignoreCase) =>
+            !ignoreCase || textCharacter == patternCharacter || char.ToUpperInvariant(textCharacter) == char.ToUpperInvariant(patternCharacter);
 
         /// <summary>
         /// 와일드카드 패턴에 따라 문자열이 일치하는지 확인합니다.
