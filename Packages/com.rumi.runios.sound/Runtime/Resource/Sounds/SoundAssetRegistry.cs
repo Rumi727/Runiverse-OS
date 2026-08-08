@@ -16,6 +16,8 @@ namespace RuniOS.Resource.Sounds
 
         public override Identifier registryId => new Identifier("runios", "sounds");
 
+        public override bool isSupportedImportData => false;
+
         public override bool isDefault => true;
 
         public override Type assetType => typeof(SoundClipRef);

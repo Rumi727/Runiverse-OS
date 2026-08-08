@@ -7,7 +7,7 @@ namespace RuniOS.Resource
     /// <summary>
     /// 특정 타입의 에셋 핸들을 관리하고 로드 로직을 정의하는 추상 클래스입니다.
     /// </summary>
-    public abstract class AssetRegistry<THandle> : IAssetRegistry<THandle>, IReadOnlyDictionary<Identifier, THandle> where THandle : class, IAssetHandle
+    public abstract class AssetRegistry<THandle> : IAssetRegistry<THandle> where THandle : class, IAssetHandle
     {
         /// <summary>
         /// 이 레지스트리의 고유 id를 나타내는 상수 값입니다.
@@ -47,19 +47,15 @@ namespace RuniOS.Resource
                 return null;
             }
         }
-        THandle IReadOnlyDictionary<Identifier, THandle>.this[Identifier key] => assetHandles[key];
 
         /// <inheritdoc/>
         public IEnumerable<Identifier> keys => assetHandles.Keys;
-        IEnumerable<Identifier> IReadOnlyDictionary<Identifier, THandle>.Keys => assetHandles.Keys;
 
         /// <inheritdoc/>
         public IEnumerable<THandle> handles => assetHandles.Values;
-        IEnumerable<THandle> IReadOnlyDictionary<Identifier, THandle>.Values => assetHandles.Values;
 
         /// <inheritdoc/>
         public int count => assetHandles.Count;
-        int IReadOnlyCollection<KeyValuePair<Identifier, THandle>>.Count => assetHandles.Count;
 
         Dictionary<Identifier, THandle> assetHandles = new();
         Dictionary<Identifier, THandle>? trackedHandles = null;
@@ -155,7 +151,6 @@ namespace RuniOS.Resource
         public bool ContainsKey(Identifier key) => assetHandles.ContainsKey(key);
 
         public bool TryGetHandle(Identifier key, [NotNullWhen(true)] out THandle? handle) => assetHandles.TryGetValue(key, out handle);
-        bool IReadOnlyDictionary<Identifier, THandle>.TryGetValue(Identifier key, [NotNullWhen(true)] out THandle handle) => TryGetHandle(key, out handle!);
 
         public IEnumerator<KeyValuePair<Identifier, THandle>> GetEnumerator() => assetHandles.GetEnumerator();
     }
