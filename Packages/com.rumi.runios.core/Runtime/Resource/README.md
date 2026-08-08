@@ -413,18 +413,26 @@ assets/{namespace}/sounds.json 하나를 파싱해 여러 사운드 ID 등록
 
 실제 예시는 `LanguageAssetRegistry`, `SoundAssetRegistry`입니다.
 
-직접 구현할 때는 중복 리로드 방지, 진행도 보고, 트래킹 시작과 종료를 직접 처리해야 합니다.
+직접 구현할 때는 `AsyncReloadGate`로 중복 리로드를 조정하고, 진행도 보고와 트래킹 시작 및 종료는 리로드 본문에서 직접 처리합니다.
 
 ```csharp
-public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
-{
-    if (isLoading)
-    {
-        await UniTask.WaitWhile(() => isLoading);
-        return;
-    }
+readonly AsyncReloadGate reloadGate = new();
 
-    _isLoading = true;
+public override bool isLoading => reloadGate.isRunning;
+
+public override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
+{
+    ResourcePack[] resourcePackSnapshot = resourcePacks.ToArray();
+
+    return reloadGate.Run
+    (
+        reloadProgress => ReloadCore(resourcePackSnapshot, reloadProgress),
+        progress
+    );
+}
+
+async UniTask ReloadCore(ResourcePack[] resourcePacks, IProgress<float>? progress)
+{
     BeginTracking();
 
     try
@@ -446,12 +454,11 @@ public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IP
         progress.SafeReport(1);
 
         EndTracking();
-        _isLoading = false;
     }
 }
 ```
 
-이 방식은 번거롭지만 가장 자유롭습니다.\
+`AsyncReloadGate`는 실행 중인 리로드 요청을 같은 배치로 합치고, 대기 중인 최신 요청을 다음 패스로 실행합니다. 따라서 `WaitWhile`, 별도 `isLoading` 플래그, 중복 실행 분기를 직접 작성할 필요가 없습니다.\
 진행도 계산, 병렬 작업, 병합 규칙, 어떤 시점에 어떤 핸들을 등록할지 모두 레지스트리 구현이 직접 결정합니다.
 
 ## 직접 레지스트리가 필요한 경우

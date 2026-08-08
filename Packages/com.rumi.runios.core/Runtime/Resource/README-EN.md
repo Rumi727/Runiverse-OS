@@ -413,18 +413,26 @@ Use internal data keys as asset IDs instead of file paths
 
 Real examples are `LanguageAssetRegistry` and `SoundAssetRegistry`.
 
-When implementing a registry directly, the registry must handle duplicate reload prevention, progress reporting, and tracking lifecycle itself.
+When implementing a registry directly, use `AsyncReloadGate` for duplicate reload coordination. Keep progress reporting and tracking lifecycle in the reload body.
 
 ```csharp
-public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
-{
-    if (isLoading)
-    {
-        await UniTask.WaitWhile(() => isLoading);
-        return;
-    }
+readonly AsyncReloadGate reloadGate = new();
 
-    _isLoading = true;
+public override bool isLoading => reloadGate.isRunning;
+
+public override UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IProgress<float>? progress = null)
+{
+    ResourcePack[] resourcePackSnapshot = resourcePacks.ToArray();
+
+    return reloadGate.Run
+    (
+        reloadProgress => ReloadCore(resourcePackSnapshot, reloadProgress),
+        progress
+    );
+}
+
+async UniTask ReloadCore(ResourcePack[] resourcePacks, IProgress<float>? progress)
+{
     BeginTracking();
 
     try
@@ -446,12 +454,11 @@ public override async UniTask Reload(IEnumerable<ResourcePack> resourcePacks, IP
         progress.SafeReport(1);
 
         EndTracking();
-        _isLoading = false;
     }
 }
 ```
 
-This is more work, but gives full control.\
+`AsyncReloadGate` joins requests into the current reload batch and runs the latest pending request as another pass. There is no need to write `WaitWhile`, a separate `isLoading` flag, or duplicate-execution branches manually.\
 The registry decides progress calculation, parallel work, merge rules, and exactly when handles are recorded.
 
 ## When To Use Which
