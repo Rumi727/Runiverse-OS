@@ -55,8 +55,8 @@ namespace RuniOS.IO
 
 
 
-        RuniPath(string path) => _value = path;
-        RuniPath(ReadOnlySpan<char> path) => _value = path.ToString();
+        public RuniPath(string path) => _value = NormalizePath(path);
+        public RuniPath(ReadOnlySpan<char> path) => _value = NormalizePath(path.ToString());
 
 
 
@@ -72,7 +72,7 @@ namespace RuniOS.IO
         /// A normalized <see cref="RuniPath"/> value.<br/>
         /// 정규화된 <see cref="RuniPath"/> 값을 반환합니다.
         /// </returns>
-        public static RuniPath From(string path) => new RuniPath(NormalizePath(path));
+        public static RuniPath From(string path) => new RuniPath(path);
 
         /// <summary>
         /// Creates a new <see cref="RuniPath"/> from the specified path string.<br/>
@@ -86,7 +86,7 @@ namespace RuniOS.IO
         /// A normalized <see cref="RuniPath"/> value.<br/>
         /// 정규화된 <see cref="RuniPath"/> 값을 반환합니다.
         /// </returns>
-        public static RuniPath From(ReadOnlySpan<char> path) => new RuniPath(NormalizePath(path.ToString()));
+        public static RuniPath From(ReadOnlySpan<char> path) => new RuniPath(path);
 
 
 
@@ -128,7 +128,7 @@ namespace RuniOS.IO
         /// A path without the last segment extension, or this path when no extension exists.<br/>
         /// 마지막 세그먼트의 확장자가 제거된 경로를 반환하며, 확장자가 없으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath GetPathWithoutExtension() => new RuniPath(RuniPathUtility.GetPathWithoutExtension(value));
+        public readonly RuniPath GetPathWithoutExtension() => new RuniPath { _value = RuniPathUtility.GetPathWithoutExtension(value).ToString() };
 
         /// <summary>
         /// Gets the path that contains every segment except the last one.<br/>
@@ -138,7 +138,7 @@ namespace RuniOS.IO
         /// The parent path, or <see cref="empty"/> when this path has no parent segment.<br/>
         /// 상위 경로를 반환하며, 상위 세그먼트가 없으면 <see cref="empty"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath GetParentPath() => new RuniPath(RuniPathUtility.GetParentPath(value));
+        public readonly RuniPath GetParentPath() => new RuniPath { _value = RuniPathUtility.GetParentPath(value).ToString() };
 
 
 
@@ -154,7 +154,7 @@ namespace RuniOS.IO
         /// The path with the prefix removed when the prefix matches; otherwise, this path.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 현재 경로를 반환합니다.
         /// </returns>
-        public readonly RuniPath GetRelativePath(RuniPath relativeTo) => new RuniPath(RuniPathUtility.GetRelativePath(value, relativeTo.value));
+        public readonly RuniPath GetRelativePath(RuniPath relativeTo) => new RuniPath { _value = RuniPathUtility.GetRelativePath(value, relativeTo.value).ToString() };
 
         /// <summary>
         /// Attempts to remove the specified prefix path from this path.<br/>
@@ -175,7 +175,7 @@ namespace RuniOS.IO
         public readonly bool TryGetRelativePath(RuniPath relativeTo, out RuniPath result)
         {
             bool success = RuniPathUtility.TryGetRelativePath(value, relativeTo.value, out ReadOnlySpan<char> span);
-            result = new RuniPath(span);
+            result = new RuniPath { _value = span.ToString() };
             return success;
         }
 
@@ -226,7 +226,7 @@ namespace RuniOS.IO
         /// A new <see cref="RuniPath"/> with the extension appended.<br/>
         /// 확장자가 덧붙여진 새 <see cref="RuniPath"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath AddExtension(FileExtension ext) => new RuniPath(value + ext);
+        public readonly RuniPath AddExtension(FileExtension ext) => new RuniPath { _value = value + ext };
 
         /// <summary>
         /// Appends the specified extension to this path.<br/>
@@ -240,7 +240,7 @@ namespace RuniOS.IO
         /// A new <see cref="RuniPath"/> with the extension appended.<br/>
         /// 확장자가 덧붙여진 새 <see cref="RuniPath"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath AddExtension(string ext) => new RuniPath(value + (FileExtension)ext);
+        public readonly RuniPath AddExtension(string ext) => new RuniPath { _value = value + (FileExtension)ext };
 
         public readonly RuniPath SetExtension(FileExtension ext) => GetPathWithoutExtension().AddExtension(ext);
         public readonly RuniPath SetExtension(string ext) => GetPathWithoutExtension().AddExtension(ext);
@@ -268,24 +268,27 @@ namespace RuniOS.IO
             else if (path.length == 0)
                 return this;
 
-            return new RuniPath(string.Create(length + 1 + path.length, (left: this, right: path), static (span, state) =>
+            return new RuniPath
             {
-                int index = 0;
-                for (int i = 0; i < state.left.length; i++)
+                _value = string.Create(length + 1 + path.length, (left: this, right: path), static (span, state) =>
                 {
-                    span[index] = state.left.value[i];
-                    index++;
-                }
+                    int index = 0;
+                    for (int i = 0; i < state.left.length; i++)
+                    {
+                        span[index] = state.left.value[i];
+                        index++;
+                    }
 
-                span[index] = directorySeparatorChar;
-                index++;
-
-                for (int i = 0; i < state.right.length; i++)
-                {
-                    span[index] = state.right.value[i];
+                    span[index] = directorySeparatorChar;
                     index++;
-                }
-            }));
+
+                    for (int i = 0; i < state.right.length; i++)
+                    {
+                        span[index] = state.right.value[i];
+                        index++;
+                    }
+                })
+            };
         }
 
         /// <summary>
@@ -300,7 +303,7 @@ namespace RuniOS.IO
         /// The combined <see cref="RuniPath"/>.<br/>
         /// 결합된 <see cref="RuniPath"/>를 반환합니다.
         /// </returns>
-        public readonly RuniPath Combine(string path) => Combine(new RuniPath(NormalizePath(path)));
+        public readonly RuniPath Combine(string path) => Combine(new RuniPath(path));
 
 
 
@@ -490,7 +493,7 @@ namespace RuniOS.IO
         /// The path string to convert.<br/>
         /// 변환할 경로 문자열입니다.
         /// </param>
-        public static explicit operator RuniPath(string path) => new RuniPath(NormalizePath(path));
+        public static explicit operator RuniPath(string path) => new RuniPath(path);
 
         /// <summary>
         /// Converts a string to a normalized <see cref="RuniPath"/>.<br/>
@@ -500,7 +503,7 @@ namespace RuniOS.IO
         /// The path span to convert.<br/>
         /// 변환할 경로 span입니다.
         /// </param>
-        public static explicit operator RuniPath(ReadOnlySpan<char> path) => new RuniPath(NormalizePath(path.ToString()));
+        public static explicit operator RuniPath(ReadOnlySpan<char> path) => new RuniPath(path);
 
 
 
