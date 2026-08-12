@@ -64,17 +64,7 @@ namespace RuniOS.IO
             set
             {
                 value ??= string.Empty;
-
-                int separatorIndex = value.LastIndexOf(RuniPath.directorySeparatorChar);
-                int extIndex = value.LastIndexOf(extensionSeparatorChar);
-
-                if (extIndex <= separatorIndex)
-                {
-                    _value = string.Empty;
-                    return;
-                }
-
-                _value = value.Substring(extIndex);
+                _value = RuniPathUtility.GetExtension(value).ToString();
             }
         }
         [SerializeField, FieldName("runios-editor:gui.value"), NotNullField, JsonIgnore] string? _value;
