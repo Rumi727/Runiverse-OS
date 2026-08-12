@@ -142,7 +142,9 @@ namespace RuniOS.IO
                 {
                     RecurseSubdirectories = recursive,
                     IgnoreInaccessible = true,
-                    MatchCasing = MatchCasing.PlatformDefault,
+                    MatchCasing = MatchCasing.CaseSensitive,
+                    MatchType = MatchType.Simple,
+                    ReturnSpecialDirectories = false
                 }
             );
 
