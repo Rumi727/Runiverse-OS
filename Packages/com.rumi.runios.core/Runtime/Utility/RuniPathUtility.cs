@@ -128,9 +128,9 @@ namespace RuniOS.Utility
         /// <see langword="true"/> if the file name is a Windows reserved device name; otherwise, <see langword="false"/>.<br/>
         /// 파일 이름이 Windows 예약 장치 이름이면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool IsWindowsReservedName(ReadOnlySpan<char> path)
+        public static bool IsWindowsReservedName(scoped ReadOnlySpan<char> path)
         {
-            ReadOnlySpan<char> name = Path.GetFileNameWithoutExtension(path);
+            ReadOnlySpan<char> name = GetFileNameWithoutExtension(path);
             if (name.Length != 3 && name.Length != 4)
                 return false;
 
@@ -294,7 +294,7 @@ namespace RuniOS.Utility
         /// The trimmed path when the prefix matches; otherwise, <paramref name="path"/>.<br/>
         /// 접두사가 일치하면 제거된 경로를 반환하고, 그렇지 않으면 빈 경로를 반환합니다.
         /// </returns>
-        public static ReadOnlySpan<char> GetRelativePath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo)
+        public static ReadOnlySpan<char> GetRelativePath(ReadOnlySpan<char> path, scoped ReadOnlySpan<char> relativeTo)
         {
             if (TryGetRelativePath(path, relativeTo, out var result))
                 return result;
@@ -322,7 +322,7 @@ namespace RuniOS.Utility
         /// <see langword="true"/> if the prefix matches; otherwise, <see langword="false"/>.<br/>
         /// 접두사가 일치하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool TryGetRelativePath(ReadOnlySpan<char> path, ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
+        public static bool TryGetRelativePath(ReadOnlySpan<char> path, scoped ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
         {
             if (path == relativeTo)
             {
@@ -356,7 +356,7 @@ namespace RuniOS.Utility
         /// <see langword="true"/> if <paramref name="path"/> equals <paramref name="startPath"/> or is under it; otherwise, <see langword="false"/>.<br/>
         /// <paramref name="path"/>가 <paramref name="startPath"/>와 같거나 그 아래에 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public static bool StartsWith(ReadOnlySpan<char> path, ReadOnlySpan<char> startPath)
+        public static bool StartsWith(scoped ReadOnlySpan<char> path, scoped ReadOnlySpan<char> startPath)
         {
             if (path == startPath)
                 return true;
