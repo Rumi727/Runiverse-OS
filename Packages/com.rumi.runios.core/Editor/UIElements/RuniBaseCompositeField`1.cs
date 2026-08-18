@@ -427,7 +427,7 @@ namespace RuniOS.Editor.UIElements
             public TField field { get; }
 
             /// <inheritdoc/>
-            public VisualElement element => field;
+            public VisualElement element => this.field;
         }
         
         /// <summary>
@@ -531,7 +531,7 @@ namespace RuniOS.Editor.UIElements
             public TField field { get; }
 
             /// <inheritdoc/>
-            public VisualElement element => field;
+            public VisualElement element => this.field;
 
             /// <summary>
             /// 부모 필드의 값이 변경될 때 호출되는 이벤트입니다.

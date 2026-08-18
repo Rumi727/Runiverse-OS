@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup Condition=" '$(MSBuildProjectName.Length)' >= 6 And '$(MSBuildProjectName.Substring(0,6))' == 'RuniOS' ">
     <Nullable>enable</Nullable>
-    <LangVersion>12</LangVersion>
+    <LangVersion>14</LangVersion>
   </PropertyGroup>
 </Project>

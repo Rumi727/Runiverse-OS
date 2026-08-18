@@ -49,7 +49,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드의 타입을 가져옵니다.
         /// </summary>
-        public Type variableType => field.FieldType;
+        public Type variableType => this.field.FieldType;
 
         /// <summary>
         /// 필드의 null 허용 여부 정보를 가져옵니다.
@@ -64,12 +64,12 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드가 공개되어있는지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public override bool isPublic => field.IsPublic;
+        public override bool isPublic => this.field.IsPublic;
 
         /// <summary>
         /// 필드가 정적인지 여부를 나타내는 값을 가져옵니다.
         /// </summary>
-        public override bool isStatic => field.IsStatic || field.IsLiteral;
+        public override bool isStatic => this.field.IsStatic || this.field.IsLiteral;
 
         /// <summary>
         /// 엑세스 메소드를 커스텀할 수 있습니다.
@@ -86,7 +86,7 @@ namespace RuniOS.Inspectors.Csharp
             {
                 try
                 {
-                    object? Method() => field.GetValue(inspectable.instance);
+                    object? Method() => this.field.GetValue(inspectable.instance);
                     return accessor.readFunc != null ? accessor.readFunc.Invoke(Method) : Method();
                 }
                 catch (Exception e)
@@ -108,7 +108,7 @@ namespace RuniOS.Inspectors.Csharp
                     
                     if (isStatic)
                     {
-                        field.SetValue(null, value);
+                        this.field.SetValue(null, value);
                         return;
                     }
 
@@ -117,7 +117,7 @@ namespace RuniOS.Inspectors.Csharp
                         // 값 형식은 참조가 아닌 복사이기에 값 바꿔줘야함
                         inspectable.parentElement.SetValues(inspectable.instances.Select(x =>
                         {
-                            field.SetValue(x, value);
+                            this.field.SetValue(x, value);
                             return x;
                         }));
                     }
@@ -125,7 +125,7 @@ namespace RuniOS.Inspectors.Csharp
                     {
                         var instances = inspectable.instances;
                         for (int i = 0; i < instances.Count; i++)
-                            field.SetValue(instances[i], value);
+                            this.field.SetValue(instances[i], value);
                     }
 
                     inspectable.OnValueChangedInvoke();
@@ -160,10 +160,10 @@ namespace RuniOS.Inspectors.Csharp
                         object? item = instances[i];
                         if (variableType.IsPointer)
                         {
-                            if (((Pointer)field.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
+                            if (((Pointer)this.field.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
                                 return true;
                         }
-                        else if (!Equals(field.GetValue(item), value))
+                        else if (!Equals(this.field.GetValue(item), value))
                             return true;
                     }
 
