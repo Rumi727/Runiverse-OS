@@ -15,7 +15,7 @@ namespace RuniOS.Resource.Sounds
 
         public override Type assetType => typeof(WaveAudioClip);
 
-        public override WildcardPatterns assetFilter => WildcardPatterns.musicFileFilter;
+        public override IPatternMatcher assetMatcher => IPatternMatcher.musicMatcher;
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<WaveAudioAssetRegistry>();

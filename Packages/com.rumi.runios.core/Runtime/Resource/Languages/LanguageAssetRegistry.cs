@@ -54,7 +54,7 @@ namespace RuniOS.Resource.Languages
                             if (!await registryNode.dir.Exists())
                                 continue;
 
-                            await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(WildcardPatterns.jsonFileFilter))
+                            await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(IPatternMatcher.jsonMatcher))
                             {
                                 uniTasks.Add(UniTask.Defer(Method));
 

@@ -28,7 +28,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋 파일 검색에 사용되는 와일드카드 패턴을 가져옵니다.
         /// </summary>
-        public abstract WildcardPatterns assetFilter { get; }
+        public abstract IPatternMatcher assetMatcher { get; }
 
         readonly AsyncReloadGate reloadGate = new();
 
@@ -81,7 +81,7 @@ namespace RuniOS.Resource
 
                 await OnBeginAssetLoop();
 
-                WildcardPatterns patterns = new WildcardPatterns(assetFilter.Concat(WildcardPatterns.jsonFileFilter));
+                PatternMatcherSet<IPatternMatcher> patterns = [assetMatcher, IPatternMatcher.jsonMatcher];
 
                 // 모든 리소스 팩을 순회하며 로드할 에셋을 비동기적으로 인덱싱
                 Dictionary<Identifier, AssetLoadTarget> loadTargetDict = [];

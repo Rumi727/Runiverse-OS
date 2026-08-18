@@ -60,12 +60,12 @@ namespace RuniOS.Editor.Resource
         protected internal virtual void OnInteractivePreviewGUI(Rect r, PhysicalPath rootPath, RuniPath relativePath, GUIStyle background) => OnPreviewGUI(r, rootPath, relativePath, background);
         protected internal virtual void OnPreviewSettings() { }
 
-        protected static bool IsMatch(RuniPath path, string folderName, WildcardPatterns patterns)
+        protected static bool IsMatch(RuniPath path, string folderName, IPatternMatcher matcher)
         {
             if (!Regex.IsMatch(path.value, $"^assets/.*/{folderName}/.*", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture))
                 return false;
 
-            return patterns.IsMatch(path);
+            return matcher.IsMatch(path);
         }
 
         public void Repaint() => repaintAction?.Invoke();

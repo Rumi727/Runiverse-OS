@@ -28,7 +28,7 @@ namespace RuniOS.Resource.NBS
         public override Type assetType => typeof(NoteBlockClip);
 
         /// <inheritdoc/>
-        public override WildcardPatterns assetFilter => WildcardPatterns.nbsFileFilter;
+        public override IPatternMatcher assetMatcher => IPatternMatcher.nbsMatcher;
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<NBSAssetRegistry>();

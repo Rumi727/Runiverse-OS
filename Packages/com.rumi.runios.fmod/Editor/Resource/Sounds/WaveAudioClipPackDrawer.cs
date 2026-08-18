@@ -32,7 +32,7 @@ namespace RuniOS.Editor.Resource.Sounds
         readonly AudioPreview preview = new AudioPreview();
         readonly Dictionary<PhysicalPath, Texture2D> loadedTextures = [];
 
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => IsMatch(x, "sounds", WildcardPatterns.musicFileFilter));
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
 
         protected override void OnEnable() => AudioPreview.onLoadedAudio += Repaint;
 

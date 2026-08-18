@@ -86,7 +86,7 @@ namespace RuniOS.IO
             /// Gets direct file entries under this node that match the specified wildcard patterns.<br/>
             /// 이 노드 아래의 직계 파일 엔트리 중 지정된 와일드카드 패턴과 일치하는 항목을 가져옵니다.
             /// </summary>
-            /// <param name="wildcardPatterns">
+            /// <param name="matcher">
             /// The wildcard patterns used to filter file paths.<br/>
             /// 파일 경로를 필터링하는 데 사용할 와일드카드 패턴입니다.
             /// </param>
@@ -98,9 +98,9 @@ namespace RuniOS.IO
             /// An asynchronous sequence of matching direct file entries.<br/>
             /// 일치하는 직계 파일 엔트리를 제공하는 비동기 시퀀스입니다.
             /// </returns>
-            public IUniTaskAsyncEnumerable<IOEntry> GetFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) =>
+            public IUniTaskAsyncEnumerable<IOEntry> GetFiles(IPatternMatcher matcher, CancellationToken cancellationToken = default) =>
                 node.provider.EnumerateEntries(node.path, false, cancellationToken)
-                    .Where(x => !x.isDirectory && wildcardPatterns.IsMatch(x.path));
+                    .Where(x => !x.isDirectory && matcher.IsMatch(x.path));
 
             /// <summary>
             /// Gets file entries under this node recursively.<br/>
@@ -120,7 +120,7 @@ namespace RuniOS.IO
             /// Gets file entries under this node recursively that match the specified wildcard patterns.<br/>
             /// 이 노드 아래의 파일 엔트리 중 지정된 와일드카드 패턴과 일치하는 항목을 재귀적으로 가져옵니다.
             /// </summary>
-            /// <param name="wildcardPatterns">
+            /// <param name="matcher">
             /// The wildcard patterns used to filter file paths.<br/>
             /// 파일 경로를 필터링하는 데 사용할 와일드카드 패턴입니다.
             /// </param>
@@ -132,9 +132,9 @@ namespace RuniOS.IO
             /// An asynchronous sequence of matching recursive file entries.<br/>
             /// 일치하는 재귀 파일 엔트리를 제공하는 비동기 시퀀스입니다.
             /// </returns>
-            public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) =>
+            public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(IPatternMatcher matcher, CancellationToken cancellationToken = default) =>
                 node.provider.EnumerateEntries(node.path, true, cancellationToken)
-                    .Where(x => !x.isDirectory && wildcardPatterns.IsMatch(x.path));
+                    .Where(x => !x.isDirectory && matcher.IsMatch(x.path));
         }
     }
 }

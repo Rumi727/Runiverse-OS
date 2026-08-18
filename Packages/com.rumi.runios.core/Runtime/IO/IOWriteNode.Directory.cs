@@ -33,14 +33,14 @@ namespace RuniOS.IO
             /// <inheritdoc cref="IONode.Directory.GetFiles(CancellationToken)"/>
             public IUniTaskAsyncEnumerable<IOEntry> GetFiles(CancellationToken cancellationToken = default) => readOnlyDir.GetFiles(cancellationToken);
 
-            /// <inheritdoc cref="IONode.Directory.GetFiles(WildcardPatterns, CancellationToken)"/>
-            public IUniTaskAsyncEnumerable<IOEntry> GetFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) => readOnlyDir.GetFiles(wildcardPatterns, cancellationToken);
+            /// <inheritdoc cref="IONode.Directory.GetFiles(IPatternMatcher, CancellationToken)"/>
+            public IUniTaskAsyncEnumerable<IOEntry> GetFiles(IPatternMatcher matcher, CancellationToken cancellationToken = default) => readOnlyDir.GetFiles(matcher, cancellationToken);
 
             /// <inheritdoc cref="IONode.Directory.GetAllFiles(CancellationToken)"/>
             public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(CancellationToken cancellationToken = default) => readOnlyDir.GetAllFiles(cancellationToken);
 
-            /// <inheritdoc cref="IONode.Directory.GetAllFiles(WildcardPatterns, CancellationToken)"/>
-            public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(WildcardPatterns wildcardPatterns, CancellationToken cancellationToken = default) => readOnlyDir.GetAllFiles(wildcardPatterns, cancellationToken);
+            /// <inheritdoc cref="IONode.Directory.GetAllFiles(IPatternMatcher, CancellationToken)"/>
+            public IUniTaskAsyncEnumerable<IOEntry> GetAllFiles(IPatternMatcher matcher, CancellationToken cancellationToken = default) => readOnlyDir.GetAllFiles(matcher, cancellationToken);
 
             /// <summary>
             /// Creates the directory represented by this node.<br/>
