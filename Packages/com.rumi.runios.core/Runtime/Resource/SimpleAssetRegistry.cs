@@ -84,7 +84,7 @@ namespace RuniOS.Resource
                 PatternMatcherSet<IPatternMatcher> patterns = [assetMatcher, IPatternMatcher.jsonMatcher];
 
                 // 모든 리소스 팩을 순회하며 로드할 에셋을 비동기적으로 인덱싱
-                Dictionary<Identifier, AssetLoadTarget> loadTargetDict = [];
+                List<AssetLoadTarget> loadTargetDict = [];
                 foreach (var resourcePack in resourcePacks)
                 {
                     await foreach ((string nameSpace, IONode registryNode) in GetRegistryNodes(resourcePack))
@@ -95,9 +95,11 @@ namespace RuniOS.Resource
                             {
                                 RuniPath path = fileEntry.path.GetRelativePath(registryNode.path);
                                 Identifier identifier = new Identifier(nameSpace, path.GetPathWithoutExtension());
-                                IONode node = registryNode.Bind(fileEntry);
+                                if (IsTracked(identifier))
+                                    continue;
 
-                                loadTargetDict.TryAdd(identifier, new AssetLoadTarget(resourcePack, node, fileEntry.metaData));
+                                IONode node = registryNode.Bind(fileEntry);
+                                loadTargetDict.Add(new AssetLoadTarget(identifier, resourcePack, node, fileEntry.metaData));
                             }
                             catch (Exception e)
                             {
@@ -108,23 +110,26 @@ namespace RuniOS.Resource
                 }
 
                 // 인덱싱한 모든 에셋을 에셋 핸들로 순서대로 등록함
-                int count = 0;
-                foreach (var target in loadTargetDict)
+                for (int i = 0; i < loadTargetDict.Count; i++)
                 {
+                    AssetLoadTarget target = loadTargetDict[i];
+                    if (IsTracked(target.identifier))
+                        continue;
+
                     try
                     {
-                        AssetImportData importData = new AssetImportData(target.Value.node.AddExtension(".json"));
+                        AssetImportData importData = new AssetImportData(target.node.AddExtension(".json"));
 
-                        THandle handle = await CreateHandle(target.Value.node, target.Value.fileMetaData, importData);
-                        await OnAssetLoop(target.Key, target.Value.node, handle);
+                        THandle handle = await CreateHandle(target.node, target.fileMetaData, importData);
+                        await OnAssetLoop(target.identifier, target.node, handle);
                     }
                     catch (Exception e)
                     {
-                        Debug.RuntimeLogError($"An exception occurred while loading {target.Value.node.path} resources from the resource pack {target.Value.resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                        Debug.RuntimeLogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.resourcePack.identifier}. The exception is: {e}", GetType().Name);
                     }
 
                     // 로드 대상 처리 진행률 보고
-                    progress.SafeReport((float)++count / loadTargetDict.Count);
+                    progress.SafeReport((float)i / loadTargetDict.Count);
                 }
 
                 await OnEndAssetLoop();
@@ -158,6 +163,6 @@ namespace RuniOS.Resource
             return UniTask.CompletedTask;
         }
 
-        readonly record struct AssetLoadTarget(ResourcePack resourcePack, IONode node, FileMetaData fileMetaData);
+        readonly record struct AssetLoadTarget(Identifier identifier, ResourcePack resourcePack, IONode node, FileMetaData fileMetaData);
     }
 }
