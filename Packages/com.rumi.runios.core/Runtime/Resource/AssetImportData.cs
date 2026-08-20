@@ -8,14 +8,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public sealed class AssetImportData(IONode node, FileMetaData? metaData = null) : IReadOnlyDictionary<Identifier, JObject>
+    public sealed class AssetImportData(IONode node, FileMetaData metaData = default) : IReadOnlyDictionary<Identifier, JObject>
     {
         public static readonly AssetImportData empty = new AssetImportData();
 
         public AssetImportData() : this(IONode.empty) { }
 
         public IONode node { get; } = node;
-        public FileMetaData? metaData { get; private set; } = metaData;
+        public FileMetaData metaData { get; private set; } = metaData;
 
         public int count => value.Count;
         int IReadOnlyCollection<KeyValuePair<Identifier, JObject>>.Count => count;
@@ -59,7 +59,7 @@ namespace RuniOS.Resource
             if (await node.file.GetEntry() is not { } entry)
             {
                 value = [];
-                metaData = null;
+                metaData = default;
 
                 return;
             }
@@ -73,7 +73,7 @@ namespace RuniOS.Resource
             catch (Exception e)
             {
                 value = [];
-                metaData = null;
+                metaData = default;
 
                 Debug.LogError($"Failed to load import settings at path {entry.path}! The exception is: {e}");
             }

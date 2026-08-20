@@ -85,7 +85,6 @@ namespace RuniOS.Resource
 
                 // 모든 리소스 팩을 순회하며 로드할 에셋을 비동기적으로 인덱싱
                 Dictionary<Identifier, AssetLoadTarget> loadTargetDict = [];
-                Dictionary<Identifier, AssetImportData> importDataDict = [];
                 foreach (var resourcePack in resourcePacks)
                 {
                     await foreach ((string nameSpace, IONode registryNode) in GetRegistryNodes(resourcePack))
@@ -98,10 +97,7 @@ namespace RuniOS.Resource
                                 Identifier identifier = new Identifier(nameSpace, path.GetPathWithoutExtension());
                                 IONode node = registryNode.Bind(fileEntry);
 
-                                if (RuniPathUtility.GetExtension(path.value) is ".json")
-                                    importDataDict.TryAdd(identifier, new AssetImportData(node, fileEntry.metaData));
-                                else
-                                    loadTargetDict.TryAdd(identifier, new AssetLoadTarget(resourcePack, node, fileEntry.metaData));
+                                loadTargetDict.TryAdd(identifier, new AssetLoadTarget(resourcePack, node, fileEntry.metaData));
                             }
                             catch (Exception e)
                             {
@@ -117,8 +113,7 @@ namespace RuniOS.Resource
                 {
                     try
                     {
-                        if (!importDataDict.TryGetValue(target.Key, out AssetImportData importData))
-                            importData = new AssetImportData(target.Value.node.SetExtension(".json"));
+                        AssetImportData importData = new AssetImportData(target.Value.node.AddExtension(".json"));
 
                         THandle handle = await CreateHandle(target.Value.node, target.Value.fileMetaData, importData);
                         await OnAssetLoop(target.Key, target.Value.node, handle);
