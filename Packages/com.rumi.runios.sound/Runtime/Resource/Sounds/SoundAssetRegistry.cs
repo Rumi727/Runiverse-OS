@@ -10,11 +10,11 @@ namespace RuniOS.Resource.Sounds
 {
     public sealed partial class SoundAssetRegistry : AssetRegistry<InstanceAssetHandle<SoundClipRef>>
     {
+        /// <inheritdoc cref="registryId" />
+        public static readonly Identifier id = new Identifier("runios", "sounds");
         public const string jsonFileName = "sounds.json";
 
-        public static SoundAssetRegistry instance => AssetRegistryManager.Get<SoundAssetRegistry>() ?? new SoundAssetRegistry();
-
-        public override Identifier registryId => new Identifier("runios", "sounds");
+        public override Identifier registryId => id;
 
         public override bool isSupportedImportData => false;
 

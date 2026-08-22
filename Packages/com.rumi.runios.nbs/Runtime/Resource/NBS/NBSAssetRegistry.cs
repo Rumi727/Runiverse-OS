@@ -12,8 +12,11 @@ namespace RuniOS.Resource.NBS
     /// </summary>
     public sealed partial class NBSAssetRegistry : SimpleAssetRegistry<NBSAssetHandle>
     {
+        /// <inheritdoc cref="registryId" />
+        public static Identifier id = new Identifier("runios", "nbs");
+
         /// <inheritdoc/>
-        public override Identifier registryId => new Identifier("runios", "nbs");
+        public override Identifier registryId => id;
 
         /// <inheritdoc/>
         public override RuniPath registryName => RuniPath.From("nbses");

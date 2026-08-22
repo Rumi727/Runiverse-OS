@@ -11,7 +11,10 @@ namespace RuniOS.Resource.Languages
 {
     public sealed partial class LanguageAssetRegistry : AssetRegistry<InstanceAssetHandle<LocalizationData>>
     {
-        public override Identifier registryId => new Identifier("runios", "lang");
+        /// <inheritdoc cref="registryId" />
+        public static readonly Identifier id = new Identifier("runios", "lang");
+
+        public override Identifier registryId => id;
 
         public override bool isDefault => true;
 

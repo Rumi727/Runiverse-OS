@@ -10,7 +10,7 @@ namespace RuniOS.Resource.Sounds
     {
         protected override async UniTask<WaveAudioClip?> Load()
         {
-            WaveAudioAssetImportData data = importData.GetValue<WaveAudioAssetImportData>(new Identifier("runios", "waves"));
+            WaveAudioAssetImportData data = importData.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
             return data.loadMode switch
             {
                 WaveAudioAssetLoadMode.normal => await SoundSystem.main.CreateSoundAsync(node),
