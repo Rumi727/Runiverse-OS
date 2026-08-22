@@ -24,6 +24,13 @@ namespace RuniOS.Editor.Sounds
             ObjectChangeEvents.changesPublished += ChangesPublished;
         }
 
+        [OnCodeUnloading]
+        static void OnCodeUnloading()
+        {
+            EditorApplication.update -= Update;
+            ObjectChangeEvents.changesPublished -= ChangesPublished;
+        }
+
         static void ChangesPublished(ref ObjectChangeEventStream stream) => UpdateGameView();
 
         static void Update()
