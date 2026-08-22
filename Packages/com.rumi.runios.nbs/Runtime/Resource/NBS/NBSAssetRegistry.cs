@@ -12,9 +12,6 @@ namespace RuniOS.Resource.NBS
     /// </summary>
     public sealed partial class NBSAssetRegistry : SimpleAssetRegistry<NBSAssetHandle>
     {
-        /// <summary>Gets the active registry instance.<br/>활성 레지스트리 인스턴스를 가져옵니다.</summary>
-        public static NBSAssetRegistry instance => AssetRegistryManager.Get<NBSAssetRegistry>() ?? new NBSAssetRegistry();
-
         /// <inheritdoc/>
         public override Identifier registryId => new Identifier("runios", "nbs");
 
