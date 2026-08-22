@@ -21,7 +21,7 @@ namespace RuniOS.IO
 
         public bool isIndependent => true;
 
-        public IWritableIOProvider Recreate(RuniPath path) => this;
+        //public IWritableIOProvider Recreate(RuniPath path) => this;
 
         public bool IsSameTarget(IIOProvider other) => ReferenceEquals(this, other);
 
