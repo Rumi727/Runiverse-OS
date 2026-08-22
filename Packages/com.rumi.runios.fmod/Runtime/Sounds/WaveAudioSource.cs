@@ -8,6 +8,7 @@ using System.Threading;
 namespace RuniOS.Sounds
 {
     [ExecuteAlways]
+    [AddComponentMenu("Audio/Wave Audio Source")]
     public sealed class WaveAudioSource : RuniAudioSource, IReloadable
     {
         /// <remarks>
