@@ -10,6 +10,7 @@
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=Unity_002EIncorrectMethodSignature/@EntryIndexedValue"></s:String>
 	<s:Boolean x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=Unity_002EIncorrectMethodSignature/@EntryIndexRemoved">True</s:Boolean>
 	<s:String x:Key="/Default/CodeInspection/Highlighting/InspectionSeverities/=Unity_002EInefficientPropertyAccess/@EntryIndexedValue">SUGGESTION</s:String>
+	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=FI/@EntryIndexedValue">FI</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=IEEE/@EntryIndexedValue">IEEE</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=NBS/@EntryIndexedValue">NBS</s:String>
 	<s:String x:Key="/Default/CodeStyle/Naming/CSharpNaming/Abbreviations/=NU/@EntryIndexedValue">NU</s:String>

@@ -92,6 +92,17 @@
         "com.rumi.runios.core": "1.0.0"
       }
     },
+    "com.rumi.runios.texture": {
+      "version": "file:com.rumi.runios.texture",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "1.0.0",
+        "com.unity.burst": "2.0.0",
+        "com.unity.mathematics": "1.4.0",
+        "com.cysharp.unitask": "2.5.10"
+      }
+    },
     "com.rumi.runios.ui": {
       "version": "file:com.rumi.runios.ui",
       "depth": 0,
