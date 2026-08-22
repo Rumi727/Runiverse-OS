@@ -92,6 +92,10 @@ namespace RuniOS.Resource
 
             if (assetObject != null && !IsDefaultAsset(assetObject))
             {
+#if UNITY_EDITOR
+                UnityEditor.AssemblyReloadEvents.beforeAssemblyReload += ExecuteUnload;
+#endif
+
                 AssetScope<TAsset> scope = new AssetScope<TAsset>(this, assetObject);
                 assetScopes.Add(new WeakReference<AssetScope<TAsset>>(scope));
 
@@ -196,6 +200,10 @@ namespace RuniOS.Resource
 
         internal void ExecuteUnload()
         {
+#if UNITY_EDITOR
+            UnityEditor.AssemblyReloadEvents.beforeAssemblyReload -= ExecuteUnload;
+#endif
+
             TAsset? assetObject = this.assetObject;
             if (assetObject != null && !IsDefaultAsset(assetObject))
             {
