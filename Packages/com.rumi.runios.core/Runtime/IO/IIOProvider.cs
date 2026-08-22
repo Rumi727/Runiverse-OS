@@ -79,7 +79,7 @@ namespace RuniOS.IO
         /// When the asynchronous operation completes, returns <see langword="true"/> if the directory exists; otherwise, <see langword="false"/>.<br/>
         /// 비동기 작업이 완료되면 디렉터리가 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default);
+        async UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default) => await GetEntry(path, cancellationToken) is { isDirectory: true };
 
         /// <summary>
         /// Determines whether a file exists at the specified provider-relative path.<br/>
@@ -97,7 +97,7 @@ namespace RuniOS.IO
         /// When the asynchronous operation completes, returns <see langword="true"/> if the file exists; otherwise, <see langword="false"/>.<br/>
         /// 비동기 작업이 완료되면 파일이 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default);
+        async UniTask<bool> FileExists(RuniPath path, CancellationToken cancellationToken = default) => await GetEntry(path, cancellationToken) is { isDirectory: false };
 
         /// <summary>
         /// Gets a snapshot of the file or directory entry at the specified provider-relative path.<br/>
