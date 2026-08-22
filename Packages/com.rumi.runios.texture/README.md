@@ -34,7 +34,7 @@ using UnityEngine;
 static UniTask<Texture2D> LoadTextureAsync(Stream stream, CancellationToken cancellationToken)
 {
     TextureLoadSettings settings = new(
-        mipmaps: TextureMipmapSettings.full,
+        mipmapCount: 0,
         linear: false,
         makeNoLongerReadable: true);
 
@@ -77,7 +77,7 @@ public static UniTask<Texture2D> LoadAsync(
 
 | 설정 | 설명 |
 | --- | --- |
-| `mipmaps` | 밉맵 생성 방식. 기본값은 `full`입니다. |
+| `mipmapCount` | `0` 이하는 전체 밉맵 자동 생성, `1`은 밉맵 없음, `2` 이상은 기본 레벨을 포함한 명시적 개수입니다. 기본값은 `0`입니다. |
 | `linear` | 결과 텍스처를 선형 데이터로 취급할지 여부입니다. |
 | `makeNoLongerReadable` | `Apply` 뒤 CPU 측 텍스처 데이터를 제거할지 여부입니다. |
 
@@ -86,12 +86,12 @@ public static UniTask<Texture2D> LoadAsync(
 ## 밉맵 설정
 
 ```csharp
-TextureMipmapSettings.full;          // 1x1까지 모든 레벨
-TextureMipmapSettings.none;          // 기본 레벨만
-TextureMipmapSettings.Explicit(4);   // 기본 레벨 포함 총 4개 레벨
+new TextureLoadSettings(mipmapCount: 0); // 1x1까지 자동 생성
+new TextureLoadSettings(mipmapCount: 1); // 기본 레벨만
+new TextureLoadSettings(mipmapCount: 4); // 기본 레벨 포함 총 4개 레벨
 ```
 
-`Explicit(count)`의 `count`는 기본 레벨을 포함합니다. 이미지 크기가 허용하는 최대 레벨보다 큰 값을 지정하면 `ArgumentOutOfRangeException`이 발생합니다.
+`mipmapCount`가 `0` 이하이면 이미지 크기에 맞춰 1x1까지 생성합니다. `2` 이상 값은 기본 레벨을 포함합니다. 이미지 크기가 허용하는 최대 레벨보다 큰 값을 지정하면 `ArgumentOutOfRangeException`이 발생합니다.
 
 ## 처리 흐름
 

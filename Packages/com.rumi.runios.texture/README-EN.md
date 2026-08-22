@@ -34,7 +34,7 @@ using UnityEngine;
 static UniTask<Texture2D> LoadTextureAsync(Stream stream, CancellationToken cancellationToken)
 {
     TextureLoadSettings settings = new(
-        mipmaps: TextureMipmapSettings.full,
+        mipmapCount: 0,
         linear: false,
         makeNoLongerReadable: true);
 
@@ -77,7 +77,7 @@ public static UniTask<Texture2D> LoadAsync(
 
 | Setting | Description |
 | --- | --- |
-| `mipmaps` | Mipmap generation mode. The default is `full`. |
+| `mipmapCount` | Values less than or equal to `0` generate the full chain automatically, `1` disables mipmaps, and values of `2` or greater request an explicit count including the base level. The default is `0`. |
 | `linear` | Whether the resulting texture treats pixel values as linear data. |
 | `makeNoLongerReadable` | Whether CPU-side texture data is discarded after `Apply`. |
 
@@ -86,12 +86,12 @@ The current public API does not expose direct `TextureFormat` selection. The dec
 ## Mipmap settings
 
 ```csharp
-TextureMipmapSettings.full;          // Every level down to 1x1
-TextureMipmapSettings.none;          // Base level only
-TextureMipmapSettings.Explicit(4);   // Four total levels, including base
+new TextureLoadSettings(mipmapCount: 0); // Automatic generation down to 1x1
+new TextureLoadSettings(mipmapCount: 1); // Base level only
+new TextureLoadSettings(mipmapCount: 4); // Four total levels, including base
 ```
 
-The `count` passed to `Explicit(count)` includes the base level. Values beyond the maximum level allowed by the image dimensions throw `ArgumentOutOfRangeException`.
+Values less than or equal to `0` generate levels down to 1x1. Values of `2` or greater include the base level in the requested count. Values beyond the maximum level allowed by the image dimensions throw `ArgumentOutOfRangeException`.
 
 ## Processing pipeline
 

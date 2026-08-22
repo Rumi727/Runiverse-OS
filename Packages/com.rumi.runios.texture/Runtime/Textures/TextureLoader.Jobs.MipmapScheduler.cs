@@ -8,10 +8,10 @@ namespace RuniOS.Textures
     {
         static class TextureMipmapScheduler
         {
-            public static TextureMipmapData Schedule(DecodedImage decodedImage, TextureMipmapSettings settings)
+            public static TextureMipmapData Schedule(DecodedImage decodedImage, int mipmapCount)
             {
-                int mipmapCount = GetMipmapCount(decodedImage.width, decodedImage.height, settings);
-                NativeArray<byte>[] levels = mipmapCount == 1 ? [] : new NativeArray<byte>[mipmapCount - 1];
+                int actualMipmapCount = GetMipmapCount(decodedImage.width, decodedImage.height, mipmapCount);
+                NativeArray<byte>[] levels = actualMipmapCount == 1 ? [] : new NativeArray<byte>[actualMipmapCount - 1];
                 JobHandle dependency = default;
 
                 try
@@ -20,7 +20,7 @@ namespace RuniOS.Textures
                     int inputHeight = decodedImage.height;
                     NativeArray<byte> input = decodedImage.pixels;
 
-                    for (int level = 1; level < mipmapCount; level++)
+                    for (int level = 1; level < actualMipmapCount; level++)
                     {
                         int outputWidth = Max(1, inputWidth >> 1);
                         int outputHeight = Max(1, inputHeight >> 1);
@@ -149,7 +149,7 @@ namespace RuniOS.Textures
                 };
             }
 
-            static int GetMipmapCount(int width, int height, TextureMipmapSettings settings)
+            static int GetMipmapCount(int width, int height, int mipmapCount)
             {
                 int maximumCount = 1;
                 int maximumDimension = Max(width, height);
@@ -160,14 +160,14 @@ namespace RuniOS.Textures
                     maximumCount++;
                 }
 
-                return settings.mode switch
-                {
-                    TextureMipmapMode.full => maximumCount,
-                    TextureMipmapMode.none => 1,
-                    TextureMipmapMode.explicitCount when settings.count <= maximumCount => settings.count,
-                    TextureMipmapMode.explicitCount => throw new ArgumentOutOfRangeException(nameof(settings), settings.count, $"Mipmap count cannot exceed {maximumCount} for a {width}x{height} image."),
-                    _ => throw new ArgumentOutOfRangeException(nameof(settings))
-                };
+                if (mipmapCount <= 0)
+                    return maximumCount;
+                if (mipmapCount == 1)
+                    return 1;
+                if (mipmapCount <= maximumCount)
+                    return mipmapCount;
+
+                throw new ArgumentOutOfRangeException(nameof(mipmapCount), mipmapCount, $"Mipmap count cannot exceed {maximumCount} for a {width}x{height} image.");
             }
 
             static void DisposeLevels(NativeArray<byte>[] levels)
