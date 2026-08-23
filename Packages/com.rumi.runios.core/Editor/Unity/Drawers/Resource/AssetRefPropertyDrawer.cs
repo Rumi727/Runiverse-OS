@@ -34,7 +34,7 @@ namespace RuniOS.Editor.Unity.Drawers.Resource
             }
 
             EditorGUI.BeginChangeCheck();
-            assetRef = RuniFields.AssetRefField(position, label, assetRef);
+            assetRef = RuniFields.AssetRefField(position, label, assetRef, !property.serializedObject.targetObjects.Any(EditorUtility.IsPersistent));
             if (EditorGUI.EndChangeCheck())
                 converter.Write(property, typeof(ResourceKey), assetRef);
         }

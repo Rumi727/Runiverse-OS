@@ -179,6 +179,7 @@
   "inspector.runi_audio_source.information.length": "長さ",
   "inspector.nbs_player.source.header": "NBSソース",
   "inspector.nbs_player.source.file": "NBSファイル",
+  "inspector.nbs_player.source.custom_instrument_namespace": "カスタム楽器の名前空間",
   "inspector.nbs_player.source.use_file_loop_settings": "ファイルのループ設定を使用",
   "inspector.nbs_player.playback.tempo.tooltip": "符号がNBSタイムラインの進行方向を決めます。負のテンポでは楽譜を逆方向に進みます。",
   "inspector.nbs_player.playback.pitch.tooltip": "符号がクリップPCMの進行方向を決めます。負のピッチでは各楽器サンプルを逆再生します。",

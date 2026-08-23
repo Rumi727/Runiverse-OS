@@ -92,6 +92,20 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             ))
                 ForEach(x => ReloadAndRepaint(x).Forget());
 
+            if (EditPropertyValue
+            (
+                "_directInstrumentNamespace",
+                x => x.directInstrumentNamespace,
+                (position, x) => EditorGUI.TextField
+                (
+                    position,
+                    TrTempContent("runios-editor:inspector.nbs_player.source.custom_instrument_namespace"),
+                    x.directInstrumentNamespace
+                ),
+                (x, value) => x.directInstrumentNamespace = value
+            ))
+                ForEach(x => ReloadAndRepaint(x).Forget());
+
             EditPropertyValue
             (
                 "_nonRigidbodyVelocity",

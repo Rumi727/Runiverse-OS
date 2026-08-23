@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public interface IAssetRegistry<THandle> : IAssetRegistry where THandle : class, IAssetHandle
+    public interface IAssetRegistry<THandle> : IAssetRegistry where THandle : IAssetHandle
     {
         Type IAssetRegistry.handleType => typeof(THandle);
         
@@ -11,7 +11,7 @@ namespace RuniOS.Resource
         IAssetHandle? IAssetRegistry.this[Identifier key] => this[key];
         
         new IEnumerable<THandle> handles { get; }
-        IEnumerable<IAssetHandle> IAssetRegistry.handles => handles;
+        IEnumerable<IAssetHandle> IAssetRegistry.handles => handles.Cast<IAssetHandle>();
 
         bool TryGetHandle(Identifier key, [NotNullWhen(true)] out THandle? handle);
         bool IAssetRegistry.TryGetHandle(Identifier key, [NotNullWhen(true)] out IAssetHandle? handle)

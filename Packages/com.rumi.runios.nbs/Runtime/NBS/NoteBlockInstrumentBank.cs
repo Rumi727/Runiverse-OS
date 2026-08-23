@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.IO;
 using RuniOS.Resource;
 using RuniOS.Sounds;
 
@@ -24,9 +25,9 @@ namespace RuniOS.NBS
         /// <paramref name="playbackMap"/>에서 사용하는 모든 고유 오디오 악기를 로드합니다.
         /// </summary>
         /// <param name="playbackMap">The clip-independent playback map.<br/>클립 독립적 재생 맵입니다.</param>
-        /// <param name="nbsAssetId">The owning NBS asset identifier used for custom instruments.<br/>커스텀 악기에 사용할 소유 NBS 에셋 식별자입니다.</param>
+        /// <param name="sourceNamespace">The owning NBS asset namespace used for custom instruments.<br/>커스텀 악기에 사용할 소유 NBS 에셋 네임스페이스입니다.</param>
         /// <returns>When loading completes, returns the instrument bank.<br/>로드가 완료되면 악기 bank를 반환합니다.</returns>
-        public static async UniTask<NoteBlockInstrumentBank> Create(NBSPlaybackMap playbackMap, Identifier nbsAssetId)
+        public static async UniTask<NoteBlockInstrumentBank> Create(NBSPlaybackMap playbackMap, string sourceNamespace)
         {
             if (playbackMap == null)
                 throw new ArgumentNullException(nameof(playbackMap));
@@ -44,7 +45,13 @@ namespace RuniOS.NBS
             {
                 foreach (NBSInstrumentReference instrument in instruments)
                 {
-                    ResourceKey key = instrument.Resolve(nbsAssetId);
+                    if (!Identifier.IsNamespaceValid(sourceNamespace) || !Identifier.IsPathValid((RuniPath)instrument.relativePath))
+                    {
+                        Debug.RuntimeLogWarning($"The invalid identifier '{sourceNamespace}:{instrument.relativePath}' is unavailable. Notes using it will be silent.", nameof(NoteBlockSource));
+                        continue;
+                    }
+
+                    ResourceKey key = instrument.Resolve(sourceNamespace);
                     IAssetScope<WaveAudioClip>? scope = await ResourceManager.LoadScopeAsync<WaveAudioClip>(key);
                     if (scope == null)
                     {

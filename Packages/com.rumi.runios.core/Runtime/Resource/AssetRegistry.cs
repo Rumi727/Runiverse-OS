@@ -7,7 +7,7 @@ namespace RuniOS.Resource
     /// <summary>
     /// 특정 타입의 에셋 핸들을 관리하고 로드 로직을 정의하는 추상 클래스입니다.
     /// </summary>
-    public abstract class AssetRegistry<THandle> : IAssetRegistry<THandle> where THandle : class, IAssetHandle
+    public abstract class AssetRegistry<THandle> : IAssetRegistry<THandle> where THandle : IAssetHandle
     {
         /// <summary>
         /// 이 레지스트리의 고유 id를 나타내는 상수 값입니다.
@@ -43,8 +43,8 @@ namespace RuniOS.Resource
             {
                 if (TryGetHandle(key, out var handle))
                     return handle;
-                
-                return null;
+
+                return default;
             }
         }
 

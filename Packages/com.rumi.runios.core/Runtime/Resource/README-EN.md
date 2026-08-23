@@ -17,7 +17,7 @@ Resource Pack files
 
 The important part is that a registry usually does not load every asset object immediately.\
 During reload, it mainly recalculates "which asset exists where, and which handle should be used to access it."\
-The real asset object is usually loaded later, when `AssetHandle<T>.GetScope()` or `AssetRef<T>.LoadAsync()` is called.
+The real asset object is usually loaded later, when `AssetHandle<T>.GetScope()` or key-mode `AssetRef<T>.LoadScopeAsync()` is called.
 
 ## Loading Flow
 
@@ -177,7 +177,8 @@ default registry -> AssetRegistryManager.GetDefaultForAsset<TAsset>()
 ```
 
 A registry with `isDefault == true` becomes the default registry for its asset type.\
-The `AssetRef<T>` inspector field also uses this information to select compatible registries and assets.
+The key-mode `AssetRef<T>` inspector field also uses this information to select compatible registries and assets.\
+Direct mode uses the asset instance stored in the reference without querying a registry.
 
 ## Fast Reload Model
 
@@ -292,17 +293,34 @@ For instance handles without a sidecar file, `InstanceAssetHandle<TAsset>` can u
 
 ## AssetRef
 
-`AssetRef<TAsset>` is an inspector-friendly wrapper for selecting a resource of a specific type.\
-Internally, it stores only a `ResourceKey`.
+`AssetRef<TAsset>` is a wrapper for referencing a resource of a specific type by key or by direct asset instance.\
+It uses `key` or `directAsset` according to `mode`.
+
+The supported modes are:
+
+- `AssetRefMode.key`: resolves the asset from a registry through a `ResourceKey`.
+- `AssetRefMode.direct`: wraps the `directAsset` in an `InstanceAssetHandle<TAsset>` and uses it without a registry entry.
 
 ```csharp
 [SerializeField] AssetRef<MyAsset> assetRef;
+
+AssetRef<MyAsset> byKey = new AssetRef<MyAsset>
+(
+    new ResourceKey
+    (
+        new Identifier("my_game", "assets"),
+        new Identifier("my_game", "ui/button")
+    )
+);
+
+AssetRef<MyAsset> direct = new AssetRef<MyAsset>(asset);
 ```
 
-When using it, call `LoadAsync()` instead of manually finding the registry, handle, and scope.
+When using it, call `LoadScopeAsync()` instead of manually finding the registry and handle.\
+Key mode resolves a handle through `ResourceManager`; direct mode creates a scope from the stored instance immediately.
 
 ```csharp
-IAssetScope<MyAsset>? scope = await assetRef.LoadAsync();
+IAssetScope<MyAsset>? scope = await assetRef.LoadScopeAsync();
 if (scope == null)
     return;
 
@@ -312,7 +330,9 @@ using (scope)
 }
 ```
 
-The manual flow would be:
+Use `GetHandle()` when a handle is needed. Use `IsSameTarget()` to determine whether the current reference points to the same target as an active scope.
+
+The manual key-mode flow is:
 
 ```text
 ResourceKey
@@ -321,7 +341,19 @@ ResourceKey
 -> handle.GetScope
 ```
 
-`AssetRef<TAsset>` wraps that flow in an inspector-friendly API.
+Direct mode uses this flow:
+
+```text
+directAsset
+-> InstanceAssetHandle
+-> InstanceAssetScope
+```
+
+`AssetRef<TAsset>` wraps both flows in one inspector-friendly API.
+
+When `AssetRefField` or `AssetRefPropertyDrawer` is used in the editor, the mode can be selected in the field.\
+For Unity-object direct assets, the `allowSceneObjects` argument controls whether scene objects are accepted and defaults to `false`.\
+The default property drawer allows scene objects only when all target objects are non-persistent. Direct asset types that are not Unity objects are displayed as the currently stored value.
 
 ## SimpleAssetRegistry
 

@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 
 using RuniOS.Resource;
+using RuniOS.Resource.Sounds;
+
 // ReSharper disable NotAccessedPositionalProperty.Global
 
 namespace RuniOS.NBS
@@ -33,8 +35,6 @@ namespace RuniOS.NBS
     /// </summary>
     public readonly record struct NBSInstrumentReference
     {
-        static readonly Identifier waveRegistryId = new Identifier("runios", "waves");
-
         NBSInstrumentReference(bool isFunctional, bool usesSongNamespace, Identifier fixedAssetId, string relativePath)
         {
             this.isFunctional = isFunctional;
@@ -64,21 +64,21 @@ namespace RuniOS.NBS
         internal static NBSInstrumentReference Custom(string relativePath) => new NBSInstrumentReference(false, true, default, relativePath);
 
         /// <summary>
-        /// Resolves this reference for the NBS asset identified by <paramref name="nbsAssetId"/>.<br/>
-        /// <paramref name="nbsAssetId"/>로 식별되는 NBS 에셋을 기준으로 이 참조를 확인합니다.
+        /// Resolves this reference for the NBS asset identified by <paramref name="sourceNamespace"/>.<br/>
+        /// <paramref name="sourceNamespace"/>로 식별되는 NBS 에셋을 기준으로 이 참조를 확인합니다.
         /// </summary>
-        /// <param name="nbsAssetId">The owning NBS asset identifier.<br/>소유 NBS 에셋 식별자입니다.</param>
+        /// <param name="sourceNamespace">The owning NBS asset namespace.<br/>소유 NBS 에셋 네임스페이스입니다.</param>
         /// <returns>The resolved wave resource key.<br/>확인된 웨이브 리소스 키입니다.</returns>
         /// <exception cref="InvalidOperationException">Thrown when this reference does not identify an audio resource.<br/>이 참조가 오디오 리소스를 식별하지 않는 경우 발생합니다.</exception>
-        public ResourceKey Resolve(Identifier nbsAssetId)
+        public ResourceKey Resolve(string sourceNamespace)
         {
             if (!isValid)
                 throw new InvalidOperationException("The NBS instrument reference does not identify an audio resource.");
 
             Identifier assetId = usesSongNamespace
-                ? new Identifier(nbsAssetId.nameSpace, relativePath)
+                ? new Identifier(sourceNamespace, relativePath)
                 : fixedAssetId;
-            return new ResourceKey(waveRegistryId, assetId);
+            return new ResourceKey(WaveAudioAssetRegistry.id, assetId);
         }
 
         /// <summary>

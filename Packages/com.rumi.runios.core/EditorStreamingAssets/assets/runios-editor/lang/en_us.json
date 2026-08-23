@@ -179,6 +179,7 @@
   "inspector.runi_audio_source.information.length": "Length",
   "inspector.nbs_player.source.header": "NBS Source",
   "inspector.nbs_player.source.file": "NBS File",
+  "inspector.nbs_player.source.custom_instrument_namespace": "Custom Instrument Namespace",
   "inspector.nbs_player.source.use_file_loop_settings": "Use File Loop Settings",
   "inspector.nbs_player.playback.tempo.tooltip": "The sign controls NBS timeline direction. Negative tempo traverses the score backward.",
   "inspector.nbs_player.playback.pitch.tooltip": "The sign controls clip PCM direction. Negative pitch plays every instrument sample backward.",

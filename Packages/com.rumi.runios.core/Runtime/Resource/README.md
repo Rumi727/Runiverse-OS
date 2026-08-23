@@ -17,7 +17,7 @@ Resource Pack files
 
 중요한 점은 레지스트리가 실제 에셋 객체를 항상 즉시 로드하지 않는다는 것입니다.\
 리로드 시점에는 주로 "어떤 에셋이 어디에 있고, 어떤 핸들로 접근해야 하는가"를 다시 계산합니다.\
-실제 에셋 객체는 보통 `AssetHandle<T>.GetScope()` 또는 `AssetRef<T>.LoadAsync()`가 호출될 때 로드됩니다.
+실제 에셋 객체는 보통 `AssetHandle<T>.GetScope()` 또는 키 모드의 `AssetRef<T>.LoadScopeAsync()`가 호출될 때 로드됩니다.
 
 ## 로드 흐름
 
@@ -177,7 +177,7 @@ default registry -> AssetRegistryManager.GetDefaultForAsset<TAsset>()
 ```
 
 `isDefault`가 `true`인 레지스트리는 같은 에셋 타입의 기본 레지스트리가 됩니다.\
-`AssetRef<T>`의 인스펙터 필드도 이 정보를 사용해 호환되는 레지스트리와 에셋을 고를 수 있습니다.
+키 모드의 `AssetRef<T>` 인스펙터 필드는 이 정보를 사용해 호환되는 레지스트리와 에셋을 고를 수 있습니다. 직접 모드에서는 레지스트리 조회 없이 참조에 저장된 에셋 인스턴스를 사용합니다.
 
 ## 빠른 리로드 구조
 
@@ -292,17 +292,34 @@ JSON을 읽지 못하면 임포트 데이터는 비워지고 오류가 기록됩
 
 ## AssetRef
 
-`AssetRef<TAsset>`는 인스펙터에서 특정 타입의 리소스를 고르기 위한 래퍼입니다.\
-내부에는 `ResourceKey`만 저장됩니다.
+`AssetRef<TAsset>`는 특정 타입의 리소스를 키 또는 직접 에셋 인스턴스로 참조하는 래퍼입니다.\
+`mode`에 따라 `key` 또는 `directAsset`을 사용합니다.
+
+지원 모드는 다음과 같습니다.
+
+- `AssetRefMode.key`: `ResourceKey`로 레지스트리에서 에셋을 찾습니다.
+- `AssetRefMode.direct`: 참조에 저장된 `directAsset`을 `InstanceAssetHandle<TAsset>`로 감싸 사용합니다. 레지스트리 등록이 필요하지 않습니다.
 
 ```csharp
 [SerializeField] AssetRef<MyAsset> assetRef;
+
+AssetRef<MyAsset> byKey = new AssetRef<MyAsset>
+(
+    new ResourceKey
+    (
+        new Identifier("my_game", "assets"),
+        new Identifier("my_game", "ui/button")
+    )
+);
+
+AssetRef<MyAsset> direct = new AssetRef<MyAsset>(asset);
 ```
 
-사용할 때는 레지스트리, 핸들, 스코프를 직접 찾아다니지 않고 `LoadAsync()`를 호출하면 됩니다.
+사용할 때는 모드에 맞는 레지스트리와 핸들을 직접 찾아다니지 않고 `LoadScopeAsync()`를 호출하면 됩니다.\
+키 모드는 `ResourceManager`를 통해 핸들을 찾고, 직접 모드는 저장된 인스턴스로 즉시 스코프를 만듭니다.
 
 ```csharp
-IAssetScope<MyAsset>? scope = await assetRef.LoadAsync();
+IAssetScope<MyAsset>? scope = await assetRef.LoadScopeAsync();
 if (scope == null)
     return;
 
@@ -312,7 +329,9 @@ using (scope)
 }
 ```
 
-직접 쓰면 다음 흐름을 매번 작성해야 합니다.
+핸들이 필요하면 `GetHandle()`을 사용할 수 있습니다. 현재 참조와 사용 중인 스코프가 같은 대상을 가리키는지는 `IsSameTarget()`으로 확인합니다.
+
+키 모드의 수동 흐름은 다음과 같습니다.
 
 ```text
 ResourceKey
@@ -321,7 +340,19 @@ ResourceKey
 -> handle.GetScope
 ```
 
-`AssetRef<TAsset>`는 이 흐름을 인스펙터 친화적인 API로 감싸 줍니다.
+직접 모드는 다음 흐름을 사용합니다.
+
+```text
+directAsset
+-> InstanceAssetHandle
+-> InstanceAssetScope
+```
+
+`AssetRef<TAsset>`는 두 흐름을 하나의 인스펙터 친화적인 API로 감싸 줍니다.
+
+에디터에서 `AssetRefField` 또는 `AssetRefPropertyDrawer`를 사용하면 모드를 필드에서 선택할 수 있습니다.\
+직접 모드의 Unity 객체 필드는 `allowSceneObjects` 인자로 씬 객체 허용 여부를 제어하며 기본값은 `false`입니다.\
+기본 프로퍼티 드로어는 모든 대상 객체가 영속 에셋이 아닐 때만 씬 객체를 허용합니다. Unity 객체가 아닌 직접 에셋 타입은 현재 저장된 값을 레이블로 표시합니다.
 
 ## SimpleAssetRegistry
 

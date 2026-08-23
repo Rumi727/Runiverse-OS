@@ -46,6 +46,35 @@ namespace RuniOS.NBS
         readonly ReaderWriterLockSlim nbsFileRefLock = new ReaderWriterLockSlim();
         [SerializeField] AssetRef<NoteBlockClip> _nbsFileRef;
 
+        public string directInstrumentNamespace
+        {
+            get
+            {
+                nbsFileRefLock.EnterReadLock();
+                try
+                {
+                    return _directInstrumentNamespace ?? string.Empty;
+                }
+                finally
+                {
+                    nbsFileRefLock.ExitReadLock();
+                }
+            }
+            set
+            {
+                nbsFileRefLock.EnterWriteLock();
+                try
+                {
+                    _directInstrumentNamespace = value;
+                }
+                finally
+                {
+                    nbsFileRefLock.ExitWriteLock();
+                }
+            }
+        }
+        [SerializeField] string? _directInstrumentNamespace = "";
+
         /// <summary>Gets the currently scoped NBS file, or <see langword="null"/> while unavailable.<br/>현재 스코프된 NBS 파일을 가져오며, 사용할 수 없으면 <see langword="null"/>입니다.</summary>
         public NoteBlockClip? nbsFile
         {
@@ -412,7 +441,7 @@ namespace RuniOS.NBS
             try
             {
                 if (newScope != null)
-                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, target.key.assetId);
+                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, target.mode == AssetRefMode.direct ? directInstrumentNamespace : target.key.assetId.nameSpace);
             }
             catch
             {

@@ -178,6 +178,7 @@
   "inspector.runi_audio_source.information.length": "길이",
   "inspector.nbs_player.source.header": "NBS 소스",
   "inspector.nbs_player.source.file": "NBS 파일",
+  "inspector.nbs_player.source.custom_instrument_namespace": "커스텀 악기 네임스페이스",
   "inspector.nbs_player.source.use_file_loop_settings": "파일 반복 설정 사용",
   "inspector.nbs_player.playback.tempo.tooltip": "부호가 NBS 타임라인 방향을 결정합니다. 음수 템포는 악보를 역방향으로 진행합니다.",
   "inspector.nbs_player.playback.pitch.tooltip": "부호가 클립 PCM 방향을 결정합니다. 음수 피치는 모든 악기 샘플을 역방향으로 재생합니다.",
