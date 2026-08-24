@@ -16,7 +16,7 @@ namespace RuniOS.Resource.Languages
 
         public override Identifier registryId => id;
 
-        public override bool isDefault => true;
+        public override int priority => 100;
 
         public override Type assetType => typeof(LocalizationData);
 

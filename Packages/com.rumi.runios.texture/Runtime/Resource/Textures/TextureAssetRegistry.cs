@@ -14,6 +14,9 @@ namespace RuniOS.Resource.Textures
         public override Identifier registryId => id;
 
         /// <inheritdoc/>
+        public override int priority => 100;
+
+        /// <inheritdoc/>
         public override Type assetType => typeof(Texture2D);
 
         /// <inheritdoc/>

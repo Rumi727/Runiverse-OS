@@ -173,10 +173,13 @@ Registries can be queried by these keys.
 registryId       -> AssetRegistryManager.Get(registryId)
 registry type    -> AssetRegistryManager.Get<TRegistry>()
 asset type       -> AssetRegistryManager.GetAllForAsset(assetType)
-default registry -> AssetRegistryManager.GetDefaultForAsset<TAsset>()
+first registry   -> AssetRegistryManager.GetFirstForAsset<TAsset>()
 ```
 
-A registry with `isDefault == true` becomes the default registry for its asset type.\
+Among registries for the same asset type, the registry with the highest `priority` is selected.\
+`AssetRegistryManager.GetFirstForAsset<TAsset>()` returns the cached highest-priority registry.\
+Selection order among registries with equal `priority` is not part of the contract. The current implementation may select the registry registered first, but callers must not depend on that behavior.\
+The first registry is cached at registration time, so do not change `priority` after registration.\
 The key-mode `AssetRef<T>` inspector field also uses this information to select compatible registries and assets.\
 Direct mode uses the asset instance stored in the reference without querying a registry.
 
@@ -407,7 +410,7 @@ namespace RuniOS.Resource.Example
     public sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
-        public override bool isDefault => true;
+        public override int priority => 1;
         public override Type assetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 

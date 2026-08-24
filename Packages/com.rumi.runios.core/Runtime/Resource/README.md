@@ -173,10 +173,13 @@ AssetRegistryManager.Register<MyAssetRegistry>();
 registryId       -> AssetRegistryManager.Get(registryId)
 registry type    -> AssetRegistryManager.Get<TRegistry>()
 asset type       -> AssetRegistryManager.GetAllForAsset(assetType)
-default registry -> AssetRegistryManager.GetDefaultForAsset<TAsset>()
+first registry   -> AssetRegistryManager.GetFirstForAsset<TAsset>()
 ```
 
-`isDefault`가 `true`인 레지스트리는 같은 에셋 타입의 기본 레지스트리가 됩니다.\
+같은 에셋 타입의 레지스트리 중 `priority`가 가장 높은 레지스트리가 선택됩니다.\
+`AssetRegistryManager.GetFirstForAsset<TAsset>()`는 캐시된 최고 우선순위 레지스트리를 반환합니다.\
+같은 `priority`인 레지스트리의 선택 순서는 계약에 포함되지 않습니다. 현재 구현에서는 먼저 등록된 레지스트리가 선택될 수 있지만, 이 동작에 의존하지 마세요.\
+우선 레지스트리는 등록 시 캐시되므로, 등록 후 `priority`를 변경하지 마세요.\
 키 모드의 `AssetRef<T>` 인스펙터 필드는 이 정보를 사용해 호환되는 레지스트리와 에셋을 고를 수 있습니다. 직접 모드에서는 레지스트리 조회 없이 참조에 저장된 에셋 인스턴스를 사용합니다.
 
 ## 빠른 리로드 구조
@@ -406,7 +409,7 @@ namespace RuniOS.Resource.Example
     public sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
-        public override bool isDefault => true;
+        public override int priority => 100;
         public override Type assetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 

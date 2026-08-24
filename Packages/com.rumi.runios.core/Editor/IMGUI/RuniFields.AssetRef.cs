@@ -44,15 +44,15 @@ namespace RuniOS.Editor.IMGUI
             else
             {
                 ReadOnlySet<IAssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
-                IAssetRegistry? defaultRegistry = AssetRegistryManager.GetDefaultForAsset(value.targetAssetType);
+                IAssetRegistry? firstRegistry = AssetRegistryManager.GetFirstForAsset(value.targetAssetType);
 
                 EditorGUI.BeginChangeCheck();
 
                 ResourceKey key;
-                if (registries.Count > 1 || defaultRegistry == null)
+                if (registries.Count > 1 || firstRegistry == null)
                     key = ResourceKeyField(position, label, value.key, registries.Contains);
                 else
-                    key = new ResourceKey(defaultRegistry.registryId, AssetIdField(position, label, defaultRegistry.registryId, value.key.assetId));
+                    key = new ResourceKey(firstRegistry.registryId, AssetIdField(position, label, firstRegistry.registryId, value.key.assetId));
 
                 if (EditorGUI.EndChangeCheck())
                     value = value.WithKey(key);
@@ -66,10 +66,10 @@ namespace RuniOS.Editor.IMGUI
             if (value.mode == AssetRefMode.direct)
             {
                 ReadOnlySet<IAssetRegistry> registries = AssetRegistryManager.GetAllForAsset(value.targetAssetType);
-                IAssetRegistry? defaultRegistry = AssetRegistryManager.GetDefaultForAsset(value.targetAssetType);
+                IAssetRegistry? firstRegistry = AssetRegistryManager.GetFirstForAsset(value.targetAssetType);
 
                 float height;
-                if (registries.Count > 1 || defaultRegistry == null)
+                if (registries.Count > 1 || firstRegistry == null)
                     height = GetMultiRowsFieldHeight(label, 2);
                 else
                     height = GetMultiColumnsFieldHeight(label);

@@ -10,7 +10,7 @@ namespace RuniOS.Resource
         static readonly Dictionary<Identifier, IAssetRegistry> registriesById = [];
         static readonly Dictionary<Type, IAssetRegistry> registriesByClassType = [];
         static readonly Dictionary<Type, HashSet<IAssetRegistry>> registriesByAssetType = [];
-        static readonly Dictionary<Type, IAssetRegistry> defaultRegistriesByAssetType = [];
+        static readonly Dictionary<Type, IAssetRegistry> firstRegistriesByAssetType = [];
 
         public static void Register<T>() where T : IAssetRegistry, new()
         {
@@ -26,13 +26,8 @@ namespace RuniOS.Resource
 
             list.Add(registry);
 
-            if (registry.isDefault)
-            {
-                if (defaultRegistriesByAssetType.TryGetValue(registry.assetType, out var currentDefault))
-                    Debug.RuntimeLogWarning($"Default registry for {registry.assetType.Name} replaced: {currentDefault.registryId} -> {registry.registryId}");
-
-                defaultRegistriesByAssetType[registry.assetType] = registry;
-            }
+            if (!firstRegistriesByAssetType.TryGetValue(registry.assetType, out IAssetRegistry? firstRegistry) || firstRegistry == null || IsHigherPriority(registry, firstRegistry))
+                firstRegistriesByAssetType[registry.assetType] = registry;
         }
 
         public static void Unregister<T>() where T : IAssetRegistry, new()
@@ -46,14 +41,18 @@ namespace RuniOS.Resource
             registriesById.Remove(registry.registryId);
             registriesByClassType.Remove(registry.GetType());
 
+            bool wasFirstRegistry = firstRegistriesByAssetType.TryGetValue(registry.assetType, out IAssetRegistry? firstRegistry) && ReferenceEquals(firstRegistry, registry);
             if (registriesByAssetType.TryGetValue(registry.assetType, out var list))
             {
                 list.Remove(registry);
                 if (list.Count == 0)
+                {
                     registriesByAssetType.Remove(registry.assetType);
+                    firstRegistriesByAssetType.Remove(registry.assetType);
+                }
+                else if (wasFirstRegistry)
+                    firstRegistriesByAssetType[registry.assetType] = FindFirst(list)!;
             }
-
-            defaultRegistriesByAssetType.Remove(registry.assetType);
         }
 
         public static IAssetRegistry? Get(Identifier registryId) => registriesById.GetValueOrDefault(registryId);
@@ -61,8 +60,22 @@ namespace RuniOS.Resource
         public static T? Get<T>() where T : IAssetRegistry => (T?)Get(typeof(T));
         public static IAssetRegistry? Get(Type registryType) => registriesByClassType.GetValueOrDefault(registryType);
 
-        public static IAssetRegistry? GetDefaultForAsset<TAsset>() => GetDefaultForAsset(typeof(TAsset));
-        public static IAssetRegistry? GetDefaultForAsset(Type assetType) => defaultRegistriesByAssetType.GetValueOrDefault(assetType);
+        public static IAssetRegistry? GetFirstForAsset<TAsset>() => GetFirstForAsset(typeof(TAsset));
+        public static IAssetRegistry? GetFirstForAsset(Type assetType) => firstRegistriesByAssetType.GetValueOrDefault(assetType);
+
+        static IAssetRegistry? FindFirst(IEnumerable<IAssetRegistry> candidates)
+        {
+            IAssetRegistry? firstRegistry = null;
+            foreach (IAssetRegistry candidate in candidates)
+            {
+                if (firstRegistry == null || IsHigherPriority(candidate, firstRegistry))
+                    firstRegistry = candidate;
+            }
+
+            return firstRegistry;
+        }
+
+        static bool IsHigherPriority(IAssetRegistry candidate, IAssetRegistry current) => candidate.priority > current.priority;
 
         public static ReadOnlySet<IAssetRegistry> GetAll() => registries.AsReadOnly();
 

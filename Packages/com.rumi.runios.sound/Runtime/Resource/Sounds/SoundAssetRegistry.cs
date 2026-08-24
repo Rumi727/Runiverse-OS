@@ -18,7 +18,7 @@ namespace RuniOS.Resource.Sounds
 
         public override bool isSupportedImportData => false;
 
-        public override bool isDefault => true;
+        public override int priority => 100;
 
         public override Type assetType => typeof(SoundClipRef);
 

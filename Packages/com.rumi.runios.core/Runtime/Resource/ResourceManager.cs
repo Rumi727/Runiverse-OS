@@ -125,7 +125,7 @@ namespace RuniOS.Resource
         public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?[key.assetId];
 
 
-        public static IAssetHandle<T>? GetHandle<T>(Identifier identifier) where T : notnull => AssetRegistryManager.GetDefaultForAsset<T>()?[identifier] as IAssetHandle<T>;
+        public static IAssetHandle<T>? GetHandle<T>(Identifier identifier) where T : notnull => AssetRegistryManager.GetFirstForAsset<T>()?[identifier] as IAssetHandle<T>;
         public static UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier) where T : notnull => GetHandle<T>(identifier)?.GetScope() ?? UniTask.FromResult<IAssetScope<T>?>(null);
 
         public static UniTask<IAssetScope<T>?> LoadScopeAsync<T>(ResourceKey key) where T : notnull => GetHandle<T>(key)?.GetScope() ?? UniTask.FromResult<IAssetScope<T>?>(null);

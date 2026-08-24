@@ -15,7 +15,7 @@ namespace RuniOS.Resource.Sounds
 
         public override RuniPath registryName => RuniPath.From("sounds");
 
-        public override bool isDefault => true;
+        public override int priority => 100;
 
         public override Type assetType => typeof(WaveAudioClip);
 

@@ -13,9 +13,11 @@ namespace RuniOS.Resource
         Identifier registryId { get; }
 
         /// <summary>
-        /// 에셋 타입이 겹칠 때 이 레지스트리를 기본으로 사용할 지 여부를 나타내는 상수 값입니다.
+        /// 같은 에셋 타입의 레지스트리 중 이 레지스트리의 우선순위를 나타냅니다.
+        /// 값이 클수록 먼저 선택됩니다.
+        /// 레지스트리 등록 후 변경하지 않는 것을 전제로 합니다.
         /// </summary>
-        bool isDefault { get; }
+        int priority { get; }
 
         Type assetType { get; }
 
