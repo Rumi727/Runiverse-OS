@@ -39,6 +39,9 @@ namespace RuniOS.Editor.Sounds
 
         public Player GetOrCreatePlayer(PhysicalPath path)
         {
+            if (isDisposed)
+                throw new ObjectDisposedException(nameof(AudioPreview));
+
             if (!players.TryGetValue(path, out var player))
                 player = new Player(this, path);
 
@@ -63,7 +66,10 @@ namespace RuniOS.Editor.Sounds
 
             SoundChannel? channel;
 
-            public WaveAudioClip? clip => preview.GetAudio(path);
+            public WaveAudioClip? clip
+            {
+                get
+                {
 
             public bool isPlaying => channel != null;
 

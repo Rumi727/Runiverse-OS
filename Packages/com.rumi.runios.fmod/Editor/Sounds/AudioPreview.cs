@@ -18,9 +18,14 @@ namespace RuniOS.Editor.Sounds
 
         public static event Action? onLoadedAudio;
 
+        public bool isDisposed { get; private set; }
+
         // ReSharper disable once MemberCanBeMadeStatic.Global
         public WaveAudioClip? GetAudio(PhysicalPath path)
         {
+            if (isDisposed)
+                throw new ObjectDisposedException(nameof(AudioPreview));
+
             previews.AddOrUpdate(this, resourceMarker);
             if (loadedClips.TryGetValue(path, out WaveAudioClip? clip))
                 return clip;
@@ -33,13 +38,25 @@ namespace RuniOS.Editor.Sounds
 
         public void ReturnAudio(PhysicalPath path)
         {
+            if (isDisposed)
+                throw new ObjectDisposedException(nameof(AudioPreview));
+
             requestedAudios.Remove(path);
             GarbageCleanup();
         }
 
         public void Dispose()
         {
+            foreach (var item in players)
+                item.Value.Stop();
+
+            _players.Clear();
+
             previews.Remove(this);
+            requestedAudios.Clear();
+
+            isDisposed = true;
+
             GarbageCleanup();
 
             GC.SuppressFinalize(this);
@@ -79,7 +96,7 @@ namespace RuniOS.Editor.Sounds
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var loadedClip in loadedClips)
             {
-                if (previews.Any(token => token.Key.requestedAudios.Contains(loadedClip.Key)))
+                if (previews.Where(x => !x.Key.isDisposed).Any(token => token.Key.requestedAudios.Contains(loadedClip.Key)))
                     continue;
 
                 loadedClip.Value.Dispose();
