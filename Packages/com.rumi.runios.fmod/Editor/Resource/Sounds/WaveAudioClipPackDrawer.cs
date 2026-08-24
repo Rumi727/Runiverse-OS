@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.Editor.Sounds;
 using RuniOS.IO;
 using RuniOS.Sounds;
@@ -34,7 +33,7 @@ namespace RuniOS.Editor.Resource.Sounds
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
 
-        protected override void OnEnable() => AudioPreview.onLoadedAudio += Repaint;
+        protected override void OnEnable() => AudioPreview.onLoadedAudio += OnLoadedAudio;
 
         protected override void OnDisable()
         {
@@ -42,8 +41,10 @@ namespace RuniOS.Editor.Resource.Sounds
                 Object.DestroyImmediate(texture);
 
             preview.Dispose();
-            AudioPreview.onLoadedAudio -= Repaint;
+            AudioPreview.onLoadedAudio -= OnLoadedAudio;
         }
+
+        void OnLoadedAudio(PhysicalPath path) => Repaint();
 
         protected override void DrawInfoLayout()
         {
@@ -157,6 +158,11 @@ namespace RuniOS.Editor.Resource.Sounds
             bool globalLoop = GUILayout.Toggle(AudioPreview.globalLoop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton);
             if (EditorGUI.EndChangeCheck())
                 AudioPreview.globalLoop = globalLoop;
+
+            EditorGUI.BeginChangeCheck();
+            bool autoPlay = GUILayout.Toggle(AudioPreview.autoPlay, EditorGUIUtility.IconContent("preAudioAutoPlayOff"), EditorStyles.toolbarButton);
+            if (EditorGUI.EndChangeCheck())
+                AudioPreview.autoPlay = autoPlay;
 
             Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
             AudioPreview.globalVolume = GUI.HorizontalSlider(sliderRect, AudioPreview.globalVolume, 0, 1);

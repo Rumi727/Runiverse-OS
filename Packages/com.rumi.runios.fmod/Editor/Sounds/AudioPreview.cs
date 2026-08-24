@@ -16,7 +16,7 @@ namespace RuniOS.Editor.Sounds
 
         readonly HashSet<PhysicalPath> requestedAudios = [];
 
-        public static event Action? onLoadedAudio;
+        public static event Action<PhysicalPath>? onLoadedAudio;
 
         public bool isDisposed { get; private set; }
 
@@ -84,7 +84,7 @@ namespace RuniOS.Editor.Sounds
                 return;
 
             loadedClips.TryAdd(path, clip);
-            onLoadedAudio?.Invoke();
+            onLoadedAudio?.Invoke(path);
 
             GarbageCleanup();
         }

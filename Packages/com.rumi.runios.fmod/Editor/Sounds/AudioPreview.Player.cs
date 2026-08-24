@@ -15,27 +15,27 @@ namespace RuniOS.Editor.Sounds
 
         public static float globalVolume
         {
-            get => _globalVolume;
+            get;
             set
             {
-                _globalVolume = value;
+                field = value;
                 foreach (var player in globalPlayers)
                     player.Key.UpdateVolumeAndLoop();
             }
-        }
-        static float _globalVolume = 0.5f;
+        } = 0.5f;
 
         public static bool globalLoop
         {
-            get => _globalLoop;
+            get;
             set
             {
-                _globalLoop = value;
+                field = value;
                 foreach (var player in globalPlayers)
                     player.Key.UpdateVolumeAndLoop();
             }
-        }
-        static bool _globalLoop = false;
+        } = false;
+
+        public static bool autoPlay { get; set; }
 
         public Player GetOrCreatePlayer(PhysicalPath path)
         {
@@ -55,10 +55,29 @@ namespace RuniOS.Editor.Sounds
                 this.preview = preview;
                 this.path = path;
 
-                preview.GetAudio(path);
+                WaveAudioClip? clip = preview.GetAudio(path);
                 preview._players.Add(path, this);
 
                 globalPlayers.Add(this, path);
+
+                if (!autoPlay)
+                    return;
+
+                if (clip != null)
+                    Play();
+                else
+                {
+                    onLoadedAudio += OnLoadedAudio;
+
+                    void OnLoadedAudio(PhysicalPath path)
+                    {
+                        if (this.path != path || isPlaying)
+                            return;
+
+                        Play();
+                        onLoadedAudio -= OnLoadedAudio;
+                    }
+                }
             }
 
             readonly AudioPreview preview;
@@ -70,6 +89,12 @@ namespace RuniOS.Editor.Sounds
             {
                 get
                 {
+                    if (preview.isDisposed)
+                        return null;
+
+                    return preview.GetAudio(path);
+                }
+            }
 
             public bool isPlaying => channel != null;
 
