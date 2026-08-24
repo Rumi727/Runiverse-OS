@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Resource.Sounds
             DrawInfoFieldLayout("runios-editor:gui.frequency", targetClip?.frequency.ToString(CultureInfo.InvariantCulture) ?? "―");
             DrawInfoFieldLayout("runios-editor:gui.channel", targetClip?.channel.ToString() ?? "―");
             DrawInfoFieldLayout("runios-editor:gui.bits", targetClip?.bits.ToString() ?? "―");
-            DrawInfoFieldLayout("runios-editor:gui.bits", targetClip?.pcmFormat.ToString() ?? "―");
+            DrawInfoFieldLayout("runios-editor:gui.format", targetClip?.pcmFormat.ToString() ?? "―");
         }
 
         protected override bool HasPreviewGUI() => true;
