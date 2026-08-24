@@ -139,7 +139,7 @@ namespace RuniOS.Editor.Resource.Sounds
             EditorGUI.BeginDisabledGroup(!isPlaying && targetSoundPath == null);
 
             EditorGUI.BeginChangeCheck();
-            isPlaying = GUILayout.Toggle(isPlaying, PlaybackController.playButtonText, EditorStyles.toolbarButton);
+            isPlaying = GUILayout.Toggle(isPlaying, EditorGUIUtility.IconContent("Play"), EditorStyles.toolbarButton);
             if (EditorGUI.EndChangeCheck())
             {
                 if (isPlaying)
@@ -153,7 +153,10 @@ namespace RuniOS.Editor.Resource.Sounds
 
             EditorGUI.EndDisabledGroup();
 
-            AudioPreview.globalLoop = GUILayout.Toggle(AudioPreview.globalLoop, PlaybackController.loopButtonText, EditorStyles.toolbarButton);
+            EditorGUI.BeginChangeCheck();
+            bool globalLoop = GUILayout.Toggle(AudioPreview.globalLoop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton);
+            if (EditorGUI.EndChangeCheck())
+                AudioPreview.globalLoop = globalLoop;
 
             Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
             AudioPreview.globalVolume = GUI.HorizontalSlider(sliderRect, AudioPreview.globalVolume, 0, 1);
