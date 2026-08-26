@@ -57,7 +57,7 @@ namespace RuniOS.Editor.Patches
                             matcher.Insert
                             (
                                 Code.Ldarg_0, // this -> propertyField
-                                Code.Call[ReflectionUtility.GetMethodInfo((Action<PropertyField>)PreCreatePropertyGUI)]
+                                Code.Call[ReflectionUtility.GetMethodInfo(PreCreatePropertyGUI)]
                             );
                             
                             matcher.MatchStartForward(methodMatch);
@@ -66,7 +66,7 @@ namespace RuniOS.Editor.Patches
                             matcher.Insert
                             (
                                 Code.Ldarg_0, // this -> propertyField
-                                Code.Call[ReflectionUtility.GetMethodInfo((Action<PropertyField>)PostCreatePropertyGUI)]
+                                Code.Call[ReflectionUtility.GetMethodInfo(PostCreatePropertyGUI)]
                             );
                             
                             return matcher.InstructionEnumeration();
