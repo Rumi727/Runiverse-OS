@@ -199,13 +199,13 @@ namespace RuniOS.Reflection
         public static bool IsFlags(this Enum value) => value.GetType().IsDefined(typeof(FlagsAttribute));
 
         [return: NotNullIfNotNull("value")]
-        public static object? Cast(this Type Type, object? value)
+        public static object? Cast(this object? value, Type type)
         {
             if (value == null)
                 return null;
 
             ParameterExpression param = Expression.Parameter(typeof(object), nameof(value));
-            BlockExpression block = Expression.Block(Expression.Convert(Expression.Convert(param, value.GetType()), Type));
+            BlockExpression block = Expression.Block(Expression.Convert(Expression.Convert(param, value.GetType()), type));
             Delegate run = Expression.Lambda(block, param).Compile();
             
             return run.DynamicInvoke(value);
