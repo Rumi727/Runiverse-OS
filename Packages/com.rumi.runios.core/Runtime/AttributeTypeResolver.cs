@@ -27,6 +27,7 @@ namespace RuniOS
     /// <br/>
     /// 대상 타입과 핸들러 타입을 매핑하는 데 사용되는 특성 타입입니다.
     /// </typeparam>
+    [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
     public abstract class AttributeTypeResolver<TBase, TAttribute> where TAttribute : TypeHandlerAttribute
     {
         /// <summary>

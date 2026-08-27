@@ -13,6 +13,7 @@ namespace RuniOS.Reflection
 {
     public static class ReflectionUtility
     {
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         static ReflectionUtility() => Refresh();
 
         /// <summary>
@@ -21,6 +22,7 @@ namespace RuniOS.Reflection
         /// <br/><br/>
         /// 이 속성은 스레드에 안전합니다.
         /// </summary>
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         public static ImmutableArray<Assembly> assemblies { get; private set; } = ImmutableArray<Assembly>.Empty;
         static readonly object assembliesLock = new();
 
@@ -30,6 +32,7 @@ namespace RuniOS.Reflection
         /// <br/><br/>
         /// 이 속성은 스레드에 안전합니다.
         /// </summary>
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         public static ImmutableArray<Type> types { get; private set; } = ImmutableArray<Type>.Empty;
 
 
@@ -40,6 +43,7 @@ namespace RuniOS.Reflection
         /// 이 이벤트 핸들러 추가/제거 및 호출은 내부적으로 잠금(<see langword="lock"/>)을 사용하여
         /// 스레드에 안전하게 보호됩니다.
         /// </summary>
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         public static event Action? onListUpdate
         {
             add
@@ -69,6 +73,7 @@ namespace RuniOS.Reflection
         /// 현재 애플리케이션 도메인에 로드된 어셈블리와 형식 목록을 새로고침(업데이트)합니다.<br/>
         /// 이 메서드는 내부적으로 잠금(<see langword="lock"/>)을 사용하여 스레드에 안전하게 데이터를 갱신합니다.
         /// </summary>
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         public static void Refresh()
         {
             lock (assembliesLock)
@@ -126,6 +131,7 @@ namespace RuniOS.Reflection
         /// 메소드 탐색은 백그라운드 스레드풀에서 수행됩니다.
         /// </summary>
         /// <typeparam name="T">찾을 메소드에 정의된 <see cref="PreserveAttribute"/> 타입입니다.</typeparam>
+        [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
         public static async UniTask InvokeDefinedMethods<T>() where T : PreserveAttribute
         {
             // Linq 쓰면 코드가 몇배는 깔끔해지겠지만, 메소드 호출이 너무 길어져 대략 2배에서 심하면 10배까지도 성능적인 차이가 나는것을 확인했습니다.

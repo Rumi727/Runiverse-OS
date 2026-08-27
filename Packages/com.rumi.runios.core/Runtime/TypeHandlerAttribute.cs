@@ -13,6 +13,7 @@ namespace RuniOS
     /// <remarks>
     /// <see cref="AttributeTargets.Class"/>에만 적용 가능하며, 파생 클래스에서는 상속되지 않고 (<see langword="false"/>), 여러 번 사용 가능합니다 (<see langword="true"/>).
     /// </remarks>
+    [Obsolete("Global type discovery is deprecated. Use explicit registration.")]
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = true)]
     public abstract class TypeHandlerAttribute : Attribute
     {
