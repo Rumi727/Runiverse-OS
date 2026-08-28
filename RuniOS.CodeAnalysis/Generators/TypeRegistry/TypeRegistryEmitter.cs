@@ -1,0 +1,366 @@
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+
+namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
+
+/// <summary>
+/// Renders generated source fragments for type registry properties and registrations.<br/>
+/// 타입 레지스트리 속성 및 등록에 필요한 생성 소스 조각을 변환합니다.
+/// </summary>
+static class TypeRegistryEmitter
+{
+    /// <summary>
+    /// Creates the stable identifier for a registry property and registry type pair.<br/>
+    /// 레지스트리 속성과 레지스트리 타입 조합의 안정 식별자를 만듭니다.
+    /// </summary>
+    /// <param name="property">
+    /// The registry property used in the identifier.<br/>
+    /// 식별자에 사용할 레지스트리 속성입니다.
+    /// </param>
+    /// <param name="registryType">
+    /// The registry type used in the identifier.<br/>
+    /// 식별자에 사용할 레지스트리 타입입니다.
+    /// </param>
+    /// <returns>
+    /// A pipe-delimited identifier containing the owner metadata name, property metadata name, and registry type name.<br/>
+    /// 소유자 메타데이터 이름, 속성 메타데이터 이름, 레지스트리 타입 이름을 파이프로 연결한 식별자입니다.
+    /// </returns>
+    public static string GetStableId(IPropertySymbol property, INamedTypeSymbol registryType)
+    {
+        return string.Join
+        (
+            "|",
+            GeneratorUtils.GetMetadataName(property.ContainingType),
+            property.MetadataName,
+            GeneratorUtils.GetTypeName(registryType)
+        );
+    }
+
+    /// <summary>
+    /// Creates the generated backing field name for a registry property.<br/>
+    /// 레지스트리 속성에 사용할 생성 백킹 필드 이름을 만듭니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition whose backing field name is requested.<br/>
+    /// 백킹 필드 이름을 가져올 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// A generated field name containing the property name and stable identifier hash.<br/>
+    /// 속성 이름과 안정 식별자 해시를 포함하는 생성 필드 이름입니다.
+    /// </returns>
+    public static string GetBackingFieldName(RegistryDefinition registry) => $"__typeRegistry_{registry.property.Name}_{GeneratorUtils.GetShortHash(registry.stableId)}";
+
+    /// <summary>
+    /// Creates the generated source hint name for a registry property implementation.<br/>
+    /// 레지스트리 속성 구현에 사용할 생성 소스 힌트 이름을 만듭니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition used to derive the hint name.<br/>
+    /// 힌트 이름을 도출할 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// The property implementation hint name ending in <c>.g.cs</c>.<br/>
+    /// <c>.g.cs</c>로 끝나는 속성 구현 힌트 이름입니다.
+    /// </returns>
+    public static string GetPropertyHintName(RegistryDefinition registry) => $"RuniOS.TypeRegistry.Property.{GeneratorUtils.GetShortHash(registry.stableId)}.g.cs";
+
+    /// <summary>
+    /// Creates the generated source hint name for a registry manifest.<br/>
+    /// 레지스트리 매니페스트에 사용할 생성 소스 힌트 이름을 만듭니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition used to derive the hint name.<br/>
+    /// 힌트 이름을 도출할 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// The manifest hint name ending in <c>.g.cs</c>.<br/>
+    /// <c>.g.cs</c>로 끝나는 매니페스트 힌트 이름입니다.
+    /// </returns>
+    public static string GetManifestHintName(RegistryDefinition registry) => $"RuniOS.TypeRegistry.Manifest.{GeneratorUtils.GetShortHash(registry.stableId)}.g.cs";
+
+    /// <summary>
+    /// Renders a registry property implementation using a parameterless constructor initializer.<br/>
+    /// 매개 변수 없는 생성자 초기화 식을 사용해 레지스트리 속성 구현을 변환합니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition whose property implementation is rendered.<br/>
+    /// 속성 구현을 변환할 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// Generated source containing the registry backing field and <c>partial</c> property implementation.<br/>
+    /// 레지스트리 백킹 필드와 <c>partial</c> 속성 구현을 포함하는 생성 소스입니다.
+    /// </returns>
+    public static string RenderPropertyImplementation(RegistryDefinition registry) => RenderPropertyImplementation(registry, $"new {GeneratorUtils.GetTypeName(registry.registryType)}()");
+
+    /// <summary>
+    /// Renders a registry property implementation using the specified initializer expression.<br/>
+    /// 지정된 초기화 식을 사용해 레지스트리 속성 구현을 변환합니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition whose property implementation is rendered.<br/>
+    /// 속성 구현을 변환할 레지스트리 정의입니다.
+    /// </param>
+    /// <param name="initializer">
+    /// The C# expression assigned to the generated backing field.<br/>
+    /// 생성 백킹 필드에 할당할 C# 식입니다.
+    /// </param>
+    /// <returns>
+    /// Generated source for the containing namespace and type hierarchy, backing field, and <c>partial</c> property.<br/>
+    /// 포함 네임스페이스 및 타입 계층, 백킹 필드, <c>partial</c> 속성을 위한 생성 소스입니다.
+    /// </returns>
+    public static string RenderPropertyImplementation(RegistryDefinition registry, string initializer)
+    {
+        SourceWriter writer = new();
+        writer.AppendLine("// <auto-generated/>");
+        writer.AppendLine("// resharper disable all");
+        writer.AppendLine("#nullable enable");
+
+        string? namespaceName = registry.ownerType.ContainingNamespace.IsGlobalNamespace ? null : registry.ownerType.ContainingNamespace.ToDisplayString();
+        if (namespaceName != null)
+        {
+            writer.AppendLine($"namespace {namespaceName}");
+            writer.AppendLine("{");
+            writer.Indent();
+        }
+
+        List<INamedTypeSymbol> containingTypes = GeneratorUtils.GetContainingTypes(registry.ownerType);
+        foreach (INamedTypeSymbol type in containingTypes)
+        {
+            writer.AppendLine(GeneratorUtils.RenderTypeDeclarationHeader(type));
+            writer.AppendLine("{");
+            writer.Indent();
+        }
+
+        string registryType = GeneratorUtils.GetTypeName(registry.registryType);
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine($"static readonly {registryType} {GetBackingFieldName(registry)} = {initializer};");
+        writer.AppendLine();
+        // 생성 구현은 사용자의 public static partial get-only 레지스트리 속성을 완성해야 합니다.
+        writer.AppendLine($"public static partial {registryType} {GeneratorUtils.EscapeIdentifier(registry.property.Name)} => {GetBackingFieldName(registry)};");
+
+        for (int index = containingTypes.Count - 1; index >= 0; index--)
+        {
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+
+        if (namespaceName != null)
+        {
+            writer.Unindent();
+            writer.AppendLine("}");
+        }
+
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Renders an assembly-level manifest attribute for a registry property.<br/>
+    /// 레지스트리 속성을 위한 어셈블리 수준 매니페스트 특성을 변환합니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition represented by the manifest.<br/>
+    /// 매니페스트가 나타내는 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// Generated source containing the registry manifest attribute.<br/>
+    /// 레지스트리 매니페스트 특성을 포함하는 생성 소스입니다.
+    /// </returns>
+    public static string RenderManifest(RegistryDefinition registry)
+    {
+        SourceWriter writer = new();
+        writer.AppendLine("// <auto-generated/>");
+        writer.AppendLine("// resharper disable all");
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine
+        (
+            // 생성 매니페스트는 정확한 `(Type ownerType, string propertyName)` 생성자 계약을 사용합니다.
+            $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)})]"
+        );
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Gets the fully qualified registration entry type nested in a registry type.<br/>
+    /// 레지스트리 타입에 중첩된 등록 항목 타입의 완전 수식 이름을 가져옵니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition whose entry type is requested.<br/>
+    /// 등록 항목 타입을 가져올 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// The fully qualified name of the registry's <c>RegistrationEntry</c> type.<br/>
+    /// 레지스트리의 <c>RegistrationEntry</c> 타입의 완전 수식 이름입니다.
+    /// </returns>
+    // AttributedTypeRegistrySourceGenerator가 RegistrationEntry[] 호출에서 이 중첩 타입 이름을 정확히 생성합니다.
+    public static string RenderRegistrationEntryType(RegistryDefinition registry) => $"{GeneratorUtils.GetTypeName(registry.registryType)}.RegistrationEntry";
+
+    /// <summary>
+    /// Creates a registration source preamble and leaves its namespace and class scopes open.<br/>
+    /// 등록 소스 프리앰블을 만들고 네임스페이스 및 클래스 스코프를 열린 상태로 둡니다.
+    /// </summary>
+    /// <param name="registrationTypeName">
+    /// The generated registration type name.<br/>
+    /// 생성할 등록 타입 이름입니다.
+    /// </param>
+    /// <returns>
+    /// The source text for the registration preamble.<br/>
+    /// 등록 소스 프리앰블의 텍스트입니다.
+    /// </returns>
+    public static string RenderRegistrationPreamble(string registrationTypeName)
+    {
+        SourceWriter writer = CreateRegistrationWriter(registrationTypeName);
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Creates a writer positioned inside a generated partial registration class.<br/>
+    /// 생성된 partial 등록 클래스 내부를 가리키는 작성기를 만듭니다.
+    /// </summary>
+    /// <param name="registrationTypeName">
+    /// The generated registration type name.<br/>
+    /// 생성할 등록 타입 이름입니다.
+    /// </param>
+    /// <returns>
+    /// A writer with the generated namespace and class declarations already appended.<br/>
+    /// 생성된 네임스페이스 및 클래스 선언이 이미 추가된 작성기입니다.
+    /// </returns>
+    public static SourceWriter CreateRegistrationWriter(string registrationTypeName)
+    {
+        SourceWriter writer = new();
+        writer.AppendLine("// <auto-generated/>");
+        writer.AppendLine("// resharper disable all");
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine("namespace RuniOS.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"static partial class {registrationTypeName}");
+        writer.AppendLine("{");
+        writer.Indent();
+        return writer;
+    }
+
+    /// <summary>
+    /// Closes the generated registration class and namespace and returns the complete source text.<br/>
+    /// 생성된 등록 클래스와 네임스페이스를 닫고 전체 소스 텍스트를 반환합니다.
+    /// </summary>
+    /// <param name="writer">
+    /// The writer whose open registration scopes are closed.<br/>
+    /// 열린 등록 스코프를 닫을 작성기입니다.
+    /// </param>
+    /// <returns>
+    /// The complete generated registration source text.<br/>
+    /// 완성된 생성 등록 소스 텍스트입니다.
+    /// </returns>
+    public static string FinishRegistration(SourceWriter writer)
+    {
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.Unindent();
+        writer.AppendLine("}");
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Renders the post-initialization lifecycle declaration for a generated registration type.<br/>
+    /// 생성된 등록 타입을 위한 post-initialization 수명 주기 선언을 변환합니다.
+    /// </summary>
+    /// <param name="registrationTypeName">
+    /// The generated registration type name shared with the implementation source.<br/>
+    /// 구현 소스와 공유할 생성 등록 타입 이름입니다.
+    /// </param>
+    /// <returns>
+    /// Generated lifecycle declaration source.<br/>
+    /// 생성된 수명 주기 선언 소스입니다.
+    /// </returns>
+    public static string RenderRegistrationLifecycleDeclaration(string registrationTypeName)
+    {
+        SourceWriter writer = new();
+        writer.AppendLine("// <auto-generated/>");
+        writer.AppendLine("// resharper disable all");
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine("#pragma warning disable CS0618");
+        writer.AppendLine("namespace RuniOS.Generated");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("[global::Microsoft.CodeAnalysis.Embedded]");
+        writer.AppendLine($"static partial class {registrationTypeName}");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("[global::Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]");
+        writer.AppendLine("static void RegisterGeneratedTypes()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("RegisterGeneratedTypesCore();");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("[global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]");
+        writer.AppendLine("static void UnregisterGeneratedTypes()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine("UnregisterGeneratedTypesCore();");
+        writer.Unindent();
+        writer.AppendLine("}");
+        writer.AppendLine();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("static partial void RegisterGeneratedTypesCore();");
+        writer.AppendLine();
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("static partial void UnregisterGeneratedTypesCore();");
+        writer.AppendLine("#pragma warning restore CS0618");
+        FinishRegistration(writer);
+        return writer.ToString();
+    }
+
+    /// <summary>
+    /// Renders compile-only fallback declarations for Unity lifecycle APIs unavailable in the current compilation.<br/>
+    /// 현재 컴파일에서 사용할 수 없는 Unity 수명 주기 API를 위한 컴파일 전용 대체 선언을 변환합니다.
+    /// </summary>
+    /// <param name="hasLoadedAttribute">
+    /// Whether the current compilation already provides <c>OnAssemblyLoadedAttribute</c>.<br/>
+    /// 현재 컴파일이 <c>OnAssemblyLoadedAttribute</c>를 이미 제공하는지 여부입니다.
+    /// </param>
+    /// <param name="hasUnloadingAttribute">
+    /// Whether the current compilation already provides <c>OnAssemblyUnloadingAttribute</c>.<br/>
+    /// 현재 컴파일이 <c>OnAssemblyUnloadingAttribute</c>를 이미 제공하는지 여부입니다.
+    /// </param>
+    /// <returns>
+    /// Generated compatibility source for the missing declarations.<br/>
+    /// 누락된 선언을 위한 생성 호환 소스입니다.
+    /// </returns>
+    public static string RenderLifecycleCompatibility(bool hasLoadedAttribute, bool hasUnloadingAttribute)
+    {
+        SourceWriter writer = new();
+        writer.AppendLine("// <auto-generated/>");
+        writer.AppendLine("// resharper disable all");
+        writer.AppendLine("#nullable enable");
+        writer.AppendLine("namespace Unity.Scripting.LifecycleManagement");
+        writer.AppendLine("{");
+        writer.Indent();
+
+        if (!hasLoadedAttribute)
+        {
+            writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+            writer.AppendLine("[global::Microsoft.CodeAnalysis.Embedded]");
+            writer.AppendLine("[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true, Inherited = false)]");
+            writer.AppendLine("sealed class OnAssemblyLoadedAttribute : global::System.Attribute { }");
+            writer.AppendLine();
+        }
+
+        if (!hasUnloadingAttribute)
+        {
+            writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+            writer.AppendLine("[global::Microsoft.CodeAnalysis.Embedded]");
+            writer.AppendLine("[global::System.AttributeUsage(global::System.AttributeTargets.Method, AllowMultiple = true, Inherited = false)]");
+            writer.AppendLine("sealed class OnAssemblyUnloadingAttribute : global::System.Attribute { }");
+            writer.AppendLine();
+        }
+
+        writer.Unindent();
+        writer.AppendLine("}");
+        return writer.ToString();
+    }
+}

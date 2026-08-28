@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ROS0002_Title" xml:space="preserve">
+    <value>GenerateTypeRegistry target must be a property</value>
+  </data>
+  <data name="ROS0002_Message" xml:space="preserve">
+    <value>'{0}' must be applied to a property</value>
+  </data>
+  <data name="ROS0003_Title" xml:space="preserve">
+    <value>Invalid generated registry property</value>
+  </data>
+  <data name="ROS0003_Message" xml:space="preserve">
+    <value>Registry property '{0}' must be public static partial, get-only, and non-indexed</value>
+  </data>
+  <data name="ROS0004_Title" xml:space="preserve">
+    <value>Invalid registry containing type</value>
+  </data>
+  <data name="ROS0004_Message" xml:space="preserve">
+    <value>Containing type hierarchy for registry property '{0}' must be public and partial</value>
+  </data>
+  <data name="ROS0005_Title" xml:space="preserve">
+    <value>Invalid registry type</value>
+  </data>
+  <data name="ROS0005_Message" xml:space="preserve">
+    <value>Registry property '{0}' must use a concrete TypeRegistry-derived type</value>
+  </data>
+  <data name="ROS0006_Title" xml:space="preserve">
+    <value>Unsupported registry type</value>
+  </data>
+  <data name="ROS0006_Message" xml:space="preserve">
+    <value>No TypeRegistry source generator supports registry type '{0}'</value>
+  </data>
+  <data name="ROS0007_Title" xml:space="preserve">
+    <value>Registry cannot be initialized</value>
+  </data>
+  <data name="ROS0007_Message" xml:space="preserve">
+    <value>Registry type '{0}' has no accessible parameterless constructor</value>
+  </data>
+  <data name="ROS0008_Title" xml:space="preserve">
+    <value>Generated registry member conflicts with an existing member</value>
+  </data>
+  <data name="ROS0008_Message" xml:space="preserve">
+    <value>Generated registry member '{0}' conflicts with an existing member in '{1}'</value>
+  </data>
+  <data name="ROS0009_Title" xml:space="preserve">
+    <value>Registry lifecycle API is unavailable</value>
+  </data>
+  <data name="ROS0009_Message" xml:space="preserve">
+    <value>Generated registry registration requires Unity.Scripting.LifecycleManagement.OnAssemblyLoaded and OnAssemblyUnloading</value>
+  </data>
+  <data name="ROS0010_Title" xml:space="preserve">
+    <value>Invalid type registry manifest</value>
+  </data>
+  <data name="ROS0010_Message" xml:space="preserve">
+    <value>Type registry manifest in assembly '{0}' could not restore public registry property '{1}.{2}'</value>
+  </data>
+  <data name="ROS0011_Title" xml:space="preserve">
+    <value>Generated hint name collision</value>
+  </data>
+  <data name="ROS0011_Message" xml:space="preserve">
+    <value>Generated hint name '{0}' collides for stable IDs '{1}' and '{2}'</value>
+  </data>
+  <data name="ROS0012_Title" xml:space="preserve">
+    <value>Generic registry owner cannot receive automatic registrations</value>
+  </data>
+  <data name="ROS0012_Message" xml:space="preserve">
+    <value>Registry property '{0}' is declared in a generic containing type and cannot receive automatic assembly lifecycle registrations</value>
+  </data>
+  <data name="ROS0013_Title" xml:space="preserve">
+    <value>Invalid attributed registry attribute type</value>
+  </data>
+  <data name="ROS0013_Message" xml:space="preserve">
+    <value>Attributed registry attribute type '{0}' must derive from RuniOS.Reflection.TypeRegistrationAttribute</value>
+  </data>
+  <data name="ROS0014_Title" xml:space="preserve">
+    <value>Attribute argument cannot be generated</value>
+  </data>
+  <data name="ROS0014_Message" xml:space="preserve">
+    <value>Attribute '{0}' contains an argument that cannot be reproduced as a C# expression: {1}</value>
+  </data>
+  <data name="ROS0015_Title" xml:space="preserve">
+    <value>Attribute is inaccessible to generated code</value>
+  </data>
+  <data name="ROS0015_Message" xml:space="preserve">
+    <value>Attribute '{0}' or one of its constructor/named members is not accessible from generated code</value>
+  </data>
+  <data name="ROS0016_Title" xml:space="preserve">
+    <value>Abstract registration candidate was skipped</value>
+  </data>
+  <data name="ROS0016_Message" xml:space="preserve">
+    <value>Abstract candidate type '{0}' was excluded from attributed registry registration</value>
+  </data>
+  <data name="ROS0017_Title" xml:space="preserve">
+    <value>Type registry requires C# 13 or later</value>
+  </data>
+  <data name="ROS0017_Message" xml:space="preserve">
+    <value>Registry property '{0}' requires C# 13 or later because its generated implementation uses a partial property</value>
+  </data>
+  <data name="ROS0018_Title" xml:space="preserve">
+    <value>TypeRegistryManifestAttribute is generator-only</value>
+  </data>
+  <data name="ROS0018_Message" xml:space="preserve">
+    <value>TypeRegistryManifestAttribute is reserved for generated source; declare a registry property with GenerateTypeRegistryAttribute instead</value>
+  </data>
+  <data name="ROS0019_Title" xml:space="preserve">
+    <value>Type registration has no matching registry</value>
+  </data>
+  <data name="ROS0019_Message" xml:space="preserve">
+    <value>TypeRegistrationAttribute '{0}' on '{1}' has no matching [GenerateTypeRegistry] AttributedTypeRegistry&lt;TBase, TAttribute&gt; in its base type hierarchy</value>
+  </data>
+</root>

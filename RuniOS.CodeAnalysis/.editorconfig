@@ -1,0 +1,7 @@
+# C# 파일
+[*.cs]
+
+#### .NET 코딩 규칙 ####
+
+# 코드 블록 기본 설정
+csharp_style_namespace_declarations = file_scoped:suggestion

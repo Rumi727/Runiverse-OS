@@ -12,6 +12,7 @@ namespace RuniOS.Resource
     /// The asset type resolved by this reference, such as <see cref="Texture2D"/>.<br/>
     /// 이 참조가 확인하는 에셋 타입입니다. 예를 들어 <see cref="Texture2D"/>가 될 수 있습니다.
     /// </typeparam>
+    // AssetRefSerializationSuppressor는 `RuniOS.Resource.AssetRef`1` 메타데이터와 field.Type.OriginalDefinition을 직접 비교합니다.
     [Serializable]
     public record struct AssetRef<TAsset> : IAssetRef where TAsset : notnull
     {

@@ -46,3 +46,10 @@
 ## C# Style
 
 - Put `#nullable enable` at the very top of C# files.
+
+## Standalone RuniOS.CodeAnalysis
+
+- `RuniOS.CodeAnalysis` is a standalone Roslyn/.NET project, independent of the Unity runtime and editor projects.
+- Do not apply Unity-specific C# conventions to files under `RuniOS.CodeAnalysis`: do not add a file-level `#nullable enable` directive or block-scoped namespace declarations. Preserve the existing file-scoped namespace style.
+- The general C# rule requiring `#nullable enable` does not apply to `RuniOS.CodeAnalysis`. Its project-level nullable configuration remains authoritative.
+- For `RuniOS.CodeAnalysis`, inspect its own project and source configuration instead of requiring Unity assembly files such as `GenericGlobalUsing`, `GenericEditorGlobalUsing`, or `AssemblyInfo`.

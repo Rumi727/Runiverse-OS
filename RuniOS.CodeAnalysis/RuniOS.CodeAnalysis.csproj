@@ -1,0 +1,40 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
+
+        <EmbeddedResource Update="Diagnostics/TypeRegistryDiagnostics.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.resources</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Diagnostics/TypeRegistryDiagnostics.ko.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.ko.resources</LogicalName>
+        </EmbeddedResource>
+    </ItemGroup>
+
+    <Target Name="CopyAnalyzerToUnityPackage" AfterTargets="Build">
+        <PropertyGroup>
+            <UnityAnalyzerDirectory>$(MSBuildThisFileDirectory)../Packages/com.rumi.runios.core/Plugins/RuniOS.CodeAnalysis/</UnityAnalyzerDirectory>
+        </PropertyGroup>
+
+        <MakeDir Directories="$(UnityAnalyzerDirectory)" />
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(UnityAnalyzerDirectory)" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="$(TargetDir)$(AssemblyName).pdb" DestinationFolder="$(UnityAnalyzerDirectory)" Condition="Exists('$(TargetDir)$(AssemblyName).pdb')" SkipUnchangedFiles="true" />
+
+        <ItemGroup>
+            <AnalyzerSatelliteFiles Include="$(TargetDir)**\$(AssemblyName).resources.dll" />
+        </ItemGroup>
+        <MakeDir Directories="@(AnalyzerSatelliteFiles->'$(UnityAnalyzerDirectory)%(RecursiveDir)')" />
+        <Copy
+            SourceFiles="@(AnalyzerSatelliteFiles)"
+            DestinationFiles="@(AnalyzerSatelliteFiles->'$(UnityAnalyzerDirectory)%(RecursiveDir)%(Filename)%(Extension)')"
+            SkipUnchangedFiles="true"
+        />
+    </Target>
+
+</Project>
