@@ -77,7 +77,8 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
             (
                 TypeRegistryDiagnostics.invalidAttributeBase,
                 TypeRegistrySymbolHelpers.GetLocation(registryType),
-                registryType.TypeArguments.Length == 2 ? registryType.TypeArguments[1].ToDisplayString() : "<unknown>"
+                compilation,
+                registryType.TypeArguments.Length == 2 ? (object)registryType.TypeArguments[1] : "<unknown>"
             );
             return false;
         }
@@ -167,7 +168,8 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
             (
                 TypeRegistryDiagnostics.abstractCandidate,
                 TypeRegistrySymbolHelpers.GetLocation(attributedCandidate.implementationType),
-                GeneratorUtils.GetTypeName(attributedCandidate.implementationType)
+                compilation,
+                attributedCandidate.implementationType
             );
             return false;
         }
@@ -177,7 +179,8 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
             (
                 TypeRegistryDiagnostics.inaccessibleAttribute,
                 TypeRegistrySymbolHelpers.GetLocation(attributedCandidate.implementationType),
-                GeneratorUtils.GetTypeName(attributedCandidate.implementationType)
+                compilation,
+                attributedCandidate.implementationType
             );
             return false;
         }
@@ -192,7 +195,8 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
             diagnostic = TypeRegistryDiagnostics.Create
             (
                 TypeRegistryDiagnostics.missingLifecycleApi,
-                TypeRegistrySymbolHelpers.GetLocation(matchingAttributes[0])
+                TypeRegistrySymbolHelpers.GetLocation(matchingAttributes[0]),
+                compilation
             );
             return false;
         }

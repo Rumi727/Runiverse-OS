@@ -41,14 +41,16 @@ static class AttributeLiteralEmitter
     {
         expression = string.Empty;
         diagnostic = null;
+        Location diagnosticLocation = TypeRegistrySymbolHelpers.GetLocation(attribute);
 
         if (attribute.AttributeClass is not { } attributeType || attribute.AttributeConstructor == null)
         {
             diagnostic = TypeRegistryDiagnostics.Create
             (
                 TypeRegistryDiagnostics.unemittableAttributeArgument,
-                TypeRegistrySymbolHelpers.GetLocation(attribute),
-                attribute.AttributeClass?.ToDisplayString() ?? "<unknown>",
+                diagnosticLocation,
+                compilation,
+                attribute.AttributeClass is { } unresolvedAttributeType ? (object)unresolvedAttributeType : "<unknown>",
                 "attribute constructor or type is unresolved"
             );
             return false;
@@ -59,8 +61,9 @@ static class AttributeLiteralEmitter
             diagnostic = TypeRegistryDiagnostics.Create
             (
                 TypeRegistryDiagnostics.inaccessibleAttribute,
-                TypeRegistrySymbolHelpers.GetLocation(attribute),
-                attributeType.ToDisplayString()
+                diagnosticLocation,
+                compilation,
+                attributeType
             );
             return false;
         }
@@ -69,13 +72,14 @@ static class AttributeLiteralEmitter
         List<string> constructorArguments = [];
         foreach (TypedConstant argument in attribute.ConstructorArguments)
         {
-            if (!TryRenderConstant(argument, compilation, out string value, out string reason))
+            if (!TryRenderConstant(argument, compilation, diagnosticLocation, out string value, out string reason))
             {
                 diagnostic = TypeRegistryDiagnostics.Create
                 (
                     TypeRegistryDiagnostics.unemittableAttributeArgument,
-                    TypeRegistrySymbolHelpers.GetLocation(attribute),
-                    attributeType.ToDisplayString(),
+                    diagnosticLocation,
+                    compilation,
+                    attributeType,
                     reason
                 );
                 return false;
@@ -95,19 +99,21 @@ static class AttributeLiteralEmitter
                 diagnostic = TypeRegistryDiagnostics.Create
                 (
                     TypeRegistryDiagnostics.inaccessibleAttribute,
-                    TypeRegistrySymbolHelpers.GetLocation(attribute),
-                    attributeType.ToDisplayString()
+                    diagnosticLocation,
+                    compilation,
+                    attributeType
                 );
                 return false;
             }
 
-            if (!TryRenderConstant(argument, compilation, out string value, out string reason))
+            if (!TryRenderConstant(argument, compilation, diagnosticLocation, out string value, out string reason))
             {
                 diagnostic = TypeRegistryDiagnostics.Create
                 (
                     TypeRegistryDiagnostics.unemittableAttributeArgument,
-                    TypeRegistrySymbolHelpers.GetLocation(attribute),
-                    attributeType.ToDisplayString(),
+                    diagnosticLocation,
+                    compilation,
+                    attributeType,
                     reason
                 );
                 return false;
@@ -135,6 +141,10 @@ static class AttributeLiteralEmitter
     /// The compilation used to validate referenced type accessibility.<br/>
     /// 참조 타입의 접근성을 검증하는 데 사용할 컴파일입니다.
     /// </param>
+    /// <param name="diagnosticLocation">
+    /// The source location used to resolve the shortest display name for diagnostic type arguments.<br/>
+    /// 진단 타입 인수의 가장 짧은 표시 이름을 확인하는 데 사용할 소스 위치입니다.
+    /// </param>
     /// <param name="value">
     /// Receives the generated expression when rendering succeeds; otherwise, an empty string.<br/>
     /// 변환에 성공하면 생성된 식을 받고, 실패하면 빈 문자열입니다.
@@ -147,7 +157,7 @@ static class AttributeLiteralEmitter
     /// <see langword="true"/> when the constant is supported; otherwise, <see langword="false"/>.<br/>
     /// 상수가 지원되면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
     /// </returns>
-    static bool TryRenderConstant(TypedConstant constant, Compilation compilation, out string value, out string reason)
+    static bool TryRenderConstant(TypedConstant constant, Compilation compilation, Location diagnosticLocation, out string value, out string reason)
     {
         value = string.Empty;
         reason = string.Empty;
@@ -175,7 +185,7 @@ static class AttributeLiteralEmitter
                 }
                 if (!TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(type, compilation))
                 {
-                    reason = $"type '{type.ToDisplayString()}' is inaccessible from generated code";
+                    reason = $"type '{TypeRegistryDiagnostics.FormatTypeName(type, compilation, diagnosticLocation)}' is inaccessible from generated code";
                     return false;
                 }
 
@@ -191,7 +201,7 @@ static class AttributeLiteralEmitter
                 }
                 if (!TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(enumType, compilation))
                 {
-                    reason = $"enum type '{enumType.ToDisplayString()}' is inaccessible from generated code";
+                    reason = $"enum type '{TypeRegistryDiagnostics.FormatTypeName(enumType, compilation, diagnosticLocation)}' is inaccessible from generated code";
                     return false;
                 }
 
@@ -207,14 +217,14 @@ static class AttributeLiteralEmitter
                 }
                 if (!TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(arrayType.ElementType, compilation))
                 {
-                    reason = $"array element type '{arrayType.ElementType.ToDisplayString()}' is inaccessible from generated code";
+                    reason = $"array element type '{TypeRegistryDiagnostics.FormatTypeName(arrayType.ElementType, compilation, diagnosticLocation)}' is inaccessible from generated code";
                     return false;
                 }
 
                 List<string> elements = [];
                 foreach (TypedConstant element in constant.Values)
                 {
-                    if (!TryRenderConstant(element, compilation, out string elementValue, out reason))
+                    if (!TryRenderConstant(element, compilation, diagnosticLocation, out string elementValue, out reason))
                         return false;
                     elements.Add(elementValue);
                 }
@@ -226,7 +236,7 @@ static class AttributeLiteralEmitter
             {
                 if (constant.Type == null || !TryRenderPrimitive(constant.Value, constant.Type.SpecialType, out value))
                 {
-                    reason = $"primitive value of type '{constant.Type?.ToDisplayString() ?? "<unknown>"}' is unsupported";
+                    reason = $"primitive value of type '{(constant.Type is { } constantType ? TypeRegistryDiagnostics.FormatTypeName(constantType, compilation, diagnosticLocation) : "<unknown>")}' is unsupported";
                     return false;
                 }
 

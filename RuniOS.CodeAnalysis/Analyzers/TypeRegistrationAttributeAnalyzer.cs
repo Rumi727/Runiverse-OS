@@ -94,6 +94,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                     (
                         TypeRegistryDiagnostics.registrationWithoutRegistry,
                         TypeRegistrySymbolHelpers.GetLocation(attribute),
+                        context.Compilation,
                         attributeType.Name,
                         implementationType.Name
                     )
@@ -131,9 +132,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 (
                     TypeRegistryDiagnostics.genericRegistrationParameterCountMismatch,
                     TypeRegistrySymbolHelpers.GetLocation(attribute),
+                    context.Compilation,
                     attributeType.Name,
                     implementationType.Name,
-                    GeneratorUtils.GetTypeName(targetType),
+                    targetType,
                     0,
                     implementationParameters.Length
                 )
@@ -149,9 +151,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 (
                     TypeRegistryDiagnostics.openGenericRegistrationRequiresChildren,
                     TypeRegistrySymbolHelpers.GetLocation(attribute),
+                    context.Compilation,
                     attributeType.Name,
                     implementationType.Name,
-                    GeneratorUtils.GetTypeName(targetType)
+                    targetType
                 )
             );
             return;
@@ -165,9 +168,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 (
                     TypeRegistryDiagnostics.genericRegistrationSuggestion,
                     TypeRegistrySymbolHelpers.GetLocation(attribute),
+                    context.Compilation,
                     attributeType.Name,
                     implementationType.Name,
-                    GeneratorUtils.GetTypeName(targetType)
+                    targetType
                 )
             );
             return;
@@ -184,9 +188,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                     (
                         TypeRegistryDiagnostics.genericRegistrationParameterCountMismatch,
                         TypeRegistrySymbolHelpers.GetLocation(attribute),
+                        context.Compilation,
                         attributeType.Name,
                         implementationType.Name,
-                        GeneratorUtils.GetTypeName(targetType),
+                        targetType,
                         targetParameters.Length,
                         implementationParameters.Length
                     )
@@ -203,9 +208,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 (
                     TypeRegistryDiagnostics.genericRegistrationConstraintMismatch,
                     TypeRegistrySymbolHelpers.GetLocation(attribute),
+                    context.Compilation,
                     attributeType.Name,
                     implementationType.Name,
-                    GeneratorUtils.GetTypeName(targetType)
+                    targetType
                 )
             );
         }

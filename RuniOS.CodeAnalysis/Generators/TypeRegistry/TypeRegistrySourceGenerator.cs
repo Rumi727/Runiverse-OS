@@ -331,7 +331,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 null,
                 location,
-                TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidGenerateTarget, location, generateTypeRegistryAttributeMetadataName)
+                TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidGenerateTarget, location, context.SemanticModel.Compilation, generateTypeRegistryAttributeMetadataName)
             );
         }
 
@@ -345,6 +345,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                 (
                     TypeRegistryDiagnostics.unsupportedLanguageVersion,
                     location,
+                    context.SemanticModel.Compilation,
                     property.Name
                 )
             );
@@ -413,8 +414,9 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.generatedMemberConflict,
                 location,
+                compilation,
                 property.Name,
-                GeneratorUtils.GetTypeName(property.ContainingType)
+                property.ContainingType
             );
             return false;
         }
@@ -425,6 +427,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.invalidPropertyContract,
                 location,
+                compilation,
                 property.Name
             );
             return false;
@@ -437,6 +440,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.invalidContainingType,
                 location,
+                compilation,
                 property.Name
             );
             return false;
@@ -444,14 +448,14 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
 
         if (property.Type is not INamedTypeSymbol registryType)
         {
-            diagnostic = TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidRegistryType, location, property.Name);
+            diagnostic = TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidRegistryType, location, compilation, property.Name);
             return false;
         }
 
         INamedTypeSymbol? typeRegistry = compilation.GetTypeByMetadataName(typeRegistryMetadataName);
         if (typeRegistry == null || registryType.IsAbstract || !TypeRegistrySymbolHelpers.IsSameOrDerived(registryType, typeRegistry))
         {
-            diagnostic = TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidRegistryType, location, property.Name);
+            diagnostic = TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidRegistryType, location, compilation, property.Name);
             return false;
         }
 
@@ -461,7 +465,8 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.unsupportedRegistryType,
                 location,
-                GeneratorUtils.GetTypeName(registryType)
+                compilation,
+                registryType
             );
             return false;
         }
@@ -472,7 +477,8 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.unsupportedRegistryType,
                 location,
-                GeneratorUtils.GetTypeName(registryType)
+                compilation,
+                registryType
             );
             return false;
         }
@@ -483,7 +489,8 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.missingParameterlessConstructor,
                 location,
-                GeneratorUtils.GetTypeName(registryType)
+                compilation,
+                registryType
             );
             return false;
         }
@@ -497,8 +504,9 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 TypeRegistryDiagnostics.generatedMemberConflict,
                 location,
+                compilation,
                 backingFieldName,
-                GeneratorUtils.GetTypeName(ownerType)
+                ownerType
             );
             return false;
         }
@@ -731,6 +739,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                         (
                             TypeRegistryDiagnostics.genericOwnerRegistration,
                             TypeRegistrySymbolHelpers.GetLocation(registration.registry.property),
+                            compilation,
                             registration.registry.property.Name
                         )
                     );
@@ -895,7 +904,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                 string ownerName = "<unknown>";
                 string propertyName = "<unknown>";
                 if (manifest.ConstructorArguments.Length > 0 && manifest.ConstructorArguments[0].Value is ITypeSymbol ownerSymbol)
-                    ownerName = GeneratorUtils.GetTypeName(ownerSymbol);
+                    ownerName = TypeRegistryDiagnostics.FormatTypeName(ownerSymbol, compilation, Location.None);
                 if (manifest.ConstructorArguments.Length > 1 && manifest.ConstructorArguments[1].Value is string manifestPropertyName)
                     propertyName = manifestPropertyName;
 
@@ -918,6 +927,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                                 (
                                     TypeRegistryDiagnostics.invalidManifest,
                                     Location.None,
+                                    compilation,
                                     assembly.Identity.Name,
                                     ownerName,
                                     propertyName

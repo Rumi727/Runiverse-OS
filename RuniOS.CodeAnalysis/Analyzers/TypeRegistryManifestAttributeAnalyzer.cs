@@ -67,7 +67,8 @@ public sealed class TypeRegistryManifestAttributeAnalyzer : DiagnosticAnalyzer
             TypeRegistryDiagnostics.Create
             (
                 TypeRegistryDiagnostics.manualManifestAttribute,
-                attribute.Name.GetLocation()
+                attribute.Name.GetLocation(),
+                context.SemanticModel.Compilation
             )
         );
     }

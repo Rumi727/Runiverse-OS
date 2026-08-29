@@ -18,6 +18,13 @@ static class TypeRegistryDiagnostics
         "RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics",
         typeof(TypeRegistryDiagnostics).Assembly
     );
+    static readonly SymbolDisplayFormat diagnosticTypeFormat = new
+    (
+        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Omitted,
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypes,
+        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions: SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers | SymbolDisplayMiscellaneousOptions.UseSpecialTypes
+    );
 
     /// <summary>
     /// Describes the diagnostic reported when <c>GenerateTypeRegistryAttribute</c> targets a non-property.<br/>
@@ -348,8 +355,14 @@ static class TypeRegistryDiagnostics
     /// 지정된 값으로 생성한 진단입니다.
     /// </returns>
     public static Diagnostic Create(DiagnosticDescriptor descriptor, Location location, params object[] arguments)
+        => CreateCore(descriptor, location, null, arguments);
+
+    internal static Diagnostic Create(DiagnosticDescriptor descriptor, Location location, Compilation compilation, params object[] arguments)
+        => CreateCore(descriptor, location, compilation, arguments);
+
+    static Diagnostic CreateCore(DiagnosticDescriptor descriptor, Location location, Compilation? compilation, object[] arguments)
     {
-        string[] formatArguments = ConvertArguments(arguments);
+        string[] formatArguments = ConvertArguments(location, compilation, arguments);
         LocalizableResourceString detailedMessage = Text($"{descriptor.Id}_Message", formatArguments);
         DiagnosticDescriptor detailedDescriptor = new
         (
@@ -369,6 +382,17 @@ static class TypeRegistryDiagnostics
         return Diagnostic.Create(detailedDescriptor, location);
     }
 
+    internal static string FormatTypeName(ITypeSymbol type, Compilation? compilation, Location location)
+    {
+        if (compilation != null && location.IsInSource && location.SourceTree is { } sourceTree && compilation.ContainsSyntaxTree(sourceTree))
+        {
+            SemanticModel semanticModel = compilation.GetSemanticModel(sourceTree);
+            return type.ToMinimalDisplayString(semanticModel, location.SourceSpan.Start, SymbolDisplayFormat.MinimallyQualifiedFormat);
+        }
+
+        return type.ToDisplayString(diagnosticTypeFormat);
+    }
+
     static LocalizableResourceString Text(string resourceName, params string[] formatArguments) => new
     (
         resourceName,
@@ -377,11 +401,15 @@ static class TypeRegistryDiagnostics
         formatArguments
     );
 
-    static string[] ConvertArguments(object[] arguments)
+    static string[] ConvertArguments(Location location, Compilation? compilation, object[] arguments)
     {
         string[] formatArguments = new string[arguments.Length];
         for (int index = 0; index < arguments.Length; index++)
-            formatArguments[index] = Convert.ToString(arguments[index], CultureInfo.InvariantCulture) ?? string.Empty;
+        {
+            formatArguments[index] = arguments[index] is ITypeSymbol type
+                ? FormatTypeName(type, compilation, location)
+                : Convert.ToString(arguments[index], CultureInfo.InvariantCulture) ?? string.Empty;
+        }
 
         return formatArguments;
     }
