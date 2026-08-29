@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Entrys
 {
-    [CustomEntryHandler(typeof(DictionaryEntry))]
+    [EntryHandler(typeof(DictionaryEntry), useForChildren = true)]
     public class DictionaryEntryHandler(object targetEntry) : EntryHandler(targetEntry)
     {
         protected override object key => ((DictionaryEntry)targetEntry).Key;

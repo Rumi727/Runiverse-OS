@@ -3,7 +3,7 @@ using RuniOS.Collections.Generic;
 
 namespace RuniOS.Collections.Handlers.Entrys
 {
-    [CustomEntryHandler(typeof(ISerializableKeyValuePair))]
+    [EntryHandler(typeof(ISerializableKeyValuePair), useForChildren = true)]
     public class SerializableKeyValuePairHandler(object targetEntry) : EntryHandler(targetEntry)
     {
         protected override object? key => ((ISerializableKeyValuePair)targetEntry).Key;

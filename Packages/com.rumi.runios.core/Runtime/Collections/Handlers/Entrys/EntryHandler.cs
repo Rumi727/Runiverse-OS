@@ -1,13 +1,18 @@
 ﻿#nullable enable
+using RuniOS.Reflection;
+
 namespace RuniOS.Collections.Handlers.Entrys
 {
-    public abstract class EntryHandler(object targetEntry) : AttributeTypeResolver<EntryHandler, CustomEntryHandlerAttribute>
+    public abstract partial class EntryHandler(object targetEntry)
     {
+        [GenerateTypeRegistry]
+        public static partial AttributedTypeRegistry<EntryHandlerAttribute> registry { get; }
+
         public static KeyValuePair<object?, object?> FindEntry(object? targetEntry)
         {
             ExceptionUtility.ThrowIfArgumentNull(targetEntry);
             
-            Type? type = FindDrawerType(targetEntry.GetType());
+            Type? type = registry.Resolve(targetEntry.GetType());
             if (type != null)
                 return ((EntryHandler)Activator.CreateInstance(type, targetEntry)).entry;
 
@@ -16,7 +21,7 @@ namespace RuniOS.Collections.Handlers.Entrys
         
         public static object CreateEntry(Type targetType, object? key, object? value)
         {
-            if (FindDrawerType(targetType, out Type? resolvedTargetType, out Type? drawerType))
+            if (registry.TryResolve(targetType, out Type? resolvedTargetType, out Type? drawerType))
             {
                 if (!resolvedTargetType.CanGetDefaultValueNotNull())
                     throw new InvalidOperationException($"Cannot create an instance of {targetType}. A public constructor without parameters is required.");
