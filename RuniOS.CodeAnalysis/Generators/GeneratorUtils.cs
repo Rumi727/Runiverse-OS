@@ -106,7 +106,21 @@ static class GeneratorUtils
     /// The fully qualified display name suitable for a <c>typeof</c> expression.<br/>
     /// <c>typeof</c> 식에 사용할 수 있는 완전 수식 표시 이름입니다.
     /// </returns>
-    public static string GetTypeOfName(ITypeSymbol type) => type.ToDisplayString(fullyQualifiedFormat);
+    public static string GetTypeOfName(ITypeSymbol type)
+    {
+        if
+        (
+            type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T } nullableType &&
+            (
+                nullableType.IsUnboundGenericType ||
+                nullableType.TypeArguments.Length == 0 ||
+                nullableType.TypeArguments.Any(static typeArgument => typeArgument is ITypeParameterSymbol)
+            )
+        )
+            return "global::System.Nullable<>";
+
+        return type.ToDisplayString(fullyQualifiedFormat);
+    }
 
     /// <summary>
     /// Formats a type as an unbound generic type name when it is a constructed named generic type.<br/>
@@ -122,9 +136,15 @@ static class GeneratorUtils
     /// </returns>
     public static string GetTypeOfGenericDefinitionName(ITypeSymbol type)
     {
-        return type is INamedTypeSymbol { IsGenericType: true } namedType
-            ? namedType.ConstructUnboundGenericType().ToDisplayString(fullyQualifiedFormat)
-            : GetTypeOfName(type);
+        if (type is INamedTypeSymbol { IsGenericType: true } namedType)
+        {
+            if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
+                return "global::System.Nullable<>";
+
+            return namedType.ConstructUnboundGenericType().ToDisplayString(fullyQualifiedFormat);
+        }
+
+        return GetTypeOfName(type);
     }
 
     /// <summary>
