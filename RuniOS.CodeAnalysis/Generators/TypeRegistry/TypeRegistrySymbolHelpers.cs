@@ -95,6 +95,9 @@ static class TypeRegistrySymbolHelpers
     /// </returns>
     public static bool IsAccessibleFromGeneratedCode(ISymbol symbol, Compilation compilation)
     {
+        if (symbol is IPointerTypeSymbol pointerType)
+            return IsAccessibleFromGeneratedCode(pointerType.PointedAtType, compilation);
+
         bool sameAssembly = SymbolEqualityComparer.Default.Equals(symbol.ContainingAssembly, compilation.Assembly);
         for (ISymbol? current = symbol; current != null; current = GetContainingSymbol(current))
         {
