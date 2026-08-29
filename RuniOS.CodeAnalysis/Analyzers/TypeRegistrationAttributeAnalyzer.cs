@@ -83,6 +83,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         if (context.Symbol is not INamedTypeSymbol { TypeKind: TypeKind.Class } implementationType)
             return;
 
+        bool canSuggestGenericImplementation = CanSuggestGenericImplementation(implementationType, registrationAttribute);
         foreach (AttributeData attribute in implementationType.GetAttributes())
         {
             if (attribute.AttributeClass == null || !TypeRegistrySymbolHelpers.IsSameOrDerived(attribute.AttributeClass, registrationAttribute))
@@ -104,8 +105,35 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 continue;
             }
 
-            AnalyzeGenericRegistration(context, attribute, attribute.AttributeClass, implementationType);
+            AnalyzeGenericRegistration(context, attribute, attribute.AttributeClass, implementationType, canSuggestGenericImplementation);
         }
+    }
+
+    static bool CanSuggestGenericImplementation(INamedTypeSymbol implementationType, INamedTypeSymbol registrationAttribute)
+    {
+        ImmutableArray<ITypeParameterSymbol> firstTargetParameters = default;
+        bool hasTarget = false;
+
+        foreach (AttributeData attribute in implementationType.GetAttributes())
+        {
+            if (attribute.AttributeClass == null || !TypeRegistrySymbolHelpers.IsSameOrDerived(attribute.AttributeClass, registrationAttribute))
+                continue;
+            if (attribute.ConstructorArguments.Length == 0 || attribute.ConstructorArguments[0].Value is not INamedTypeSymbol targetType || !IsOpenGenericType(targetType))
+                return false;
+
+            ImmutableArray<ITypeParameterSymbol> targetParameters = GetRuntimeTypeParameters(targetType.OriginalDefinition);
+            if (!hasTarget)
+            {
+                firstTargetParameters = targetParameters;
+                hasTarget = true;
+                continue;
+            }
+
+            if (!AreGenericParameterContractsEquivalent(firstTargetParameters, targetParameters))
+                return false;
+        }
+
+        return hasTarget;
     }
 
     static void AnalyzeGenericRegistration
@@ -113,7 +141,8 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         SymbolAnalysisContext context,
         AttributeData attribute,
         INamedTypeSymbol attributeType,
-        INamedTypeSymbol implementationType
+        INamedTypeSymbol implementationType,
+        bool canSuggestGenericImplementation
     )
     {
         if (attribute.ConstructorArguments.Length == 0 || attribute.ConstructorArguments[0].Value is not INamedTypeSymbol targetType)
@@ -164,6 +193,9 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
 
         if (!implementationType.IsGenericType)
         {
+            if (!canSuggestGenericImplementation)
+                return;
+
             context.ReportDiagnostic
             (
                 TypeRegistryDiagnostics.Create
@@ -269,6 +301,67 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
             parameters.AddRange(containingTypes.Pop().TypeParameters);
 
         return parameters.ToImmutable();
+    }
+
+    static bool AreGenericParameterContractsEquivalent
+    (
+        ImmutableArray<ITypeParameterSymbol> firstParameters,
+        ImmutableArray<ITypeParameterSymbol> secondParameters
+    )
+    {
+        if (firstParameters.Length != secondParameters.Length)
+            return false;
+
+        for (int index = 0; index < firstParameters.Length; index++)
+        {
+            ITypeParameterSymbol firstParameter = firstParameters[index];
+            ITypeParameterSymbol secondParameter = secondParameters[index];
+            if
+            (
+                firstParameter.HasReferenceTypeConstraint != secondParameter.HasReferenceTypeConstraint ||
+                firstParameter.ReferenceTypeConstraintNullableAnnotation != secondParameter.ReferenceTypeConstraintNullableAnnotation ||
+                firstParameter.HasValueTypeConstraint != secondParameter.HasValueTypeConstraint ||
+                firstParameter.HasUnmanagedTypeConstraint != secondParameter.HasUnmanagedTypeConstraint ||
+                firstParameter.HasNotNullConstraint != secondParameter.HasNotNullConstraint ||
+                firstParameter.HasConstructorConstraint != secondParameter.HasConstructorConstraint ||
+                firstParameter.ConstraintTypes.Length != secondParameter.ConstraintTypes.Length ||
+                firstParameter.ConstraintNullableAnnotations.Length != secondParameter.ConstraintNullableAnnotations.Length
+            )
+                return false;
+
+            bool[] matchedConstraints = new bool[secondParameter.ConstraintTypes.Length];
+            for (int firstConstraintIndex = 0; firstConstraintIndex < firstParameter.ConstraintTypes.Length; firstConstraintIndex++)
+            {
+                int matchingConstraintIndex = -1;
+                for (int secondConstraintIndex = 0; secondConstraintIndex < secondParameter.ConstraintTypes.Length; secondConstraintIndex++)
+                {
+                    if
+                    (
+                        matchedConstraints[secondConstraintIndex] ||
+                        firstParameter.ConstraintNullableAnnotations[firstConstraintIndex] != secondParameter.ConstraintNullableAnnotations[secondConstraintIndex] ||
+                        !AreEquivalentTypes
+                        (
+                            firstParameter.ConstraintTypes[firstConstraintIndex],
+                            secondParameter.ConstraintTypes[secondConstraintIndex],
+                            firstParameters,
+                            secondParameters,
+                            includeNullability: true
+                        )
+                    )
+                        continue;
+
+                    matchingConstraintIndex = secondConstraintIndex;
+                    break;
+                }
+
+                if (matchingConstraintIndex < 0)
+                    return false;
+
+                matchedConstraints[matchingConstraintIndex] = true;
+            }
+        }
+
+        return true;
     }
 
     static bool HasUnsatisfiedGenericConstraints
@@ -382,9 +475,13 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         ITypeSymbol first,
         ITypeSymbol second,
         ImmutableArray<ITypeParameterSymbol> targetParameters,
-        ImmutableArray<ITypeParameterSymbol> implementationParameters
+        ImmutableArray<ITypeParameterSymbol> implementationParameters,
+        bool includeNullability = false
     )
     {
+        if (includeNullability && first.NullableAnnotation != second.NullableAnnotation)
+            return false;
+
         if (first is ITypeParameterSymbol || second is ITypeParameterSymbol)
         {
             if (first is not ITypeParameterSymbol targetParameter || second is not ITypeParameterSymbol implementationParameter)
@@ -405,7 +502,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
 
             for (int index = 0; index < firstNamed.TypeArguments.Length; index++)
             {
-                if (!AreEquivalentTypes(firstNamed.TypeArguments[index], secondNamed.TypeArguments[index], targetParameters, implementationParameters))
+                if (!AreEquivalentTypes(firstNamed.TypeArguments[index], secondNamed.TypeArguments[index], targetParameters, implementationParameters, includeNullability))
                     return false;
             }
 
@@ -413,10 +510,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         }
 
         if (first is IArrayTypeSymbol firstArray && second is IArrayTypeSymbol secondArray)
-            return firstArray.Rank == secondArray.Rank && AreEquivalentTypes(firstArray.ElementType, secondArray.ElementType, targetParameters, implementationParameters);
+            return firstArray.Rank == secondArray.Rank && AreEquivalentTypes(firstArray.ElementType, secondArray.ElementType, targetParameters, implementationParameters, includeNullability);
 
         if (first is IPointerTypeSymbol firstPointer && second is IPointerTypeSymbol secondPointer)
-            return AreEquivalentTypes(firstPointer.PointedAtType, secondPointer.PointedAtType, targetParameters, implementationParameters);
+            return AreEquivalentTypes(firstPointer.PointedAtType, secondPointer.PointedAtType, targetParameters, implementationParameters, includeNullability);
 
         return false;
     }
