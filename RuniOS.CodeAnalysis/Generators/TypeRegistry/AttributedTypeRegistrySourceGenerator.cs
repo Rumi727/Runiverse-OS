@@ -59,7 +59,11 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     {
         foreach (IMethodSymbol constructor in registryType.InstanceConstructors)
         {
-            if (constructor.Parameters.Length == 1 && constructor.Parameters[0].Type.SpecialType == SpecialType.System_Type && TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(constructor, compilation))
+            INamedTypeSymbol? systemType = compilation.GetTypeByMetadataName("System.Type");
+            if (systemType == null)
+                return false;
+
+            if (constructor.Parameters.Length == 1 && SymbolEqualityComparer.Default.Equals(constructor.Parameters[0].Type, systemType) && TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(constructor, compilation))
                 return true;
         }
 
@@ -120,7 +124,7 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
                 TypeRegistryDiagnostics.invalidAttributeBase,
                 TypeRegistrySymbolHelpers.GetLocation(registryType),
                 compilation,
-                registryType.TypeArguments.Length == 1 ? (object)registryType.TypeArguments[0] : "<unknown>"
+                registryType.TypeArguments.Length == 1 ? registryType.TypeArguments[0] : "<unknown>"
             );
             return false;
         }

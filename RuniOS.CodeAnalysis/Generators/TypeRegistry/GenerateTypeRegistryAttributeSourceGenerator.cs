@@ -26,17 +26,14 @@ public sealed class GenerateTypeRegistryAttributeSourceGenerator : IIncrementalG
             [global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
             sealed class GenerateTypeRegistryAttribute : global::System.Attribute
             {
-                public readonly global::System.Type? baseType;
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public global::System.Type? baseType { get; }
 
-                public GenerateTypeRegistryAttribute()
-                {
-                    baseType = null;
-                }
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public GenerateTypeRegistryAttribute() => baseType = null;
 
-                public GenerateTypeRegistryAttribute(global::System.Type baseType)
-                {
-                    this.baseType = baseType;
-                }
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public GenerateTypeRegistryAttribute(global::System.Type baseType) => this.baseType = baseType;
             }
         }
         """;

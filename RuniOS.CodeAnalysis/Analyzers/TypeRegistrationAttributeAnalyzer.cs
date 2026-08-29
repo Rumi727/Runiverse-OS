@@ -85,10 +85,10 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
 
         foreach (AttributeData attribute in implementationType.GetAttributes())
         {
-            if (attribute.AttributeClass is not INamedTypeSymbol attributeType || !TypeRegistrySymbolHelpers.IsSameOrDerived(attributeType, registrationAttribute))
+            if (attribute.AttributeClass == null || !TypeRegistrySymbolHelpers.IsSameOrDerived(attribute.AttributeClass, registrationAttribute))
                 continue;
 
-            if (!HasMatchingRegistry(implementationType, attributeType, attributedRegistry, referencedRegistryProperties))
+            if (!HasMatchingRegistry(implementationType, attribute.AttributeClass, attributedRegistry, referencedRegistryProperties))
             {
                 context.ReportDiagnostic
                 (
@@ -97,14 +97,14 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                         TypeRegistryDiagnostics.registrationWithoutRegistry,
                         TypeRegistrySymbolHelpers.GetLocation(attribute),
                         context.Compilation,
-                        attributeType.Name,
+                        attribute.AttributeClass.Name,
                         implementationType.Name
                     )
                 );
                 continue;
             }
 
-            AnalyzeGenericRegistration(context, attribute, attributeType, implementationType);
+            AnalyzeGenericRegistration(context, attribute, attribute.AttributeClass, implementationType);
         }
     }
 
@@ -468,8 +468,8 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         }
 
         return property.GetAttributes().Any(attribute =>
-            attribute.AttributeClass is INamedTypeSymbol attributeType &&
-            GeneratorUtils.GetMetadataName(attributeType) == generateTypeRegistryAttributeMetadataName);
+            attribute.AttributeClass != null &&
+            GeneratorUtils.GetMetadataName(attribute.AttributeClass) == generateTypeRegistryAttributeMetadataName);
     }
 
     static bool IsRegistryPropertyShape(IPropertySymbol property, INamedTypeSymbol attributedRegistry)
@@ -528,7 +528,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         {
             foreach (AttributeData manifest in assembly.GetAttributes())
             {
-                if (manifest.AttributeClass is not INamedTypeSymbol manifestType || GeneratorUtils.GetMetadataName(manifestType) != typeRegistryManifestAttributeMetadataName)
+                if (manifest.AttributeClass == null || GeneratorUtils.GetMetadataName(manifest.AttributeClass) != typeRegistryManifestAttributeMetadataName)
                     continue;
                 if (manifest.ConstructorArguments.Length < 2 ||
                     manifest.ConstructorArguments[0].Value is not INamedTypeSymbol ownerType ||

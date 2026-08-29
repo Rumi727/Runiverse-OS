@@ -50,7 +50,7 @@ static class AttributeLiteralEmitter
                 TypeRegistryDiagnostics.unemittableAttributeArgument,
                 diagnosticLocation,
                 compilation,
-                attribute.AttributeClass is { } unresolvedAttributeType ? (object)unresolvedAttributeType : "<unknown>",
+                (object?)attribute.AttributeClass ?? "<unknown>",
                 "attribute constructor or type is unresolved"
             );
             return false;
