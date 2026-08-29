@@ -180,19 +180,19 @@ static class TypeRegistryEmitter
     }
 
     /// <summary>
-    /// Gets the fully qualified registration entry type nested in a registry type.<br/>
-    /// 레지스트리 타입에 중첩된 등록 항목 타입의 완전 수식 이름을 가져옵니다.
+    /// Gets the fully qualified registration entry type for a registry's attribute type.<br/>
+    /// 레지스트리의 특성 타입에 대응하는 등록 항목 타입의 완전 수식 이름을 가져옵니다.
     /// </summary>
     /// <param name="registry">
     /// The registry definition whose entry type is requested.<br/>
     /// 등록 항목 타입을 가져올 레지스트리 정의입니다.
     /// </param>
     /// <returns>
-    /// The fully qualified name of the registry's <c>RegistrationEntry</c> type.<br/>
-    /// 레지스트리의 <c>RegistrationEntry</c> 타입의 완전 수식 이름입니다.
+    /// The fully qualified name of the namespace-level generic <c>RegistrationEntry&lt;TAttribute&gt;</c> type.<br/>
+    /// 네임스페이스 수준 제네릭 <c>RegistrationEntry&lt;TAttribute&gt;</c> 타입의 완전 수식 이름입니다.
     /// </returns>
-    // AttributedTypeRegistrySourceGenerator가 RegistrationEntry[] 호출에서 이 중첩 타입 이름을 정확히 생성합니다.
-    public static string RenderRegistrationEntryType(RegistryDefinition registry) => $"{GeneratorUtils.GetTypeName(registry.registryType)}.RegistrationEntry";
+    // AttributedTypeRegistrySourceGenerator가 레지스트리의 TAttribute에 맞는 RegistrationEntry<TAttribute> 타입을 생성합니다.
+    public static string RenderRegistrationEntryType(RegistryDefinition registry) => $"global::RuniOS.Reflection.RegistrationEntry<{GeneratorUtils.GetTypeName(registry.registryType.TypeArguments[1])}>";
 
     /// <summary>
     /// Creates a registration source preamble and leaves its namespace and class scopes open.<br/>

@@ -562,7 +562,7 @@ public sealed class AttributedTypeRegistry<TBase, TAttribute> : TypeRegistry
 내부 등록 단위:
 
 ~~~csharp
-public readonly record struct RegistrationEntry
+public readonly record struct RegistrationEntry<TAttribute>
 (
     Type implementationType,
     TAttribute attribute
@@ -622,14 +622,14 @@ public void DirectRegister(Type implementationType, TAttribute attribute)
 
 이 API에는 runtime validation이 없습니다. 호출자가 잘못된 implementationType을 넘겨도 TBase assignability나 attribute 유효성을 다시 검사하지 않습니다.
 
-DirectRegisterRange(ReadOnlySpan<RegistrationEntry>)은 같은 일을 batch로 수행합니다.
+DirectRegisterRange(ReadOnlySpan<RegistrationEntry<TAttribute>>)은 같은 일을 batch로 수행합니다.
 
 ~~~csharp
-public void DirectRegisterRange(ReadOnlySpan<RegistrationEntry> entries)
+public void DirectRegisterRange(ReadOnlySpan<RegistrationEntry<TAttribute>> entries)
 {
     lock (registrationLock)
     {
-        foreach (RegistrationEntry entry in entries)
+        foreach (RegistrationEntry<TAttribute> entry in entries)
         {
             // dictionary에 entry.attribute 추가
         }
@@ -662,7 +662,7 @@ registrationSnapshot =
 [
     ..registrationsByImplementationType
         .SelectMany(pair => pair.Value.Select(attribute =>
-            new RegistrationEntry(pair.Key, attribute)))
+            new RegistrationEntry<TAttribute>(pair.Key, attribute)))
         .OrderByTypes(
             x => x.attribute.targetType,
             x => x.attribute.priority)
@@ -1939,7 +1939,7 @@ override 구현은 다음 모양의 소스를 만들기 시작합니다.
 
 ~~~csharp
 registry.DirectRegisterRange(
-    new RegistryType.RegistrationEntry[]
+    new global::RuniOS.Reflection.RegistrationEntry<TAttribute>[]
     {
         // entry들
     }
@@ -3171,21 +3171,16 @@ namespace RuniOS.Generated
         {
             global::MyCompany.Registries.Services.DirectRegisterRange
             (
-                new
-                    global::RuniOS.Reflection.AttributedTypeRegistry
+                new global::RuniOS.Reflection.RegistrationEntry
                     <
-                        global::MyCompany.IService,
                         global::MyCompany.ServiceRegistrationAttribute
-                    >
-                    .RegistrationEntry[]
+                    >[]
                 {
                     new
-                        global::RuniOS.Reflection.AttributedTypeRegistry
-                        <
-                            global::MyCompany.IService,
-                            global::MyCompany.ServiceRegistrationAttribute
-                        >
-                        .RegistrationEntry
+                        global::RuniOS.Reflection.RegistrationEntry
+                    <
+                        global::MyCompany.ServiceRegistrationAttribute
+                    >
                     (
                         typeof(global::MyCompany.LoggingService),
                         new global::MyCompany.ServiceRegistrationAttribute

@@ -429,9 +429,8 @@ new global::CustomCollectionHandlerAttribute(typeof(global::MyTarget<>))
 
 ```csharp
 global::CollectionHandlerBase.registry.DirectRegisterRange(
-    new global::RuniOS.Reflection.AttributedTypeRegistry<
-        global::CollectionHandlerBase,
-        global::CustomCollectionHandlerAttribute>.RegistrationEntry[]
+    new global::RuniOS.Reflection.RegistrationEntry<
+        global::CustomCollectionHandlerAttribute>[]
     {
         new(typeof(global::CsvCollectionHandler),
             new global::CustomCollectionHandlerAttribute(typeof(global::CsvCollection))
@@ -449,7 +448,7 @@ global::CollectionHandlerBase.registry.DirectRegisterRange(
 정확한 런타임 시그니처는 다음 계약을 만족해야 한다.
 
 ```csharp
-public void DirectRegisterRange(ReadOnlySpan<RegistrationEntry> entries)
+public void DirectRegisterRange(ReadOnlySpan<RegistrationEntry<TAttribute>> entries)
 ```
 
 Unity/Roslyn 대상 프레임워크에서 collection expression이나 span 호출 제약이 있으면 배열 또는 `ImmutableArray` 기반 overload를 제공해도 된다. 생성기 전용 API이므로 입력 검증은 수행하지 않는다. 핵심 계약은 한 batch가 다음을 한 번씩만 수행하는 것이다.
@@ -561,9 +560,8 @@ internal static class __AttributedTypeRegistryRegistration_A1B2C3D4
     private static void RegisterGeneratedTypes()
     {
         CollectionHandlerBase.registry.DirectRegisterRange(
-            new AttributedTypeRegistry<
-                CollectionHandlerBase,
-                CustomCollectionHandlerAttribute>.RegistrationEntry[]
+            new global::RuniOS.Reflection.RegistrationEntry<
+                CustomCollectionHandlerAttribute>[]
             {
                 new(
                     typeof(CsvCollectionHandler),

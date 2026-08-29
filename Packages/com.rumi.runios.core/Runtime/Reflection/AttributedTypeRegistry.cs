@@ -10,15 +10,13 @@ namespace RuniOS.Reflection
     // RuniOS.CodeAnalysis는 `RuniOS.Reflection.AttributedTypeRegistry`2` 원본 정의와 `[0]=TBase`, `[1]=TAttribute` 순서를 전제로 합니다.
     public sealed class AttributedTypeRegistry<TBase, TAttribute> : TypeRegistry where TAttribute : TypeRegistrationAttribute
     {
-        // 생성기가 이 public 중첩 타입으로 배열을 만들고 `implementationType`/`attribute` 순서의 `(Type, TAttribute)` 생성자를 호출합니다.
-        public readonly record struct RegistrationEntry(Type implementationType, TAttribute attribute);
         readonly record struct TypeResolution(Type matchedTargetType, Type implementationType);
 
         readonly Dictionary<Type, List<TAttribute>> registrationsByImplementationType = [];
         volatile ConcurrentDictionary<Type, TypeResolution?> resolutionCache = new();
         readonly object registrationLock = new();
 
-        public ImmutableArray<RegistrationEntry> registrationEntries
+        public ImmutableArray<RegistrationEntry<TAttribute>> registrationEntries
         {
             get
             {
@@ -28,7 +26,7 @@ namespace RuniOS.Reflection
                     {
                         registrationSnapshot =
                         [
-                            ..registrationsByImplementationType.SelectMany(pair => pair.Value.Select(attribute => new RegistrationEntry(pair.Key, attribute)))
+                            ..registrationsByImplementationType.SelectMany(pair => pair.Value.Select(attribute => new RegistrationEntry<TAttribute>(pair.Key, attribute)))
                                 .OrderByTypes(x => x.attribute.targetType, x => x.attribute.priority)
                         ];
                     }
@@ -37,7 +35,7 @@ namespace RuniOS.Reflection
                 }
             }
         }
-        ImmutableArray<RegistrationEntry> registrationSnapshot;
+        ImmutableArray<RegistrationEntry<TAttribute>> registrationSnapshot;
 
 
         public override event Action? onChanged
@@ -91,12 +89,12 @@ namespace RuniOS.Reflection
         /// </remarks>
         [EditorBrowsable(EditorBrowsableState.Never)]
         [Obsolete("This is for source generators only. Please use Register(Type) for manual registration.")]
-        // AttributedTypeRegistrySourceGenerator가 생성한 코드가 `RegistrationEntry[]`를 이 `ReadOnlySpan<RegistrationEntry>` API로 전달합니다.
-        public void DirectRegisterRange(params ReadOnlySpan<RegistrationEntry> entries)
+        // AttributedTypeRegistrySourceGenerator가 생성한 `RegistrationEntry<TAttribute>` 항목을 이 `ReadOnlySpan<RegistrationEntry<TAttribute>>` API로 전달합니다.
+        public void DirectRegisterRange(params ReadOnlySpan<RegistrationEntry<TAttribute>> entries)
         {
             lock (registrationLock)
             {
-                foreach (RegistrationEntry entry in entries)
+                foreach (RegistrationEntry<TAttribute> entry in entries)
                 {
                     if (!registrationsByImplementationType.TryGetValue(entry.implementationType, out List<TAttribute> list))
                         registrationsByImplementationType[entry.implementationType] = list = [];
@@ -127,13 +125,13 @@ namespace RuniOS.Reflection
                 _onChanged?.Invoke();
         }
 
-        public Type? Resolve(Type targetType, Func<RegistrationEntry, bool>? predicate = null)
+        public Type? Resolve(Type targetType, Func<RegistrationEntry<TAttribute>, bool>? predicate = null)
         {
             TryResolve(targetType, out _, out Type? implementationType, predicate);
             return implementationType;
         }
 
-        public bool TryResolve(Type targetType, [NotNullWhen(true)] out Type? matchedTargetType, [NotNullWhen(true)] out Type? implementationType, Func<RegistrationEntry, bool>? predicate = null)
+        public bool TryResolve(Type targetType, [NotNullWhen(true)] out Type? matchedTargetType, [NotNullWhen(true)] out Type? implementationType, Func<RegistrationEntry<TAttribute>, bool>? predicate = null)
         {
             ConcurrentDictionary<Type, TypeResolution?> cache = resolutionCache;
             if (predicate == null)
@@ -156,7 +154,7 @@ namespace RuniOS.Reflection
             }
 
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach (RegistrationEntry registration in registrationEntries)
+            foreach (RegistrationEntry<TAttribute> registration in registrationEntries)
             {
                 // 조건부 엑세스도 사용 가능하지만 가독성을 해칩니다.
                 if (predicate != null && !predicate.Invoke(registration))

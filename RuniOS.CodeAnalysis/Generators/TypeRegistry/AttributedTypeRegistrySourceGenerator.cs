@@ -241,7 +241,7 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
         int remainingEntryCount = registrations.Sum(static registration =>
             registration.payload is AttributedRegistrationPayload payload ? payload.attributeExpressions.Length : 0);
 
-        // 생성 코드가 AttributedTypeRegistry.DirectRegisterRange(params ReadOnlySpan<RegistrationEntry>)에 직접 바인딩됩니다.
+        // 생성 코드가 AttributedTypeRegistry.DirectRegisterRange(params ReadOnlySpan<RegistrationEntry<TAttribute>>)에 직접 바인딩됩니다.
         writer.AppendLine($"{registryAccess}.DirectRegisterRange(");
         writer.Indent();
 
