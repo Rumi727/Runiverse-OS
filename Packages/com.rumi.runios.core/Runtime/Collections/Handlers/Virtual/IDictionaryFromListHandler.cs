@@ -4,7 +4,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual
 {
-    [CustomCollectionHandler(typeof(IDictionary))]
+    [CollectionHandler(typeof(IDictionary), useForChildren = true)]
     public class IDictionaryFromListHandler(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
         public override bool isReadOnly => ((IDictionary)targetCollection).IsReadOnly;

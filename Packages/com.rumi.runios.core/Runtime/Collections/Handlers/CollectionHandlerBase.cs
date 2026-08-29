@@ -1,16 +1,20 @@
 ﻿#nullable enable
 using RuniOS.Collections.Handlers.Virtual;
+using RuniOS.Reflection;
 using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    public abstract class CollectionHandlerBase(IEnumerable targetCollection) : ICollection
+    public abstract partial class CollectionHandlerBase(IEnumerable targetCollection) : ICollection
     {
-        public static bool HandlerCheck<TDrawer>(Type targetType) where TDrawer : CollectionHandlerBase => typeof(TDrawer).IsAssignableFrom(AttributeTypeResolver<TDrawer, CustomCollectionHandlerAttribute>.FindDrawerType(targetType));
+        [GenerateTypeRegistry]
+        public static partial AttributedTypeRegistry<CollectionHandlerAttribute> collectionRegistry { get; }
+
+        public static bool HandlerCheck<TDrawer>(Type targetType) where TDrawer : CollectionHandlerBase => typeof(TDrawer).IsAssignableFrom(collectionRegistry.Resolve(targetType));
 
         public static CollectionHandlerBase FindCollectionHandler(IEnumerable targetCollection)
         {
-            Type? handlerType = AttributeTypeResolver<CollectionHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
+            Type? handlerType = collectionRegistry.Resolve(targetCollection.GetType());
             if (handlerType != null)
                 return (CollectionHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
 

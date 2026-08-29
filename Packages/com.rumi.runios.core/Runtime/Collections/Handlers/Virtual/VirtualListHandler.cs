@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual
 {
-    [CustomCollectionHandler(typeof(IEnumerable))]
+    [CollectionHandler(typeof(IEnumerable), useForChildren = true)]
     public class VirtualListHandler(IEnumerable targetCollection) : ListHandlerBase(targetCollection)
     {
         protected ArrayList synchronizedList { get; } = new();

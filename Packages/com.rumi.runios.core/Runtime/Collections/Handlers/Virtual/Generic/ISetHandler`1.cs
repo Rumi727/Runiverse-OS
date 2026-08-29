@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual.Generic
 {
-    [CustomCollectionHandler(typeof(ISet<>))]
+    [CollectionHandler(typeof(ISet<>), useForChildren = true)]
     public class ISetHandler<T>(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
         public override bool isReadOnly => ((ICollection<T>)targetCollection).IsReadOnly;

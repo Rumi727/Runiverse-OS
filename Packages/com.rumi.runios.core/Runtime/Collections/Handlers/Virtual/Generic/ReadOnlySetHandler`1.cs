@@ -4,6 +4,6 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual.Generic
 {
-    [CustomCollectionHandler(typeof(ReadOnlySet<>))]
+    [CollectionHandler(typeof(ReadOnlySet<>), useForChildren = true)]
     public class ReadOnlySetHandler(IEnumerable targetCollection) : VirtualListHandler(targetCollection);
 }

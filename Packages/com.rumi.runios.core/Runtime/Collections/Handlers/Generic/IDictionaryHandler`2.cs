@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Generic
 {
-    [CustomCollectionHandler(typeof(IDictionary<,>))]
+    [CollectionHandler(typeof(IDictionary<,>), useForChildren = true)]
     public class IDictionaryHandler<TKey, TValue>(IEnumerable targetCollection) : DictionaryHandlerBase(targetCollection)
     {
         public override bool isReadOnly => ((ICollection<KeyValuePair<TKey, TValue>>)targetCollection).IsReadOnly;

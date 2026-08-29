@@ -1,15 +1,19 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
 using RuniOS.Collections.Handlers.Entrys;
+using RuniOS.Reflection;
 using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    public abstract class DictionaryHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IDictionary
+    public abstract partial class DictionaryHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IDictionary
     {
+        [GenerateTypeRegistry]
+        public static partial AttributedTypeRegistry<CollectionHandlerAttribute> dictionaryRegistry { get; }
+
         public static DictionaryHandlerBase FindDictionaryHandler(IEnumerable targetCollection)
         {
-            Type? handlerType = AttributeTypeResolver<DictionaryHandlerBase, CustomCollectionHandlerAttribute>.FindDrawerType(targetCollection.GetType());
+            Type? handlerType = dictionaryRegistry.Resolve(targetCollection.GetType());
             if (handlerType != null && typeof(DictionaryHandlerBase).IsAssignableFrom(handlerType))
                 return (DictionaryHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
 

@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers.Virtual.Generic
 {
-    [CustomCollectionHandler(typeof(Queue<>))]
+    [CollectionHandler(typeof(Queue<>), useForChildren = true)]
     public class QueueHandler<T>(IEnumerable targetCollection) : VirtualListHandler(targetCollection)
     {
         public override bool isReadOnly => false;

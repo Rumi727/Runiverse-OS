@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    [CustomCollectionHandler(typeof(IList))]
+    [CollectionHandler(typeof(IList), useForChildren = true)]
     public class IListHandler(IEnumerable targetCollection) : ListHandlerBase(targetCollection)
     {
         public override object? this[int index]

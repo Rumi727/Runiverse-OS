@@ -3,7 +3,7 @@ using System.Collections;
 
 namespace RuniOS.Collections.Handlers
 {
-    [CustomCollectionHandler(typeof(IDictionary))]
+    [CollectionHandler(typeof(IDictionary), useForChildren = true)]
     public class IDictionaryHandler(IEnumerable targetCollection) : DictionaryHandlerBase(targetCollection)
     {
         public override object? this[object key]

@@ -67,7 +67,10 @@ namespace RuniOS.Inspectors.Drawers
         protected void CheckInspectableDictionary()
         {
             if (inspectableDictionary == null)
+            {
+                Debug.Log(variableElement?.inspectableDictionaryElement);
                 throw new InvalidOperationException($"{nameof(inspectableDictionary)} is null");
+            }
         }
 
         [MemberNotNull(nameof(element))]
