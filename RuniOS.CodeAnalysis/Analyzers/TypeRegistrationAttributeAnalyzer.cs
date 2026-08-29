@@ -11,8 +11,8 @@ using System.Linq;
 namespace RuniOS.CodeAnalysis.Analyzers;
 
 /// <summary>
-/// Warns when a type-registration attribute has no generated attributed registry, cannot resolve a generic registration, or has mismatched generic constraints.<br/>
-/// 생성된 특성 기반 레지스트리가 없거나 제네릭 등록을 확인할 수 없거나 제네릭 제약 조건이 일치하지 않는 타입 등록 특성을 경고합니다.
+/// Warns when a type-registration attribute has no generated attributed registry, cannot resolve a non-exact registration, or has mismatched generic constraints.<br/>
+/// 생성된 특성 기반 레지스트리가 없거나 정확히 일치하지 않는 등록을 확인할 수 없거나 제네릭 제약 조건이 일치하지 않는 타입 등록 특성을 경고합니다.
 /// </summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
@@ -32,7 +32,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         ImmutableArray.Create
         (
             TypeRegistryDiagnostics.registrationWithoutRegistry,
-            TypeRegistryDiagnostics.openGenericRegistrationRequiresChildren,
+            TypeRegistryDiagnostics.registrationRequiresChildren,
             TypeRegistryDiagnostics.genericRegistrationParameterCountMismatch,
             TypeRegistryDiagnostics.genericRegistrationConstraintMismatch,
             TypeRegistryDiagnostics.genericRegistrationSuggestion
@@ -148,7 +148,28 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         if (attribute.ConstructorArguments.Length == 0 || attribute.ConstructorArguments[0].Value is not INamedTypeSymbol targetType)
             return;
 
-        if (!IsOpenGenericType(targetType))
+        bool isOpenGenericTarget = IsOpenGenericType(targetType);
+        bool requiresChildMatching = isOpenGenericTarget || targetType.TypeKind == TypeKind.Interface || (targetType.IsAbstract && !targetType.IsSealed);
+        if (!GetUseForChildren(attribute) && requiresChildMatching)
+        {
+            context.ReportDiagnostic
+            (
+                TypeRegistryDiagnostics.Create
+                (
+                    TypeRegistryDiagnostics.registrationRequiresChildren,
+                    TypeRegistrySymbolHelpers.GetLocation(attribute),
+                    context.Compilation,
+                    attributeType.Name,
+                    implementationType.Name,
+                    targetType
+                )
+            );
+
+            if (isOpenGenericTarget)
+                return;
+        }
+
+        if (!isOpenGenericTarget)
         {
             if (targetType.IsGenericType || !implementationType.IsGenericType)
                 return;
@@ -169,23 +190,6 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                     targetType,
                     0,
                     implementationParameters.Length
-                )
-            );
-            return;
-        }
-
-        if (!GetUseForChildren(attribute))
-        {
-            context.ReportDiagnostic
-            (
-                TypeRegistryDiagnostics.Create
-                (
-                    TypeRegistryDiagnostics.openGenericRegistrationRequiresChildren,
-                    TypeRegistrySymbolHelpers.GetLocation(attribute),
-                    context.Compilation,
-                    attributeType.Name,
-                    implementationType.Name,
-                    targetType
                 )
             );
             return;

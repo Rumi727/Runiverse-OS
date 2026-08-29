@@ -22,7 +22,7 @@ RuniOS.CodeAnalysis는 런타임 라이브러리가 아닙니다. Unity가 C#을
 2. DiagnosticAnalyzer 기반 analyzer
    - TypeRegistrationAttribute 계열 특성이 기본 타입 계층의 generated registry에 연결되는지 검사합니다.
    - 연결할 registry가 없으면 ROS0019 warning을 보고합니다.
-   - generic target 등록이 AttributedTypeRegistry.TryResolve에서 매칭·구성될 수 없거나 target과 implementation의 제약 조건이 일치하지 않는 경우 ROS0020~ROS0022 warning을 보고하고, non-generic 구현에는 ROS0023 suggestion을 보고합니다.
+   - open generic, interface, abstract target 등록이 AttributedTypeRegistry.TryResolve에서 파생·구성 대상까지 매칭되지 않거나 target과 implementation의 제약 조건이 일치하지 않는 경우 ROS0020~ROS0022 warning을 보고하고, non-generic 구현에는 ROS0023 suggestion을 보고합니다.
 
 3. DiagnosticSuppressor 기반 analyzer suppressor
    - Unity analyzer가 AssetRef<TAsset> 필드에 보고하는 UAC1001을 의도적으로 억제합니다.
@@ -3424,7 +3424,7 @@ Diagnostics/TypeRegistryDiagnostics0002~0019.cs는 type registry generator/analy
 | ROS0017 | error | C# 13 미만에서 partial property 기반 registry를 사용할 수 없음 |
 | ROS0018 | warning | TypeRegistryManifestAttribute는 소스 생성기 전용이므로 직접 사용할 수 없음 |
 | ROS0019 | warning | TypeRegistrationAttribute에 일치하는 generated registry가 없음 |
-| ROS0020 | warning | 열린 generic target에서 useForChildren=false라 닫힌 target을 확인할 수 없음 |
+| ROS0020 | warning | open generic, interface, abstract target에서 useForChildren=false라 파생/구성 target을 확인할 수 없음 |
 | ROS0021 | warning | target이 제공하는 generic 인자와 generic implementation의 매개 변수 개수가 다름 |
 | ROS0022 | warning | target과 generic implementation의 제네릭 제약 조건이 일치하지 않음 |
 | ROS0023 | info | non-generic implementation이 유효하게 생성되지만 별도 generic implementation을 고려할 수 있음 |
@@ -3566,7 +3566,7 @@ Roslyn incremental pipeline은 syntax provider 결과와 compilation 결합 결�
 | TypeRegistryDiagnostics | diagnostic metadata | ROS0002~ROS0023 descriptor |
 | AssetRefSerializationSuppressor | compiler/analyzer diagnostic | UAC1001에 대한 조건부 suppression |
 | TypeRegistryManifestAttributeAnalyzer | C# attribute syntax | 직접 사용된 TypeRegistryManifestAttribute에 대한 ROS0018 |
-| TypeRegistrationAttributeAnalyzer | C# type symbols | generated registry 부재 ROS0019, TryResolve generic 실패 ROS0020~ROS0022, non-generic 구현 제안 ROS0023 |
+| TypeRegistrationAttributeAnalyzer | C# type symbols | generated registry 부재 ROS0019, TryResolve 비정확/generic 등록 실패 ROS0020~ROS0022, non-generic 구현 제안 ROS0023 |
 
 여기서 중요한 ownership은 다음과 같습니다.
 

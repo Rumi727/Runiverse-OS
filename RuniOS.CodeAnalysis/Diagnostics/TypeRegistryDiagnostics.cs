@@ -279,10 +279,10 @@ static class TypeRegistryDiagnostics
     );
 
     /// <summary>
-    /// Describes the warning reported when an open generic target does not enable child-type matching.<br/>
-    /// 열린 제네릭 대상이 하위 타입 매칭을 활성화하지 않은 경우 보고하는 경고를 설명합니다.
+    /// Describes the warning reported when an open generic, interface, or abstract target does not enable child-type matching.<br/>
+    /// 열린 제네릭, 인터페이스 또는 추상 대상이 하위 타입 매칭을 활성화하지 않은 경우 보고하는 경고를 설명합니다.
     /// </summary>
-    public static readonly DiagnosticDescriptor openGenericRegistrationRequiresChildren = new
+    public static readonly DiagnosticDescriptor registrationRequiresChildren = new
     (
         "ROS0020",
         Text("ROS0020_Title"),
