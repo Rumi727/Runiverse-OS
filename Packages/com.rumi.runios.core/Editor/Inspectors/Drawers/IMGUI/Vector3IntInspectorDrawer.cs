@@ -7,7 +7,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(Vector3Int))]
+    [InspectorDrawer(typeof(Vector3Int))]
     public class Vector3IntInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
         protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.Vector3IntField(position, label, (Vector3Int)value!);

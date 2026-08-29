@@ -8,7 +8,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(CornerRadius))]
+    [InspectorDrawer(typeof(CornerRadius))]
     public class CornerRadiusInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
         readonly AnimFloat animFloat = new AnimFloat(EditorGUIUtility.singleLineHeight);

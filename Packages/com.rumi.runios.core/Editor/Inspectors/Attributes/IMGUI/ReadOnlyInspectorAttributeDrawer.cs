@@ -5,7 +5,7 @@ using RuniOS.Inspectors.Drawers;
 
 namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 {
-    [CustomInspectorDrawer(typeof(ReadOnlyFieldAttribute))]
+    [InspectorDrawer(typeof(ReadOnlyFieldAttribute))]
     public class ReadOnlyInspectorAttributeDrawer(IInspectorAttribute attribute) : IMGUIInspectorAttributeDrawer(attribute)
     {
         protected override void OnGUI(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)

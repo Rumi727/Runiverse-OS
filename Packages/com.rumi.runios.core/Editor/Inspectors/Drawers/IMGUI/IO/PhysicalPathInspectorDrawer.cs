@@ -8,7 +8,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.IO
 {
-    [CustomInspectorDrawer(typeof(PhysicalPath))]
+    [InspectorDrawer(typeof(PhysicalPath))]
     public class PhysicalPathInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
         protected override object DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => RuniFields.PhysicalPathField(position, label, (PhysicalPath)value!);

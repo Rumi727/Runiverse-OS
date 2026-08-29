@@ -7,7 +7,7 @@ using UnityEditor.AnimatedValues;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(object), true, allowInDebug = true)]
+    [InspectorDrawer(typeof(object), true, allowInDebug = true)]
     public class ObjectInspectorDrawer : IMGUIInspectorDrawer
     {
         public ObjectInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) =>

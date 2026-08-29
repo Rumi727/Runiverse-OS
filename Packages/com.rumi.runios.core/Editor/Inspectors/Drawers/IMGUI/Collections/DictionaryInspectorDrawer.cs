@@ -9,8 +9,8 @@ using System.Collections;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 {
-    [CustomInspectorDrawer(typeof(IDictionary), true)]
-    [CustomInspectorDrawer(typeof(IDictionary<,>), true)]
+    [InspectorDrawer(typeof(IDictionary), true)]
+    [InspectorDrawer(typeof(IDictionary<,>), true)]
     public class DictionaryInspectorDrawer : ListInspectorDrawer
     {
         public DictionaryInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }

@@ -5,7 +5,7 @@ using RuniOS.Inspectors.Drawers;
 
 namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 {
-    [CustomInspectorDrawer(typeof(FieldNameAttribute))]
+    [InspectorDrawer(typeof(FieldNameAttribute))]
     public class FieldNameInspectorAttributeDrawer(IInspectorAttribute attribute) : IMGUIInspectorAttributeDrawer(attribute)
     {
 

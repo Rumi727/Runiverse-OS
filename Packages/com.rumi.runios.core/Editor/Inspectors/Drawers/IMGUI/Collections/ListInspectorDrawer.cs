@@ -12,8 +12,8 @@ using UnityEditorInternal;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 {
-    [CustomInspectorDrawer(typeof(IEnumerable), true)]
-    [CustomInspectorDrawer(typeof(Array), true, allowInDebug = true)]
+    [InspectorDrawer(typeof(IEnumerable), true)]
+    [InspectorDrawer(typeof(Array), true, allowInDebug = true)]
     public class ListInspectorDrawer : IMGUIInspectorDrawer
     {
         public ListInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }

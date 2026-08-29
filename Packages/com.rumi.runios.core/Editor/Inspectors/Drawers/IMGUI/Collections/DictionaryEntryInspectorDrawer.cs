@@ -10,10 +10,10 @@ using System.Collections;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 {
-    [CustomInspectorDrawer(typeof(DictionaryEntry))]
-    [CustomInspectorDrawer(typeof(KeyValuePair<,>), true)]
-    [CustomInspectorDrawer(typeof(ISerializableKeyValuePair), true)]
-    [CustomInspectorDrawer(typeof(ISerializableKeyValuePair<,>), true)]
+    [InspectorDrawer(typeof(DictionaryEntry))]
+    [InspectorDrawer(typeof(KeyValuePair<,>), true)]
+    [InspectorDrawer(typeof(ISerializableKeyValuePair), true)]
+    [InspectorDrawer(typeof(ISerializableKeyValuePair<,>), true)]
     public class DictionaryEntryInspectorDrawer : IMGUIInspectorDrawer
     {
         public DictionaryEntryInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder)

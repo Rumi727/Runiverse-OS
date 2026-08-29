@@ -9,8 +9,8 @@ using UnityEditor.AnimatedValues;
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
     // 이쪽은 원래의 UI가 따로 있어서 allowInDebug = true 안했습니다.
-    [CustomInspectorDrawer(typeof(Nullable<>), true)]
-    [CustomInspectorDrawer(typeof(ISerializableNullable<>), true)]
+    [InspectorDrawer(typeof(Nullable<>), true)]
+    [InspectorDrawer(typeof(ISerializableNullable<>), true)]
     public class NullableInspectorDrawer : IMGUIInspectorDrawer
     {
         public NullableInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder)

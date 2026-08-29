@@ -7,8 +7,8 @@ using System.Reflection;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
 {
-    [CustomInspectorDrawer(typeof(Pointer))]
-    [CustomInspectorDrawer(typeof(void*), true, allowInDebug = true)]
+    [InspectorDrawer(typeof(Pointer))]
+    [InspectorDrawer(typeof(void*), true, allowInDebug = true)]
     public class VoidPointerInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
         protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default)

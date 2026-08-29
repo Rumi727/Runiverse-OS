@@ -6,7 +6,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    [CustomInspectorDrawer(typeof(Gradient))]
+    [InspectorDrawer(typeof(Gradient))]
     public class GradientInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
         protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default) => EditorGUI.GradientField(position, label, (Gradient)value!);

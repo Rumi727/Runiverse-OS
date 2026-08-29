@@ -6,7 +6,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections.Generic
 {
-    [CustomInspectorDrawer(typeof(ISet<>), true)]
+    [InspectorDrawer(typeof(ISet<>), true)]
     public class SetInspectorDrawer : ListInspectorDrawer
     {
         public SetInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : base(element, inheritedAttributes, undoRecorder) { }

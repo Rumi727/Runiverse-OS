@@ -12,7 +12,7 @@ using System.Reflection;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
-    public abstract class IMGUIInspectorDrawer : InspectorDrawer
+    public abstract partial class IMGUIInspectorDrawer : InspectorDrawer
     {
         readonly struct NestingScope : IDisposable
         {
@@ -32,15 +32,18 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 
             public void Dispose() => drawer.nestingLevel = oldNestingLevel;
         }
-        
+
+        [GenerateTypeRegistry(typeof(InspectorDrawer))]
+        public static partial AttributedTypeRegistry<InspectorDrawerAttribute> registry { get; }
+
         static readonly object?[] args = new object?[3];
         [return: NotNullIfNotNull(nameof(element))]
-        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null, Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null)
+        public static IMGUIInspectorDrawer? FindDrawer(IInspectorVariableElement? element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null, Func<RegistrationEntry<InspectorDrawerAttribute>, bool>? predicate = null)
         {
             if (element == null)
                 return null;
 
-            Type? type = AttributeTypeResolver<IMGUIInspectorDrawer, CustomInspectorDrawerAttribute>.FindDrawerType(element.variableType, predicate);
+            Type? type = registry.Resolve(element.variableType, predicate);
             if (type == null)
                 return new ObjectInspectorDrawer(element, inheritedAttributes, undoRecorder);
 

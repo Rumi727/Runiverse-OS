@@ -6,6 +6,7 @@ using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Csharp;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Linq;
+using RuniOS.Reflection;
 using RuniOS.Undos;
 using System.Collections.Immutable;
 
@@ -55,7 +56,7 @@ namespace RuniOS.Editor.Inspectors
 
         public void Rebuild(IInspectable inspectable, InspectorFlags flags = InspectorFlags.PublicAccess | InspectorFlags.Member | InspectorFlags.List)
         {
-            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            Func<RegistrationEntry<InspectorDrawerAttribute>, bool>? predicate = null;
             if (flags.HasFlagFast(InspectorFlags.Debug))
                 predicate = x => x.attribute.allowInDebug;
 
@@ -103,7 +104,7 @@ namespace RuniOS.Editor.Inspectors
             if (!element.HasFlags(flags) && !skipFlagCheck)
                 return;
 
-            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            Func<RegistrationEntry<InspectorDrawerAttribute>, bool>? predicate = null;
             if (flags.HasFlagFast(InspectorFlags.Debug))
                 predicate = x => x.attribute.allowInDebug;
 
@@ -121,7 +122,7 @@ namespace RuniOS.Editor.Inspectors
             if (!skipFlagCheck)
                 elements = elements.Where(x => x.HasFlags(flags));
 
-            Func<(Type type, CustomInspectorDrawerAttribute attribute), bool>? predicate = null;
+            Func<RegistrationEntry<InspectorDrawerAttribute>, bool>? predicate = null;
             if (flags.HasFlagFast(InspectorFlags.Debug))
                 predicate = x => x.attribute.allowInDebug;
 

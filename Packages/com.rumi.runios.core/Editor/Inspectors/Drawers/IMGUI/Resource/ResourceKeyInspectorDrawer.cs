@@ -8,7 +8,7 @@ using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Resource
 {
-    [CustomInspectorDrawer(typeof(ResourceKey))]
+    [InspectorDrawer(typeof(ResourceKey))]
     public class ResourceKeyInspectorDrawer(IInspectorVariableElement element, IEnumerable<IInspectorAttribute> inheritedAttributes, IUndoRecorder? undoRecorder = null) : GenericInspectorDrawer(element, inheritedAttributes, undoRecorder)
     {
 
