@@ -245,6 +245,16 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                 return useForChildren;
         }
 
+        if (attribute.AttributeConstructor is not { } constructor)
+            return false;
+
+        for (int index = 0; index < attribute.ConstructorArguments.Length && index < constructor.Parameters.Length; index++)
+        {
+            IParameterSymbol parameter = constructor.Parameters[index];
+            if (parameter.Name == "useForChildren" && parameter.Type.SpecialType == SpecialType.System_Boolean && attribute.ConstructorArguments[index].Value is bool useForChildren)
+                return useForChildren;
+        }
+
         return false;
     }
 
