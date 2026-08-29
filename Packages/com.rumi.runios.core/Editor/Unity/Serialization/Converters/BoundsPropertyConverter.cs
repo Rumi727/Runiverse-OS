@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(Bounds))]
+    [PropertyConverter(typeof(Bounds))]
     public class BoundsPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => property.boundsValue;

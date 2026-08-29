@@ -3,7 +3,7 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(SerializableNullable<>), true)]
+    [PropertyConverter(typeof(SerializableNullable<>), true)]
     public class SerializableNullablePropertyConverter<T> : PropertyConverter where T : struct
     {
         public override object Read(SerializedProperty property, Type propertyType)

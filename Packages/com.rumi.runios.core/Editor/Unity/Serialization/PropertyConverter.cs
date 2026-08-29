@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
+using RuniOS.Reflection;
 
 namespace RuniOS.Editor.Unity.Serialization
 {
@@ -10,8 +11,11 @@ namespace RuniOS.Editor.Unity.Serialization
     /// <see cref="SerializedProperty">직렬화된 속성</see>과 인스턴스를 서로 변환하기 위한 추상적인 기본 클래스를 제공합니다.
     /// 파생 클래스는 특정 타입에 대한 속성 값을 읽고 쓰는 방법을 정의합니다.
     /// </summary>
-    public abstract class PropertyConverter
+    public abstract partial class PropertyConverter
     {
+        [GenerateTypeRegistry]
+        public static partial AttributedTypeRegistry<PropertyConverterAttribute> registry { get; }
+
         public static PropertyConverter? FindConverter<T>() => FindConverter(typeof(T));
 
         public static PropertyConverter? FindConverter(SerializedProperty property)
@@ -24,7 +28,7 @@ namespace RuniOS.Editor.Unity.Serialization
         
         public static PropertyConverter? FindConverter(Type propertyType)
         {
-            Type? drawerType = AttributeTypeResolver<PropertyConverter, CustomPropertyConverterAttribute>.FindDrawerType(propertyType);
+            Type? drawerType = registry.Resolve(propertyType);
             return drawerType != null ? (PropertyConverter)Activator.CreateInstance(drawerType) : null;
         }
 

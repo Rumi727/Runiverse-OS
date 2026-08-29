@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(Enum), true)]
+    [PropertyConverter(typeof(Enum), true)]
     public class EnumPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => Enum.ToObject(propertyType, property.numericType switch

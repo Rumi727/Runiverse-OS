@@ -9,7 +9,7 @@ namespace RuniOS.Editor.Unity.Serialization.Converters
     /// <see cref="object"/> 타입의 속성을 처리하는 <see cref="PropertyConverter"/>의 구체적인 구현입니다.
     /// <br/>이 바인더는 읽기 및 쓰기에 <see cref="SerializedProperty.boxedValue"/>를 사용합니다.
     /// </summary>
-    [CustomPropertyConverter(typeof(object), true)]
+    [PropertyConverter(typeof(object), true)]
     public class ObjectPropertyConverter : PropertyConverter
     {
         /// <summary>

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(ulong))]
+    [PropertyConverter(typeof(ulong))]
     public class ULongPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => property.ulongValue;

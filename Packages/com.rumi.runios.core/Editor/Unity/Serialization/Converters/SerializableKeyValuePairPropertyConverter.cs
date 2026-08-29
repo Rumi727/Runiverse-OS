@@ -4,7 +4,7 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(SerializableKeyValuePair<,>), true)]
+    [PropertyConverter(typeof(SerializableKeyValuePair<,>), true)]
     public class SerializableKeyValuePairPropertyConverter<TKey, TValue> : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType)

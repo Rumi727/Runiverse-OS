@@ -7,7 +7,7 @@ using RuniOS.Resource;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
 {
-    [CustomPropertyConverter(typeof(PackIdentifier))]
+    [PropertyConverter(typeof(PackIdentifier))]
     public class PackIdentifierPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType)

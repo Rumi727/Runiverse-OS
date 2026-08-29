@@ -4,7 +4,7 @@ using RuniOS.IO;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters.IO
 {
-    [CustomPropertyConverter(typeof(PhysicalPath))]
+    [PropertyConverter(typeof(PhysicalPath))]
     public class PhysicalPathPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => (PhysicalPath)PhysicalPathPropertyDrawer.GetChildProperty(property).stringValue;

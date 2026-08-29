@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(Vector2))]
+    [PropertyConverter(typeof(Vector2))]
     public class Vector2PropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => property.vector2Value;

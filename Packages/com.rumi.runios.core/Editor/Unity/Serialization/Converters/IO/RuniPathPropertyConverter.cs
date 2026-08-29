@@ -4,7 +4,7 @@ using RuniOS.IO;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters.IO
 {
-    [CustomPropertyConverter(typeof(RuniPath))]
+    [PropertyConverter(typeof(RuniPath))]
     public class RuniPathPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => (RuniPath)RuniPathPropertyDrawer.GetChildProperty(property).stringValue;

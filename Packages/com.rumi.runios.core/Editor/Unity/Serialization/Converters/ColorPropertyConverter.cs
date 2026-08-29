@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(Color))]
+    [PropertyConverter(typeof(Color))]
     public class ColorPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => property.colorValue;

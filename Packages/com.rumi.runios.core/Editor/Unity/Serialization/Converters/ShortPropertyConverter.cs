@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(short))]
+    [PropertyConverter(typeof(short))]
     public class ShortPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => (short)property.intValue;

@@ -5,7 +5,7 @@ using RuniOS.Resource;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters.Resource
 {
-    [CustomPropertyConverter(typeof(Identifier))]
+    [PropertyConverter(typeof(Identifier))]
     public class IdentifierPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType)

@@ -1,7 +1,7 @@
 ﻿#nullable enable
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(char))]
+    [PropertyConverter(typeof(char))]
     public class CharPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => (char)property.intValue;

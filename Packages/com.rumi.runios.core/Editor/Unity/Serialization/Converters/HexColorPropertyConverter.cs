@@ -3,7 +3,7 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(HexColor))]
+    [PropertyConverter(typeof(HexColor))]
     public class HexColorPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => new HexColor(HexColorPropertyDrawer.GetChildProperty(property).stringValue);

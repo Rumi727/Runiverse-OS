@@ -4,7 +4,7 @@ using RuniOS.IO;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters.IO
 {
-    [CustomPropertyConverter(typeof(FileExtension))]
+    [PropertyConverter(typeof(FileExtension))]
     public class FileExtensionPropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => new FileExtension(FileExtensionPropertyDrawer.GetChildProperty(property).stringValue);

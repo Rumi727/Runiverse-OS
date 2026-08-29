@@ -3,7 +3,7 @@ using RuniOS.Editor.Unity.Drawers;
 
 namespace RuniOS.Editor.Unity.Serialization.Converters
 {
-    [CustomPropertyConverter(typeof(SerializableType))]
+    [PropertyConverter(typeof(SerializableType))]
     public class SerializableTypePropertyConverter : PropertyConverter
     {
         public override object Read(SerializedProperty property, Type propertyType) => new SerializableType(TypeUtility.DeserializeFromString(SerializableTypePropertyDrawer.GetChildProperty(property).stringValue));
