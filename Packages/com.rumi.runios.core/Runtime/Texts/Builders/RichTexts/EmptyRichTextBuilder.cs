@@ -7,7 +7,7 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// Builds rich-text output for <see cref="EmptyText"/> instances.<br/>
     /// <see cref="EmptyText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
-    [CustomTextRenderer(typeof(EmptyText))]
+    [TextRenderer(typeof(EmptyText))]
     public sealed class EmptyRichTextBuilder : RichTextBuilder
     {
         /// <inheritdoc/>

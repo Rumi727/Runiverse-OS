@@ -15,7 +15,7 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// <see cref="ValueText{T}"/>에 저장된 정렬 및 format 정보는 호출자가 제공한 정보를 대체합니다.<br/>
     /// 저장된 값이 <see cref="System.IFormattable"/>을 구현하면 format 문자열을 적용합니다.
     /// </remarks>
-    [CustomTextRenderer(typeof(ValueText<>), true)]
+    [TextRenderer(typeof(ValueText<>), useForChildren = true)]
     public class ValueRichTextBuilder<T> : FormattableRichTextBuilder
     {
         /// <inheritdoc/>

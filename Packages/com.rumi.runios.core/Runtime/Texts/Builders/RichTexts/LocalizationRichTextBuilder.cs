@@ -8,7 +8,7 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// Builds rich-text output for <see cref="LocalizationText"/> instances.<br/>
     /// <see cref="LocalizationText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
-    [CustomTextRenderer(typeof(LocalizationText))]
+    [TextRenderer(typeof(LocalizationText))]
     public class LocalizationRichTextBuilder : RichTextBuilder
     {
         /// <inheritdoc/>

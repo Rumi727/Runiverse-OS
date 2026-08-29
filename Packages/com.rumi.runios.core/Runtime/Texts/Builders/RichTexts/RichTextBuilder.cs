@@ -9,10 +9,13 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// Converts <see cref="Text"/> objects into rich-text strings.<br/>
     /// <see cref="Text"/> 객체를 rich text 문자열로 변환합니다.
     /// </summary>
-    public abstract class RichTextBuilder : TextBuilder
+    public abstract partial class RichTextBuilder : TextBuilder
     {
-        static RichTextBuilder() => ReflectionUtility.onListUpdate += cache.Clear;
+        static RichTextBuilder() => registry.onChanged += cache.Clear;
         static readonly ConcurrentDictionary<Type, RichTextBuilder> cache = new ConcurrentDictionary<Type, RichTextBuilder>();
+
+        [GenerateTypeRegistry]
+        public static partial AttributedTypeRegistry<RichTextBuilder, TextRendererAttribute> registry { get; }
 
         /// <summary>
         /// Finds the rich-text builder registered for the runtime type of a text instance.<br/>
@@ -41,7 +44,7 @@ namespace RuniOS.Texts.Builders.RichTexts
 
             return cache.GetOrAdd(textType, x =>
             {
-                Type? rendererType = AttributeTypeResolver<RichTextBuilder, CustomTextRendererAttribute>.FindDrawerType(x);
+                Type? rendererType = registry.Resolve(x);
                 if (rendererType == null)
                     throw new InvalidOperationException($"{x} is an invalid entry type. An entry type with an {nameof(RichTextBuilder)} implementation is required.");
 

@@ -7,7 +7,7 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// Builds rich-text output for <see cref="GroupText"/> instances.<br/>
     /// <see cref="GroupText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
-    [CustomTextRenderer(typeof(GroupText))]
+    [TextRenderer(typeof(GroupText))]
     public sealed class GroupRichTextBuilder : RichTextBuilder
     {
         /// <inheritdoc/>
