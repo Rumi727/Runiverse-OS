@@ -7,10 +7,33 @@ using System.Reflection;
 
 namespace RuniOS.Reflection
 {
-    // RuniOS.CodeAnalysis는 `RuniOS.Reflection.AttributedTypeRegistry`2` 원본 정의와 `[0]=TBase`, `[1]=TAttribute` 순서를 전제로 합니다.
-    public sealed class AttributedTypeRegistry<TBase, TAttribute> : TypeRegistry where TAttribute : TypeRegistrationAttribute
+    /// <summary>
+    /// Stores attribute-based registrations and resolves implementations for target types.<br/>
+    /// 특성 기반 등록을 저장하고 대상 타입에 대한 구현 타입을 확인합니다.
+    /// </summary>
+    /// <typeparam name="TAttribute">
+    /// The registration attribute type stored in this registry.<br/>
+    /// 이 레지스트리에 저장하는 등록 특성 타입입니다.
+    /// </typeparam>
+    public sealed class AttributedTypeRegistry<TAttribute> : TypeRegistry where TAttribute : TypeRegistrationAttribute
     {
         readonly record struct TypeResolution(Type matchedTargetType, Type implementationType);
+
+        /// <summary>
+        /// Gets the type that registered implementations must match or derive from.<br/>
+        /// 등록 구현 타입이 일치하거나 상속해야 하는 타입을 가져옵니다.
+        /// </summary>
+        public Type baseType { get; }
+
+        /// <summary>
+        /// Initializes a registry for implementations matching the specified base type.<br/>
+        /// 지정된 기본 타입과 일치하는 구현 타입을 위한 레지스트리를 초기화합니다.
+        /// </summary>
+        /// <param name="baseType">
+        /// The type that registered implementations must match or derive from.<br/>
+        /// 등록 구현 타입이 일치하거나 상속해야 하는 타입입니다.
+        /// </param>
+        public AttributedTypeRegistry(Type baseType) => this.baseType = baseType;
 
         readonly Dictionary<Type, List<TAttribute>> registrationsByImplementationType = [];
         volatile ConcurrentDictionary<Type, TypeResolution?> resolutionCache = new();
@@ -56,7 +79,7 @@ namespace RuniOS.Reflection
 
         public override void Register(Type implementationType)
         {
-            if ((typeof(TBase).IsAbstract && typeof(TBase) == implementationType) || !typeof(TBase).IsAssignableFrom(implementationType))
+            if ((baseType.IsAbstract && baseType == implementationType) || !baseType.IsAssignableFrom(implementationType))
                 return;
 
             TAttribute[] attributes = implementationType.GetCustomAttributes<TAttribute>().ToArray();

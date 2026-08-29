@@ -129,10 +129,10 @@ ISymbol 계열은 컴파일러가 바인딩한 선언의 의미적 정체성입�
 | Roslyn 타입 | 뜻 | 이 프로젝트에서 쓰이는 예 |
 |---|---|---|
 | IAssemblySymbol | 어셈블리 | 참조 어셈블리의 assembly-level manifest 읽기 |
-| INamedTypeSymbol | class, struct, interface, enum 등 명명된 타입 | AttributedTypeRegistry<,>, 후보 구현 클래스 |
+| INamedTypeSymbol | class, struct, interface, enum 등 명명된 타입 | AttributedTypeRegistry<>, 후보 구현 클래스 |
 | IPropertySymbol | property 선언 | GenerateTypeRegistry 대상 |
 | IFieldSymbol | field 선언 | attribute named argument 검증 |
-| IMethodSymbol | method 또는 constructor | parameterless constructor, attribute constructor |
+| IMethodSymbol | method 또는 constructor | registry constructor, attribute constructor |
 | ITypeParameterSymbol | generic type parameter | generated partial type constraint 복원 |
 | AttributeData | 적용된 attribute와 인자 값 | 등록 attribute를 generated new Attribute(...)로 재생성 |
 
@@ -160,15 +160,15 @@ Compilation은 현재 컴파일 전체를 나타냅니다.
 
 ~~~csharp
 "RuniOS.Reflection.TypeRegistry"
-"RuniOS.Reflection.AttributedTypeRegistry`2"
+"RuniOS.Reflection.AttributedTypeRegistry`1"
 "RuniOS.Reflection.TypeRegistrationAttribute"
 ~~~
 
-여기서 metadata 이름 끝의 backtick-2 표기는 CLR metadata에서 generic parameter가 2개라는 뜻입니다.
+여기서 metadata 이름 끝의 backtick-1 표기는 CLR metadata에서 generic parameter가 1개라는 뜻입니다.
 
 ~~~text
-AttributedTypeRegistry<TBase, TAttribute>
-                        \____ arity 2
+AttributedTypeRegistry<TAttribute>
+                     \____ arity 1
 ~~~
 
 이 방식의 효과는 다음과 같습니다.
@@ -441,7 +441,7 @@ Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/RuniOS.Analyzers.dll.meta
 |---|---|
 | Generators/EmbeddedAttributeSourceGenerator.cs | 생성 구현 타입을 참조 어셈블리 조회에서 숨길 Microsoft.CodeAnalysis.EmbeddedAttribute 선언을 compilation에 주입 |
 | Generators/TypeRegistry/TypeRegistrySourceGenerator.cs | 모든 TypeRegistry generator가 공유하는 핵심 pipeline, registry 검증, manifest 탐색, output 생성 |
-| Generators/TypeRegistry/AttributedTypeRegistrySourceGenerator.cs | AttributedTypeRegistry<TBase,TAttribute> 전용 후보 탐색/매칭/attribute 직접 등록 코드 |
+| Generators/TypeRegistry/AttributedTypeRegistrySourceGenerator.cs | AttributedTypeRegistry<TAttribute> 전용 후보 탐색/매칭/attribute 직접 등록 코드 |
 | Generators/TypeRegistry/GenerateTypeRegistryAttributeSourceGenerator.cs | GenerateTypeRegistry 선언을 compilation에 주입 |
 | Generators/TypeRegistry/TypeRegistryManifestAttributeSourceGenerator.cs | assembly-level manifest attribute 선언을 compilation에 주입 |
 | Generators/TypeRegistry/TypeRegistryEmitter.cs | property/backing field, manifest, entry type 이름 및 소스 생성 |
@@ -544,7 +544,7 @@ public sealed class StringHandler : HandlerBase
 - useForChildren=true면 target type에 할당 가능한 하위 타입에도 적용할 수 있습니다.
 - AllowMultiple=true이면 하나의 구현 타입이 여러 대상 타입/여러 priority로 등록될 수 있습니다.
 
-### 3.3 AttributedTypeRegistry<TBase,TAttribute>
+### 3.3 AttributedTypeRegistry<TAttribute>
 
 경로:
 
@@ -555,8 +555,16 @@ Packages/com.rumi.runios.core/Runtime/Reflection/AttributedTypeRegistry.cs
 선언:
 
 ~~~csharp
-public sealed class AttributedTypeRegistry<TBase, TAttribute> : TypeRegistry
+public sealed class AttributedTypeRegistry<TAttribute> : TypeRegistry
     where TAttribute : TypeRegistrationAttribute
+{
+    public Type baseType { get; }
+
+    public AttributedTypeRegistry(Type baseType)
+    {
+        this.baseType = baseType;
+    }
+}
 ~~~
 
 내부 등록 단위:
@@ -588,10 +596,10 @@ typeof(StringHandler)
 AttributedTypeRegistry.Register(Type implementationType)은 다음 순서입니다.
 
 ~~~csharp
-if (TBase가 abstract이고 TBase 자체를 등록하려는 경우)
+if (baseType가 abstract이고 baseType 자체를 등록하려는 경우)
     return;
 
-if (TBase가 implementationType의 base/interface가 아니면)
+if (baseType가 implementationType의 base/interface가 아니면)
     return;
 
 implementationType.GetCustomAttributes<TAttribute>()
@@ -603,7 +611,7 @@ implementationType.GetCustomAttributes<TAttribute>()
 
 구체적인 코드 흐름:
 
-1. typeof(TBase).IsAssignableFrom(implementationType)으로 구현 타입 계약을 검사합니다.
+1. baseType.IsAssignableFrom(implementationType)으로 구현 타입 계약을 검사합니다.
 2. GetCustomAttributes<TAttribute>()로 런타임 리플렉션을 수행합니다.
 3. registrationsByImplementationType에 attribute들을 넣습니다.
 4. registrationSnapshot = default로 정렬 snapshot을 무효화합니다.
@@ -620,7 +628,7 @@ DirectRegister(Type, TAttribute)은 source generator가 이미 만든 attribute�
 public void DirectRegister(Type implementationType, TAttribute attribute)
 ~~~
 
-이 API에는 runtime validation이 없습니다. 호출자가 잘못된 implementationType을 넘겨도 TBase assignability나 attribute 유효성을 다시 검사하지 않습니다.
+이 API에는 runtime validation이 없습니다. 호출자가 잘못된 implementationType을 넘겨도 baseType assignability나 attribute 유효성을 다시 검사하지 않습니다.
 
 DirectRegisterRange(ReadOnlySpan<RegistrationEntry<TAttribute>>)은 같은 일을 batch로 수행합니다.
 
@@ -738,7 +746,7 @@ RuniOS.TypeHandlerAttribute
     -> current candidate discovery
     -> generated typeof + generated attribute instance
     -> assembly lifecycle registration
-    -> AttributedTypeRegistry<TBase,TAttribute>
+    -> AttributedTypeRegistry<TAttribute>
 ~~~
 
 새 generator가 요구하는 attribute 계열은 다음입니다.
@@ -755,9 +763,9 @@ RuniOS.Reflection.TypeRegistrationAttribute
 | child 적용 flag | isSubtypeCompatible | useForChildren |
 | 탐색 | ReflectionUtility.types global scan | 현재 compilation candidate + referenced manifest |
 | 등록 | Register(Type)가 runtime attribute reflection | generated DirectRegisterRange |
-| resolver | AttributeTypeResolver<TBase,TAttribute> | AttributedTypeRegistry<TBase,TAttribute> |
+| resolver | AttributeTypeResolver<TBase,TAttribute> | AttributedTypeRegistry<TAttribute> |
 
-현재 Runiverse OS 패키지 소스에서 GenerateTypeRegistry 실제 사용처는 확인되지 않았습니다. 따라서 이 generator는 현재 코드에 이미 적용된 모든 AttributeTypeResolver를 자동으로 대체하는 상태가 아닙니다. 이름이 비슷하다고 기존 CollectionHandlerBase와 새 generator의 registry가 이미 연결됐다고 보면 안 됩니다.
+현재 Runiverse OS 패키지에서 확인되는 GenerateTypeRegistry 사용처는 IMGUIInspectorDrawer.registry와 RichTextBuilder.registry입니다. 따라서 이 generator가 현재 코드에 이미 적용된 모든 AttributeTypeResolver를 자동으로 대체하는 상태는 아닙니다. 이름이 비슷하다고 기존 CollectionHandlerBase와 새 generator의 registry가 이미 연결됐다고 보면 안 됩니다.
 
 ---
 
@@ -804,7 +812,20 @@ namespace RuniOS.Reflection
         AllowMultiple = false,
         Inherited = false)]
     sealed class GenerateTypeRegistryAttribute
-        : global::System.Attribute;
+        : global::System.Attribute
+    {
+        public readonly global::System.Type? baseType;
+
+        public GenerateTypeRegistryAttribute()
+        {
+            baseType = null;
+        }
+
+        public GenerateTypeRegistryAttribute(global::System.Type baseType)
+        {
+            this.baseType = baseType;
+        }
+    }
 }
 ~~~
 
@@ -823,6 +844,8 @@ public void Initialize(IncrementalGeneratorInitializationContext context) =>
 ~~~
 
 RegisterPostInitializationOutput은 사용자 소스에 GenerateTypeRegistry를 쓰기 전에 attribute 선언 자체를 compilation에 공급하는 단계입니다.
+
+매개 변수 없는 GenerateTypeRegistryAttribute 생성자는 `baseType` 필드에 `null`을 저장합니다. 공통 generator는 이 경우 marker를 선언한 containing type을 base type으로 사용하고, Type 인자를 지정하면 그 타입을 사용합니다.
 
 이 attribute가 generator 전용인 이유:
 
@@ -852,8 +875,21 @@ namespace RuniOS.Reflection
     sealed class TypeRegistryManifestAttribute
         : global::System.Attribute
     {
+        public TypeRegistryManifestAttribute(Type ownerType, string propertyName)
+            : this(ownerType, propertyName, ownerType)
+        {
+        }
+
+        public TypeRegistryManifestAttribute(Type ownerType, string propertyName, Type baseType)
+        {
+            this.ownerType = ownerType;
+            this.propertyName = propertyName;
+            this.baseType = baseType;
+        }
+
         public global::System.Type ownerType { get; }
         public string propertyName { get; }
+        public global::System.Type baseType { get; }
     }
 }
 ~~~
@@ -864,7 +900,7 @@ namespace RuniOS.Reflection
 
 ~~~text
 contract assembly
-    -> [assembly: TypeRegistryManifest(typeof(Owner), "registry")]
+    -> [assembly: TypeRegistryManifest(typeof(Owner), "registry", typeof(BaseType))]
     -> implementation assembly generator가 IAssemblySymbol.GetAttributes()로 읽음
 ~~~
 
@@ -1031,7 +1067,7 @@ protected virtual string CreateRegistryInitializer
 ) => $"new {GeneratorUtils.GetTypeName(registry.registryType)}()";
 ~~~
 
-기본 generated backing field 초기화식은 단순한 parameterless constructor 호출입니다.
+기본 generated backing field 초기화식은 단순한 parameterless constructor 호출입니다. AttributedTypeRegistrySourceGenerator는 registry의 baseType을 받는 생성자 호출로 이를 재정의합니다.
 
 ~~~csharp
 static readonly global::Some.Registry __field =
@@ -1359,7 +1395,7 @@ if (!IsSupportedRegistryType(registryType, compilation))
 
 지원하는 generator가 없으면 ROS0006입니다.
 
-현재 유일한 concrete generator는 AttributedTypeRegistry<,> 원본 정의만 지원합니다.
+현재 유일한 concrete generator는 AttributedTypeRegistry<> 원본 정의만 지원합니다.
 
 ### 7.7 파생 generator 추가 검증
 
@@ -1370,22 +1406,24 @@ if (!TryValidateSupportedRegistryType
 
 현재 AttributedTypeRegistrySourceGenerator는 여기서 TAttribute가 TypeRegistrationAttribute에서 파생됐는지 검사합니다. 이 조건은 다음 장에서 자세히 설명합니다.
 
-### 7.8 parameterless constructor
+### 7.8 registry constructor
 
-기본 initializer가 다음 식을 만들기 때문에 필요합니다.
+registry initializer가 생성기별 필요한 constructor 호출을 만들기 때문에 검사합니다.
 
 ~~~csharp
-new global::Some.RegistryType()
+new global::RuniOS.Reflection.AttributedTypeRegistry<global::Some.RegistrationAttribute>
+    (typeof(global::Some.RegistryBase))
 ~~~
 
-HasAccessibleParameterlessConstructor는 모든 instance constructor를 순회하며 다음을 확인합니다.
+AttributedTypeRegistrySourceGenerator는 모든 instance constructor를 순회하며 다음을 확인합니다.
 
 ~~~csharp
-constructor.Parameters.Length == 0
+constructor.Parameters.Length == 1
+&& constructor.Parameters[0].Type == System.Type
 && IsAccessibleFromGeneratedCode(constructor, compilation)
 ~~~
 
-없으면 ROS0007입니다.
+필요한 constructor가 없거나 접근할 수 없으면 ROS0007입니다.
 
 ### 7.9 stable ID와 backing field 충돌
 
@@ -1433,6 +1471,7 @@ new RegistryDefinition
     property,
     ownerType,
     registryType,
+    baseType,
     origin,
     stableId
 )
@@ -1444,6 +1483,7 @@ new RegistryDefinition
 public IPropertySymbol property { get; }
 public INamedTypeSymbol ownerType { get; }
 public INamedTypeSymbol registryType { get; }
+public ITypeSymbol baseType { get; }
 public RegistryOrigin origin { get; }
 public string stableId { get; }
 ~~~
@@ -1612,7 +1652,7 @@ metadata name:
 
 ~~~csharp
 const string attributedTypeRegistryMetadataName =
-    "RuniOS.Reflection.AttributedTypeRegistry`2";
+    "RuniOS.Reflection.AttributedTypeRegistry`1";
 ~~~
 
 검사:
@@ -1635,9 +1675,9 @@ return attributedRegistry != null
 OriginalDefinition을 비교하는 이유:
 
 ~~~text
-AttributedTypeRegistry<HandlerBase, MyAttribute>
+AttributedTypeRegistry<MyAttribute>
     -> OriginalDefinition
-       AttributedTypeRegistry<TBase,TAttribute>
+       AttributedTypeRegistry<TAttribute>
 ~~~
 
 구성된 generic type의 인자 값이 아니라 generic type 자체가 같은지 확인합니다.
@@ -1654,7 +1694,7 @@ const string typeRegistrationAttributeMetadataName =
 다음 조건을 검사합니다.
 
 ~~~csharp
-registryType.TypeArguments is [_, INamedTypeSymbol attributeType]
+registryType.TypeArguments is [INamedTypeSymbol attributeType]
 && TypeRegistrySymbolHelpers.IsSameOrDerived(attributeType, registrationAttribute)
 ~~~
 
@@ -1663,7 +1703,7 @@ registryType.TypeArguments is [_, INamedTypeSymbol attributeType]
 올바른 예:
 
 ~~~csharp
-AttributedTypeRegistry<HandlerBase, MyRegistrationAttribute>
+AttributedTypeRegistry<MyRegistrationAttribute>
 ~~~
 
 여기서 MyRegistrationAttribute는 TypeRegistrationAttribute의 파생 타입이어야 합니다.
@@ -1671,7 +1711,7 @@ AttributedTypeRegistry<HandlerBase, MyRegistrationAttribute>
 잘못된 예:
 
 ~~~csharp
-AttributedTypeRegistry<HandlerBase, System.Attribute>
+AttributedTypeRegistry<System.Attribute>
 ~~~
 
 ### 9.3 후보 provider 생성
@@ -1799,7 +1839,7 @@ diagnostic = null;
 
 if (
     candidate is not AttributedRegistrationCandidate attributedCandidate
-    || registry.registryType.TypeArguments.Length != 2
+    || registry.registryType.TypeArguments.Length != 1
 )
     return false;
 ~~~
@@ -1808,14 +1848,13 @@ if (
 
 ~~~csharp
 if (
-    registry.registryType.TypeArguments[0] is not { } baseType
-    || registry.registryType.TypeArguments[1]
+    registry.registryType.TypeArguments[0]
        is not INamedTypeSymbol attributeType
 )
     return false;
 ~~~
 
-baseType는 TBase, attributeType은 TAttribute입니다.
+baseType는 RegistryDefinition에 저장된 registry 기본 타입이고, attributeType은 TAttribute입니다.
 
 #### 단계 2: 이 registry의 attribute만 선택
 
@@ -1842,11 +1881,11 @@ TAttribute = BaseRegistrationAttribute
 
 matching attribute가 없으면 이 registry와는 관계없는 candidate이므로 false입니다.
 
-#### 단계 3: implementation type이 TBase 계열인지 확인
+#### 단계 3: implementation type이 baseType 계열인지 확인
 
 ~~~csharp
 if (!TypeRegistrySymbolHelpers.IsSameOrDerived
-    (attributedCandidate.implementationType, baseType))
+    (attributedCandidate.implementationType, registry.baseType))
     return false;
 ~~~
 
@@ -2283,15 +2322,17 @@ TypeRegistryManifestAttributeSourceGenerator.cs는 다음과 같은 assembly-lev
 [assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute
 (
     typeof(MyRegistryOwner),
-    "services"
+    "services",
+    typeof(MyRegistryOwner)
 )]
 ~~~
 
-이 attribute는 registry instance를 직접 담지 않습니다. 다음 두 정보만 담습니다.
+이 attribute는 registry instance를 직접 담지 않습니다. owner, property 이름, base type 정보를 담습니다.
 
 ~~~csharp
 public Type ownerType { get; }
 public string propertyName { get; }
+public Type baseType { get; }
 ~~~
 
 즉, 의미는 다음과 같습니다.
@@ -2344,7 +2385,7 @@ foreach (IAssemblySymbol assembly in EnumerateReferencedAssemblies(compilation))
         )
             continue;
 
-        // constructor argument에서 ownerType과 propertyName을 decode한다.
+        // constructor argument에서 ownerType, propertyName, baseType을 decode한다.
         // ownerType.GetMembers(propertyName)에서 property를 찾는다.
         // TryCreateRegistryDefinition(... requirePartial: false)를 호출한다.
     }
@@ -2410,7 +2451,7 @@ public static partial TRegistry Property { get; }
 - owner type이 public hierarchy인지
 - property type이 구체적인 TypeRegistry인지
 - 해당 registry type을 현재 generator가 지원하는지
-- parameterless constructor를 호출할 수 있는지
+- source generator가 요구하는 registry constructor를 호출할 수 있는지
 - stable ID를 만들 수 있는지
 
 문제가 있으면 generator가 전체 compilation을 깨뜨리기보다는 ROS0010 warning을 보고 해당 manifest만 버립니다.
@@ -2426,7 +2467,7 @@ library A
   [GenerateTypeRegistry] public static partial Registry Services { get; }
         │
         ├─ generated property implementation
-        └─ assembly-level TypeRegistryManifestAttribute(owner, "Services")
+        └─ assembly-level TypeRegistryManifestAttribute(owner, "Services", baseType)
                                 │
                                 ▼
 application B generator
@@ -2477,7 +2518,7 @@ string backingFieldName =
 ~~~csharp
 static readonly global::Some.Namespace.RegistryType
     __typeRegistry_Services_A1B2C3D4 =
-    new global::Some.Namespace.RegistryType();
+    new global::Some.Namespace.RegistryType(typeof(global::Some.Namespace.ServiceBase));
 ~~~
 
 hash만 쓰지 않고 property name을 앞에 남기는 것은 generated source를 사람이 읽고 디버깅하기 쉽게 하기 위해서입니다.
@@ -2496,20 +2537,18 @@ namespace MyCompany.Core
         static readonly global::RuniOS.Reflection
             .AttributedTypeRegistry
             <
-                global::MyCompany.Core.IService,
                 global::MyCompany.Core.ServiceRegistrationAttribute
             >
             __typeRegistry_Services_A1B2C3D4 =
             new global::RuniOS.Reflection
                 .AttributedTypeRegistry
                 <
-                    global::MyCompany.Core.IService,
                     global::MyCompany.Core.ServiceRegistrationAttribute
-                >();
+                >(typeof(global::MyCompany.Core.IService));
 
         public static partial
             global::RuniOS.Reflection
-                .AttributedTypeRegistry<...>
+                .AttributedTypeRegistry<global::MyCompany.Core.ServiceRegistrationAttribute>
             Services =>
             __typeRegistry_Services_A1B2C3D4;
     }
@@ -2571,7 +2610,8 @@ RenderManifest는 registry object를 생성하지 않습니다. 다음과 같은
 [assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute
 (
     typeof(global::MyCompany.Core.RegistryHost),
-    "Services"
+    "Services",
+    typeof(global::MyCompany.Core.IService)
 )]
 ~~~
 
@@ -2790,21 +2830,22 @@ IsAccessibleFromGeneratedCode는 generated source가 해당 type을 참조할 �
 
 이 검사는 특히 attribute 재출력에서 중요합니다. attribute class는 public인데 constructor가 internal이거나, named property가 private이면 generated code가 해당 attribute expression을 만들 수 없습니다.
 
-### 14.3 parameterless constructor
+### 14.3 registry constructor
 
-registry property의 implementation을 다음처럼 만들기 때문입니다.
+AttributedTypeRegistry property의 implementation을 다음처럼 만들기 때문입니다.
 
 ~~~csharp
-new global::Some.RegistryType()
+new global::RuniOS.Reflection.AttributedTypeRegistry<global::Some.RegistrationAttribute>
+    (typeof(global::Some.RegistryBase))
 ~~~
 
-HasAccessibleParameterlessConstructor는 다음을 확인합니다.
+AttributedTypeRegistrySourceGenerator의 constructor 검사는 다음을 확인합니다.
 
 - instance constructor인가
-- parameter count가 0인가
+- parameter count가 1이고 parameter가 `System.Type`인가
 - generated code에서 접근 가능한가
 
-명시적 constructor가 하나라도 있고 parameterless constructor가 없으면 C#이 암묵적 parameterless constructor를 만들지 않으므로 ROS0007이 발생합니다.
+필요한 constructor에 접근할 수 없으면 ROS0007이 발생합니다.
 
 ### 14.4 partial hierarchy
 
@@ -3048,11 +3089,10 @@ registry owner는 다음처럼 선언합니다.
 ~~~csharp
 public static partial class Registries
 {
-    [global::RuniOS.Reflection.GenerateTypeRegistry]
+    [global::RuniOS.Reflection.GenerateTypeRegistry(typeof(IService))]
     public static partial
         global::RuniOS.Reflection.AttributedTypeRegistry
         <
-            IService,
             ServiceRegistrationAttribute
         >
         Services
@@ -3079,7 +3119,7 @@ public sealed class LoggingService : IService
 4. TryCreateRegistryDefinition이 property contract를 검증합니다.
 5. AttributedTypeRegistrySourceGenerator의 candidate provider가 LoggingService class를 발견합니다.
 6. GetInheritedAttributes가 ServiceRegistrationAttribute를 수집합니다.
-7. TryBindCandidate가 LoggingService가 IService에 assignable한지 확인합니다.
+7. TryBindCandidate가 LoggingService가 registry의 baseType에 assignable한지 확인합니다.
 8. AttributeLiteralEmitter가 attribute를 generated expression으로 재출력합니다.
 9. TypeRegistryEmitter가 Registries.Services의 backing field/property를 생성합니다.
 10. TypeRegistryEmitter가 manifest를 생성합니다.
@@ -3098,19 +3138,17 @@ namespace MyCompany
         static readonly
             global::RuniOS.Reflection.AttributedTypeRegistry
             <
-                global::MyCompany.IService,
                 global::MyCompany.ServiceRegistrationAttribute
             >
             __typeRegistry_Services_A1B2C3D4 =
             new
                 global::RuniOS.Reflection.AttributedTypeRegistry
                 <
-                    global::MyCompany.IService,
                     global::MyCompany.ServiceRegistrationAttribute
-                >();
+                >(typeof(global::MyCompany.IService));
 
         public static partial
-            global::RuniOS.Reflection.AttributedTypeRegistry<...>
+            global::RuniOS.Reflection.AttributedTypeRegistry<global::MyCompany.ServiceRegistrationAttribute>
             Services =>
             __typeRegistry_Services_A1B2C3D4;
     }
@@ -3125,7 +3163,8 @@ namespace MyCompany
 [assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute
 (
     typeof(global::MyCompany.Registries),
-    "Services"
+    "Services",
+    typeof(global::MyCompany.IService)
 )]
 ~~~
 
@@ -3372,7 +3411,7 @@ Diagnostics/TypeRegistryDiagnostics0002~0019.cs는 type registry generator/analy
 | ROS0004 | error | owner containing type hierarchy가 public/partial이 아님 |
 | ROS0005 | error | property type이 구체적인 TypeRegistry-derived type이 아님 |
 | ROS0006 | error | registry type을 지원하는 generator가 없음 |
-| ROS0007 | error | registry type에 접근 가능한 parameterless constructor가 없음 |
+| ROS0007 | error | registry type에 source generator가 요구하는 접근 가능한 constructor가 없음 |
 | ROS0008 | error | generated member name이 기존 member와 충돌함 |
 | ROS0009 | error | 등록 대상 어트리뷰트 바인딩 중 public OnAssemblyLoaded/OnAssemblyUnloading API를 찾을 수 없음 |
 | ROS0010 | warning | referenced assembly manifest를 registry definition으로 복원할 수 없음 |
@@ -3495,7 +3534,7 @@ candidate discovery
   class/record + 관련 attribute가 있는가?
 
 registry binding
-  이 candidate가 TBase에 assignable한가?
+  이 candidate가 registry의 baseType에 assignable한가?
   attribute가 TAttribute 계열인가?
   attribute literal을 재출력할 수 있는가?
 ~~~
@@ -3628,11 +3667,11 @@ Unity.Scripting.LifecycleManagement.OnCodeUnloading
 
 ~~~text
 RuniOS.Reflection.TypeRegistrationAttribute
-RuniOS.Reflection.AttributedTypeRegistry<,>
+RuniOS.Reflection.AttributedTypeRegistry<>
 RuniOS.Reflection.GenerateTypeRegistry
 ~~~
 
-현재 Runiverse OS source 검색에서는 GenerateTypeRegistry 사용 예가 발견되지 않았고, 기존 CustomCollectionHandlerAttribute는 old TypeHandlerAttribute 계열입니다. 그러므로 새 generator가 존재한다고 해서 기존 CollectionHandlerBase가 자동으로 compile-time registry로 바뀌는 것은 아닙니다.
+현재 Runiverse OS source에서 확인되는 GenerateTypeRegistry 사용처는 IMGUIInspectorDrawer.registry와 RichTextBuilder.registry이며, 기존 CustomCollectionHandlerAttribute는 여전히 old TypeHandlerAttribute 계열입니다. 그러므로 새 generator가 존재한다고 해서 기존 CollectionHandlerBase가 자동으로 compile-time registry로 바뀌는 것은 아닙니다.
 
 ### 21.6 generated source는 repository source가 아니다
 
@@ -3659,7 +3698,7 @@ RuniOS.AttributedTypeRegistry.Registration....g.cs
 3. property가 public static partial get-only인가
 4. containing type hierarchy가 public partial인가
 5. property type이 concrete TypeRegistry-derived type인가
-6. parameterless constructor가 접근 가능한가
+6. source generator가 요구하는 registry constructor가 접근 가능한가
 7. ROS0002~ROS0008 중 어떤 diagnostic이 있는가
 8. generated source hint를 AddGeneratedSource가 충돌로 버리지 않았는가
 
@@ -3670,7 +3709,7 @@ RuniOS.AttributedTypeRegistry.Registration....g.cs
 1. class 또는 record declaration인가
 2. TypeRegistrationAttribute 계열 attribute가 붙었는가
 3. TAttribute가 그 attribute base와 compatible한가
-4. candidate type이 TBase에 assignable한가
+4. candidate type이 registry의 baseType에 assignable한가
 5. candidate가 abstract인가
 6. attribute constructor/named property가 generated code에서 accessible한가
 7. attribute argument가 supported TypedConstantKind인가

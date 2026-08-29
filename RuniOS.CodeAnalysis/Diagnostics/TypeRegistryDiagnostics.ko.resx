@@ -46,7 +46,7 @@
     <value>레지스트리를 초기화할 수 없음</value>
   </data>
   <data name="ROS0007_Message" xml:space="preserve">
-    <value>레지스트리 타입 '{0}'에 접근 가능한 매개 변수 없는 생성자가 없습니다</value>
+    <value>레지스트리 타입 '{0}'에 소스 생성기가 요구하는 접근 가능한 생성자가 없습니다</value>
   </data>
   <data name="ROS0008_Title" xml:space="preserve">
     <value>생성된 레지스트리 멤버가 기존 멤버와 충돌함</value>

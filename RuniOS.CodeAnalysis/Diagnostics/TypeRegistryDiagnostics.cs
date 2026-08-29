@@ -97,10 +97,10 @@ static class TypeRegistryDiagnostics
     );
 
     /// <summary>
-    /// Describes the diagnostic for a registry type without an accessible parameterless constructor.<br/>
-    /// 레지스트리 타입에 접근 가능한 매개 변수 없는 생성자가 없는 경우의 진단 설명자입니다.
+    /// Describes the diagnostic for a registry type whose required constructor is inaccessible.<br/>
+    /// 필요한 생성자에 접근할 수 없는 레지스트리 타입의 진단 설명자입니다.
     /// </summary>
-    public static readonly DiagnosticDescriptor missingParameterlessConstructor = new
+    public static readonly DiagnosticDescriptor missingRegistryConstructor = new
     (
         "ROS0007",
         Text("ROS0007_Title"),

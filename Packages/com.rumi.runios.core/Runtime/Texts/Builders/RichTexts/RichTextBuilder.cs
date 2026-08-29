@@ -15,7 +15,7 @@ namespace RuniOS.Texts.Builders.RichTexts
         static readonly ConcurrentDictionary<Type, RichTextBuilder> cache = new ConcurrentDictionary<Type, RichTextBuilder>();
 
         [GenerateTypeRegistry]
-        public static partial AttributedTypeRegistry<RichTextBuilder, TextRendererAttribute> registry { get; }
+        public static partial AttributedTypeRegistry<TextRendererAttribute> registry { get; }
 
         /// <summary>
         /// Finds the rich-text builder registered for the runtime type of a text instance.<br/>

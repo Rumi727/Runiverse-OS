@@ -156,6 +156,25 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     protected virtual string CreateRegistryInitializer(RegistryDefinition registry) => $"new {GeneratorUtils.GetTypeName(registry.registryType)}()";
 
     /// <summary>
+    /// Determines whether generated code can call the required registry constructor.<br/>
+    /// 생성 코드가 레지스트리에 필요한 생성자를 호출할 수 있는지 확인합니다.
+    /// </summary>
+    /// <param name="registryType">
+    /// The registry type whose constructor is inspected.<br/>
+    /// 생성자를 검사할 레지스트리 타입입니다.
+    /// </param>
+    /// <param name="compilation">
+    /// The compilation used for accessibility checks.<br/>
+    /// 접근성 검사에 사용할 컴파일입니다.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the required constructor is accessible; otherwise, <see langword="false"/>.<br/>
+    /// 필요한 생성자에 접근할 수 있으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+    /// </returns>
+    protected virtual bool HasAccessibleRegistryConstructor(INamedTypeSymbol registryType, Compilation compilation) =>
+        TypeRegistrySymbolHelpers.HasAccessibleParameterlessConstructor(registryType, compilation);
+
+    /// <summary>
     /// Performs additional validation for a supported registry type.<br/>
     /// 지원되는 레지스트리 타입에 대한 추가 검증을 수행합니다.
     /// </summary>
@@ -351,7 +370,8 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             );
         }
 
-        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
+        ITypeSymbol baseType = GetRegistryBaseType(context.Attributes, property.ContainingType);
+        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, baseType, RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
             return InvalidDiscovery(property, location, diagnostic!);
 
         return new RegistryDiscoveryItem(definition, property, location, isCurrent: true, ImmutableArray<Diagnostic>.Empty);
@@ -372,6 +392,10 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// <param name="compilation">
     /// The compilation used for type and accessibility checks.<br/>
     /// 타입 및 접근성 검사에 사용할 컴파일입니다.
+    /// </param>
+    /// <param name="baseType">
+    /// The type that registered implementations must match or derive from.<br/>
+    /// 등록 구현 타입이 일치하거나 상속해야 하는 타입입니다.
     /// </param>
     /// <param name="origin">
     /// The origin recorded in the resulting definition.<br/>
@@ -398,6 +422,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         IPropertySymbol property,
         PropertyDeclarationSyntax? declaration,
         Compilation compilation,
+        ITypeSymbol baseType,
         RegistryOrigin origin,
         bool requirePartial,
         out RegistryDefinition? definition,
@@ -483,11 +508,11 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             return false;
         }
 
-        if (!TypeRegistrySymbolHelpers.HasAccessibleParameterlessConstructor(registryType, compilation))
+        if (!HasAccessibleRegistryConstructor(registryType, compilation))
         {
             diagnostic = TypeRegistryDiagnostics.Create
             (
-                TypeRegistryDiagnostics.missingParameterlessConstructor,
+                TypeRegistryDiagnostics.missingRegistryConstructor,
                 location,
                 compilation,
                 registryType
@@ -496,7 +521,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         }
 
         string stableId = TypeRegistryEmitter.GetStableId(property, registryType);
-        RegistryDefinition candidate = new(property, ownerType, registryType, origin, stableId);
+        RegistryDefinition candidate = new(property, ownerType, registryType, baseType, origin, stableId);
         string backingFieldName = TypeRegistryEmitter.GetBackingFieldName(candidate);
         if (origin == RegistryOrigin.currentCompilation && ownerType.GetMembers(backingFieldName).Length != 0)
         {
@@ -617,6 +642,22 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// 정의 없이 지정된 진단을 포함하는 현재 컴파일 발견 항목입니다.
     /// </returns>
     static RegistryDiscoveryItem InvalidDiscovery(IPropertySymbol? property, Location location, Diagnostic diagnostic) => new RegistryDiscoveryItem(null, property, location, isCurrent: true, ImmutableArray.Create(diagnostic));
+
+    static ITypeSymbol GetRegistryBaseType(ImmutableArray<AttributeData> attributes, INamedTypeSymbol ownerType)
+    {
+        foreach (AttributeData attribute in attributes)
+        {
+            if (attribute.AttributeClass == null || GeneratorUtils.GetMetadataName(attribute.AttributeClass) != generateTypeRegistryAttributeMetadataName)
+                continue;
+
+            if (attribute.ConstructorArguments.Length != 0 && attribute.ConstructorArguments[0].Value is ITypeSymbol baseType)
+                return baseType;
+
+            break;
+        }
+
+        return ownerType;
+    }
 
     /// <summary>
     /// Validates discovered registries, binds candidates, and emits generated source and diagnostics.<br/>
@@ -908,10 +949,11 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                 if (manifest.ConstructorArguments.Length > 1 && manifest.ConstructorArguments[1].Value is string manifestPropertyName)
                     propertyName = manifestPropertyName;
 
-                // 매니페스트 계약은 positional `(Type ownerType, string propertyName)` 생성자 인자로 소비됩니다.
+                // 매니페스트 계약은 positional `(Type ownerType, string propertyName, Type baseType)` 생성자 인자로 소비됩니다.
                 INamedTypeSymbol? ownerType = manifest.ConstructorArguments.Length > 0 ? manifest.ConstructorArguments[0].Value as INamedTypeSymbol : null;
                 IPropertySymbol? property = ownerType?.GetMembers(propertyName).OfType<IPropertySymbol>().FirstOrDefault();
-                if (ownerType == null || property == null || !TryCreateRegistryDefinition(property, null, compilation, RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
+                ITypeSymbol? baseType = manifest.ConstructorArguments.Length > 2 ? manifest.ConstructorArguments[2].Value as ITypeSymbol : ownerType;
+                if (ownerType == null || property == null || baseType == null || !TryCreateRegistryDefinition(property, null, compilation, baseType, RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
                 {
                     result.Add
                     (

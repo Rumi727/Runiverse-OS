@@ -13,8 +13,8 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 [Generator]
 public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGenerator
 {
-    // 런타임 제네릭 정의의 정확한 메타데이터 이름, arity, TBase/TAttribute 인자 순서를 유지해야 합니다.
-    const string attributedTypeRegistryMetadataName = "RuniOS.Reflection.AttributedTypeRegistry`2";
+    // 런타임 제네릭 정의의 정확한 메타데이터 이름과 TAttribute 인자 위치를 유지해야 합니다.
+    const string attributedTypeRegistryMetadataName = "RuniOS.Reflection.AttributedTypeRegistry`1";
     // 후보 발견과 타입 매칭을 위해 런타임 등록 특성의 정확한 메타데이터 이름을 유지해야 합니다.
     const string typeRegistrationAttributeMetadataName = "RuniOS.Reflection.TypeRegistrationAttribute";
 
@@ -25,8 +25,50 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     protected override string generatorName => "AttributedTypeRegistry";
 
     /// <summary>
-    /// Determines whether the registry is an <c>AttributedTypeRegistry&lt;,&gt;</c> definition.<br/>
-    /// 레지스트리가 <c>AttributedTypeRegistry&lt;,&gt;</c> 정의인지 확인합니다.
+    /// Creates the initializer that supplies the registry base type.<br/>
+    /// 레지스트리 기본 타입을 전달하는 초기화 식을 만듭니다.
+    /// </summary>
+    /// <param name="registry">
+    /// The registry definition being initialized.<br/>
+    /// 초기화할 레지스트리 정의입니다.
+    /// </param>
+    /// <returns>
+    /// A C# expression that creates the registry with its base type.<br/>
+    /// 기본 타입으로 레지스트리를 생성하는 C# 식입니다.
+    /// </returns>
+    protected override string CreateRegistryInitializer(RegistryDefinition registry) =>
+        $"new {GeneratorUtils.GetTypeName(registry.registryType)}(typeof({GeneratorUtils.GetTypeOfName(registry.baseType)}))";
+
+    /// <summary>
+    /// Determines whether the registry has an accessible constructor accepting <see cref="System.Type"/>.<br/>
+    /// 레지스트리에 <see cref="System.Type"/>을 받는 접근 가능한 생성자가 있는지 확인합니다.
+    /// </summary>
+    /// <param name="registryType">
+    /// The registry type whose constructors are inspected.<br/>
+    /// 생성자를 검사할 레지스트리 타입입니다.
+    /// </param>
+    /// <param name="compilation">
+    /// The compilation used for accessibility checks.<br/>
+    /// 접근성 검사에 사용할 컴파일입니다.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when an accessible <see cref="System.Type"/> constructor exists; otherwise, <see langword="false"/>.<br/>
+    /// 접근 가능한 <see cref="System.Type"/> 생성자가 있으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+    /// </returns>
+    protected override bool HasAccessibleRegistryConstructor(INamedTypeSymbol registryType, Compilation compilation)
+    {
+        foreach (IMethodSymbol constructor in registryType.InstanceConstructors)
+        {
+            if (constructor.Parameters.Length == 1 && constructor.Parameters[0].Type.SpecialType == SpecialType.System_Type && TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(constructor, compilation))
+                return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    /// Determines whether the registry is an <c>AttributedTypeRegistry&lt;TAttribute&gt;</c> definition.<br/>
+    /// 레지스트리가 <c>AttributedTypeRegistry&lt;TAttribute&gt;</c> 정의인지 확인합니다.
     /// </summary>
     /// <param name="registryType">
     /// The registry type to inspect.<br/>
@@ -37,8 +79,8 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     /// 특성 기반 레지스트리 정의를 확인하는 데 사용할 컴파일입니다.
     /// </param>
     /// <returns>
-    /// <see langword="true"/> when the registry's original definition is <c>AttributedTypeRegistry&lt;,&gt;</c>; otherwise, <see langword="false"/>.<br/>
-    /// 레지스트리의 원본 정의가 <c>AttributedTypeRegistry&lt;,&gt;</c>이면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+    /// <see langword="true"/> when the registry's original definition is <c>AttributedTypeRegistry&lt;TAttribute&gt;</c>; otherwise, <see langword="false"/>.<br/>
+    /// 레지스트리의 원본 정의가 <c>AttributedTypeRegistry&lt;TAttribute&gt;</c>이면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
     /// </returns>
     protected override bool IsSupportedRegistryType(INamedTypeSymbol registryType, Compilation compilation)
     {
@@ -71,14 +113,14 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
         INamedTypeSymbol? registrationAttribute = compilation.GetTypeByMetadataName(typeRegistrationAttributeMetadataName);
 
         // ReSharper disable once MergeIntoNegatedPattern
-        if (registrationAttribute == null || registryType.TypeArguments.Length != 2 || registryType.TypeArguments[1] is not INamedTypeSymbol attributeType || !TypeRegistrySymbolHelpers.IsSameOrDerived(attributeType, registrationAttribute))
+        if (registrationAttribute == null || registryType.TypeArguments.Length != 1 || registryType.TypeArguments[0] is not INamedTypeSymbol attributeType || !TypeRegistrySymbolHelpers.IsSameOrDerived(attributeType, registrationAttribute))
         {
             diagnostic = TypeRegistryDiagnostics.Create
             (
                 TypeRegistryDiagnostics.invalidAttributeBase,
                 TypeRegistrySymbolHelpers.GetLocation(registryType),
                 compilation,
-                registryType.TypeArguments.Length == 2 ? (object)registryType.TypeArguments[1] : "<unknown>"
+                registryType.TypeArguments.Length == 1 ? (object)registryType.TypeArguments[0] : "<unknown>"
             );
             return false;
         }
@@ -147,11 +189,11 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     {
         registration = null;
         diagnostic = null;
-        // 바인딩과 생성 항목 구성에서 TBase는 인자 0, TAttribute는 인자 1입니다.
-        if (candidate is not AttributedRegistrationCandidate attributedCandidate || registry.registryType.TypeArguments.Length != 2)
+        // 바인딩과 생성 항목 구성에서 TAttribute는 인자 0이며, 기본 타입은 RegistryDefinition에 저장됩니다.
+        if (candidate is not AttributedRegistrationCandidate attributedCandidate || registry.registryType.TypeArguments.Length != 1)
             return false;
 
-        if (registry.registryType.TypeArguments[0] is not { } baseType || registry.registryType.TypeArguments[1] is not INamedTypeSymbol attributeType)
+        if (registry.registryType.TypeArguments[0] is not INamedTypeSymbol attributeType)
             return false;
 
         ImmutableArray<AttributeData> matchingAttributes = attributedCandidate.attributes
@@ -160,7 +202,7 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
         if (matchingAttributes.Length == 0)
             return false;
 
-        if (!TypeRegistrySymbolHelpers.IsSameOrDerived(attributedCandidate.implementationType, baseType))
+        if (!TypeRegistrySymbolHelpers.IsSameOrDerived(attributedCandidate.implementationType, registry.baseType))
             return false;
         if (attributedCandidate.implementationType.IsAbstract)
         {

@@ -173,8 +173,8 @@ static class TypeRegistryEmitter
         writer.AppendLine("#nullable enable");
         writer.AppendLine
         (
-            // 생성 매니페스트는 정확한 `(Type ownerType, string propertyName)` 생성자 계약을 사용합니다.
-            $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)})]"
+            // 생성 매니페스트는 정확한 `(Type ownerType, string propertyName, Type baseType)` 생성자 계약을 사용합니다.
+            $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)}, typeof({GeneratorUtils.GetTypeOfName(registry.baseType)}))]"
         );
         return writer.ToString();
     }
@@ -192,7 +192,7 @@ static class TypeRegistryEmitter
     /// 네임스페이스 수준 제네릭 <c>RegistrationEntry&lt;TAttribute&gt;</c> 타입의 완전 수식 이름입니다.
     /// </returns>
     // AttributedTypeRegistrySourceGenerator가 레지스트리의 TAttribute에 맞는 RegistrationEntry<TAttribute> 타입을 생성합니다.
-    public static string RenderRegistrationEntryType(RegistryDefinition registry) => $"global::RuniOS.Reflection.RegistrationEntry<{GeneratorUtils.GetTypeName(registry.registryType.TypeArguments[1])}>";
+    public static string RenderRegistrationEntryType(RegistryDefinition registry) => $"global::RuniOS.Reflection.RegistrationEntry<{GeneratorUtils.GetTypeName(registry.registryType.TypeArguments[0])}>";
 
     /// <summary>
     /// Creates a registration source preamble and leaves its namespace and class scopes open.<br/>

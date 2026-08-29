@@ -24,7 +24,20 @@ public sealed class GenerateTypeRegistryAttributeSourceGenerator : IIncrementalG
             [global::System.Runtime.CompilerServices.CompilerGenerated]
             [global::Microsoft.CodeAnalysis.Embedded]
             [global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-            sealed class GenerateTypeRegistryAttribute : global::System.Attribute { }
+            sealed class GenerateTypeRegistryAttribute : global::System.Attribute
+            {
+                public readonly global::System.Type? baseType;
+
+                public GenerateTypeRegistryAttribute()
+                {
+                    baseType = null;
+                }
+
+                public GenerateTypeRegistryAttribute(global::System.Type baseType)
+                {
+                    this.baseType = baseType;
+                }
+            }
         }
         """;
 

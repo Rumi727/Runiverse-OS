@@ -13,7 +13,7 @@
 
 공통 추상 클래스 `TypeRegistrySourceGenerator`가 위 골격을 담당하고, 실제 레지스트리별 소스 제너레이터는 후보 탐색과 매칭, 필요한 등록 최적화만 구현한다.
 
-첫 구현체인 `AttributedTypeRegistrySourceGenerator`는 `AttributedTypeRegistry<TBase, TAttribute>`를 지원한다. 등록 시에는 리플렉션을 사용하는 `Register(Type)` 대신 생성된 어트리뷰트 인스턴스를 `DirectRegisterRange`로 전달한다.
+첫 구현체인 `AttributedTypeRegistrySourceGenerator`는 `AttributedTypeRegistry<TAttribute>`를 지원한다. 등록 시에는 리플렉션을 사용하는 `Register(Type)` 대신 생성된 어트리뷰트 인스턴스를 `DirectRegisterRange`로 전달한다.
 
 이 설계는 런타임 코드 변경안을 설명하지만, 이 문서 자체의 산출 범위는 설계뿐이다.
 
@@ -37,9 +37,7 @@
 public abstract partial class CollectionHandlerBase
 {
     [GenerateTypeRegistry]
-    public static partial AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> registry { get; }
+    public static partial AttributedTypeRegistry<CustomCollectionHandlerAttribute> registry { get; }
 }
 ```
 
@@ -50,13 +48,10 @@ public abstract partial class CollectionHandlerBase
 
 public abstract partial class CollectionHandlerBase
 {
-    private static readonly AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> __registry = new();
+    private static readonly AttributedTypeRegistry<CustomCollectionHandlerAttribute> __registry =
+        new(typeof(CollectionHandlerBase));
 
-    public static partial AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> registry => __registry;
+    public static partial AttributedTypeRegistry<CustomCollectionHandlerAttribute> registry => __registry;
 }
 ```
 
@@ -71,7 +66,7 @@ C# 13 partial property 규칙상 구현 선언은 자동 프로퍼티일 수 없
 - 프로퍼티 타입은 추상이 아닌 구체적인 `TypeRegistry` 파생 타입이다.
 - 프로퍼티를 포함하는 모든 타입 선언은 `partial`이다.
 - 프로퍼티와 containing type 전체가 외부 어셈블리에서 접근 가능하다.
-- 생성기가 기본 초기화식을 사용할 경우 레지스트리 타입에 접근 가능한 매개변수 없는 생성자가 있다.
+- 생성기가 사용하는 초기화식에 필요한 레지스트리 생성자에 접근할 수 있다.
 - 사용자가 같은 partial property의 구현 선언을 직접 제공하지 않았다.
 
 외부 어셈블리의 생성 코드가 이 프로퍼티를 참조하므로 `internal` owner 또는 `internal` 프로퍼티는 허용하지 않는다. 중첩 타입이면 바깥쪽 containing type까지 모두 실질적으로 `public`이어야 한다.
@@ -84,9 +79,7 @@ C# 13 partial property 규칙상 구현 선언은 자동 프로퍼티일 수 없
 public abstract partial class CollectionHandlerBase
 {
     [GenerateTypeRegistry]
-    public static partial AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> registry { get; }
+    public static partial AttributedTypeRegistry<CustomCollectionHandlerAttribute> registry { get; }
 
     [GenerateTypeRegistry]
     public static partial AnotherTypeRegistry<CollectionHandlerBase> fallbackRegistry { get; }
@@ -107,6 +100,17 @@ public abstract partial class CollectionHandlerBase
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 internal sealed class GenerateTypeRegistryAttribute : Attribute
 {
+    public readonly Type? baseType;
+
+    public GenerateTypeRegistryAttribute()
+    {
+        baseType = null;
+    }
+
+    public GenerateTypeRegistryAttribute(Type baseType)
+    {
+        this.baseType = baseType;
+    }
 }
 ```
 
@@ -121,13 +125,20 @@ internal sealed class GenerateTypeRegistryAttribute : Attribute
 internal sealed class TypeRegistryManifestAttribute : Attribute
 {
     public TypeRegistryManifestAttribute(Type ownerType, string propertyName)
+        : this(ownerType, propertyName, ownerType)
+    {
+    }
+
+    public TypeRegistryManifestAttribute(Type ownerType, string propertyName, Type baseType)
     {
         this.ownerType = ownerType;
         this.propertyName = propertyName;
+        this.baseType = baseType;
     }
 
     public Type ownerType { get; }
     public string propertyName { get; }
+    public Type baseType { get; }
 }
 ```
 
@@ -136,12 +147,13 @@ internal sealed class TypeRegistryManifestAttribute : Attribute
 ```csharp
 [assembly: TypeRegistryManifest(
     typeof(CollectionHandlerBase),
-    nameof(CollectionHandlerBase.registry))]
+    nameof(CollectionHandlerBase.registry),
+    typeof(CollectionHandlerBase))]
 ```
 
 참조 어셈블리의 생성기는 `IAssemblySymbol.GetAttributes()`를 통해 manifest만 읽고 owner 타입의 프로퍼티 심볼을 복원한다. 따라서 참조 어셈블리의 전체 namespace/type 트리를 재귀 탐색할 필요가 없다.
 
-manifest에는 owner와 프로퍼티 이름만 기록한다. 실제 프로퍼티 타입과 접근성은 복원한 `IPropertySymbol`에서 다시 검증하여 오래되었거나 잘못 작성된 manifest를 안전하게 거부한다.
+manifest에는 owner, 프로퍼티 이름, base type을 기록한다. 실제 프로퍼티 타입과 접근성은 복원한 `IPropertySymbol`에서 다시 검증하여 오래되었거나 잘못 작성된 manifest를 안전하게 거부한다.
 
 ## 5. 생성기 프로젝트 구성
 
@@ -349,13 +361,13 @@ RuniOS.AttributedTypeRegistry.Registration.<hash>.g.cs
 프로퍼티 타입의 `OriginalDefinition`이 다음 metadata type과 같은지 확인한다.
 
 ```text
-RuniOS.Reflection.AttributedTypeRegistry`2
+RuniOS.Reflection.AttributedTypeRegistry`1
 ```
 
 그리고 다음을 검증한다.
 
-- `TBase`가 유효한 타입 인자다.
 - `TAttribute`가 `TypeRegistrationAttribute`와 같거나 그 파생 타입이다.
+- registry definition에 저장된 `baseType`가 유효한 타입이다.
 - 레지스트리 타입 자체가 `TypeRegistry`를 상속한다.
 
 ### 8.2 후보 수집
@@ -371,9 +383,9 @@ RuniOS.Reflection.AttributedTypeRegistry`2
 
 ### 8.3 레지스트리 매칭
 
-후보 구현 타입과 각 `AttributedTypeRegistry<TBase, TAttribute>`에 대해 다음을 모두 만족하면 매칭한다.
+후보 구현 타입과 각 `AttributedTypeRegistry<TAttribute>`에 대해 다음을 모두 만족하면 매칭한다.
 
-1. 구현 타입이 `TBase`에 할당 가능하다.
+1. 구현 타입이 registry definition의 `baseType`에 할당 가능하다.
 2. 적용된 attribute type이 `TAttribute`와 같거나 그 파생 타입이다.
 3. 구현 타입과 attribute 생성에 필요한 모든 심볼이 등록 코드를 생성하는 어셈블리에서 접근 가능하다.
 
@@ -513,9 +525,7 @@ global::CollectionHandlerBase.registry.Unregister(typeof(global::CsvCollectionHa
 public abstract partial class CollectionHandlerBase
 {
     [GenerateTypeRegistry]
-    public static partial AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> registry { get; }
+    public static partial AttributedTypeRegistry<CustomCollectionHandlerAttribute> registry { get; }
 }
 ```
 
@@ -524,19 +534,17 @@ public abstract partial class CollectionHandlerBase
 ```csharp
 public abstract partial class CollectionHandlerBase
 {
-    private static readonly AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> __typeRegistry_registry_A1B2C3D4 = new();
+    private static readonly AttributedTypeRegistry<CustomCollectionHandlerAttribute> __typeRegistry_registry_A1B2C3D4 =
+        new(typeof(CollectionHandlerBase));
 
-    public static partial AttributedTypeRegistry<
-        CollectionHandlerBase,
-        CustomCollectionHandlerAttribute> registry
+    public static partial AttributedTypeRegistry<CustomCollectionHandlerAttribute> registry
         => __typeRegistry_registry_A1B2C3D4;
 }
 
 [assembly: TypeRegistryManifest(
     typeof(CollectionHandlerBase),
-    nameof(CollectionHandlerBase.registry))]
+    nameof(CollectionHandlerBase.registry),
+    typeof(CollectionHandlerBase))]
 ```
 
 ### 10.2 구현 어셈블리
@@ -646,7 +654,7 @@ private static void UnregisterTypes()
 - enum의 이름 있는 값과 flags 조합 값이 생성된다.
 - 빈 배열, 값이 있는 배열, null 배열을 구분한다.
 - 문자열 escape, 문자, 숫자 suffix, `null`을 올바르게 생성한다.
-- `TBase`에 할당할 수 없는 후보는 해당 registry와 매칭되지 않는다.
+- `baseType`에 할당할 수 없는 후보는 해당 registry와 매칭되지 않는다.
 - `TAttribute`와 무관한 attribute는 포함하지 않는다.
 - 파생 attribute가 `TAttribute` 계약에 맞으면 구체 파생 attribute 생성식을 유지한다.
 - 등록은 레지스트리당 `DirectRegisterRange` 한 번으로 묶인다.

@@ -46,7 +46,7 @@
     <value>Registry cannot be initialized</value>
   </data>
   <data name="ROS0007_Message" xml:space="preserve">
-    <value>Registry type '{0}' has no accessible parameterless constructor</value>
+    <value>Registry type '{0}' has no accessible constructor required by its source generator</value>
   </data>
   <data name="ROS0008_Title" xml:space="preserve">
     <value>Generated registry member conflicts with an existing member</value>
