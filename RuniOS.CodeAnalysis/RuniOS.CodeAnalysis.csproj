@@ -14,6 +14,7 @@
         </EmbeddedResource>
         <EmbeddedResource Update="Diagnostics/TypeRegistryDiagnostics.ko.resx">
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.ko.resources</LogicalName>
+            <DependentUpon>TypeRegistryDiagnostics.cs</DependentUpon>
         </EmbeddedResource>
     </ItemGroup>
 

@@ -120,4 +120,28 @@
   <data name="ROS0019_Message" xml:space="preserve">
     <value>TypeRegistrationAttribute '{0}' on '{1}' has no matching [GenerateTypeRegistry] AttributedTypeRegistry&lt;TBase, TAttribute&gt; in its base type hierarchy</value>
   </data>
+  <data name="ROS0020_Title" xml:space="preserve">
+    <value>Open generic registration requires child matching</value>
+  </data>
+  <data name="ROS0020_Message" xml:space="preserve">
+    <value>TypeRegistrationAttribute '{0}' on '{1}' targets open generic type '{2}' with useForChildren=false, so closed constructed target types cannot be resolved by AttributedTypeRegistry.TryResolve</value>
+  </data>
+  <data name="ROS0021_Title" xml:space="preserve">
+    <value>Generic registration parameter count mismatch</value>
+  </data>
+  <data name="ROS0021_Message" xml:space="preserve">
+    <value>TypeRegistrationAttribute '{0}' on '{1}' targets type '{2}' with {3} generic arguments, but the implementation has {4} generic parameters; AttributedTypeRegistry.TryResolve cannot close the implementation</value>
+  </data>
+  <data name="ROS0022_Title" xml:space="preserve">
+    <value>Generic registration constraints are incompatible</value>
+  </data>
+  <data name="ROS0022_Message" xml:space="preserve">
+    <value>TypeRegistrationAttribute '{0}' on '{1}' targets generic type '{2}', but its generic constraints differ from those of the implementation; verify that the implementation accepts exactly the target type arguments expected by AttributedTypeRegistry.TryResolve</value>
+  </data>
+  <data name="ROS0023_Title" xml:space="preserve">
+    <value>Generic implementation can be considered</value>
+  </data>
+  <data name="ROS0023_Message" xml:space="preserve">
+    <value>TypeRegistrationAttribute '{0}' on non-generic type '{1}' targets open generic type '{2}'. The registration is valid as generated; consider a separate generic implementation when behavior should vary by type arguments</value>
+  </data>
 </root>

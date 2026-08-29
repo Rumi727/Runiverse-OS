@@ -272,6 +272,62 @@ static class TypeRegistryDiagnostics
     );
 
     /// <summary>
+    /// Describes the warning reported when an open generic target does not enable child-type matching.<br/>
+    /// 열린 제네릭 대상이 하위 타입 매칭을 활성화하지 않은 경우 보고하는 경고를 설명합니다.
+    /// </summary>
+    public static readonly DiagnosticDescriptor openGenericRegistrationRequiresChildren = new
+    (
+        "ROS0020",
+        Text("ROS0020_Title"),
+        Text("ROS0020_Message"),
+        category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
+    /// <summary>
+    /// Describes the warning reported when generic target and implementation parameter counts differ.<br/>
+    /// 제네릭 대상과 구현 타입의 매개 변수 개수가 다른 경우 보고하는 경고를 설명합니다.
+    /// </summary>
+    public static readonly DiagnosticDescriptor genericRegistrationParameterCountMismatch = new
+    (
+        "ROS0021",
+        Text("ROS0021_Title"),
+        Text("ROS0021_Message"),
+        category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
+    /// <summary>
+    /// Describes the warning reported when target and implementation generic constraints differ.<br/>
+    /// 대상과 구현 타입의 제네릭 제약 조건이 다른 경우 보고하는 경고를 설명합니다.
+    /// </summary>
+    public static readonly DiagnosticDescriptor genericRegistrationConstraintMismatch = new
+    (
+        "ROS0022",
+        Text("ROS0022_Title"),
+        Text("ROS0022_Message"),
+        category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
+    /// <summary>
+    /// Describes the suggestion reported when a non-generic implementation handles an open generic target.<br/>
+    /// 제네릭이 아닌 구현 타입이 열린 제네릭 대상을 처리할 때 보고하는 제안을 설명합니다.
+    /// </summary>
+    public static readonly DiagnosticDescriptor genericRegistrationSuggestion = new
+    (
+        "ROS0023",
+        Text("ROS0023_Title"),
+        Text("ROS0023_Message"),
+        category,
+        DiagnosticSeverity.Info,
+        isEnabledByDefault: true
+    );
+
+    /// <summary>
     /// Creates a diagnostic using the specified descriptor, location, and message arguments.<br/>
     /// 지정된 설명자, 위치, 메시지 인수로 진단을 생성합니다.
     /// </summary>

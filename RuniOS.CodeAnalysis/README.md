@@ -22,6 +22,7 @@ RuniOS.CodeAnalysis는 런타임 라이브러리가 아닙니다. Unity가 C#을
 2. DiagnosticAnalyzer 기반 analyzer
    - TypeRegistrationAttribute 계열 특성이 기본 타입 계층의 generated registry에 연결되는지 검사합니다.
    - 연결할 registry가 없으면 ROS0019 warning을 보고합니다.
+   - generic target 등록이 AttributedTypeRegistry.TryResolve에서 매칭·구성될 수 없거나 target과 implementation의 제약 조건이 일치하지 않는 경우 ROS0020~ROS0022 warning을 보고하고, non-generic 구현에는 ROS0023 suggestion을 보고합니다.
 
 3. DiagnosticSuppressor 기반 analyzer suppressor
    - Unity analyzer가 AssetRef<TAsset> 필드에 보고하는 UAC1001을 의도적으로 억제합니다.
@@ -456,11 +457,11 @@ Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/RuniOS.Analyzers.dll.meta
 | Generators/TypeRegistry/RegistryOrigin.cs | current compilation인지 referenced manifest인지 구분 |
 | Generators/SourceWriter.cs | indentation을 관리하는 간단한 소스 writer |
 | Generators/GeneratorUtils.cs | fully-qualified 이름, escape, hash, literal, partial type header 생성 |
-| Diagnostics/TypeRegistryDiagnostics0002~0018.cs | TypeRegistry generator/analyzer 진단 descriptor |
+| Diagnostics/TypeRegistryDiagnostics0002~0019.cs | TypeRegistry generator/analyzer 진단 descriptor |
 | Diagnostics/SuppressorDiagnostics0001.cs | suppressor descriptor ROS0001 |
 | Analyzers/AssetRefSerializationSuppressor.cs | Unity UAC1001 억제 구현 |
 | Analyzers/TypeRegistryManifestAttributeAnalyzer.cs | 직접 사용된 TypeRegistryManifestAttribute에 대한 ROS0018 경고 |
-| Analyzers/TypeRegistrationAttributeAnalyzer.cs | 일치하는 generated registry가 없는 TypeRegistrationAttribute에 대한 ROS0019 경고 |
+| Analyzers/TypeRegistrationAttributeAnalyzer.cs | generated registry 부재 및 TryResolve에서 확인할 수 없는 generic TypeRegistrationAttribute에 대한 ROS0019~ROS0022 진단과 non-generic 구현 제안 ROS0023 |
 | RuniOS.CodeAnalysis.csproj | Roslyn package, target framework, Unity 복사 target |
 
 현재 RuniOS.CodeAnalysis 저장소에는 이 generator 전용 테스트 프로젝트나 테스트 소스가 보이지 않습니다. 따라서 아래 설명은 소스 독해 기준이며, 모든 generated source/lifecycle 동작이 Unity에서 실행됐다는 뜻은 아닙니다.
@@ -3366,7 +3367,7 @@ AssetRefSerializationSuppressor는 source를 추가하지 않습니다. 또한 �
 
 ## 18. Diagnostics: 실패를 표현하는 방식
 
-Diagnostics/TypeRegistryDiagnostics0002~0018.cs는 type registry generator/analyzer의 ROS0002~ROS0019 진단 descriptor를 모아 둔 파일입니다. category는 RuniOS.TypeRegistry입니다.
+Diagnostics/TypeRegistryDiagnostics0002~0019.cs는 type registry generator/analyzer의 ROS0002~ROS0023 진단 descriptor를 모아 둔 파일입니다. category는 RuniOS.TypeRegistry입니다.
 
 | ID | severity | 의미 |
 | --- | --- | --- |
@@ -3389,6 +3390,10 @@ Diagnostics/TypeRegistryDiagnostics0002~0018.cs는 type registry generator/analy
 | ROS0017 | error | C# 13 미만에서 partial property 기반 registry를 사용할 수 없음 |
 | ROS0018 | warning | TypeRegistryManifestAttribute는 소스 생성기 전용이므로 직접 사용할 수 없음 |
 | ROS0019 | warning | TypeRegistrationAttribute에 일치하는 generated registry가 없음 |
+| ROS0020 | warning | 열린 generic target에서 useForChildren=false라 닫힌 target을 확인할 수 없음 |
+| ROS0021 | warning | target이 제공하는 generic 인자와 generic implementation의 매개 변수 개수가 다름 |
+| ROS0022 | warning | target과 generic implementation의 제네릭 제약 조건이 일치하지 않음 |
+| ROS0023 | info | non-generic implementation이 유효하게 생성되지만 별도 generic implementation을 고려할 수 있음 |
 
 ### 18.1 error와 warning의 의미
 
@@ -3524,10 +3529,10 @@ Roslyn incremental pipeline은 syntax provider 결과와 compilation 결합 결�
 | TypeRegistrySymbolHelpers | Roslyn symbols | inheritance/accessibility/partial/attribute 검사 |
 | AttributeLiteralEmitter | AttributeData | new Attribute(...) { ... } expression |
 | SourceWriter | 문자열 line | indentation이 적용된 source text |
-| TypeRegistryDiagnostics | diagnostic metadata | ROS0002~ROS0019 descriptor |
+| TypeRegistryDiagnostics | diagnostic metadata | ROS0002~ROS0023 descriptor |
 | AssetRefSerializationSuppressor | compiler/analyzer diagnostic | UAC1001에 대한 조건부 suppression |
 | TypeRegistryManifestAttributeAnalyzer | C# attribute syntax | 직접 사용된 TypeRegistryManifestAttribute에 대한 ROS0018 |
-| TypeRegistrationAttributeAnalyzer | C# type symbols | 일치하는 generated registry가 없는 TypeRegistrationAttribute에 대한 ROS0019 |
+| TypeRegistrationAttributeAnalyzer | C# type symbols | generated registry 부재 ROS0019, TryResolve generic 실패 ROS0020~ROS0022, non-generic 구현 제안 ROS0023 |
 
 여기서 중요한 ownership은 다음과 같습니다.
 
