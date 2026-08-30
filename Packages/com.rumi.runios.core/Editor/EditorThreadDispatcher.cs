@@ -1,51 +1,35 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Booting;
-using RuniOS.LowLevel;
+using RuniOS.Threading;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 
-namespace RuniOS.Threading
+namespace RuniOS.Editor
 {
-    public static partial class ThreadDispatcher
+    public static partial class EditorThreadDispatcher
     {
         public const int allottedTime = 3;
 
         static readonly Stopwatch stopwatch = new Stopwatch();
         static readonly ConcurrentQueue<Action> scheduledTasks = new ConcurrentQueue<Action>();
 
-        [Awaken]
-        static void Awaken()
-        {
-            RuniPlayerLoop.onUpdate += Update;
-            Kernel.quitting += BeginShutdown;
-        }
-
 #if UNITY_EDITOR
-        [Unity.Scripting.LifecycleManagement.OnCodeLoaded]
+        [global::Unity.Scripting.LifecycleManagement.OnCodeLoaded]
         static void OnCodeLoaded()
         {
-            UnityEditor.EditorApplication.update += EditorUpdate;
-            UnityEditor.EditorApplication.quitting += BeginShutdown;
+            EditorApplication.update += Update;
+            EditorApplication.quitting += ForceScheduledTasksExecute;
         }
 
-        [Unity.Scripting.LifecycleManagement.OnCodeUnloading]
+        [global::Unity.Scripting.LifecycleManagement.OnCodeUnloading]
         static void OnCodeUnloading()
         {
-            UnityEditor.EditorApplication.update -= EditorUpdate;
-            UnityEditor.EditorApplication.quitting -= BeginShutdown;
+            EditorApplication.update -= Update;
+            EditorApplication.quitting -= ForceScheduledTasksExecute;
 
-            BeginShutdown();
-        }
-
-        static void EditorUpdate()
-        {
-            if (!Kernel.isPlaying || UnityEditor.EditorApplication.isPaused)
-                Update();
+            ForceScheduledTasksExecute();
         }
 #endif
-
-        static void BeginShutdown() => ForceScheduledTasksExecute();
 
         static void Update()
         {

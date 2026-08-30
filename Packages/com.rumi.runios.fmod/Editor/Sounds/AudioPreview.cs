@@ -65,7 +65,7 @@ namespace RuniOS.Editor.Sounds
         ~AudioPreview()
         {
             Debug.RuntimeLogWarning($"{nameof(AudioPreview)} was destroyed without calling the Dispose method.\nNative garbage is currently being cleaned up on the main thread, but this cannot be guaranteed to be completely resolved.\nPlease call the Dispose method before discarding {nameof(AudioPreview)}.");
-            ThreadDispatcher.ExecuteForget(GarbageCleanup);
+            EditorThreadDispatcher.ExecuteForget(GarbageCleanup);
         }
 
         static async UniTaskVoid LoadAudio(PhysicalPath path)
