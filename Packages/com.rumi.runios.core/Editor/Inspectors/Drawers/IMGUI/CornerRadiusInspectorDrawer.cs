@@ -1,10 +1,10 @@
 ﻿#nullable enable
-using RuniOS.AnimatedValues;
 using RuniOS.Editor.IMGUI;
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
 using RuniOS.Undos;
+using UnityEditor.AnimatedValues;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
