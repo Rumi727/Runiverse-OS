@@ -184,10 +184,10 @@ namespace RuniOS.Editor.Sounds
 
             void OnStop(SoundChannel channel)
             {
+                channel.onStop -= OnStop;
+
                 ThreadDispatcher.Execute(() =>
                 {
-                    channel.onStop -= OnStop;
-
                     if (channel == this.channel)
                         this.channel = null;
                 });
