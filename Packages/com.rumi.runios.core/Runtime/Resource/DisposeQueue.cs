@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.Booting;
 using RuniOS.LowLevel;
 using RuniOS.Threading;
 using System.Collections.Concurrent;
