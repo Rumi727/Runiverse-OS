@@ -26,6 +26,9 @@ namespace RuniOS.Reflection
         // 생성된 등록 코드가 assembly load 시 public `Register(typeof(구현 타입))`을 호출하므로 이름과 `Type` 매개변수 계약을 유지합니다.
         public abstract void Register(Type type);
 
+        public abstract void RegisterRange(IEnumerable<Type> types);
+        public abstract void RegisterRange(params ReadOnlySpan<Type> types);
+
         /// <summary>
         /// Removes registrations associated with the specified implementation type.<br/>
         /// 지정된 구현 타입과 연결된 등록을 제거합니다.

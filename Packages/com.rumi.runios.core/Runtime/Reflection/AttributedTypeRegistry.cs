@@ -80,7 +80,7 @@ namespace RuniOS.Reflection
         public override void Register(Type implementationType)
         {
             if ((baseType.IsAbstract && baseType == implementationType) || !baseType.IsAssignableFrom(implementationType))
-                return;
+                throw new ArgumentException($"{implementationType} is not assignable from {baseType}");
 
             TAttribute[] attributes = implementationType.GetCustomAttributes<TAttribute>().ToArray();
             lock (registrationLock)
@@ -92,6 +92,54 @@ namespace RuniOS.Reflection
 
                 entriesSnapshot = default;
                 resolutionCache = [];
+            }
+
+            lock (onChangedLock)
+                _onChanged?.Invoke();
+        }
+
+        public override void RegisterRange(IEnumerable<Type> types)
+        {
+            foreach (var item in types)
+            {
+                if ((baseType.IsAbstract && baseType == item) || !baseType.IsAssignableFrom(item))
+                    throw new ArgumentException($"{item} is not assignable from {baseType}");
+
+                TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
+                lock (registrationLock)
+                {
+                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
+                        registrationsByImplementationType[item] = list = [];
+
+                    list.AddRange(attributes);
+
+                    entriesSnapshot = default;
+                    resolutionCache = [];
+                }
+            }
+
+            lock (onChangedLock)
+                _onChanged?.Invoke();
+        }
+
+        public override void RegisterRange(params ReadOnlySpan<Type> types)
+        {
+            foreach (var item in types)
+            {
+                if ((baseType.IsAbstract && baseType == item) || !baseType.IsAssignableFrom(item))
+                    return;
+
+                TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
+                lock (registrationLock)
+                {
+                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
+                        registrationsByImplementationType[item] = list = [];
+
+                    list.AddRange(attributes);
+
+                    entriesSnapshot = default;
+                    resolutionCache = [];
+                }
             }
 
             lock (onChangedLock)
