@@ -39,26 +39,26 @@ namespace RuniOS.Reflection
         volatile ConcurrentDictionary<Type, TypeResolution?> resolutionCache = new();
         readonly object registrationLock = new();
 
-        public ImmutableArray<RegistrationEntry<TAttribute>> registrationEntries
+        public ImmutableArray<RegistrationEntry<TAttribute>> registeredEntries
         {
             get
             {
                 lock (registrationLock)
                 {
-                    if (registrationSnapshot.IsDefault)
+                    if (entriesSnapshot.IsDefault)
                     {
-                        registrationSnapshot =
+                        entriesSnapshot =
                         [
                             ..registrationsByImplementationType.SelectMany(pair => pair.Value.Select(attribute => new RegistrationEntry<TAttribute>(pair.Key, attribute)))
                                 .OrderByTypes(x => x.attribute.targetType, x => x.attribute.priority)
                         ];
                     }
 
-                    return registrationSnapshot;
+                    return entriesSnapshot;
                 }
             }
         }
-        ImmutableArray<RegistrationEntry<TAttribute>> registrationSnapshot;
+        ImmutableArray<RegistrationEntry<TAttribute>> entriesSnapshot;
 
 
         public override event Action? onChanged
@@ -90,7 +90,7 @@ namespace RuniOS.Reflection
 
                 list.AddRange(attributes);
 
-                registrationSnapshot = default;
+                entriesSnapshot = default;
                 resolutionCache = [];
             }
 
@@ -125,7 +125,7 @@ namespace RuniOS.Reflection
                     list.Add(entry.attribute);
                 }
 
-                registrationSnapshot = default;
+                entriesSnapshot = default;
                 resolutionCache = [];
             }
 
@@ -140,7 +140,7 @@ namespace RuniOS.Reflection
                 if (!registrationsByImplementationType.Remove(implementationType))
                     return;
 
-                registrationSnapshot = default;
+                entriesSnapshot = default;
                 resolutionCache = [];
             }
 
@@ -177,7 +177,7 @@ namespace RuniOS.Reflection
             }
 
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach (RegistrationEntry<TAttribute> registration in registrationEntries)
+            foreach (RegistrationEntry<TAttribute> registration in registeredEntries)
             {
                 // 조건부 엑세스도 사용 가능하지만 가독성을 해칩니다.
                 if (predicate != null && !predicate.Invoke(registration))
