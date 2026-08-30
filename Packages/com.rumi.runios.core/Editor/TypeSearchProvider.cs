@@ -59,7 +59,7 @@ namespace RuniOS.Editor
 
         IEnumerable<Type> GetSearchData()
         {
-            foreach (var t in ReflectionUtility.types.Where(x => !x.IsSpecialName && !x.IsCompilerGenerated() && x.IsAssignableToAny(baseType)))
+            foreach (var t in TypeCache.GetTypesDerivedFrom(baseType).Where(x => !x.IsSpecialName && !x.IsCompilerGenerated()))
             {
                 assemblies.Add(t.Assembly);
                 yield return t;
