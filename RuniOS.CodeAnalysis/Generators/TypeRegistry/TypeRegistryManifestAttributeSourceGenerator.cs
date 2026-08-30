@@ -20,7 +20,7 @@ public sealed class TypeRegistryManifestAttributeSourceGenerator : IIncrementalG
             /// Identifies a registry property that was generated in another assembly.<br/>
             /// 다른 어셈블리에서 생성된 레지스트리 속성을 식별합니다.
             /// </summary>
-            // TypeRegistrySourceGenerator가 Assembly/AllowMultiple과 positional `(Type, string, Type)` 계약으로 매니페스트를 읽습니다.
+            // TypeRegistrySourceGenerator가 Assembly/AllowMultiple과 positional `(Type, string, params Type[])` 계약으로 매니페스트를 읽습니다.
             [global::System.Runtime.CompilerServices.CompilerGenerated]
             [global::Microsoft.CodeAnalysis.Embedded]
             [global::System.AttributeUsage(global::System.AttributeTargets.Assembly, AllowMultiple = true)]
@@ -29,16 +29,22 @@ public sealed class TypeRegistryManifestAttributeSourceGenerator : IIncrementalG
             {
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public TypeRegistryManifestAttribute(global::System.Type ownerType, string propertyName)
-                    : this(ownerType, propertyName, ownerType)
+                    : this(ownerType, propertyName, new global::System.Type[] { })
                 {
                 }
 
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public TypeRegistryManifestAttribute(global::System.Type ownerType, string propertyName, global::System.Type baseType)
+                    : this(ownerType, propertyName, new global::System.Type[] { baseType })
+                {
+                }
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public TypeRegistryManifestAttribute(global::System.Type ownerType, string propertyName, params global::System.Type[] baseTypes)
                 {
                     this.ownerType = ownerType;
                     this.propertyName = propertyName;
-                    this.baseType = baseType;
+                    this.baseTypes = baseTypes;
                 }
 
                 /// <summary>
@@ -56,11 +62,11 @@ public sealed class TypeRegistryManifestAttributeSourceGenerator : IIncrementalG
                 public string propertyName { get; }
 
                 /// <summary>
-                /// Gets the type that registered implementations must match or derive from.<br/>
-                /// 등록 구현 타입이 일치하거나 상속해야 하는 타입을 가져옵니다.
+                /// Gets the types that registered implementations must match or derive from.<br/>
+                /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들을 가져옵니다.
                 /// </summary>
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
-                public global::System.Type baseType { get; }
+                public global::System.Type[] baseTypes { get; }
             }
         }
         """;

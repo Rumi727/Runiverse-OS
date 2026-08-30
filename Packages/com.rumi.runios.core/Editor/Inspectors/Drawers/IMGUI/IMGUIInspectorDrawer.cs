@@ -33,7 +33,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             public void Dispose() => drawer.nestingLevel = oldNestingLevel;
         }
 
-        [GenerateTypeRegistry(typeof(InspectorDrawer))]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<InspectorDrawerAttribute> registry { get; }
 
         static readonly object?[] args = new object?[3];

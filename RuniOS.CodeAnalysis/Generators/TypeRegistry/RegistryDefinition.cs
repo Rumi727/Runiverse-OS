@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Immutable;
 
 namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 
@@ -19,9 +20,9 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 /// The concrete registry type used by <paramref name="property"/>.<br/>
 /// <paramref name="property"/>가 사용하는 구체적인 레지스트리 타입입니다.
 /// </param>
-/// <param name="baseType">
-/// The type that registered implementations must match or derive from.<br/>
-/// 등록 구현 타입이 일치하거나 상속해야 하는 타입입니다.
+/// <param name="baseTypes">
+/// The types that registered implementations must match or derive from.<br/>
+/// 등록 구현 타입이 일치하거나 상속해야 하는 타입들입니다.
 /// </param>
 /// <param name="origin">
 /// The compilation source from which the definition was discovered.<br/>
@@ -31,7 +32,7 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 /// The stable identifier used to derive generated names for this registry.<br/>
 /// 이 레지스트리의 생성 이름을 도출하는 데 사용하는 안정 식별자입니다.
 /// </param>
-public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbol ownerType, INamedTypeSymbol registryType, ITypeSymbol baseType, RegistryOrigin origin, string stableId) : IEquatable<RegistryDefinition>
+public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbol ownerType, INamedTypeSymbol registryType, ImmutableArray<ITypeSymbol> baseTypes, RegistryOrigin origin, string stableId) : IEquatable<RegistryDefinition>
 {
     /// <summary>
     /// Gets the registry property represented by this definition.<br/>
@@ -52,10 +53,10 @@ public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbo
     public INamedTypeSymbol registryType { get; } = registryType;
 
     /// <summary>
-    /// Gets the type that registered implementations must match or derive from.<br/>
-    /// 등록 구현 타입이 일치하거나 상속해야 하는 타입을 가져옵니다.
+    /// Gets the types that registered implementations must match or derive from.<br/>
+    /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들을 가져옵니다.
     /// </summary>
-    public ITypeSymbol baseType { get; } = baseType;
+    public ImmutableArray<ITypeSymbol> baseTypes { get; } = baseTypes;
 
     /// <summary>
     /// Gets the source from which this registry definition was discovered.<br/>

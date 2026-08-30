@@ -19,7 +19,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
 {
     const string typeRegistrationAttributeMetadataName = "RuniOS.Reflection.TypeRegistrationAttribute";
     const string attributedTypeRegistryMetadataName = "RuniOS.Reflection.AttributedTypeRegistry`1";
-    const string generateTypeRegistryAttributeMetadataName = "RuniOS.Reflection.GenerateTypeRegistryAttribute";
+    const string generateAttributedTypeRegistryAttributeMetadataName = "RuniOS.Reflection.GenerateAttributedTypeRegistryAttribute";
     const string typeRegistryManifestAttributeMetadataName = "RuniOS.Reflection.TypeRegistryManifestAttribute";
 
     readonly record struct ReferencedRegistryProperty(IPropertySymbol property, ITypeSymbol baseType);
@@ -57,7 +57,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
             if (registrationAttribute == null || attributedRegistry == null)
                 return;
 
-            ImmutableArray<ReferencedRegistryProperty> referencedRegistryProperties = FindReferencedRegistryProperties(context.Compilation);
+            ImmutableArray<ReferencedRegistryProperty> referencedRegistryProperties = FindReferencedRegistryProperties(context.Compilation, attributedRegistry);
             context.RegisterSymbolAction
             (
                 symbolContext => AnalyzeType
@@ -414,10 +414,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
             HasUnsatisfiedGenericConstraints(implementationParameters, targetParameters);
     }
 
-    static bool HasReferenceTypeGuarantee(ITypeParameterSymbol parameter)
-    {
-        return parameter.HasReferenceTypeConstraint || parameter.ConstraintTypes.Any(x => x.TypeKind == TypeKind.Class);
-    }
+    static bool HasReferenceTypeGuarantee(ITypeParameterSymbol parameter) => parameter.HasReferenceTypeConstraint || parameter.ConstraintTypes.Any(x => x.TypeKind == TypeKind.Class);
 
     static bool HasValueTypeGuarantee(ITypeParameterSymbol parameter) => parameter.HasValueTypeConstraint || parameter.HasUnmanagedTypeConstraint;
 
@@ -580,7 +577,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
 
         return property.GetAttributes().Any(attribute =>
             attribute.AttributeClass != null &&
-            GeneratorUtils.GetMetadataName(attribute.AttributeClass) == generateTypeRegistryAttributeMetadataName);
+            GeneratorUtils.GetMetadataName(attribute.AttributeClass) == generateAttributedTypeRegistryAttributeMetadataName);
     }
 
     static bool IsRegistryPropertyShape(IPropertySymbol property, INamedTypeSymbol attributedRegistry)
@@ -618,7 +615,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
     {
         foreach (AttributeData attribute in property.GetAttributes())
         {
-            if (attribute.AttributeClass == null || GeneratorUtils.GetMetadataName(attribute.AttributeClass) != generateTypeRegistryAttributeMetadataName)
+            if (attribute.AttributeClass == null || GeneratorUtils.GetMetadataName(attribute.AttributeClass) != generateAttributedTypeRegistryAttributeMetadataName)
                 continue;
 
             if (attribute.ConstructorArguments.Length != 0 && attribute.ConstructorArguments[0].Value is ITypeSymbol baseType)
@@ -630,7 +627,7 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
         return null;
     }
 
-    static ImmutableArray<ReferencedRegistryProperty> FindReferencedRegistryProperties(Compilation compilation)
+    static ImmutableArray<ReferencedRegistryProperty> FindReferencedRegistryProperties(Compilation compilation, INamedTypeSymbol attributedRegistry)
     {
         ImmutableArray<ReferencedRegistryProperty>.Builder properties = ImmutableArray.CreateBuilder<ReferencedRegistryProperty>();
         HashSet<IPropertySymbol> seenProperties = new(SymbolEqualityComparer.Default);
@@ -647,13 +644,30 @@ public sealed class TypeRegistrationAttributeAnalyzer : DiagnosticAnalyzer
                     continue;
 
                 IPropertySymbol? property = ownerType.GetMembers(propertyName).OfType<IPropertySymbol>().FirstOrDefault();
-                ITypeSymbol? baseType = manifest.ConstructorArguments.Length > 2 ? manifest.ConstructorArguments[2].Value as ITypeSymbol : ownerType;
-                if (property != null && baseType != null && seenProperties.Add(property))
+                if (property?.Type is not INamedTypeSymbol registryType || !SymbolEqualityComparer.Default.Equals(registryType.OriginalDefinition, attributedRegistry))
+                    continue;
+
+                ITypeSymbol? baseType = GetManifestBaseType(manifest, ownerType);
+                if (baseType != null && seenProperties.Add(property))
                     properties.Add(new ReferencedRegistryProperty(property, baseType));
             }
         }
 
         return properties.ToImmutable();
+    }
+
+    static ITypeSymbol? GetManifestBaseType(AttributeData manifest, INamedTypeSymbol ownerType)
+    {
+        if (manifest.ConstructorArguments.Length <= 2)
+            return ownerType;
+
+        TypedConstant argument = manifest.ConstructorArguments[2];
+        if (argument.Value is ITypeSymbol baseType)
+            return baseType;
+        if (argument.Kind == TypedConstantKind.Array && argument.Values.Length == 1)
+            return argument.Values[0].Value as ITypeSymbol;
+
+        return null;
     }
 
     static IEnumerable<IAssemblySymbol> EnumerateReferencedAssemblies(Compilation compilation)

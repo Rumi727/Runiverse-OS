@@ -8,7 +8,7 @@ namespace RuniOS.Collections.Handlers
 {
     public abstract partial class DictionaryHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IDictionary
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<CollectionHandlerAttribute> dictionaryRegistry { get; }
 
         public static DictionaryHandlerBase FindDictionaryHandler(IEnumerable targetCollection)

@@ -5,7 +5,7 @@ namespace RuniOS.Collections.Handlers.Entrys
 {
     public abstract partial class EntryHandler(object targetEntry)
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<EntryHandlerAttribute> registry { get; }
 
         public static KeyValuePair<object?, object?> FindEntry(object? targetEntry)

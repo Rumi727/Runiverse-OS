@@ -25,6 +25,74 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     protected override string generatorName => "AttributedTypeRegistry";
 
     /// <summary>
+    /// Gets the metadata name of the attributed registry marker attribute.<br/>
+    /// 특성 기반 레지스트리 표식 특성의 메타데이터 이름을 가져옵니다.
+    /// </summary>
+    protected override string registryAttributeMetadataName => "RuniOS.Reflection.GenerateAttributedTypeRegistryAttribute";
+
+    /// <summary>
+    /// Reads the single base type accepted by <c>GenerateAttributedTypeRegistryAttribute</c>, defaulting to the declaring type when omitted.<br/>
+    /// <c>GenerateAttributedTypeRegistryAttribute</c>가 받는 단일 기본 타입을 읽으며, 생략하면 선언 타입을 기본값으로 사용합니다.
+    /// </summary>
+    /// <param name="constructorArguments">
+    /// The marker or manifest constructor arguments.<br/>
+    /// 표식 또는 매니페스트 생성자 인자입니다.
+    /// </param>
+    /// <param name="ownerType">
+    /// The type that declares the registry property.<br/>
+    /// 레지스트리 속성을 선언한 타입입니다.
+    /// </param>
+    /// <param name="isManifest">
+    /// Indicates whether the arguments belong to a registry manifest.<br/>
+    /// 인자가 레지스트리 매니페스트에 속하는지 나타냅니다.
+    /// </param>
+    /// <param name="baseTypes">
+    /// Receives the one decoded base type.<br/>
+    /// 디코드된 하나의 기본 타입을 받습니다.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when exactly one base type is available; otherwise, <see langword="false"/>.<br/>
+    /// 정확히 하나의 기본 타입을 사용할 수 있으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+    /// </returns>
+    protected override bool TryGetRegistryBaseTypes
+    (
+        ImmutableArray<TypedConstant> constructorArguments,
+        INamedTypeSymbol ownerType,
+        bool isManifest,
+        out ImmutableArray<ITypeSymbol> baseTypes
+    )
+    {
+        int baseTypeArgumentIndex = isManifest ? 2 : 0;
+        if (constructorArguments.Length <= baseTypeArgumentIndex)
+        {
+            baseTypes = ImmutableArray.Create<ITypeSymbol>(ownerType);
+            return true;
+        }
+
+        TypedConstant argument = constructorArguments[baseTypeArgumentIndex];
+        if (argument.Kind == TypedConstantKind.Array)
+        {
+            if (argument.Values.Length != 1 || argument.Values[0].Value is not ITypeSymbol baseType)
+            {
+                baseTypes = ImmutableArray<ITypeSymbol>.Empty;
+                return false;
+            }
+
+            baseTypes = ImmutableArray.Create(baseType);
+            return true;
+        }
+
+        if (argument.Value is ITypeSymbol singleBaseType)
+        {
+            baseTypes = ImmutableArray.Create(singleBaseType);
+            return true;
+        }
+
+        baseTypes = ImmutableArray<ITypeSymbol>.Empty;
+        return false;
+    }
+
+    /// <summary>
     /// Creates the initializer that supplies the registry base type.<br/>
     /// 레지스트리 기본 타입을 전달하는 초기화 식을 만듭니다.
     /// </summary>
@@ -37,7 +105,7 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
     /// 기본 타입으로 레지스트리를 생성하는 C# 식입니다.
     /// </returns>
     protected override string CreateRegistryInitializer(RegistryDefinition registry) =>
-        $"new {GeneratorUtils.GetTypeName(registry.registryType)}(typeof({GeneratorUtils.GetTypeOfName(registry.baseType)}))";
+        $"new {GeneratorUtils.GetTypeName(registry.registryType)}(typeof({GeneratorUtils.GetTypeOfName(registry.baseTypes[0])}))";
 
     /// <summary>
     /// Determines whether the registry has an accessible constructor accepting <see cref="System.Type"/>.<br/>
@@ -206,7 +274,7 @@ public sealed class AttributedTypeRegistrySourceGenerator : TypeRegistrySourceGe
         if (matchingAttributes.Length == 0)
             return false;
 
-        if (!TypeRegistrySymbolHelpers.IsSameOrDerived(attributedCandidate.implementationType, registry.baseType))
+        if (!TypeRegistrySymbolHelpers.IsSameOrDerived(attributedCandidate.implementationType, registry.baseTypes[0]))
             return false;
         if (attributedCandidate.implementationType.IsAbstract)
         {

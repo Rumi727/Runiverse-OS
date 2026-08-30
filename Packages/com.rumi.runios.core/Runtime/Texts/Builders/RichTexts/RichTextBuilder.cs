@@ -14,7 +14,7 @@ namespace RuniOS.Texts.Builders.RichTexts
         static RichTextBuilder() => registry.onChanged += cache.Clear;
         static readonly ConcurrentDictionary<Type, RichTextBuilder> cache = new ConcurrentDictionary<Type, RichTextBuilder>();
 
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<TextRendererAttribute> registry { get; }
 
         /// <summary>

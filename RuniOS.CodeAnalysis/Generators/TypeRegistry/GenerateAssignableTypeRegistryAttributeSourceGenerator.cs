@@ -7,7 +7,7 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 /// 타입 레지스트리 생성기가 사용하는 내부 레지스트리 표식 특성 정의를 주입합니다.
 /// </summary>
 [Generator]
-public sealed class GenerateTypeRegistryAttributeSourceGenerator : IIncrementalGenerator
+public sealed class GenerateAssignableTypeRegistryAttributeSourceGenerator : IIncrementalGenerator
 {
     const string source =
         """
@@ -17,13 +17,19 @@ public sealed class GenerateTypeRegistryAttributeSourceGenerator : IIncrementalG
         namespace RuniOS.Reflection
         {
             /// <summary>
-            /// Base type for registry marker attributes.<br/>
-            /// 레지스트리 표식 특성의 기본 타입입니다.
+            /// Marks an assignable type registry property.<br/>
+            /// 할당 가능한 타입 레지스트리 속성을 표시합니다.
             /// </summary>
             [global::System.Runtime.CompilerServices.CompilerGenerated]
             [global::Microsoft.CodeAnalysis.Embedded]
-            [global::System.AttributeUsage(global::System.AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
-            abstract class GenerateTypeRegistryAttribute : global::System.Attribute { }
+            sealed class GenerateAssignableTypeRegistryAttribute : GenerateTypeRegistryAttribute
+            {
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public global::System.Type[] baseTypes { get; }
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public GenerateAssignableTypeRegistryAttribute(params global::System.Type[] baseTypes) => this.baseTypes = baseTypes;
+            }
         }
         """;
 

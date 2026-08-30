@@ -7,7 +7,7 @@ namespace RuniOS.Collections.Handlers
 {
     public abstract partial class CollectionHandlerBase(IEnumerable targetCollection) : ICollection
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<CollectionHandlerAttribute> collectionRegistry { get; }
 
         public static bool HandlerCheck<TDrawer>(Type targetType) where TDrawer : CollectionHandlerBase => typeof(TDrawer).IsAssignableFrom(collectionRegistry.Resolve(targetType));

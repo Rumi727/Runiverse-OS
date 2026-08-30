@@ -23,11 +23,10 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
 {
     /// <summary>
-    /// Gets the metadata name of the attribute that marks registry properties in the current compilation.<br/>
-    /// 현재 컴파일의 레지스트리 속성을 표시하는 특성의 메타데이터 이름을 가져옵니다.
+    /// Gets the metadata name of the concrete attribute that marks registry properties in the current compilation.<br/>
+    /// 현재 컴파일의 레지스트리 속성을 표시하는 구체적인 특성의 메타데이터 이름을 가져옵니다.
     /// </summary>
-    // 런타임 컴파일에 주입되는 GenerateTypeRegistryAttribute의 네임스페이스/타입 이름과 정확히 일치해야 합니다.
-    protected const string generateTypeRegistryAttributeMetadataName = "RuniOS.Reflection.GenerateTypeRegistryAttribute";
+    protected abstract string registryAttributeMetadataName { get; }
 
     // Microsoft.CodeAnalysis.CSharp 4.3.0 reference에는 CSharp13 enum 멤버가 없어 숫자 값을 사용합니다.
     const int minimumPartialPropertyLanguageVersion = 1300;
@@ -106,7 +105,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
 
         IncrementalValuesProvider<RegistryDiscoveryItem> currentRegistries = context.SyntaxProvider.ForAttributeWithMetadataName
         (
-            generateTypeRegistryAttributeMetadataName,
+            registryAttributeMetadataName,
             static (_, _) => true,
             CreateCurrentRegistryDiscovery
         );
@@ -139,6 +138,38 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// 이 생성기가 <paramref name="registryType"/>을 지원하면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
     /// </returns>
     protected abstract bool IsSupportedRegistryType(INamedTypeSymbol registryType, Compilation compilation);
+
+    /// <summary>
+    /// Decodes the registry base types from a concrete registry marker or a registry manifest.<br/>
+    /// 구체적인 레지스트리 표식 또는 레지스트리 매니페스트에서 레지스트리 기본 타입을 디코드합니다.
+    /// </summary>
+    /// <param name="constructorArguments">
+    /// The constructor arguments of the marker or manifest attribute.<br/>
+    /// 표식 또는 매니페스트 특성의 생성자 인자입니다.
+    /// </param>
+    /// <param name="ownerType">
+    /// The type that declares the registry property.<br/>
+    /// 레지스트리 속성을 선언한 타입입니다.
+    /// </param>
+    /// <param name="isManifest">
+    /// Indicates whether <paramref name="constructorArguments"/> belongs to a manifest attribute.<br/>
+    /// <paramref name="constructorArguments"/>가 매니페스트 특성의 인자인지 나타냅니다.
+    /// </param>
+    /// <param name="baseTypes">
+    /// Receives the decoded registry base types when decoding succeeds.<br/>
+    /// 디코드에 성공하면 디코드된 레지스트리 기본 타입들을 받습니다.
+    /// </param>
+    /// <returns>
+    /// <see langword="true"/> when the arguments have the expected shape; otherwise, <see langword="false"/>.<br/>
+    /// 인자가 예상한 형태이면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+    /// </returns>
+    protected abstract bool TryGetRegistryBaseTypes
+    (
+        ImmutableArray<TypedConstant> constructorArguments,
+        INamedTypeSymbol ownerType,
+        bool isManifest,
+        out ImmutableArray<ITypeSymbol> baseTypes
+    );
 
     /// <summary>
     /// Creates the default expression used to initialize a generated registry backing field.<br/>
@@ -350,7 +381,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             (
                 null,
                 location,
-                TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidGenerateTarget, location, context.SemanticModel.Compilation, generateTypeRegistryAttributeMetadataName)
+                TypeRegistryDiagnostics.Create(TypeRegistryDiagnostics.invalidGenerateTarget, location, context.SemanticModel.Compilation, registryAttributeMetadataName)
             );
         }
 
@@ -370,8 +401,25 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             );
         }
 
-        ITypeSymbol baseType = GetRegistryBaseType(context.Attributes, property.ContainingType);
-        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, baseType, RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
+        AttributeData? registryAttribute = context.Attributes.FirstOrDefault(attribute =>
+            attribute.AttributeClass != null && GeneratorUtils.GetMetadataName(attribute.AttributeClass) == registryAttributeMetadataName);
+        if (registryAttribute == null || !TryGetRegistryBaseTypes(registryAttribute.ConstructorArguments, property.ContainingType, isManifest: false, out ImmutableArray<ITypeSymbol> baseTypes))
+        {
+            return InvalidDiscovery
+            (
+                property,
+                location,
+                TypeRegistryDiagnostics.Create
+                (
+                    TypeRegistryDiagnostics.invalidPropertyContract,
+                    location,
+                    context.SemanticModel.Compilation,
+                    property.Name
+                )
+            );
+        }
+
+        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, baseTypes, RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
             return InvalidDiscovery(property, location, diagnostic!);
 
         return new RegistryDiscoveryItem(definition, property, location, isCurrent: true, ImmutableArray<Diagnostic>.Empty);
@@ -393,9 +441,9 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// The compilation used for type and accessibility checks.<br/>
     /// 타입 및 접근성 검사에 사용할 컴파일입니다.
     /// </param>
-    /// <param name="baseType">
-    /// The type that registered implementations must match or derive from.<br/>
-    /// 등록 구현 타입이 일치하거나 상속해야 하는 타입입니다.
+    /// <param name="baseTypes">
+    /// The types that registered implementations must match or derive from.<br/>
+    /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들입니다.
     /// </param>
     /// <param name="origin">
     /// The origin recorded in the resulting definition.<br/>
@@ -422,7 +470,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         IPropertySymbol property,
         PropertyDeclarationSyntax? declaration,
         Compilation compilation,
-        ITypeSymbol baseType,
+        ImmutableArray<ITypeSymbol> baseTypes,
         RegistryOrigin origin,
         bool requirePartial,
         out RegistryDefinition? definition,
@@ -521,7 +569,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         }
 
         string stableId = TypeRegistryEmitter.GetStableId(property, registryType);
-        RegistryDefinition candidate = new(property, ownerType, registryType, baseType, origin, stableId);
+        RegistryDefinition candidate = new(property, ownerType, registryType, baseTypes, origin, stableId);
         string backingFieldName = TypeRegistryEmitter.GetBackingFieldName(candidate);
         if (origin == RegistryOrigin.currentCompilation && ownerType.GetMembers(backingFieldName).Length != 0)
         {
@@ -642,22 +690,6 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// 정의 없이 지정된 진단을 포함하는 현재 컴파일 발견 항목입니다.
     /// </returns>
     static RegistryDiscoveryItem InvalidDiscovery(IPropertySymbol? property, Location location, Diagnostic diagnostic) => new RegistryDiscoveryItem(null, property, location, isCurrent: true, ImmutableArray.Create(diagnostic));
-
-    static ITypeSymbol GetRegistryBaseType(ImmutableArray<AttributeData> attributes, INamedTypeSymbol ownerType)
-    {
-        foreach (AttributeData attribute in attributes)
-        {
-            if (attribute.AttributeClass == null || GeneratorUtils.GetMetadataName(attribute.AttributeClass) != generateTypeRegistryAttributeMetadataName)
-                continue;
-
-            if (attribute.ConstructorArguments.Length != 0 && attribute.ConstructorArguments[0].Value is ITypeSymbol baseType)
-                return baseType;
-
-            break;
-        }
-
-        return ownerType;
-    }
 
     /// <summary>
     /// Validates discovered registries, binds candidates, and emits generated source and diagnostics.<br/>
@@ -949,11 +981,40 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                 if (manifest.ConstructorArguments.Length > 1 && manifest.ConstructorArguments[1].Value is string manifestPropertyName)
                     propertyName = manifestPropertyName;
 
-                // 매니페스트 계약은 positional `(Type ownerType, string propertyName, Type baseType)` 생성자 인자로 소비됩니다.
                 INamedTypeSymbol? ownerType = manifest.ConstructorArguments.Length > 0 ? manifest.ConstructorArguments[0].Value as INamedTypeSymbol : null;
                 IPropertySymbol? property = ownerType?.GetMembers(propertyName).OfType<IPropertySymbol>().FirstOrDefault();
-                ITypeSymbol? baseType = manifest.ConstructorArguments.Length > 2 ? manifest.ConstructorArguments[2].Value as ITypeSymbol : ownerType;
-                if (ownerType == null || property == null || baseType == null || !TryCreateRegistryDefinition(property, null, compilation, baseType, RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
+                if (ownerType == null || property == null)
+                {
+                    result.Add
+                    (
+                        new RegistryDiscoveryItem
+                        (
+                            null,
+                            property,
+                            Location.None,
+                            isCurrent: false,
+                            ImmutableArray.Create
+                            (
+                                TypeRegistryDiagnostics.Create
+                                (
+                                    TypeRegistryDiagnostics.invalidManifest,
+                                    Location.None,
+                                    compilation,
+                                    assembly.Identity.Name,
+                                    ownerName,
+                                    propertyName
+                                )
+                            )
+                        )
+                    );
+                    continue;
+                }
+
+                if (property.Type is not INamedTypeSymbol registryType || !IsSupportedRegistryType(registryType, compilation))
+                    continue;
+
+                if (!TryGetRegistryBaseTypes(manifest.ConstructorArguments, ownerType, isManifest: true, out ImmutableArray<ITypeSymbol> baseTypes) ||
+                    !TryCreateRegistryDefinition(property, null, compilation, baseTypes, RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
                 {
                     result.Add
                     (

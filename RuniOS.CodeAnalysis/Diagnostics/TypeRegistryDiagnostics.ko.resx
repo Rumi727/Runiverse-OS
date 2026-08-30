@@ -112,13 +112,13 @@
     <value>TypeRegistryManifestAttribute는 소스 생성기 전용임</value>
   </data>
   <data name="ROS0018_Message" xml:space="preserve">
-    <value>TypeRegistryManifestAttribute는 생성된 소스에서만 사용됩니다. 대신 GenerateTypeRegistryAttribute로 레지스트리 속성을 선언하세요</value>
+    <value>TypeRegistryManifestAttribute는 생성된 소스에서만 사용됩니다. 대신 GenerateAttributedTypeRegistryAttribute 또는 GenerateAssignableTypeRegistryAttribute로 레지스트리 속성을 선언하세요</value>
   </data>
   <data name="ROS0019_Title" xml:space="preserve">
     <value>타입 등록에 일치하는 레지스트리가 없음</value>
   </data>
   <data name="ROS0019_Message" xml:space="preserve">
-    <value>타입 '{1}'의 TypeRegistrationAttribute '{0}'에 일치하는 [GenerateTypeRegistry] AttributedTypeRegistry&lt;TBase, TAttribute&gt;가 기본 타입 계층에 없습니다</value>
+    <value>타입 '{1}'의 TypeRegistrationAttribute '{0}'에 일치하는 [GenerateAttributedTypeRegistry] AttributedTypeRegistry&lt;TAttribute&gt;가 기본 타입 계층에 없습니다</value>
   </data>
   <data name="ROS0020_Title" xml:space="preserve">
     <value>등록 대상에 하위 타입 매칭이 필요함</value>

@@ -7,7 +7,7 @@ namespace RuniOS.Collections.Handlers
 {
     public abstract partial class ListHandlerBase(IEnumerable targetCollection) : CollectionHandlerBase(targetCollection), IList
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<CollectionHandlerAttribute> listRegistry { get; }
 
         public static ListHandlerBase FindListHandler(IEnumerable targetCollection)

@@ -10,7 +10,7 @@ namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
 {
     public abstract partial class IMGUIInspectorAttributeDrawer(IInspectorAttribute attribute) : InspectorAttributeDrawer(attribute)
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<InspectorDrawerAttribute> registry { get; }
 
         static readonly object?[] args = new object?[1];

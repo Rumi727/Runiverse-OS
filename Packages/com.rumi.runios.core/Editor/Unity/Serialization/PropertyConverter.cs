@@ -13,7 +13,7 @@ namespace RuniOS.Editor.Unity.Serialization
     /// </summary>
     public abstract partial class PropertyConverter
     {
-        [GenerateTypeRegistry]
+        [GenerateAttributedTypeRegistry]
         public static partial AttributedTypeRegistry<PropertyConverterAttribute> registry { get; }
 
         public static PropertyConverter? FindConverter<T>() => FindConverter(typeof(T));

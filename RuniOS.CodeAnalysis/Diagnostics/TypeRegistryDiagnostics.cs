@@ -27,8 +27,8 @@ static class TypeRegistryDiagnostics
     );
 
     /// <summary>
-    /// Describes the diagnostic reported when <c>GenerateTypeRegistryAttribute</c> targets a non-property.<br/>
-    /// <c>GenerateTypeRegistryAttribute</c>가 속성이 아닌 대상에 지정된 경우의 진단 설명자입니다.
+    /// Describes the diagnostic reported when a registry marker attribute targets a non-property.<br/>
+    /// 레지스트리 표식 특성이 속성이 아닌 대상에 지정된 경우의 진단 설명자입니다.
     /// </summary>
     public static readonly DiagnosticDescriptor invalidGenerateTarget = new
     (

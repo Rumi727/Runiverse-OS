@@ -112,13 +112,13 @@
     <value>TypeRegistryManifestAttribute is generator-only</value>
   </data>
   <data name="ROS0018_Message" xml:space="preserve">
-    <value>TypeRegistryManifestAttribute is reserved for generated source; declare a registry property with GenerateTypeRegistryAttribute instead</value>
+    <value>TypeRegistryManifestAttribute is reserved for generated source; declare a registry property with a GenerateAttributedTypeRegistryAttribute or GenerateAssignableTypeRegistryAttribute instead</value>
   </data>
   <data name="ROS0019_Title" xml:space="preserve">
     <value>Type registration has no matching registry</value>
   </data>
   <data name="ROS0019_Message" xml:space="preserve">
-    <value>TypeRegistrationAttribute '{0}' on '{1}' has no matching [GenerateTypeRegistry] AttributedTypeRegistry&lt;TBase, TAttribute&gt; in its base type hierarchy</value>
+    <value>TypeRegistrationAttribute '{0}' on '{1}' has no matching [GenerateAttributedTypeRegistry] AttributedTypeRegistry&lt;TAttribute&gt; in its base type hierarchy</value>
   </data>
   <data name="ROS0020_Title" xml:space="preserve">
     <value>Registration target requires child matching</value>
