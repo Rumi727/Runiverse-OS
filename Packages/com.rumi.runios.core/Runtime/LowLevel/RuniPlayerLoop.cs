@@ -78,25 +78,6 @@ namespace RuniOS.LowLevel
             remove => Unregister<TimeUpdate>(value);
         }
 #endif
-        
-        static PlayerLoopSystem.UpdateFunction? allRegisteredDelegate;
-
-#if UNITY_EDITOR
-        /// <summary>
-        /// 플레이 모드가 종료될 때 등록된 모든 델리게이트를 자동으로 해제합니다.
-        /// </summary>
-        [Awaken]
-        static void Awaken() => Kernel.quitting += Clear;
-#endif
-        
-        /// <summary>
-        /// 등록된 모든 델리게이트를 자동으로 해제합니다.
-        /// </summary>
-        static void Clear()
-        {
-            UnregisterAll(allRegisteredDelegate);
-            allRegisteredDelegate = null;
-        }
 
         /// <summary>
         /// 지정된 타입의 PlayerLoop 시스템에 델리게이트를 등록합니다.
@@ -129,8 +110,6 @@ namespace RuniOS.LowLevel
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
             bool result = InternalRegister(ref loop, targetType, updateDelegate);
             PlayerLoop.SetPlayerLoop(loop);
-
-            allRegisteredDelegate += updateDelegate;
 
             return result;
         }
@@ -198,13 +177,6 @@ namespace RuniOS.LowLevel
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
             InternalUnregister(ref loop, targetType, updateDelegate);
             PlayerLoop.SetPlayerLoop(loop);
-
-            if (allRegisteredDelegate != null)
-            {
-                Delegate[] delegatesToRemove = updateDelegate.GetInvocationList();
-                foreach (var del in delegatesToRemove)
-                    allRegisteredDelegate -= (PlayerLoopSystem.UpdateFunction)del;
-            }
         }
 
         /// <summary>
@@ -222,13 +194,6 @@ namespace RuniOS.LowLevel
             PlayerLoopSystem loop = PlayerLoop.GetCurrentPlayerLoop();
             InternalUnregister(ref loop, null, updateDelegate);
             PlayerLoop.SetPlayerLoop(loop);
-
-            if (allRegisteredDelegate != null)
-            {
-                Delegate[] delegatesToRemove = updateDelegate.GetInvocationList();
-                foreach (var del in delegatesToRemove)
-                    allRegisteredDelegate -= (PlayerLoopSystem.UpdateFunction)del;
-            }
         }
 
         /// <summary>
