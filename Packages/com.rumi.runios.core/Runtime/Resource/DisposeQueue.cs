@@ -5,6 +5,8 @@ using RuniOS.Threading;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using Unity.Scripting.LifecycleManagement;
+using UnityEngine;
 
 namespace RuniOS.Resource
 {
@@ -15,41 +17,34 @@ namespace RuniOS.Resource
         static readonly Stopwatch stopwatch = new Stopwatch();
         static readonly ConcurrentQueue<Action> scheduledTasks = [];
 
+        [AutoStaticsCleanup]
         static volatile bool shutdownStarted = false;
 
-        [UnityEngine.RuntimeInitializeOnLoadMethod(UnityEngine.RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void ResetShutdownState() => shutdownStarted = false;
+        [OnEnteringPlayMode]
+        static void OnEnteringPlayMode() => RuniPlayerLoop.onPostLateUpdate += Update;
 
-        [Awaken]
-        static void Awaken()
+        [OnExitingPlayMode]
+        static void OnExitingPlayMode()
         {
-            RuniPlayerLoop.onPostLateUpdate += Update;
-            Kernel.quitting += BeginShutdown;
-        }
-
-#if UNITY_EDITOR
-        [Unity.Scripting.LifecycleManagement.OnCodeLoaded]
-        static void OnCodeLoaded()
-        {
-            ResetShutdownState();
-
-            UnityEditor.EditorApplication.update += EditorUpdate;
-            UnityEditor.EditorApplication.quitting += BeginShutdown;
-        }
-
-        [Unity.Scripting.LifecycleManagement.OnCodeUnloading]
-        static void OnCodeUnloading()
-        {
-            UnityEditor.EditorApplication.update -= EditorUpdate;
-            UnityEditor.EditorApplication.quitting -= BeginShutdown;
-
+            RuniPlayerLoop.onPostLateUpdate -= Update;
             BeginShutdown();
         }
 
-        static void EditorUpdate()
+#if UNITY_EDITOR
+        [UnityEditor.Scripting.LifecycleManagement.OnEnteringEditMode]
+        static void OnCodeLoaded()
         {
-            if (!Kernel.isPlaying || UnityEditor.EditorApplication.isPaused)
-                Update();
+            UnityEditor.EditorApplication.update += Update;
+            UnityEditor.EditorApplication.quitting += BeginShutdown;
+        }
+
+        [UnityEditor.Scripting.LifecycleManagement.OnExitingEditMode]
+        static void OnCodeUnloading()
+        {
+            UnityEditor.EditorApplication.update -= Update;
+            UnityEditor.EditorApplication.quitting -= BeginShutdown;
+
+            BeginShutdown();
         }
 #endif
 
