@@ -9,7 +9,7 @@ namespace RuniOS.Threading
         public static int mainThreadId { get; private set; }
         public static bool isMainThread => Thread.CurrentThread.ManagedThreadId == mainThreadId;
 
-        [OnCodeLoaded]
+        [OnAssemblyLoaded]
         static void OnCodeLoaded() => mainThreadId = Thread.CurrentThread.ManagedThreadId;
 
         public static void ThrowIfNotMainThread()
