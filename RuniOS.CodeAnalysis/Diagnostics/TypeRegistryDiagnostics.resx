@@ -144,4 +144,10 @@
   <data name="ROS0023_Message" xml:space="preserve">
     <value>TypeRegistrationAttribute '{0}' on non-generic type '{1}' targets open generic type '{2}'. The registration is valid as generated; consider a separate generic implementation when behavior should vary by type arguments</value>
   </data>
+  <data name="ROS0024_Title" xml:space="preserve">
+    <value>Assignable registry candidate requires a default constructor</value>
+  </data>
+  <data name="ROS0024_Message" xml:space="preserve">
+    <value>Type '{0}' is assignable to an AssignableTypeRegistry with requireDefaultConstructor=true but has no public parameterless constructor</value>
+  </data>
 </root>

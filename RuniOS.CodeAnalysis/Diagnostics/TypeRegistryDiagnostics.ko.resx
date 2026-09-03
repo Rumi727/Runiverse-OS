@@ -144,4 +144,10 @@
   <data name="ROS0023_Message" xml:space="preserve">
     <value>제네릭이 아닌 타입 '{1}'의 TypeRegistrationAttribute '{0}'이(가) 열린 제네릭 타입 '{2}'을(를) 대상으로 합니다. 현재 등록은 생성되며 유효하지만 타입 인자에 따라 동작이 달라져야 하면 별도 제네릭 구현 타입을 고려할 수 있습니다</value>
   </data>
+  <data name="ROS0024_Title" xml:space="preserve">
+    <value>할당 가능한 레지스트리 후보에 기본 생성자가 필요함</value>
+  </data>
+  <data name="ROS0024_Message" xml:space="preserve">
+    <value>타입 '{0}'은(는) requireDefaultConstructor=true인 AssignableTypeRegistry에 할당 가능하지만 공개 매개 변수 없는 생성자가 없습니다</value>
+  </data>
 </root>

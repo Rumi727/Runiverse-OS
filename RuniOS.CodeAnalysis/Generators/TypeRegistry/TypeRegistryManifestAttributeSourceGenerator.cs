@@ -40,6 +40,15 @@ public sealed class TypeRegistryManifestAttributeSourceGenerator : IIncrementalG
                 }
 
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public TypeRegistryManifestAttribute(global::System.Type ownerType, string propertyName, bool requireDefaultConstructor, params global::System.Type[] baseTypes)
+                {
+                    this.ownerType = ownerType;
+                    this.propertyName = propertyName;
+                    this.requireDefaultConstructor = requireDefaultConstructor;
+                    this.baseTypes = baseTypes;
+                }
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public TypeRegistryManifestAttribute(global::System.Type ownerType, string propertyName, params global::System.Type[] baseTypes)
                 {
                     this.ownerType = ownerType;
@@ -67,6 +76,9 @@ public sealed class TypeRegistryManifestAttributeSourceGenerator : IIncrementalG
                 /// </summary>
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public global::System.Type[] baseTypes { get; }
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public bool requireDefaultConstructor { get; }
             }
         }
         """;

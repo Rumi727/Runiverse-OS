@@ -27,6 +27,10 @@ public sealed class AssignableTypeRegistrySourceGenerator : TypeRegistrySourceGe
     )
     {
         int baseTypeArgumentIndex = isManifest ? 2 : 0;
+        if (!isManifest && constructorArguments.Length > 0 && constructorArguments[0].Kind == TypedConstantKind.Primitive && constructorArguments[0].Value is bool)
+            baseTypeArgumentIndex = 1;
+        else if (isManifest && constructorArguments.Length > 2 && constructorArguments[2].Kind == TypedConstantKind.Primitive && constructorArguments[2].Value is bool)
+            baseTypeArgumentIndex = 3;
         if (constructorArguments.Length <= baseTypeArgumentIndex)
         {
             baseTypes = ImmutableArray<ITypeSymbol>.Empty;
@@ -53,8 +57,14 @@ public sealed class AssignableTypeRegistrySourceGenerator : TypeRegistrySourceGe
         return true;
     }
 
+    protected override bool GetRequireDefaultConstructor(ImmutableArray<TypedConstant> constructorArguments, bool isManifest)
+    {
+        int index = isManifest ? 2 : 0;
+        return constructorArguments.Length > index && constructorArguments[index].Kind == TypedConstantKind.Primitive && constructorArguments[index].Value is bool value && value;
+    }
+
     protected override string CreateRegistryInitializer(RegistryDefinition registry) =>
-        $"new {GeneratorUtils.GetTypeName(registry.registryType)}(global::System.Collections.Immutable.ImmutableArray.Create<global::System.Type>({string.Join(", ", registry.baseTypes.Select(baseType => $"typeof({GeneratorUtils.GetTypeOfName(baseType)})"))}))";
+        $"new {GeneratorUtils.GetTypeName(registry.registryType)}({(registry.requireDefaultConstructor ? "true" : "false")}, global::System.Collections.Immutable.ImmutableArray.Create<global::System.Type>({string.Join(", ", registry.baseTypes.Select(baseType => $"typeof({GeneratorUtils.GetTypeOfName(baseType)})"))}))";
 
     protected override bool HasAccessibleRegistryConstructor(INamedTypeSymbol registryType, Compilation compilation)
     {
@@ -114,6 +124,9 @@ public sealed class AssignableTypeRegistrySourceGenerator : TypeRegistrySourceGe
         if (registry.baseTypes.Any(baseType => !TypeRegistrySymbolHelpers.IsSameOrDerived(implementationType, baseType)))
             return false;
 
+        if (registry.requireDefaultConstructor && !HasPublicParameterlessConstructor(implementationType))
+            return false;
+
         if (!TypeRegistrySymbolHelpers.IsAccessibleFromGeneratedCode(implementationType, compilation))
         {
             diagnostic = TypeRegistryDiagnostics.Create
@@ -146,6 +159,9 @@ public sealed class AssignableTypeRegistrySourceGenerator : TypeRegistrySourceGe
         registration = new BoundRegistration(registry, implementationType, null);
         return true;
     }
+
+    static bool HasPublicParameterlessConstructor(INamedTypeSymbol type) =>
+        type.InstanceConstructors.Any(constructor => constructor.Parameters.Length == 0 && constructor.DeclaredAccessibility == Accessibility.Public);
 
     protected override void EmitRegisterStatements(SourceWriter writer, RegistryDefinition registry, ImmutableArray<BoundRegistration> registrations)
     {

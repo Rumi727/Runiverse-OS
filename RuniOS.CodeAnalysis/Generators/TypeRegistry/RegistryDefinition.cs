@@ -24,6 +24,10 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 /// The types that registered implementations must match or derive from.<br/>
 /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들입니다.
 /// </param>
+/// <param name="requireDefaultConstructor">
+/// Whether registered implementation types must have an accessible public parameterless constructor.<br/>
+/// 등록 구현 타입에 접근 가능한 공개 매개 변수 없는 생성자가 필요한지 여부입니다.
+/// </param>
 /// <param name="origin">
 /// The compilation source from which the definition was discovered.<br/>
 /// 이 정의를 발견한 컴파일 소스입니다.
@@ -32,7 +36,7 @@ namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 /// The stable identifier used to derive generated names for this registry.<br/>
 /// 이 레지스트리의 생성 이름을 도출하는 데 사용하는 안정 식별자입니다.
 /// </param>
-public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbol ownerType, INamedTypeSymbol registryType, ImmutableArray<ITypeSymbol> baseTypes, RegistryOrigin origin, string stableId) : IEquatable<RegistryDefinition>
+public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbol ownerType, INamedTypeSymbol registryType, ImmutableArray<ITypeSymbol> baseTypes, bool requireDefaultConstructor, RegistryOrigin origin, string stableId) : IEquatable<RegistryDefinition>
 {
     /// <summary>
     /// Gets the registry property represented by this definition.<br/>
@@ -57,6 +61,8 @@ public sealed class RegistryDefinition(IPropertySymbol property, INamedTypeSymbo
     /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들을 가져옵니다.
     /// </summary>
     public ImmutableArray<ITypeSymbol> baseTypes { get; } = baseTypes;
+
+    public bool requireDefaultConstructor { get; } = requireDefaultConstructor;
 
     /// <summary>
     /// Gets the source from which this registry definition was discovered.<br/>

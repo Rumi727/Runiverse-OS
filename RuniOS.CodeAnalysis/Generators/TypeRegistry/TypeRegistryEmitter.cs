@@ -175,10 +175,10 @@ static class TypeRegistryEmitter
         string baseTypes = registry.baseTypes.Length == 0
             ? "new global::System.Type[] { }"
             : string.Join(", ", registry.baseTypes.Select(baseType => $"typeof({GeneratorUtils.GetTypeOfName(baseType)})"));
-        writer.AppendLine
-        (
-            $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)}, {baseTypes})]"
-        );
+        string manifest = registry.requireDefaultConstructor
+            ? $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)}, true, {baseTypes})]"
+            : $"[assembly: global::RuniOS.Reflection.TypeRegistryManifestAttribute(typeof({GeneratorUtils.GetTypeOfGenericDefinitionName(registry.ownerType)}), {GeneratorUtils.StringLiteral(registry.property.Name)}, {baseTypes})]";
+        writer.AppendLine(manifest);
         return writer.ToString();
     }
 

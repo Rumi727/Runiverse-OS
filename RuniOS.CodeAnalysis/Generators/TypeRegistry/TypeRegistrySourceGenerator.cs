@@ -165,6 +165,8 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         out ImmutableArray<ITypeSymbol> baseTypes
     );
 
+    protected virtual bool GetRequireDefaultConstructor(ImmutableArray<TypedConstant> constructorArguments, bool isManifest) => false;
+
     /// <summary>
     /// Creates the default expression used to initialize a generated registry backing field.<br/>
     /// 생성된 레지스트리 백킹 필드를 초기화하는 기본 식을 만듭니다.
@@ -413,7 +415,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
             );
         }
 
-        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, baseTypes, RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
+        if (!TryCreateRegistryDefinition(property, declaration, context.SemanticModel.Compilation, baseTypes, GetRequireDefaultConstructor(registryAttribute.ConstructorArguments, isManifest: false), RegistryOrigin.currentCompilation, requirePartial: true, out RegistryDefinition? definition, out Diagnostic? diagnostic))
             return InvalidDiscovery(property, location, diagnostic!);
 
         return new RegistryDiscoveryItem(definition, property, location, isCurrent: true, ImmutableArray<Diagnostic>.Empty);
@@ -465,6 +467,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         PropertyDeclarationSyntax? declaration,
         Compilation compilation,
         ImmutableArray<ITypeSymbol> baseTypes,
+        bool requireDefaultConstructor,
         RegistryOrigin origin,
         bool requirePartial,
         out RegistryDefinition? definition,
@@ -563,7 +566,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         }
 
         string stableId = TypeRegistryEmitter.GetStableId(property, registryType);
-        RegistryDefinition candidate = new(property, ownerType, registryType, baseTypes, origin, stableId);
+        RegistryDefinition candidate = new(property, ownerType, registryType, baseTypes, requireDefaultConstructor, origin, stableId);
         string backingFieldName = TypeRegistryEmitter.GetBackingFieldName(candidate);
         if (origin == RegistryOrigin.currentCompilation && ownerType.GetMembers(backingFieldName).Length != 0)
         {
@@ -1004,7 +1007,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                     continue;
 
                 if (!TryGetRegistryBaseTypes(manifest.ConstructorArguments, ownerType, isManifest: true, out ImmutableArray<ITypeSymbol> baseTypes) ||
-                    !TryCreateRegistryDefinition(property, null, compilation, baseTypes, RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
+                    !TryCreateRegistryDefinition(property, null, compilation, baseTypes, GetRequireDefaultConstructor(manifest.ConstructorArguments, isManifest: true), RegistryOrigin.referencedAssemblyManifest, requirePartial: false, out RegistryDefinition? definition, out _))
                 {
                     result.Add
                     (

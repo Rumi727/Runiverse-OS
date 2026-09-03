@@ -6,12 +6,19 @@ namespace RuniOS.Reflection
 {
     public sealed class AssignableTypeRegistry : TypeRegistry
     {
-        public AssignableTypeRegistry(params ImmutableArray<Type> baseTypes)
+        public AssignableTypeRegistry(bool requireDefaultConstructor, params ImmutableArray<Type> baseTypes)
         {
+            this.requireDefaultConstructor = requireDefaultConstructor;
             if (!baseTypes.IsDefault)
                 this.baseTypes = baseTypes;
         }
 
+        public AssignableTypeRegistry(params ImmutableArray<Type> baseTypes)
+            : this(false, baseTypes)
+        {
+        }
+
+        public bool requireDefaultConstructor { get; }
         public ImmutableArray<Type> baseTypes { get; } = [];
         public ImmutableArray<Type> registeredTypes { get; private set; } = [];
 
@@ -21,6 +28,8 @@ namespace RuniOS.Reflection
         {
             if (baseTypes.Any(x => !type.IsAssignableToAny(x)))
                 throw new ArgumentException($"Type {type} is not assignable from {baseTypes}");
+            if (requireDefaultConstructor && !type.HasDefaultConstructor())
+                throw new ArgumentException($"Type {type} has no public parameterless constructor");
 
             registeredTypes = registeredTypes.Add(type);
             onChanged?.Invoke();
@@ -32,6 +41,8 @@ namespace RuniOS.Reflection
             {
                 if (baseTypes.Any(x => !item.IsAssignableToAny(x)))
                     throw new ArgumentException($"Type {item} is not assignable from {baseTypes}");
+                if (requireDefaultConstructor && !item.HasDefaultConstructor())
+                    throw new ArgumentException($"Type {item} has no public parameterless constructor");
             }
 
             registeredTypes = registeredTypes.AddRange(types);
@@ -44,6 +55,8 @@ namespace RuniOS.Reflection
             {
                 if (baseTypes.Any(x => !item.IsAssignableToAny(x)))
                     throw new ArgumentException($"Type {item} is not assignable from {baseTypes}");
+                if (requireDefaultConstructor && !item.HasDefaultConstructor())
+                    throw new ArgumentException($"Type {item} has no public parameterless constructor");
             }
 
             registeredTypes = registeredTypes.AddRange(types);

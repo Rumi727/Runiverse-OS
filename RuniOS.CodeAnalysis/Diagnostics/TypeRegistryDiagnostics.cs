@@ -334,6 +334,16 @@ static class TypeRegistryDiagnostics
         isEnabledByDefault: true
     );
 
+    public static readonly DiagnosticDescriptor assignableRegistrationRequiresDefaultConstructor = new
+    (
+        "ROS0024",
+        Text("ROS0024_Title"),
+        Text("ROS0024_Message"),
+        category,
+        DiagnosticSeverity.Warning,
+        isEnabledByDefault: true
+    );
+
     /// <summary>
     /// Creates a diagnostic using the specified descriptor, location, and message arguments.<br/>
     /// 지정된 설명자, 위치, 메시지 인수로 진단을 생성합니다.

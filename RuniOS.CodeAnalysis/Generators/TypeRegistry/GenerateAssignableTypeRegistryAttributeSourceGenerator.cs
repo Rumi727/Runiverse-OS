@@ -25,10 +25,20 @@ public sealed class GenerateAssignableTypeRegistryAttributeSourceGenerator : IIn
             sealed class GenerateAssignableTypeRegistryAttribute : GenerateTypeRegistryAttribute
             {
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public bool requireDefaultConstructor { get; }
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public global::System.Type[] baseTypes { get; }
 
                 [global::System.Runtime.CompilerServices.CompilerGenerated]
                 public GenerateAssignableTypeRegistryAttribute(params global::System.Type[] baseTypes) => this.baseTypes = baseTypes;
+
+                [global::System.Runtime.CompilerServices.CompilerGenerated]
+                public GenerateAssignableTypeRegistryAttribute(bool requireDefaultConstructor, params global::System.Type[] baseTypes)
+                {
+                    this.requireDefaultConstructor = requireDefaultConstructor;
+                    this.baseTypes = baseTypes;
+                }
             }
         }
         """;
