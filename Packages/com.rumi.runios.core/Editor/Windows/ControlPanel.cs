@@ -6,15 +6,10 @@ using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Windows
 {
-    public sealed class ControlPanel : EditorWindow
+    public sealed partial class ControlPanel : EditorWindow
     {
-        static ControlPanel() => panelTypes =
-        [
-            ..ReflectionUtility.types
-                .Where(x => typeof(IControlPanel).IsAssignableFrom(x) && typeof(ScriptableObject).IsAssignableFrom(x) && x.HasDefaultConstructor())
-        ];
-
-        public static ImmutableArray<Type> panelTypes { get; }
+        [GenerateAssignableTypeRegistry(true, typeof(IControlPanel), typeof(ScriptableObject))]
+        public static partial AssignableTypeRegistry panelTypes { get; }
 
         public static GUIStyle bigLabelStyle => _bigLabelStyle ??= new GUIStyle(EditorStyles.boldLabel) { fontSize = 16 };
         static GUIStyle? _bigLabelStyle;
@@ -66,8 +61,8 @@ namespace RuniOS.Editor.Windows
             _ = SystemInfo.deviceModel; //이거 없으면 유니티 킬때 딱 한번 에러남 deviceModel 프로퍼티를 GUI 단계에서 처음 호출할 때 생기는 유니티 버그인듯
             
             // 도메인 재로드시에도 에디터 창의 데이터가 유지될 수 있게하기 위한 똥꼬쇼
-            if (_panels == null || _panels.WhereNotNull().Count() != panelTypes.Length)
-                _panels = panelTypes.Select(CreateInstance).ToArray();
+            if (_panels == null || _panels.WhereNotNull().Count() != panelTypes.registeredTypes.Length)
+                _panels = panelTypes.registeredTypes.Select(CreateInstance).ToArray();
             panels = [.._panels.OfType<IControlPanel>().OrderBy(x => x.sort)];
             
             EditorLocalization.onLanguageUpdate += TitleUpdate;
