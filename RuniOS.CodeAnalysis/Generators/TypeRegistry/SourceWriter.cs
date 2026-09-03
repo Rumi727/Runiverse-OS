@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace RuniOS.CodeAnalysis.Generators;
+namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 
 /// <summary>
 /// Builds generated source text one line at a time while tracking indentation.<br/>

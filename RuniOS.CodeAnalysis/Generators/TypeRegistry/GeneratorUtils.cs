@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text;
 
-namespace RuniOS.CodeAnalysis.Generators;
+namespace RuniOS.CodeAnalysis.Generators.TypeRegistry;
 
 /// <summary>
 /// Provides shared symbol formatting and generated-source helpers.<br/>
