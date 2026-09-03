@@ -97,12 +97,6 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
                 lifecycleDeclarationSource
             )
         );
-        context.RegisterSourceOutput
-        (
-            context.CompilationProvider,
-            (productionContext, compilation) => EmitLifecycleCompatibility(productionContext, compilation, generatorName)
-        );
-
         IncrementalValuesProvider<RegistryDiscoveryItem> currentRegistries = context.SyntaxProvider.ForAttributeWithMetadataName
         (
             registryAttributeMetadataName,
@@ -898,11 +892,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// The current compilation whose lifecycle API references are inspected.<br/>
     /// 수명 주기 API 참조를 검사할 현재 컴파일입니다.
     /// </param>
-    /// <param name="generatorName">
-    /// The generator name used to keep the compatibility hint name unique.<br/>
-    /// 호환 힌트 이름을 고유하게 유지하는 데 사용할 생성기 이름입니다.
-    /// </param>
-    static void EmitLifecycleCompatibility(SourceProductionContext context, Compilation compilation, string generatorName)
+    internal static void EmitLifecycleCompatibility(SourceProductionContext context, Compilation compilation)
     {
         bool hasLoadedAttribute = HasAvailableLifecycleApi(compilation, onAssemblyLoadedAttributeMetadataName);
         bool hasUnloadingAttribute = HasAvailableLifecycleApi(compilation, onAssemblyUnloadingAttributeMetadataName);
@@ -911,7 +901,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
 
         context.AddSource
         (
-            $"RuniOS.{generatorName}.LifecycleCompatibility.g.cs",
+            "RuniOS.LifecycleCompatibility.g.cs",
             SourceText.From
             (
                 TypeRegistryEmitter.RenderLifecycleCompatibility
