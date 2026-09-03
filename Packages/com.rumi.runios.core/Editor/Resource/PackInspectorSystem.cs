@@ -10,26 +10,29 @@ namespace RuniOS.Editor.Resource
 {
     public static partial class PackInspectorSystem
     {
-        public static readonly RuniPath packRootPath;
-        
-        static ImmutableArray<PackDrawer> drawers;
-
-        public static bool isFolderViewMode { get; private set; }
-        public static RuniPath activeFolderPath { get; private set; }
-
-        static PackInspectorSystem() => packRootPath = PhysicalPath.From(Application.streamingAssetsPath).GetRelativePath(projectPath);
-
-        [OnCodeInitializing]
-        static void OnCodeInitializing()
+        static PackInspectorSystem() => registry.onChanged += () =>
         {
-            ReflectionUtility.onListUpdate += UpdateDrawers;
-            UpdateDrawers();
+            for (int i = 0; i < drawers.Length; i++)
+                drawers[i].OnDisable();
 
-            static void UpdateDrawers()
+            drawers = default;
+        };
+
+        public static readonly RuniPath packRootPath = PhysicalPath.From(Application.streamingAssetsPath).GetRelativePath(projectPath);
+
+        [GenerateAssignableTypeRegistry(typeof(PackDrawer))]
+        public static partial AssignableTypeRegistry registry { get; }
+
+        public static ImmutableArray<PackDrawer> drawers
+        {
+            get
             {
-                drawers =
+                if (!field.IsDefault)
+                    return field;
+
+                return field =
                 [
-                    ..ReflectionUtility.types
+                    ..registry.registeredTypes
                         .Where(x => !x.IsAbstract && !x.IsConstructedGenericType && x.IsSubclassOf(typeof(PackDrawer)))
                         .Select(x =>
                         {
@@ -51,17 +54,22 @@ namespace RuniOS.Editor.Resource
                         .OrderByDescending(x => x.order)
                 ];
             }
+            private set;
+        } = default;
 
+        public static bool isFolderViewMode { get; private set; }
+        public static RuniPath activeFolderPath { get; private set; }
+
+        [OnAssemblyLoaded]
+        static void OnAssemblyLoaded()
+        {
             Selection.selectionChanged += CheckFolder;
             EditorApplication.update += CheckFolder;
         }
 
-        [OnCodeDeinitializing]
-        static void OnCodeDeinitializing()
+        [OnAssemblyUnloading]
+        static void OnAssemblyUnloading()
         {
-            for (int i = 0; i < drawers.Length; i++)
-                drawers[i].OnDisable();
-
             Selection.selectionChanged -= CheckFolder;
             EditorApplication.update -= CheckFolder;
         }
