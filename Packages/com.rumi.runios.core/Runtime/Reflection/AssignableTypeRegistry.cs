@@ -57,5 +57,17 @@ namespace RuniOS.Reflection
             registeredTypes = registeredTypes.Remove(type);
             onChanged?.Invoke();
         }
+
+        public override void UnregisterRange(IEnumerable<Type> types)
+        {
+            registeredTypes = registeredTypes.RemoveRange(types);
+            onChanged?.Invoke();
+        }
+
+        public override void UnregisterRange(params ReadOnlySpan<Type> types)
+        {
+            registeredTypes = registeredTypes.RemoveRange(types);
+            onChanged?.Invoke();
+        }
     }
 }

@@ -39,5 +39,8 @@ namespace RuniOS.Reflection
         /// </param>
         // 생성된 등록 코드가 assembly unload 시 public `Unregister(typeof(구현 타입))`을 호출하므로 이름과 `Type` 매개변수 계약을 유지합니다.
         public abstract void Unregister(Type type);
+
+        public abstract void UnregisterRange(IEnumerable<Type> types);
+        public abstract void UnregisterRange(params ReadOnlySpan<Type> types);
     }
 }

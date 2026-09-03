@@ -1,10 +1,8 @@
 #nullable enable
-using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Threading;
 
 namespace RuniOS.Reflection
 {
@@ -166,6 +164,28 @@ namespace RuniOS.Reflection
                 entriesSnapshot = default;
                 resolutionCache = [];
             }
+
+            onChanged?.Invoke();
+        }
+
+        public override void UnregisterRange(IEnumerable<Type> types)
+        {
+            foreach (var type in types)
+                registrationsByImplementationType.Remove(type);
+
+            entriesSnapshot = default;
+            resolutionCache = [];
+
+            onChanged?.Invoke();
+        }
+
+        public override void UnregisterRange(params ReadOnlySpan<Type> types)
+        {
+            foreach (var type in types)
+                registrationsByImplementationType.Remove(type);
+
+            entriesSnapshot = default;
+            resolutionCache = [];
 
             onChanged?.Invoke();
         }
