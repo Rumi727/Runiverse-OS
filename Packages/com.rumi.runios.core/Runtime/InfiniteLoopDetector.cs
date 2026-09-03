@@ -34,8 +34,8 @@ namespace RuniOS
 #endif
 
 #if UNITY_EDITOR || UNITY_ENABLE_CHECKS
-        [OnCodeLoaded]
-        static void OnCodeLoaded()
+        [OnAssemblyLoaded]
+        static void OnAssemblyLoaded()
         {
 #if UNITY_EDITOR
             UnityEditor.EditorApplication.update += Update;
@@ -45,8 +45,8 @@ namespace RuniOS
         }
 
 #if UNITY_EDITOR
-        [OnCodeUnloading]
-        static void OnCodeUnloading() => UnityEditor.EditorApplication.update -= Update;
+        [OnAssemblyUnloading]
+        static void OnAssemblyUnloading() => UnityEditor.EditorApplication.update -= Update;
 #endif
 
         static void Update() => detectionCount = 0;

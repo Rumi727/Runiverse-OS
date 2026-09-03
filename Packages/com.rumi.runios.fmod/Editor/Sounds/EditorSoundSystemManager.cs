@@ -17,14 +17,14 @@ namespace RuniOS.Editor.Sounds
         // ReSharper disable once ClassNeverInstantiated.Local
         class SceneViewExtra { public Vector3 lastPosition; }
 
-        [OnCodeLoaded]
+        [OnAssemblyLoaded]
         static void OnCodeLoaded()
         {
             EditorApplication.update += Update;
             ObjectChangeEvents.changesPublished += ChangesPublished;
         }
 
-        [OnCodeUnloading]
+        [OnAssemblyUnloading]
         static void OnCodeUnloading()
         {
             EditorApplication.update -= Update;

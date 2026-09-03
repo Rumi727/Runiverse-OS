@@ -14,21 +14,22 @@ namespace RuniOS.Editor
         static readonly ConcurrentQueue<Action> scheduledTasks = new ConcurrentQueue<Action>();
 
 #if UNITY_EDITOR
-        [global::Unity.Scripting.LifecycleManagement.OnCodeLoaded]
-        static void OnCodeLoaded()
+        [global::Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
+        static void OnAssemblyLoaded()
         {
             EditorApplication.update += Update;
             EditorApplication.quitting += ForceScheduledTasksExecute;
         }
 
-        [global::Unity.Scripting.LifecycleManagement.OnCodeUnloading]
-        static void OnCodeUnloading()
+        [global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
+        static void OnAssemblyUnloading()
         {
             EditorApplication.update -= Update;
             EditorApplication.quitting -= ForceScheduledTasksExecute;
-
-            ForceScheduledTasksExecute();
         }
+
+        [global::Unity.Scripting.LifecycleManagement.OnCodeUnloading]
+        static void OnCodeUnloading() => ForceScheduledTasksExecute();
 #endif
 
         static void Update()
