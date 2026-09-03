@@ -4,10 +4,16 @@ using System.ComponentModel;
 
 namespace RuniOS.Reflection
 {
-    public sealed class AssignableTypeRegistry(params ImmutableArray<Type> baseTypes) : TypeRegistry
+    public sealed class AssignableTypeRegistry : TypeRegistry
     {
-        public ImmutableArray<Type> baseTypes { get; } = baseTypes;
-        public ImmutableArray<Type> registeredTypes { get; private set; }
+        public AssignableTypeRegistry(params ImmutableArray<Type> baseTypes)
+        {
+            if (!baseTypes.IsDefault)
+                this.baseTypes = baseTypes;
+        }
+
+        public ImmutableArray<Type> baseTypes { get; } = [];
+        public ImmutableArray<Type> registeredTypes { get; private set; } = [];
 
         public override event Action? onChanged;
 
