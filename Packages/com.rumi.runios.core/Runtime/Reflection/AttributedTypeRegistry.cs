@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Threading;
 
 namespace RuniOS.Reflection
 {
@@ -36,46 +37,29 @@ namespace RuniOS.Reflection
         public AttributedTypeRegistry(Type baseType) => this.baseType = baseType;
 
         readonly Dictionary<Type, List<TAttribute>> registrationsByImplementationType = [];
-        volatile ConcurrentDictionary<Type, TypeResolution?> resolutionCache = new();
-        readonly object registrationLock = new();
+        Dictionary<Type, TypeResolution?> resolutionCache = new();
 
         public ImmutableArray<RegistrationEntry<TAttribute>> registeredEntries
         {
             get
             {
-                lock (registrationLock)
+                var result = entriesSnapshot;
+                if (result.IsDefault)
                 {
-                    if (entriesSnapshot.IsDefault)
-                    {
-                        entriesSnapshot =
-                        [
-                            ..registrationsByImplementationType.SelectMany(pair => pair.Value.Select(attribute => new RegistrationEntry<TAttribute>(pair.Key, attribute)))
-                                .OrderByTypes(x => x.attribute.targetType, x => x.attribute.priority)
-                        ];
-                    }
-
-                    return entriesSnapshot;
+                    result = entriesSnapshot =
+                    [
+                        ..registrationsByImplementationType.SelectMany(pair => pair.Value.Select(attribute => new RegistrationEntry<TAttribute>(pair.Key, attribute)))
+                            .OrderByTypes(x => x.attribute.targetType, x => x.attribute.priority)
+                    ];
                 }
+
+                return result;
             }
         }
         ImmutableArray<RegistrationEntry<TAttribute>> entriesSnapshot;
 
 
-        public override event Action? onChanged
-        {
-            add
-            {
-                lock (onChangedLock)
-                    _onChanged += value;
-            }
-            remove
-            {
-                lock (onChangedLock)
-                    _onChanged -= value;
-            }
-        }
-        Action? _onChanged;
-        readonly object onChangedLock = new();
+        public override event Action? onChanged;
 
         public override void Register(Type implementationType)
         {
@@ -83,7 +67,6 @@ namespace RuniOS.Reflection
                 throw new ArgumentException($"{implementationType} is not assignable from {baseType}");
 
             TAttribute[] attributes = implementationType.GetCustomAttributes<TAttribute>().ToArray();
-            lock (registrationLock)
             {
                 if (!registrationsByImplementationType.TryGetValue(implementationType, out List<TAttribute> list))
                     registrationsByImplementationType[implementationType] = list = [];
@@ -94,8 +77,7 @@ namespace RuniOS.Reflection
                 resolutionCache = [];
             }
 
-            lock (onChangedLock)
-                _onChanged?.Invoke();
+            onChanged?.Invoke();
         }
 
         public override void RegisterRange(IEnumerable<Type> types)
@@ -106,7 +88,6 @@ namespace RuniOS.Reflection
                     throw new ArgumentException($"{item} is not assignable from {baseType}");
 
                 TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
-                lock (registrationLock)
                 {
                     if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
                         registrationsByImplementationType[item] = list = [];
@@ -118,8 +99,7 @@ namespace RuniOS.Reflection
                 }
             }
 
-            lock (onChangedLock)
-                _onChanged?.Invoke();
+            onChanged?.Invoke();
         }
 
         public override void RegisterRange(params ReadOnlySpan<Type> types)
@@ -130,7 +110,6 @@ namespace RuniOS.Reflection
                     return;
 
                 TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
-                lock (registrationLock)
                 {
                     if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
                         registrationsByImplementationType[item] = list = [];
@@ -142,8 +121,7 @@ namespace RuniOS.Reflection
                 }
             }
 
-            lock (onChangedLock)
-                _onChanged?.Invoke();
+            onChanged?.Invoke();
         }
 
         /// <summary>
@@ -163,7 +141,6 @@ namespace RuniOS.Reflection
         // AttributedTypeRegistrySourceGenerator가 생성한 `RegistrationEntry<TAttribute>` 항목을 이 `ReadOnlySpan<RegistrationEntry<TAttribute>>` API로 전달합니다.
         public void DirectRegisterRange(params ReadOnlySpan<RegistrationEntry<TAttribute>> entries)
         {
-            lock (registrationLock)
             {
                 foreach (RegistrationEntry<TAttribute> entry in entries)
                 {
@@ -177,13 +154,11 @@ namespace RuniOS.Reflection
                 resolutionCache = [];
             }
 
-            lock (onChangedLock)
-                _onChanged?.Invoke();
+            onChanged?.Invoke();
         }
 
         public override void Unregister(Type implementationType)
         {
-            lock (registrationLock)
             {
                 if (!registrationsByImplementationType.Remove(implementationType))
                     return;
@@ -192,8 +167,7 @@ namespace RuniOS.Reflection
                 resolutionCache = [];
             }
 
-            lock (onChangedLock)
-                _onChanged?.Invoke();
+            onChanged?.Invoke();
         }
 
         public Type? Resolve(Type targetType, Func<RegistrationEntry<TAttribute>, bool>? predicate = null)
@@ -204,7 +178,7 @@ namespace RuniOS.Reflection
 
         public bool TryResolve(Type targetType, [NotNullWhen(true)] out Type? matchedTargetType, [NotNullWhen(true)] out Type? implementationType, Func<RegistrationEntry<TAttribute>, bool>? predicate = null)
         {
-            ConcurrentDictionary<Type, TypeResolution?> cache = resolutionCache;
+            Dictionary<Type, TypeResolution?> cache = resolutionCache;
             if (predicate == null)
             {
                 if (cache.TryGetValue(targetType, out TypeResolution? value))
