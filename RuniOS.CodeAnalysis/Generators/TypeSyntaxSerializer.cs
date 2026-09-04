@@ -229,19 +229,13 @@ public static partial class TypeSyntaxSerializer
 
     static SerializeErrorResults RenderIdentifier(StringBuilder builder, string identifier)
     {
-        if (identifier.Length == 0)
+        if (!SyntaxFacts.IsValidIdentifier(identifier))
             return new SerializeErrorResults(SerializeError.invalidIdentifier, identifier);
 
-        if (SyntaxFacts.IsValidIdentifier(identifier))
-            builder.Append(identifier);
-        else if (SyntaxFacts.IsValidIdentifier("@" + identifier))
-        {
+        if (SyntaxFacts.GetKeywordKind(identifier) != SyntaxKind.None)
             builder.Append('@');
-            builder.Append(identifier);
-        }
-        else
-            return new SerializeErrorResults(SerializeError.invalidIdentifier, identifier);
 
+        builder.Append(identifier);
         return default;
     }
 }

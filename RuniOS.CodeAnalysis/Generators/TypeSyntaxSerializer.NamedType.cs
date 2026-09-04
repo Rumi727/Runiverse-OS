@@ -35,6 +35,9 @@ public static partial class TypeSyntaxSerializer
             result |= RenderNamespace(builder, namedTypeSymbol.ContainingNamespace);
             if (!result.isSuccess)
                 return result;
+
+            if (!namedTypeSymbol.ContainingNamespace.IsGlobalNamespace)
+                builder.Append('.');
         }
 
         result |= RenderIdentifier(builder, namedTypeSymbol.Name);
@@ -47,7 +50,10 @@ public static partial class TypeSyntaxSerializer
     static SerializeErrorResults RenderNamespace(StringBuilder builder, INamespaceSymbol namespaceSymbol)
     {
         if (namespaceSymbol.IsGlobalNamespace)
+        {
+            builder.Append("global::");
             return default;
+        }
 
         SerializeErrorResults result = default;
         if (namespaceSymbol.ContainingNamespace is { IsGlobalNamespace: false } containingNamespace)
