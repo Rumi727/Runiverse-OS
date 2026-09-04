@@ -17,8 +17,8 @@ public sealed partial class SourceWriter
     }
 
     public bool isEmpty => builder.Length == 0;
-    public bool isLineStart => isEmpty || SyntaxFacts.IsNewLine(builder[^1]);
-    public bool isTokenBoundary => isEmpty || SyntaxFacts.IsWhitespace(builder[^1]);
+    public bool isLineStart => isEmpty || SyntaxFacts.IsNewLine(builder[builder.Length - 1]);
+    public bool isTokenBoundary => isEmpty || SyntaxFacts.IsWhitespace(builder[builder.Length - 1]);
 
     public bool isBlankLineStart
     {
