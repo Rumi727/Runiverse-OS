@@ -147,3 +147,9 @@ fmod_editor.log
 /[Pa]ackages/com.rumi.runios.nbs/StreamingAssets/assets/runios/sounds/*.ogg.meta
 
 /ProfilerCaptures/*
+
+# RuniOS.CodeAnalysis test project build outputs
+/RuniOS.CodeAnalysis.Tests/bin/
+/RuniOS.CodeAnalysis.Tests/obj/
+/RuniOS.CodeAnalysis.Tests/TestResults/
+!/RuniOS.CodeAnalysis.Tests/RuniOS.CodeAnalysis.Tests.csproj
