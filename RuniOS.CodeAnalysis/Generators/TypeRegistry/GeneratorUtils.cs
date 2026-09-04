@@ -119,6 +119,9 @@ static class GeneratorUtils
         )
             return "global::System.Nullable<>";
 
+        if (type is INamedTypeSymbol { OriginalDefinition.SpecialType: SpecialType.System_Nullable_T, IsUnboundGenericType: true })
+            return "global::System.Nullable<>";
+
         return type.ToDisplayString(fullyQualifiedFormat);
     }
 
