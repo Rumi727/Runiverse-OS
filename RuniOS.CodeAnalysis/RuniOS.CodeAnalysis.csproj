@@ -9,6 +9,13 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
 
+        <EmbeddedResource Update="Diagnostics\TypeSyntaxSerializerDiagnostics.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.Diagnostics.resources</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Diagnostics\TypeSyntaxSerializerDiagnostics.ko.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.Diagnostics.ko.resources</LogicalName>
+            <DependentUpon>TypeSyntaxSerializerDiagnostics.cs</DependentUpon>
+        </EmbeddedResource>
         <EmbeddedResource Update="Diagnostics/TypeRegistryDiagnostics.resx">
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.resources</LogicalName>
         </EmbeddedResource>

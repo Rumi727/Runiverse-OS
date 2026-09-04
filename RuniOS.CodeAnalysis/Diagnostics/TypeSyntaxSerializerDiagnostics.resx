@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ROS0025_Title" xml:space="preserve">
+    <value>Type syntax contains an invalid identifier</value>
+  </data>
+  <data name="ROS0025_Message" xml:space="preserve">
+    <value>Identifier '{0}' cannot be represented as equivalent C# type syntax</value>
+  </data>
+  <data name="ROS0026_Title" xml:space="preserve">
+    <value>Array type syntax is not equivalent</value>
+  </data>
+  <data name="ROS0026_Message" xml:space="preserve">
+    <value>Array type '{0}' cannot be represented as equivalent C# array syntax</value>
+  </data>
+  <data name="ROS0027_Title" xml:space="preserve">
+    <value>Function pointer syntax is not equivalent</value>
+  </data>
+  <data name="ROS0027_Message" xml:space="preserve">
+    <value>Function pointer '{0}' cannot be represented as equivalent C# function pointer syntax</value>
+  </data>
+  <data name="ROS0028_Title" xml:space="preserve">
+    <value>Type cannot be represented as syntax</value>
+  </data>
+  <data name="ROS0028_Message" xml:space="preserve">
+    <value>Type '{0}' cannot be represented as C# type syntax</value>
+  </data>
+</root>
