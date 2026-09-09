@@ -11,7 +11,16 @@ public partial class SourceWriter
         EnsureBlankLine();
 
         Append("namespace ");
-        bool valid = AppendIdentifier(nameSpace);
+        bool valid = true;
+        string[] parts = nameSpace.Split('.');
+
+        for (int i = 0; i < parts.Length; i++)
+        {
+            if (i != 0)
+                Append('.');
+
+            valid &= AppendIdentifier(parts[i]);
+        }
 
         BeginBlock();
         return valid;
