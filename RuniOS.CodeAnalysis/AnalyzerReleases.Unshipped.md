@@ -33,3 +33,9 @@
 | ROS0026 | RuniOS.Serializer   | Error    | unsupportedArrayType                             |
 | ROS0027 | RuniOS.Serializer   | Error    | unsupportedFunctionPointer                       |
 | ROS0028 | RuniOS.Serializer   | Error    | unrepresentableType                              |
+| ROS0029 | RuniOS.Milestones  | Error    | methodMustBeStatic                               |
+| ROS0030 | RuniOS.Milestones  | Error    | methodMustBeParameterless                        |
+| ROS0031 | RuniOS.Milestones  | Error    | methodMustNotBeGeneric                           |
+| ROS0032 | RuniOS.Milestones  | Error    | containingTypeMustBePartial                      |
+| ROS0033 | RuniOS.Milestones  | Error    | containingTypeMustNotBeGeneric                   |
+| ROS0034 | RuniOS.Milestones  | Error    | invalidReturnType                                |

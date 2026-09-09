@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ROS0029_Title" xml:space="preserve">
+    <value>마일스톤 메서드는 정적이어야 함</value>
+  </data>
+  <data name="ROS0029_Message" xml:space="preserve">
+    <value>마일스톤 특성이 적용된 메서드는 static이어야 합니다</value>
+  </data>
+  <data name="ROS0030_Title" xml:space="preserve">
+    <value>마일스톤 메서드는 매개변수가 없어야 함</value>
+  </data>
+  <data name="ROS0030_Message" xml:space="preserve">
+    <value>마일스톤 특성이 적용된 메서드는 매개변수를 선언할 수 없습니다</value>
+  </data>
+  <data name="ROS0031_Title" xml:space="preserve">
+    <value>마일스톤 메서드는 제네릭일 수 없음</value>
+  </data>
+  <data name="ROS0031_Message" xml:space="preserve">
+    <value>마일스톤 특성이 적용된 메서드는 제네릭일 수 없습니다</value>
+  </data>
+  <data name="ROS0032_Title" xml:space="preserve">
+    <value>마일스톤 포함 타입은 partial이어야 함</value>
+  </data>
+  <data name="ROS0032_Message" xml:space="preserve">
+    <value>마일스톤 메서드를 포함하는 모든 타입은 partial이어야 합니다</value>
+  </data>
+  <data name="ROS0033_Title" xml:space="preserve">
+    <value>마일스톤 포함 타입은 제네릭일 수 없음</value>
+  </data>
+  <data name="ROS0033_Message" xml:space="preserve">
+    <value>마일스톤 메서드를 포함하는 모든 타입은 제네릭일 수 없습니다</value>
+  </data>
+  <data name="ROS0034_Title" xml:space="preserve">
+    <value>마일스톤 메서드 반환 타입이 잘못됨</value>
+  </data>
+  <data name="ROS0034_Message" xml:space="preserve">
+    <value>마일스톤 메서드는 void 또는 제네릭이 아닌 Cysharp.Threading.Tasks.UniTask를 반환해야 합니다</value>
+  </data>
+</root>
