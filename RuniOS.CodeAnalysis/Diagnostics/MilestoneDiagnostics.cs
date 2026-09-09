@@ -1,11 +1,10 @@
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Resources;
 
 namespace RuniOS.CodeAnalysis.Diagnostics;
 
-internal static class MilestoneDiagnostics
+static class MilestoneDiagnostics
 {
     const string category = "RuniOS.Milestones";
     static readonly ResourceManager resourceManager = new
