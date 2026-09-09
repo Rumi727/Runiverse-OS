@@ -441,6 +441,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// The types that registered implementations must match or derive from.<br/>
     /// 등록 구현 타입이 일치하거나 상속해야 하는 타입들입니다.
     /// </param>
+    /// <param name="requireDefaultConstructor"></param>
     /// <param name="origin">
     /// The origin recorded in the resulting definition.<br/>
     /// 결과 정의에 기록할 출처입니다.
