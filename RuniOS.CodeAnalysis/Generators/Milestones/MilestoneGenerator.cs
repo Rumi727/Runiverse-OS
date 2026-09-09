@@ -113,9 +113,9 @@ public sealed class MilestoneGenerator : IIncrementalGenerator
 
             writer.AppendLineCompilerGenerated();
             writer.AppendLineEditorBrowsable(EditorBrowsableState.Never);
-            writer.AppendLine($"internal static void __{method.methodName}_{method.attributeName}_RegisterMilestoneMethod");
+            writer.AppendLine($"internal static void __{method.methodName}_{method.attributeName}_RegisterMilestoneMethod()");
             using (writer.Block())
-                writer.AppendLine($"global::RuniOS.Milestones.MilestoneDispatcher.Register<{method.attributeSyntax}>({method.methodName})");
+                writer.AppendLine($"global::RuniOS.Milestones.MilestoneDispatcher.Register<{method.attributeSyntax}>({method.methodName});");
         }
 
         context.AddSource(method.hintName, writer.ToString());
