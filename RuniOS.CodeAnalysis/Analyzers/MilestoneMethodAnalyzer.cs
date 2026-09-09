@@ -4,7 +4,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using RuniOS.CodeAnalysis.Diagnostics;
 using RuniOS.CodeAnalysis.Generators;
-using RuniOS.CodeAnalysis.Generators.Milestones;
 using System.Collections.Immutable;
 using System.Threading;
 
@@ -13,6 +12,8 @@ namespace RuniOS.CodeAnalysis.Analyzers;
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
 {
+    const string milestoneAttributeMetadataName = "RuniOS.Milestones.OnResourcesReadyAttribute";
+
     public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
         ImmutableArray.Create
         (
@@ -31,11 +32,8 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
         context.RegisterCompilationStartAction(static context =>
         {
             ImmutableArray<INamedTypeSymbol>.Builder milestoneAttributes = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
-            for (int i = 0; i < MilestoneGenerator.targetAttributes.Length; i++)
-            {
-                if (context.Compilation.GetTypeByMetadataName(MilestoneGenerator.targetAttributes[i]) is { } milestoneAttribute)
-                    milestoneAttributes.Add(milestoneAttribute);
-            }
+            if (context.Compilation.GetTypeByMetadataName(milestoneAttributeMetadataName) is { } milestoneAttribute)
+                milestoneAttributes.Add(milestoneAttribute);
 
             ImmutableArray<INamedTypeSymbol> resolvedMilestoneAttributes = milestoneAttributes.ToImmutable();
             if (resolvedMilestoneAttributes.IsDefaultOrEmpty)
