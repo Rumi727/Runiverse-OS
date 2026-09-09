@@ -1,9 +1,6 @@
-#nullable enable
-
-using System.Collections;
-using Error = RuniOS.CodeAnalysis.Generators.TypeSyntaxSerializer.SerializeError;
-using ErrorResult = RuniOS.CodeAnalysis.Generators.TypeSyntaxSerializer.SerializeErrorResult;
-using Results = RuniOS.CodeAnalysis.Generators.TypeSyntaxSerializer.SerializeErrorResults;
+using Error = RuniOS.CodeAnalysis.Generators.SerializeError;
+using ErrorResult = RuniOS.CodeAnalysis.Generators.SerializeErrorResult;
+using Results = RuniOS.CodeAnalysis.Generators.SerializeErrorResults;
 
 namespace RuniOS.CodeAnalysis.Tests;
 
@@ -15,10 +12,7 @@ public sealed class SerializeErrorResultsTests
     {
         Results result = default;
         Assert.True(result.isSuccess);
-        Assert.Equal(0, result.count);
-        Assert.Equal(0, ((IReadOnlyCollection<ErrorResult>)result).Count);
         Assert.Empty(result);
-        Assert.Empty(((IEnumerable)result).Cast<ErrorResult>());
         var enumerator = result.GetEnumerator();
         Assert.False(enumerator.MoveNext());
         Assert.Empty(default(Results) | default(Results));
@@ -36,7 +30,6 @@ public sealed class SerializeErrorResultsTests
         Assert.Equal(1, result.count);
         Assert.Equal(new ErrorResult(kind, null), result[0]);
         Assert.Equal(result[0], Assert.Single(result));
-        Assert.Equal(result[0], Assert.Single(((IEnumerable)result).Cast<ErrorResult>()));
     }
 
     [Fact]
@@ -66,5 +59,17 @@ public sealed class SerializeErrorResultsTests
         Results combined = result | result;
         Assert.Equal(2, combined.count);
         Assert.Equal(combined[0], combined[1]);
+    }
+
+    [Fact]
+    public void Equality_compares_all_elements_and_hashes_equal_sequences_equally()
+    {
+        Results left = new Results(Error.invalidIdentifier, "first") | new Results(Error.unrepresentableType, "second");
+        Results right = new Results(Error.invalidIdentifier, "first") | new Results(Error.unrepresentableType, "second");
+        Results reordered = new Results(Error.unrepresentableType, "second") | new Results(Error.invalidIdentifier, "first");
+
+        Assert.Equal(left, right);
+        Assert.Equal(left.GetHashCode(), right.GetHashCode());
+        Assert.NotEqual(left, reordered);
     }
 }

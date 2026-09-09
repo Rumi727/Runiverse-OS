@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
@@ -31,11 +29,11 @@ internal static class MetadataFixture
         metadata.AddModule(0, metadata.GetOrAddString("SerializerMetadata.dll"),
             metadata.GetOrAddGuid(new Guid("dfb1bb53-3955-498f-ab25-40c514afcb18")), default, default);
         metadata.AddAssembly(metadata.GetOrAddString("SerializerMetadata"), new Version(1, 0, 0, 0),
-            default, default, (AssemblyFlags)0, AssemblyHashAlgorithm.None);
+            default, default, 0, AssemblyHashAlgorithm.None);
 
         AssemblyName core = typeof(object).Assembly.GetName();
         AssemblyReferenceHandle coreReference = metadata.AddAssemblyReference(metadata.GetOrAddString(core.Name!),
-            core.Version!, default, metadata.GetOrAddBlob(core.GetPublicKeyToken()!), (AssemblyFlags)0, default);
+            core.Version!, default, metadata.GetOrAddBlob(core.GetPublicKeyToken()!), 0, default);
         TypeReferenceHandle objectType = metadata.AddTypeReference(coreReference,
             metadata.GetOrAddString("System"), metadata.GetOrAddString("Object"));
 

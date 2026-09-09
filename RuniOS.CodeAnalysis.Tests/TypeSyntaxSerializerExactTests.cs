@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace RuniOS.CodeAnalysis.Tests;
 
 [Trait("Category", "Contract")]

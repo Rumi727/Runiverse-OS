@@ -9,12 +9,12 @@
     <ItemGroup>
         <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.3.0" PrivateAssets="all" />
 
-        <EmbeddedResource Update="Diagnostics\TypeSyntaxSerializerDiagnostics.resx">
+        <EmbeddedResource Update="Diagnostics\SerializerDiagnostics.resx">
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.Diagnostics.resources</LogicalName>
         </EmbeddedResource>
-        <EmbeddedResource Update="Diagnostics\TypeSyntaxSerializerDiagnostics.ko.resx">
+        <EmbeddedResource Update="Diagnostics\SerializerDiagnostics.ko.resx">
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.Diagnostics.ko.resources</LogicalName>
-            <DependentUpon>TypeSyntaxSerializerDiagnostics.cs</DependentUpon>
+            <DependentUpon>SerializerDiagnostics.cs</DependentUpon>
         </EmbeddedResource>
         <EmbeddedResource Update="Diagnostics/TypeRegistryDiagnostics.resx">
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.resources</LogicalName>
@@ -23,6 +23,57 @@
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.TypeRegistryDiagnostics.ko.resources</LogicalName>
             <DependentUpon>TypeRegistryDiagnostics.cs</DependentUpon>
         </EmbeddedResource>
+    </ItemGroup>
+
+    <ItemGroup>
+      <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    </ItemGroup>
+
+      <Compile Update="Generators\TypeSyntaxSerializer.Array.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\TypeSyntaxSerializer.DynamicType.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\TypeSyntaxSerializer.FunctionPointer.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\TypeSyntaxSerializer.NamedType.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\TypeSyntaxSerializer.Pointer.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\TypeSyntaxSerializer.TypeParameter.cs">
+        <DependentUpon>TypeSyntaxSerializer.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.Append.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.AppendIdentifier.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.AppendJoin.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.AppendLine.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.Block.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.Indent.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.Namespace.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.AppendLineCompilerGenerated.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
+      <Compile Update="Generators\SourceWriter.AppendLineEditorBrowsable.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <Target Name="CopyAnalyzerToUnityPackage" AfterTargets="Build">

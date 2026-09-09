@@ -2,7 +2,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
 using RuniOS.CodeAnalysis.Diagnostics;
-using RuniOS.CodeAnalysis.Generators;
 using RuniOS.CodeAnalysis.Generators.TypeRegistry;
 using System.Collections.Generic;
 using System.Collections.Immutable;

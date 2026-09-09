@@ -1,5 +1,3 @@
-#nullable enable
-
 namespace RuniOS.CodeAnalysis.Tests;
 
 public static class SerializationCases

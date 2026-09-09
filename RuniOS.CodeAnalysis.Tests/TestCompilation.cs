@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -138,7 +136,7 @@ internal static class TestCompilation
 
     public static string Serialize(ITypeSymbol type)
     {
-        var errors = type.TrySerialize(out string text);
+        var errors = type.TrySyntaxSerialize(out string text);
         Assert.True(errors.isSuccess, $"Serialization failed.\nSymbol: {type}\nOutput: {text}\nErrors: {FormatErrors(errors)}");
         return text;
     }
@@ -186,6 +184,6 @@ internal static class TestCompilation
     }
 
     public static string FormatDiagnostics(IEnumerable<Diagnostic> diagnostics) => string.Join("\n", diagnostics);
-    public static string FormatErrors(TypeSyntaxSerializer.SerializeErrorResults errors) =>
+    public static string FormatErrors(SerializeErrorResults errors) =>
         string.Join("; ", errors.Select(static e => $"{e.error}: {e.problematicObject ?? "<null>"}"));
 }

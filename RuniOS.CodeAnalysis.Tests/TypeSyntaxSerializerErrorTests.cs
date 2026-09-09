@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using RuniOS.CodeAnalysis.Generators;
@@ -16,7 +14,7 @@ public sealed class TypeSyntaxSerializerErrorTests
         BoundType bound = TestCompilation.BindField("Missing");
         Assert.Contains(bound.Compilation.GetDiagnostics(), d => d.Id == "CS0246");
         Assert.IsAssignableFrom<IErrorTypeSymbol>(bound.Type);
-        var errors = bound.Type.TrySerialize(out string output);
+        var errors = bound.Type.TrySyntaxSerialize(out string output);
         Assert.True(errors.isSuccess, TestCompilation.FormatErrors(errors));
         Assert.False(SyntaxFactory.ParseTypeName(output).ContainsDiagnostics, output);
         BoundType rebound = TestCompilation.BindField(output);
@@ -30,11 +28,11 @@ public sealed class TypeSyntaxSerializerErrorTests
         BoundType bound = TestCompilation.BindExpression("new { Number = 1, Name = \"anonymous\" }");
         TestCompilation.AssertNoErrors(bound.Compilation);
         Assert.True(bound.Type.IsAnonymousType);
-        var errors = bound.Type.TrySerialize(out _);
+        var errors = bound.Type.TrySyntaxSerialize(out _);
         Assert.False(errors.isSuccess);
         Assert.Contains(errors, error =>
-            (error.error == TypeSyntaxSerializer.SerializeError.unrepresentableType && ReferenceEquals(error.problematicObject, bound.Type)) ||
-            (error.error == TypeSyntaxSerializer.SerializeError.invalidIdentifier && Equals(error.problematicObject, bound.Type.Name)));
+            (error.error == SerializeError.unrepresentableType && ReferenceEquals(error.problematicObject, bound.Type)) ||
+            (error.error == SerializeError.invalidIdentifier && Equals(error.problematicObject, bound.Type.Name)));
     }
 
     [Fact]
@@ -44,7 +42,7 @@ public sealed class TypeSyntaxSerializerErrorTests
         TestCompilation.AssertNoErrors(compilation);
         INamedTypeSymbol hidden = Assert.IsAssignableFrom<INamedTypeSymbol>(compilation.GetTypeByMetadataName("Fixture.Owner+Hidden"));
         Assert.Equal(Accessibility.Private, hidden.DeclaredAccessibility);
-        var errors = hidden.TrySerialize(out string output);
+        var errors = hidden.TrySyntaxSerialize(out string output);
         Assert.True(errors.isSuccess, TestCompilation.FormatErrors(errors));
         Assert.Equal("global::Fixture.Owner.Hidden", output);
     }
@@ -57,9 +55,9 @@ public sealed class TypeSyntaxSerializerErrorTests
     {
         var compilation = MetadataFixture.Compilation();
         INamedTypeSymbol type = MetadataFixture.Type(compilation, metadataName);
-        var errors = type.TrySerialize(out _);
+        var errors = type.TrySyntaxSerialize(out _);
         var error = Assert.Single(errors);
-        Assert.Equal(TypeSyntaxSerializer.SerializeError.invalidIdentifier, error.error);
+        Assert.Equal(SerializeError.invalidIdentifier, error.error);
         Assert.Equal(badName, error.problematicObject);
     }
 
@@ -70,9 +68,9 @@ public sealed class TypeSyntaxSerializerErrorTests
         var array = Assert.IsAssignableFrom<IArrayTypeSymbol>(MetadataFixture.Field(compilation, "NonSz"));
         Assert.Equal(1, array.Rank);
         Assert.False(array.IsSZArray);
-        var errors = array.TrySerialize(out string partial);
+        var errors = array.TrySyntaxSerialize(out string partial);
         var error = Assert.Single(errors);
-        Assert.Equal(TypeSyntaxSerializer.SerializeError.unsupportedArrayType, error.error);
+        Assert.Equal(SerializeError.unsupportedArrayType, error.error);
         Assert.Same(array, error.problematicObject);
         // The surviving element is renderable; the API permits partial syntax on failure.
         Assert.Contains("int", partial);
@@ -98,9 +96,9 @@ public sealed class TypeSyntaxSerializerErrorTests
         var compilation = MetadataFixture.Compilation();
         var pointer = Assert.IsAssignableFrom<IFunctionPointerTypeSymbol>(MetadataFixture.Field(compilation, "VarArg"));
         Assert.Equal(SignatureCallingConvention.VarArgs, pointer.Signature.CallingConvention);
-        var errors = pointer.TrySerialize(out string partial);
+        var errors = pointer.TrySyntaxSerialize(out string partial);
         var error = Assert.Single(errors);
-        Assert.Equal(TypeSyntaxSerializer.SerializeError.unsupportedFunctionPointer, error.error);
+        Assert.Equal(SerializeError.unsupportedFunctionPointer, error.error);
         Assert.Same(pointer.Signature, error.problematicObject);
         Assert.Contains("delegate*", partial);
     }
@@ -116,9 +114,9 @@ public sealed class TypeSyntaxSerializerErrorTests
         var pointer = Assert.IsAssignableFrom<IFunctionPointerTypeSymbol>(MetadataFixture.Field(compilation, "Unmanaged" + convention));
         Assert.Equal(SignatureCallingConvention.Unmanaged, pointer.Signature.CallingConvention);
         Assert.Equal("CallConv" + convention, Assert.Single(pointer.Signature.UnmanagedCallingConventionTypes).Name);
-        var errors = pointer.TrySerialize(out _);
+        var errors = pointer.TrySyntaxSerialize(out _);
         var error = Assert.Single(errors);
-        Assert.Equal(TypeSyntaxSerializer.SerializeError.unsupportedFunctionPointer, error.error);
+        Assert.Equal(SerializeError.unsupportedFunctionPointer, error.error);
         Assert.Same(pointer.Signature, error.problematicObject);
     }
 
@@ -129,7 +127,7 @@ public sealed class TypeSyntaxSerializerErrorTests
         INamedTypeSymbol definition = MetadataFixture.Type(compilation, "System.Collections.Generic.Dictionary`2");
         INamedTypeSymbol first = MetadataFixture.Type(compilation, "Fixture.Bad-Name");
         INamedTypeSymbol second = MetadataFixture.Type(compilation, "Fixture.Bad-Container");
-        var errors = definition.Construct(first, second).TrySerialize(out string partial);
+        var errors = definition.Construct(first, second).TrySyntaxSerialize(out string partial);
         Assert.False(errors.isSuccess);
         Assert.Collection(errors,
             error => AssertBadName(error, "Bad-Name"),
@@ -146,19 +144,20 @@ public sealed class TypeSyntaxSerializerErrorTests
         var array = Assert.IsAssignableFrom<IArrayTypeSymbol>(MetadataFixture.Field(compilation, "NonSzBadElement"));
         Assert.False(array.IsSZArray);
         Assert.Equal("Bad-Name", array.ElementType.Name);
-        var errors = array.TrySerialize(out _);
+        var errors = array.TrySyntaxSerialize(out _);
         Assert.Collection(errors,
             error =>
             {
-                Assert.Equal(TypeSyntaxSerializer.SerializeError.unsupportedArrayType, error.error);
-                Assert.Same(array, error.problematicObject);
+                (SerializeError serializeError, object? problematicObject) = error;
+                Assert.Equal(SerializeError.unsupportedArrayType, serializeError);
+                Assert.Same(array, problematicObject);
             },
             error => AssertBadName(error, "Bad-Name"));
     }
 
-    static void AssertBadName(TypeSyntaxSerializer.SerializeErrorResult error, string name)
+    static void AssertBadName(SerializeErrorResult error, string name)
     {
-        Assert.Equal(TypeSyntaxSerializer.SerializeError.invalidIdentifier, error.error);
+        Assert.Equal(SerializeError.invalidIdentifier, error.error);
         Assert.Equal(name, error.problematicObject);
     }
 }
