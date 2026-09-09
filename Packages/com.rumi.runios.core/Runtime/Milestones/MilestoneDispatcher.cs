@@ -15,12 +15,19 @@ namespace RuniOS.Milestones
         {
             foreach (Assembly assembly in CurrentAssemblies.GetLoadedAssemblies())
             {
-                Type? type = assembly.GetType("RuniOS.Generated.__RuniModuleInitialization", false, false);
-                if (type == null)
-                    return;
+                try
+                {
+                    Type? type = assembly.GetType("RuniOS.Generated.__RuniModuleInitialization", false, false);
+                    if (type == null)
+                        continue;
 
-                MethodInfo method = type.GetMethod("Initialize", BindingFlags.Static | BindingFlags.NonPublic) ?? throw new MissingMethodException(type.FullName, "Initialize");
-                method.Invoke(null, null);
+                    MethodInfo method = type.GetMethod("Initialize", BindingFlags.Static | BindingFlags.NonPublic) ?? throw new MissingMethodException(type.FullName, "Initialize");
+                    method.Invoke(null, null);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
         }
 
