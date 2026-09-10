@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Milestones;
 using RuniOS.Reflection;
 using RuniOS.Resource;
 using UnityEngine;
@@ -9,7 +10,7 @@ namespace RuniOS.Booting
     /// <summary>
     /// ROS의 부팅을 담당하는 클래스입니다. 초기 로딩을 수행합니다.
     /// </summary>
-    public static class BootLoader
+    public static partial class BootLoader
     {
         // UniTask 버그로 인해 작업이 취소되는 문제가 있음
 #if FALSE //UNITY_2020_1_OR_NEWER
@@ -29,15 +30,15 @@ namespace RuniOS.Booting
             //Awaken Invoke
             Debug.RuntimeLog("Awaken Method Invoke");
             await ReflectionUtility.InvokeDefinedMethods<AwakenAttribute>();
-            
+
             Debug.RuntimeLog("Loading the resource registry");
-            
+
             await ResourceManager.Reload();
-            
-            //Starten Invoke
-            Debug.RuntimeLog("Starten Method Invoke");
-            await ReflectionUtility.InvokeDefinedMethods<StartenAttribute>();
-            
+
+            //On Resources Ready Method Invoke
+            Debug.RuntimeLog("On Resources Ready Method Invoke");
+            await MilestoneDispatcher.Invoke<OnResourcesReadyAttribute>();
+
             Debug.RuntimeLog("Exit bootloader");
         }
     }

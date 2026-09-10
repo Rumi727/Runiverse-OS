@@ -17,7 +17,7 @@ namespace RuniOS.Milestones
             {
                 try
                 {
-                    Type? type = assembly.GetType("RuniOS.Generated.__RuniModuleInitialization", false, false);
+                    Type? type = assembly.GetType("RuniOS.Milestones.Generated.__RuniModuleInitialization", false, false);
                     if (type == null)
                         continue;
 
@@ -68,13 +68,15 @@ namespace RuniOS.Milestones
 
             methods.GetValueOrDefault(type)?.SafeInvoke();
 
-            if (MilestoneDispatcher.asyncMethods.ContainsKey(type))
+            if (!MilestoneDispatcher.asyncMethods.TryGetValue(type, out Func<UniTask>? asyncMethod))
                 return;
 
-            Func<UniTask>[] asyncMethods = MilestoneDispatcher.asyncMethods[type]
-                .GetInvocationList()
-                .Cast<Func<UniTask>>()
-                .ToArray();
+            Func<UniTask>[] asyncMethods =
+            [
+                ..asyncMethod
+                    .GetInvocationList()
+                    .Cast<Func<UniTask>>()
+            ];
 
             await UniTask.WhenAll(asyncMethods.Select(InvokeAsync));
         }
