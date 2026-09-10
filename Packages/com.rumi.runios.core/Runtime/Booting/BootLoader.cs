@@ -1,7 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Milestones;
-using RuniOS.Reflection;
 using RuniOS.Resource;
 using UnityEngine;
 
@@ -28,8 +27,8 @@ namespace RuniOS.Booting
             PlayerLoopHelper.Initialize(ref loop);*/
 
             //Awaken Invoke
-            Debug.RuntimeLog("Awaken Method Invoke");
-            await ReflectionUtility.InvokeDefinedMethods<AwakenAttribute>();
+            /*Debug.RuntimeLog("Awaken Method Invoke");
+            await ReflectionUtility.InvokeDefinedMethods<AwakenAttribute>();*/
 
             Debug.RuntimeLog("Loading the resource registry");
 
