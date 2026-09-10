@@ -73,6 +73,16 @@ static class MilestoneDiagnostics
         isEnabledByDefault: true
     );
 
+    internal static readonly DiagnosticDescriptor containingTypeMustBePublicOrInternal = new
+    (
+        "ROS0035",
+        Text("ROS0035_Title"),
+        Text("ROS0035_Message"),
+        category,
+        DiagnosticSeverity.Error,
+        isEnabledByDefault: true
+    );
+
     internal static Diagnostic Create(DiagnosticDescriptor descriptor, Location location)
     {
         LocalizableResourceString detailedMessage = Text($"{descriptor.Id}_Message");

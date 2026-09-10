@@ -22,7 +22,8 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
             MilestoneDiagnostics.methodMustNotBeGeneric,
             MilestoneDiagnostics.containingTypeMustBePartial,
             MilestoneDiagnostics.containingTypeMustNotBeGeneric,
-            MilestoneDiagnostics.invalidReturnType
+            MilestoneDiagnostics.invalidReturnType,
+            MilestoneDiagnostics.containingTypeMustBePublicOrInternal
         );
 
     public override void Initialize(AnalysisContext context)
@@ -41,51 +42,96 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
 
             context.RegisterSymbolAction
             (
-                symbolContext => AnalyzeMethod(symbolContext, resolvedMilestoneAttributes),
-                SymbolKind.Method
+                symbolContext => AnalyzeType(symbolContext, resolvedMilestoneAttributes),
+                SymbolKind.NamedType
             );
         });
     }
 
-    static void AnalyzeMethod(SymbolAnalysisContext context, ImmutableArray<INamedTypeSymbol> milestoneAttributes)
+    static void AnalyzeType(SymbolAnalysisContext context, ImmutableArray<INamedTypeSymbol> milestoneAttributes)
     {
-        if (context.Symbol is not IMethodSymbol method || !TryGetMilestoneAttribute(method, milestoneAttributes, out AttributeData milestoneAttribute))
+        if (context.Symbol is not INamedTypeSymbol type)
             return;
 
-        CancellationToken cancellationToken = context.CancellationToken;
-        MethodDeclarationSyntax? declaration = GetMethodDeclaration(method, cancellationToken);
-        Location fallbackLocation = GetFallbackLocation(method, milestoneAttribute, declaration, cancellationToken);
-
-        if (!method.IsStatic)
-            Report(context, MilestoneDiagnostics.methodMustBeStatic, GetMethodIdentifierLocation(declaration, fallbackLocation));
-
-        if (method.Parameters.Length != 0)
-            Report(context, MilestoneDiagnostics.methodMustBeParameterless, GetParameterListLocation(declaration, fallbackLocation));
-
-        if (method.TypeParameters.Length != 0)
-            Report(context, MilestoneDiagnostics.methodMustNotBeGeneric, GetTypeParameterListLocation(declaration, fallbackLocation));
-
-        if (!method.ReturnsVoid && !method.ReturnType.IsNonGenericUniTask)
-            Report(context, MilestoneDiagnostics.invalidReturnType, GetReturnTypeLocation(declaration, fallbackLocation));
-
-        for (INamedTypeSymbol? containingType = method.ContainingType; containingType != null; containingType = containingType.ContainingType)
+        bool containsMilestoneMethod = false;
+        Location milestoneLocation = Location.None;
+        foreach (ISymbol member in type.GetMembers())
         {
-            TypeDeclarationSyntax? nonPartialDeclaration = FindNonPartialDeclaration(containingType, cancellationToken);
-            if (nonPartialDeclaration != null || !HasSourceDeclaration(containingType, cancellationToken))
-            {
-                Location location = nonPartialDeclaration?.Identifier.GetLocation() ?? GetContainingTypeLocation(containingType, fallbackLocation, cancellationToken);
-                Report(context, MilestoneDiagnostics.containingTypeMustBePartial, location);
-            }
+            context.CancellationToken.ThrowIfCancellationRequested();
 
-            if (containingType.TypeParameters.Length != 0)
+            if (member is IMethodSymbol method && TryGetMilestoneAttribute(method, milestoneAttributes, out AttributeData milestoneAttribute))
             {
-                TypeDeclarationSyntax? typeDeclaration = GetTypeDeclaration(containingType, cancellationToken);
-                Location location = typeDeclaration?.TypeParameterList?.GetLocation()
-                    ?? typeDeclaration?.Identifier.GetLocation()
-                    ?? GetContainingTypeLocation(containingType, fallbackLocation, cancellationToken);
-                Report(context, MilestoneDiagnostics.containingTypeMustNotBeGeneric, location);
+                containsMilestoneMethod = true;
+                Location methodMilestoneLocation = GetMilestoneAttributeLocation(method, milestoneAttribute, context.CancellationToken);
+                milestoneLocation = methodMilestoneLocation;
+                AnalyzeMethod(context, method, methodMilestoneLocation);
+            }
+            else if (member is INamedTypeSymbol nestedType && TryGetMilestoneMethodLocation(nestedType, milestoneAttributes, context.CancellationToken, out Location nestedMilestoneLocation))
+            {
+                containsMilestoneMethod = true;
+                milestoneLocation = nestedMilestoneLocation;
             }
         }
+
+        if (!containsMilestoneMethod)
+            return;
+
+        AnalyzeContainingType(context, type, milestoneLocation);
+    }
+
+    static void AnalyzeMethod(SymbolAnalysisContext context, IMethodSymbol method, Location milestoneLocation)
+    {
+        if (!method.IsStatic)
+            Report(context, MilestoneDiagnostics.methodMustBeStatic, milestoneLocation);
+
+        if (method.Parameters.Length != 0)
+            Report(context, MilestoneDiagnostics.methodMustBeParameterless, milestoneLocation);
+
+        if (method.TypeParameters.Length != 0)
+            Report(context, MilestoneDiagnostics.methodMustNotBeGeneric, milestoneLocation);
+
+        if (!method.ReturnsVoid && !method.ReturnType.IsNonGenericUniTask)
+            Report(context, MilestoneDiagnostics.invalidReturnType, milestoneLocation);
+    }
+
+    static void AnalyzeContainingType(SymbolAnalysisContext context, INamedTypeSymbol type, Location milestoneLocation)
+    {
+        CancellationToken cancellationToken = context.CancellationToken;
+        TypeDeclarationSyntax? nonPartialDeclaration = FindNonPartialDeclaration(type, cancellationToken);
+        if (nonPartialDeclaration != null || !HasSourceDeclaration(type, cancellationToken))
+            Report(context, MilestoneDiagnostics.containingTypeMustBePartial, milestoneLocation);
+
+        if (type.TypeParameters.Length != 0)
+            Report(context, MilestoneDiagnostics.containingTypeMustNotBeGeneric, milestoneLocation);
+
+        if (type.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+            Report(context, MilestoneDiagnostics.containingTypeMustBePublicOrInternal, milestoneLocation);
+    }
+
+    static bool TryGetMilestoneMethodLocation
+    (
+        INamedTypeSymbol type,
+        ImmutableArray<INamedTypeSymbol> milestoneAttributes,
+        CancellationToken cancellationToken,
+        out Location milestoneLocation
+    )
+    {
+        foreach (ISymbol member in type.GetMembers())
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (member is IMethodSymbol method && TryGetMilestoneAttribute(method, milestoneAttributes, out AttributeData milestoneAttribute))
+            {
+                milestoneLocation = GetMilestoneAttributeLocation(method, milestoneAttribute, cancellationToken);
+                return true;
+            }
+
+            if (member is INamedTypeSymbol nestedType && TryGetMilestoneMethodLocation(nestedType, milestoneAttributes, cancellationToken, out milestoneLocation))
+                return true;
+        }
+
+        milestoneLocation = Location.None;
+        return false;
     }
 
     static bool TryGetMilestoneAttribute
@@ -112,28 +158,6 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
 
         milestoneAttribute = null!;
         return false;
-    }
-
-    static MethodDeclarationSyntax? GetMethodDeclaration(IMethodSymbol method, CancellationToken cancellationToken)
-    {
-        foreach (SyntaxReference reference in method.DeclaringSyntaxReferences)
-        {
-            if (reference.GetSyntax(cancellationToken) is MethodDeclarationSyntax declaration)
-                return declaration;
-        }
-
-        return null;
-    }
-
-    static TypeDeclarationSyntax? GetTypeDeclaration(INamedTypeSymbol type, CancellationToken cancellationToken)
-    {
-        foreach (SyntaxReference reference in type.DeclaringSyntaxReferences)
-        {
-            if (reference.GetSyntax(cancellationToken) is TypeDeclarationSyntax declaration)
-                return declaration;
-        }
-
-        return null;
     }
 
     static TypeDeclarationSyntax? FindNonPartialDeclaration(INamedTypeSymbol type, CancellationToken cancellationToken)
@@ -171,19 +195,15 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
         return false;
     }
 
-    static Location GetFallbackLocation
+    static Location GetMilestoneAttributeLocation
     (
         IMethodSymbol method,
         AttributeData milestoneAttribute,
-        MethodDeclarationSyntax? declaration,
         CancellationToken cancellationToken
     )
     {
         if (milestoneAttribute.ApplicationSyntaxReference is { } attributeReference)
             return attributeReference.GetSyntax(cancellationToken).GetLocation();
-
-        if (declaration != null)
-            return declaration.Identifier.GetLocation();
 
         foreach (Location location in method.Locations)
         {
@@ -193,25 +213,6 @@ public sealed class MilestoneMethodAnalyzer : DiagnosticAnalyzer
 
         return Location.None;
     }
-
-    static Location GetMethodIdentifierLocation(MethodDeclarationSyntax? declaration, Location fallbackLocation) =>
-        declaration?.Identifier.GetLocation() ?? fallbackLocation;
-
-    static Location GetParameterListLocation(MethodDeclarationSyntax? declaration, Location fallbackLocation) =>
-        declaration?.ParameterList.GetLocation() ?? fallbackLocation;
-
-    static Location GetTypeParameterListLocation(MethodDeclarationSyntax? declaration, Location fallbackLocation) =>
-        declaration?.TypeParameterList?.GetLocation() ?? fallbackLocation;
-
-    static Location GetReturnTypeLocation(MethodDeclarationSyntax? declaration, Location fallbackLocation) =>
-        declaration?.ReturnType.GetLocation() ?? fallbackLocation;
-
-    static Location GetContainingTypeLocation
-    (
-        INamedTypeSymbol type,
-        Location fallbackLocation,
-        CancellationToken cancellationToken
-    ) => GetTypeDeclaration(type, cancellationToken)?.Identifier.GetLocation() ?? fallbackLocation;
 
     static void Report(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, Location location) =>
         context.ReportDiagnostic(MilestoneDiagnostics.Create(descriptor, location));

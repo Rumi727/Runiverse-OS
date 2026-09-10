@@ -39,3 +39,4 @@
 | ROS0032 | RuniOS.Milestones  | Error    | containingTypeMustBePartial                      |
 | ROS0033 | RuniOS.Milestones  | Error    | containingTypeMustNotBeGeneric                   |
 | ROS0034 | RuniOS.Milestones  | Error    | invalidReturnType                                |
+| ROS0035 | RuniOS.Milestones  | Error    | containingTypeMustBePublicOrInternal             |

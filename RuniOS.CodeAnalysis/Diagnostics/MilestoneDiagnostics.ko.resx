@@ -48,4 +48,10 @@
   <data name="ROS0034_Message" xml:space="preserve">
     <value>마일스톤 메서드는 void 또는 제네릭이 아닌 Cysharp.Threading.Tasks.UniTask를 반환해야 합니다</value>
   </data>
+  <data name="ROS0035_Title" xml:space="preserve">
+    <value>마일스톤 포함 타입은 public 또는 internal이어야 함</value>
+  </data>
+  <data name="ROS0035_Message" xml:space="preserve">
+    <value>마일스톤 메서드를 포함하는 모든 타입은 public 또는 internal이어야 합니다</value>
+  </data>
 </root>

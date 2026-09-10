@@ -61,6 +61,9 @@ public sealed class MilestoneGenerator : IIncrementalGenerator
     static MilestoneMethodInfo? CreateMethodInfo(GeneratorAttributeSyntaxContext context, CancellationToken cancellationToken)
     {
         IMethodSymbol methodSymbol = (IMethodSymbol)context.TargetSymbol;
+        if (!IsPublicOrInternalTypeHierarchy(methodSymbol.ContainingType))
+            return null;
+
         if (!methodSymbol.ReturnsVoid && !methodSymbol.ReturnType.IsNonGenericUniTask)
             return null;
 
@@ -91,6 +94,17 @@ public sealed class MilestoneGenerator : IIncrementalGenerator
             methodSymbol.Name,
             errors
         );
+    }
+
+    static bool IsPublicOrInternalTypeHierarchy(INamedTypeSymbol type)
+    {
+        for (INamedTypeSymbol? current = type; current != null; current = current.ContainingType)
+        {
+            if (current.DeclaredAccessibility is not (Accessibility.Public or Accessibility.Internal))
+                return false;
+        }
+
+        return true;
     }
 
     static void GenerateRegistrationMethod(SourceProductionContext context, MilestoneMethodInfo method)

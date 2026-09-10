@@ -48,4 +48,10 @@
   <data name="ROS0034_Message" xml:space="preserve">
     <value>A milestone method must return void or non-generic Cysharp.Threading.Tasks.UniTask</value>
   </data>
+  <data name="ROS0035_Title" xml:space="preserve">
+    <value>Milestone containing type must be public or internal</value>
+  </data>
+  <data name="ROS0035_Message" xml:space="preserve">
+    <value>Every containing type of a milestone method must be public or internal</value>
+  </data>
 </root>

@@ -452,9 +452,9 @@ static class AttributeLiteralEmitter
             .Select((field, index) => (field, value: ToEnumBits(field.ConstantValue, enumType.EnumUnderlyingType?.SpecialType ?? SpecialType.System_Int32), index))
             .ToList();
 
-        (IFieldSymbol field, ulong value, int index)? exact = fields.FirstOrDefault(x => x.value == target);
-        if (exact.HasValue)
-            return $"{enumName}.{GeneratorUtils.EscapeIdentifier(exact.Value.field.Name)}";
+        int exactIndex = fields.FindIndex(x => x.value == target);
+        if (exactIndex >= 0)
+            return $"{enumName}.{GeneratorUtils.EscapeIdentifier(fields[exactIndex].field.Name)}";
 
         ulong remaining = target;
         List<string> names = [];
