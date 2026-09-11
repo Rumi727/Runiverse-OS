@@ -8,11 +8,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public sealed class AssetImportData(IONode node, FileMetaData metaData = default) : IReadOnlyDictionary<Identifier, JObject>
+    public sealed class AssetSidecar(IONode node, FileMetaData metaData = default) : IReadOnlyDictionary<Identifier, JObject>
     {
-        public static readonly AssetImportData empty = new AssetImportData();
+        public static readonly AssetSidecar empty = new AssetSidecar();
 
-        public AssetImportData() : this(IONode.empty) { }
+        public AssetSidecar() : this(IONode.empty) { }
 
         public IONode node { get; } = node;
         public FileMetaData metaData { get; private set; } = metaData;
@@ -78,7 +78,7 @@ namespace RuniOS.Resource
             }
         }
 
-        public bool IsSameTarget(AssetImportData other) => node.IsSameTarget(other.node) && metaData == other.metaData;
+        public bool IsSameTarget(AssetSidecar other) => node.IsSameTarget(other.node) && metaData == other.metaData;
 
         public IEnumerator<KeyValuePair<Identifier, JObject>> GetEnumerator() => value.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

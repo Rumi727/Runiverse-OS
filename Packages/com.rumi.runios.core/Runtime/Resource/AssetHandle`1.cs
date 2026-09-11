@@ -12,9 +12,9 @@ namespace RuniOS.Resource
     /// </summary>
     /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
     /// <param name="fileMetaData">에셋 파일의 초기 메타 데이터입니다.</param>
-    /// <param name="importData">에셋의 초기 임포트 설정입니다.</param>
+    /// <param name="sidecar">에셋의 초기 임포트 설정입니다.</param>
     /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-    public abstract class AssetHandle<TAsset>(IONode node, FileMetaData fileMetaData, AssetImportData importData, int unloadDelayFrame = 600) : IAssetHandle<TAsset> where TAsset : notnull
+    public abstract class AssetHandle<TAsset>(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar, int unloadDelayFrame = 600) : IAssetHandle<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
@@ -27,7 +27,7 @@ namespace RuniOS.Resource
         public FileMetaData fileMetaData { get; private set; } = fileMetaData;
 
         /// <inheritdoc/>
-        public AssetImportData importData { get; } = importData;
+        public AssetSidecar sidecar { get; } = sidecar;
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -75,7 +75,7 @@ namespace RuniOS.Resource
                 try
                 {
                     fileMetaData = entry.metaData;
-                    await importData.Reload();
+                    await sidecar.Reload();
 
                     assetObject = await Load();
                 }
@@ -241,7 +241,7 @@ namespace RuniOS.Resource
             if (isSealed || other is not AssetHandle<TAsset> otherHandle)
                 return false;
 
-            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && fileMetaData == otherHandle.fileMetaData && importData.IsSameTarget(otherHandle.importData);
+            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && fileMetaData == otherHandle.fileMetaData && sidecar.IsSameTarget(otherHandle.sidecar);
         }
 
         /// <inheritdoc/>

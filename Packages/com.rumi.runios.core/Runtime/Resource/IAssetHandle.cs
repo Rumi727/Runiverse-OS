@@ -14,7 +14,7 @@ namespace RuniOS.Resource
         /// <summary>
         /// 에셋의 임포트 설정을 가져옵니다.
         /// </summary>
-        AssetImportData importData { get; }
+        AssetSidecar sidecar { get; }
 
         /// <summary>
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.

@@ -5,11 +5,11 @@ using RuniOS.Textures;
 
 namespace RuniOS.Resource.Textures
 {
-    public sealed class TextureAssetHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData) : AssetHandle<Texture2D>(node, fileMetaData, importData)
+    public sealed class TextureAssetHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar) : AssetHandle<Texture2D>(node, fileMetaData, sidecar)
     {
         protected override async UniTask<Texture2D?> Load()
         {
-            TextureLoadSettings settings = importData.GetValue<TextureLoadSettings>(TextureAssetRegistry.id);
+            TextureLoadSettings settings = sidecar.GetValue<TextureLoadSettings>(TextureAssetRegistry.id);
             return await TextureLoader.LoadAsync(node, settings);
         }
 

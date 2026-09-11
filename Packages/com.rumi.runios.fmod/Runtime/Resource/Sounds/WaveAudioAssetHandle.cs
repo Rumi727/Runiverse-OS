@@ -6,11 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class WaveAudioAssetHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData) : AssetHandle<WaveAudioClip>(node, fileMetaData, importData)
+    public class WaveAudioAssetHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar) : AssetHandle<WaveAudioClip>(node, fileMetaData, sidecar)
     {
         protected override async UniTask<WaveAudioClip?> Load()
         {
-            WaveAudioAssetImportData data = importData.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
+            WaveAudioAssetImportData data = sidecar.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
             return data.loadMode switch
             {
                 WaveAudioAssetLoadMode.normal => await SoundSystem.main.CreateSoundAsync(node),
