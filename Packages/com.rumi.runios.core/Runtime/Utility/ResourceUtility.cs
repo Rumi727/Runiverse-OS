@@ -1,9 +1,10 @@
 #nullable enable
+using Unity.Scripting.LifecycleManagement;
 using UnityEngine;
 
 namespace RuniOS.Utility
 {
-    public static class ResourceUtility
+    public static partial class ResourceUtility
     {
         /// <summary>
         /// 빈 게임 오브젝트
@@ -81,5 +82,42 @@ namespace RuniOS.Utility
         static readonly int dstBlend = Shader.PropertyToID("_DstBlend");
         static readonly int cull = Shader.PropertyToID("_Cull");
         static readonly int zWrite = Shader.PropertyToID("_ZWrite");
+
+        extension(Texture2D)
+        {
+            public static Texture2D missingTexture => _missingTexture;
+        }
+
+        static Texture2D _missingTexture = null!;
+
+        [OnCodeInitializing]
+        static void OnCodeInitializing()
+        {
+            Texture2D texture = new Texture2D(2, 2, TextureFormat.RGBA32, false)
+            {
+                name = "Missing Texture",
+                filterMode = FilterMode.Point,
+                wrapMode = TextureWrapMode.Repeat,
+                hideFlags = HideFlags.HideAndDontSave
+            };
+
+            texture.SetPixels
+            ([
+                Color.magenta, Color.black,
+                Color.black,   Color.magenta
+            ]);
+
+            texture.Apply(false, true);
+            _missingTexture = texture;
+        }
+
+        [OnCodeDeinitializing]
+        static void OnCodeDeinitializing()
+        {
+            if (_missingTexture != null)
+                Object.DestroyImmediate(_missingTexture);
+
+            _missingTexture = null!;
+        }
     }
 }
