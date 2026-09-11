@@ -77,9 +77,11 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
             label ??= new GUIContent(element?.displayName ?? inspectable.inspectionDisplayName);
             
             BeginWideMode(EditorGUIUtility.wideMode && isField);
-            
+
             int controlID = GUIUtility.GetControlID(EditorGUIBridge.s_FoldoutHash, FocusType.Keyboard, position);
             position = EditorGUIBridge.MultiFieldPrefixLabel(position, controlID, label, 3); // 2로 하면 크기 절반 줄어듬
+
+            EndWideMode();
             
             string keyLabel = GetTextOrKey("gui.key");
             GUIContent keyLabelContent = new GUIContent(keyLabel);
@@ -131,8 +133,6 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 if (EditorGUIUtility.hierarchyMode)
                     EndLabelWidth();
             }
-            
-            EndWideMode();
         }
 
         public override float GetHeight(GUIContent? label, InspectorFlags flags, DrawerContext context = default)
