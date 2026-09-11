@@ -24,10 +24,16 @@ namespace RuniOS.Editor.IMGUI
             position.height = EditorGUIUtility.singleLineHeight;
 
             BeginIndentLevel(0);
-            float fieldWidth = (position.width - (2 * 4) - (4 * 2)) / 3f;
+
+            float fieldAreaWidth = EditorGUIUtility.hierarchyMode
+                ? EditorGUIUtilityBridge.contextWidth - EditorGUIUtility.labelWidth - 2f
+                : position.width;
+
+            float namespaceWidth = (fieldAreaWidth - (2 * 4) - (4 * 2)) / 3f;
+            float fieldEnd = position.xMax;
 
             {
-                position.width = fieldWidth;
+                position.width = namespaceWidth;
 
                 string nameSpace = TextFieldDropDown(position, value.nameSpace, out bool isPressed);
                 int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
@@ -73,7 +79,7 @@ namespace RuniOS.Editor.IMGUI
             }
 
             {
-                position.width = (fieldWidth * 2) + 8;
+                position.width = fieldEnd - position.x;
 
                 RuniPath path;
                 if (dropdownAction != null)
