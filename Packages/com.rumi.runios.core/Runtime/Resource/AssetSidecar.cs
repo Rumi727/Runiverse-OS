@@ -31,12 +31,12 @@ namespace RuniOS.Resource
 
         Dictionary<Identifier, JObject> value = [];
 
-        public T? GetValue<T>(Identifier key)
+        public T? GetValue<T>(Identifier key) where T : struct
         {
-            if (value.TryGetValue(key, out JObject jObject))
-                return jObject.ToObject<T>();
+            if (TryGetValue(key, out T value))
+                return value;
 
-            return default;
+            return null;
         }
 
         public bool ContainsKey(Identifier key) => value.ContainsKey(key);
@@ -44,14 +44,25 @@ namespace RuniOS.Resource
         public bool TryGetValue(Identifier key, out JObject value) => this.value.TryGetValue(key, out value);
         public bool TryGetValue<T>(Identifier key, [NotNullWhen(true)] out T? value)
         {
-            if (this.value.TryGetValue(key, out JObject jObject))
+            value = default;
+
+            if (!this.value.TryGetValue(key, out JObject jObject))
+                return false;
+
+            try
             {
                 value = jObject.ToObject<T>();
                 return value != null;
             }
-
-            value = default;
-            return false;
+            catch (JsonException)
+            {
+                return false;
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return false;
+            }
         }
 
         public async UniTask Reload()
