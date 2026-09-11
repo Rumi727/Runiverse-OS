@@ -16,8 +16,6 @@ namespace RuniOS.Resource.Sounds
 
         public override Identifier registryId => id;
 
-        public override int priority => 100;
-
         public override Type providedAssetType => typeof(SoundClipRef);
 
         public override bool isLoading => reloadGate.isRunning;

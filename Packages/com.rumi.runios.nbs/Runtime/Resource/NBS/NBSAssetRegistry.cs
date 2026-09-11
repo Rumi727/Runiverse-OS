@@ -22,9 +22,6 @@ namespace RuniOS.Resource.NBS
         public override RuniPath registryName => RuniPath.From("nbses");
 
         /// <inheritdoc/>
-        public override int priority => 100;
-
-        /// <inheritdoc/>
         public override Type providedAssetType => typeof(NoteBlockClip);
 
         /// <inheritdoc/>

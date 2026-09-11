@@ -16,8 +16,6 @@ namespace RuniOS.Resource.Languages
 
         public override Identifier registryId => id;
 
-        public override int priority => 100;
-
         public override Type providedAssetType => typeof(LocalizationData);
 
         public override bool isLoading => reloadGate.isRunning;
