@@ -150,6 +150,8 @@ namespace RuniOS.Editor.Windows
 
             public class Test2
             {
+                public Identifier identifier;
+                public Vector2 vector2;
                 public float test2Field = 100;
                 public double doubleProperty { get; set; } = 32;
                 public double privateReadOnlyProperty { get; private set; } = 64;
