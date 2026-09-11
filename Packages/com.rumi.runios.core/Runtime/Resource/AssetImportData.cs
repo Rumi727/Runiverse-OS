@@ -64,17 +64,16 @@ namespace RuniOS.Resource
                 return;
             }
 
+            metaData = entry.metaData;
+
             try
             {
                 string text = await node.file.ReadAllText();
                 value = JsonConvert.DeserializeObject<Dictionary<Identifier, JObject>>(text) ?? [];
-                metaData = entry.metaData;
             }
             catch (Exception e)
             {
                 value = [];
-                metaData = default;
-
                 Debug.LogError($"Failed to load import settings at path {entry.path}! The exception is: {e}");
             }
         }
