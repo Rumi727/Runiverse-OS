@@ -87,7 +87,7 @@ namespace RuniOS.Inspectors.Csharp
             if (isStatic ? !flags.HasFlagFast(InspectorFlags.Static) : !flags.HasFlagFast(InspectorFlags.Instance))
                 return false;
 
-            if (member.IsCompilerGenerated() && !flags.HasFlagFast(InspectorFlags.Hidden))
+            if (member.IsCompilerGenerated && !flags.HasFlagFast(InspectorFlags.Hidden))
                 return false;
 
             return true;

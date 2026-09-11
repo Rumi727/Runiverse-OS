@@ -123,7 +123,7 @@ namespace RuniOS.Editor.Windows
         {
             labelText.identifier = key;
             valueText.value = value;
-            if (value.GetType().IsNumeric())
+            if (value.GetType().IsNumeric)
                 valueText.SetStyle(TMPStyles.monoSpacing, 7.6f);
             else
                 valueText.UnsetStyle(TMPStyles.monoSpacing);

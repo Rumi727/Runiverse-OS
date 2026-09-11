@@ -8,26 +8,54 @@ namespace RuniOS.Reflection
 {
     public static class ReflectionUtility
     {
-        public static bool IsAsyncMethod(this MethodBase methodBase) => methodBase.IsDefined(typeof(AsyncStateMachineAttribute));
+        extension(MethodBase methodBase)
+        {
+            public bool IsAsyncMethod => methodBase.IsDefined(typeof(AsyncStateMachineAttribute), false);
+        }
 
-        public static bool IsCompilerGenerated(this Type type) => type.IsDefined(typeof(CompilerGeneratedAttribute));
-        public static bool IsCompilerGenerated(this MemberInfo memberInfo) => memberInfo.IsDefined(typeof(CompilerGeneratedAttribute));
+        extension(MemberInfo memberInfo)
+        {
+            public bool IsCompilerGenerated => memberInfo.IsDefined(typeof(CompilerGeneratedAttribute), true);
+        }
 
         public static MethodInfo GetMethodInfo(Delegate method) => method.Method;
-        
+
+        public static object? GetDefaultValue(this Type type, bool nonPublic = false)
+        {
+            if (!type.IsValueType)
+                return null;
+
+            return Activator.CreateInstance(type, nonPublic);
+        }
+
+        public static object GetDefaultValueNotNull(this Type type, bool nonPublic = false)
+        {
+            if (type == typeof(string))
+                return string.Empty;
+            if (type.IsArray)
+                return Array.CreateInstance(type.GetElementType() ?? typeof(object), 0);
+
+            // Nullable<T>는 default 값을 boxing하면 null이 되므로,
+            // non-null 상태인 default(T)를 대신 반환합니다.
+            if (Nullable.GetUnderlyingType(type) is { } underlyingType)
+                return Activator.CreateInstance(underlyingType, nonPublic)!;
+
+            return Activator.CreateInstance(type, nonPublic) ?? throw new InvalidOperationException($"Could not create a non-null default value for '{type}'.");
+        }
+
+        public static bool CanGetDefaultValueNotNull(this Type type, bool nonPublic = false) => type == typeof(string) || type.IsArray || type.HasDefaultConstructor(nonPublic);
+
         /// <summary>
         /// 문자열과 배열은 포함되지 않습니다!
         /// </summary>
-        public static bool HasDefaultConstructor(this Type t, bool includeNonPublic = false)
+        public static bool HasDefaultConstructor(this Type type, bool nonPublic = false)
         {
             BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
-            if (includeNonPublic)
-                flags |= BindingFlags.NonPublic; 
-            
-            return t.IsValueType || t.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
+            if (nonPublic)
+                flags |= BindingFlags.NonPublic;
+
+            return type.IsValueType || type.GetConstructor(flags, null, Type.EmptyTypes, null) != null;
         }
-        
-        public static bool IsFlags(this Enum value) => value.GetType().IsDefined(typeof(FlagsAttribute));
 
         [return: NotNullIfNotNull("value")]
         public static object? Cast(this object? value, Type type)

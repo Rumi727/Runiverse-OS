@@ -2,7 +2,6 @@
 using RuniOS.Inspectors;
 using RuniOS.Inspectors.Attributes;
 using RuniOS.Inspectors.Drawers;
-using RuniOS.Reflection;
 using RuniOS.Undos;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
@@ -13,7 +12,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Primitives
         protected override object? DrawField(Rect position, GUIContent label, object? value, DrawerContext context = default)
         {
             Enum enumValue = (Enum)value!;
-            if (enumValue.IsFlags())
+            if (enumValue.IsFlags)
                 return EditorGUI.EnumFlagsField(position, label, enumValue);
             else
                 return EditorGUI.EnumPopup(position, label, enumValue);

@@ -1,6 +1,4 @@
 #nullable enable
-using RuniOS.Reflection;
-
 namespace RuniOS.Editor.IMGUI
 {
     public static partial class RuniFields
@@ -18,16 +16,16 @@ namespace RuniOS.Editor.IMGUI
             Type type = value.GetType();
             if (type == typeof(bool))
                 return EditorGUI.Toggle(position, (bool)value);
-            else if (type.IsNumeric())
+            else if (type.IsNumeric)
             {
-                if (type.IsAssignableToInt())
+                if (type.IsExactlyRepresentableAsInt32)
                 {
                     EditorGUI.BeginChangeCheck();
 
                     int intValue = EditorGUI.IntField(position, Convert.ToInt32(value));
 
-                    int minValue = Convert.ToInt32(type.GetMinValue());
-                    int maxValue = Convert.ToInt32(type.GetMaxValue());
+                    int minValue = Convert.ToInt32(type.NumericMinValue);
+                    int maxValue = Convert.ToInt32(type.NumericMaxValue);
 
                     intValue = intValue.Clamp(minValue, maxValue);
 
@@ -36,14 +34,14 @@ namespace RuniOS.Editor.IMGUI
 
                     return value;
                 }
-                else if (type.IsAssignableToLong())
+                else if (type.IsExactlyRepresentableAsInt64)
                 {
                     EditorGUI.BeginChangeCheck();
 
                     long longValue = EditorGUI.LongField(position, Convert.ToInt64(value));
 
-                    long minValue = Convert.ToInt64(type.GetMinValue());
-                    long maxValue = Convert.ToInt64(type.GetMaxValue());
+                    long minValue = Convert.ToInt64(type.NumericMinValue);
+                    long maxValue = Convert.ToInt64(type.NumericMaxValue);
 
                     longValue = longValue.Clamp(minValue, maxValue);
 
@@ -52,14 +50,25 @@ namespace RuniOS.Editor.IMGUI
 
                     return value;
                 }
-                else if (type.IsAssignableToFloat())
+                else if (type == typeof(ulong))
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    long longValue = EditorGUI.LongField(position, ((ulong)value).ClampToLong());
+
+                    if (EditorGUI.EndChangeCheck())
+                        value = longValue.ClampToULong();
+
+                    return value;
+                }
+                else if (type.IsExactlyRepresentableAsSingle)
                 {
                     EditorGUI.BeginChangeCheck();
 
                     float floatValue = EditorGUI.FloatField(position, Convert.ToSingle(value));
 
-                    float minValue = Convert.ToSingle(type.GetMinValue());
-                    float maxValue = Convert.ToSingle(type.GetMaxValue());
+                    float minValue = Convert.ToSingle(type.NumericMinValue);
+                    float maxValue = Convert.ToSingle(type.NumericMaxValue);
 
                     floatValue = floatValue.Clamp(minValue, maxValue);
 
@@ -68,14 +77,14 @@ namespace RuniOS.Editor.IMGUI
 
                     return value;
                 }
-                else if (type.IsAssignableToDouble())
+                else if (type.IsExactlyRepresentableAsDouble)
                 {
                     EditorGUI.BeginChangeCheck();
 
                     double doubleValue = EditorGUI.DoubleField(position, Convert.ToDouble(value));
 
-                    double minValue = Convert.ToDouble(type.GetMinValue());
-                    double maxValue = Convert.ToDouble(type.GetMaxValue());
+                    double minValue = Convert.ToDouble(type.NumericMinValue);
+                    double maxValue = Convert.ToDouble(type.NumericMaxValue);
 
                     doubleValue = doubleValue.Clamp(minValue, maxValue);
 
@@ -84,15 +93,26 @@ namespace RuniOS.Editor.IMGUI
 
                     return value;
                 }
+                else if (type == typeof(decimal))
+                {
+                    EditorGUI.BeginChangeCheck();
+
+                    double doubleValue = EditorGUI.DoubleField(position, ((decimal)value).ClampToDouble());
+
+                    if (EditorGUI.EndChangeCheck())
+                        value = doubleValue.ClampToDecimal();
+
+                    return value;
+                }
             }
             else if (type == typeof(char))
                 return CharField(position, (char)value);
             else if (type == typeof(string))
                 return EditorGUI.TextField(position, (string)value);
-            else if (type.IsEnum())
+            else if (type.IsEnum)
             {
                 Enum enumValue = (Enum)value;
-                if (enumValue.IsFlags())
+                if (enumValue.IsFlags)
                     return EditorGUI.EnumFlagsField(position, enumValue);
                 else
                     return EditorGUI.EnumPopup(position, enumValue);

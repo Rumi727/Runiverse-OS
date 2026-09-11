@@ -1,6 +1,5 @@
 ﻿#nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor.Search;
-using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
 using UnityEditor.Search;
@@ -59,7 +58,7 @@ namespace RuniOS.Editor
 
         IEnumerable<Type> GetSearchData()
         {
-            foreach (var t in TypeCache.GetTypesDerivedFrom(baseType).Where(x => !x.IsSpecialName && !x.IsCompilerGenerated()))
+            foreach (var t in TypeCache.GetTypesDerivedFrom(baseType).Where(x => !x.IsSpecialName && !x.IsCompilerGenerated))
             {
                 assemblies.Add(t.Assembly);
                 yield return t;

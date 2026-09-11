@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
+using RuniOS.Reflection;
 
 namespace RuniOS.Editor.IMGUI
 {
@@ -56,7 +57,7 @@ namespace RuniOS.Editor.IMGUI
 
             nullText ??= $"null ({typeof(T).GetTypeDisplayName()})";
 
-            if (typeof(T).IsTextField())
+            if (typeof(T).IsTextOrNumeric)
             {
                 Rect fieldRect = new Rect(position.x, position.y, fieldWidth, position.height);
                 if (toggleRect.Contains(Event.current.mousePosition))
@@ -71,7 +72,7 @@ namespace RuniOS.Editor.IMGUI
                     EditorGUI.BeginChangeCheck();
 
                     T primitiveValue;
-                    if (typeof(T).IsText())
+                    if (typeof(T).IsText)
                         primitiveValue = (T)Convert.ChangeType(EditorGUI.TextField(fieldRect, nullText), typeof(T));
                     else
                     {
