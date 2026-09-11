@@ -14,7 +14,7 @@ namespace RuniOS.Resource.Sounds
         {
             await sidecar.Reload();
 
-            WaveAudioAssetImportData data = sidecar.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
+            WaveAudioAssetImportData data = sidecar.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id) ?? default;
             return data.loadMode switch
             {
                 WaveAudioAssetLoadMode.normal => await SoundSystem.main.CreateSoundAsync(node),
