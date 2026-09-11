@@ -55,9 +55,10 @@ namespace RuniOS.Resource
         /// </summary>
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="fileMetaData">에셋 파일의 메타 데이터 값입니다.</param>
-        /// <param name="sidecar">에셋 파일의 초기 임포트 설정입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar);
+        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData fileMetaData);
+
+        protected AssetSidecar CreateSidecar(IONode node) => new AssetSidecar(node.AddExtension(".json"));
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -118,9 +119,7 @@ namespace RuniOS.Resource
 
                     try
                     {
-                        AssetSidecar sidecar = new AssetSidecar(target.node.AddExtension(".json"));
-
-                        THandle handle = await CreateHandle(target.node, target.fileMetaData, sidecar);
+                        THandle handle = await CreateHandle(target.node, target.fileMetaData);
                         await OnAssetLoop(target.identifier, target.node, handle);
                     }
                     catch (Exception e)

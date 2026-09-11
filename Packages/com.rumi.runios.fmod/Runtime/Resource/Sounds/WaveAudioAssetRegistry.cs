@@ -27,6 +27,6 @@ namespace RuniOS.Resource.Sounds
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<WaveAudioAssetRegistry>();
 
-        protected override UniTask<WaveAudioAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar) => UniTask.FromResult(new WaveAudioAssetHandle(node, fileMetaData, sidecar));
+        protected override UniTask<WaveAudioAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new WaveAudioAssetHandle(node, fileMetaData, CreateSidecar(node)));
     }
 }

@@ -11,6 +11,8 @@ namespace RuniOS.Resource.Textures
 
         protected override async UniTask<Texture2D?> Load()
         {
+            await sidecar.Reload();
+
             TextureLoadSettings settings = sidecar.GetValue<TextureLoadSettings>(TextureAssetRegistry.id);
             return await TextureLoader.LoadAsync(node, settings);
         }

@@ -12,6 +12,8 @@ namespace RuniOS.Resource.Sounds
 
         protected override async UniTask<WaveAudioClip?> Load()
         {
+            await sidecar.Reload();
+
             WaveAudioAssetImportData data = sidecar.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
             return data.loadMode switch
             {
