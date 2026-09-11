@@ -1,4 +1,4 @@
 -langVersion:14
 -nullable:enable
--nowarn:nullable
+-warnaserror:nullable
 -nowarn:UAL0010,UAL0013
