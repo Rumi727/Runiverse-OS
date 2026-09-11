@@ -78,7 +78,7 @@ namespace RuniOS.Resource
             }
         }
 
-        public bool IsSameTarget(AssetSidecar other) => node.IsSameTarget(other.node) && metaData == other.metaData;
+        public bool IsSameTarget(AssetSidecar other) => node.IsSameTarget(other.node) && metaData.IsSameRevision(other.metaData);
 
         public IEnumerator<KeyValuePair<Identifier, JObject>> GetEnumerator() => value.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

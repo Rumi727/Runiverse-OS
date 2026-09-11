@@ -6,8 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource.Sounds
 {
-    public class WaveAudioAssetHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar) : AssetHandle<WaveAudioClip>(node, fileMetaData, sidecar)
+    public class WaveAudioAssetHandle(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar) : AssetHandle<WaveAudioClip>(node, fileMetaData)
     {
+        public AssetSidecar sidecar { get; } = sidecar;
+
         protected override async UniTask<WaveAudioClip?> Load()
         {
             WaveAudioAssetImportData data = sidecar.GetValue<WaveAudioAssetImportData>(WaveAudioAssetRegistry.id);
@@ -26,13 +28,10 @@ namespace RuniOS.Resource.Sounds
 
         public override bool IsSameTarget(IAssetHandle other)
         {
-            if (!base.IsSameTarget(other) || other is not WaveAudioAssetHandle)
+            if (!base.IsSameTarget(other))
                 return false;
 
-            if (assetObject == null || assetObject.isDisposed)
-                return false;
-
-            return true;
+            return assetObject != null && !assetObject.isDisposed;
         }
     }
 }

@@ -3,11 +3,8 @@ using Cysharp.Threading.Tasks;
 
 namespace RuniOS.Resource
 {
-    public readonly record struct InstanceAssetHandle<TAsset>(TAsset assetObject, AssetSidecar? importData = null) : IAssetHandle<TAsset> where TAsset : notnull
+    public readonly record struct InstanceAssetHandle<TAsset>(TAsset assetObject) : IAssetHandle<TAsset> where TAsset : notnull
     {
-        /// <inheritdoc/>
-        public AssetSidecar sidecar { get; } = importData ?? AssetSidecar.empty;
-
         /// <summary>
         /// 참조한 인스턴스를 가져옵니다.
         /// </summary>
@@ -35,7 +32,7 @@ namespace RuniOS.Resource
             if (other is not InstanceAssetHandle<TAsset> otherHandle)
                 return false;
 
-            return EqualityComparer<TAsset>.Default.Equals(assetObject, otherHandle.assetObject) && sidecar.IsSameTarget(otherHandle.sidecar);
+            return EqualityComparer<TAsset>.Default.Equals(assetObject, otherHandle.assetObject);
         }
 
         /// <inheritdoc/>

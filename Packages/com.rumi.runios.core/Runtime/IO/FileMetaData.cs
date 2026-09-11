@@ -59,5 +59,44 @@ namespace RuniOS.IO
         /// 파일 크기(바이트)입니다.
         /// </param>
         public FileMetaData(string name, long size) : this(name, size, null, null, null, null) { }
+
+        /// <summary>
+        /// 현재 파일 메타데이터와 <paramref name="other"/>가 동일한 파일 리비전을 나타내는지 확인합니다.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// <see cref="lastWriteTime"/>은 리비전 비교의 필수 기준입니다.
+        /// 두 값 중 하나라도 없거나 서로 다르면 동일한 리비전으로 취급하지 않습니다.
+        /// </para>
+        /// <para>
+        /// <see cref="size"/>와 <see cref="creationTime"/>은 양쪽 모두 값이 제공되는 경우에만 추가로 비교하며,
+        /// 값이 서로 다르면 동일한 리비전으로 취급하지 않습니다.
+        /// </para>
+        /// <para>
+        /// <see cref="lastAccessTime"/>과 <see cref="attributes"/>는 파일 내용의 리비전을 안정적으로 나타내지 않으므로 비교하지 않습니다.
+        /// </para>
+        /// </remarks>
+        /// <param name="other">비교할 파일 메타데이터입니다.</param>
+        /// <returns>
+        /// 동일한 파일 리비전으로 판단할 수 있으면 <see langword="true"/>,
+        /// 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        public bool IsSameRevision(FileMetaData other)
+        {
+            // 마지막 수정 시간은 양쪽 모두 존재해야 하며 서로 같아야 합니다.
+            if (lastWriteTime is not { } thisLastWriteTime || other.lastWriteTime is not { } otherLastWriteTime || thisLastWriteTime != otherLastWriteTime)
+                return false;
+
+            // 파일 크기는 양쪽 모두 제공되는 경우에만 비교하며, 다르면 다른 리비전으로 취급합니다.
+            if (size is { } thisSize && other.size is { } otherSize && thisSize != otherSize)
+                return false;
+
+            // 생성 시간은 양쪽 모두 제공되는 경우에만 비교하며, 다르면 다른 리비전으로 취급합니다.
+            if (creationTime is { } thisCreationTime && other.creationTime is { } otherCreationTime && thisCreationTime != otherCreationTime)
+                return false;
+
+            // 마지막 접근 시간과 파일 시스템 특성은 리비전 판정에 사용하지 않습니다.
+            return true;
+        }
     }
 }

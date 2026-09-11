@@ -12,11 +12,6 @@ namespace RuniOS.Resource
         object? assetObject { get; }
 
         /// <summary>
-        /// 에셋의 임포트 설정을 가져옵니다.
-        /// </summary>
-        AssetSidecar sidecar { get; }
-
-        /// <summary>
         /// 에셋이 현재 로드 중인지 여부를 가져오거나 설정합니다.
         /// </summary>
         bool isLoading { get; }
@@ -35,11 +30,13 @@ namespace RuniOS.Resource
         UniTask<IAssetScope?> GetScope();
 
         /// <summary>
-        /// 다른 <see cref="IAssetHandle"/>이 현재 핸들과 동일한 에셋을 참조하는지 확인합니다.
-        /// <br/>타입, I/O 핸들러, MD5 해시가 모두 일치해야 합니다.
+        /// 다른 <see cref="IAssetHandle"/>이 현재 핸들과 동일한 에셋 대상을 참조하는지 확인합니다.<br/>
+        /// 핸들 구현에 따라 I/O 대상, 파일 리비전 메타데이터, 사이드카 등의 정보를 비교할 수 있습니다.
         /// </summary>
         /// <param name="other">비교할 다른 에셋 핸들입니다.</param>
-        /// <returns>동일한 에셋을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
+        /// <returns>
+        /// 동일한 에셋 대상을 참조한다고 판단되면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         bool IsSameTarget(IAssetHandle other);
 
         /// <summary>

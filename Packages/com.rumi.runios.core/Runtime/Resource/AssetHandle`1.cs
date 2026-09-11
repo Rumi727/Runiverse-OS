@@ -12,9 +12,8 @@ namespace RuniOS.Resource
     /// </summary>
     /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
     /// <param name="fileMetaData">에셋 파일의 초기 메타 데이터입니다.</param>
-    /// <param name="sidecar">에셋의 초기 임포트 설정입니다.</param>
     /// <param name="unloadDelayFrame">에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수입니다. 기본값은 600입니다.</param>
-    public abstract class AssetHandle<TAsset>(IONode node, FileMetaData fileMetaData, AssetSidecar sidecar, int unloadDelayFrame = 600) : IAssetHandle<TAsset> where TAsset : notnull
+    public abstract class AssetHandle<TAsset>(IONode node, FileMetaData fileMetaData, int unloadDelayFrame = 600) : IAssetHandle<TAsset> where TAsset : notnull
     {
         /// <summary>
         /// 에셋 파일에 접근하는 데 사용되는 I/O 핸들러를 가져옵니다.
@@ -25,9 +24,6 @@ namespace RuniOS.Resource
         /// 에셋 파일의 메타 데이터 값을 가져오거나 설정합니다.
         /// </summary>
         public FileMetaData fileMetaData { get; private set; } = fileMetaData;
-
-        /// <inheritdoc/>
-        public AssetSidecar sidecar { get; } = sidecar;
 
         /// <summary>
         /// 에셋 스코프 카운트가 0이 된 후 언로드까지 대기할 프레임 수를 가져옵니다.
@@ -75,8 +71,6 @@ namespace RuniOS.Resource
                 try
                 {
                     fileMetaData = entry.metaData;
-                    await sidecar.Reload();
-
                     assetObject = await Load();
                 }
                 catch (Exception e)
@@ -230,18 +224,16 @@ namespace RuniOS.Resource
 
         protected virtual TAsset? GetDefaultAsset() => default;
 
-        /// <summary>
-        /// 다른 <see cref="IAssetHandle"/>이 현재 핸들과 동일한 에셋을 참조하는지 확인합니다.
-        /// <br/>타입, I/O 핸들러, MD5 해시가 모두 일치해야 합니다.
-        /// </summary>
-        /// <param name="other">비교할 다른 에셋 핸들입니다.</param>
-        /// <returns>동일한 에셋을 참조하면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.</returns>
+        /// <inheritdoc/>
         public virtual bool IsSameTarget(IAssetHandle other)
         {
             if (isSealed || other is not AssetHandle<TAsset> otherHandle)
                 return false;
 
-            return GetType() == other.GetType() && node.IsSameTarget(otherHandle.node) && fileMetaData == otherHandle.fileMetaData && sidecar.IsSameTarget(otherHandle.sidecar);
+            if (GetType() != other.GetType() || !node.IsSameTarget(otherHandle.node) || !fileMetaData.IsSameRevision(otherHandle.fileMetaData))
+                return false;
+
+            return this is not IAssetSidecarHandle sidecarHandle || sidecarHandle.sidecar.IsSameTarget(((IAssetSidecarHandle)other).sidecar);
         }
 
         /// <inheritdoc/>
