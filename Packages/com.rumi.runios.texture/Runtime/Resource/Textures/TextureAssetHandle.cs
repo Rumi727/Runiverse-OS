@@ -13,7 +13,7 @@ namespace RuniOS.Resource.Textures
         {
             await sidecar.Reload();
 
-            TextureLoadSettings settings = sidecar.GetValue<TextureLoadSettings>(TextureAssetRegistry.id);
+            TextureLoadSettings settings = sidecar.GetValue<TextureLoadSettings>(TextureAssetRegistry.id) ?? TextureLoadSettings.defaultValue;
             return await TextureLoader.LoadAsync(node, settings);
         }
 
