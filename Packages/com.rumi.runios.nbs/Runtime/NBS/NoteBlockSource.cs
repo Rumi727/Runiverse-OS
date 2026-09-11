@@ -441,7 +441,15 @@ namespace RuniOS.NBS
             try
             {
                 if (newScope != null)
-                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, target.mode == AssetRefMode.direct ? directInstrumentNamespace : target.key.assetId.nameSpace);
+                {
+                    string sourceNamespace = target.mode switch
+                    {
+                        AssetRefMode.direct => directInstrumentNamespace,
+                        AssetRefMode.automatic => target.assetId.nameSpace,
+                        _ => target.resourceKey.assetId.nameSpace
+                    };
+                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, sourceNamespace);
+                }
             }
             catch
             {

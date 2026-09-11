@@ -174,16 +174,16 @@ Registries can be queried by these keys.
 ```text
 registryId       -> AssetRegistryManager.Get(registryId)
 registry type    -> AssetRegistryManager.Get<TRegistry>()
-asset type       -> AssetRegistryManager.GetAllForAsset(assetType)
-first registry   -> AssetRegistryManager.GetFirstForAsset<TAsset>()
+provided type    -> AssetRegistryManager.GetAllForAsset(providedAssetType)
+automatic handle -> AssetRegistryManager.GetHandle<TAsset>(assetId)
 ```
 
-Among registries for the same asset type, the registry with the highest `priority` is selected.\
-`AssetRegistryManager.GetFirstForAsset<TAsset>()` returns the cached highest-priority registry.\
-Selection order among registries with equal `priority` is not part of the contract. The current implementation may select the registry registered first, but callers must not depend on that behavior.\
-The first registry is cached at registration time, so do not change `priority` after registration.\
-The key-mode `AssetRef<T>` inspector field also uses this information to select compatible registries and assets.\
-Direct mode uses the asset instance stored in the reference without querying a registry.
+`providedAssetType` is the asset type a registry promises to provide through its lookup results. Multiple registries may provide the same asset type.\
+The automatic provider order is cached by descending `priority` when registry membership changes, so do not change `priority` after registration.\
+Selection order among registries with equal `priority` is not part of the contract.\
+Automatic lookup does not use only the highest-priority registry. It iterates compatible registries in descending priority order and returns the handle from the first registry that actually contains the requested `assetId`.\
+Registry lookup queries only the registry specified by `ResourceKey.registryId`; it ignores priority and does not fall back to another registry.\
+The `AssetRef<T>` inspector edits only the asset identifier in automatic mode and the complete `ResourceKey` in registry mode. Direct mode uses the asset instance stored in the reference without querying a registry.
 
 ## Fast Reload Model
 
@@ -296,18 +296,24 @@ The consumer also decides **when** to read a sidecar. An ordinary file handle ma
 
 ## AssetRef
 
-`AssetRef<TAsset>` is a wrapper for referencing a resource of a specific type by key or by direct asset instance.\
-It uses `key` or `directAsset` according to `mode`.
+`AssetRef<TAsset>` is a wrapper for referencing a resource of a specific type through automatic, registry, or direct mode.\
+It uses `assetId`, `resourceKey`, or `directAsset` according to `mode`.
 
 The supported modes are:
 
-- `AssetRefMode.key`: resolves the asset from a registry through a `ResourceKey`.
+- `AssetRefMode.automatic`: searches registries that provide the target type in descending priority order and uses the first registry that actually contains the asset ID.
+- `AssetRefMode.registry`: queries only the registry specified by `resourceKey`. It ignores priority and does not fall back.
 - `AssetRefMode.direct`: wraps the `directAsset` in an `InstanceAssetHandle<TAsset>` and uses it without a registry entry.
 
 ```csharp
 [SerializeField] AssetRef<MyAsset> assetRef;
 
-AssetRef<MyAsset> byKey = new AssetRef<MyAsset>
+AssetRef<MyAsset> automatic = new AssetRef<MyAsset>
+(
+    new Identifier("my_game", "ui/button")
+);
+
+AssetRef<MyAsset> byRegistry = new AssetRef<MyAsset>
 (
     new ResourceKey
     (
@@ -320,7 +326,7 @@ AssetRef<MyAsset> direct = new AssetRef<MyAsset>(asset);
 ```
 
 When using it, call `LoadScopeAsync()` instead of manually finding the registry and handle.\
-Key mode resolves a handle through `ResourceManager`; direct mode creates a scope from the stored instance immediately.
+Automatic mode searches compatible registries by priority; registry mode queries only the registry specified by `resourceKey`; direct mode creates a scope from the stored instance immediately.
 
 ```csharp
 IAssetScope<MyAsset>? scope = await assetRef.LoadScopeAsync();
@@ -335,12 +341,22 @@ using (scope)
 
 Use `GetHandle()` when a handle is needed. Use `IsSameTarget()` to determine whether the current reference points to the same target as an active scope.
 
-The manual key-mode flow is:
+The manual automatic-mode flow is:
+
+```text
+assetId + target asset type
+-> AssetRegistryManager.GetHandle
+-> compatible registries, descending priority
+-> first registry containing assetId
+-> handle.GetScope
+```
+
+The manual registry-mode flow is:
 
 ```text
 ResourceKey
--> AssetRegistryManager.Get
--> registry[assetId]
+-> AssetRegistryManager.Get(resourceKey.registryId)
+-> registry[resourceKey.assetId]
 -> handle.GetScope
 ```
 
@@ -352,7 +368,7 @@ directAsset
 -> InstanceAssetScope
 ```
 
-`AssetRef<TAsset>` wraps both flows in one inspector-friendly API.
+`AssetRef<TAsset>` wraps all three flows in one inspector-friendly API.
 
 When `AssetRefField` or `AssetRefPropertyDrawer` is used in the editor, the mode can be selected in the field.\
 For Unity-object direct assets, the `allowSceneObjects` argument controls whether scene objects are accepted and defaults to `false`.\
@@ -407,7 +423,7 @@ namespace RuniOS.Resource.Example
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
         public override int priority => 100;
-        public override Type assetType => typeof(MyAsset);
+        public override Type providedAssetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 
         [OnCodeLoaded]

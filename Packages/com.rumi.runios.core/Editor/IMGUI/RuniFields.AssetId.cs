@@ -15,37 +15,59 @@ namespace RuniOS.Editor.IMGUI
             return DoAssetIdField(position, registryId, value);
         }
 
+        public static Identifier AssetIdField(Rect position, Type assetType, Identifier value) => DoAssetIdField(position, assetType, value);
+        public static Identifier AssetIdField(Rect position, string label, Type assetType, Identifier value) => AssetIdField(position, new GUIContent(label), assetType, value);
+        public static Identifier AssetIdField(Rect position, GUIContent label, Type assetType, Identifier value)
+        {
+            position = DrawMultiColumnsFieldPrefixLabel(position, label, 3);
+            return DoAssetIdField(position, assetType, value);
+        }
+
+        static Identifier DoAssetIdField(Rect position, Identifier registryId, Identifier value) => DoAssetIdField
+        (
+            position,
+            value,
+            AssetRegistryManager.Get(registryId)?.keys
+                .Where(x => value.nameSpace == x.nameSpace)
+                .Select(x => x.path) ?? []
+        );
+
+        static Identifier DoAssetIdField(Rect position, Type assetType, Identifier value) => DoAssetIdField
+        (
+            position,
+            value,
+            AssetRegistryManager.GetAllForAsset(assetType)
+                .SelectMany(x => x.keys)
+                .Where(x => value.nameSpace == x.nameSpace)
+                .Select(x => x.path)
+                .Distinct()
+        );
+
         static int? assetIdFieldLastControlID;
         static RuniPath assetIdFieldSelectedPath = RuniPath.empty;
-        static Identifier DoAssetIdField(Rect position, Identifier registryId, Identifier value)
+        static Identifier DoAssetIdField(Rect position, Identifier value, IEnumerable<RuniPath> assetPaths)
         {
-            string currentNamespace = value.nameSpace;
-
             value = IdentifierField(position, value, x =>
             {
-                IEnumerable<RuniPath>? assetPaths = AssetRegistryManager.Get(registryId)?.keys
-                    .Where(x => currentNamespace == x.nameSpace)
-                    .Select(x => x.path);
-
                 int lastControlID = EditorGUIUtilityBridge.s_LastControlID;
 
                 RuniPathDropdown dropdown = new RuniPathDropdown();
                 dropdown.onSelectedItem += x =>
                 {
-                    registryTypeFieldLastControlID = lastControlID;
-                    registryTypeFieldSelectedPath = x.path;
+                    assetIdFieldLastControlID = lastControlID;
+                    assetIdFieldSelectedPath = x.path;
                 };
 
-                dropdown.Rebuild(assetPaths ?? []);
+                dropdown.Rebuild(assetPaths);
                 dropdown.Show(x);
             });
 
-            if (registryTypeFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
+            if (assetIdFieldLastControlID == EditorGUIUtilityBridge.s_LastControlID)
             {
-                value.path = registryTypeFieldSelectedPath;
+                value.path = assetIdFieldSelectedPath;
 
-                registryTypeFieldSelectedPath = RuniPath.empty;
-                registryTypeFieldLastControlID = null;
+                assetIdFieldSelectedPath = RuniPath.empty;
+                assetIdFieldLastControlID = null;
 
                 GUI.changed = true;
             }

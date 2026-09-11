@@ -18,9 +18,7 @@ namespace RuniOS.Resource.Languages
 
         public override int priority => 100;
 
-        public override Type assetType => typeof(LocalizationData);
-
-        public override bool isSupportedImportData => false;
+        public override Type providedAssetType => typeof(LocalizationData);
 
         public override bool isLoading => reloadGate.isRunning;
 

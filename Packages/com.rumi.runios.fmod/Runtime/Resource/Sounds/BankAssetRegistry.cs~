@@ -11,9 +11,9 @@ namespace RuniOS.Resource.Sounds
     {
         public override Identifier registryId => new Identifier("runios", "banks");
 
-        public override bool isDefault => true;
+        public override int priority => 100;
 
-        public override Type assetType => typeof(Bank);
+        public override Type providedAssetType => typeof(Bank);
 
         public override WildcardPatterns assetFilter { get; } = "bank";
 

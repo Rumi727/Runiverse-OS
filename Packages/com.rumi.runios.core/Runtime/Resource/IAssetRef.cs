@@ -20,10 +20,16 @@ namespace RuniOS.Resource
         AssetRefMode mode { get; }
 
         /// <summary>
-        /// Gets the key associated with the reference. It is used when <see cref="mode"/> is <see cref="AssetRefMode.key"/>.<br/>
-        /// 참조에 연결된 키를 가져옵니다. <see cref="mode"/>가 <see cref="AssetRefMode.key"/>일 때 사용됩니다.
+        /// Gets the asset identifier used when <see cref="mode"/> is <see cref="AssetRefMode.automatic"/>.<br/>
+        /// <see cref="mode"/>가 <see cref="AssetRefMode.automatic"/>일 때 사용할 에셋 식별자를 가져옵니다.
         /// </summary>
-        ResourceKey key { get; }
+        Identifier assetId { get; }
+
+        /// <summary>
+        /// Gets the resource key used when <see cref="mode"/> is <see cref="AssetRefMode.registry"/>.<br/>
+        /// <see cref="mode"/>가 <see cref="AssetRefMode.registry"/>일 때 사용할 리소스 키를 가져옵니다.
+        /// </summary>
+        ResourceKey resourceKey { get; }
 
         /// <summary>
         /// Gets the direct asset instance associated with the reference, or <see langword="null"/> when none is available.<br/>
@@ -46,10 +52,24 @@ namespace RuniOS.Resource
         IAssetRef WithMode(AssetRefMode mode);
 
         /// <summary>
+        /// Returns a copy of the reference with the specified asset identifier.<br/>
+        /// 지정된 에셋 식별자로 변경한 참조의 복사본을 반환합니다.
+        /// </summary>
+        /// <param name="assetId">
+        /// The asset identifier to assign to the copy.<br/>
+        /// 복사본에 설정할 에셋 식별자입니다.
+        /// </param>
+        /// <returns>
+        /// A copy with the specified asset identifier.<br/>
+        /// 지정된 에셋 식별자가 설정된 복사본을 반환합니다.
+        /// </returns>
+        IAssetRef WithAssetId(Identifier assetId);
+
+        /// <summary>
         /// Returns a copy of the reference with the specified resource key.<br/>
         /// 지정된 리소스 키로 변경한 참조의 복사본을 반환합니다.
         /// </summary>
-        /// <param name="key">
+        /// <param name="resourceKey">
         /// The resource key to assign to the copy.<br/>
         /// 복사본에 설정할 리소스 키입니다.
         /// </param>
@@ -57,24 +77,24 @@ namespace RuniOS.Resource
         /// A copy with the specified resource key.<br/>
         /// 지정된 리소스 키가 설정된 복사본을 반환합니다.
         /// </returns>
-        IAssetRef WithKey(ResourceKey key);
+        IAssetRef WithResourceKey(ResourceKey resourceKey);
 
         /// <summary>
         /// Returns a copy of the reference with the specified direct asset instance.<br/>
         /// 지정된 직접 에셋 인스턴스로 변경한 참조의 복사본을 반환합니다.
         /// </summary>
         /// <param name="asset">
-        /// The asset instance to assign to the copy.<br/>
-        /// 복사본에 설정할 에셋 인스턴스입니다.
+        /// The asset instance to assign to the copy, or <see langword="null"/> to clear it.<br/>
+        /// 복사본에 설정할 에셋 인스턴스이며, <see langword="null"/>이면 비웁니다.
         /// </param>
         /// <returns>
         /// A copy with the specified direct asset instance.<br/>
         /// 지정된 직접 에셋 인스턴스가 설정된 복사본을 반환합니다.
         /// </returns>
         /// <exception cref="InvalidCastException">
-        /// Thrown when <paramref name="asset"/> cannot be cast to <see cref="targetAssetType"/>.<br/>
-        /// <paramref name="asset"/>을 <see cref="targetAssetType"/>으로 변환할 수 없을 때 발생합니다.
+        /// Thrown when a non-null <paramref name="asset"/> cannot be cast to <see cref="targetAssetType"/>.<br/>
+        /// <see langword="null"/>이 아닌 <paramref name="asset"/>을 <see cref="targetAssetType"/>으로 변환할 수 없을 때 발생합니다.
         /// </exception>
-        IAssetRef WithDirect(object asset);
+        IAssetRef WithDirect(object? asset);
     }
 }

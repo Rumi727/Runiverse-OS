@@ -29,7 +29,7 @@ namespace RuniOS.Editor.IMGUI
                 ? EditorGUIUtilityBridge.contextWidth - EditorGUIUtility.labelWidth - 2f
                 : position.width;
 
-            float namespaceWidth = (fieldAreaWidth - (2 * 4) - (4 * 2)) / 3f;
+            float namespaceWidth = (fieldAreaWidth - 32) / 3f;
             float fieldEnd = position.xMax;
 
             {

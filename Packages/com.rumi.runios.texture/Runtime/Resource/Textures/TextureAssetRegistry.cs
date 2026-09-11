@@ -17,7 +17,7 @@ namespace RuniOS.Resource.Textures
         public override int priority => 100;
 
         /// <inheritdoc/>
-        public override Type assetType => typeof(Texture2D);
+        public override Type providedAssetType => typeof(Texture2D);
 
         /// <inheritdoc/>
         public override IPatternMatcher assetMatcher => IPatternMatcher.pictureMatcher;

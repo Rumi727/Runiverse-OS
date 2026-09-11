@@ -174,15 +174,16 @@ AssetRegistryManager.Register<MyAssetRegistry>();
 ```text
 registryId       -> AssetRegistryManager.Get(registryId)
 registry type    -> AssetRegistryManager.Get<TRegistry>()
-asset type       -> AssetRegistryManager.GetAllForAsset(assetType)
-first registry   -> AssetRegistryManager.GetFirstForAsset<TAsset>()
+provided type    -> AssetRegistryManager.GetAllForAsset(providedAssetType)
+automatic handle -> AssetRegistryManager.GetHandle<TAsset>(assetId)
 ```
 
-같은 에셋 타입의 레지스트리 중 `priority`가 가장 높은 레지스트리가 선택됩니다.\
-`AssetRegistryManager.GetFirstForAsset<TAsset>()`는 캐시된 최고 우선순위 레지스트리를 반환합니다.\
-같은 `priority`인 레지스트리의 선택 순서는 계약에 포함되지 않습니다. 현재 구현에서는 먼저 등록된 레지스트리가 선택될 수 있지만, 이 동작에 의존하지 마세요.\
-우선 레지스트리는 등록 시 캐시되므로, 등록 후 `priority`를 변경하지 마세요.\
-키 모드의 `AssetRef<T>` 인스펙터 필드는 이 정보를 사용해 호환되는 레지스트리와 에셋을 고를 수 있습니다. 직접 모드에서는 레지스트리 조회 없이 참조에 저장된 에셋 인스턴스를 사용합니다.
+`providedAssetType`은 레지스트리가 조회 결과로 제공한다고 약속하는 에셋 타입입니다. 하나의 에셋 타입을 여러 레지스트리가 제공할 수 있습니다.\
+automatic provider 순서는 레지스트리 구성이 변경될 때 `priority` 내림차순으로 캐시됩니다. 등록 후 `priority`를 변경하지 마세요.\
+같은 `priority`인 레지스트리의 선택 순서는 계약에 포함되지 않습니다.\
+automatic 조회는 최고 priority 레지스트리 하나만 사용하지 않습니다. 호환 레지스트리를 priority 내림차순으로 순회하며, 요청한 `assetId`를 실제로 포함한 첫 레지스트리의 핸들을 반환합니다.\
+registry 조회는 `ResourceKey.registryId`로 지정한 레지스트리 하나만 직접 조회하며 priority나 다른 레지스트리 fallback을 사용하지 않습니다.\
+`AssetRef<T>` 인스펙터는 automatic 모드에서 에셋 식별자만, registry 모드에서 `ResourceKey` 전체를 편집합니다. direct 모드에서는 레지스트리 조회 없이 참조에 저장된 에셋 인스턴스를 사용합니다.
 
 ## 빠른 리로드 구조
 
@@ -295,18 +296,24 @@ if (sidecar.TryGetValue<MusicData>(key, out MusicData? data))
 
 ## AssetRef
 
-`AssetRef<TAsset>`는 특정 타입의 리소스를 키 또는 직접 에셋 인스턴스로 참조하는 래퍼입니다.\
-`mode`에 따라 `key` 또는 `directAsset`을 사용합니다.
+`AssetRef<TAsset>`는 특정 타입의 리소스를 automatic, registry, direct 세 모드로 참조하는 래퍼입니다.\
+`mode`에 따라 `assetId`, `resourceKey`, `directAsset` 중 하나를 사용합니다.
 
 지원 모드는 다음과 같습니다.
 
-- `AssetRefMode.key`: `ResourceKey`로 레지스트리에서 에셋을 찾습니다.
+- `AssetRefMode.automatic`: `assetId`를 사용해 대상 타입을 제공하는 레지스트리를 priority 내림차순으로 순회하고, 해당 ID가 실제로 있는 첫 레지스트리를 사용합니다.
+- `AssetRefMode.registry`: `resourceKey`로 지정한 레지스트리 하나만 직접 조회합니다. priority의 영향을 받지 않으며 fallback하지 않습니다.
 - `AssetRefMode.direct`: 참조에 저장된 `directAsset`을 `InstanceAssetHandle<TAsset>`로 감싸 사용합니다. 레지스트리 등록이 필요하지 않습니다.
 
 ```csharp
 [SerializeField] AssetRef<MyAsset> assetRef;
 
-AssetRef<MyAsset> byKey = new AssetRef<MyAsset>
+AssetRef<MyAsset> automatic = new AssetRef<MyAsset>
+(
+    new Identifier("my_game", "ui/button")
+);
+
+AssetRef<MyAsset> byRegistry = new AssetRef<MyAsset>
 (
     new ResourceKey
     (
@@ -319,7 +326,7 @@ AssetRef<MyAsset> direct = new AssetRef<MyAsset>(asset);
 ```
 
 사용할 때는 모드에 맞는 레지스트리와 핸들을 직접 찾아다니지 않고 `LoadScopeAsync()`를 호출하면 됩니다.\
-키 모드는 `ResourceManager`를 통해 핸들을 찾고, 직접 모드는 저장된 인스턴스로 즉시 스코프를 만듭니다.
+automatic 모드는 호환 레지스트리를 priority 순으로 탐색하고, registry 모드는 `resourceKey`가 지정한 레지스트리만 조회합니다. direct 모드는 저장된 인스턴스로 즉시 스코프를 만듭니다.
 
 ```csharp
 IAssetScope<MyAsset>? scope = await assetRef.LoadScopeAsync();
@@ -334,12 +341,22 @@ using (scope)
 
 핸들이 필요하면 `GetHandle()`을 사용할 수 있습니다. 현재 참조와 사용 중인 스코프가 같은 대상을 가리키는지는 `IsSameTarget()`으로 확인합니다.
 
-키 모드의 수동 흐름은 다음과 같습니다.
+automatic 모드의 수동 흐름은 다음과 같습니다.
+
+```text
+assetId + target asset type
+-> AssetRegistryManager.GetHandle
+-> compatible registries, descending priority
+-> first registry containing assetId
+-> handle.GetScope
+```
+
+registry 모드의 수동 흐름은 다음과 같습니다.
 
 ```text
 ResourceKey
--> AssetRegistryManager.Get
--> registry[assetId]
+-> AssetRegistryManager.Get(resourceKey.registryId)
+-> registry[resourceKey.assetId]
 -> handle.GetScope
 ```
 
@@ -351,7 +368,7 @@ directAsset
 -> InstanceAssetScope
 ```
 
-`AssetRef<TAsset>`는 두 흐름을 하나의 인스펙터 친화적인 API로 감싸 줍니다.
+`AssetRef<TAsset>`는 세 흐름을 하나의 인스펙터 친화적인 API로 감싸 줍니다.
 
 에디터에서 `AssetRefField` 또는 `AssetRefPropertyDrawer`를 사용하면 모드를 필드에서 선택할 수 있습니다.\
 직접 모드의 Unity 객체 필드는 `allowSceneObjects` 인자로 씬 객체 허용 여부를 제어하며 기본값은 `false`입니다.\
@@ -406,7 +423,7 @@ namespace RuniOS.Resource.Example
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
         public override int priority => 100;
-        public override Type assetType => typeof(MyAsset);
+        public override Type providedAssetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 
         [OnCodeLoaded]

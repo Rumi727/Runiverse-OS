@@ -17,7 +17,7 @@ namespace RuniOS.Resource.Sounds
 
         public override int priority => 100;
 
-        public override Type assetType => typeof(WaveAudioClip);
+        public override Type providedAssetType => typeof(WaveAudioClip);
 
         public override IPatternMatcher assetMatcher => IPatternMatcher.musicMatcher;
 

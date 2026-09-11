@@ -25,7 +25,7 @@ namespace RuniOS.Resource.NBS
         public override int priority => 100;
 
         /// <inheritdoc/>
-        public override Type assetType => typeof(NoteBlockClip);
+        public override Type providedAssetType => typeof(NoteBlockClip);
 
         /// <inheritdoc/>
         public override IPatternMatcher assetMatcher => IPatternMatcher.nbsMatcher;

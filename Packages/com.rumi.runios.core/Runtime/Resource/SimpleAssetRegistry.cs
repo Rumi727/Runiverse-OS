@@ -17,9 +17,6 @@ namespace RuniOS.Resource
         /// </summary>
         public virtual RuniPath registryName => registryId.path;
 
-        /// <inheritdoc/>
-        public override bool isSupportedImportData => true;
-
         /// <summary>
         /// 레지스트리의 리소스 로딩 진행 중인지 여부를 가져옵니다.
         /// </summary>
