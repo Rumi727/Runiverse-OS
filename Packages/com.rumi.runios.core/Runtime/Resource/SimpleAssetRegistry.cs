@@ -50,10 +50,11 @@ namespace RuniOS.Resource
         /// <summary>
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
+        /// <param name="identifier"></param>
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="fileMetaData">에셋 파일의 메타 데이터 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(IONode node, FileMetaData fileMetaData);
+        protected abstract UniTask<THandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData);
 
         protected AssetSidecar CreateSidecar(IONode node) => new AssetSidecar(node.AddExtension(".json"));
 
@@ -116,7 +117,7 @@ namespace RuniOS.Resource
 
                     try
                     {
-                        THandle handle = await CreateHandle(target.node, target.fileMetaData);
+                        THandle handle = await CreateHandle(target.identifier, target.node, target.fileMetaData);
                         await OnAssetLoop(target.identifier, target.node, handle);
                     }
                     catch (Exception e)

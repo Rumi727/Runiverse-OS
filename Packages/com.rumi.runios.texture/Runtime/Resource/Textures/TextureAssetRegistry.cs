@@ -26,6 +26,6 @@ namespace RuniOS.Resource.Textures
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<TextureAssetRegistry>();
 
         /// <inheritdoc/>
-        protected override UniTask<TextureAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new TextureAssetHandle(node, fileMetaData, CreateSidecar(node)));
+        protected override UniTask<TextureAssetHandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new TextureAssetHandle(node, fileMetaData, CreateSidecar(node)));
     }
 }
