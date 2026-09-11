@@ -5,19 +5,22 @@ Language available: \[[**한국어 (대한민국)**](README.md)\] \[[English (US
 ## 개요
 
 이 프로젝트의 리소스 시스템은 Minecraft의 리소스 팩 구조에서 아이디어를 가져왔습니다.\
-파일은 리소스 팩에 들어 있고, 에셋 레지스트리는 그 파일들을 게임에서 사용할 수 있는 `Identifier`와 에셋 핸들로 등록합니다.
+파일은 리소스 팩에 들어 있고, 에셋 레지스트리는 `Identifier`를 입력받아 자신이 약속한 타입의 에셋을 제공할 수 있는 핸들을 등록합니다.
 
 ```text
-Resource Pack files
+Identifier
 -> AssetRegistry
 -> AssetHandle
 -> AssetScope
--> loaded asset object
+-> asset object
 ```
 
-중요한 점은 레지스트리가 실제 에셋 객체를 항상 즉시 로드하지 않는다는 것입니다.\
-리로드 시점에는 주로 "어떤 에셋이 어디에 있고, 어떤 핸들로 접근해야 하는가"를 다시 계산합니다.\
-실제 에셋 객체는 보통 `AssetHandle<T>.GetScope()` 또는 키 모드의 `AssetRef<T>.LoadScopeAsync()`가 호출될 때 로드됩니다.
+레지스트리의 핵심 계약은 **하나의 식별자가 하나의 에셋을 가리킨다**는 것입니다.\
+그 에셋을 만들기 위해 어떤 파일을 읽는지, 여러 파일을 병합하는지, 다른 네임스페이스나 레지스트리를 참조하는지, 실제 객체를 리로드 단계에서 미리 만드는지 여부는 각 레지스트리 구현이 결정합니다.\
+같은 물리 파일도 서로 다른 레지스트리가 독립적으로 해석할 수 있습니다. 예를 들어 같은 오디오 파일을 FMOD 레지스트리는 `FMOD.Sound`로, 다른 레지스트리는 Unity `AudioClip`로 제공할 수 있습니다.
+
+일반적인 파일 기반 핸들은 `GetScope()`가 호출될 때 실제 객체를 지연 로드하지만, 이는 레지스트리 전체의 강제 계약이 아닙니다.\
+`InstanceAssetHandle<TAsset>`처럼 이미 만들어진 객체를 감싸거나, `LanguageAssetRegistry`처럼 리로드 단계에서 데이터를 파싱하고 실제 객체까지 만들어 등록하는 구현도 가능합니다.
 
 ## 로드 흐름
 
@@ -164,8 +167,7 @@ ResourceKey key = new ResourceKey
 AssetRegistryManager.Register<MyAssetRegistry>();
 ```
 
-레지스트리는 보통 `[Awaken]` 메소드에서 등록됩니다.\
-에디터에서도 보이게 하려면 기존 구현처럼 `[UnityEditor.InitializeOnLoadMethod]`를 같이 사용할 수 있습니다.
+레지스트리는 코드 생명주기에 맞춰 등록하고 해제합니다. 현재 구현에서는 보통 `[OnCodeLoaded]`에서 등록하고 `[OnCodeUnloading]`에서 해제합니다.
 
 레지스트리는 다음 기준으로 조회됩니다.
 
@@ -184,10 +186,8 @@ first registry   -> AssetRegistryManager.GetFirstForAsset<TAsset>()
 
 ## 빠른 리로드 구조
 
-레지스트리는 리로드 때 전체 인덱스를 다시 만듭니다.\
-하지만 이 작업은 대부분 파일 조회와 핸들 기록입니다. 실제 에셋 객체 전체를 다시 로드하는 구조가 아닙니다.
-
-`AssetRegistry<THandle>`는 리로드 중 임시 추적 테이블을 만듭니다.
+레지스트리는 리로드 때 자신의 `Identifier -> AssetHandle` 인덱스를 다시 계산합니다.\
+`AssetRegistry<THandle>`는 리로드 중 임시 추적 테이블을 만들고, 새 패스에서 기록된 핸들과 기존 핸들을 비교합니다.
 
 ```text
 BeginTracking
@@ -195,7 +195,7 @@ BeginTracking
 -> EndTracking
 ```
 
-`RecordAssetHandle`은 같은 ID의 기존 핸들이 있고, 새 핸들과 같은 대상을 가리킨다면 기존 핸들을 재사용합니다.
+`RecordAssetHandle`은 같은 ID의 기존 핸들이 있고, 새 핸들이 `IsSameTarget()` 기준으로 같은 대상을 가리킨다면 기존 핸들을 재사용합니다.
 
 ```text
 same identifier + same target -> keep old handle
@@ -203,19 +203,15 @@ same identifier + changed target -> replace with new handle
 missing from reload pass -> remove from registry
 ```
 
-그래서 레지스트리 자체는 전체 리로드처럼 보이지만, 에셋 핸들은 변경된 것만 교체됩니다.\
-파일이 바뀌지 않은 에셋은 기존 핸들이 유지되고, 이미 로드된 에셋 객체도 그대로 이어질 수 있습니다.
+따라서 레지스트리는 매번 전체 등록 결과를 다시 계산할 수 있으면서도, 바뀌지 않은 핸들과 이미 로드된 객체는 그대로 유지할 수 있습니다.\
+핸들이 교체된 뒤에도 기존 핸들을 들고 있는 시스템은 리로드 완료 이벤트에서 최신 핸들을 다시 조회할 수 있습니다.
 
-파일이 바뀐 에셋은 레지스트리에서 새 핸들로 교체됩니다.\
-기존 핸들을 들고 있던 렌더러나 시스템은 리로드 완료 이벤트에서 다시 레지스트리를 조회해 새 핸들을 가져오면 됩니다.
-
-이 구조 덕분에 리로드는 Minecraft식 전체 재적재보다 훨씬 가볍습니다.\
-레지스트리 갱신은 빠른 파일 인덱싱에 가깝고, 실제 에셋 로드는 필요한 시점에 핸들과 스코프가 처리합니다.
+단, **리로드가 반드시 단순한 파일 인덱싱이어야 하는 것은 아닙니다.** `SimpleAssetRegistry`는 대부분 파일 탐색과 메타데이터 비교만 수행하지만, 직접 구현한 레지스트리는 JSON을 파싱하거나 여러 파일을 병합하거나 `InstanceAssetHandle<TAsset>`에 넣을 실제 에셋 객체를 리로드 단계에서 생성해도 됩니다. 이 비용과 생명주기의 책임은 해당 레지스트리 구현에 있습니다.
 
 ## AssetHandle과 AssetScope
 
-`AssetHandle<TAsset>`는 단일 에셋의 로드와 언로드를 담당합니다.\
-실제 에셋은 `GetScope()`가 호출될 때 필요하면 로드됩니다.
+`IAssetHandle`은 레지스트리가 등록한 에셋 핸들의 공통 계약입니다. 모든 핸들이 파일이나 사이드카를 가져야 하는 것은 아닙니다.\
+`AssetHandle<TAsset>`는 일반적인 지연 로드/언로드와 스코프 생명주기를 제공하는 기본 구현이며, 실제 에셋은 필요할 때 `GetScope()`를 통해 로드됩니다.
 
 ```csharp
 IAssetScope<MyAsset>? scope = await handle.GetScope();
@@ -231,31 +227,41 @@ using (scope)
 `AssetScope<TAsset>`는 에셋 사용권입니다.\
 사용이 끝나면 반드시 `Dispose()`해야 합니다.
 
-스코프가 모두 반환되면 핸들은 `unloadDelayFrame` 뒤에 언로드를 시도합니다.\
+스코프가 모두 반환되면 일반 `AssetHandle<TAsset>`은 `unloadDelayFrame` 뒤에 언로드를 시도합니다.\
 따라서 짧은 시간 안에 같은 에셋이 다시 요청되는 경우 불필요한 언로드와 재로드를 줄일 수 있습니다.
 
-`AssetHandle<TAsset>.IsSameTarget()`은 리로드에서 핸들을 재사용해도 되는지 판단합니다.\
-기본 구현은 핸들 타입, I/O 대상, 파일 메타데이터, 임포트 데이터 파일의 대상과 메타데이터가 같은지 확인합니다.
+`InstanceAssetHandle<TAsset>`은 이미 존재하는 객체를 직접 감싸며 파일 로드나 사이드카를 요구하지 않습니다.
 
-## 에셋 임포트 데이터
+`IsSameTarget()`은 리로드에서 기존 핸들을 재사용해도 되는지 판단합니다. 일반 `AssetHandle<TAsset>` 구현은 실제 핸들 타입, I/O 대상, 파일 리비전 메타데이터를 비교하며, 핸들이 `IAssetSidecarHandle`도 구현한다면 연결된 `AssetSidecar`의 대상과 리비전도 함께 비교합니다.\
+`FileMetaData.IsSameRevision()`은 `lastWriteTime`을 필수 비교 기준으로 사용하고, 양쪽에서 제공되는 경우 `size`와 `creationTime`도 추가로 비교합니다. 비교에 필요한 수정 시간을 알 수 없으면 동일한 리비전으로 취급하지 않습니다.
 
-`AssetImportData`는 `FileMetaData`와 별개인 확장 가능한 임포트 데이터 컨테이너입니다.\
-`FileMetaData`가 파일 크기나 수정 시간 같은 파일 시스템 정보를 나타낸다면, `AssetImportData`는 개발자가 에셋별 추가 정보를 저장하는 sidecar JSON 파일을 나타냅니다.
+## AssetSidecar
 
-`SimpleAssetRegistry<THandle>`는 에셋 파일과 같은 경로에서 마지막 확장자를 `.json`으로 바꾼 파일을 임포트 데이터 파일로 연결합니다.
+`AssetSidecar`는 특정 I/O 에셋에 연결된 확장 가능한 JSON 사이드카를 나타냅니다.\
+사이드카는 특정 핸들이나 레지스트리의 전용 "임포트 설정"이 아니며, 필요한 레지스트리·핸들·기능이 원하는 시점에 읽고 해석할 수 있는 별도의 I/O 데이터입니다.
+
+사이드카 파일 이름은 원본 파일 이름 전체 뒤에 `.json`을 붙입니다.
 
 ```text
 assets/runios/sounds/ui/click.ogg
-assets/runios/sounds/ui/click.json
+assets/runios/sounds/ui/click.ogg.json
+
+assets/runios/textures/character.png
+assets/runios/textures/character.png.json
 ```
 
-임포트 데이터 JSON의 최상위 키는 `Identifier`이고, 각 값은 `JObject`입니다.\
-키는 데이터를 해석하는 레지스트리나 기능의 식별자로 사용합니다. 파일 에셋의 식별자와 반드시 같을 필요는 없습니다.
+`AssetSidecar`의 최상위 데이터는 `Dictionary<Identifier, JObject>` 형태입니다.\
+각 `Identifier`는 해당 섹션을 해석하는 레지스트리나 기능의 이름 영역으로 사용할 수 있으며, 원본 에셋의 식별자와 같을 필요는 없습니다.
 
 ```json
 {
   "runios:waves": {
     "loadMode": "stream"
+  },
+  "runios:sprites": {
+    "idle": {
+      "rect": [0, 0, 32, 32]
+    }
   },
   "my_game:music": {
     "bpm": 128,
@@ -264,34 +270,28 @@ assets/runios/sounds/ui/click.json
 }
 ```
 
-패키지나 특정 에셋 구현이 알지 못하는 식별자와 필드도 `JObject` 형태로 함께 보존됩니다.\
-따라서 새로운 에셋별 데이터를 추가하기 위해 기존 패키지 코드를 수정할 필요가 없습니다.\
-단, 저장된 값을 실제 동작에 사용하려면 해당 식별자의 데이터를 읽는 소비자 코드가 필요합니다.
+알 수 없는 식별자와 필드도 `JObject` 형태로 보존되므로, 코어 타입을 수정하지 않고 새로운 소비자가 자기 섹션을 추가할 수 있습니다.
 
-핸들은 실제 에셋을 로드하기 직전에 임포트 데이터 JSON을 읽습니다.\
-레지스트리 리로드 시에는 sidecar 파일의 존재 여부와 파일 메타데이터만 확인하고, 실제 JSON 역직렬화는 `AssetHandle<TAsset>.GetScope()`의 로드 경로에서 수행합니다.\
-프레임마다 읽는 구조는 아니며, 에셋이 언로드된 뒤 다시 로드되면 다시 읽습니다.
+`Reload()`는 현재 `IONode`의 내용을 다시 읽어 사이드카의 현재 상태를 반영합니다.\
+파일이 존재하지만 JSON을 읽거나 역직렬화하지 못한 경우 데이터는 빈 상태로 취급되고 오류가 기록되지만, 파일 자체의 `FileMetaData`는 현재 엔트리의 리비전을 유지합니다. 파일이 존재하지 않는 경우에는 데이터와 메타데이터가 빈 상태가 됩니다.
 
 ```csharp
-using Newtonsoft.Json.Linq;
+await sidecar.Reload();
 
 Identifier key = new Identifier("my_game", "music");
-JObject? rawData = handle.importData[key];
-MusicImportData? typedData = handle.importData.GetValue<MusicImportData>(key);
+JObject? rawData = sidecar[key];
+MusicData? typedData = sidecar.GetValue<MusicData>(key);
 
-if (handle.importData.TryGetValue<MusicImportData>(key, out MusicImportData? data))
+if (sidecar.TryGetValue<MusicData>(key, out MusicData? data))
 {
-    // MusicImportData는 애플리케이션이 정의한 타입입니다.
     // data 사용
 }
 ```
 
-키가 없으면 `GetValue<T>()`는 해당 타입의 기본값을 반환합니다.\
-필수 데이터 여부를 구분해야 하면 `TryGetValue<T>()`를 사용하세요.\
-JSON을 읽지 못하면 임포트 데이터는 비워지고 오류가 기록됩니다. 원본 sidecar 파일 자체가 삭제되거나 덮어써지는 것은 아닙니다.
+`IAssetHandle` 자체는 사이드카를 요구하지 않습니다. 사이드카가 자신의 대상 동일성이나 로드 과정에 필요한 핸들만 `IAssetSidecarHandle`을 구현해 `AssetSidecar sidecar`를 제공합니다.\
+따라서 `InstanceAssetHandle<TAsset>`처럼 사이드카가 필요 없는 핸들은 빈 더미 객체를 가질 필요가 없습니다.
 
-`AssetRegistry<THandle>`를 직접 구현하는 경우에는 sidecar 파일을 레지스트리에서 직접 찾아 `AssetImportData`를 생성한 뒤 핸들에 전달해야 합니다.\
-`InstanceAssetHandle<TAsset>`처럼 별도 파일이 없는 인스턴스 핸들은 공유된 빈 `AssetImportData`를 사용할 수 있습니다.
+사이드카를 **언제** 읽을지도 소비자 책임입니다. 일반 파일 핸들은 실제 에셋을 로드할 때 읽을 수 있고, `SpriteRegistry`처럼 사이드카 내용이 어떤 에셋 ID를 등록할지 결정하는 레지스트리는 자신의 `Reload()` 단계에서 미리 읽을 수도 있습니다.
 
 ## AssetRef
 
@@ -359,7 +359,7 @@ directAsset
 
 ## SimpleAssetRegistry
 
-일반적인 "폴더 안 파일을 전부 에셋으로 등록"하는 경우에는 `SimpleAssetRegistry<THandle>`를 쓰는 편이 좋습니다.
+일반적인 "폴더 안 파일 하나 = 에셋 하나" 패턴에는 `SimpleAssetRegistry<THandle>`를 사용합니다.
 
 `SimpleAssetRegistry`는 활성 리소스 팩마다 다음 폴더를 순회합니다.
 
@@ -367,17 +367,12 @@ directAsset
 assets/{namespace}/{registryName}
 ```
 
-여기서 `{namespace}`는 레지스트리가 탐색 중인 리소스 팩 안의 네임스페이스입니다.\
-레지스트리 ID의 네임스페이스가 아닙니다.
+여기서 `{namespace}`는 레지스트리가 탐색 중인 리소스 팩 안의 네임스페이스이며, 레지스트리 ID의 네임스페이스가 아닙니다.
 
-`registryId.nameSpace`는 레지스트리끼리 ID가 충돌하지 않게 하는 이름 영역입니다.\
-`SimpleAssetRegistry`의 폴더 탐색 범위를 제한하지 않습니다.
+`registryId.nameSpace`는 레지스트리 ID끼리 충돌하지 않게 하는 이름 영역입니다.\
+`registryName`의 기본값은 `registryId.path`이며, 모든 리소스 팩 네임스페이스 아래에서 같은 `registryName` 폴더를 찾습니다.
 
-`registryName`의 기본값은 `registryId.path`입니다.\
-즉 `SimpleAssetRegistry`는 모든 리소스 팩 네임스페이스 아래에서 `registryName` 폴더를 찾습니다.
-
-예를 들어 `registryId`가 `example:textures`라면 기본 `registryName`은 `textures`입니다.\
-따라서 리소스 팩에 존재하는 모든 네임스페이스에서 다음 위치를 찾습니다.
+예를 들어 `registryId`가 `example:textures`라면 기본 `registryName`은 `textures`입니다.
 
 ```text
 assets/runios/textures
@@ -385,7 +380,7 @@ assets/example/textures
 assets/any_namespace/textures
 ```
 
-파일 경로는 확장자를 제외한 에셋 ID가 됩니다.
+파일 경로에서 마지막 확장자를 제거한 경로가 에셋 ID가 됩니다.
 
 ```text
 assets/runios/textures/ui/button.png
@@ -395,34 +390,34 @@ assets/any_namespace/textures/ui/button.png
 -> any_namespace:ui/button
 ```
 
-개발자는 대부분 `CreateHandle`만 구현하면 됩니다.
+`SimpleAssetRegistry`는 이 파일 탐색/ID 변환 패턴을 편의 기능으로 제공할 뿐이며, 모든 핸들에 사이드카나 특정 로드 방식을 강제하지 않습니다. 필요한 핸들은 자신의 생성 과정에서 대응하는 `AssetSidecar`를 연결할 수 있습니다.
+
+개발자는 보통 `CreateHandle`만 구현하면 됩니다.
 
 ```csharp
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Booting;
 using RuniOS.IO;
-using UnityEngine.Scripting;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Example
 {
-    public sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
+    public partial sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
         public override int priority => 100;
         public override Type assetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 
-        [Awaken]
-        [Preserve]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        static void Awaken() => AssetRegistryManager.Register<MyAssetRegistry>();
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => AssetRegistryManager.Register<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData)
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => AssetRegistryManager.Unregister<MyAssetRegistry>();
+
+        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData)
         {
-            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData, importData));
+            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData));
         }
     }
 }
@@ -437,15 +432,19 @@ namespace RuniOS.Resource.Example
 
 파일을 단순 순회하는 구조가 아니라면 `AssetRegistry<THandle>`를 직접 상속합니다.
 
+직접 레지스트리는 **식별자를 자신이 약속한 에셋 타입으로 해결하는 책임**만 지며, 그 과정에서 어떤 리소스팩 파일을 읽고 어떻게 조합할지는 자유롭게 결정합니다.\
+한 물리 파일을 여러 레지스트리가 각각 다른 타입으로 해석해도 되고, 한 파일에서 여러 에셋 ID를 만들어도 되며, 필요하다면 리로드 단계에서 실제 객체까지 만들어 `InstanceAssetHandle<TAsset>`로 등록해도 됩니다.
+
 예를 들어 다음 같은 경우입니다.
 
 ```text
-여러 json 파일의 딕셔너리를 언어별로 병합
+여러 json 파일의 딕셔너리를 언어별로 병합하고 LocalizationData를 즉시 생성
 assets/{namespace}/sounds.json 하나를 파싱해 여러 사운드 ID 등록
-파일 경로가 아니라 내부 데이터 키를 에셋 ID로 사용
+하나의 소스 파일을 서로 다른 레지스트리가 각자 다른 에셋 타입으로 해석
+파일 경로가 아니라 내부 데이터 키나 AssetSidecar 내용을 에셋 ID 등록에 사용
 ```
 
-실제 예시는 `LanguageAssetRegistry`, `SoundAssetRegistry`입니다.
+실제 예시는 `LanguageAssetRegistry`, `SoundAssetRegistry`입니다. `LanguageAssetRegistry`는 리로드 단계에서 언어 JSON을 병합하고 `LocalizationData`를 만든 뒤 `InstanceAssetHandle<LocalizationData>`로 바로 등록합니다.
 
 직접 구현할 때는 `AsyncReloadGate`로 중복 리로드를 조정하고, 진행도 보고와 트래킹 시작 및 종료는 리로드 본문에서 직접 처리합니다.
 
@@ -503,7 +502,7 @@ async UniTask ReloadCore(ResourcePack[] resourcePacks, IProgress<float>? progres
 폴더 안 파일 하나 = 에셋 하나
 파일 경로 = 에셋 ID
 확장자 필터로 대상 파일을 고를 수 있음
-CreateHandle만 다르면 됨
+표준 파일 탐색 규칙만 필요함
 ```
 
 직접 `AssetRegistry`가 좋은 경우:
@@ -511,18 +510,20 @@ CreateHandle만 다르면 됨
 ```text
 여러 파일을 합쳐 하나의 에셋으로 만들어야 함
 한 파일에서 여러 에셋 ID가 나와야 함
+AssetSidecar나 파일 내부 데이터를 등록 단계에서 해석해야 함
+같은 소스를 독자적인 규칙으로 재해석해야 함
 리소스 팩별 병합 규칙이 필요함
-폴더 순회가 아니라 고정 json 파일을 읽어야 함
+리로드 단계에서 실제 에셋 객체까지 만들고 싶음
 진행도와 병렬 처리 방식을 직접 제어해야 함
 ```
 
 ## 요약
 
-리소스 시스템은 리소스 팩의 파일 구조와 게임 내부 에셋 접근을 분리합니다.\
-레지스트리는 파일을 빠르게 인덱싱하고, 핸들은 실제 에셋 로드와 생명주기를 담당합니다.
+리소스 시스템은 리소스팩의 물리 파일 구조와 게임 내부의 논리 에셋 접근을 분리합니다.\
+레지스트리는 `Identifier`를 자신이 약속한 에셋 타입으로 해결할 책임을 가지며, 파일 탐색·병합·사이드카 해석·eager/lazy 로드 방식은 구현이 선택합니다.
 
-일반 파일 에셋은 `SimpleAssetRegistry`를 쓰면 됩니다.\
-복잡한 병합이나 커스텀 포맷은 `AssetRegistry`를 직접 구현하면 됩니다.
+일반적인 파일 하나당 에셋 하나 구조는 `SimpleAssetRegistry`를 사용하고, 복잡한 병합·다중 에셋 생성·등록 단계 데이터 해석은 `AssetRegistry`를 직접 구현합니다.\
+`AssetSidecar`는 특정 핸들의 전용 임포트 설정이 아니라 여러 소비자가 독립적으로 사용할 수 있는 확장 가능한 I/O 사이드카입니다.
 
-리로드는 레지스트리 전체를 다시 계산하지만, 에셋 객체 전체를 무조건 버리고 다시 로드하지 않습니다.\
-변경된 핸들만 교체하고, 사용 중인 시스템은 리로드 완료 이벤트에서 최신 핸들을 다시 가져오는 방식으로 동작합니다.
+리로드는 각 레지스트리의 전체 등록 결과를 다시 계산하지만, `IsSameTarget()`이 같은 대상으로 판단한 기존 핸들은 재사용합니다.\
+따라서 레지스트리는 자유로운 구현 방식을 유지하면서도 변경되지 않은 에셋의 핸들과 생명주기를 보존할 수 있습니다.

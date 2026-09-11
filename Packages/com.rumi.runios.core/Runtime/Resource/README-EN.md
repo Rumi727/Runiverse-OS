@@ -5,19 +5,22 @@ Language available: \[[한국어 (대한민국)](README.md)\] \[[**English (US)*
 ## Overview
 
 This project's resource system is inspired by Minecraft resource packs.\
-Files live inside resource packs, and asset registries expose those files to the game as `Identifier` values and asset handles.
+Files live inside resource packs, and an asset registry accepts an `Identifier` and registers handles capable of providing the asset type promised by that registry.
 
 ```text
-Resource Pack files
+Identifier
 -> AssetRegistry
 -> AssetHandle
 -> AssetScope
--> loaded asset object
+-> asset object
 ```
 
-The important part is that a registry usually does not load every asset object immediately.\
-During reload, it mainly recalculates "which asset exists where, and which handle should be used to access it."\
-The real asset object is usually loaded later, when `AssetHandle<T>.GetScope()` or key-mode `AssetRef<T>.LoadScopeAsync()` is called.
+The core registry contract is that **one identifier refers to one asset**.\
+How that asset is produced is up to the registry: it may read one file or many files, merge data, inspect other namespaces, depend on another registry, or even construct the final object during registry reload.\
+The same physical source file may also be interpreted independently by multiple registries. For example, one audio source may be exposed as `FMOD.Sound` by an FMOD registry and as Unity `AudioClip` by another registry.
+
+Ordinary file-backed handles usually defer real object creation until `GetScope()` is called, but laziness is not a global registry requirement.\
+Implementations may wrap an already-created object with `InstanceAssetHandle<TAsset>`, and registries such as `LanguageAssetRegistry` may parse data and construct the final asset object during reload.
 
 ## Loading Flow
 
@@ -164,8 +167,7 @@ So `registryId` means "which registry should be searched", and `assetId` means "
 AssetRegistryManager.Register<MyAssetRegistry>();
 ```
 
-Registries are usually registered from an `[Awaken]` method.\
-To make them visible in the editor too, existing implementations also use `[UnityEditor.InitializeOnLoadMethod]`.
+Registries are registered and unregistered with the code lifecycle. Current implementations usually register from `[OnCodeLoaded]` and unregister from `[OnCodeUnloading]`.
 
 Registries can be queried by these keys.
 
@@ -185,10 +187,8 @@ Direct mode uses the asset instance stored in the reference without querying a r
 
 ## Fast Reload Model
 
-A registry rebuilds its full index on reload.\
-However, this is mostly file lookup and handle recording. It is not a full reload of every real asset object.
-
-`AssetRegistry<THandle>` creates a temporary tracking table while reloading.
+A registry recalculates its `Identifier -> AssetHandle` index during reload.\
+`AssetRegistry<THandle>` uses a temporary tracking table and compares the handles recorded by the new pass with the existing handles.
 
 ```text
 BeginTracking
@@ -196,7 +196,7 @@ BeginTracking
 -> EndTracking
 ```
 
-`RecordAssetHandle` reuses the existing handle when the same ID already exists and the new handle points to the same target.
+When the same ID already exists and the new handle points to the same target according to `IsSameTarget()`, `RecordAssetHandle` reuses the existing handle.
 
 ```text
 same identifier + same target -> keep old handle
@@ -204,19 +204,15 @@ same identifier + changed target -> replace with new handle
 missing from reload pass -> remove from registry
 ```
 
-So the registry itself behaves like a full reload, but asset handles are replaced only when needed.\
-If a file did not change, its old handle stays alive, and an already loaded asset object can continue to be used.
+This lets a registry recompute its complete registration result while preserving unchanged handles and already-loaded objects.\
+Systems that still hold an old handle can reacquire the latest handle after reload completion when a target changed.
 
-If a file changed, the registry maps that ID to a new handle.\
-A renderer or another system that still holds the old handle can listen for reload completion and fetch the latest handle from the registry again.
-
-This makes reload much lighter than a Minecraft-style full asset reload.\
-Registry refresh is closer to fast file indexing, while actual asset loading is handled lazily by handles and scopes.
+However, **registry reload is not required to be a cheap file-indexing pass**. `SimpleAssetRegistry` mostly performs file discovery and metadata comparison, while a custom registry may parse JSON, merge multiple files, or even construct the final asset objects and wrap them in `InstanceAssetHandle<TAsset>` during reload. The registry implementation owns the cost and lifecycle consequences of that choice.
 
 ## AssetHandle and AssetScope
 
-`AssetHandle<TAsset>` owns loading and unloading for one asset.\
-The real asset is loaded when `GetScope()` is called, if needed.
+`IAssetHandle` is the common contract for handles registered by asset registries. Not every handle is required to have a backing file or sidecar.\
+`AssetHandle<TAsset>` is the ordinary base implementation for lazy loading, unloading, and scope lifetime. The real asset is loaded through `GetScope()` when needed.
 
 ```csharp
 IAssetScope<MyAsset>? scope = await handle.GetScope();
@@ -232,31 +228,41 @@ using (scope)
 `AssetScope<TAsset>` is a usage token for the asset.\
 It must be disposed when the caller is done using the asset.
 
-When all scopes are returned, the handle tries to unload after `unloadDelayFrame`.\
+When all scopes are returned, an ordinary `AssetHandle<TAsset>` tries to unload after `unloadDelayFrame`.\
 This reduces unnecessary unload and reload work when the same asset is requested again soon.
 
-`AssetHandle<TAsset>.IsSameTarget()` decides whether a handle can be reused during reload.\
-The default implementation checks handle type, I/O target, file metadata, and the import-data sidecar's target and metadata.
+`InstanceAssetHandle<TAsset>` directly wraps an already-existing object and does not require file loading or a sidecar.
 
-## Asset Import Data
+`IsSameTarget()` decides whether an existing handle can be reused during registry reload. The ordinary `AssetHandle<TAsset>` implementation compares the concrete handle type, I/O target, and file revision metadata. If the handle also implements `IAssetSidecarHandle`, the linked `AssetSidecar` target and revision are included in the comparison.\
+`FileMetaData.IsSameRevision()` requires matching `lastWriteTime` values, and additionally compares `size` and `creationTime` when both sides provide those values. If the write time is unavailable, the metadata is not considered the same revision.
 
-`AssetImportData` is an extensible import-data container separate from `FileMetaData`.\
-`FileMetaData` describes file-system information such as file size or write time, while `AssetImportData` represents the sidecar JSON file used to store developer-defined per-asset information.
+## AssetSidecar
 
-`SimpleAssetRegistry<THandle>` uses the file at the same path with the asset's final extension replaced by `.json` as its import-data sidecar.
+`AssetSidecar` represents an extensible JSON sidecar associated with an I/O asset.\
+A sidecar is not a private set of "import settings" owned by one handle or registry. It is separate I/O data that any registry, handle, or feature may load and interpret when needed.
+
+The sidecar file name is formed by appending `.json` to the complete original file name.
 
 ```text
 assets/runios/sounds/ui/click.ogg
-assets/runios/sounds/ui/click.json
+assets/runios/sounds/ui/click.ogg.json
+
+assets/runios/textures/character.png
+assets/runios/textures/character.png.json
 ```
 
-The top-level keys in an import-data JSON file are `Identifier` values, and each value is a `JObject`.\
-Use the key as the identifier of the registry or feature that interprets the data. It does not have to match the file asset's identifier.
+The top-level data in an `AssetSidecar` is a `Dictionary<Identifier, JObject>`.\
+Each `Identifier` can act as the namespace of the registry or feature that interprets that section, and does not have to match the identifier of the source asset.
 
 ```json
 {
   "runios:waves": {
     "loadMode": "stream"
+  },
+  "runios:sprites": {
+    "idle": {
+      "rect": [0, 0, 32, 32]
+    }
   },
   "my_game:music": {
     "bpm": 128,
@@ -265,34 +271,28 @@ Use the key as the identifier of the registry or feature that interprets the dat
 }
 ```
 
-Identifiers and fields unknown to a package or a particular asset implementation remain in memory as `JObject` values.\
-This lets developers add new per-asset data without modifying the existing package code.\
-Consumer code is still required if the new value should affect runtime behavior.
+Unknown identifiers and fields remain preserved as `JObject` values, so new consumers can add their own sections without modifying a central schema.
 
-Handles read and deserialize the import-data JSON immediately before loading the real asset.\
-During registry reload, the registry checks only the sidecar's existence and file metadata; actual JSON deserialization occurs in the `AssetHandle<TAsset>.GetScope()` load path.\
-This is not read every frame, but it is read again when an unloaded asset is loaded again.
+`Reload()` rereads the current `IONode` and updates the sidecar to reflect the current source state.\
+If the file exists but cannot be read or deserialized, the data is treated as empty and an error is logged, while `FileMetaData` still keeps the revision of the current file entry. If the file does not exist, both data and metadata become empty.
 
 ```csharp
-using Newtonsoft.Json.Linq;
+await sidecar.Reload();
 
 Identifier key = new Identifier("my_game", "music");
-JObject? rawData = handle.importData[key];
-MusicImportData? typedData = handle.importData.GetValue<MusicImportData>(key);
+JObject? rawData = sidecar[key];
+MusicData? typedData = sidecar.GetValue<MusicData>(key);
 
-if (handle.importData.TryGetValue<MusicImportData>(key, out MusicImportData? data))
+if (sidecar.TryGetValue<MusicData>(key, out MusicData? data))
 {
-    // MusicImportData is an application-defined type.
     // Use data.
 }
 ```
 
-When a key is missing, `GetValue<T>()` returns the default value for that type.\
-Use `TryGetValue<T>()` when missing data must be distinguished from a valid default value.\
-If the JSON cannot be read, the import data is cleared and an error is logged. The original sidecar file is not deleted or overwritten.
+`IAssetHandle` itself does not require a sidecar. Only handles that need a sidecar for target identity or loading implement `IAssetSidecarHandle` and expose `AssetSidecar sidecar`.\
+This means handles such as `InstanceAssetHandle<TAsset>` no longer need a dummy empty sidecar.
 
-When implementing `AssetRegistry<THandle>` directly, the registry must locate the sidecar file, create `AssetImportData`, and pass it to the handle itself.\
-For instance handles without a sidecar file, `InstanceAssetHandle<TAsset>` can use the shared empty `AssetImportData` instance.
+The consumer also decides **when** to read a sidecar. An ordinary file handle may read it while loading the real asset, while a registry such as `SpriteRegistry` may read it during its own `Reload()` when sidecar contents determine which asset IDs should be registered.
 
 ## AssetRef
 
@@ -360,7 +360,7 @@ The default property drawer allows scene objects only when all target objects ar
 
 ## SimpleAssetRegistry
 
-For the common "every file in this folder is one asset" case, use `SimpleAssetRegistry<THandle>`.
+Use `SimpleAssetRegistry<THandle>` for the common "one file in a folder = one asset" pattern.
 
 `SimpleAssetRegistry` scans this folder in every enabled resource pack.
 
@@ -368,17 +368,12 @@ For the common "every file in this folder is one asset" case, use `SimpleAssetRe
 assets/{namespace}/{registryName}
 ```
 
-Here, `{namespace}` is a namespace folder inside the resource pack being scanned.\
-It is not the namespace of the registry ID.
+Here, `{namespace}` is a namespace folder inside the resource pack being scanned, not the namespace of the registry ID.
 
-`registryId.nameSpace` is only a namespace for avoiding registry ID conflicts.\
-It does not limit which folders `SimpleAssetRegistry` scans.
+`registryId.nameSpace` only prevents registry ID conflicts.\
+The default `registryName` is `registryId.path`, and the same `registryName` folder is searched under every resource-pack namespace.
 
-The default value of `registryName` is `registryId.path`.\
-This means `SimpleAssetRegistry` searches for the `registryName` folder under every namespace in every enabled resource pack.
-
-For example, if `registryId` is `example:textures`, the default `registryName` is `textures`.\
-So it searches these locations for every namespace that exists in the resource pack.
+For example, if `registryId` is `example:textures`, the default `registryName` is `textures`.
 
 ```text
 assets/runios/textures
@@ -386,7 +381,7 @@ assets/example/textures
 assets/any_namespace/textures
 ```
 
-The file path without extension becomes the asset ID.
+The file path with its final extension removed becomes the asset ID.
 
 ```text
 assets/runios/textures/ui/button.png
@@ -396,34 +391,34 @@ assets/any_namespace/textures/ui/button.png
 -> any_namespace:ui/button
 ```
 
+`SimpleAssetRegistry` provides this file-discovery and ID-mapping pattern as a convenience. It does not require every handle to use a sidecar or a particular loading strategy. A handle that needs one may associate the matching `AssetSidecar` during handle creation.
+
 Most implementations only need to implement `CreateHandle`.
 
 ```csharp
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Booting;
 using RuniOS.IO;
-using UnityEngine.Scripting;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Example
 {
-    public sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
+    public partial sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
-        public override int priority => 1;
+        public override int priority => 100;
         public override Type assetType => typeof(MyAsset);
         public override WildcardPatterns assetFilter { get; } = "json";
 
-        [Awaken]
-        [Preserve]
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-#endif
-        static void Awaken() => AssetRegistryManager.Register<MyAssetRegistry>();
+        [OnCodeLoaded]
+        static void OnCodeLoaded() => AssetRegistryManager.Register<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData, AssetImportData importData)
+        [OnCodeUnloading]
+        static void OnCodeUnloading() => AssetRegistryManager.Unregister<MyAssetRegistry>();
+
+        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData)
         {
-            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData, importData));
+            return UniTask.FromResult(new MyAssetHandle(node, fileMetaData));
         }
     }
 }
@@ -432,21 +427,25 @@ namespace RuniOS.Resource.Example
 For more control, override `OnBeginAssetLoop`, `OnAssetLoop`, or `OnEndAssetLoop`.
 
 In the current implementation, if the same ID was already recorded in the same reload pass, later entries are ignored.\
-That means pack priority follows enabled pack order and the duplicate handling rule in `RecordAssetHandle`.
+Pack priority therefore follows enabled pack order and the duplicate handling rule in `RecordAssetHandle`.
 
 ## Custom AssetRegistry
 
 If the resource shape is not a simple folder scan, inherit from `AssetRegistry<THandle>` directly.
 
+A custom registry is responsible for **resolving an identifier to the asset type it promises**. It is otherwise free to choose which resource-pack files it reads and how they are combined.\
+Multiple registries may interpret the same physical source independently, one file may produce multiple asset IDs, and a registry may even construct final objects during reload and register them through `InstanceAssetHandle<TAsset>`.
+
 Examples:
 
 ```text
-Merge dictionaries from multiple language json files
+Merge multiple language json dictionaries and construct LocalizationData immediately
 Parse one assets/{namespace}/sounds.json file into many sound IDs
-Use internal data keys as asset IDs instead of file paths
+Interpret the same source file independently as different asset types in different registries
+Use internal data keys or AssetSidecar contents to determine registered asset IDs
 ```
 
-Real examples are `LanguageAssetRegistry` and `SoundAssetRegistry`.
+Real examples are `LanguageAssetRegistry` and `SoundAssetRegistry`. `LanguageAssetRegistry` merges language JSON during reload, constructs `LocalizationData`, and registers it immediately through `InstanceAssetHandle<LocalizationData>`.
 
 When implementing a registry directly, use `AsyncReloadGate` for duplicate reload coordination. Keep progress reporting and tracking lifecycle in the reload body.
 
@@ -504,7 +503,7 @@ The registry decides progress calculation, parallel work, merge rules, and exact
 One file in a folder = one asset
 File path = asset ID
 Target files can be selected with an extension filter
-Only CreateHandle differs
+Only the standard file-discovery pattern is needed
 ```
 
 Direct `AssetRegistry` is better when:
@@ -512,18 +511,20 @@ Direct `AssetRegistry` is better when:
 ```text
 Several files must be merged into one asset
 One file produces many asset IDs
-Resource pack merge rules are needed
-A fixed json file is read instead of scanning a folder
+AssetSidecar or internal file data must be interpreted during registration
+The same source must be reinterpreted with registry-specific rules
+Resource-pack-specific merge rules are needed
+The final asset object should be constructed during registry reload
 Progress and parallel work need custom control
 ```
 
 ## Summary
 
-The resource system separates resource pack files from in-game asset access.\
-Registries quickly index files, while handles own real asset loading and lifetime.
+The resource system separates the physical file layout of resource packs from logical in-game asset access.\
+A registry is responsible for resolving an `Identifier` to the asset type it promises, while file discovery, merging, sidecar interpretation, and eager/lazy loading strategies are implementation choices.
 
-Use `SimpleAssetRegistry` for normal file assets.\
-Implement `AssetRegistry` directly for complex merging or custom formats.
+Use `SimpleAssetRegistry` for the ordinary one-file-per-asset pattern, and implement `AssetRegistry` directly for complex merging, multi-asset registration, or registration-time data interpretation.\
+`AssetSidecar` is an extensible I/O sidecar that may be consumed independently by multiple systems, not private import settings owned by one handle.
 
-Reload recalculates the full registry, but it does not blindly discard and reload every asset object.\
-Only changed handles are replaced, and systems can reacquire the latest handle from the registry after reload completion.
+Reload recomputes the complete registration result of each registry, but existing handles are reused when `IsSameTarget()` says the target is unchanged.\
+This preserves unchanged asset lifetimes without restricting how a registry produces its assets.
