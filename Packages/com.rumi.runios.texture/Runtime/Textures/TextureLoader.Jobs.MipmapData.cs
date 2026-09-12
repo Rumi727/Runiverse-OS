@@ -14,11 +14,17 @@ namespace RuniOS.Textures
 
             public void Dispose()
             {
-                dependency.Complete();
-                for (int index = 0; index < levels.Length; index++)
+                try
                 {
-                    if (levels[index].IsCreated)
-                        levels[index].Dispose();
+                    dependency.Complete();
+                }
+                finally
+                {
+                    for (int index = 0; index < levels.Length; index++)
+                    {
+                        if (levels[index].IsCreated)
+                            levels[index].Dispose();
+                    }
                 }
             }
         }

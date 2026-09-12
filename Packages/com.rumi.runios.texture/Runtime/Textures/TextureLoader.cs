@@ -155,18 +155,18 @@ namespace RuniOS.Textures
             ValidateDecodedImage(decodedImage);
 
             TextureMipmapData? mipmapData = null;
-            if (settings.mipmapCount != 1)
-            {
-                mipmapData = TextureMipmapScheduler.Schedule(decodedImage, settings.mipmapCount);
-                while (!mipmapData.Value.dependency.IsCompleted)
-                    await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: cancellationToken);
-
-                mipmapData.Value.dependency.Complete();
-            }
-
             Texture2D? texture = null;
             try
             {
+                if (settings.mipmapCount != 1)
+                {
+                    mipmapData = TextureMipmapScheduler.Schedule(decodedImage, settings.mipmapCount);
+                    while (!mipmapData.Value.dependency.IsCompleted)
+                        await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: cancellationToken);
+
+                    mipmapData.Value.dependency.Complete();
+                }
+
                 texture = new Texture2D(decodedImage.width, decodedImage.height, decodedImage.textureFormat, mipmapData?.count ?? 1, settings.linear);
                 if (mipmapData != null)
                 {
