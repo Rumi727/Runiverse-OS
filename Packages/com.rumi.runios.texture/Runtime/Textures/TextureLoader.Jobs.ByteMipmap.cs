@@ -17,17 +17,21 @@ namespace RuniOS.Textures
             public int inputHeight;
             public int outputWidth;
             public int channelCount;
+            public bool sRgb;
 
             public void Execute(int outputIndex)
             {
                 GetSampleIndices(outputIndex, inputWidth, inputHeight, outputWidth, out int first, out int second, out int third, out int fourth);
                 for (int channel = 0; channel < channelCount; channel++)
                 {
-                    uint total = input[(first * channelCount) + channel];
-                    total += input[(second * channelCount) + channel];
-                    total += input[(third * channelCount) + channel];
-                    total += input[(fourth * channelCount) + channel];
-                    output[(outputIndex * channelCount) + channel] = (byte)(total / 4u);
+                    byte firstValue = input[(first * channelCount) + channel];
+                    byte secondValue = input[(second * channelCount) + channel];
+                    byte thirdValue = input[(third * channelCount) + channel];
+                    byte fourthValue = input[(fourth * channelCount) + channel];
+
+                    output[(outputIndex * channelCount) + channel] = sRgb && channel < 3
+                        ? (byte)AverageSrgb(firstValue, secondValue, thirdValue, fourthValue, byte.MaxValue)
+                        : (byte)(((uint)firstValue + secondValue + thirdValue + fourthValue) / 4u);
                 }
             }
         }

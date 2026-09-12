@@ -93,6 +93,8 @@ new TextureLoadSettings(mipmapCount: 4); // 기본 레벨 포함 총 4개 레벨
 
 `mipmapCount`가 `0` 이하이면 이미지 크기에 맞춰 1x1까지 생성합니다. `2` 이상 값은 기본 레벨을 포함합니다. 이미지 크기가 허용하는 최대 레벨보다 큰 값을 지정하면 `ArgumentOutOfRangeException`이 발생합니다.
 
+`linear`가 `false`인 `RGB24`와 `RGBA32`의 색상 채널은 선형 공간에서 box filtering한 뒤 sRGB로 다시 인코딩합니다. alpha와 선형 데이터 포맷은 저장된 값을 직접 평균합니다.
+
 ## 처리 흐름
 
 ```text

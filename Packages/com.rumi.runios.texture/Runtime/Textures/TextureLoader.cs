@@ -160,7 +160,7 @@ namespace RuniOS.Textures
             {
                 if (settings.mipmapCount != 1)
                 {
-                    mipmapData = TextureMipmapScheduler.Schedule(decodedImage, settings.mipmapCount);
+                    mipmapData = TextureMipmapScheduler.Schedule(decodedImage, settings.mipmapCount, settings.linear);
                     while (!mipmapData.Value.dependency.IsCompleted)
                         await UniTask.Yield(PlayerLoopTiming.Update, cancellationToken: cancellationToken);
 

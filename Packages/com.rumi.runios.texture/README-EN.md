@@ -93,6 +93,8 @@ new TextureLoadSettings(mipmapCount: 4); // Four total levels, including base
 
 Values less than or equal to `0` generate levels down to 1x1. Values of `2` or greater include the base level in the requested count. Values beyond the maximum level allowed by the image dimensions throw `ArgumentOutOfRangeException`.
 
+When `linear` is `false`, `RGB24` and `RGBA32` color channels are box-filtered in linear space and then encoded back to sRGB. Alpha and linear data formats are averaged directly.
+
 ## Processing pipeline
 
 ```text

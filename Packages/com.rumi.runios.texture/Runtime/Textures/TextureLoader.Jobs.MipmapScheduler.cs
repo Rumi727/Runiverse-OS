@@ -8,7 +8,7 @@ namespace RuniOS.Textures
     {
         static class TextureMipmapScheduler
         {
-            public static TextureMipmapData Schedule(DecodedImage decodedImage, int mipmapCount)
+            public static TextureMipmapData Schedule(DecodedImage decodedImage, int mipmapCount, bool linear)
             {
                 int actualMipmapCount = GetMipmapCount(decodedImage.width, decodedImage.height, mipmapCount);
                 NativeArray<byte>[] levels = actualMipmapCount == 1 ? [] : new NativeArray<byte>[actualMipmapCount - 1];
@@ -40,6 +40,7 @@ namespace RuniOS.Textures
                             inputWidth,
                             inputHeight,
                             outputWidth,
+                            linear,
                             dependency
                         );
 
@@ -66,6 +67,7 @@ namespace RuniOS.Textures
                 int inputWidth,
                 int inputHeight,
                 int outputWidth,
+                bool linear,
                 JobHandle dependency
             )
             {
@@ -81,7 +83,8 @@ namespace RuniOS.Textures
                         inputWidth = inputWidth,
                         inputHeight = inputHeight,
                         outputWidth = outputWidth,
-                        channelCount = decodedImage.bytesPerPixel
+                        channelCount = decodedImage.bytesPerPixel,
+                        sRgb = !linear && decodedImage.textureFormat is TextureFormat.RGB24 or TextureFormat.RGBA32
                     }.Schedule(outputPixelCount, batchSize, dependency),
                     TextureMipmapKind.unsignedShortChannels => new UnsignedShortMipmapJob
                     {

@@ -1,4 +1,6 @@
 #nullable enable
+using Unity.Mathematics;
+
 namespace RuniOS.Textures
 {
     public static partial class TextureLoader
@@ -17,5 +19,24 @@ namespace RuniOS.Textures
             third = (secondY * inputWidth) + firstX;
             fourth = (secondY * inputWidth) + secondX;
         }
+
+        static int AverageSrgb(int first, int second, int third, int fourth, int maximumValue)
+        {
+            float scale = 1f / maximumValue;
+            float average = (SrgbToLinear(first * scale)
+                + SrgbToLinear(second * scale)
+                + SrgbToLinear(third * scale)
+                + SrgbToLinear(fourth * scale)) * 0.25f;
+
+            return (int)math.round(LinearToSrgb(average) * maximumValue);
+        }
+
+        static float SrgbToLinear(float value) => value <= 0.04045f
+            ? value / 12.92f
+            : math.pow((value + 0.055f) / 1.055f, 2.4f);
+
+        static float LinearToSrgb(float value) => value <= 0.0031308f
+            ? value * 12.92f
+            : (1.055f * math.pow(value, 1f / 2.4f)) - 0.055f;
     }
 }
