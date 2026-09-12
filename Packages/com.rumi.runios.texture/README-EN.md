@@ -117,8 +117,8 @@ Decoded data keeps its original data type when possible. Only normalization requ
 | 1/2/4/8-bit grayscale, grayscale palette | `R8` | Expanded to 8-bit values |
 | 16-bit grayscale | `R16` | `min-is-white` is inverted |
 | RGB555/RGB565 | `RGB565` | RGB555 converted to RGB565 |
-| 24-bit bitmap | `RGB24` | FreeImage BGR converted to RGB |
-| 32-bit bitmap | `RGBA32` | FreeImage BGRA converted to RGBA |
+| 24-bit bitmap | `RGB24` | BGR channel-mask layouts converted to RGB |
+| 32-bit bitmap | `RGBA32` | BGRA channel-mask layouts converted to RGBA |
 | `uint16` / `int16` | `R16` / `R16_SIGNED` | Raw channels preserved |
 | `float32` | `RFloat` | Raw floating-point data preserved |
 | `rgb16` / `rgba16` | `RGB48` / `RGBA64` | 16-bit channels preserved |

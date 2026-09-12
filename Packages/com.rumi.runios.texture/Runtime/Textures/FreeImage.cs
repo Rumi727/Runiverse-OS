@@ -1,5 +1,4 @@
 #nullable enable
-using System.Runtime.InteropServices;
 
 namespace RuniOS.Textures
 {
@@ -14,11 +13,5 @@ namespace RuniOS.Textures
 #else
         const string dllName = "FreeImage";
 #endif
-
-        public static extern bool isLittleEndian
-        {
-            [DllImport(dllName, EntryPoint = "FreeImage_IsLittleEndian")]
-            get;
-        }
     }
 }

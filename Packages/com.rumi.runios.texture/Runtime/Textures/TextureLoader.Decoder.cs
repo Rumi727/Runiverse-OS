@@ -193,7 +193,7 @@ namespace RuniOS.Textures
 
                 NativeArray<byte> pixels;
                 if (normalizeBitmap)
-                    pixels = CopyBitmapPixels(bitmap, bytesPerPixel, FreeImage.isLittleEndian, convertRgb555ToRgb565);
+                    pixels = CopyBitmapPixels(bitmap, bytesPerPixel, bitsPerPixel is 24 or 32 && UsesBlueGreenRedOrder(bitmap), convertRgb555ToRgb565);
                 else if (expandRgbFloat)
                     pixels = CopyRgbFloatPixels(bitmap);
                 else
@@ -213,6 +213,20 @@ namespace RuniOS.Textures
 
                 return (redMask == 0xF800 && greenMask == 0x07E0 && blueMask == 0x001F)
                     || (redMask == 0x7C00 && greenMask == 0x03E0 && blueMask == 0x001F);
+            }
+
+            static bool UsesBlueGreenRedOrder(FreeImage.Bitmap bitmap)
+            {
+                uint redMask = bitmap.redMask;
+                uint greenMask = bitmap.greenMask;
+                uint blueMask = bitmap.blueMask;
+
+                if (redMask == 0x00FF0000 && greenMask == 0x0000FF00 && blueMask == 0x000000FF)
+                    return true;
+                if (redMask == 0x000000FF && greenMask == 0x0000FF00 && blueMask == 0x00FF0000)
+                    return false;
+
+                throw new InvalidDataException($"Unsupported bitmap channel masks: R=0x{redMask:X8}, G=0x{greenMask:X8}, B=0x{blueMask:X8}.");
             }
 
             static unsafe bool IsGrayscalePalette(FreeImage.Bitmap bitmap, int bitsPerPixel)

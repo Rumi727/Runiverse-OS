@@ -117,8 +117,8 @@ encoded image data
 | 1/2/4/8-bit grayscale, grayscale palette | `R8` | 8-bit 값으로 확장 |
 | 16-bit grayscale | `R16` | `min-is-white`는 반전 |
 | RGB555/RGB565 | `RGB565` | RGB555를 RGB565로 변환 |
-| 24-bit bitmap | `RGB24` | FreeImage BGR을 RGB로 변환 |
-| 32-bit bitmap | `RGBA32` | FreeImage BGRA를 RGBA로 변환 |
+| 24-bit bitmap | `RGB24` | channel mask가 BGR이면 RGB로 변환 |
+| 32-bit bitmap | `RGBA32` | channel mask가 BGRA이면 RGBA로 변환 |
 | `uint16` / `int16` | `R16` / `R16_SIGNED` | 원시 채널 유지 |
 | `float32` | `RFloat` | 원시 부동소수점 데이터 유지 |
 | `rgb16` / `rgba16` | `RGB48` / `RGBA64` | 16-bit 채널 유지 |
