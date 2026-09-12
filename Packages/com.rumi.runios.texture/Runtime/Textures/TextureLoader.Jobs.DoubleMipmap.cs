@@ -1,6 +1,7 @@
 #nullable enable
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 
 namespace RuniOS.Textures
@@ -11,7 +12,7 @@ namespace RuniOS.Textures
         struct DoubleMipmapJob : IJobParallelFor
         {
             [ReadOnly] public NativeArray<double> input;
-            [WriteOnly] public NativeArray<double> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<double> output;
             public int inputWidth;
             public int inputHeight;
             public int outputWidth;
