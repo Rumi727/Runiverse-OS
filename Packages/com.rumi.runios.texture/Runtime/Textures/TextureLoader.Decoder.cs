@@ -151,39 +151,11 @@ namespace RuniOS.Textures
                         bytesPerPixel = 2;
                         break;
                     }
-                    case FreeImage.ImageType.uint32:
-                    {
-                        textureFormat = TextureFormat.RG32;
-                        mipmapKind = TextureMipmapKind.unsignedIntPayload;
-                        bytesPerPixel = 4;
-                        break;
-                    }
-                    case FreeImage.ImageType.int32:
-                    {
-                        textureFormat = TextureFormat.RG32_SIGNED;
-                        mipmapKind = TextureMipmapKind.signedIntPayload;
-                        bytesPerPixel = 4;
-                        break;
-                    }
                     case FreeImage.ImageType.float32:
                     {
                         textureFormat = TextureFormat.RFloat;
                         mipmapKind = TextureMipmapKind.floatChannels;
                         bytesPerPixel = 4;
-                        break;
-                    }
-                    case FreeImage.ImageType.float64:
-                    {
-                        textureFormat = TextureFormat.RGFloat;
-                        mipmapKind = TextureMipmapKind.doublePayload;
-                        bytesPerPixel = 8;
-                        break;
-                    }
-                    case FreeImage.ImageType.complex:
-                    {
-                        textureFormat = TextureFormat.RGBAFloat;
-                        mipmapKind = TextureMipmapKind.doublePayload;
-                        bytesPerPixel = 16;
                         break;
                     }
                     case FreeImage.ImageType.rgb16:

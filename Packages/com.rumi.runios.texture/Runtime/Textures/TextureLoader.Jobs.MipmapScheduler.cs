@@ -101,24 +101,6 @@ namespace RuniOS.Textures
                         outputWidth = outputWidth,
                         channelCount = decodedImage.bytesPerPixel / sizeof(short)
                     }.Schedule(outputPixelCount, batchSize, dependency),
-                    TextureMipmapKind.unsignedIntPayload => new UnsignedIntMipmapJob
-                    {
-                        input = input.Reinterpret<uint>(),
-                        output = output.Reinterpret<uint>(),
-                        inputWidth = inputWidth,
-                        inputHeight = inputHeight,
-                        outputWidth = outputWidth,
-                        channelCount = decodedImage.bytesPerPixel / sizeof(uint)
-                    }.Schedule(outputPixelCount, batchSize, dependency),
-                    TextureMipmapKind.signedIntPayload => new SignedIntMipmapJob
-                    {
-                        input = input.Reinterpret<int>(),
-                        output = output.Reinterpret<int>(),
-                        inputWidth = inputWidth,
-                        inputHeight = inputHeight,
-                        outputWidth = outputWidth,
-                        channelCount = decodedImage.bytesPerPixel / sizeof(int)
-                    }.Schedule(outputPixelCount, batchSize, dependency),
                     TextureMipmapKind.floatChannels => new FloatMipmapJob
                     {
                         input = input.Reinterpret<float>(),
@@ -127,15 +109,6 @@ namespace RuniOS.Textures
                         inputHeight = inputHeight,
                         outputWidth = outputWidth,
                         channelCount = decodedImage.bytesPerPixel / sizeof(float)
-                    }.Schedule(outputPixelCount, batchSize, dependency),
-                    TextureMipmapKind.doublePayload => new DoubleMipmapJob
-                    {
-                        input = input.Reinterpret<double>(),
-                        output = output.Reinterpret<double>(),
-                        inputWidth = inputWidth,
-                        inputHeight = inputHeight,
-                        outputWidth = outputWidth,
-                        channelCount = decodedImage.bytesPerPixel / sizeof(double)
                     }.Schedule(outputPixelCount, batchSize, dependency),
                     TextureMipmapKind.rgb565 => new Rgb565MipmapJob
                     {

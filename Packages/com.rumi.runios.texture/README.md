@@ -118,13 +118,11 @@ encoded image data
 | 24-bit bitmap | `RGB24` | FreeImage BGR을 RGB로 변환 |
 | 32-bit bitmap | `RGBA32` | FreeImage BGRA를 RGBA로 변환 |
 | `uint16` / `int16` | `R16` / `R16_SIGNED` | 원시 채널 유지 |
-| `uint32` / `int32` | `RG32` / `RG32_SIGNED` | 원시 payload 유지 |
-| `float32` / `float64` | `RFloat` / `RGFloat` | 원시 부동소수점 데이터 유지 |
-| `complex` | `RGBAFloat` | double payload 밉맵 사용 |
+| `float32` | `RFloat` | 원시 부동소수점 데이터 유지 |
 | `rgb16` / `rgba16` | `RGB48` / `RGBA64` | 16-bit 채널 유지 |
 | `rgbFloat` / `rgbaFloat` | `RGBAFloat` | RGB 입력은 alpha `1.0` 추가 |
 
-팔레트·CMYK·비표준 bitmap 채널 레이아웃은 필요하면 FreeImage의 24-bit 또는 32-bit 변환을 거칩니다. 플랫폼이 선택된 Unity 포맷을 지원하지 않으면 변환 fallback 없이 `NotSupportedException`이 발생합니다.
+팔레트·CMYK·비표준 bitmap 채널 레이아웃은 필요하면 FreeImage의 24-bit 또는 32-bit 변환을 거칩니다. `uint32`, `int32`, `float64`, `complex`처럼 동일한 의미의 Unity `TextureFormat`이 없는 타입은 `NotSupportedException`이 발생합니다. 플랫폼이 선택된 Unity 포맷을 지원하지 않아도 변환 fallback 없이 `NotSupportedException`이 발생합니다.
 
 ## 입력 및 소유권
 

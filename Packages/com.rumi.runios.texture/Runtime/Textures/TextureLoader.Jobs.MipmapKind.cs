@@ -8,10 +8,7 @@ namespace RuniOS.Textures
             byteChannels,
             unsignedShortChannels,
             signedShortChannels,
-            unsignedIntPayload,
-            signedIntPayload,
             floatChannels,
-            doublePayload,
             rgb565
         }
     }

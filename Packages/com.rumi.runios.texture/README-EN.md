@@ -118,13 +118,11 @@ Decoded data keeps its original data type when possible. Only normalization requ
 | 24-bit bitmap | `RGB24` | FreeImage BGR converted to RGB |
 | 32-bit bitmap | `RGBA32` | FreeImage BGRA converted to RGBA |
 | `uint16` / `int16` | `R16` / `R16_SIGNED` | Raw channels preserved |
-| `uint32` / `int32` | `RG32` / `RG32_SIGNED` | Raw payload preserved |
-| `float32` / `float64` | `RFloat` / `RGFloat` | Raw floating-point data preserved |
-| `complex` | `RGBAFloat` | Uses double-payload mipmaps |
+| `float32` | `RFloat` | Raw floating-point data preserved |
 | `rgb16` / `rgba16` | `RGB48` / `RGBA64` | 16-bit channels preserved |
 | `rgbFloat` / `rgbaFloat` | `RGBAFloat` | RGB input receives alpha `1.0` |
 
-Paletted, CMYK, and non-canonical bitmap channel layouts may be converted by FreeImage to 24-bit or 32-bit output. If the current platform does not support the selected Unity format, the loader throws `NotSupportedException` without a conversion fallback.
+Paletted, CMYK, and non-canonical bitmap channel layouts may be converted by FreeImage to 24-bit or 32-bit output. Types without a semantically equivalent Unity `TextureFormat`, including `uint32`, `int32`, `float64`, and `complex`, throw `NotSupportedException`. If the current platform does not support the selected Unity format, the loader also throws `NotSupportedException` without a conversion fallback.
 
 ## Input and ownership
 
