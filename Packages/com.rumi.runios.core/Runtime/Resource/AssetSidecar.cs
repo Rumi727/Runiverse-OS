@@ -8,26 +8,16 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public sealed class AssetSidecar(IONode node, FileMetaData metaData = default) : IReadOnlyDictionary<Identifier, JObject>
+    public sealed class AssetSidecar(IONode node, FileMetaData metaData = default) : IEnumerable<Identifier>
     {
-        public static readonly AssetSidecar empty = new AssetSidecar();
-
-        public AssetSidecar() : this(IONode.empty) { }
+        public static readonly AssetSidecar empty = new AssetSidecar(IONode.empty);
 
         public IONode node { get; } = node;
         public FileMetaData metaData { get; private set; } = metaData;
 
         public int count => value.Count;
-        int IReadOnlyCollection<KeyValuePair<Identifier, JObject>>.Count => count;
-
-        public JObject? this[Identifier key] => value.GetValueOrDefault(key);
-        JObject IReadOnlyDictionary<Identifier, JObject>.this[Identifier key] => value[key];
 
         public Dictionary<Identifier, JObject>.KeyCollection keys => value.Keys;
-        IEnumerable<Identifier> IReadOnlyDictionary<Identifier, JObject>.Keys => keys;
-
-        public Dictionary<Identifier, JObject>.ValueCollection values => value.Values;
-        IEnumerable<JObject> IReadOnlyDictionary<Identifier, JObject>.Values => values;
 
         Dictionary<Identifier, JObject> value = [];
 
@@ -39,9 +29,16 @@ namespace RuniOS.Resource
             return null;
         }
 
+        public JObject? GetValue(Identifier key)
+        {
+            if (TryGetValue(key, out JObject? value))
+                return value;
+
+            return null;
+        }
+
         public bool ContainsKey(Identifier key) => value.ContainsKey(key);
 
-        public bool TryGetValue(Identifier key, out JObject value) => this.value.TryGetValue(key, out value);
         public bool TryGetValue<T>(Identifier key, [NotNullWhen(true)] out T? value)
         {
             value = default;
@@ -91,7 +88,8 @@ namespace RuniOS.Resource
 
         public bool IsSameTarget(AssetSidecar other) => node.IsSameTarget(other.node) && metaData.IsSameRevision(other.metaData);
 
-        public IEnumerator<KeyValuePair<Identifier, JObject>> GetEnumerator() => value.GetEnumerator();
+        public Dictionary<Identifier, JObject>.KeyCollection.Enumerator GetEnumerator() => keys.GetEnumerator();
+        IEnumerator<Identifier> IEnumerable<Identifier>.GetEnumerator() => GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }
