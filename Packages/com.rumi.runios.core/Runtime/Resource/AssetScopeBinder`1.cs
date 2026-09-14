@@ -43,6 +43,9 @@ namespace RuniOS.Resource
 
         async UniTask ReloadCore()
         {
+            if (assetRef.IsSameTarget(currentAssetScope))
+                return;
+
             currentAssetScope = await assetRef.LoadScopeAsync();
             if (currentAssetScope != null)
                 Apply(currentAssetScope.asset);
