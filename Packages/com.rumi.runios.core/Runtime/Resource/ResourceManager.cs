@@ -168,17 +168,19 @@ namespace RuniOS.Resource
                 preReloadCompletionEvent.SafeInvoke();
                 reloadCompletionEvent.SafeInvoke();
 
-                foreach (var reloadable in reloadables)
+                static async UniTask ReloadSafe(IReloadable reloadable)
                 {
                     try
                     {
-                        reloadable.Reload().Forget();
+                        await reloadable.Reload();
                     }
                     catch (Exception e)
                     {
                         Debug.LogException(e);
                     }
                 }
+
+                await UniTask.WhenAll(reloadables.Select(ReloadSafe));
             }
         }
 
