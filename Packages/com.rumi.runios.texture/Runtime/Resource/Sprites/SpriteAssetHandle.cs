@@ -41,7 +41,7 @@ namespace RuniOS.Resource.Sprites
             secondarySpriteTextureScopes = scopeBuilder.MoveToImmutable();
 
             Texture2D texture = textureScope.asset;
-            return Sprite.Create
+            Sprite sprite = Sprite.Create
             (
                 texture,
                 loadSettings.rect ?? new Rect(0, 0, texture.width, texture.height),
@@ -53,6 +53,11 @@ namespace RuniOS.Resource.Sprites
                 loadSettings.generateFallbackPhysicsShape,
                 secondarySpriteTextures
             );
+
+            sprite.name = node.path.GetFileNameWithoutExtension();
+            sprite.hideFlags = HideFlags.HideAndDontSave;
+
+            return sprite;
         }
 
         protected override void Unload(Sprite unloadedAsset)

@@ -14,7 +14,12 @@ namespace RuniOS.Resource.Textures
             await sidecar.Reload();
 
             TextureLoadSettings settings = sidecar.GetValue<TextureLoadSettings>(TextureAssetRegistry.id) ?? TextureLoadSettings.defaultValue;
-            return await TextureLoader.LoadAsync(node, settings);
+            Texture2D texture = await TextureLoader.LoadAsync(node, settings);
+
+            texture.name = node.path.GetFileNameWithoutExtension();
+            texture.hideFlags = HideFlags.HideAndDontSave;
+
+            return texture;
         }
 
         protected override void Unload(Texture2D unloadedAsset) => Object.DestroyImmediate(unloadedAsset);
