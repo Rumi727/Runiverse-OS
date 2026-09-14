@@ -593,6 +593,7 @@ GameObject:
   - component: {fileID: 403932573}
   - component: {fileID: 403932572}
   - component: {fileID: 403932574}
+  - component: {fileID: 403932575}
   m_Layer: 0
   m_Name: GameObject (5)
   m_TagString: Untagged
@@ -649,12 +650,12 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 0}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 0.16, y: 0.16}
+  m_Size: {x: 8, y: 13.15}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -670,7 +671,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.9, y: 1.21, z: -2.07549}
-  m_LocalScale: {x: 6, y: 6, z: 1}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -688,6 +689,34 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: RuniOS.Effects::RuniOS.Effects.MergeOutline
   _profileId: 0
+--- !u!114 &403932575
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 403932570}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ff0ef242d414c62b65abf436d969bc8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RuniOS.Textures::RuniOS.Sprites.SpriteRendererBinder
+  _assetRef:
+    mode: 0
+    assetId:
+      _nameSpace: test
+      _path:
+        _value: 89478062_0
+    resourceKey:
+      registryId:
+        _nameSpace: runios
+        _path:
+          _value: 
+      assetId:
+        _nameSpace: runios
+        _path:
+          _value: 
+    directAsset: {fileID: 0}
 --- !u!1 &548284940
 GameObject:
   m_ObjectHideFlags: 0
