@@ -1,0 +1,1 @@
+By contributing to this project, you agree to the terms in [CONTRIBUTOR_POLICY.md](CONTRIBUTOR_POLICY.md)
