@@ -9,6 +9,10 @@ Runiverse OS는 특정 게임 하나만을 위한 도구 모음이 아닙니다.
 > 아직 개발 중인 프로젝트입니다. 패키지마다 구현 상태와 검증 수준이 다르며, 완성된 상용 엔진이나 안정 릴리스로 취급하면 안 됩니다.
 > 이 라이브러리가 완성되면 기존 [SC KRM 1.0](https://github.com/Rumi727/SC-KRM-1.0/)을 대체할 예정입니다.
 
+## 라이선스
+
+프로젝트 본체는 [Mozilla Public License 2.0](LICENSE)을 따릅니다. FMOD, FreeImage, UnityAsyncImageLoader 등 포함된 외부 구성 요소는 각각의 라이선스와 고지 문서를 따르므로 배포 전 [Third-party notices](THIRD-PARTY-NOTICES.md)와 각 구성 요소의 문서를 확인해야 합니다.
+
 ## 참고 사항
 
 * 추후 System.Text.Json으로의 전환을 고려해야합니다.
@@ -294,7 +298,3 @@ Runiverse OS는 짧은 기간에 새로 만든 프로젝트가 아닙니다. 아
 - [FMOD SoundSystem](Packages/com.rumi.runios.fmod/README.md)
 - [Runiverse OS NBS](Packages/com.rumi.runios.nbs/README.md)
 - [Runiverse OS Texture](Packages/com.rumi.runios.texture/README.md)
-
-## 라이선스
-
-프로젝트 본체는 [Mozilla Public License 2.0](LICENSE)을 따릅니다. FMOD, FreeImage, UnityAsyncImageLoader 등 포함된 외부 구성 요소는 각각의 라이선스와 고지 문서를 따르므로 배포 전 [Third-party notices](THIRD-PARTY-NOTICES.md)와 각 구성 요소의 문서를 확인해야 합니다.
