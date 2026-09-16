@@ -11,7 +11,15 @@ Runiverse OS는 특정 게임 하나만을 위한 도구 모음이 아닙니다.
 
 ## 라이선스
 
-프로젝트 본체는 [Mozilla Public License 2.0](LICENSE)을 따릅니다. FMOD, FreeImage, UnityAsyncImageLoader 등 포함된 외부 구성 요소는 각각의 라이선스와 고지 문서를 따르므로 배포 전 [Third-party notices](THIRD-PARTY-NOTICES.md)와 각 구성 요소의 문서를 확인해야 합니다.
+프로젝트 본체의 소스 코드는 [Mozilla Public License 2.0](LICENSE)을 따릅니다.
+
+별도로 명시되지 않은 경우, 프로젝트에 포함된 텍스처, 이미지, 오디오 및 그 밖의 리소스 에셋 중 제가 저작권 또는 재라이선스 권한을 보유한 저작물은 [Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)](LICENSE-ASSETS)을 따릅니다.\
+이러한 에셋은 주로 `Assets/StreamingAssets` 및 `Packages/*/*StreamingAssets` 아래에 위치하지만, 라이선스의 적용 범위가 해당 경로에만 한정되지는 않습니다.
+
+현재 `StreamingAssets`에 포함된 리소스의 대부분은 제가 권리를 보유한 저작물이지만, 프로젝트가 매우 초기 개발 단계에 있어 파일 배치와 라이선스 표기가 완전히 정리되지 않았을 수 있습니다.\
+따라서 재사용 또는 재배포 전에는 [Third-party notices](THIRD-PARTY-NOTICES.md)와 해당 파일 또는 구성 요소에 포함된 별도의 라이선스 및 고지 문서를 함께 확인하는 것을 권장합니다.
+
+FMOD, FreeImage, UnityAsyncImageLoader 등 포함된 외부 구성 요소와 제3자 저작물은 위 라이선스와 관계없이 각각의 원래 라이선스와 고지 조건을 따릅니다.
 
 ## 참고 사항
 
