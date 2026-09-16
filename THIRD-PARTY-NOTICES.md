@@ -1217,7 +1217,7 @@ Software distributed under the License is distributed on an "AS IS" basis, WITHO
 
 ## UnityAsyncImageLoader
 
-Files: `Packages/com.rumi.runios.texture/Runtime/UnityAsyncImageLoader/**`
+Files: `Packages/com.rumi.runios.texture/Runtime/**`
 
 Source: https://github.com/Looooong/UnityAsyncImageLoader  
 Copyright (c) 2021 Nguyễn Đức Long
