@@ -97,7 +97,7 @@ Shader "Hidden/RuniOS/RoundedCorners"
                 IN.color = v.color;
                 
                 IN.uiPos = v.uv1;
-                IN.rectInfo = float4(v.uv2.x, v.uv2.y, 0, 0);
+                IN.rectInfo = float4(v.uv2.x, v.uv2.y, v.normal.z, 0);
                 // Unpack: x=Width, y=OutSoft, z=IsOutline, w=BodySoft
                 IN.outlineInfo = float4(v.uv3.x, v.uv3.y, v.normal.x, v.normal.y);
                 IN.radii = v.tangent;
@@ -118,7 +118,7 @@ Shader "Hidden/RuniOS/RoundedCorners"
                 float2 pixelPos = IN.uiPos;
                 float2 halfSize = IN.rectInfo.xy;
                 float dist = CalcRoundedBox(pixelPos, halfSize, IN.radii);
-                float delta = fwidth(pixelPos.x) * 0.5; 
+                float delta = max(fwidth(dist), 1e-4);
                 
                 float outlineWidth = IN.outlineInfo.x;
                 float outlineSoftness = IN.outlineInfo.y;
@@ -133,7 +133,7 @@ Shader "Hidden/RuniOS/RoundedCorners"
                     // Body
                     half4 texColor = (tex2D(_MainTex, IN.texcoord) + _TextureSampleAdd) * IN.color;
                     
-                    float softRange = delta * outlineSoftness; // Body uses its own softness
+                    float softRange = delta * max(bodySoftness, 1.0);
                     float alpha = 1.0 - smoothstep(-softRange, softRange, dist);
                     
                     texColor.a *= alpha;
@@ -142,15 +142,26 @@ Shader "Hidden/RuniOS/RoundedCorners"
                 else
                 {
                     // Outline
-                    float innerSoftRange = delta * bodySoftness;
-                    float overlap = innerSoftRange * 0.5; // Gap fix
-                    
-                    float innerHole = smoothstep(-innerSoftRange - overlap, innerSoftRange - overlap, dist); 
-                    float outerSoftRange = delta * outlineSoftness; 
-                    float outerBorder = 1.0 - smoothstep(outlineWidth - outerSoftRange, outlineWidth + outerSoftRange, dist);
-
+                    float effectiveWidth = clamp(outlineWidth, 0.0, min(halfSize.x, halfSize.y));
+                    float outerSoftRange = delta * max(outlineSoftness, 1.0);
+                    float outerCoverage = 1.0 - smoothstep(-outerSoftRange, outerSoftRange, dist);
+                    float outlineCoverage;
+                    if (IN.rectInfo.z > 0.5)
+                    {
+                        float2 innerHalfSize = max(halfSize - effectiveWidth, 0.0);
+                        float4 innerRadii = max(IN.radii - effectiveWidth, 0.0);
+                        float innerDistance = CalcRoundedBox(pixelPos, innerHalfSize, innerRadii);
+                        float innerAA = max(fwidth(innerDistance), 1e-4) * max(outlineSoftness, 1.0);
+                        float innerCoverage = 1.0 - smoothstep(-innerAA, innerAA, innerDistance);
+                        outlineCoverage = outerCoverage * (1.0 - innerCoverage);
+                    }
+                    else
+                    {
+                        float expandedCoverage = 1.0 - smoothstep(effectiveWidth - outerSoftRange, effectiveWidth + outerSoftRange, dist);
+                        outlineCoverage = expandedCoverage * (1.0 - outerCoverage);
+                    }
                     finalColor = IN.color;
-                    finalColor.a *= (innerHole * outerBorder);
+                    finalColor.a *= outlineCoverage;
                 }
 
                 #ifdef UNITY_UI_CLIP_RECT

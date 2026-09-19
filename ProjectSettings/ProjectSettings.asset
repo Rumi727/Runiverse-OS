@@ -4,7 +4,7 @@
 PlayerSettings:
   m_ObjectHideFlags: 0
   m_BuildProfilePlayerSettings: {fileID: 0}
-  serializedVersion: 31
+  serializedVersion: 32
   productGUID: e9c323e16640a4044ae2780f4c410609
   AndroidProfiler: 0
   AndroidFilterTouchesWhenObscured: 0
@@ -259,7 +259,6 @@ PlayerSettings:
   VisionOSManualSigningProvisioningProfileType: 0
   appleEnableAutomaticSigning: 0
   iOSRequireARKit: 0
-  iOSAutomaticallyDetectAndAddCapabilities: 1
   appleEnableProMotion: 0
   shaderPrecisionModel: 0
   clonedFromGUID: c0afd0d1d80e3634a9dac47e8a0426ea
@@ -459,6 +458,9 @@ PlayerSettings:
     m_Automatic: 1
   - m_BuildTarget: WindowsStandaloneSupport
     m_APIs: 0200000012000000i
+    m_Automatic: 0
+  - m_BuildTarget: LinuxStandaloneSupport
+    m_APIs: 1500000011000000i
     m_Automatic: 0
   m_DefaultShaderChunkSizeInMB: 16
   m_DefaultShaderChunkCount: 0
