@@ -106,6 +106,9 @@ namespace RuniOS.Editor.Windows
 
             DrawText("control_panel.generic.graphics_device_name", SystemInfo.graphicsDeviceName);
             DrawText("control_panel.generic.graphics_memory_size", SystemInfo.graphicsMemorySize);
+            DrawText("control_panel.generic.graphics_device_type", SystemInfo.graphicsDeviceType);
+            DrawText("control_panel.generic.graphics_multi_threaded", SystemInfo.graphicsMultiThreaded);
+            DrawText("control_panel.generic.rendering_threading_mode", SystemInfo.renderingThreadingMode);
 
             DrawHLine();
 
