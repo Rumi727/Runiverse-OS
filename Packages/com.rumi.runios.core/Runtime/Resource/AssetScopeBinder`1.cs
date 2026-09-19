@@ -36,6 +36,7 @@ namespace RuniOS.Resource
 
             ClearAsset();
             currentAssetScope?.Dispose();
+            currentAssetScope = null;
         }
 
         readonly AsyncReloadGate asyncReloadGate = new AsyncReloadGate();
@@ -46,9 +47,18 @@ namespace RuniOS.Resource
             if (assetRef.IsSameTarget(currentAssetScope))
                 return;
 
-            currentAssetScope = await assetRef.LoadScopeAsync();
-            if (currentAssetScope != null)
-                Apply(currentAssetScope.asset);
+            IAssetScope<TAsset>? newScope = await assetRef.LoadScopeAsync();
+            if (this == null || !isActiveAndEnabled)
+            {
+                newScope?.Dispose();
+                return;
+            }
+
+            currentAssetScope?.Dispose();
+            currentAssetScope = newScope;
+
+            if (newScope != null)
+                Apply(newScope.asset);
             else
                 ClearAsset();
         }
