@@ -21,12 +21,12 @@ namespace RuniOS.Effects
         }
         [SerializeField, Range(0, 5)] float _width = 0.05f;
         
-        public bool useFixedWidth
+        public bool usePixelWidth
         {
-            get => _useFixedWidth;
-            set => _useFixedWidth = value;
+            get => _usePixelWidth;
+            set => _usePixelWidth = value;
         }
-        [SerializeField] bool _useFixedWidth = false;
+        [FormerlySerializedAs("_useFixedWidth"), SerializeField] bool _usePixelWidth = false;
 
         public float gap
         {
@@ -35,12 +35,12 @@ namespace RuniOS.Effects
         }
         [SerializeField, Range(0, 5)] float _gap = 0f;
 
-        public bool useFixedGap
+        public bool usePixelGap
         {
-            get => _useFixedGap;
-            set => _useFixedGap = value;
+            get => _usePixelGap;
+            set => _usePixelGap = value;
         }
-        [SerializeField] bool _useFixedGap = false;
+        [FormerlySerializedAs("_useFixedGap"), SerializeField] bool _usePixelGap = false;
 
         public OutlineVisibility outlineVisibility
         {
@@ -64,8 +64,8 @@ namespace RuniOS.Effects
         static readonly int propOffset = Shader.PropertyToID("_Offset");
         static readonly int propZTest = Shader.PropertyToID("_ZTest");
         
-        static readonly int propWidthScreen = Shader.PropertyToID("_WidthUseScreen");
-        static readonly int propOffsetScreen = Shader.PropertyToID("_OffsetUseScreen");
+        static readonly int propWidthPixels = Shader.PropertyToID("_WidthInPixels");
+        static readonly int propGapPixels = Shader.PropertyToID("_GapInPixels");
 
         void OnEnable()
         {
@@ -155,8 +155,8 @@ namespace RuniOS.Effects
             mpb.SetFloat(propWidth, width);
             mpb.SetFloat(propOffset, gap);
             
-            mpb.SetFloat(propWidthScreen, useFixedWidth ? 1.0f : 0.0f);
-            mpb.SetFloat(propOffsetScreen, useFixedGap ? 1.0f : 0.0f);
+            mpb.SetFloat(propWidthPixels, usePixelWidth ? 1.0f : 0.0f);
+            mpb.SetFloat(propGapPixels, usePixelGap ? 1.0f : 0.0f);
 
             Matrix4x4 matrix = transform.localToWorldMatrix;
             int subMeshCount = bakedMesh.subMeshCount;

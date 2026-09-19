@@ -8,8 +8,8 @@ Shader "Custom/SimpleMeshOutline"
         
         [Enum(UnityEngine.Rendering.CompareFunction)] _ZTest ("ZTest", Int) = 4
         
-        [Toggle] _WidthUseScreen ("Width Screen Space", Float) = 0 
-        [Toggle] _OffsetUseScreen ("Offset Screen Space", Float) = 0 
+        [Toggle] _WidthInPixels ("Width (Pixels)", Float) = 0
+        [Toggle] _GapInPixels ("Gap (Pixels)", Float) = 0
     }
     SubShader
     {
@@ -20,7 +20,7 @@ Shader "Custom/SimpleMeshOutline"
 
         fixed4 _Color;
         float _Width, _Offset;
-        float _WidthUseScreen, _OffsetUseScreen;
+        float _WidthInPixels, _GapInPixels;
         int _ZTest; // C#에서 전달받는 ZTest 값
 
         struct appdata {
@@ -37,18 +37,31 @@ Shader "Custom/SimpleMeshOutline"
             float NdotD = dot(v.normal, norm);
             float correction = 1.0 / max(NdotD, 0.1);
             correction = min(correction, 5.0);
-            
-            float3 viewPos = UnityObjectToViewPos(v.vertex);
-            float dist = length(viewPos);
-            float distScale = dist * 0.02;
 
-            float finalOffset = offsetVal * (_OffsetUseScreen > 0.5 ? distScale : 1.0);
-            float finalWidth = widthVal * (_WidthUseScreen > 0.5 ? distScale : 1.0);
+            float localDistance = offsetVal * (1.0 - _GapInPixels)
+                + widthVal * (1.0 - _WidthInPixels);
+            float screenDistance = offsetVal * _GapInPixels
+                + widthVal * _WidthInPixels;
 
-            float totalDist = (finalOffset + finalWidth) * correction;
-            
-            float3 pos = v.vertex.xyz + norm * totalDist;
-            return UnityObjectToClipPos(pos);
+            float3 pos = v.vertex.xyz + norm * (localDistance * correction);
+            float4 clipPos = UnityObjectToClipPos(float4(pos, 1.0));
+
+            if (abs(screenDistance) > 0.0001 && abs(clipPos.w) > 0.000001)
+            {
+                float3 normalVS = normalize(mul((float3x3)UNITY_MATRIX_IT_MV, norm));
+                float2 projectedNormal = TransformViewToProjection(normalVS.xy);
+                float2 pixelDirection = projectedNormal * _ScreenParams.xy;
+                float directionLengthSq = dot(pixelDirection, pixelDirection);
+
+                if (directionLengthSq > 0.0000000001)
+                {
+                    pixelDirection *= rsqrt(directionLengthSq);
+                    clipPos.xy += pixelDirection * screenDistance
+                        * (2.0 / _ScreenParams.xy) * clipPos.w;
+                }
+            }
+
+            return clipPos;
         }
         ENDCG
 

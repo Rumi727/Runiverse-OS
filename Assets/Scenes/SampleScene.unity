@@ -2562,22 +2562,22 @@ MonoBehaviour:
   _profiles:
   - name: blue
     color: {r: 0, g: 0.5235295, b: 1, a: 1}
-    width: 1
+    width: 1.5
     shape: 3
-    softness: 0.5
+    softness: 1
     hardness: 2
     iterations: 1
     visibility: 8
-    downsample: 2
+    downsample: 1
   - name: red
     color: {r: 1, g: 0.42240417, b: 0.3537736, a: 1}
-    width: 1
+    width: 1.5
     shape: 3
-    softness: 0.5
+    softness: 1
     hardness: 2
     iterations: 1
     visibility: 5
-    downsample: 2
+    downsample: 1
   maskS: {fileID: 4800000, guid: d34929b9c38eca0468464df890ac685b, type: 3}
   dilateS: {fileID: 4800000, guid: 82ddfce7c50c8ee4ebb425cf11001ed8, type: 3}
   compS: {fileID: 4800000, guid: ddee61a3964f01644b93c5ca53384b09, type: 3}
@@ -4097,9 +4097,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RuniOS.Effects.StencilOutline
   _color: {r: 0.5754717, g: 0.5549238, b: 0.31759524, a: 1}
-  _width: 1
+  _width: 10
   _useFixedWidth: 1
-  _gap: 5
+  _gap: 40
   _useFixedGap: 1
   _outlineVisibility: 8
   shader: {fileID: 4800000, guid: 7e3adafb5dded4d4d9993f95bec12cd7, type: 3}

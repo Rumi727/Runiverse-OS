@@ -17,12 +17,12 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
             Space();
             
             DrawPropertyLayout("_width", TrTempContent("inspector.simple_mesh_outline.appearance.width"));
-            DrawPropertyLayout("_useFixedWidth", TrTempContent("inspector.simple_mesh_outline.appearance.use_fixed_width", "inspector.simple_mesh_outline.appearance.use_fixed_width.tooltip"));
+            DrawPropertyLayout("_usePixelWidth", TrTempContent("inspector.simple_mesh_outline.appearance.use_pixel_width", "inspector.simple_mesh_outline.appearance.use_pixel_width.tooltip"));
             
             Space();
             
             DrawPropertyLayout("_gap", TrTempContent("inspector.simple_mesh_outline.appearance.gap"));
-            DrawPropertyLayout("_useFixedGap", TrTempContent("inspector.simple_mesh_outline.appearance.use_fixed_gap", "inspector.simple_mesh_outline.appearance.use_fixed_gap.tooltip"));
+            DrawPropertyLayout("_usePixelGap", TrTempContent("inspector.simple_mesh_outline.appearance.use_pixel_gap", "inspector.simple_mesh_outline.appearance.use_pixel_gap.tooltip"));
             
             Space();
             
