@@ -3,6 +3,7 @@ namespace RuniOS.Sounds
 {
     public sealed partial class WaveAudioClip
     {
+        public delegate void GetRawDataAction(ReadOnlySpan<byte> pcmView, int channel);
         public delegate void GetDataAction(PCMDoubleView pcmView, int channel);
 
         public int subSoundCount => UseNative(sound =>
@@ -68,6 +69,59 @@ namespace RuniOS.Sounds
                     {
                         ReadOnlySpan<byte> source = new(ptr1.ToPointer(), checked((int)len1));
                         action.Invoke(new PCMDoubleView(source, pcmFormat!.Value), channel);
+                    }
+                }
+                finally
+                {
+                    native.unlock(ptr1, ptr2, len1, len2).ThrowIfNotOk();
+                }
+            }
+            finally
+            {
+                nativeLock.ExitReadLock();
+            }
+        }
+
+        public void GetRawData(uint offset, uint length, GetRawDataAction action)
+        {
+            if (action == null)
+                throw new ArgumentNullException(nameof(action));
+
+            if (isStream)
+                throw new InvalidOperationException("FMOD stream sound data cannot be locked.");
+
+            if (keepCompressed)
+                throw new InvalidOperationException("Compressed FMOD sound data cannot be converted to PCM samples.");
+
+            if (pcmFormat == null)
+                throw new InvalidOperationException("PCM format is null.");
+
+            ulong totalSampleCount = (ulong)samples * (uint)channel;
+            if ((ulong)offset + length > totalSampleCount)
+                throw new ArgumentOutOfRangeException(nameof(length), length, "The requested sample range exceeds the clip data.");
+
+            nativeLock.EnterReadLock();
+            try
+            {
+                ThrowIfDisposedUnsafe();
+
+                if (length == 0)
+                {
+                    action.Invoke(ReadOnlySpan<byte>.Empty, channel);
+                    return;
+                }
+
+                int bytesPerSample = bits / 8;
+                uint byteOffset = checked(offset * (uint)bytesPerSample);
+                uint byteLength = checked(length * (uint)bytesPerSample);
+
+                native.@lock(byteOffset, byteLength, out IntPtr ptr1, out IntPtr ptr2, out uint len1, out uint len2).ThrowIfNotOk();
+                try
+                {
+                    unsafe
+                    {
+                        ReadOnlySpan<byte> source = new(ptr1.ToPointer(), checked((int)len1));
+                        action.Invoke(source, channel);
                     }
                 }
                 finally
