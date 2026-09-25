@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Resource
 
         public override bool needsApplyRevert => true;
 
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x == ResourcePack.assetsFolderName);
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
         readonly string[] relativeExistsPaths = [];
 

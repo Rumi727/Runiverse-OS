@@ -3,7 +3,6 @@ using RuniOS.IO;
 using RuniOS.Localizations;
 using System.Collections.Immutable;
 using System.IO;
-using System.Text.RegularExpressions;
 
 namespace RuniOS.Editor.Resource
 {
@@ -25,7 +24,7 @@ namespace RuniOS.Editor.Resource
 
         readonly GUIContent[] contents = [];
 
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => Regex.IsMatch(x.value, "^assets/.*/lang/.*\\.json$", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture));
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => IsMatch(x, "lang", IPatternMatcher.jsonMatcher));
 
         protected internal override void OnGUI(bool isDebug = false)
         {

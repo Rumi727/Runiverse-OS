@@ -17,7 +17,7 @@ namespace RuniOS.Editor.Resource
 
         public override bool needsApplyRevert => true;
 
-        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
+        public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => x.IsEmpty() || x == ResourcePack.infoPath);
 
         string[] relativeExistsPaths = [];
         PackMetaData[] packMetaDatas = [];
