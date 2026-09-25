@@ -11,12 +11,7 @@ namespace RuniOS.Editor
     public static class ProgressInToolbar
     {
         [MainToolbarElement("RuniOS/Progress Bar", defaultDockPosition = MainToolbarDockPosition.Left)]
-        public static MainToolbarElement ProgressBarElement() => new MainToolbarProgress();
-        
-        class MainToolbarProgress : MainToolbarElementMarshal
-        {
-            public override VisualElement CreateElementMarshal() => new IMGUIContainer(OnToolbarGUI);
-        }
+        public static MainToolbarElement ProgressBarElement() => new MainToolbarCustomElement(() => new IMGUIContainer(OnToolbarGUI));
 
         static readonly Dictionary<string, Dictionary<string, float>> progresses = new();
         static GUIViewBridge? toolbarGUIView;

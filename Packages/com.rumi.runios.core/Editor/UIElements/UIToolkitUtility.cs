@@ -294,28 +294,6 @@ namespace RuniOS.Editor.UIElements
         // ReSharper restore UnusedParameter.Global
 #pragma warning restore IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
 #endif
-
-        static PropertyInfo? pseudoStatesProperty;
-
-        public static PseudoStates GetPsuedoState(this VisualElement element) => (PseudoStates)VisualElementBridge.__GetInstanceFrom(element).pseudoStates;
-        
-        public static void SetPsuedoState(this VisualElement element, PseudoStates state) => VisualElementBridge.__GetInstanceFrom(element).pseudoStates = (PseudoStatesBridge)state;
-
-        public static void AddPsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() | state);
-
-        public static void RemovePsuedoState(this VisualElement element, PseudoStates state) => element.SetPsuedoState(element.GetPsuedoState() & ~state);
-
-        public static bool HasPseudoFlag(this VisualElement element, PseudoStates flag) => (element.GetPsuedoState() & flag) == flag;
-
-#if !UNITY_6000_3_OR_NEWER
-        public static void SetCheckedPseudoState(this VisualElement element, bool value)
-        {
-            if (value)
-                element.AddPsuedoState(PseudoStates.Checked);
-            else
-                element.RemovePsuedoState(PseudoStates.Checked);
-        }
-#endif
         
         public static void SetValueWithoutNotify<T>(this INotifyValueChanged<T> element, T newValue) => element.SetValueWithoutNotify(newValue);
 
