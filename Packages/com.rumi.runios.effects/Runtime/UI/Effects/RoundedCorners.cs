@@ -1,7 +1,6 @@
 #nullable enable
 using UnityEngine.Rendering;
 using UnityEngine.UI;
-using RuniOS.Effects;
 
 namespace RuniOS.UI.Effects
 {
@@ -48,7 +47,7 @@ namespace RuniOS.UI.Effects
             set
             {
                 float normalized = NormalizeNonNegative(value);
-                if (_softness == normalized)
+                if (_softness.Approximately(normalized))
                     return;
 
                 _softness = normalized;
@@ -77,7 +76,7 @@ namespace RuniOS.UI.Effects
             set
             {
                 float normalized = NormalizeNonNegative(value);
-                if (_outlineWidth == normalized)
+                if (_outlineWidth.Approximately(normalized))
                     return;
 
                 _outlineWidth = normalized;
@@ -92,7 +91,7 @@ namespace RuniOS.UI.Effects
             set
             {
                 float normalized = NormalizeNonNegative(value);
-                if (_outlineSoftness == normalized)
+                if (_outlineSoftness.Approximately(normalized))
                     return;
 
                 _outlineSoftness = normalized;
@@ -377,8 +376,8 @@ namespace RuniOS.UI.Effects
             else
                 selectedRadius = local.y > 0 ? radii.x : radii.z;
 
-            Vector2 q = new Vector2(Mathf.Abs(local.x), Mathf.Abs(local.y)) - halfSize + Vector2.one * selectedRadius;
-            float distance = Min(Max(q.x, q.y), 0) + new Vector2(Max(q.x, 0), Max(q.y, 0)).magnitude - selectedRadius;
+            Vector2 q = (new Vector2(Mathf.Abs(local.x), Mathf.Abs(local.y)) - halfSize) + (Vector2.one * selectedRadius);
+            float distance = (Min(Max(q.x, q.y), 0) + new Vector2(Max(q.x, 0), Max(q.y, 0)).magnitude) - selectedRadius;
             return distance <= 0;
         }
 
