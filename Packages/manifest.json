@@ -6,7 +6,7 @@
     "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
     "com.unity.ide.rider": "3.1.0",
     "com.unity.ide.visualstudio": "2.0.28",
-    "com.unity.memoryprofiler": "1.1.12",
+    "com.unity.memoryprofiler": "1.2.0-pre.1",
     "com.unity.sdk.linux-x86_64": "1.1.0",
     "com.unity.toolchain.linux-x86_64-linux": "1.1.0",
     "com.unity.ugui": "2.7.0"

@@ -285,12 +285,12 @@ namespace RuniOS.UI.Effects
             modifiedBaseMaterial = null;
         }
 
-        void IMeshModifier.ModifyMesh(Mesh mesh)
+        /*void IMeshModifier.ModifyMesh(Mesh mesh)
         {
             using VertexHelper vh = new VertexHelper(mesh);
             ((IMeshModifier)this).ModifyMesh(vh);
             vh.FillMesh(mesh);
-        }
+        }*/
 
         void IMeshModifier.ModifyMesh(VertexHelper vh)
         {
