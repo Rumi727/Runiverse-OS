@@ -25,7 +25,9 @@ namespace RuniOS.Editor
             AddSymbol(NamedBuildTarget.XboxOne, symbolName);
             AddSymbol(NamedBuildTarget.FromBuildTargetGroup(BuildTargetGroup.GameCoreXboxSeries), symbolName); // Xbox Series X|S
             AddSymbol(NamedBuildTarget.FromBuildTargetGroup(BuildTargetGroup.GameCoreXboxOne), symbolName);  // Xbox One (GDK)
+#if !UNITY_6000_7_OR_NEWER
             AddSymbol(NamedBuildTarget.FromBuildTargetGroup(BuildTargetGroup.Kepler), symbolName);
+#endif
 #if UNITY_2022_1_OR_NEWER
             AddSymbol(NamedBuildTarget.QNX, symbolName);
 #endif
