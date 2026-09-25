@@ -478,9 +478,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuniOS.Effects.StencilOutline
   _color: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   _width: 0.1
-  _useFixedWidth: 0
+  _usePixelWidth: 0
   _gap: 0.33
-  _useFixedGap: 0
+  _usePixelGap: 0
   _outlineVisibility: 4
   shader: {fileID: 4800000, guid: 7e3adafb5dded4d4d9993f95bec12cd7, type: 3}
 --- !u!1 &321395738
@@ -1022,7 +1022,6 @@ MonoBehaviour:
   m_CancelButton: Cancel
   m_InputActionsPerSecond: 10
   m_RepeatDelay: 0.5
-  m_ForceModuleActive: 0
 --- !u!1 &583866181
 GameObject:
   m_ObjectHideFlags: 0
@@ -2423,6 +2422,7 @@ MonoBehaviour:
   checkPaddingRequired: 0
   m_isRichText: 1
   m_EmojiFallbackSupport: 1
+  m_EnableAdvancedText: 0
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -3157,6 +3157,7 @@ MonoBehaviour:
   checkPaddingRequired: 0
   m_isRichText: 1
   m_EmojiFallbackSupport: 1
+  m_EnableAdvancedText: 0
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
@@ -4098,9 +4099,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::RuniOS.Effects.StencilOutline
   _color: {r: 0.5754717, g: 0.5549238, b: 0.31759524, a: 1}
   _width: 10
-  _useFixedWidth: 1
+  _usePixelWidth: 1
   _gap: 40
-  _useFixedGap: 1
+  _usePixelGap: 1
   _outlineVisibility: 8
   shader: {fileID: 4800000, guid: 7e3adafb5dded4d4d9993f95bec12cd7, type: 3}
 --- !u!114 &1500255070
@@ -4746,6 +4747,10 @@ PanelRenderer:
   m_PivotReferenceSize: 0
   m_Pivot: 0
   m_Position: 0
+  m_GenerateAccessibilityHierarchy: 1
+  m_TrackScreenSpacePosition: 0
+  m_ScreenSpaceOffsetX: 0
+  m_ScreenSpaceOffsetY: 0
 --- !u!1 &2007544202
 GameObject:
   m_ObjectHideFlags: 0
@@ -4860,6 +4865,7 @@ MonoBehaviour:
   checkPaddingRequired: 0
   m_isRichText: 1
   m_EmojiFallbackSupport: 1
+  m_EnableAdvancedText: 0
   m_parseCtrlCharacters: 1
   m_isOrthographic: 1
   m_isCullingEnabled: 0
