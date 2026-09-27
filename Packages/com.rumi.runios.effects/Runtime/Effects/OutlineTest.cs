@@ -1,5 +1,7 @@
 #nullable enable
 using UnityEngine.Rendering;
+// ReSharper disable Unity.PreferAddressByIdToGraphicsParams
+// ReSharper disable Unity.NoNullPatternMatching
 
 namespace RuniOS
 {
