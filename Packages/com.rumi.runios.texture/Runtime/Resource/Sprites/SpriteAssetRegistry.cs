@@ -22,6 +22,7 @@ namespace RuniOS.Resource.Sprites
 
         /// <inheritdoc/>
         public override IPatternMatcher assetMatcher => IPatternMatcher.pictureMatcher;
+        public override IPatternMatcher auxiliaryMatcher => IPatternMatcher.jsonMatcher;
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<SpriteAssetRegistry>();
@@ -30,6 +31,6 @@ namespace RuniOS.Resource.Sprites
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<SpriteAssetRegistry>();
 
         /// <inheritdoc/>
-        protected override UniTask<SpriteAssetHandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new SpriteAssetHandle(identifier, node, fileMetaData, CreateSidecar(node)));
+        protected override UniTask<SpriteAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new SpriteAssetHandle(identifier, node, fileMetaData, CreateSidecar(context, node)));
     }
 }

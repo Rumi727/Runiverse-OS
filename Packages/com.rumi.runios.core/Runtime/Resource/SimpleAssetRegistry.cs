@@ -27,6 +27,8 @@ namespace RuniOS.Resource
         /// </summary>
         public abstract IPatternMatcher assetMatcher { get; }
 
+        public virtual IPatternMatcher? auxiliaryMatcher => null;
+
         readonly AsyncReloadGate reloadGate = new();
 
         /// <summary>
@@ -50,13 +52,24 @@ namespace RuniOS.Resource
         /// <summary>
         /// 지정된 I/O 핸들러와 MD5 해시를 사용하여 새로운 <see cref="AssetHandle{T}"/> 인스턴스를 생성합니다.
         /// </summary>
+        /// <param name="context"></param>
         /// <param name="identifier"></param>
         /// <param name="node">에셋 파일에 접근하는 I/O 핸들러입니다.</param>
         /// <param name="fileMetaData">에셋 파일의 메타 데이터 값입니다.</param>
         /// <returns>새로 생성된 <see cref="AssetHandle{T}"/> 인스턴스입니다.</returns>
-        protected abstract UniTask<THandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData);
+        protected abstract UniTask<THandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData);
 
-        protected AssetSidecar CreateSidecar(IONode node) => new AssetSidecar(node.AddExtension(".json"));
+        protected AssetSidecar CreateSidecar(AssetDiscoveryContext context, IONode node)
+        {
+            IONode sidecarNode = node.AddExtension(".json");
+            if (context.TryGetAuxiliary(sidecarNode.path, out IOEntry entry))
+                return new AssetSidecar(sidecarNode, entry.metaData);
+
+            if (auxiliaryMatcher?.IsMatch(sidecarNode.path) ?? false)
+                return new AssetSidecar(sidecarNode, null); // known missing
+
+            return new AssetSidecar(sidecarNode); // unknown
+        }
 
         /// <summary>
         /// 레지스트리에 등록된 모든 에셋 핸들 정보를 지정된 <paramref name="resourcePacks"/>를 기반으로 다시 로드합니다.
@@ -80,7 +93,7 @@ namespace RuniOS.Resource
 
                 await OnBeginAssetLoop();
 
-                PatternMatcherSet<IPatternMatcher> patterns = [assetMatcher, IPatternMatcher.jsonMatcher];
+                IPatternMatcher patterns = auxiliaryMatcher != null ? PatternMatcherSet.Create(assetMatcher, auxiliaryMatcher) : assetMatcher;
 
                 // 모든 리소스 팩을 순회하며 로드할 에셋을 비동기적으로 인덱싱
                 List<AssetLoadTarget> loadTargetDict = [];
@@ -88,17 +101,25 @@ namespace RuniOS.Resource
                 {
                     await foreach ((string nameSpace, IONode registryNode) in GetRegistryNodes(resourcePack))
                     {
+                        AssetDiscoveryContext context = new AssetDiscoveryContext(resourcePack, nameSpace, registryNode);
                         await foreach (IOEntry fileEntry in registryNode.dir.GetAllFiles(patterns))
                         {
                             try
                             {
-                                RuniPath path = fileEntry.path.GetRelativePath(registryNode.path);
+                                bool isAuxiliary = auxiliaryMatcher?.IsMatch(fileEntry.path) ?? false;
+                                if (isAuxiliary)
+                                {
+                                    context.AddAuxiliary(fileEntry);
+                                    continue;
+                                }
+
+                                RuniPath path = context.GetRegistryRelativePath(fileEntry.path);
                                 Identifier identifier = new Identifier(nameSpace, path.GetPathWithoutExtension());
                                 if (IsTracked(identifier))
                                     continue;
 
                                 IONode node = registryNode.Bind(fileEntry);
-                                loadTargetDict.Add(new AssetLoadTarget(identifier, resourcePack, node, fileEntry.metaData));
+                                loadTargetDict.Add(new AssetLoadTarget(context, identifier, node, fileEntry.metaData));
                             }
                             catch (Exception e)
                             {
@@ -117,12 +138,12 @@ namespace RuniOS.Resource
 
                     try
                     {
-                        THandle handle = await CreateHandle(target.identifier, target.node, target.fileMetaData);
-                        await OnAssetLoop(target.identifier, target.node, handle);
+                        THandle handle = await CreateHandle(target.context, target.identifier, target.node, target.fileMetaData);
+                        await OnAssetLoop(target.context, target.identifier, target.node, handle);
                     }
                     catch (Exception e)
                     {
-                        Debug.RuntimeLogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.resourcePack.identifier}. The exception is: {e}", GetType().Name);
+                        Debug.RuntimeLogError($"An exception occurred while loading {target.node.path} resources from the resource pack {target.context.resourcePack.identifier}. The exception is: {e}", GetType().Name);
                     }
 
                     // 로드 대상 처리 진행률 보고
@@ -150,16 +171,32 @@ namespace RuniOS.Resource
         /// 각 에셋을 순회하며 핸들을 등록하는 로직을 수행합니다.
         /// <br/>파생 클래스에서 이 메서드를 오버라이드하여 추가적인 등록 로직을 구현할 수 있습니다.
         /// </summary>
+        /// <param name="context"></param>
         /// <param name="identifier">에셋을 식별하는 고유 ID입니다.</param>
         /// <param name="node">에셋 파일에 접근하는 I/O 노드입니다.</param>
         /// <param name="assetHandle">생성된 <see cref="AssetHandle{T}"/>입니다.</param>
         /// <returns>비동기 작업을 나타내는 <see cref="UniTask"/>입니다.</returns>
-        protected virtual UniTask OnAssetLoop(Identifier identifier, IONode node, THandle assetHandle)
+        protected virtual UniTask OnAssetLoop(AssetDiscoveryContext context, Identifier identifier, IONode node, THandle assetHandle)
         {
             RecordAssetHandle(identifier, assetHandle);
             return UniTask.CompletedTask;
         }
 
-        readonly record struct AssetLoadTarget(Identifier identifier, ResourcePack resourcePack, IONode node, FileMetaData fileMetaData);
+        protected sealed class AssetDiscoveryContext(ResourcePack resourcePack, string nameSpace, IONode registryNode)
+        {
+            public ResourcePack resourcePack { get; } = resourcePack;
+
+            public string nameSpace { get; } = nameSpace;
+            public IONode registryNode { get; } = registryNode;
+
+            readonly Dictionary<RuniPath, IOEntry> auxiliaryEntries = [];
+
+            public RuniPath GetRegistryRelativePath(RuniPath path) => path.GetRelativePath(registryNode.path);
+
+            public bool TryGetAuxiliary(RuniPath path, out IOEntry entry) => auxiliaryEntries.TryGetValue(path, out entry);
+            internal void AddAuxiliary(IOEntry entry) => auxiliaryEntries[entry.path] = entry;
+        }
+
+        readonly record struct AssetLoadTarget(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData);
     }
 }

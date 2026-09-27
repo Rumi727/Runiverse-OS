@@ -18,6 +18,7 @@ namespace RuniOS.Resource.Textures
 
         /// <inheritdoc/>
         public override IPatternMatcher assetMatcher => IPatternMatcher.pictureMatcher;
+        public override IPatternMatcher auxiliaryMatcher => IPatternMatcher.jsonMatcher;
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<TextureAssetRegistry>();
@@ -26,6 +27,6 @@ namespace RuniOS.Resource.Textures
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<TextureAssetRegistry>();
 
         /// <inheritdoc/>
-        protected override UniTask<TextureAssetHandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new TextureAssetHandle(node, fileMetaData, CreateSidecar(node)));
+        protected override UniTask<TextureAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new TextureAssetHandle(node, fileMetaData, CreateSidecar(context, node)));
     }
 }

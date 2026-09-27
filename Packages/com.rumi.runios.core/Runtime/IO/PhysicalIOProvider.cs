@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using RuniOS.Linq.Async;
 using RuniOS.Spans;
 using System.IO;
@@ -148,7 +149,8 @@ namespace RuniOS.IO
                 }
             );
 
-            return enumerable.EnumerateOnThreadPool(cancellationToken: cancellationToken);
+            // 생각보다 I/O가 엄청 빠름 수만개 파일도 0.2초면 끝내버림
+            return enumerable.ToUniTaskAsyncEnumerable();
         }
         #endregion
 
@@ -167,7 +169,7 @@ namespace RuniOS.IO
 
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadLines(ResolveFullPath(path)).EnumerateOnThreadPool(cancellationToken: cancellationToken);
+            File.ReadLines(ResolveFullPath(path)).ToUniTaskAsyncEnumerable();
         #endregion
 
         #region Write

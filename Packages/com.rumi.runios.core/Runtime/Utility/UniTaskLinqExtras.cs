@@ -20,7 +20,7 @@ namespace RuniOS.Linq.Async
         (
             this IEnumerable<TSource> enumerable,
             int batchSize = 64,
-            int queueLimit = 2,
+            int? queueLimit = null,
             CancellationToken cancellationToken = default
         ) => UniTaskAsyncEnumerable.Create<TSource>(async (writer, iterationToken) =>
         {
@@ -34,7 +34,7 @@ namespace RuniOS.Linq.Async
             Channel<List<TSource>>? channel = Channel.CreateSingleConsumerUnbounded<List<TSource>>();
             
             // 배압(Backpressure)을 위한 세마포어 생성
-            SemaphoreSlim semaphore = new SemaphoreSlim(queueLimit, queueLimit);
+            SemaphoreSlim? semaphore = queueLimit != null ? new SemaphoreSlim(queueLimit.Value, queueLimit.Value) : null;
 
             // [Producer] 스레드 풀
             UniTask producerTask = UniTask.RunOnThreadPool(async () =>
@@ -53,10 +53,14 @@ namespace RuniOS.Linq.Async
                         // 버퍼가 가득 차면 채널로 전송하고 새 버퍼 생성
                         if (buffer.Count >= batchSize)
                         {
-                            // [3] 채널에 넣기 전에 세마포어 대기 (티켓 확인)
-                            // 꽉 찼다면(티켓 0장), 소비자가 Release 할 때까지 여기서 멈춤 -> I/O 중단
                             // ReSharper disable once AccessToDisposedClosure
-                            await semaphore.WaitAsync(ct);
+                            if (semaphore != null)
+                            {
+                                // [3] 채널에 넣기 전에 세마포어 대기 (티켓 확인)
+                                // 꽉 찼다면(티켓 0장), 소비자가 Release 할 때까지 여기서 멈춤 -> I/O 중단
+                                // ReSharper disable once AccessToDisposedClosure
+                                await semaphore.WaitAsync(ct);
+                            }
 
                             // Unbounded지만 세마포어 때문에 사실상 Bounded처럼 동작함
                             channel.Writer.TryWrite(buffer);
@@ -72,7 +76,12 @@ namespace RuniOS.Linq.Async
                     if (buffer.Count > 0)
                     {
                         // ReSharper disable once AccessToDisposedClosure
-                        await semaphore.WaitAsync(ct);
+                        if (semaphore != null)
+                        {
+                            // ReSharper disable once AccessToDisposedClosure
+                            await semaphore.WaitAsync(ct);
+                        }
+
                         channel.Writer.TryWrite(buffer);
                     }
                 }
@@ -101,7 +110,7 @@ namespace RuniOS.Linq.Async
 
                     // [4] 소비 완료 후 세마포어 반납 (티켓 반환)
                     // 이제 Producer가 다음 배치를 넣을 수 있게 됨
-                    semaphore.Release();
+                    semaphore?.Release();
                 }
 
                 // 루프 종료 후 마지막으로 컨텍스트 보장
@@ -117,7 +126,7 @@ namespace RuniOS.Linq.Async
                 // Producer 스레드가 완전히 종료될 때까지 기다립니다.
                 // 이 줄이 통과되어야 아래 Dispose가 실행되므로, 'AccessToDisposedClosure' 문제는 절대 발생하지 않습니다.
                 await producerTask.SuppressCancellationThrow();
-                semaphore.Dispose();
+                semaphore?.Dispose();
             }
         });
     }

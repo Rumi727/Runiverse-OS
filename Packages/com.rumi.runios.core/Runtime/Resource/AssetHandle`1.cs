@@ -56,7 +56,7 @@ namespace RuniOS.Resource
         {
             if (isSealed)
             {
-                Debug.RuntimeLogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.");
+                Debug.RuntimeLogWarning($"Cannot create a new AssetScope from sealed AssetHandle '{node.path}'.", GetType().Name);
                 return null;
             }
 
@@ -75,7 +75,7 @@ namespace RuniOS.Resource
                 }
                 catch (Exception e)
                 {
-                    Debug.RuntimeLogError($"Failed to load asset at path {entry.path}! The exception is: {e}");
+                    Debug.RuntimeLogError($"Failed to load asset at path {entry.path}! The exception is: {e}", GetType().Name);
                     assetObject = GetDefaultAsset();
                 }
                 finally
@@ -136,7 +136,8 @@ namespace RuniOS.Resource
                 Debug.RuntimeLogWarning
                 (
                     $"Invalid or already-returned AssetScope detected! Scope for asset '{node.path}' was not found in the handle's list.\n" +
-                    "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle."
+                    "Possible causes: 1. Scope was returned twice. 2. Scope was disposed outside of its lifecycle.",
+                    GetType().Name
                 );
 
                 return;
@@ -209,10 +210,10 @@ namespace RuniOS.Resource
                     }
                     catch (Exception e)
                     {
-                        Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}");
+                        Debug.RuntimeLogError($"Failed to unload asset at path {node.path}! The exception is: {e}", GetType().Name);
                     }
 
-                    Debug.Log($"Unloaded asset at path {node.path}");
+                    Debug.Log($"Unloaded asset at path {node.path}", GetType().Name);
                 });
             }
 

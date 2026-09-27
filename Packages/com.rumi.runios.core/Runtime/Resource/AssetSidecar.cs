@@ -8,12 +8,35 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Resource
 {
-    public sealed class AssetSidecar(IONode node, FileMetaData metaData = default) : IEnumerable<Identifier>
+    public sealed class AssetSidecar : IEnumerable<Identifier>
     {
-        public static readonly AssetSidecar empty = new AssetSidecar(IONode.empty);
+        public static readonly AssetSidecar empty = new AssetSidecar(IONode.empty, null);
 
-        public IONode node { get; } = node;
-        public FileMetaData metaData { get; private set; } = metaData;
+        public AssetSidecar(IONode node)
+        {
+            this.node = node;
+            presence = AssetSidecarPresence.unknown;
+        }
+
+        public AssetSidecar(IONode node, FileMetaData? metaData)
+        {
+            this.node = node;
+
+            if (metaData is { } value)
+            {
+                this.metaData = value;
+                presence = AssetSidecarPresence.present;
+            }
+            else
+            {
+                this.metaData = default;
+                presence = AssetSidecarPresence.missing;
+            }
+        }
+
+        public IONode node { get; }
+        public FileMetaData metaData { get; private set; }
+        public AssetSidecarPresence presence { get; private set; }
 
         public int count => value.Count;
 
@@ -68,11 +91,13 @@ namespace RuniOS.Resource
             {
                 value = [];
                 metaData = default;
+                presence = AssetSidecarPresence.missing;
 
                 return;
             }
 
             metaData = entry.metaData;
+            presence = AssetSidecarPresence.present;
 
             try
             {
@@ -86,7 +111,24 @@ namespace RuniOS.Resource
             }
         }
 
-        public bool IsSameTarget(AssetSidecar other) => node.IsSameTarget(other.node) && metaData.IsSameRevision(other.metaData);
+        public bool IsSameTarget(AssetSidecar other)
+        {
+            if (!node.IsSameTarget(other.node))
+                return false;
+
+            if (presence == AssetSidecarPresence.unknown || other.presence == AssetSidecarPresence.unknown)
+                return false;
+
+            if (presence != other.presence)
+                return false;
+
+            return presence switch
+            {
+                AssetSidecarPresence.missing => true,
+                AssetSidecarPresence.present => metaData.IsSameRevision(other.metaData),
+                _ => false
+            };
+        }
 
         public Dictionary<Identifier, JObject>.KeyCollection.Enumerator GetEnumerator() => keys.GetEnumerator();
         IEnumerator<Identifier> IEnumerable<Identifier>.GetEnumerator() => GetEnumerator();

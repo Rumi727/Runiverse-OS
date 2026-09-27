@@ -18,6 +18,7 @@ namespace RuniOS.Resource.Sounds
         public override Type providedAssetType => typeof(WaveAudioClip);
 
         public override IPatternMatcher assetMatcher => IPatternMatcher.musicMatcher;
+        public override IPatternMatcher auxiliaryMatcher => IPatternMatcher.jsonMatcher;
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<WaveAudioAssetRegistry>();
@@ -25,6 +26,6 @@ namespace RuniOS.Resource.Sounds
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<WaveAudioAssetRegistry>();
 
-        protected override UniTask<WaveAudioAssetHandle> CreateHandle(Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new WaveAudioAssetHandle(node, fileMetaData, CreateSidecar(node)));
+        protected override UniTask<WaveAudioAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new WaveAudioAssetHandle(node, fileMetaData, CreateSidecar(context, node)));
     }
 }
