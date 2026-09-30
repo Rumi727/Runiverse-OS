@@ -1,4 +1,5 @@
-﻿using Unity.Properties;
+﻿using RuniOS.UIElements;
+using Unity.Properties;
 using UnityEditor.UIElements;
 using UnityEngine.UIElements;
 
@@ -53,7 +54,7 @@ namespace RuniOS.Editor.UIElements
         public HexColorField() : this(string.Empty) { }
         public HexColorField(string label) : base(label, new ColorField(label))
         {
-            styleSheets.Add(UIToolkitUtility.rosControlStyle);
+            styleSheets.Add(UIElementsUtility.rosControlStyle);
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

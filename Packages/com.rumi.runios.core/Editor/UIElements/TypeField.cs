@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.Editor.IMGUI;
+using RuniOS.UIElements;
 using Unity.Properties;
 using UnityEngine.UIElements;
 
@@ -84,7 +85,7 @@ namespace RuniOS.Editor.UIElements
         public TypeField(Type? baseType) : this(string.Empty, baseType) { }
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
-            this.RegisterDefaultStyleSheet(UIToolkitUtility.rosControlStyle);
+            styleSheets.Add(UIElementsUtility.rosControlStyle);
             
             labelElement.AddToClassList(labelUssClassName);
 

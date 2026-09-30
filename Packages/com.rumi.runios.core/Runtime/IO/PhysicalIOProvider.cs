@@ -1,7 +1,6 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Linq.Async;
 using RuniOS.Spans;
 using System.IO;
 using System.IO.Enumeration;

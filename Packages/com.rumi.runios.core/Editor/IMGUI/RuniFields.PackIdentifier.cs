@@ -2,6 +2,7 @@
 using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.IO;
 using RuniOS.Resource;
+using RuniOS.UIElements.Resource;
 
 namespace RuniOS.Editor.IMGUI
 {
@@ -63,19 +64,19 @@ namespace RuniOS.Editor.IMGUI
             position.width = 50;
             position.height = EditorGUIUtility.singleLineHeight;
 
-            UIElements.Resource.PackIdentifierField.PackIdentifierMode mode = value.identifier != null ? UIElements.Resource.PackIdentifierField.PackIdentifierMode.id : UIElements.Resource.PackIdentifierField.PackIdentifierMode.path;
+            PackIdentifierField.PackIdentifierMode mode = value.identifier != null ? RuniOS.UIElements.Resource.PackIdentifierField.PackIdentifierMode.id : RuniOS.UIElements.Resource.PackIdentifierField.PackIdentifierMode.path;
             EditorGUI.BeginChangeCheck();
-            mode = (UIElements.Resource.PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
+            mode = (PackIdentifierField.PackIdentifierMode)EditorGUI.EnumPopup(position, mode);
             if (EditorGUI.EndChangeCheck())
             {
                 switch (mode)
                 {
-                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.id:
+                    case RuniOS.UIElements.Resource.PackIdentifierField.PackIdentifierMode.id:
                     {
                         value.identifier ??= Identifier.empty;
                         break;
                     }
-                    case UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
+                    case RuniOS.UIElements.Resource.PackIdentifierField.PackIdentifierMode.path:
                     {
                         value.path ??= PhysicalPath.currentDirectory;
                         break;

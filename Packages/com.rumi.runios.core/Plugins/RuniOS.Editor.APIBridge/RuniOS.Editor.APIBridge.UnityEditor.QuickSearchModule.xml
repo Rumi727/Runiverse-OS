@@ -135,11 +135,6 @@
             이 브릿지의 타겟 타입입니다.
             </summary>
         </member>
-        <member name="M:RuniOS.Editor.APIBridge.UnityEditor.Search.SearchProviderBridge.__CreateInstanceNonPublic(System.String,System.String,UnityEditor.Search.SearchProvider,System.Int32)">
-            <summary>
-            타겟 타입을 만들고 브릿지로 생성합니다.
-            </summary>
-        </member>
         <member name="M:RuniOS.Editor.APIBridge.UnityEditor.Search.SearchProviderBridge.__GetInstanceFrom(UnityEditor.Search.SearchProvider)">
             <summary>
             타겟 타입의 인스턴스로 브릿지를 생성합니다.

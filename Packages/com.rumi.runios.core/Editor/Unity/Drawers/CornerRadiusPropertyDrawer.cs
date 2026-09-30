@@ -1,5 +1,5 @@
 #nullable enable
-using RuniOS.Editor.UIElements;
+using RuniOS.Editor.APIBridge.UnityEngine.UIElements;
 using UnityEditor.AnimatedValues;
 
 namespace RuniOS.Editor.Unity.Drawers
@@ -119,7 +119,7 @@ namespace RuniOS.Editor.Unity.Drawers
 
             height += (isAnimating ? childHeight * animBool.faded : childHeight);
             if (isAnimating)
-                UIToolkitUtility.UpdateContainerHeight(height);
+                IMGUIContainerBridge.MakeCurrentIMGUIContainerDirty();
 
             return height;
         }

@@ -102,10 +102,13 @@ namespace RuniOS.Editor.Windows
                 EditorGUILayout.EndScrollView();
             }
 
-            using (new EditorGUI.DisabledScope(reloadingWithDeepProfile))
+            using (new EditorGUI.DisabledScope(RuniOS.Resource.ResourceManager.isLoading))
             {
-                if (GUILayout.Button(reloadingWithDeepProfile ? "리로드 중..." : "리로드"))
+                if (GUILayout.Button(RuniOS.Resource.ResourceManager.isLoading ? "리로드 중..." : "프로파일 리로드"))
                     ReloadWithDeepProfile().Forget();
+
+                if (GUILayout.Button(RuniOS.Resource.ResourceManager.isLoading ? "리로드 중..." : "리로드"))
+                    RuniOS.Resource.ResourceManager.Reload().Forget();
             }
         }
 

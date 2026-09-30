@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_DefaultRuntimeTheme: {fileID: 0}
   m_DefaultEditorTheme: {fileID: 0}
-  m_StyleSheetEditingPreviewDocument: {fileID: 0}
+  m_StyleSheetEditingPreviewDocument: {fileID: 9197481963319205126, guid: 9119f05d64897d656a6ee5a95c639db6, type: 3}
   m_DefaultRuntimeCanvasTheme: 0
   m_DefaultEditorCanvasTheme: 0
   m_ConsistentAttributeOrderingWhenExporting: 1

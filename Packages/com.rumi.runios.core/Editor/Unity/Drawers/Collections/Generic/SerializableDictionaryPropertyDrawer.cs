@@ -2,7 +2,7 @@
 
 using RuniOS.Collections;
 using RuniOS.Collections.Generic;
-using RuniOS.Editor.UIElements;
+using RuniOS.Editor.APIBridge.UnityEngine.UIElements;
 using RuniOS.Reflection;
 using UnityEditor.AnimatedValues;
 using UnityEditorInternal;
@@ -96,7 +96,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
                 height = animFloat.value + headerHeight;
                 
                 if (animFloat.isAnimating)
-                    UIToolkitUtility.UpdateContainerHeight(height);
+                    IMGUIContainerBridge.MakeCurrentIMGUIContainerDirty();
                 
                 return height;
             }

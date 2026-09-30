@@ -1,7 +1,7 @@
 #nullable enable
 using RuniOS.Editor.IMGUI;
 using RuniOS.Editor.UIElements;
-using RuniOS.Editor.UIElements.Primitives;
+using RuniOS.UIElements.Primitives;
 using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Unity.Drawers

@@ -136,6 +136,7 @@ namespace RuniOS.Editor.Windows
             public ReadOnlyStack<Vector2> readOnlyStackVector2;
             public IList iList = new List<Test2> { new Test2() };
             public IList<Test2> iList2 = new List<Test2> { new Test2() };
+            public LinkedList<Test2> linkedList = new LinkedList<Test2>([new Test2(), new Test2()]);
 
             public Test()
             {

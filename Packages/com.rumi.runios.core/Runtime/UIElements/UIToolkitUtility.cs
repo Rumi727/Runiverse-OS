@@ -1,0 +1,152 @@
+﻿using RuniOS.Reflection;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+namespace RuniOS.UIElements
+{
+    public static class UIElementsUtility
+    {
+        /// <summary>
+        /// RuniOS 컨트롤 스타일
+        /// </summary>
+        public static StyleSheet rosControlStyle
+        {
+            get
+            {
+                if (_rosControlStyle == null)
+                    _rosControlStyle = Resources.Load<StyleSheet>("RuniOS/UI Elements/ROS Control Style");
+
+                return _rosControlStyle;
+            }
+        }
+        static StyleSheet? _rosControlStyle;
+
+#if UNITY_EDITOR
+        /// <summary>
+        /// 지정된 <see cref="VisualElement"/>가 런타임 패널에 속하는지 여부를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 에디터에서는 <see cref="IRuntimePanel"/>에 속하고 <see cref="Kernel.isPlaying"/>이 true일 때만 런타임 패널로 간주합니다.
+        /// 빌드된 애플리케이션에서는 항상 true를 반환합니다.
+        /// </remarks>
+        /// <param name="visualElement">확인할 <see cref="VisualElement"/>입니다.</param>
+        /// <returns>지정된 <see cref="VisualElement"/>가 런타임 패널에 속하면 true, 그렇지 않으면 false를 반환합니다.</returns>
+        public static bool IsRuntimePanel(this VisualElement visualElement) => visualElement.panel is IRuntimePanel && Kernel.isPlaying;
+
+        /// <summary>
+        /// 지정된 <see cref="VisualElement"/>가 에디터 패널에 속하는지 여부를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// 에디터에서는 <see cref="IRuntimePanel"/>에 속하지 않거나 <see cref="Kernel.isPlaying"/>이 false일 때만 에디터 패널로 간주합니다.
+        /// 빌드된 애플리케이션에서는 항상 false를 반환합니다.
+        /// </remarks>
+        /// <param name="visualElement">확인할 <see cref="VisualElement"/>입니다.</param>
+        /// <returns>지정된 <see cref="VisualElement"/>가 에디터 패널에 속하면 true, 그렇지 않으면 false를 반환합니다.</returns>
+        public static bool IsEditorPanel(this VisualElement visualElement) => visualElement.panel is not IRuntimePanel || !Kernel.isPlaying;
+#else
+#pragma warning disable IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
+        // ReSharper disable UnusedParameter.Global
+        /// <summary>
+        /// 지정된 <see cref="VisualElement"/>가 런타임 패널에 속하는지 여부를 반환합니다.
+        /// 빌드된 애플리케이션에서는 항상 true를 반환합니다.
+        /// </summary>
+        /// <param name="visualElement">확인할 <see cref="VisualElement"/>입니다.</param>
+        /// <returns>항상 true를 반환합니다.</returns>
+        public static bool IsRuntimePanel(this VisualElement visualElement) => true;
+
+        /// <summary>
+        /// 지정된 <see cref="VisualElement"/>가 에디터 패널에 속하는지 여부를 반환합니다.
+        /// 빌드된 애플리케이션에서는 항상 false를 반환합니다.
+        /// </summary>
+        /// <param name="visualElement">확인할 <see cref="VisualElement"/>입니다.</param>
+        /// <returns>항상 false를 반환합니다.</returns>
+        public static bool IsEditorPanel(this VisualElement visualElement) => false;
+        // ReSharper restore UnusedParameter.Global
+#pragma warning restore IDE0060 // 사용하지 않는 매개 변수를 제거하세요.
+#endif
+
+        public static void SetValueWithoutNotify<T>(this INotifyValueChanged<T> element, T newValue) => element.SetValueWithoutNotify(newValue);
+
+        /// <summary>
+        /// 요소가 패널에 등록될 때마다 루트 요소에 스타일 시트를 맨 위에 등록합니다
+        /// </summary>
+        [Obsolete("TSS로 수정 예정")]
+        public static void RegisterDefaultStyleSheet(this VisualElement element, StyleSheet styleSheet)
+        {
+            element.RegisterCallback<AttachToPanelEvent>(x =>
+            {
+                VisualElement root = x.destinationPanel.visualTree;
+                if (!element.IsEditorPanel())
+                {
+                    if (!root.styleSheets.Contains(styleSheet))
+                        root.styleSheets.Insert(0, styleSheet);
+
+                    return;
+                }
+
+                /*
+                 * 디버거 찍어보심 아시겠지만 root 안의 rootVisualContainer2 요소에 스타일 시트가 적용되서
+                 * 이렇게 해주지 않으면 유니티의 내장 스타일 시트가 먹어버립니다
+                 */
+
+                for (int i = 0; i < root.hierarchy.childCount; i++)
+                {
+                    VisualElement child = root.hierarchy[i];
+                    if (!child.styleSheets.Contains(styleSheet))
+                        child.styleSheets.Add(styleSheet);
+                }
+            });
+        }
+
+        static readonly ConditionalWeakTable<CallbackEventHandler, Dictionary<(Type type, ValueChangedCallback callback), Delegate>> registeredValueChangedCallbacks = [];
+
+        public static bool RegisterValueChangedCallback(this CallbackEventHandler element, Type targetType, ValueChangedCallback callback)
+        {
+            if (!typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
+                return false;
+
+            MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
+            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
+
+            static bool Callback<T>(INotifyValueChanged<T> control, ValueChangedCallback callback)
+            {
+                Dictionary<(Type, ValueChangedCallback), Delegate> callbacks = registeredValueChangedCallbacks.GetOrCreateValue((CallbackEventHandler)control);
+
+                var key = (typeof(T), callback);
+                if (callbacks.ContainsKey(key))
+                    return true;
+
+                EventCallback<ChangeEvent<T>> wrapper = x => callback.Invoke(x.previousValue, x.newValue);
+                callbacks.Add(key, wrapper);
+
+                return control.RegisterValueChangedCallback(wrapper);
+            }
+        }
+
+        public static bool UnregisterValueChangedCallback(this CallbackEventHandler element, Type targetType, ValueChangedCallback callback)
+        {
+            if (!typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
+                return false;
+
+            MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
+            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
+
+            static bool Callback<T>(INotifyValueChanged<T> control, ValueChangedCallback callback)
+            {
+                if (!registeredValueChangedCallbacks.TryGetValue((CallbackEventHandler)control, out var callbacks))
+                    return true;
+
+                var key = (typeof(T), callback);
+                if (!callbacks.Remove(key, out Delegate? wrapper))
+                    return true;
+
+                if (callbacks.Count <= 0)
+                    registeredValueChangedCallbacks.Remove((CallbackEventHandler)control);
+
+                return control.UnregisterValueChangedCallback((EventCallback<ChangeEvent<T>>)wrapper);
+            }
+        }
+    }
+}
