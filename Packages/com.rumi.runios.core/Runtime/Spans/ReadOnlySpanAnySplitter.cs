@@ -7,19 +7,21 @@ namespace RuniOS.Spans
     {
         readonly ReadOnlySpan<T> _source;
         readonly ReadOnlySpan<T> _separator;
+        readonly StringSplitOptions _options;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlySpanAnySplitter(ReadOnlySpan<T> source, ReadOnlySpan<T> separator)
+        public ReadOnlySpanAnySplitter(ReadOnlySpan<T> source, ReadOnlySpan<T> separator, StringSplitOptions options = StringSplitOptions.None)
         {
             if (separator.Length == 0)
                 throw new ArgumentException("Requires non-empty value", nameof(separator));
 
             _source = source;
             _separator = separator;
+            _options = options;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Enumerator GetEnumerator() => new Enumerator(_source, _separator);
+        public Enumerator GetEnumerator() => new Enumerator(_source, _separator, _options);
 
         public ref struct Enumerator
         {
@@ -27,13 +29,17 @@ namespace RuniOS.Spans
 
             readonly ReadOnlySpan<T> _source;
             readonly ReadOnlySpan<T> _separator;
+            readonly StringSplitOptions _options;
 
 #pragma warning disable IDE0032 // auto 속성 사용
             ReadOnlySpan<T> _current;
 #pragma warning restore IDE0032 // auto 속성 사용
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public Enumerator(ReadOnlySpan<T> source, ReadOnlySpan<T> separator)
+            public Enumerator(ReadOnlySpan<T> source, ReadOnlySpan<T> separator) : this(source, separator, StringSplitOptions.None) { }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            public Enumerator(ReadOnlySpan<T> source, ReadOnlySpan<T> separator, StringSplitOptions options)
             {
                 if (separator.Length == 0)
                     throw new ArgumentException("Requires non-empty value", nameof(separator));
@@ -42,24 +48,30 @@ namespace RuniOS.Spans
 
                 _source = source;
                 _separator = separator;
+                _options = options;
 
                 _current = new ReadOnlySpan<T>();
             }
 
             public bool MoveNext()
             {
-                if (_nextStartIndex > _source.Length)
-                    return false;
+                while (_nextStartIndex <= _source.Length)
+                {
+                    ReadOnlySpan<T> nextSource = _source.Slice(_nextStartIndex);
 
-                ReadOnlySpan<T> nextSource = _source.Slice(_nextStartIndex);
+                    int foundIndex = nextSource.IndexOfAny(_separator);
+                    int length = foundIndex >= 0 ? foundIndex : nextSource.Length;
 
-                int foundIndex = nextSource.IndexOfAny(_separator);
-                int length = foundIndex >= 0 ? foundIndex : nextSource.Length;
+                    _current = _source.Slice(_nextStartIndex, length);
+                    _nextStartIndex += _current.Length + 1;
 
-                _current = _source.Slice(_nextStartIndex, length);
-                _nextStartIndex += _current.Length + 1;
+                    if ((_options & StringSplitOptions.RemoveEmptyEntries) != 0 && length == 0)
+                        continue;
 
-                return true;
+                    return true;
+                }
+
+                return false;
             }
 
 #pragma warning disable IDE1006 // 명명 스타일
