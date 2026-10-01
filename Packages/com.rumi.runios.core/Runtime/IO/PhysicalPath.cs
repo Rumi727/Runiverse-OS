@@ -174,14 +174,15 @@ namespace RuniOS.IO
             ReadOnlySpan<char> root = GetPathRootSpan();
             ReadOnlySpan<char> relativePath = value.AsSpan().Slice(root.Length);
 
-            return relativePath.ToString().Split(Path.DirectorySeparatorChar);
+            return relativePath.ToString().Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan()
         {
             ReadOnlySpan<char> root = GetPathRootSpan();
             ReadOnlySpan<char> relativePath = value.AsSpan().Slice(root.Length);
-            return relativePath.Split(Path.DirectorySeparatorChar);
+
+            return relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
         }
 
 

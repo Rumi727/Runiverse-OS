@@ -197,8 +197,8 @@ namespace RuniOS.IO
 
 
 
-        public string[] GetSegments() => value.Split(directorySeparatorChar);
-        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan() => value.AsSpan().Split(directorySeparatorChar);
+        public string[] GetSegments() => value.Split(directorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan() => value.AsSpan().Split(directorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
 
 
