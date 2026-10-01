@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 using System.IO;
-using RuniOS.PackageManagement;
+using RuniOS.PackageManagement.Model;
 
 namespace RuniOS.PackageManagement.Unity.Editor
 {
@@ -15,12 +15,12 @@ namespace RuniOS.PackageManagement.Unity.Editor
         /// Identifies the editor-project observation capability.<br/>
         /// 에디터 프로젝트 관측 기능을 식별합니다.
         /// </summary>
-        public const string TargetKind = "unity:editor-project";
+        public const string targetKind = "unity:editor-project";
         /// <summary>
         /// Gets the normalized project location without verifying its existence.<br/>
         /// 존재를 확인하지 않고 정규화된 프로젝트 위치를 가져옵니다.
         /// </summary>
-        public string ProjectPath => Key;
+        public string projectPath => this.key;
 
         /// <summary>
         /// Normalizes a project path without requiring the directory to exist.<br/>
@@ -46,7 +46,7 @@ namespace RuniOS.PackageManagement.Unity.Editor
         /// May be thrown when the path exceeds platform limits.<br/>
         /// 경로가 플랫폼 제한을 초과하면 발생할 수 있습니다.
         /// </exception>
-        public UnityProjectTarget(string projectPath) : base(TargetKind, Normalize(projectPath)) { }
+        public UnityProjectTarget(string projectPath) : base(targetKind, Normalize(projectPath)) { }
 
         static string Normalize(string path)
         {

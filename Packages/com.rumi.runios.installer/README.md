@@ -3,7 +3,7 @@
 하나의 bootstrap UPM package 내부에 세 assembly를 둡니다. 기존 `com.rumi.runios` Installer는 변경하지 않습니다. 새 package는 RuniOS Core, TMP, NuGet, JSON library 등의 package dependency를 요구하지 않습니다.
 
 | Assembly | 현재 구현 | 의존성 |
-|---|---|---|
+| --- | --- | --- |
 | `RuniOS.PackageManagement` | Immutable 선언/graph/plan, provider 등록, 후보 탐색, passive planning | BCL |
 | `RuniOS.PackageManagement.Unity.Editor` | 변경 없는 프로젝트 target descriptor | Core, Unity Editor 환경 |
 | `RuniOS.Installer.Editor` | Extension 진입점 검색 및 서비스 구성 | Core, Unity Editor adapter |
@@ -29,7 +29,7 @@
 ## Provider boundary
 
 | Capability | 책임 |
-|---|---|
+| --- | --- |
 | `IPackageCatalogProvider` | Source별 후보 identity와 exact metadata 조회 |
 | `IPackageConstraintEvaluator` | Source와 독립적인 선택 제약 평가 |
 | `IPackageContentProvider` | 실행 단계에서 artifact를 필요한 representation으로 획득 |

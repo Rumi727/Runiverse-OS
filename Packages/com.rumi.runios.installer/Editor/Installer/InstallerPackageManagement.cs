@@ -2,8 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using RuniOS.PackageManagement;
 using UnityEditor;
+using RuniOS.PackageManagement;
+using RuniOS.PackageManagement.Diagnostics;
+using RuniOS.PackageManagement.Providers;
 
 namespace RuniOS.Installer.Editor
 {
@@ -49,9 +51,9 @@ namespace RuniOS.Installer.Editor
                 }
             }
             PackageResult<PackageManagementServices> result = builder.Build();
-            diagnostics.AddRange(result.Diagnostics);
-            return new PackageResult<PackageManagementServices>(diagnostics.Any(x => x.Severity == PackageDiagnosticSeverity.Error)
-                ? null : result.Value, diagnostics);
+            diagnostics.AddRange(result.diagnostics);
+            return new PackageResult<PackageManagementServices>(diagnostics.Any(x => x.severity == PackageDiagnosticSeverity.Error)
+                ? null : result.value, diagnostics);
         }
 
         static PackageDiagnostic Error(Type type, string message) => new("installer:extension-registration-failed",
