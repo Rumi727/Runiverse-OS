@@ -4,7 +4,7 @@
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Parameter)]
-#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT 
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_CALLER_ARGUMENT_EXPRESSION_ATTRIBUTE
     public
 #endif
         sealed class CallerArgumentExpressionAttribute(string parameterName) : Attribute

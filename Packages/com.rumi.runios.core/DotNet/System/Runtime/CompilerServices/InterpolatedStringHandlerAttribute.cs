@@ -5,7 +5,7 @@ namespace System.Runtime.CompilerServices
 {
     /// <summary>Indicates the attributed type is to be used as an interpolated string handler.</summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_IS_EXTERNAL_INIT
+#if !RUNI_ENGINE_DOTNET_INTERNAL && !RUNI_ENGINE_DOTNET_INTERNAL_INTERPOLATED_STRING_HANDLER_ATTRIBUTE
     public
 #endif
         sealed class InterpolatedStringHandlerAttribute : Attribute

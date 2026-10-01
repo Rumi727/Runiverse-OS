@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node>
+    <interface name="org.freedesktop.DBus.ObjectManager">
+        <method name="GetManagedObjects">
+            <arg type="a{oa{sa{sv}}}" direction="out"/>
+        </method>
+    </interface>
+
+    <interface name="org.freedesktop.UDisks2.Filesystem">
+        <!-- 현재 마운트된 경로 -->
+        <property name="MountPoints" type="aay" access="read"/>
+    </interface>
+
+    <interface name="org.freedesktop.UDisks2.Block">
+        <!-- 대응하는 physical drive -->
+        <property name="Drive" type="o" access="read"/>
+
+        <!-- Linux/UDisks 측 식별 정보 -->
+        <property name="Id" type="s" access="read"/>
+
+        <!-- 표시 이름 -->
+        <property name="IdLabel" type="s" access="read"/>
+        <property name="HintName" type="s" access="read"/>
+
+        <!-- UI 노출 여부 -->
+        <property name="HintIgnore" type="b" access="read"/>
+
+        <!-- 향후 icon abstraction -->
+        <property name="HintIconName" type="s" access="read"/>
+        <property name="HintSymbolicIconName" type="s" access="read"/>
+    </interface>
+
+    <interface name="org.freedesktop.UDisks2.Drive">
+        <!-- 표시 이름 fallback / 장치 정보 -->
+        <property name="Vendor" type="s" access="read"/>
+        <property name="Model" type="s" access="read"/>
+
+        <!-- DeviceLocation.isRemovable -->
+        <property name="Removable" type="b" access="read"/>
+
+        <!-- Linux-specific metadata / 향후 icon·badge 선택 -->
+        <property name="ConnectionBus" type="s" access="read"/>
+    </interface>
+</node>
