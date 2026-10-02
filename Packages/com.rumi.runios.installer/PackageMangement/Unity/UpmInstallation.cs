@@ -1,13 +1,12 @@
 #nullable enable
 using System;
 using System.IO;
-using UnityEditor.PackageManager;
 
 namespace RuniOS.PackageManagement.Unity
 {
     /// <summary>
-    /// Contains a native UPM reference and the condition that satisfies this installation.<br/>
-    /// native UPM 참조와 이 설치를 만족시키는 조건을 담습니다.
+    /// Contains a native package name, acquisition reference, and optional registry requirements.<br/>
+    /// native package 이름, 획득 참조와 선택적인 registry 요구사항을 담습니다.
     /// </summary>
     public sealed class UpmInstallation : IInstallation
     {
@@ -22,15 +21,19 @@ namespace RuniOS.PackageManagement.Unity
         /// </summary>
         public string packageReference { get; }
         /// <summary>
-        /// Gets the condition evaluated against native package information.<br/>
-        /// native package 정보로 평가하는 조건을 가져옵니다.
-        /// </summary>
-        public Func<PackageInfo, bool> isSatisfied { get; }
-        /// <summary>
         /// Gets optional required scoped-registry configuration.<br/>
         /// 선택적인 필수 scoped registry 설정을 가져옵니다.
         /// </summary>
         public ScopedRegistryDefinition? registry { get; }
+        /// <summary>
+        /// Gets whether the executor must ensure the package itself in addition to registry configuration.<br/>
+        /// registry 설정과 함께 executor가 package 자체를 ensure해야 하는지 여부를 가져옵니다.
+        /// </summary>
+        /// <remarks>
+        /// When <see langword="false"/>, only registry preparation is ensured; package acquisition is delegated to UPM and is not verified.<br/>
+        /// <see langword="false"/>이면 registry 준비만 ensure하며 package 획득은 UPM에 위임하고 검증하지 않습니다.
+        /// </remarks>
+        public bool ensurePackage { get; }
         /// <summary>
         /// Creates complete UPM requirements without binding an executor.<br/>
         /// executor를 결합하지 않고 완결된 UPM 요구사항을 생성합니다.
@@ -43,34 +46,30 @@ namespace RuniOS.PackageManagement.Unity
         /// The exact native UPM request reference.<br/>
         /// 정확한 native UPM 요청 참조입니다.
         /// </param>
-        /// <param name="isSatisfied">
-        /// The native observation predicate.<br/>
-        /// native 관측 predicate입니다.
-        /// </param>
         /// <param name="registry">
         /// Optional scoped-registry requirements.<br/>
         /// 선택적인 scoped registry 요구사항입니다.
+        /// </param>
+        /// <param name="ensurePackage">
+        /// Whether to ensure the package itself; <see langword="false"/> requires only registry preparation.<br/>
+        /// package 자체를 ensure할지 여부이며 <see langword="false"/>이면 registry 준비만 요구합니다.
         /// </param>
         /// <exception cref="ArgumentException">
         /// Thrown when a name or reference is empty.<br/>
         /// 이름 또는 참조가 비어 있으면 발생합니다.
         /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// Thrown when isSatisfied is null.<br/>
-        /// isSatisfied가 null이면 발생합니다.
-        /// </exception>
-        public UpmInstallation(string packageName, string packageReference, Func<PackageInfo, bool> isSatisfied, ScopedRegistryDefinition? registry = null)
+        public UpmInstallation(string packageName, string packageReference, ScopedRegistryDefinition? registry = null, bool ensurePackage = true)
         {
             if (string.IsNullOrWhiteSpace(packageName)) throw new ArgumentException("A native package name is required.", nameof(packageName));
             if (string.IsNullOrWhiteSpace(packageReference)) throw new ArgumentException("A UPM reference is required.", nameof(packageReference));
             this.packageName = packageName;
             this.packageReference = packageReference;
-            this.isSatisfied = isSatisfied ?? throw new ArgumentNullException(nameof(isSatisfied));
             this.registry = registry;
+            this.ensurePackage = ensurePackage;
         }
         /// <summary>
-        /// Creates Git requirements pinned to a full commit hash.<br/>
-        /// 전체 commit hash로 고정한 Git 요구사항을 생성합니다.
+        /// Creates a Git acquisition reference pinned to a full commit hash.<br/>
+        /// 전체 commit hash로 고정한 Git 획득 참조를 생성합니다.
         /// </summary>
         /// <param name="packageName">
         /// The native package name.<br/>
@@ -89,8 +88,8 @@ namespace RuniOS.PackageManagement.Unity
         /// 저장소 안의 선택적인 package 경로입니다.
         /// </param>
         /// <returns>
-        /// Requirements verified by the resolved Git commit hash.<br/>
-        /// 해석된 Git commit hash로 확인하는 요구사항을 반환합니다.
+        /// A pinned Git reference used only when the native package name is absent.<br/>
+        /// native package 이름이 없을 때만 사용하는 고정된 Git 참조를 반환합니다.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// Thrown when the Git reference or commit is invalid.<br/>
@@ -106,11 +105,11 @@ namespace RuniOS.PackageManagement.Unity
             string reference = repositoryUrl;
             if (!string.IsNullOrEmpty(packagePath))reference += (reference.Contains("?") ? "&" : "?") + "path=" + Uri.EscapeDataString("/" + packagePath!.TrimStart('/'));
             reference += "#" + pin;
-            return new UpmInstallation(packageName, reference, info => info.source == PackageSource.Git && info.git is not null && StringComparer.OrdinalIgnoreCase.Equals(info.git.hash, pin));
+            return new UpmInstallation(packageName, reference);
         }
         /// <summary>
-        /// Creates exact-version registry requirements without version solving.<br/>
-        /// 버전 탐색 없이 exact version registry 요구사항을 생성합니다.
+        /// Creates an exact-version registry acquisition reference without version solving.<br/>
+        /// 버전 탐색 없이 exact version registry 획득 참조를 생성합니다.
         /// </summary>
         /// <param name="packageName">
         /// The native package name.<br/>
@@ -124,25 +123,26 @@ namespace RuniOS.PackageManagement.Unity
         /// Optional required scoped-registry configuration.<br/>
         /// 선택적인 필수 scoped registry 설정입니다.
         /// </param>
+        /// <param name="ensurePackage">
+        /// Whether to ensure this native package or delegate acquisition to UPM dependency resolution.<br/>
+        /// native package를 ensure할지 UPM dependency resolution에 획득을 위임할지 여부입니다.
+        /// </param>
         /// <returns>
-        /// Requirements verified by native source and exact version.<br/>
-        /// native source와 exact version으로 확인하는 요구사항을 반환합니다.
+        /// Registry configuration and an exact-version acquisition reference for an absent package name.<br/>
+        /// registry 설정과 package 이름이 없을 때 사용하는 exact version 획득 참조를 반환합니다.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// Thrown when the name or version is empty.<br/>
         /// 이름 또는 버전이 비어 있으면 발생합니다.
         /// </exception>
-        public static UpmInstallation Registry(string packageName, string version, ScopedRegistryDefinition? registry = null)
+        public static UpmInstallation Registry(string packageName, string version, ScopedRegistryDefinition? registry = null, bool ensurePackage = true)
         {
             if (string.IsNullOrWhiteSpace(version)) throw new ArgumentException("An exact version is required.", nameof(version));
-            return new UpmInstallation(packageName, packageName + "@" + version, info =>
-                (info.source == PackageSource.Registry || (registry is null && info.source == PackageSource.BuiltIn)) &&
-                StringComparer.Ordinal.Equals(info.version, version) &&
-                (registry is null || (info.registry is not null && StringComparer.Ordinal.Equals(info.registry.url.TrimEnd('/'), registry.url))), registry);
+            return new UpmInstallation(packageName, packageName + "@" + version, registry, ensurePackage);
         }
         /// <summary>
-        /// Creates local-directory requirements verified by the resolved path.<br/>
-        /// 해석된 경로로 확인하는 local directory 요구사항을 생성합니다.
+        /// Creates a local-directory acquisition reference for an absent package name.<br/>
+        /// package 이름이 없을 때 사용하는 local directory 획득 참조를 생성합니다.
         /// </summary>
         /// <param name="packageName">
         /// The native package name.<br/>
@@ -163,9 +163,7 @@ namespace RuniOS.PackageManagement.Unity
         public static UpmInstallation Local(string packageName, string fullPath)
         {
             string path = Path.GetFullPath(fullPath);
-            StringComparison comparison = Path.DirectorySeparatorChar == '\\' ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-            return new UpmInstallation(packageName, "file:" + path.Replace('\\', '/'), info => info.source == PackageSource.Local &&
-                string.Equals(Path.GetFullPath(info.resolvedPath).TrimEnd('/', '\\'), path.TrimEnd('/', '\\'), comparison));
+            return new UpmInstallation(packageName, "file:" + path.Replace('\\', '/'));
         }
     }
 }

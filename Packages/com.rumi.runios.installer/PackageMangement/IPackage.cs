@@ -32,10 +32,14 @@ namespace RuniOS.PackageManagement
         /// Creates an installation descriptor without selecting an executor.<br/>
         /// executor를 선택하지 않고 설치 요구사항 descriptor를 생성합니다.
         /// </summary>
+        /// <param name="isRoot">
+        /// Whether the caller directly selected this definition as a root.<br/>
+        /// caller가 이 정의를 root로 직접 선택했는지 여부입니다.
+        /// </param>
         /// <returns>
         /// A descriptor containing the complete installation requirements for this definition.<br/>
         /// 이 정의의 완결된 설치 요구사항을 담은 descriptor를 반환합니다.
         /// </returns>
-        IInstallation CreateInstallation();
+        IInstallation CreateInstallation(bool isRoot);
     }
 }

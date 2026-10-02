@@ -89,6 +89,104 @@ namespace RuniOS.PackageManagement
             await foreach (InstallationResult result in ExecuteAsync(dispatch, cancellationToken).ConfigureAwait(false))
                 yield return result;
         }
+        /// <summary>
+        /// Independently groups descriptors and observes every matching executor's optional preview capability.<br/>
+        /// descriptor를 독립적으로 grouping하고 모든 matching executor의 선택적인 preview capability를 관측합니다.
+        /// </summary>
+        /// <param name="installations">
+        /// The descriptors to observe.<br/>
+        /// 관측할 descriptor들입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The token used to cancel enumeration and observation.<br/>
+        /// 열거와 관측 취소에 사용하는 토큰입니다.
+        /// </param>
+        /// <returns>
+        /// Advisory results per executor and input, including unsupported inputs and unavailable preview capabilities.<br/>
+        /// 지원되지 않는 입력과 preview capability 부재를 포함한 executor 및 입력별 advisory 결과를 반환합니다.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Thrown when an installation entry is <see langword="null"/>.<br/>
+        /// installation 항목이 <see langword="null"/>이면 발생합니다.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="installations"/> is <see langword="null"/>.<br/>
+        /// <paramref name="installations"/>가 <see langword="null"/>이면 발생합니다.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// Thrown when observation is cancelled.<br/>
+        /// 관측이 취소되면 발생합니다.
+        /// </exception>
+        public async IAsyncEnumerable<InstallationPreview> PreviewAsync(IEnumerable<IInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            DispatchResult dispatch = Dispatch(installations, cancellationToken);
+            await foreach (InstallationPreview preview in ObserveAsync(dispatch, cancellationToken).ConfigureAwait(false))
+                yield return preview;
+        }
+        static async IAsyncEnumerable<InstallationPreview> ObserveAsync(DispatchResult dispatch, [EnumeratorCancellation] CancellationToken cancellationToken)
+        {
+            foreach (IInstallation installation in dispatch.unsupported)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, new[] { new InstallationDiagnostic("installation:unsupported", "No configured executor supports this installation.") });
+            }
+            foreach (ExecutorBatch batch in dispatch.batches)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                IInstallationExecutor executor = batch.executor;
+                if (executor is not IInstallationPreviewer previewer)
+                {
+                    foreach (IInstallation installation in batch.installations)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        yield return new InstallationPreview(installation, InstallationPreviewStatus.NotSupported, executor: executor);
+                    }
+                    continue;
+                }
+                var completed = new HashSet<IInstallation>();
+                IAsyncEnumerator<InstallationPreview>? enumerator = null;
+                Exception? failure = null;
+                try { enumerator = previewer.PreviewAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken); }
+                catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
+                if (enumerator is not null)
+                {
+                    try
+                    {
+                        while (true)
+                        {
+                            cancellationToken.ThrowIfCancellationRequested();
+                            bool moved = false;
+                            InstallationPreview? preview = null;
+                            try
+                            {
+                                moved = await enumerator.MoveNextAsync().ConfigureAwait(false);
+                                if (moved) preview = enumerator.Current;
+                            }
+                            catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
+                            if (failure is not null || !moved) break;
+                            if (preview is null) { failure = new InvalidOperationException("A previewer returned a null result."); break; }
+                            cancellationToken.ThrowIfCancellationRequested();
+                            completed.Add(preview.installation);
+                            yield return new InstallationPreview(preview, executor);
+                        }
+                    }
+                    finally
+                    {
+                        try { await enumerator.DisposeAsync().ConfigureAwait(false); }
+                        catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
+                    }
+                }
+                foreach (IInstallation installation in batch.installations)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (completed.Contains(installation)) continue;
+                    yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, new[]
+                    {
+                        new InstallationDiagnostic("installation:preview-failed", failure?.Message ?? "The previewer did not return an observation for this installation.")
+                    }, executor);
+                }
+            }
+        }
         static async IAsyncEnumerable<InstallationResult> ExecuteAsync(DispatchResult dispatch, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             foreach (IInstallation installation in dispatch.unsupported)

@@ -7,11 +7,13 @@
 ## 사용
 
 1. `Window > Runiverse OS > Installer`를 엽니다.
-2. `Catalog (optional)`에 `LegacyPackageCatalog.asset`을 넣습니다.
+2. unused 비교가 필요하면 `Catalog (optional)`에 `LegacyPackageCatalog.asset`을 넣습니다. Flatten에는 catalog가 필요하지 않습니다.
 3. `Selected roots`에 `com.rumi.runios.core`, `com.rumi.runios.sound`, `com.rumi.runios.ui` asset을 넣으면 원본의 세 가지 설치 항목을 재현합니다. FMOD까지 포함하려면 `com.rumi.runios.fmod`도 추가합니다.
-4. `Flatten dependencies`로 참조 graph를 확인합니다. 실제 설치를 확인하려는 경우 창의 `Ensure required installations`를 명시적으로 실행합니다.
+4. `Flatten dependencies`로 roots, dependencies와 requiredBy를 확인합니다. `Preview required installations`로 현재 상태를 관측하고, 실제 실행은 `Ensure required installations`를 명시적으로 선택합니다.
 
 Git Package 참조와 문자열 dependency를 모두 직접 Package asset 참조로 연결했습니다. 공유 dependency는 동일 asset을 참조합니다. native package.json 내부 dependency를 추가 수집하지 않습니다.
+
+RegistryPackage가 dependency-only이면 registry 준비만 수행하고 package 설치는 UPM dependency resolution에 맡깁니다. Preview의 Delegated와 registry-only Ensure 성공은 package 설치 완료를 증명하지 않습니다. RegistryPackage를 root로 선택하면 package 자체도 ensure합니다.
 
 ## 고정값
 
@@ -34,10 +36,10 @@ Git Package 참조와 문자열 dependency를 모두 직접 Package asset 참조
 | `com.unity.textmeshpro` | `5.0.0` | Unity |
 | `com.unity.ui` | `2.0.0` | Unity |
 
-세 OpenUPM 정의에는 레거시 `package.openupm.com.asset`의 registry name, URL, 세 scopes를 함께 복사했습니다. Unity built-in 항목도 기존 `RegistryPackage`/UPM descriptor의 BuiltIn satisfaction 지원을 사용합니다.
+세 OpenUPM 정의에는 레거시 `package.openupm.com.asset`의 registry name, URL, 세 scopes를 함께 복사했습니다. UPM package 충족 판단은 source와 무관한 native package name 존재 확인입니다.
 
 ## 원본과의 차이
 
 레거시 `com.rumi.runios.ui.asset`의 URL은 `Packages/com.rumi.runios.core`를 가리킵니다. 새 UI 정의에서는 실제 UI package를 요청하도록 `Packages/com.rumi.runios.ui`로 맞췄습니다. 원본 설정은 그대로 둡니다.
 
-현재 프로젝트의 RuniOS 패키지는 embedded이지만, 이 복사본은 레거시 설정처럼 Git 요구사항입니다. 기존 embedded가 있다고 Git 요구사항을 satisfied로 취급하지 않습니다. 정의 생성만 수행했으며 실제 UPM 설치는 실행하지 않았습니다.
+현재 프로젝트의 RuniOS 패키지는 embedded이며 이 복사본의 acquisition reference는 레거시 설정처럼 Git입니다. 같은 native package name의 embedded package가 있으면 충족으로 취급하고 Git 설치 요청을 하지 않습니다. Git pin은 graph definition identity와 미설치 시 acquisition reference에 사용합니다. 실제 UPM 설치는 실행하지 않았습니다.

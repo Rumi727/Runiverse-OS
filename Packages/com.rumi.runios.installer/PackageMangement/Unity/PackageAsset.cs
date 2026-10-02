@@ -41,7 +41,7 @@ namespace RuniOS.PackageManagement.Unity
         /// <inheritdoc/>
         public abstract string exactIdentity { get; }
         /// <inheritdoc/>
-        public abstract IInstallation CreateInstallation();
+        public abstract IInstallation CreateInstallation(bool isRoot);
         /// <summary>
         /// Gets direct dependencies, preserving missing reference slots.<br/>
         /// 누락된 참조 슬롯을 유지하며 직접 dependencies를 가져옵니다.

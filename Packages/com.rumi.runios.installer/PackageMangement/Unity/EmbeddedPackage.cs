@@ -13,6 +13,6 @@ namespace RuniOS.PackageManagement.Unity
         /// <inheritdoc/>
         public override string exactIdentity => "embedded:" + nativeName;
         /// <inheritdoc/>
-        public override IInstallation CreateInstallation() => new EmbeddedInstallation(nativeName);
+        public override IInstallation CreateInstallation(bool isRoot) => new EmbeddedInstallation(nativeName);
     }
 }

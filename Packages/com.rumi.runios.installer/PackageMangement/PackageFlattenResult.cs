@@ -12,10 +12,10 @@ namespace RuniOS.PackageManagement
     {
         readonly HashSet<PackageIdentity> _required;
         /// <summary>
-        /// Gets dependency-first unique definitions reached from the roots.<br/>
-        /// root에서 도달한 고유 정의를 의존성 우선 순서로 가져옵니다.
+        /// Gets dependency-first unique definitions with their root and direct-dependency provenance.<br/>
+        /// 고유 정의와 root 및 직접 dependency provenance를 의존성 우선 순서로 가져옵니다.
         /// </summary>
-        public IReadOnlyList<IPackage> packages { get; }
+        public IReadOnlyList<FlattenedPackage> packages { get; }
         /// <summary>
         /// Gets definition and graph errors.<br/>
         /// 정의와 graph 오류를 가져옵니다.
@@ -26,7 +26,7 @@ namespace RuniOS.PackageManagement
         /// closure를 실행할 수 있는지 여부를 가져옵니다.
         /// </summary>
         public bool succeeded => diagnostics.Count == 0;
-        internal PackageFlattenResult(List<IPackage> packages, List<PackageGraphDiagnostic> diagnostics, HashSet<PackageIdentity> required)
+        internal PackageFlattenResult(List<FlattenedPackage> packages, List<PackageGraphDiagnostic> diagnostics, HashSet<PackageIdentity> required)
         {
             this.packages = packages.AsReadOnly();
             this.diagnostics = diagnostics.AsReadOnly();

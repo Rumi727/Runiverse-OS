@@ -40,11 +40,11 @@ namespace RuniOS.PackageManagement.Unity
             }
         }
         /// <inheritdoc/>
-        public override IInstallation CreateInstallation() => CreateUpmInstallation();
-        UpmInstallation CreateUpmInstallation()
+        public override IInstallation CreateInstallation(bool isRoot) => CreateUpmInstallation(isRoot);
+        UpmInstallation CreateUpmInstallation(bool ensurePackage = true)
         {
             ScopedRegistryDefinition? registry = string.IsNullOrEmpty(registryUrl) ? null : new ScopedRegistryDefinition(registryName, registryUrl, registryScopes);
-            return UpmInstallation.Registry(nativeName, version, registry);
+            return UpmInstallation.Registry(nativeName, version, registry, ensurePackage);
         }
     }
 }

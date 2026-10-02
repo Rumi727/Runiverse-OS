@@ -28,7 +28,7 @@ namespace RuniOS.PackageManagement.Unity
         /// <inheritdoc/>
         public override string exactIdentity => CreateUpmInstallation().packageReference;
         /// <inheritdoc/>
-        public override IInstallation CreateInstallation() => CreateUpmInstallation();
+        public override IInstallation CreateInstallation(bool isRoot) => CreateUpmInstallation();
         UpmInstallation CreateUpmInstallation() => UpmInstallation.Git(nativeName, repositoryUrl, commit, packagePath);
     }
 }
