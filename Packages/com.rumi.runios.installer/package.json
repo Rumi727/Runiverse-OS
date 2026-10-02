@@ -2,10 +2,12 @@
   "name": "com.rumi.runios.installer",
   "version": "0.0.0",
   "displayName": "Runiverse OS Installer",
-  "description": "Independent package-management core and editor extension bootstrap for Runiverse OS.",
+  "description": "Exact package dependency flattening, host-configured installation executors, and an independent Unity editor installer.",
   "author": {
     "name": "Rumi"
   },
-  "dependencies": {},
+  "dependencies": {
+    "com.unity.nuget.newtonsoft-json": "3.2.2"
+  },
   "unity": "6000.7"
 }

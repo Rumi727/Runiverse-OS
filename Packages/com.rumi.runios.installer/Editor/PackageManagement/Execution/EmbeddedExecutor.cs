@@ -1,0 +1,35 @@
+#nullable enable
+using System;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using UnityEditor.PackageManager;
+
+namespace RuniOS.PackageManagement.Unity.Editor
+{
+    /// <summary>
+    /// Satisfies requirements only when the named embedded packages already exist.<br/>
+    /// 지정한 embedded package가 이미 존재할 때만 요구사항을 만족시킵니다.
+    /// </summary>
+    public sealed class EmbeddedExecutor : IInstallationExecutor<EmbeddedInstallation>
+    {
+        /// <inheritdoc/>
+        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<EmbeddedInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        {
+            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            PackageInfo[] infos = await UnityEditorThread.RunAsync(() => PackageInfo.GetAllRegisteredPackages(), cancellationToken).ConfigureAwait(false);
+            var names = new HashSet<string>(StringComparer.Ordinal);
+            foreach (PackageInfo info in infos)
+                if (info.source == PackageSource.Embedded) names.Add(info.name);
+            foreach (EmbeddedInstallation installation in installations)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (names.Contains(installation.packageName)) yield return new InstallationResult(installation, true);
+                else yield return new InstallationResult(installation, false, new[]
+                {
+                    new InstallationDiagnostic("embedded:missing", $"Required embedded package '{installation.packageName}' is not present in this project.")
+                });
+            }
+        }
+    }
+}
