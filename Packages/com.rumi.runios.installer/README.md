@@ -18,7 +18,7 @@ public interface IPackage
     PackageId id { get; }
     string exactIdentity { get; }
     IReadOnlyList<IPackage?> dependencies { get; }
-    IInstallation installation { get; }
+    IInstallation CreateInstallation();
 }
 ```
 
@@ -57,10 +57,10 @@ var runner = new InstallationRunner(new IInstallationExecutor[]
     // 외부 executor instances
 });
 
-// 각 Package getter는 한 번만 읽어 실행 동안 사용할 descriptor를 보관합니다.
+// 각 Package의 CreateInstallation()을 한 번 호출해 실행 동안 사용할 descriptor를 보관합니다.
 var installations = new List<IInstallation>();
 foreach (IPackage package in closure.packages)
-    installations.Add(package.installation);
+    installations.Add(package.CreateInstallation());
 
 await foreach (InstallationResult result in runner.EnsureAsync(installations, cancellationToken))
 {
