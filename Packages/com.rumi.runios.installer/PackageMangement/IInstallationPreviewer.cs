@@ -23,8 +23,8 @@ namespace RuniOS.PackageManagement
         /// 관측 취소에 사용하는 토큰입니다.
         /// </param>
         /// <returns>
-        /// One observation per original input descriptor.<br/>
-        /// 원래 입력 descriptor별 관측 결과를 반환합니다.
+        /// One observation per input installation entry.<br/>
+        /// 입력 installation 항목별 관측 결과 하나를 반환합니다.
         /// </returns>
         IAsyncEnumerable<InstallationPreview> PreviewAsync(IEnumerable<IInstallation> installations, CancellationToken cancellationToken = default);
     }

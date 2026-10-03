@@ -41,7 +41,7 @@ IEnumerable<IPackage> unused = closure.GetUnused(definitions);
 
 `closure.packages`는 `FlattenedPackage(package, isRoot, requiredBy)` 목록입니다. `requiredBy`는 이 package를 직접 요구한 정의들을 instance 기준으로 중복 제거한 snapshot입니다. 동일 dependency slot 반복은 한 번만 표시하며 여러 owner는 모두 보존합니다. root이면서 dependency인 package는 `isRoot == true`와 비어 있지 않은 `requiredBy`를 함께 갖습니다.
 
-Flatten은 누락 참조, cycle, exact identity conflict를 검출합니다. 반복 탐색으로 dependency-first unique closure를 만들며 깊은 graph를 CLR 재귀로 탐색하지 않습니다. 실패한 결과의 partial closure는 진단용이고 실행하면 안 됩니다. Graph diagnostic에는 대상·관련 정의, owner·reference slot과 root에서의 경로가 있습니다. Identity conflict에는 양쪽 정의의 root 경로를 보존합니다. source location 표시는 caller가 asset 등으로 대응시킵니다.
+Flatten은 누락 참조, cycle, exact identity conflict를 검출합니다. 반복 탐색으로 unique closure를 만들며 깊은 graph를 CLR 재귀로 탐색하지 않습니다. Package 결과 순서는 정의되지 않습니다(The order is unspecified). Dependency graph는 Installation 실행 순서를 정의하지 않습니다. 실패한 결과의 partial closure는 진단용이고 실행하면 안 됩니다. Graph diagnostic에는 대상·관련 정의, owner·reference slot과 root에서의 경로가 있습니다. Identity conflict에는 양쪽 정의의 root 경로를 보존합니다. source location 표시는 caller가 asset 등으로 대응시킵니다.
 
 `GetUnused`는 성공한 closure 밖의 exact keys를 찾는 순수 정의 query입니다. 설치된 UPM graph와의 비교나 package 제거를 뜻하지 않습니다. 자동 pruning, ownership, 과거 적용 상태는 없습니다.
 
@@ -83,15 +83,15 @@ Runner는 executor collection의 instance별 `CanExecute`를 평가합니다. 0 
 
 Dispatch는 입력을 한 번 열거해 executor와 batch를 연결한 읽기 전용 중간 데이터를 만듭니다. Preview와 Ensure는 각각 Dispatch를 수행하고 별도 관측·실행 경로에서 그 결과만 소비합니다. 중간 데이터는 비공개 matching/grouping 결과이며 environment diff나 execution plan이 아닙니다. dispatch는 executor 실행을 시작하지 않습니다.
 
-비어 있지 않은 executor별 batch invocation은 한 번입니다. 각 executor는 input instance에 대응하는 최종 결과를 비동기로 생산합니다. Runner는 실행 주체를 결과에 붙입니다. N match 결과는 하나로 합치지 않습니다. stream을 끝까지 열거해야 전체 실행이 진행됩니다. caller가 열거를 중단하거나 취소하면 남은 실행은 수행되지 않습니다.
+비어 있지 않은 executor별 batch invocation은 한 번입니다. 각 executor는 input installation 항목별 최종 결과 하나를 비동기로 생산합니다. Runner는 batch 입력을 복사한 remaining 목록에서 기본 동등성으로 결과당 한 occurrence를 제거합니다. 같은 값이나 instance가 반복되면 각각 결과가 필요하며 누락된 각 항목은 failure로 보고합니다. Runner는 실행 주체를 결과에 붙입니다. N match 결과는 하나로 합치지 않습니다. stream을 끝까지 열거해야 전체 실행이 진행됩니다. caller가 열거를 중단하거나 취소하면 남은 실행은 수행되지 않습니다.
 
-Executor 간 순서, side effect 호환성, 중복 작업의 안전성, idempotency, transactionality는 보장하지 않습니다. priority, ambiguity resolver, execution dependency graph는 없습니다. 일반 executor 실패는 미보고 항목의 execution diagnostic으로 전달하고 다른 batch를 계속 처리합니다. cancellation은 취소로 전파합니다. CanExecute는 dispatch 중 호출되므로 실행 side effect 없이 matching을 수행해야 합니다.
+Executor 간 순서, side effect 호환성, 중복 작업의 안전성, idempotency, transactionality는 보장하지 않습니다. priority, ambiguity resolver, execution dependency graph는 없습니다. 특정 installation 실패는 executor가 failure 결과로 반환합니다. 정상 열거 종료 후 미보고 항목은 Runner가 missing-result failure로 보고하고 다른 batch를 계속 처리합니다. executor 호출, GetAsyncEnumerator, MoveNextAsync, Current, DisposeAsync의 예외는 호출자에게 전파합니다. cancellation은 취소로 전파합니다. CanExecute는 dispatch 중 호출되므로 실행 side effect 없이 matching을 수행해야 합니다.
 
 ## Optional preview
 
 `IInstallationPreviewer<TInstallation>`은 typed `PreviewAsync(IEnumerable<TInstallation>, CancellationToken)`만 구현하며 default interface bridge가 비제네릭 capability를 연결합니다. Runner는 matching executor instance가 `IInstallationPreviewer`인지 확인합니다. 별도 preview matching, Type metadata, registry, locator는 없습니다. Preview 미지원 executor도 Ensure에 정상 참여합니다.
 
-`InstallationPreview`에는 원래 installation, Runner가 지정한 executor, status, diagnostics만 있습니다. 0 match는 executor가 없는 `Failed`와 `installation:unsupported` diagnostic입니다. N match는 executor별 결과를 노출하며 합치지 않습니다. 일반 관측 실패나 누락 결과는 `Failed`로 보고하고 다른 batch를 계속 관측합니다.
+`InstallationPreview`에는 관측에 대응하는 installation, Runner가 지정한 executor, status, diagnostics만 있습니다. 0 match는 executor가 없는 `Failed`와 `installation:unsupported` diagnostic입니다. N match는 executor별 결과를 노출하며 합치지 않습니다. 특정 installation의 관측 실패는 previewer가 `Failed`로 반환합니다. Preview도 remaining 목록과 기본 동등성으로 항목별 결과를 추적합니다. 정상 열거 종료 후 누락 결과는 `Failed`로 보고하고 다른 batch를 계속 관측합니다. Preview enumeration의 예외와 DisposeAsync 실패는 호출자에게 전파합니다.
 
 | Status | 의미 |
 | --- | --- |

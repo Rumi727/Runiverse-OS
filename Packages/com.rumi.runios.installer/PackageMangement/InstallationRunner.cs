@@ -14,7 +14,12 @@ namespace RuniOS.PackageManagement
     /// </summary>
     /// <remarks>
     /// Fully enumerating the stream runs all matching executor entries; composition safety and executor ordering are not guaranteed.<br/>
-    /// stream을 끝까지 열거하면 matching된 모든 executor 항목을 실행하며 조합 안전성과 executor 순서는 보장하지 않습니다.
+    /// Results are accounted for per input entry using default descriptor equality.<br/>
+    /// Exceptions from executor enumeration, including disposal, propagate to the caller.
+    /// <br/><br/>
+    /// stream을 끝까지 열거하면 matching된 모든 executor 항목을 실행하며 조합 안전성과 executor 순서는 보장하지 않습니다.<br/>
+    /// descriptor의 기본 동등성으로 입력 항목별 결과를 추적합니다.<br/>
+    /// 해제를 포함한 executor 열거의 예외는 호출자에게 전파합니다.
     /// </remarks>
     public sealed class InstallationRunner
     {
@@ -68,8 +73,8 @@ namespace RuniOS.PackageManagement
         /// 열거와 실행 취소에 사용하는 토큰입니다.
         /// </param>
         /// <returns>
-        /// One result per executor and input, or an unsupported result when no executor matches.<br/>
-        /// executor와 입력별 결과 또는 matching이 없을 때 지원되지 않는다는 결과를 반환합니다.
+        /// One result per executor and input entry, or an unsupported result when no executor matches.<br/>
+        /// executor와 입력 항목별 결과 또는 matching이 없을 때 지원되지 않는다는 결과를 반환합니다.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// Thrown when an installation entry is null.<br/>
@@ -102,8 +107,8 @@ namespace RuniOS.PackageManagement
         /// 열거와 관측 취소에 사용하는 토큰입니다.
         /// </param>
         /// <returns>
-        /// Advisory results per executor and input, including unsupported inputs and unavailable preview capabilities.<br/>
-        /// 지원되지 않는 입력과 preview capability 부재를 포함한 executor 및 입력별 advisory 결과를 반환합니다.
+        /// Advisory results per executor and input entry, including unsupported inputs and unavailable preview capabilities.<br/>
+        /// 지원되지 않는 입력과 preview capability 부재를 포함한 executor 및 입력 항목별 advisory 결과를 반환합니다.
         /// </returns>
         /// <exception cref="ArgumentException">
         /// Thrown when an installation entry is <see langword="null"/>.<br/>
@@ -143,46 +148,32 @@ namespace RuniOS.PackageManagement
                     }
                     continue;
                 }
-                var completed = new HashSet<IInstallation>();
-                IAsyncEnumerator<InstallationPreview>? enumerator = null;
-                Exception? failure = null;
-                try { enumerator = previewer.PreviewAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken); }
-                catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
-                if (enumerator is not null)
+                var remaining = new List<IInstallation>(batch.installations);
+                IAsyncEnumerator<InstallationPreview> enumerator = previewer.PreviewAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken);
+                string? failureMessage = null;
+                try
                 {
-                    try
+                    while (true)
                     {
-                        while (true)
-                        {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            bool moved = false;
-                            InstallationPreview? preview = null;
-                            try
-                            {
-                                moved = await enumerator.MoveNextAsync().ConfigureAwait(false);
-                                if (moved) preview = enumerator.Current;
-                            }
-                            catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
-                            if (failure is not null || !moved) break;
-                            if (preview is null) { failure = new InvalidOperationException("A previewer returned a null result."); break; }
-                            cancellationToken.ThrowIfCancellationRequested();
-                            completed.Add(preview.installation);
-                            yield return new InstallationPreview(preview, executor);
-                        }
-                    }
-                    finally
-                    {
-                        try { await enumerator.DisposeAsync().ConfigureAwait(false); }
-                        catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (!await enumerator.MoveNextAsync().ConfigureAwait(false)) break;
+                        InstallationPreview? preview = enumerator.Current;
+                        if (preview is null) { failureMessage = "A previewer returned a null result."; break; }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        remaining.Remove(preview.installation);
+                        yield return new InstallationPreview(preview, executor);
                     }
                 }
-                foreach (IInstallation installation in batch.installations)
+                finally
+                {
+                    await enumerator.DisposeAsync().ConfigureAwait(false);
+                }
+                foreach (IInstallation installation in remaining)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    if (completed.Contains(installation)) continue;
                     yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, new[]
                     {
-                        new InstallationDiagnostic("installation:preview-failed", failure?.Message ?? "The previewer did not return an observation for this installation.")
+                        new InstallationDiagnostic("installation:preview-failed", failureMessage ?? "The previewer did not return an observation for this installation.")
                     }, executor);
                 }
             }
@@ -198,45 +189,31 @@ namespace RuniOS.PackageManagement
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 IInstallationExecutor executor = batch.executor;
-                var completed = new HashSet<IInstallation>();
-                IAsyncEnumerator<InstallationResult>? enumerator = null;
-                Exception? failure = null;
-                try { enumerator = executor.EnsureAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken); }
-                catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
-                if (enumerator is not null)
+                var remaining = new List<IInstallation>(batch.installations);
+                IAsyncEnumerator<InstallationResult> enumerator = executor.EnsureAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken);
+                string? failureMessage = null;
+                try
                 {
-                    try
+                    while (true)
                     {
-                        while (true)
-                        {
-                            cancellationToken.ThrowIfCancellationRequested();
-                            bool moved = false;
-                            InstallationResult? result = null;
-                            try
-                            {
-                                moved = await enumerator.MoveNextAsync().ConfigureAwait(false);
-                                if (moved) result = enumerator.Current;
-                            }
-                            catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
-                            if (failure is not null || !moved) break;
-                            if (result is null) { failure = new InvalidOperationException("An executor returned a null result."); break; }
-                            cancellationToken.ThrowIfCancellationRequested();
-                            completed.Add(result.installation);
-                            yield return new InstallationResult(result, executor);
-                        }
-                    }
-                    finally
-                    {
-                        try { await enumerator.DisposeAsync().ConfigureAwait(false); }
-                        catch (Exception exception) when (exception is not OperationCanceledException) { failure = exception; }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (!await enumerator.MoveNextAsync().ConfigureAwait(false)) break;
+                        InstallationResult? result = enumerator.Current;
+                        if (result is null) { failureMessage = "An executor returned a null result."; break; }
+                        cancellationToken.ThrowIfCancellationRequested();
+                        remaining.Remove(result.installation);
+                        yield return new InstallationResult(result, executor);
                     }
                 }
-                foreach (IInstallation installation in batch.installations)
+                finally
                 {
-                    if (completed.Contains(installation)) continue;
+                    await enumerator.DisposeAsync().ConfigureAwait(false);
+                }
+                foreach (IInstallation installation in remaining)
+                {
                     yield return new InstallationResult(installation, false, new[]
                     {
-                        new InstallationDiagnostic("installation:executor-failed", failure?.Message ?? "The executor did not return a final result for this installation.")
+                        new InstallationDiagnostic("installation:executor-failed", failureMessage ?? "The executor did not return a final result for this installation.")
                     }, executor);
                 }
             }

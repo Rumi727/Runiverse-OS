@@ -12,8 +12,8 @@ namespace RuniOS.PackageManagement
     public sealed class InstallationPreview
     {
         /// <summary>
-        /// Gets the original input descriptor.<br/>
-        /// 원래 입력 descriptor를 가져옵니다.
+        /// Gets the descriptor associated with this result.<br/>
+        /// 이 결과에 대응하는 descriptor를 가져옵니다.
         /// </summary>
         public IInstallation installation { get; }
         /// <summary>
@@ -36,8 +36,8 @@ namespace RuniOS.PackageManagement
         /// native 환경 상태를 보관하지 않고 관측 결과를 담습니다.
         /// </summary>
         /// <param name="installation">
-        /// The original input descriptor.<br/>
-        /// 원래 입력 descriptor입니다.
+        /// The descriptor associated with this result.<br/>
+        /// 이 결과에 대응하는 descriptor입니다.
         /// </param>
         /// <param name="status">
         /// The observed status.<br/>

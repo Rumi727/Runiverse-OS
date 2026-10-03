@@ -43,8 +43,8 @@ namespace RuniOS.PackageManagement
         /// 선택한 root의 직접 참조이며 각 정의에서 dependency를 따라갑니다.
         /// </param>
         /// <returns>
-        /// A dependency-first closure with provenance and diagnostics; failure may leave a partial closure.<br/>
-        /// provenance와 diagnostic을 포함한 의존성 우선 closure를 반환하며 실패 시 부분 closure가 남을 수 있습니다.
+        /// A closure with provenance and diagnostics in unspecified package order; failure may leave a partial closure.<br/>
+        /// provenance와 diagnostic을 포함한 closure를 반환하며 package 순서는 정의되지 않고 실패 시 부분 closure가 남을 수 있습니다.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="roots"/> is <see langword="null"/>.<br/>

@@ -12,8 +12,8 @@ namespace RuniOS.PackageManagement
     public sealed class InstallationResult
     {
         /// <summary>
-        /// Gets the original input descriptor.<br/>
-        /// 원래 입력 descriptor를 가져옵니다.
+        /// Gets the descriptor associated with this result.<br/>
+        /// 이 결과에 대응하는 descriptor를 가져옵니다.
         /// </summary>
         public IInstallation installation { get; }
         /// <summary>
@@ -36,8 +36,8 @@ namespace RuniOS.PackageManagement
         /// 최종 설치 결과를 생성합니다.
         /// </summary>
         /// <param name="installation">
-        /// The original input descriptor.<br/>
-        /// 원래 입력 descriptor입니다.
+        /// The descriptor associated with this result.<br/>
+        /// 이 결과에 대응하는 descriptor입니다.
         /// </param>
         /// <param name="succeeded">
         /// Whether the requirements were satisfied.<br/>

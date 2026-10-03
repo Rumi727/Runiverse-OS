@@ -12,8 +12,8 @@ namespace RuniOS.PackageManagement
     {
         readonly HashSet<PackageIdentity> _required;
         /// <summary>
-        /// Gets dependency-first unique definitions with their root and direct-dependency provenance.<br/>
-        /// 고유 정의와 root 및 직접 dependency provenance를 의존성 우선 순서로 가져옵니다.
+        /// Gets unique definitions with their root and direct-dependency provenance in unspecified order.<br/>
+        /// 고유 정의와 root 및 직접 dependency provenance를 가져오며 순서는 정의되지 않습니다.
         /// </summary>
         public IReadOnlyList<FlattenedPackage> packages { get; }
         /// <summary>

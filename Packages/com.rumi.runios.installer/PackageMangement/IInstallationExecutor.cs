@@ -24,8 +24,8 @@ namespace RuniOS.PackageManagement
         /// </returns>
         bool CanExecute(IInstallation installation);
         /// <summary>
-        /// Ensures supported requirements and produces one final result per input descriptor.<br/>
-        /// 지원하는 요구사항을 만족시키고 입력 descriptor별 최종 결과를 생산합니다.
+        /// Ensures supported requirements and produces one final result per input installation entry.<br/>
+        /// 지원하는 요구사항을 만족시키고 입력 installation 항목별 최종 결과 하나를 생산합니다.
         /// </summary>
         /// <param name="installations">
         /// Descriptors accepted by this instance's CanExecute method.<br/>
@@ -36,8 +36,8 @@ namespace RuniOS.PackageManagement
         /// 실행 취소에 사용하는 토큰입니다.
         /// </param>
         /// <returns>
-        /// Final results associated with the original input instances, in implementation-defined order.<br/>
-        /// 구현이 정한 순서로 원래 입력 인스턴스에 대응하는 최종 결과를 반환합니다.
+        /// One final result per input installation entry, in implementation-defined order.<br/>
+        /// 구현이 정한 순서로 입력 installation 항목별 최종 결과 하나를 반환합니다.
         /// </returns>
         IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<IInstallation> installations, CancellationToken cancellationToken = default);
     }
