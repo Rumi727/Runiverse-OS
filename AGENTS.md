@@ -53,3 +53,105 @@
 - Do not apply Unity-specific C# conventions to files under `RuniOS.CodeAnalysis`: do not add a file-level `#nullable enable` directive or block-scoped namespace declarations. Preserve the existing file-scoped namespace style.
 - The general C# rule requiring `#nullable enable` does not apply to `RuniOS.CodeAnalysis`. Its project-level nullable configuration remains authoritative.
 - For `RuniOS.CodeAnalysis`, inspect its own project and source configuration instead of requiring Unity assembly files such as `GenericGlobalUsing`, `GenericEditorGlobalUsing`, or `AssemblyInfo`.
+
+## Code design philosophy
+
+Prefer the smallest implementation that expresses the intended contract.
+
+Do not add behavior, policy, validation, abstraction, state, or lifecycle management unless it is required by the existing design or fixes a concrete demonstrated problem.
+
+### Preserve intentional freedom
+
+Do not make unspecified behavior deterministic merely for reproducibility.
+
+For example:
+
+- If objects are sorted by `order`, compare only `order`.
+- Do not add type names, assembly names, registration order, GUIDs, or other tie-breakers unless the code explicitly requires a total ordering.
+- Equal priority means equal priority. Their relative order may remain unspecified.
+- Do not clamp or validate values merely because they look unusual if the current representation can validly express them.
+
+Undefined or unconstrained behavior is not automatically a bug.
+
+### Do not invent contracts
+
+Do not infer new requirements from implementation details.
+
+A field name such as `index`, a collection boundary, a type name, or the presence of a lifecycle callback does not by itself imply additional validation or semantics.
+
+Before adding a rule, ask:
+
+1. Is this rule already part of the code's contract?
+2. Is it required for correctness?
+3. Is there a concrete failure without it?
+
+If all answers are no, do not add it.
+
+### Avoid defensive overengineering
+
+Do not introduce extra:
+
+- state flags
+- lifecycle state machines
+- attach/detach tracking
+- cleanup orchestration
+- helper abstractions
+- fallback paths
+- deterministic tie-breakers
+- duplicate validation
+- synchronization
+- caching
+- exception wrapping
+
+solely because they might theoretically be useful.
+
+Use framework lifecycle and guarantees directly when they are sufficient.
+
+Do not reimplement behavior already supplied by Unity, C#, UI Toolkit, or the surrounding architecture.
+
+### Keep abstractions proportional
+
+Do not create a new class, interface, wrapper, service, or helper merely to make code look architecturally complete.
+
+A small direct implementation is preferred when it accurately represents the responsibility.
+
+Extract something only when the extraction has a concrete semantic purpose, not merely to reduce visible code in a method.
+
+### Respect semantic ownership
+
+Two collections or values containing the same objects are not necessarily redundant if they represent different contracts or ownership.
+
+Do not merge state solely because the current values happen to be identical.
+
+Reason about what each piece of state means, not only about its runtime contents.
+
+### Prefer transparent code
+
+Prefer code whose behavior can be understood locally.
+
+Avoid bookkeeping state whose only purpose is to coordinate other bookkeeping state.
+
+Prefer:
+```javascript
+_screens.Sort(static (x, y) => x.order.CompareTo(y.order));
+```
+
+over adding unrelated tie-breakers for deterministic ordering.
+
+### Changes must earn their complexity
+
+Every nontrivial addition should answer:
+
+> What concrete requirement or bug makes this necessary?
+
+If there is no strong answer, leave the code simpler.
+
+When reviewing existing code, do not "improve" something merely because a more defensive, deterministic, generalized, or extensible version can be imagined.
+
+Preserve intentional simplicity.
+
+### When uncertain
+
+If something looks unusual but is internally valid, do not silently normalize it into a conventional pattern.
+
+Preserve the existing behavior and mention the concern separately rather than changing the design.
