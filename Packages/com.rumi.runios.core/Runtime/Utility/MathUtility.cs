@@ -5110,7 +5110,15 @@ namespace RuniOS.Utility
         public static float Round(this float value, MidpointRounding midpointRounding) => (float)Math.Round(value, midpointRounding);
         public static double Round(this double value, MidpointRounding midpointRounding) => Math.Round(value, midpointRounding);
         public static decimal Round(this decimal value, MidpointRounding midpointRounding) => Math.Round(value, midpointRounding);
-        public static BigDecimal Round(this BigDecimal value, MidpointRounding midpointRounding) => BigDecimal.Round(value, midpointRounding);
+        public static BigDecimal Round(this BigDecimal value, MidpointRounding midpointRounding) => midpointRounding switch
+        {
+            MidpointRounding.ToEven => BigDecimal.Round(value, RoundingStrategy.ToEven),
+            MidpointRounding.AwayFromZero => BigDecimal.Round(value, RoundingStrategy.AwayFromZero),
+            /*MidpointRounding.ToZero => BigDecimal.Truncate(value),
+            MidpointRounding.ToNegativeInfinity => BigDecimal.Floor(value),
+            MidpointRounding.ToPositiveInfinity => BigDecimal.Ceiling(value),*/
+            _ => throw new ArgumentOutOfRangeException(nameof(midpointRounding), midpointRounding, null)
+        };
 
         public static float Round(this float value, int digits) => (float)Math.Round(value, digits);
         public static double Round(this double value, int digits) => Math.Round(value, digits);
