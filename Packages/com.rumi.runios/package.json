@@ -1,5 +1,5 @@
 {
-  "name": "com.rumi.runios.installer",
+  "name": "com.rumi.runios",
   "version": "0.0.0",
   "displayName": "Runiverse OS",
   "description": "Exact package dependency flattening, host-configured installation executors, and an independent Unity editor installer.",
