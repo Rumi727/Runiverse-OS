@@ -18,7 +18,7 @@
         "Newtonsoft.Json.dll",
         "R3.dll"
     ],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [
         {

@@ -2,7 +2,7 @@
     "name": "RuniOS.Editor.NBS",
     "rootNamespace": "RuniOS.Editor",
     "references": [
-        "RuniOS.NBS",
+        "GUID:2612ad92d2d01519f964d115429ae3a3",
         "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
         "GUID:c358082e85227cc4f9dee2438a164545",
         "GUID:e04069b3d121e7b4db324e77dd2a22a4",
@@ -23,7 +23,7 @@
         "ExtendedNumerics.BigDecimal.dll",
         "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll"
     ],
-    "autoReferenced": true,
+    "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
     "noEngineReferences": false

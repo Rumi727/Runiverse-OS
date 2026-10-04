@@ -1,19 +1,19 @@
 {
-  "name": "RuniOS.Installer",
-  "rootNamespace": "RuniOS.Editor.Installer",
-  "references": [
-    "GUID:edf5dbf325ff43a1b839e6c512f627b7",
-    "GUID:788ae01ab0fa4ffe8a6de7784798bf37"
-  ],
-  "includePlatforms": [
-    "Editor"
-  ],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": true,
-  "precompiledReferences": [],
-  "autoReferenced": false,
-  "defineConstraints": [],
-  "versionDefines": [],
-  "noEngineReferences": false
+    "name": "RuniOS.Installer",
+    "rootNamespace": "RuniOS.Editor.Installer",
+    "references": [
+        "GUID:edf5dbf325ff43a1b839e6c512f627b7",
+        "GUID:788ae01ab0fa4ffe8a6de7784798bf37"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

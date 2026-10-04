@@ -1,23 +1,27 @@
 {
-  "name": "RuniOS.Installer.CoreIntegration",
-  "rootNamespace": "RuniOS.Editor.Installer",
-  "references": [
-    "RuniOS.Installer",
-    "RuniOS.Editor"
-  ],
-  "includePlatforms": ["Editor"],
-  "excludePlatforms": [],
-  "allowUnsafeCode": false,
-  "overrideReferences": true,
-  "precompiledReferences": [],
-  "autoReferenced": false,
-  "defineConstraints": ["RUNIOS_INSTALLER_CORE_INTEGRATION"],
-  "versionDefines": [
-    {
-      "name": "com.rumi.runios.core",
-      "expression": "",
-      "define": "RUNIOS_INSTALLER_CORE_INTEGRATION"
-    }
-  ],
-  "noEngineReferences": false
+    "name": "RuniOS.Installer.CoreIntegration",
+    "rootNamespace": "RuniOS.Editor.Installer",
+    "references": [
+        "RuniOS.Installer",
+        "RuniOS.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "RUNIOS_INSTALLER_CORE_INTEGRATION"
+    ],
+    "versionDefines": [
+        {
+            "name": "com.rumi.runios.core",
+            "expression": "",
+            "define": "RUNIOS_INSTALLER_CORE_INTEGRATION"
+        }
+    ],
+    "noEngineReferences": false
 }
