@@ -1,4 +1,6 @@
 #nullable enable
+using System.Collections.Generic;
+using RuniOS.PackageManagement.Unity;
 using UnityEditor;
 using UnityEngine;
 
@@ -7,6 +9,7 @@ namespace RuniOS.Editor.Installer
     class ConfigScriptableObject : ScriptableObject
     {
         public string currentLanguage = "en_us";
+        public List<PackageAsset> selectedRoots = [];
 
         public static ConfigScriptableObject config
         {

@@ -24,22 +24,6 @@ MonoBehaviour:
       value: 'Thank you for using Runi Engine.
 
         From now on, we start the initial setup of the engine.'
-    - key: installer.package_setting.label
-      value: Setting the scope registry
-    - key: installer.package_setting.file_not_found
-      value: Could not find file {path}!
-    - key: installer.package_setting.json_deserialization_fail
-      value: JSON deserialization failed
-    - key: installer.package_setting.url_warning
-      value: "The URL of the registry \"{name}\" does not match the expected value.\r\nTo protect security, the operation has been stopped.\r\nPlease change the URL to the following: {url}\r"
-    - key: installer.package_setting.setting_info
-      value: "To install dependencies automatically, set the scoped registry before installing the package.\r\nYou can review the changes and set it manually or click Apply to do it automatically.\r"
-    - key: installer.package_setting.apply
-      value: Apply
-    - key: installer.package_setting.no_changes
-      value: No changes
-    - key: installer.package_setting.warning
-      value: If it does not refresh automatically, please refresh manually with the shortcut Ctrl + R.
     - key: installer.tmp_setting.label
       value: TMP Resources
     - key: installer.tmp_setting.warning
@@ -48,35 +32,105 @@ MonoBehaviour:
       value: 'The ROS package utilizes Unity''s TextMesh Pro package.
 
         We recommend importing TextMesh Pro''s essential resources for smooth operation.'
-    - key: installer.install_setting.label
-      value: Installation time!
     - key: installer.install_setting.install
       value: Install
-    - key: installer.install_setting.installed
-      value: "\u2713 Installed"
     - key: installer.install_setting.dependency
       value: Dependencies
     - key: installer.install_setting.core.label
-      value: Runiverse OS Core
+      value: "Runiverse OS Core"
     - key: installer.install_setting.core.one_line
-      value: User-friendly game engine library for Unity Engine
+      value: "Shared utilities and resource management"
     - key: installer.install_setting.core.description
-      value: 'This is the core package.
-
-        All RuniOS packages require this package.
-
-
-
-        It contains several utilities and a built-in resource management system.'
+      value: "Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages."
     - key: installer.install_setting.ui.label
-      value: Runiverse OS UI
+      value: "Runiverse OS UI"
     - key: installer.install_setting.ui.one_line
-      value: RuniOS's official runtime UI/UX system
+      value: "RuniOS's official runtime UI/UX system"
     - key: installer.install_setting.ui.description
-      value: 'The design is inspired by the game osu!lazer.
-
-
-
-        It''s the heaviest and most complex app, requiring all of RuniOS''s packages as dependencies...
-
-        However, it offers users easy control over its various features!'
+      value: "A planned runtime UI/UX system for controlling RuniOS features, with a design inspired by osu!lazer. It requires all RuniOS feature packages and SoftMask for uGUI. The UI/UX implementation is planned; the currently available components bind resources to Unity UI."
+    - key: installer.setup.roots.title
+      value: "Root packages"
+    - key: installer.tmp_setting.essentials.title
+      value: "TMP Essentials"
+    - key: installer.tmp_setting.essentials.info
+      value: "Import the essential TextMesh Pro resources into Assets/TextMesh Pro."
+    - key: installer.tmp_setting.essentials.update
+      value: "The installed TMP resources need an update. Reimport them while preserving TMP Settings."
+    - key: installer.tmp_setting.essentials.import
+      value: "Import TMP Essentials"
+    - key: installer.tmp_setting.examples.title
+      value: "TMP Examples & Extras"
+    - key: installer.tmp_setting.examples.info
+      value: "Optional resources and examples for exploring TextMesh Pro. Import Essentials first."
+    - key: installer.tmp_setting.examples.update
+      value: "Reimport the updated TMP examples and extras."
+    - key: installer.tmp_setting.examples.import
+      value: "Import TMP Examples & Extras"
+    - key: installer.setup.preview.title
+      value: "Preview changes"
+    - key: installer.setup.preview.info
+      value: "Selected roots and their dependencies are observed by Package Management. Preview is advisory; Install checks the environment again. Unchecked roots do not remove installed packages. TMP resources are imported separately on the TMP screen."
+    - key: installer.setup.preview.empty
+      value: "No root packages selected."
+    - key: installer.setup.preview.observing
+      value: "Checking installation requirements…"
+    - key: installer.setup.preview.ensuring
+      value: "Ensuring installation requirements…"
+    - key: installer.setup.preview.ready
+      value: "Preview complete. Install observes the environment again."
+    - key: installer.setup.preview.graph_error
+      value: "Resolve dependency graph errors before installation."
+    - key: installer.setup.preview.complete
+      value: "All installation requirements were satisfied."
+    - key: installer.setup.preview.failed
+      value: "Failed. See diagnostics."
+    - key: installer.setup.preview.cancelled
+      value: "Cancelled. An already-started UPM request was allowed to finish."
+    - key: installer.setup.preview.refresh
+      value: "Refresh preview"
+    - key: installer.setup.preview.cancel
+      value: "Cancel"
+    - key: installer.setup.preview.root
+      value: "Selected root"
+    - key: installer.setup.preview.dependency
+      value: "Dependency"
+    - key: installer.setup.preview.satisfied
+      value: "Already satisfied"
+    - key: installer.setup.preview.required
+      value: "Installation required"
+    - key: installer.setup.preview.registry_required
+      value: "Registry preparation required; package acquisition delegated to UPM"
+    - key: installer.setup.preview.delegated
+      value: "Registry ready; package acquisition delegated, not verified"
+    - key: installer.setup.preview.unsupported
+      value: "Preview is not supported by this executor"
+    - key: installer.install_setting.sound.label
+      value: "Runiverse OS Sound"
+    - key: installer.install_setting.sound.one_line
+      value: "Shared audio APIs and sound resources"
+    - key: installer.install_setting.sound.description
+      value: "Provides audio clips, playback and spatial audio contracts, Unity audio source components and sound resource registration shared by audio implementations."
+    - key: installer.install_setting.effects.label
+      value: "Runiverse OS Effects"
+    - key: installer.install_setting.effects.one_line
+      value: "Rounded corners and outline effects"
+    - key: installer.install_setting.effects.description
+      value: "Provides rounded corners for Unity UI and mesh outline effects, including merged outlines for groups of objects."
+    - key: installer.install_setting.fmod.label
+      value: "FMOD for RuniOS"
+    - key: installer.install_setting.fmod.one_line
+      value: "FMOD audio playback for RuniOS"
+    - key: installer.install_setting.fmod.description
+      value: "Provides an FMOD Core sound system, audio clips, playback channels and channel groups integrated with RuniOS sound resources. The FMOD for Unity integration must be supplied separately; Setup does not install it."
+    - key: installer.install_setting.nbs.label
+      value: "Runiverse OS NBS"
+    - key: installer.install_setting.nbs.one_line
+      value: "Note Block Studio loading and playback"
+    - key: installer.install_setting.nbs.description
+      value: "Loads Note Block Studio files through RuniOS resource packs and plays notes through FMOD. Supports tempo maps, custom instruments and editor previews."
+    - key: installer.install_setting.texture.label
+      value: "Runiverse OS Texture"
+    - key: installer.install_setting.texture.one_line
+      value: "Asynchronous runtime image loading"
+    - key: installer.install_setting.texture.description
+      value: "Decodes encoded images with FreeImage, generates mipmaps with Burst and uploads Texture2D data on the Unity main thread. Accepts memory, streams and RuniOS IO nodes."

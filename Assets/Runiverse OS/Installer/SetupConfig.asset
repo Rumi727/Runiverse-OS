@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: SetupConfig
   m_EditorClassIdentifier: RuniOS.Installer::RuniOS.Editor.Installer.ConfigScriptableObject
   currentLanguage: ko_kr
+  selectedRoots: []

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1bb216b4fd944ecc98bde0892f74cfe6, type: 3}
+  m_Name: com.unity.modules.uielements
+  m_EditorClassIdentifier: RuniOS.PackageManagement.Unity::RuniOS.PackageManagement.Unity.RegistryPackage
+  _id: com.unity.modules.uielements
+  _displayName: "Unity UI Toolkit Module"
+  packageName: ""
+  _dependencies:
+  - {fileID: 11400000, guid: 4205dc14ceec4b95865421bbcb0f7de5, type: 2}
+  - {fileID: 11400000, guid: 63e4224afcdc40ae8d98e191264b6d4b, type: 2}
+  - {fileID: 11400000, guid: d188c194d5ff413b824e3abeb52f941e, type: 2}
+  - {fileID: 11400000, guid: 57307eacb43c4d10b453406dcc016570, type: 2}
+  - {fileID: 11400000, guid: 2eb45d6aedb14288a0a07a9a1c9bce91, type: 2}
+  - {fileID: 11400000, guid: 62ef0783dd804fca8da690584cc5d687, type: 2}
+  - {fileID: 11400000, guid: 134a2378e24f48e195d24e9ae8d4ee5a, type: 2}
+  version: "1.0.0"
+  registryName: ""
+  registryUrl: ""
+  registryScopes: []

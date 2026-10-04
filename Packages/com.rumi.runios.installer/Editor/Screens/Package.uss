@@ -30,6 +30,11 @@
     overflow: hidden;
 }
 
+.runios-setup-package__header-viewport {
+    flex-shrink: 0;
+    height: var(--header-two-line);
+}
+
 .runios-setup-package__header {
     flex-shrink: 0;
     flex-direction: row;
@@ -51,6 +56,14 @@
     font-size: 15px;
 }
 
+.runios-setup-package__header:hover .runios-setup-package__label {
+    color: var(--unity-colors-label-text-focus);
+}
+
+.runios-setup-package__header:active .runios-setup-package__label {
+    color: var(--unity-colors-button-border_accent-focus);
+}
+
 .runios-setup-package__one-line-text {
     -unity-text-align: middle-left;
     height: 20px;
@@ -70,12 +83,17 @@
     margin-top: 2px;
 }
 
+.runios-setup-package__content {
+    flex-grow: 1;
+}
+
 .runios-setup-package .unity-scroll-view {
     margin-left: -2px;
     margin-right: -2px;
     overflow: hidden;
     margin-bottom: -2px;
     margin-top: -2px;
+    flex-grow: 1;
 }
 
 .runios-setup-package .unity-scroll-view .unity-scroll-view__content-container {

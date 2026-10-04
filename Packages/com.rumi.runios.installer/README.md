@@ -159,19 +159,27 @@ UPM batch의 rollback/atomicity는 가정하지 않습니다. 실패 후 다음 
 
 Client.Embed, 선설치, direct dependency 승격, 복사, commit/content/digest 검증, provenance/history/ownership 추적을 하지 않습니다. 공통 Unknown/3-state 모델도 없습니다.
 
-## Independent UI
+## Authored packages
 
-`Window > Runiverse OS > Installer`에서 selected roots를 입력합니다. optional catalog 또는 직접 definitions 목록은 unused 비교에만 사용합니다. inventory 오류는 유효한 roots-only closure를 무효화하지 않습니다.
-
-Selected roots와 Dependencies를 구분하고 requiredBy, graph errors, closure 밖 정의 query를 표시합니다. Preview와 Ensure 버튼은 독립적이며 성공한 closure만 관측·실행할 수 있습니다. 각 호출 직전 현재 정의를 다시 flatten하고 descriptor를 생성합니다. 기본 host는 UpmExecutor와 EmbeddedExecutor를 구성하고 비동기 결과를 표시합니다. Registry-only 결과는 package 설치 완료와 구분합니다. 이 UI는 기존 Installer의 language/TMP 기능을 변경하지 않습니다.
+운영용 정의는 [`Editor/Packages`](Editor/Packages/README.md)에 있습니다. 기존 LegacyPackages 정의를 GUID를 유지하며 옮겼고 실제 본체 패키지의 기능·직접 종속성을 반영했습니다. Setup의 root 목록은 별도 `Editor/Screens/RootPackages.asset`이 소유합니다. 런타임에 manifest나 설치 상태에서 후보를 자동 수집하지 않습니다.
 
 ## Setup screen infrastructure
 
-`Window > Runiverse OS > Setup`은 `Setup.uxml` / `Setup.uss` shell을 사용하는 새 Setup 창입니다. 현재 세 화면의 내용은 placeholder이며 PackageManagement나 실제 프로젝트 설정에는 연결하지 않습니다.
+`Window > Runiverse OS > Setup`은 `Setup.uxml` / `Setup.uss` shell을 사용합니다. 내장 화면 순서는 Welcome(0), TMPSettingScreen(100), RootPackageSelectionScreen(200), PreviewScreen(300)입니다. 기존 SecondScreen/ThirdScreen placeholder는 TMP/root 화면으로 교체했습니다.
+
+TMP 화면은 기존 importer와 같은 기본 리소스·예제 경로와 TMP 자체 resource version을 확인합니다. 기본 리소스와 선택적인 Examples & Extras를 Unity의 기존 import 메뉴로 가져오므로 TMP Settings 백업·복원은 Unity가 담당합니다. 메뉴의 import dialog는 기존 Installer의 즉시 import와 다릅니다. TMP가 없어도 Installer assembly는 compile되며 화면에서 기존 경고를 표시합니다. 이 단계는 legacy와 같이 프로젝트 리소스를 직접 가져오며 package descriptor나 별도 TMP 선택 상태를 만들지 않습니다.
+
+Root 후보는 `Editor/Screens/RootPackages.asset`의 작성된 일곱 정의(Core/Sound/UI/Effects/FMOD/NBS/Texture)입니다. 설치 여부로 선택을 추측하지 않으며 최초 선택은 비어 있습니다. Toggle은 `Assets/Runiverse OS/Installer/SetupConfig.asset`의 `selectedRoots`만 수정합니다. 재진입 시 같은 선택을 읽으며 저장된 asset 참조는 reload 후에도 유지됩니다. `PackageAsset.labelKey`, `oneLineDescriptionKey`, `descriptionKey`는 선택적인 번역 metadata이며 설치 descriptor 계약을 변경하지 않습니다. 기존 displayName은 유지합니다.
+
+`PackageElement`는 Package template의 내부 hierarchy를 사용하고 expanded, Toggle, 텍스트, dependency tree, Header height와 설명 X/Y를 관리합니다. Root 화면이 모든 카드의 absolute top/height/opacity를 Follow합니다. collapsed Y는 앞선 카드의 USS collapsed height와 margin 합입니다. 레거시와 같이 펼친 카드는 Y=0과 viewport 높이(자체 margin 제외)를 따라가고 다른 카드는 원래 위치에서 fade합니다. 동시에 한 카드만 펼치며 선택 카드를 마지막에 그립니다. 카드·Header 높이는 USS custom Length properties에서 읽습니다.
+
+설명 Label은 원래 flex layout을 유지합니다. `Expanded-One-Line-Description-Target.ChangeCoordinatesTo(label.parent, Vector2.zero)`와 Label의 transform 이전 layout 위치 차이를 geometry callback에서 읽고 OnUpdate에서 translate X/Y만 Follow합니다. Width/Height는 layout에 맡기며 별도의 collapsed 측정 요소를 만들지 않습니다. Dependency tree는 backend Flatten이 검증한 직접 참조를 Foldout/leaf Label로 표시하며 생성·project 변경 때 갱신합니다. OnUpdate에서 query, tree traversal, hierarchy rebuilding은 없습니다.
+
+Preview 진입·새로 고침·Install은 현재 selectedRoots를 backend로 다시 Flatten하고 root-aware descriptor를 생성합니다. Preview는 InstallationRunner.PreviewAsync 결과(Satisfied/RequiresEnsure/Delegated/NotSupported/Failed)를 표시하며 Install은 EnsureAsync를 독립적으로 실행합니다. 제거·pruning 계획은 현재 backend에 없으므로 미선택 root를 제거 대상으로 표시하지 않습니다. 화면 이동·창 해제는 진행 중 관측/실행을 취소하며 시작된 native UPM 요청은 backend 계약대로 완료까지 기다립니다. 화면 문자열은 공유 InstallerLocalization과 OnLanguageChanged를 사용합니다.
 
 `SetupScreen : VisualElement`을 상속하고 public parameterless constructor, `order`, `usesHeader`, `title`을 구현합니다. Screen 자체를 Track에 붙이며 `Add()` / `contentContainer`는 base가 소유하는 ScrollView 내부로 연결됩니다. 각 화면이 자신의 UI와 상태를 소유합니다.
 
-창 구성 시 `TypeCache.GetTypesDerivedFrom<SetupScreen>()`으로 내장/외부 assembly의 구현들을 같은 경로로 발견합니다. abstract type은 제외하며 생성 실패는 타입 정보와 예외를 로그로 남깁니다. `order`, type FullName, AssemblyQualifiedName을 ordinal 기준으로 비교하여 화면 순서를 결정합니다. 별도 registry나 Window factory는 없습니다. 외부 asmdef에서 `RuniOS.Installer`를 참조하면 같은 창에 참여합니다.
+창 구성 시 `TypeCache.GetTypesDerivedFrom<SetupScreen>()`으로 내장/외부 assembly의 구현들을 같은 경로로 발견합니다. abstract type은 제외하며 생성 실패는 타입 정보와 예외를 로그로 남깁니다. `order`만 비교하여 화면 순서를 결정하며 같은 order의 상대 순서는 지정하지 않습니다. 별도 registry나 Window factory는 없습니다. 외부 asmdef에서 `RuniOS.Installer`를 참조하면 같은 창에 참여합니다.
 
 protected virtual `OnActivated` / `OnDeactivated`는 panel에 연결된 창의 선택 상태를 알립니다. activation은 애니메이션 완료를 기다리지 않습니다. 이전 화면을 deactivate하고 새 화면을 activate한 뒤 title, header 사용 class, navigation 상태를 갱신하므로 OnActivated에서 설정한 정보가 반영됩니다. 창이 detach되거나 화면들을 해제할 때도 deactivation을 호출합니다. 화면 해제 중 hook이 예외를 던져도 창의 callback과 화면 참조는 finally에서 정리하며 hook 오류를 숨기지 않습니다.
 
@@ -187,7 +195,7 @@ Header height와 연속적인 `animatedIndex`가 동일한 Follow를 사용합�
 
 SetupWindow는 shell binding, 발견, 화면 소유, navigation, lifecycle와 animation만 담당합니다. 현재 UXML/USS가 hierarchy, card width, margin/padding, separator와 header spacing의 기준입니다. C#은 실제 geometry를 읽어 projection과 Header+Viewport 높이 합산을 수행하며 화면 내용이나 package 의미를 중앙에서 해석하지 않습니다.
 
-현재 Setup은 별도 설정 저장소가 없고 화면 index를 Window 안에서 관리합니다. reload 후 UI와 Screen 인스턴스를 다시 구성하며 화면 집합이 달라지면 기존 숫자 index를 범위 안으로 제한합니다. 동일 화면 타입의 복원이나 언어·roots 영구 저장은 아직 제공하지 않습니다. 향후 Setup 자체 상태를 저장하더라도 Installer-local state로 두며 RuniOS runtime config에 의존하지 않습니다.
+Setup은 화면 index를 Window 안에서 관리하고 언어와 selectedRoots를 Installer-local SetupConfig에 저장합니다. reload 후 UI와 Screen 인스턴스를 다시 구성합니다. SetupConfig는 RuniOS runtime config에 의존하지 않습니다.
 
 ## Migration
 

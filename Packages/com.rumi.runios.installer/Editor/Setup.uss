@@ -93,7 +93,6 @@
 }
 
 .runios-setup__content--with-header > .runios-setup__scroll-view > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport {
-    flex-shrink: 0;
     margin-top: var(--header-height);
 }
 

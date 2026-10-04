@@ -1,0 +1,27 @@
+.runios-setup__settings {
+    padding: 6px;
+}
+
+.runios-setup__settings .unity-label {
+    white-space: normal;
+    flex-shrink: 0;
+}
+
+.runios-setup__resource-box {
+    padding: 6px;
+    margin-top: 6px;
+    background-color: var(--unity-colors-helpbox-background);
+    border-color: var(--unity-colors-helpbox-border);
+    border-width: 1px;
+    border-radius: 3px;
+    flex-shrink: 0;
+}
+
+.runios-setup__section-title {
+    -unity-font-style: bold;
+}
+
+.runios-setup__settings .unity-button {
+    align-self: flex-start;
+    flex-shrink: 0;
+}

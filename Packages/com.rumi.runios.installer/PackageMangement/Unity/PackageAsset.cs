@@ -29,6 +29,21 @@ namespace RuniOS.PackageManagement.Unity
         /// </summary>
         public string displayName { get => string.IsNullOrEmpty(_displayName) ? name : _displayName; set => _displayName = value; }
         /// <summary>
+        /// Gets or sets the optional localization key for the display name.<br/>
+        /// 표시 이름의 선택적인 번역 key를 가져오거나 설정합니다.
+        /// </summary>
+        public string labelKey = string.Empty;
+        /// <summary>
+        /// Gets or sets the localization key for the one-line description.<br/>
+        /// 한 줄 설명의 번역 key를 가져오거나 설정합니다.
+        /// </summary>
+        public string oneLineDescriptionKey = string.Empty;
+        /// <summary>
+        /// Gets or sets the localization key for the full description.<br/>
+        /// 상세 설명의 번역 key를 가져오거나 설정합니다.
+        /// </summary>
+        public string descriptionKey = string.Empty;
+        /// <summary>
         /// Gets or sets the native UPM name override; empty text uses the logical identifier.<br/>
         /// native UPM 이름 override를 가져오거나 설정하며 빈 문자열은 논리적 식별자를 사용합니다.
         /// </summary>
