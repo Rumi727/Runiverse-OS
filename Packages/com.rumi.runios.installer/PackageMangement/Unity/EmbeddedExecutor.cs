@@ -9,8 +9,8 @@ using UnityEditor.PackageManager;
 namespace RuniOS.PackageManagement.Unity
 {
     /// <summary>
-    /// Satisfies requirements only when the named embedded packages already exist.<br/>
-    /// 지정한 embedded package가 이미 존재할 때만 요구사항을 만족시킵니다.
+    /// Satisfies requirements only when the named embedded packages and required assembly-definition assets exist.<br/>
+    /// 지정한 embedded package와 필수 어셈블리 정의 에셋이 존재할 때만 요구사항을 만족시킵니다.
     /// </summary>
     public sealed class EmbeddedExecutor : IInstallationExecutor<EmbeddedInstallation>, IInstallationPreviewer<EmbeddedInstallation>
     {
@@ -22,6 +22,12 @@ namespace RuniOS.PackageManagement.Unity
             foreach (EmbeddedInstallation installation in installations)
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                InstallationDiagnostic[] diagnostics = await UnityEditorThread.RunAsync(() => AssemblyRequirementUtility.Observe(installation.packageName, installation.requiredAssemblyReferences), cancellationToken).ConfigureAwait(false);
+                if (diagnostics.Length != 0)
+                {
+                    yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, diagnostics);
+                    continue;
+                }
                 yield return names.Contains(installation.packageName)
                     ? new InstallationPreview(installation, InstallationPreviewStatus.Satisfied)
                     : new InstallationPreview(installation, InstallationPreviewStatus.Failed, MissingDiagnostics(installation));
@@ -35,7 +41,9 @@ namespace RuniOS.PackageManagement.Unity
             foreach (EmbeddedInstallation installation in installations)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (names.Contains(installation.packageName)) yield return new InstallationResult(installation, true);
+                InstallationDiagnostic[] diagnostics = await UnityEditorThread.RunAsync(() => AssemblyRequirementUtility.Observe(installation.packageName, installation.requiredAssemblyReferences), cancellationToken).ConfigureAwait(false);
+                if (diagnostics.Length != 0) yield return new InstallationResult(installation, false, diagnostics);
+                else if (names.Contains(installation.packageName)) yield return new InstallationResult(installation, true);
                 else yield return new InstallationResult(installation, false, MissingDiagnostics(installation));
             }
         }

@@ -28,6 +28,6 @@ namespace RuniOS.PackageManagement.Unity
         }
         /// <inheritdoc/>
         public override IInstallation CreateInstallation(bool isRoot) => UpmInstallation.Local(nativeName,
-            Path.GetFullPath(packagePath, Path.GetDirectoryName(Application.dataPath)!));
+            Path.GetFullPath(packagePath, Path.GetDirectoryName(Application.dataPath)!), requiredAssemblyReferences);
     }
 }

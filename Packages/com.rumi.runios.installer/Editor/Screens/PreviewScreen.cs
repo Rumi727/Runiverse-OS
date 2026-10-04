@@ -114,10 +114,12 @@ namespace RuniOS.Editor.Installer.Screens
                 reloadLocked = true;
                 if (preview)
                 {
+                    bool succeeded = true;
                     await foreach (InstallationPreview observation in runner.PreviewAsync(installations, token))
                     {
                         await Awaitable.MainThreadAsync();
                         token.ThrowIfCancellationRequested();
+                        succeeded &= observation.status != InstallationPreviewStatus.Failed;
                         foreach (Row row in rows)
                             if (ReferenceEquals(row.installation, observation.installation))
                             {
@@ -127,7 +129,7 @@ namespace RuniOS.Editor.Installer.Screens
                             }
                     }
                     token.ThrowIfCancellationRequested();
-                    statusKey = "installer.setup.preview.ready";
+                    statusKey = succeeded ? "installer.setup.preview.ready" : "installer.setup.preview.failed";
                 }
                 else
                 {
@@ -181,7 +183,10 @@ namespace RuniOS.Editor.Installer.Screens
         void UpdateButtons()
         {
             refresh.SetEnabled(cancellation == null);
-            install.SetEnabled(cancellation == null && closure is { succeeded: true } && rows.Count != 0);
+            bool canInstall = cancellation == null && closure is { succeeded: true } && rows.Count != 0;
+            foreach (Row row in rows)
+                if (row.preview?.status == InstallationPreviewStatus.Failed) { canInstall = false; break; }
+            install.SetEnabled(canInstall);
             cancel.style.display = cancellation == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
 
@@ -218,7 +223,12 @@ namespace RuniOS.Editor.Installer.Screens
             IReadOnlyList<InstallationDiagnostic>? diagnostics = row.result?.diagnostics ?? row.preview?.diagnostics;
             if (diagnostics != null)
                 foreach (InstallationDiagnostic diagnostic in diagnostics)
-                    row.diagnostics.Add(new HelpBox(diagnostic.code + ": " + diagnostic.message, HelpBoxMessageType.Error));
+                {
+                    string message = diagnostic.code + ": " + diagnostic.message;
+                    if (diagnostic.code == "unity:required-assembly-missing")
+                        message = InstallerLocalization.GetText("installer.setup.preview.assembly_required") + "\n" + message;
+                    row.diagnostics.Add(new HelpBox(message, HelpBoxMessageType.Error));
+                }
         }
     }
 }

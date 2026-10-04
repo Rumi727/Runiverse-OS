@@ -19,7 +19,10 @@ namespace RuniOS.PackageManagement.Unity
     /// </summary>
     /// <remarks>
     /// Any registered package with the requested name satisfies the package requirement, regardless of source, version, commit, path, or native errors.<br/>
-    /// 요청한 이름의 등록된 package가 있으면 source, version, commit, path 또는 native 오류와 무관하게 package 요구사항을 충족합니다.
+    /// Required assembly-definition assets are checked independently; an unmet requirement blocks the entire UPM batch before registry changes or package requests.
+    /// <br/><br/>
+    /// 요청한 이름의 등록된 package가 있으면 source, version, commit, path 또는 native 오류와 무관하게 package 요구사항을 충족합니다.<br/>
+    /// 필수 어셈블리 정의 에셋은 별도로 검사하며 미충족 요구사항은 registry 변경이나 package 요청 전에 UPM batch 전체를 차단합니다.
     /// </remarks>
     public sealed class UpmExecutor : IInstallationExecutor<UpmInstallation>, IInstallationPreviewer<UpmInstallation>
     {
@@ -55,6 +58,7 @@ namespace RuniOS.PackageManagement.Unity
             {
                 return await UnityEditorThread.RunAsync(() =>
                 {
+                    InstallationDiagnostic[][] assemblyDiagnostics = ObserveAssemblyRequirements(batch, cancellationToken);
                     PackageInfo[] current = batch.Any(x => x.ensurePackage) ? PackageInfo.GetAllRegisteredPackages() : Array.Empty<PackageInfo>();
                     ValidatePackageReferences(batch, current);
                     bool[] registries = ObserveRegistries(batch, cancellationToken);
@@ -62,6 +66,11 @@ namespace RuniOS.PackageManagement.Unity
                     for (int i = 0; i < batch.Length; i++)
                     {
                         cancellationToken.ThrowIfCancellationRequested();
+                        if (assemblyDiagnostics[i].Length != 0)
+                        {
+                            previews[i] = new InstallationPreview(batch[i], InstallationPreviewStatus.Failed, assemblyDiagnostics[i]);
+                            continue;
+                        }
                         InstallationPreviewStatus status = !registries[i] ? InstallationPreviewStatus.RequiresEnsure
                             : !batch[i].ensurePackage ? InstallationPreviewStatus.Delegated
                             : IsInstalled(batch[i], current) ? InstallationPreviewStatus.Satisfied : InstallationPreviewStatus.RequiresEnsure;
@@ -82,6 +91,23 @@ namespace RuniOS.PackageManagement.Unity
         {
             try
             {
+                InstallationDiagnostic[][] assemblyDiagnostics = await UnityEditorThread.RunAsync(() => ObserveAssemblyRequirements(batch, cancellationToken), cancellationToken).ConfigureAwait(false);
+                bool blocked = false;
+                foreach (InstallationDiagnostic[] diagnostics in assemblyDiagnostics)
+                    if (diagnostics.Length != 0) { blocked = true; break; }
+                if (blocked)
+                {
+                    var blockedResults = new InstallationResult[batch.Length];
+                    for (int i = 0; i < batch.Length; i++)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        blockedResults[i] = new InstallationResult(batch[i], false, assemblyDiagnostics[i].Length != 0 ? assemblyDiagnostics[i] : new[]
+                        {
+                            new InstallationDiagnostic("upm:batch-blocked", "The UPM batch was not started because a required assembly-definition asset is missing. Resolve the missing references before retrying.")
+                        });
+                    }
+                    return blockedResults;
+                }
                 PackageInfo[] current = await UnityEditorThread.RunAsync(() => batch.Any(x => x.ensurePackage) ? PackageInfo.GetAllRegisteredPackages() : Array.Empty<PackageInfo>(), cancellationToken).ConfigureAwait(false);
                 ValidatePackageReferences(batch, current);
                 // Registry requirements belong to the entire batch, including delegated and already-installed packages.
@@ -119,6 +145,16 @@ namespace RuniOS.PackageManagement.Unity
                     results[i] = new InstallationResult(batch[i], false, new[] { new InstallationDiagnostic("upm:execution-failed", exception.Message) });
                 return results;
             }
+        }
+        static InstallationDiagnostic[][] ObserveAssemblyRequirements(UpmInstallation[] batch, CancellationToken cancellationToken)
+        {
+            var diagnostics = new InstallationDiagnostic[batch.Length][];
+            for (int i = 0; i < batch.Length; i++)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                diagnostics[i] = AssemblyRequirementUtility.Observe(batch[i].packageName, batch[i].requiredAssemblyReferences);
+            }
+            return diagnostics;
         }
         static void ValidatePackageReferences(IEnumerable<UpmInstallation> installations, IEnumerable<PackageInfo> current)
         {

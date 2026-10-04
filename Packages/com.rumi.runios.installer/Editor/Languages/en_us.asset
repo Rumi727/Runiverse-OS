@@ -82,6 +82,8 @@ MonoBehaviour:
       value: "Resolve dependency graph errors before installation."
     - key: installer.setup.preview.complete
       value: "All installation requirements were satisfied."
+    - key: installer.setup.preview.assembly_required
+      value: "Import the external integration named in the package description, then refresh."
     - key: installer.setup.preview.failed
       value: "Failed. See diagnostics."
     - key: installer.setup.preview.cancelled

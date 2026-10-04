@@ -78,6 +78,8 @@ MonoBehaviour:
       value: "インストール前に依存関係グラフのエラーを解決してください。"
     - key: installer.setup.preview.complete
       value: "すべてのインストール要件を満たしました。"
+    - key: installer.setup.preview.assembly_required
+      value: "パッケージ説明に記載された外部統合を先にインポートしてから更新してください。"
     - key: installer.setup.preview.failed
       value: "失敗しました。診断内容を確認してください。"
     - key: installer.setup.preview.cancelled

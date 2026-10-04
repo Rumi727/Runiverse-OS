@@ -1,6 +1,7 @@
 #nullable enable
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEditorInternal;
 
 namespace RuniOS.PackageManagement.Unity
 {
@@ -48,6 +49,11 @@ namespace RuniOS.PackageManagement.Unity
         /// native UPM 이름 override를 가져오거나 설정하며 빈 문자열은 논리적 식별자를 사용합니다.
         /// </summary>
         public string packageName = string.Empty;
+        /// <summary>
+        /// Gets or sets assembly-definition assets required before installation; missing entries remain requirements.<br/>
+        /// 설치 전에 필요한 어셈블리 정의 에셋을 가져오거나 설정하며 누락된 항목도 요구사항으로 유지합니다.
+        /// </summary>
+        public AssemblyDefinitionAsset?[] requiredAssemblyReferences = System.Array.Empty<AssemblyDefinitionAsset?>();
         /// <summary>
         /// Gets the effective native package name.<br/>
         /// 실제로 사용하는 native package 이름을 가져옵니다.

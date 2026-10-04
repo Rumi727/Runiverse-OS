@@ -44,7 +44,7 @@ namespace RuniOS.PackageManagement.Unity
         UpmInstallation CreateUpmInstallation(bool ensurePackage = true)
         {
             ScopedRegistryDefinition? registry = string.IsNullOrEmpty(registryUrl) ? null : new ScopedRegistryDefinition(registryName, registryUrl, registryScopes);
-            return UpmInstallation.Registry(nativeName, version, registry, ensurePackage);
+            return UpmInstallation.Registry(nativeName, version, registry, ensurePackage, requiredAssemblyReferences);
         }
     }
 }

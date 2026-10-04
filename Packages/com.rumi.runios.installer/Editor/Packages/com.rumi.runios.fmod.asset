@@ -18,6 +18,8 @@ MonoBehaviour:
   oneLineDescriptionKey: installer.install_setting.fmod.one_line
   descriptionKey: installer.install_setting.fmod.description
   packageName: ""
+  requiredAssemblyReferences:
+  - {fileID: 5897886265953266890, guid: 0c752da273b17c547ae705acf0f2adf2, type: 3}
   _dependencies:
   - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
   - {fileID: 11400000, guid: e45a25509b694ad4abb89dd57addc373, type: 2}

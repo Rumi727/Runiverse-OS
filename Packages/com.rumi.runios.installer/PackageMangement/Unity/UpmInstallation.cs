@@ -1,12 +1,14 @@
 #nullable enable
 using System;
+using System.Collections.Generic;
+using UnityEditorInternal;
 using System.IO;
 
 namespace RuniOS.PackageManagement.Unity
 {
     /// <summary>
-    /// Contains a native package name, acquisition reference, and optional registry requirements.<br/>
-    /// native package 이름, 획득 참조와 선택적인 registry 요구사항을 담습니다.
+    /// Contains a native package name, acquisition reference, and optional registry and assembly-definition requirements.<br/>
+    /// native package 이름, 획득 참조와 선택적인 registry 및 어셈블리 정의 요구사항을 담습니다.
     /// </summary>
     public sealed class UpmInstallation : IInstallation
     {
@@ -30,10 +32,15 @@ namespace RuniOS.PackageManagement.Unity
         /// registry 설정과 함께 executor가 package 자체를 ensure해야 하는지 여부를 가져옵니다.
         /// </summary>
         /// <remarks>
-        /// When <see langword="false"/>, only registry preparation is ensured; package acquisition is delegated to UPM and is not verified.<br/>
-        /// <see langword="false"/>이면 registry 준비만 ensure하며 package 획득은 UPM에 위임하고 검증하지 않습니다.
+        /// When <see langword="false"/>, only registry preparation and required assembly-definition assets are ensured; package acquisition is delegated to UPM and is not verified.<br/>
+        /// <see langword="false"/>이면 registry 준비와 필수 어셈블리 정의 에셋만 ensure하며 package 획득은 UPM에 위임하고 검증하지 않습니다.
         /// </remarks>
         public bool ensurePackage { get; }
+        /// <summary>
+        /// Gets required assembly-definition assets, preserving missing reference slots.<br/>
+        /// 누락된 참조 슬롯을 유지하며 필수 어셈블리 정의 에셋을 가져옵니다.
+        /// </summary>
+        public IReadOnlyList<AssemblyDefinitionAsset?> requiredAssemblyReferences { get; }
         /// <summary>
         /// Creates complete UPM requirements without binding an executor.<br/>
         /// executor를 결합하지 않고 완결된 UPM 요구사항을 생성합니다.
@@ -51,14 +58,19 @@ namespace RuniOS.PackageManagement.Unity
         /// 선택적인 scoped registry 요구사항입니다.
         /// </param>
         /// <param name="ensurePackage">
-        /// Whether to ensure the package itself; <see langword="false"/> requires only registry preparation.<br/>
-        /// package 자체를 ensure할지 여부이며 <see langword="false"/>이면 registry 준비만 요구합니다.
+        /// Whether to ensure the package itself; <see langword="false"/> requires registry preparation and required assembly-definition assets.<br/>
+        /// package 자체를 ensure할지 여부이며 <see langword="false"/>이면 registry 준비와 필수 어셈블리 정의 에셋을 요구합니다.
+        /// </param>
+        /// <param name="requiredAssemblyReferences">
+        /// Required assembly-definition assets; <see langword="null"/> requires none, and missing entries are unmet requirements.<br/>
+        /// 필수 어셈블리 정의 에셋이며 <see langword="null"/>이면 요구하지 않고 누락된 항목은 미충족 요구사항입니다.
         /// </param>
         /// <exception cref="ArgumentException">
         /// Thrown when a name or reference is empty.<br/>
         /// 이름 또는 참조가 비어 있으면 발생합니다.
         /// </exception>
-        public UpmInstallation(string packageName, string packageReference, ScopedRegistryDefinition? registry = null, bool ensurePackage = true)
+        public UpmInstallation(string packageName, string packageReference, ScopedRegistryDefinition? registry = null, bool ensurePackage = true,
+            IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             if (string.IsNullOrWhiteSpace(packageName)) throw new ArgumentException("A native package name is required.", nameof(packageName));
             if (string.IsNullOrWhiteSpace(packageReference)) throw new ArgumentException("A UPM reference is required.", nameof(packageReference));
@@ -66,6 +78,8 @@ namespace RuniOS.PackageManagement.Unity
             this.packageReference = packageReference;
             this.registry = registry;
             this.ensurePackage = ensurePackage;
+            this.requiredAssemblyReferences = requiredAssemblyReferences is null
+                ? Array.Empty<AssemblyDefinitionAsset?>() : new List<AssemblyDefinitionAsset?>(requiredAssemblyReferences).AsReadOnly();
         }
         /// <summary>
         /// Creates a Git acquisition reference pinned to a full commit hash.<br/>
@@ -87,6 +101,10 @@ namespace RuniOS.PackageManagement.Unity
         /// The optional package path inside the repository.<br/>
         /// 저장소 안의 선택적인 package 경로입니다.
         /// </param>
+        /// <param name="requiredAssemblyReferences">
+        /// Required assembly-definition assets; <see langword="null"/> requires none, and missing entries are unmet requirements.<br/>
+        /// 필수 어셈블리 정의 에셋이며 <see langword="null"/>이면 요구하지 않고 누락된 항목은 미충족 요구사항입니다.
+        /// </param>
         /// <returns>
         /// A pinned Git reference used only when the native package name is absent.<br/>
         /// native package 이름이 없을 때만 사용하는 고정된 Git 참조를 반환합니다.
@@ -95,7 +113,8 @@ namespace RuniOS.PackageManagement.Unity
         /// Thrown when the Git reference or commit is invalid.<br/>
         /// Git 참조 또는 commit이 유효하지 않으면 발생합니다.
         /// </exception>
-        public static UpmInstallation Git(string packageName, string repositoryUrl, string commit, string? packagePath = null)
+        public static UpmInstallation Git(string packageName, string repositoryUrl, string commit, string? packagePath = null,
+            IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             if (string.IsNullOrWhiteSpace(repositoryUrl) || repositoryUrl.Contains("#")) throw new ArgumentException("A Git URL without a fragment is required.", nameof(repositoryUrl));
             if (commit is null || commit.Length != 40) throw new ArgumentException("A full 40-character commit hash is required.", nameof(commit));
@@ -105,7 +124,7 @@ namespace RuniOS.PackageManagement.Unity
             string reference = repositoryUrl;
             if (!string.IsNullOrEmpty(packagePath))reference += (reference.Contains("?") ? "&" : "?") + "path=" + Uri.EscapeDataString("/" + packagePath!.TrimStart('/'));
             reference += "#" + pin;
-            return new UpmInstallation(packageName, reference);
+            return new UpmInstallation(packageName, reference, requiredAssemblyReferences: requiredAssemblyReferences);
         }
         /// <summary>
         /// Creates an exact-version registry acquisition reference without version solving.<br/>
@@ -127,6 +146,10 @@ namespace RuniOS.PackageManagement.Unity
         /// Whether to ensure this native package or delegate acquisition to UPM dependency resolution.<br/>
         /// native package를 ensure할지 UPM dependency resolution에 획득을 위임할지 여부입니다.
         /// </param>
+        /// <param name="requiredAssemblyReferences">
+        /// Required assembly-definition assets; <see langword="null"/> requires none, and missing entries are unmet requirements.<br/>
+        /// 필수 어셈블리 정의 에셋이며 <see langword="null"/>이면 요구하지 않고 누락된 항목은 미충족 요구사항입니다.
+        /// </param>
         /// <returns>
         /// Registry configuration and an exact-version acquisition reference for an absent package name.<br/>
         /// registry 설정과 package 이름이 없을 때 사용하는 exact version 획득 참조를 반환합니다.
@@ -135,10 +158,11 @@ namespace RuniOS.PackageManagement.Unity
         /// Thrown when the name or version is empty.<br/>
         /// 이름 또는 버전이 비어 있으면 발생합니다.
         /// </exception>
-        public static UpmInstallation Registry(string packageName, string version, ScopedRegistryDefinition? registry = null, bool ensurePackage = true)
+        public static UpmInstallation Registry(string packageName, string version, ScopedRegistryDefinition? registry = null, bool ensurePackage = true,
+            IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             if (string.IsNullOrWhiteSpace(version)) throw new ArgumentException("An exact version is required.", nameof(version));
-            return new UpmInstallation(packageName, packageName + "@" + version, registry, ensurePackage);
+            return new UpmInstallation(packageName, packageName + "@" + version, registry, ensurePackage, requiredAssemblyReferences);
         }
         /// <summary>
         /// Creates a local-directory acquisition reference for an absent package name.<br/>
@@ -152,6 +176,10 @@ namespace RuniOS.PackageManagement.Unity
         /// The package directory path.<br/>
         /// package directory 경로입니다.
         /// </param>
+        /// <param name="requiredAssemblyReferences">
+        /// Required assembly-definition assets; <see langword="null"/> requires none, and missing entries are unmet requirements.<br/>
+        /// 필수 어셈블리 정의 에셋이며 <see langword="null"/>이면 요구하지 않고 누락된 항목은 미충족 요구사항입니다.
+        /// </param>
         /// <returns>
         /// Requirements for the designated local directory, without content verification.<br/>
         /// 내용 검증 없이 지정한 local directory의 요구사항을 반환합니다.
@@ -160,10 +188,10 @@ namespace RuniOS.PackageManagement.Unity
         /// Thrown when a name or path is invalid.<br/>
         /// 이름 또는 경로가 유효하지 않으면 발생합니다.
         /// </exception>
-        public static UpmInstallation Local(string packageName, string fullPath)
+        public static UpmInstallation Local(string packageName, string fullPath, IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             string path = Path.GetFullPath(fullPath);
-            return new UpmInstallation(packageName, "file:" + path.Replace('\\', '/'));
+            return new UpmInstallation(packageName, "file:" + path.Replace('\\', '/'), requiredAssemblyReferences: requiredAssemblyReferences);
         }
     }
 }
