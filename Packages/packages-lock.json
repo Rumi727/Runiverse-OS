@@ -65,7 +65,7 @@
       }
     },
     "com.rumi.runios.installer": {
-      "version": "file:com.rumi.runios.installer",
+      "version": "file:com.rumi.runios",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
