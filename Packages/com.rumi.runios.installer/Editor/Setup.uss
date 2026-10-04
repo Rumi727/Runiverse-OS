@@ -1,0 +1,132 @@
+:root {
+    --header-height: 50px;
+    --footer-height: 32px;
+    --separator-thickness: 2px;
+}
+
+.runios-setup {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.runios-setup__header {
+    height: var(--header-height);
+    justify-content: flex-end;
+    max-height: var(--header-height);
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.runios-setup__header-viewport {
+    flex-direction: row;
+    overflow: hidden;
+    flex-shrink: 0;
+    height: 48px;
+}
+
+.runios-setup__header-logo {
+    aspect-ratio: 1;
+    margin-top: 6px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+    height: 100%;
+    visibility: hidden;
+}
+
+.runios-setup__title {
+    font-size: 18px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-left;
+    flex-grow: 1;
+    text-overflow: ellipsis;
+}
+
+.runios-setup__separator {
+    background-color: var(--unity-colors-separator-background);
+    flex-shrink: 0;
+}
+
+.runios-setup__separator--horizontal {
+    height: var(--separator-thickness);
+}
+
+.runios-setup__separator--vertical {
+    width: var(--separator-thickness);
+}
+
+.runios-setup__viewport {
+    flex-grow: 1;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.runios-setup__track {
+    flex-direction: row;
+    flex-grow: 1;
+    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+.runios-setup__content {
+    flex-shrink: 0;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.runios-setup__content--with-header.runios-setup__content--without-scroll-view {
+    margin-top: var(--header-height);
+}
+
+.runios-setup__scroll-view {
+    flex-grow: 1;
+    min-width: 0;
+    min-height: 0;
+}
+
+.runios-setup__content--with-header > .runios-setup__scroll-view > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__content-viewport {
+    flex-shrink: 0;
+    margin-top: var(--header-height);
+}
+
+.runios-setup__content--with-header > .runios-setup__scroll-view > .unity-scroll-view__content-and-vertical-scroll-container > .unity-scroll-view__vertical-scroller {
+    align-self: flex-end;
+}
+
+.runios-setup__footer {
+    height: var(--footer-height);
+    flex-shrink: 0;
+}
+
+.runios-setup__footer-viewport {
+    flex-grow: 1;
+    flex-direction: row;
+    padding-left: 3px;
+    overflow: hidden;
+    padding-top: 3px;
+    padding-right: 3px;
+    padding-bottom: 3px;
+}
+
+.runios-setup__navigation-page {
+    min-width: 30px;
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
+}
+
+.runios-setup__flexible-space {
+    flex-grow: 1;
+}
+
+.runios-setup__logo {
+    position: absolute;
+    background-image: url("project://database/Packages/com.rumi.runios.installer/Editor/Logo.png?fileID=2800000&guid=445a9a07c7125f92a809cfc9d337c9f4&type=3#Logo");
+}

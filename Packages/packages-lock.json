@@ -78,7 +78,9 @@
       "version": "file:com.rumi.runios.installer",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {}
+      "dependencies": {
+        "com.unity.nuget.newtonsoft-json": "3.2.2"
+      }
     },
     "com.rumi.runios.nbs": {
       "version": "file:com.rumi.runios.nbs",

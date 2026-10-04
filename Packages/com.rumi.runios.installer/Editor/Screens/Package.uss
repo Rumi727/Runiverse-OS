@@ -1,0 +1,95 @@
+:root {
+    --package-height: 26px;
+    --header-one-line: 20px;
+    --header-two-line: 40px;
+}
+
+.runios-setup-package {
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    background-color: var(--unity-colors-helpbox-background);
+    border-top-color: var(--unity-colors-helpbox-border);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    border-right-color: var(--unity-colors-helpbox-border);
+    border-bottom-color: var(--unity-colors-helpbox-border);
+    border-left-color: var(--unity-colors-helpbox-border);
+    min-height: var(--package-height);
+    overflow: hidden;
+}
+
+.runios-setup-package__header {
+    flex-shrink: 0;
+    flex-direction: row;
+    min-height: var(--header-one-line);
+    max-height: var(--header-two-line);
+}
+
+.runios-setup-package__header-two-line {
+    flex-grow: 1;
+    height: var(--header-two-line);
+    overflow: hidden;
+}
+
+.runios-setup-package__header-one-line {
+    flex-direction: row;
+}
+
+.runios-setup-package__label {
+    font-size: 15px;
+}
+
+.runios-setup-package__one-line-text {
+    -unity-text-align: middle-left;
+    height: 20px;
+}
+
+.runios-setup-package__one-line-description {
+    flex-grow: 1;
+}
+
+.runios-setup-package__separator {
+    height: 1px;
+    background-color: var(--unity-colors-separator-background);
+    margin-left: -2px;
+    margin-right: -2px;
+    flex-shrink: 0;
+    margin-bottom: 2px;
+    margin-top: 2px;
+}
+
+.runios-setup-package .unity-scroll-view {
+    margin-left: -2px;
+    margin-right: -2px;
+    overflow: hidden;
+    margin-bottom: -2px;
+    margin-top: -2px;
+}
+
+.runios-setup-package .unity-scroll-view .unity-scroll-view__content-container {
+    padding-top: 2px;
+    padding-right: 2px;
+    padding-bottom: 2px;
+    padding-left: 2px;
+}
+
+.runios-setup-package__description {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.runios-setup-package .unity-foldout__content {
+    margin-left: 18px;
+}

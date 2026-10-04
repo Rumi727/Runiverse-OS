@@ -1,14 +1,33 @@
-# Package management
+# Runiverse OS Installer
 
 `com.rumi.runios.installer`는 exact Package definitions의 dependency closure를 계산하고, caller가 구성한 executor로 필요한 Installation을 실행합니다. 기존 `com.rumi.runios` Installer UI는 변경하지 않습니다.
 
 | Assembly | 책임 | 참조 |
 | --- | --- | --- |
 | `RuniOS.PackageManagement` | Package/Installation 계약, flattening, graph diagnostics, dispatch, optional preview와 execution | BCL |
-| `RuniOS.PackageManagement.Unity` | SO authoring, UPM batch 실행, 기존 embedded 존재 확인 | Core, Unity Editor, Newtonsoft Json |
-| `RuniOS.Installer` | 정의·roots 입력과 결과를 표시하는 독립 UI | Core, Unity 구현 |
+| `RuniOS.PackageManagement.Unity` | SO authoring, UPM batch 실행, 기존 embedded 존재 확인 | `RuniOS.PackageManagement`, Unity Editor, Newtonsoft Json |
+| `RuniOS.Installer` | 정의·roots 입력과 결과를 표시하는 독립 UI, Setup 화면 기반 | `RuniOS.PackageManagement`, `RuniOS.PackageManagement.Unity`, Unity Editor |
 
-Core에는 Unity, JSON, Git, registry, semantic version 해석이 없습니다. 모든 assembly는 Editor 전용이며 `csc.rsp`의 C# 14, nullable 설정을 사용합니다. 별도 NuGet restore, RuniOS Core, TMP를 요구하지 않습니다. Newtonsoft Json 3.2.2는 scopedRegistries 편집에만 사용하며 UPM이 bootstrap dependency를 복원합니다.
+`RuniOS.PackageManagement`에는 Unity, JSON, Git, registry, semantic version 해석이 없습니다. 모든 assembly는 Editor 전용이며 `csc.rsp`의 C# 14, nullable 설정을 사용합니다. 별도 NuGet restore, RuniOS Core, TMP를 요구하지 않습니다. Newtonsoft Json 3.2.2는 scopedRegistries 편집에만 사용하며 UPM이 bootstrap dependency를 복원합니다.
+
+## Bootstrap boundary
+
+`com.rumi.runios.installer`는 RuniOS 본체를 설치하고 설정하기 전부터 사용할 bootstrap package입니다. 일반 `RuniOS` assembly와 `com.rumi.runios.core` package가 없어도 Installer와 Setup 자체가 compile되고 열릴 수 있어야 합니다. Installer의 utility, state, UI 자산을 위해 본체 의존성을 추가하지 않습니다.
+
+```text
+RuniOS.Installer
+  references RuniOS.PackageManagement
+  references RuniOS.PackageManagement.Unity
+  uses Unity Editor/Engine APIs
+
+SomePackage.Editor
+  references RuniOS.Installer
+  provides SetupScreen implementations
+```
+
+외부 package의 Setup 구현은 해당 package의 Editor assembly가 소유합니다. Installer는 외부 assembly를 참조하거나 package별 type switch, 수동 화면 등록으로 구현을 끌어오지 않습니다. 내장과 외부 화면은 동일한 SetupScreen 계약과 TypeCache 발견 경로로 참여합니다.
+
+이 경계는 Installer 소스의 독립성을 뜻합니다. 다른 프로젝트 assembly의 compile error까지 해결하거나, Unity가 실패한 전체 script recompilation 중 새 domain을 로드하도록 보장하지는 않습니다.
 
 ## Definitions와 closure
 
@@ -145,6 +164,30 @@ Client.Embed, 선설치, direct dependency 승격, 복사, commit/content/digest
 `Window > Runiverse OS > Installer`에서 selected roots를 입력합니다. optional catalog 또는 직접 definitions 목록은 unused 비교에만 사용합니다. inventory 오류는 유효한 roots-only closure를 무효화하지 않습니다.
 
 Selected roots와 Dependencies를 구분하고 requiredBy, graph errors, closure 밖 정의 query를 표시합니다. Preview와 Ensure 버튼은 독립적이며 성공한 closure만 관측·실행할 수 있습니다. 각 호출 직전 현재 정의를 다시 flatten하고 descriptor를 생성합니다. 기본 host는 UpmExecutor와 EmbeddedExecutor를 구성하고 비동기 결과를 표시합니다. Registry-only 결과는 package 설치 완료와 구분합니다. 이 UI는 기존 Installer의 language/TMP 기능을 변경하지 않습니다.
+
+## Setup screen infrastructure
+
+`Window > Runiverse OS > Setup`은 `Setup.uxml` / `Setup.uss` shell을 사용하는 새 Setup 창입니다. 현재 세 화면의 내용은 placeholder이며 PackageManagement나 실제 프로젝트 설정에는 연결하지 않습니다.
+
+`SetupScreen : VisualElement`을 상속하고 public parameterless constructor, `order`, `usesHeader`, `title`을 구현합니다. Screen 자체를 Track에 붙이며 `Add()` / `contentContainer`는 base가 소유하는 ScrollView 내부로 연결됩니다. 각 화면이 자신의 UI와 상태를 소유합니다.
+
+창 구성 시 `TypeCache.GetTypesDerivedFrom<SetupScreen>()`으로 내장/외부 assembly의 구현들을 같은 경로로 발견합니다. abstract type은 제외하며 생성 실패는 타입 정보와 예외를 로그로 남깁니다. `order`, type FullName, AssemblyQualifiedName을 ordinal 기준으로 비교하여 화면 순서를 결정합니다. 별도 registry나 Window factory는 없습니다. 외부 asmdef에서 `RuniOS.Installer`를 참조하면 같은 창에 참여합니다.
+
+protected virtual `OnActivated` / `OnDeactivated`는 panel에 연결된 창의 선택 상태를 알립니다. activation은 애니메이션 완료를 기다리지 않습니다. 이전 화면을 deactivate하고 새 화면을 activate한 뒤 title, header 사용 class, navigation 상태를 갱신하므로 OnActivated에서 설정한 정보가 반영됩니다. 창이 detach되거나 화면들을 해제할 때도 deactivation을 호출합니다. 화면 해제 중 hook이 예외를 던져도 창의 callback과 화면 참조는 finally에서 정리하며 hook 오류를 숨기지 않습니다.
+
+protected virtual `OnUpdate(double time, float deltaTime)`는 연결된 창의 **모든 생성된 화면**에 호출하므로 outgoing/incoming 화면도 계속 갱신됩니다. time은 Editor 시작 이후 초이며 deltaTime은 실제 editor update 간격입니다. 선택 여부와 update 여부는 별개이며 Screen이 Window를 직접 참조할 필요는 없습니다.
+
+`EditorApplication.update`를 enable/attach 상태에서 한 번만 구독하고 detach/disable/화면 해제 시 해제합니다. 재개할 때 시간 기준을 초기화합니다. Every(16) polling이나 별도 update framework는 없습니다. Editor tick은 display refresh rate와 같다고 보장하지 않습니다.
+
+`RuniOS.Editor.Installer.SetupAnimationUtility.Follow(float current, float target, float rate, float deltaTime)`은 `1 - exp(-rate * deltaTime)`의 공개 exponential follow입니다. `SetupAnimationUtility.Follow(...)`로 호출합니다. 기존 Core의 float Follow extension과 함께 사용할 때 이름 충돌을 만들지 않도록 extension method는 추가하지 않습니다. rate는 0 이상의 초당 수렴 계수이며 deltaTime은 0 이상의 경과 초입니다. Window와 외부 Screen 모두 `RuniOS.Installer` 참조만으로 같은 utility를 사용하며 `RuniOS.Utility.MathUtility`를 요구하지 않습니다.
+
+Header는 기존 flex 공간을 그대로 차지합니다. height가 변하면 Viewport 높이가 반대로 변하고, 아래쪽에 고정된 Track은 실제 Header+Viewport layout 높이를 유지하여 Viewport의 clipping만 달라집니다. 각 화면의 내부 header 여백은 USS의 최종 header 높이로 고정합니다. 이 합산을 Viewport 높이만으로 바꾸면 Track까지 줄어들어 기존 동작이 달라집니다.
+
+Header height와 연속적인 `animatedIndex`가 동일한 Follow를 사용합니다. pixel translate는 매 update와 geometry 변경 시 `-animatedIndex * (viewportWidth + separatorWidth)`로 계산합니다. separatorWidth는 첫 실제 separator의 layout에서 읽습니다. 모든 Screen은 100% width, 모든 separator는 같은 USS 폭을 사용하며, resize는 animation 진행도를 유지한 채 새 크기에 즉시 재투영합니다. 첫 유효 layout에서는 초기 index와 header height를 즉시 맞춥니다. 모든 화면과 사이 separator는 Track에 유지됩니다. Dropdown은 localization 구현 전까지 비활성화합니다.
+
+SetupWindow는 shell binding, 발견, 화면 소유, navigation, lifecycle와 animation만 담당합니다. 현재 UXML/USS가 hierarchy, card width, margin/padding, separator와 header spacing의 기준입니다. C#은 실제 geometry를 읽어 projection과 Header+Viewport 높이 합산을 수행하며 화면 내용이나 package 의미를 중앙에서 해석하지 않습니다.
+
+현재 Setup은 별도 설정 저장소가 없고 화면 index를 Window 안에서 관리합니다. reload 후 UI와 Screen 인스턴스를 다시 구성하며 화면 집합이 달라지면 기존 숫자 index를 범위 안으로 제한합니다. 동일 화면 타입의 복원이나 언어·roots 영구 저장은 아직 제공하지 않습니다. 향후 Setup 자체 상태를 저장하더라도 Installer-local state로 두며 RuniOS runtime config에 의존하지 않습니다.
 
 ## Migration
 

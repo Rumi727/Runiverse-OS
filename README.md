@@ -391,7 +391,10 @@ Undo/Redo도 같은 모델 위에 추가되어 있습니다. Inspector Element�
 | `com.rumi.runios.texture` | FreeImage 기반 런타임 이미지 로더. 메모리·`Stream`·`IONode` 입력, 백그라운드 decode, Burst 밉맵 생성, Unity 메인 스레드 `Texture2D` 업로드. [문서](Packages/com.rumi.runios.texture/README.md) |
 | `com.rumi.runios.effects` | UI 둥근 모서리, 단순 메쉬 외곽선, 여러 오브젝트를 합친 외곽선과 관련 셰이더 |
 | `com.rumi.runios.ui` | UI 런타임 패키지 경계. 구체적인 기본 UI는 아직 개발 중이며, Core 에디터 쪽에는 IMGUI·UIElements 필드와 인스펙터 기반이 먼저 존재 |
-| `com.rumi.runios` | Unity Editor 설치 창, 패키지·scoped registry 설정, TMP 설정, 다국어 설치 화면 |
+| `com.rumi.runios.installer` | 본체 없이 사용할 bootstrap Installer, exact package dependency closure와 installation 실행, UI Toolkit Setup shell과 SetupScreen 확장 API. [문서](Packages/com.rumi.runios.installer/README.md) |
+| `com.rumi.runios` | Legacy Unity Editor 설치 창, 패키지·scoped registry 설정, TMP 설정, 다국어 설치 화면 |
+
+Installer는 설치 대상인 일반 `RuniOS` assembly에 의존하지 않습니다. 외부 package의 Editor assembly가 `RuniOS.Installer`의 `SetupScreen`을 구현하고 TypeCache로 같은 Setup 흐름에 참여합니다. 구체적인 설정 의미는 각 화면이 소유하며 Installer는 shell과 navigation을 조정합니다.
 
 Core 내부에는 Unity 내부 API를 감싸는 `APIBridge`, Harmony 기반 `Modding`·`Patches`, .NET 호환 보조 계층, unsafe 유틸리티도 별도 어셈블리로 나뉘어 있습니다.\
 이런 계층도 내부 전용 구현으로 고립시키기보다 필요한 기능을 같은 확장 표면으로 끌어올리기 위한 기반입니다.
@@ -449,12 +452,14 @@ Runiverse OS는 짧은 기간에 새로 만든 프로젝트가 아닙니다. 아
 
 현재 저장소는 Unity 프로젝트 자체이며 패키지는 `Packages/` 아래에 포함되어 있습니다.
 
-에디터에서 설치·패키지 설정 창을 열 때는 `RuniOS/Show Installer` 메뉴를 사용할 수 있습니다.\
+새 설치 frontend는 `Window/Runiverse OS/Installer`, Setup 기반은 `Window/Runiverse OS/Setup` 메뉴에서 엽니다. Setup의 화면 내용은 현재 placeholder이며 실제 설치 workflow에는 아직 연결되지 않았습니다.\
+기존 Legacy 설치 창은 `RuniOS/Show Installer` 메뉴를 사용합니다.\
 개별 API를 사용하려면 위 패키지 문서와 소스의 현재 계약을 우선 확인하세요.\
 버전 `0.0.0`의 개발 패키지들이므로 아직 고정된 릴리스 설치 절차나 하위 호환성 보장은 없습니다.
 
 ## 문서
 
+- [Installer와 Setup](Packages/com.rumi.runios.installer/README.md)
 - [I/O 시스템](Packages/com.rumi.runios.core/Runtime/IO/README.md)
 - [리소스 시스템](Packages/com.rumi.runios.core/Runtime/Resource/README.md)
 - [텍스트 시스템](Packages/com.rumi.runios.core/Runtime/Texts/README.md)

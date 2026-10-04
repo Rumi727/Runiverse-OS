@@ -1,0 +1,82 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4877a65100aa43f7b113ba2717f32cbc, type: 3}
+  m_Name: en_us
+  m_EditorClassIdentifier: 
+  texts:
+    pairs:
+    - key: language.name
+      value: English
+    - key: language.region
+      value: US
+    - key: installer.welcome
+      value: Welcome!
+    - key: installer.welcome.text
+      value: 'Thank you for using Runi Engine.
+
+        From now on, we start the initial setup of the engine.'
+    - key: installer.package_setting.label
+      value: Setting the scope registry
+    - key: installer.package_setting.file_not_found
+      value: Could not find file {path}!
+    - key: installer.package_setting.json_deserialization_fail
+      value: JSON deserialization failed
+    - key: installer.package_setting.url_warning
+      value: "The URL of the registry \"{name}\" does not match the expected value.\r\nTo protect security, the operation has been stopped.\r\nPlease change the URL to the following: {url}\r"
+    - key: installer.package_setting.setting_info
+      value: "To install dependencies automatically, set the scoped registry before installing the package.\r\nYou can review the changes and set it manually or click Apply to do it automatically.\r"
+    - key: installer.package_setting.apply
+      value: Apply
+    - key: installer.package_setting.no_changes
+      value: No changes
+    - key: installer.package_setting.warning
+      value: If it does not refresh automatically, please refresh manually with the shortcut Ctrl + R.
+    - key: installer.tmp_setting.label
+      value: TMP Resources
+    - key: installer.tmp_setting.warning
+      value: The TextMeshPro package is not installed.
+    - key: installer.tmp_setting.info
+      value: 'The ROS package utilizes Unity''s TextMesh Pro package.
+
+        We recommend importing TextMesh Pro''s essential resources for smooth operation.'
+    - key: installer.install_setting.label
+      value: Installation time!
+    - key: installer.install_setting.install
+      value: Install
+    - key: installer.install_setting.installed
+      value: "\u2713 Installed"
+    - key: installer.install_setting.dependency
+      value: Dependencies
+    - key: installer.install_setting.core.label
+      value: Runiverse OS Core
+    - key: installer.install_setting.core.one_line
+      value: User-friendly game engine library for Unity Engine
+    - key: installer.install_setting.core.description
+      value: 'This is the core package.
+
+        All RuniOS packages require this package.
+
+
+
+        It contains several utilities and a built-in resource management system.'
+    - key: installer.install_setting.ui.label
+      value: Runiverse OS UI
+    - key: installer.install_setting.ui.one_line
+      value: RuniOS's official runtime UI/UX system
+    - key: installer.install_setting.ui.description
+      value: 'The design is inspired by the game osu!lazer.
+
+
+
+        It''s the heaviest and most complex app, requiring all of RuniOS''s packages as dependencies...
+
+        However, it offers users easy control over its various features!'
