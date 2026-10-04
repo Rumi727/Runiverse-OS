@@ -37,102 +37,127 @@ MonoBehaviour:
     - key: installer.install_setting.dependency
       value: Dependencies
     - key: installer.install_setting.core.label
-      value: "Runiverse OS Core"
+      value: Runiverse OS Core
     - key: installer.install_setting.core.one_line
-      value: "Shared utilities and resource management"
+      value: Shared utilities and resource management
     - key: installer.install_setting.core.description
-      value: "Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages."
+      value: Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages.
     - key: installer.install_setting.ui.label
-      value: "Runiverse OS UI"
+      value: Runiverse OS UI
     - key: installer.install_setting.ui.one_line
-      value: "RuniOS's official runtime UI/UX system"
+      value: RuniOS's official runtime UI/UX system
     - key: installer.install_setting.ui.description
-      value: "A planned runtime UI/UX system for controlling RuniOS features, with a design inspired by osu!lazer. It requires all RuniOS feature packages and SoftMask for uGUI. The UI/UX implementation is planned; the currently available components bind resources to Unity UI."
+      value: 'A planned runtime UI/UX system for controlling RuniOS features,
+
+        with a design inspired by osu!lazer.
+
+
+        The UI/UX implementation is planned;
+
+        the currently available components bind resources to Unity UI.'
     - key: installer.setup.roots.title
-      value: "Root packages"
+      value: Root packages
     - key: installer.tmp_setting.essentials.title
-      value: "TMP Essentials"
+      value: TMP Essentials
     - key: installer.tmp_setting.essentials.info
-      value: "Import the essential TextMesh Pro resources into Assets/TextMesh Pro."
+      value: Import the essential TextMesh Pro resources into Assets/TextMesh Pro.
     - key: installer.tmp_setting.essentials.update
-      value: "The installed TMP resources need an update. Reimport them while preserving TMP Settings."
+      value: The installed TMP resources need an update. Reimport them while preserving TMP Settings.
     - key: installer.tmp_setting.essentials.import
-      value: "Import TMP Essentials"
+      value: Import TMP Essentials
     - key: installer.tmp_setting.examples.title
-      value: "TMP Examples & Extras"
+      value: TMP Examples & Extras
     - key: installer.tmp_setting.examples.info
-      value: "Optional resources and examples for exploring TextMesh Pro. Import Essentials first."
+      value: Optional resources and examples for exploring TextMesh Pro. Import Essentials first.
     - key: installer.tmp_setting.examples.update
-      value: "Reimport the updated TMP examples and extras."
+      value: Reimport the updated TMP examples and extras.
     - key: installer.tmp_setting.examples.import
-      value: "Import TMP Examples & Extras"
+      value: Import TMP Examples & Extras
     - key: installer.setup.preview.title
-      value: "Preview changes"
+      value: Preview changes
     - key: installer.setup.preview.info
-      value: "Selected roots and their dependencies are observed by Package Management. Preview is advisory; Install checks the environment again. Unchecked roots do not remove installed packages. TMP resources are imported separately on the TMP screen."
+      value: Selected roots and their dependencies are observed by Package Management. Preview is advisory; Install checks the environment again. Unchecked roots do not remove installed packages. TMP resources are imported separately on the TMP screen.
     - key: installer.setup.preview.empty
-      value: "No root packages selected."
+      value: No root packages selected.
     - key: installer.setup.preview.observing
-      value: "Checking installation requirements…"
+      value: "Checking installation requirements\u2026"
     - key: installer.setup.preview.ensuring
-      value: "Ensuring installation requirements…"
+      value: "Ensuring installation requirements\u2026"
     - key: installer.setup.preview.ready
-      value: "Preview complete. Install observes the environment again."
+      value: Preview complete. Install observes the environment again.
     - key: installer.setup.preview.graph_error
-      value: "Resolve dependency graph errors before installation."
+      value: Resolve dependency graph errors before installation.
     - key: installer.setup.preview.complete
-      value: "All installation requirements were satisfied."
+      value: All installation requirements were satisfied.
     - key: installer.setup.preview.assembly_required
-      value: "Import the external integration named in the package description, then refresh."
+      value: Import the external integration named in the package description, then refresh.
     - key: installer.setup.preview.failed
-      value: "Failed. See diagnostics."
+      value: Failed. See diagnostics.
     - key: installer.setup.preview.cancelled
-      value: "Cancelled. An already-started UPM request was allowed to finish."
+      value: Cancelled. An already-started UPM request was allowed to finish.
     - key: installer.setup.preview.refresh
-      value: "Refresh preview"
+      value: Refresh preview
     - key: installer.setup.preview.cancel
-      value: "Cancel"
+      value: Cancel
     - key: installer.setup.preview.root
-      value: "Selected root"
+      value: Selected root
     - key: installer.setup.preview.dependency
-      value: "Dependency"
+      value: Dependency
     - key: installer.setup.preview.satisfied
-      value: "Already satisfied"
+      value: Already satisfied
     - key: installer.setup.preview.required
-      value: "Installation required"
+      value: Installation required
     - key: installer.setup.preview.registry_required
-      value: "Registry preparation required; package acquisition delegated to UPM"
+      value: Registry preparation required; package acquisition delegated to UPM
     - key: installer.setup.preview.delegated
-      value: "Registry ready; package acquisition delegated, not verified"
+      value: Registry ready; package acquisition delegated, not verified
     - key: installer.setup.preview.unsupported
-      value: "Preview is not supported by this executor"
+      value: Preview is not supported by this executor
     - key: installer.install_setting.sound.label
-      value: "Runiverse OS Sound"
+      value: Runiverse OS Sound
     - key: installer.install_setting.sound.one_line
-      value: "Shared audio APIs and sound resources"
+      value: Shared audio APIs and sound resources
     - key: installer.install_setting.sound.description
-      value: "Provides audio clips, playback and spatial audio contracts, Unity audio source components and sound resource registration shared by audio implementations."
+      value: 'Provides audio clips, playback and spatial audio contracts,
+
+        Unity audio source components and sound resource registration shared by audio implementations.'
     - key: installer.install_setting.effects.label
-      value: "Runiverse OS Effects"
+      value: Runiverse OS Effects
     - key: installer.install_setting.effects.one_line
-      value: "Rounded corners and outline effects"
+      value: Rounded corners and outline effects
     - key: installer.install_setting.effects.description
-      value: "Provides rounded corners for Unity UI and mesh outline effects, including merged outlines for groups of objects."
+      value: 'Provides rounded corners for Unity UI and mesh outline effects,
+
+        including merged outlines for groups of objects.'
     - key: installer.install_setting.fmod.label
-      value: "FMOD for RuniOS"
+      value: FMOD for RuniOS
     - key: installer.install_setting.fmod.one_line
-      value: "FMOD audio playback for RuniOS"
+      value: FMOD audio playback for RuniOS
     - key: installer.install_setting.fmod.description
-      value: "Provides an FMOD Core sound system, audio clips, playback channels and channel groups integrated with RuniOS sound resources. The FMOD for Unity integration must be supplied separately; Setup does not install it."
+      value: 'Provides an FMOD Core sound system, audio clips,
+
+        playback channels and channel groups integrated with RuniOS sound resources.
+
+
+        The FMOD for Unity integration must be supplied separately;
+
+        Setup does not install it.'
     - key: installer.install_setting.nbs.label
-      value: "Runiverse OS NBS"
+      value: Runiverse OS NBS
     - key: installer.install_setting.nbs.one_line
-      value: "Note Block Studio loading and playback"
+      value: Note Block Studio loading and playback
     - key: installer.install_setting.nbs.description
-      value: "Loads Note Block Studio files through RuniOS resource packs and plays notes through FMOD. Supports tempo maps, custom instruments and editor previews."
+      value: 'Loads Note Block Studio files through RuniOS resource packs and plays notes through FMOD.
+
+        Supports tempo maps, custom instruments and editor previews.'
     - key: installer.install_setting.texture.label
-      value: "Runiverse OS Texture"
+      value: Runiverse OS Texture
     - key: installer.install_setting.texture.one_line
-      value: "Asynchronous runtime image loading"
+      value: Asynchronous runtime image loading
     - key: installer.install_setting.texture.description
-      value: "Decodes encoded images with FreeImage, generates mipmaps with Burst and uploads Texture2D data on the Unity main thread. Accepts memory, streams and RuniOS IO nodes."
+      value: 'Decodes encoded images with FreeImage, generates mipmaps with Burst and uploads
+
+        Texture2D data on the Unity main thread.
+
+
+        Accepts memory, streams and RuniOS IO nodes.'

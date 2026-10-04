@@ -33,102 +33,102 @@ MonoBehaviour:
     - key: installer.install_setting.dependency
       value: "\u4F9D\u5B58\u95A2\u4FC2"
     - key: installer.install_setting.core.label
-      value: "Runiverse OS Core"
+      value: Runiverse OS Core
     - key: installer.install_setting.core.one_line
-      value: "共通ユーティリティとリソース管理"
+      value: "\u5171\u901A\u30E6\u30FC\u30C6\u30A3\u30EA\u30C6\u30A3\u3068\u30EA\u30BD\u30FC\u30B9\u7BA1\u7406"
     - key: installer.install_setting.core.description
-      value: "RuniOS パッケージが共有するユーティリティ、非同期タスク、IO 抽象化、リソースパックとローカライズを提供します。"
+      value: "RuniOS \u30D1\u30C3\u30B1\u30FC\u30B8\u304C\u5171\u6709\u3059\u308B\u30E6\u30FC\u30C6\u30A3\u30EA\u30C6\u30A3\u3001\u975E\u540C\u671F\u30BF\u30B9\u30AF\u3001IO \u62BD\u8C61\u5316\u3001\u30EA\u30BD\u30FC\u30B9\u30D1\u30C3\u30AF\u3068\u30ED\u30FC\u30AB\u30E9\u30A4\u30BA\u3092\u63D0\u4F9B\u3057\u307E\u3059\u3002"
     - key: installer.install_setting.ui.label
-      value: "Runiverse OS UI"
+      value: Runiverse OS UI
     - key: installer.install_setting.ui.one_line
-      value: "RuniOS の公式ランタイム UI/UX システム"
+      value: "RuniOS \u306E\u516C\u5F0F\u30E9\u30F3\u30BF\u30A4\u30E0 UI/UX \u30B7\u30B9\u30C6\u30E0"
     - key: installer.install_setting.ui.description
-      value: "osu!lazer に着想を得たデザインで RuniOS の機能を操作するランタイム UI/UX システムです。すべての RuniOS 機能パッケージと SoftMask for uGUI を使用する設計です。UI/UX の実装は予定されており、現在のコンポーネントはリソースを Unity UI に接続します。"
+      value: "osu!lazer \u306B\u7740\u60F3\u3092\u5F97\u305F\u30C7\u30B6\u30A4\u30F3\u3067 RuniOS \u306E\u6A5F\u80FD\u3092\u64CD\u4F5C\u3059\u308B\u30E9\u30F3\u30BF\u30A4\u30E0 UI/UX \u30B7\u30B9\u30C6\u30E0\u3067\u3059\u3002\nUI/UX \u306E\u5B9F\u88C5\u306F\u4E88\u5B9A\u3055\u308C\u3066\u304A\u308A\u3001\u73FE\u5728\u306E\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u306F\u30EA\u30BD\u30FC\u30B9\u3092 Unity UI \u306B\u63A5\u7D9A\u3057\u307E\u3059\u3002"
     - key: installer.setup.roots.title
-      value: "ルートパッケージの選択"
+      value: "\u30EB\u30FC\u30C8\u30D1\u30C3\u30B1\u30FC\u30B8\u306E\u9078\u629E"
     - key: installer.tmp_setting.essentials.title
-      value: "TMP 必須リソース"
+      value: "TMP \u5FC5\u9808\u30EA\u30BD\u30FC\u30B9"
     - key: installer.tmp_setting.essentials.info
-      value: "TextMesh Pro の必須リソースを Assets/TextMesh Pro にインポートします。"
+      value: "TextMesh Pro \u306E\u5FC5\u9808\u30EA\u30BD\u30FC\u30B9\u3092 Assets/TextMesh Pro \u306B\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u307E\u3059\u3002"
     - key: installer.tmp_setting.essentials.update
-      value: "TMP リソースの更新が必要です。TMP Settings を保持して再インポートします。"
+      value: "TMP \u30EA\u30BD\u30FC\u30B9\u306E\u66F4\u65B0\u304C\u5FC5\u8981\u3067\u3059\u3002TMP Settings \u3092\u4FDD\u6301\u3057\u3066\u518D\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u307E\u3059\u3002"
     - key: installer.tmp_setting.essentials.import
-      value: "TMP 必須リソースをインポート"
+      value: "TMP \u5FC5\u9808\u30EA\u30BD\u30FC\u30B9\u3092\u30A4\u30F3\u30DD\u30FC\u30C8"
     - key: installer.tmp_setting.examples.title
-      value: "TMP サンプルと追加リソース"
+      value: "TMP \u30B5\u30F3\u30D7\u30EB\u3068\u8FFD\u52A0\u30EA\u30BD\u30FC\u30B9"
     - key: installer.tmp_setting.examples.info
-      value: "TextMesh Pro の使い方を確認できる任意のサンプルと追加リソースです。必須リソースを先にインポートしてください。"
+      value: "TextMesh Pro \u306E\u4F7F\u3044\u65B9\u3092\u78BA\u8A8D\u3067\u304D\u308B\u4EFB\u610F\u306E\u30B5\u30F3\u30D7\u30EB\u3068\u8FFD\u52A0\u30EA\u30BD\u30FC\u30B9\u3067\u3059\u3002\u5FC5\u9808\u30EA\u30BD\u30FC\u30B9\u3092\u5148\u306B\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
     - key: installer.tmp_setting.examples.update
-      value: "更新された TMP サンプルと追加リソースを再インポートします。"
+      value: "\u66F4\u65B0\u3055\u308C\u305F TMP \u30B5\u30F3\u30D7\u30EB\u3068\u8FFD\u52A0\u30EA\u30BD\u30FC\u30B9\u3092\u518D\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u307E\u3059\u3002"
     - key: installer.tmp_setting.examples.import
-      value: "TMP サンプルと追加リソースをインポート"
+      value: "TMP \u30B5\u30F3\u30D7\u30EB\u3068\u8FFD\u52A0\u30EA\u30BD\u30FC\u30B9\u3092\u30A4\u30F3\u30DD\u30FC\u30C8"
     - key: installer.setup.preview.title
-      value: "変更内容のプレビュー"
+      value: "\u5909\u66F4\u5185\u5BB9\u306E\u30D7\u30EC\u30D3\u30E5\u30FC"
     - key: installer.setup.preview.info
-      value: "選択したルートと依存関係を Package Management が確認します。プレビューは参考情報で、インストール時に現在の状態を再確認します。選択解除してもインストール済みパッケージは削除しません。TMP リソースは TMP 画面で別途インポートします。"
+      value: "\u9078\u629E\u3057\u305F\u30EB\u30FC\u30C8\u3068\u4F9D\u5B58\u95A2\u4FC2\u3092 Package Management \u304C\u78BA\u8A8D\u3057\u307E\u3059\u3002\u30D7\u30EC\u30D3\u30E5\u30FC\u306F\u53C2\u8003\u60C5\u5831\u3067\u3001\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u6642\u306B\u73FE\u5728\u306E\u72B6\u614B\u3092\u518D\u78BA\u8A8D\u3057\u307E\u3059\u3002\u9078\u629E\u89E3\u9664\u3057\u3066\u3082\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u6E08\u307F\u30D1\u30C3\u30B1\u30FC\u30B8\u306F\u524A\u9664\u3057\u307E\u305B\u3093\u3002TMP \u30EA\u30BD\u30FC\u30B9\u306F TMP \u753B\u9762\u3067\u5225\u9014\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u307E\u3059\u3002"
     - key: installer.setup.preview.empty
-      value: "ルートパッケージが選択されていません。"
+      value: "\u30EB\u30FC\u30C8\u30D1\u30C3\u30B1\u30FC\u30B8\u304C\u9078\u629E\u3055\u308C\u3066\u3044\u307E\u305B\u3093\u3002"
     - key: installer.setup.preview.observing
-      value: "インストール要件を確認中…"
+      value: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u8981\u4EF6\u3092\u78BA\u8A8D\u4E2D\u2026"
     - key: installer.setup.preview.ensuring
-      value: "インストール要件を適用中…"
+      value: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u8981\u4EF6\u3092\u9069\u7528\u4E2D\u2026"
     - key: installer.setup.preview.ready
-      value: "プレビュー完了。インストール時に現在の状態を再確認します。"
+      value: "\u30D7\u30EC\u30D3\u30E5\u30FC\u5B8C\u4E86\u3002\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u6642\u306B\u73FE\u5728\u306E\u72B6\u614B\u3092\u518D\u78BA\u8A8D\u3057\u307E\u3059\u3002"
     - key: installer.setup.preview.graph_error
-      value: "インストール前に依存関係グラフのエラーを解決してください。"
+      value: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u524D\u306B\u4F9D\u5B58\u95A2\u4FC2\u30B0\u30E9\u30D5\u306E\u30A8\u30E9\u30FC\u3092\u89E3\u6C7A\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
     - key: installer.setup.preview.complete
-      value: "すべてのインストール要件を満たしました。"
+      value: "\u3059\u3079\u3066\u306E\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u8981\u4EF6\u3092\u6E80\u305F\u3057\u307E\u3057\u305F\u3002"
     - key: installer.setup.preview.assembly_required
-      value: "パッケージ説明に記載された外部統合を先にインポートしてから更新してください。"
+      value: "\u30D1\u30C3\u30B1\u30FC\u30B8\u8AAC\u660E\u306B\u8A18\u8F09\u3055\u308C\u305F\u5916\u90E8\u7D71\u5408\u3092\u5148\u306B\u30A4\u30F3\u30DD\u30FC\u30C8\u3057\u3066\u304B\u3089\u66F4\u65B0\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
     - key: installer.setup.preview.failed
-      value: "失敗しました。診断内容を確認してください。"
+      value: "\u5931\u6557\u3057\u307E\u3057\u305F\u3002\u8A3A\u65AD\u5185\u5BB9\u3092\u78BA\u8A8D\u3057\u3066\u304F\u3060\u3055\u3044\u3002"
     - key: installer.setup.preview.cancelled
-      value: "キャンセルしました。開始済みの UPM リクエストは完了まで待機しました。"
+      value: "\u30AD\u30E3\u30F3\u30BB\u30EB\u3057\u307E\u3057\u305F\u3002\u958B\u59CB\u6E08\u307F\u306E UPM \u30EA\u30AF\u30A8\u30B9\u30C8\u306F\u5B8C\u4E86\u307E\u3067\u5F85\u6A5F\u3057\u307E\u3057\u305F\u3002"
     - key: installer.setup.preview.refresh
-      value: "プレビューを更新"
+      value: "\u30D7\u30EC\u30D3\u30E5\u30FC\u3092\u66F4\u65B0"
     - key: installer.setup.preview.cancel
-      value: "キャンセル"
+      value: "\u30AD\u30E3\u30F3\u30BB\u30EB"
     - key: installer.setup.preview.root
-      value: "選択したルート"
+      value: "\u9078\u629E\u3057\u305F\u30EB\u30FC\u30C8"
     - key: installer.setup.preview.dependency
-      value: "依存パッケージ"
+      value: "\u4F9D\u5B58\u30D1\u30C3\u30B1\u30FC\u30B8"
     - key: installer.setup.preview.satisfied
-      value: "充足済み"
+      value: "\u5145\u8DB3\u6E08\u307F"
     - key: installer.setup.preview.required
-      value: "インストールが必要"
+      value: "\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u304C\u5FC5\u8981"
     - key: installer.setup.preview.registry_required
-      value: "レジストリの準備が必要。パッケージ取得は UPM に委任"
+      value: "\u30EC\u30B8\u30B9\u30C8\u30EA\u306E\u6E96\u5099\u304C\u5FC5\u8981\u3002\u30D1\u30C3\u30B1\u30FC\u30B8\u53D6\u5F97\u306F UPM \u306B\u59D4\u4EFB"
     - key: installer.setup.preview.delegated
-      value: "レジストリ準備済み。パッケージ取得は委任され、検証されません"
+      value: "\u30EC\u30B8\u30B9\u30C8\u30EA\u6E96\u5099\u6E08\u307F\u3002\u30D1\u30C3\u30B1\u30FC\u30B8\u53D6\u5F97\u306F\u59D4\u4EFB\u3055\u308C\u3001\u691C\u8A3C\u3055\u308C\u307E\u305B\u3093"
     - key: installer.setup.preview.unsupported
-      value: "この executor はプレビューに対応していません"
+      value: "\u3053\u306E executor \u306F\u30D7\u30EC\u30D3\u30E5\u30FC\u306B\u5BFE\u5FDC\u3057\u3066\u3044\u307E\u305B\u3093"
     - key: installer.install_setting.sound.label
-      value: "Runiverse OS Sound"
+      value: Runiverse OS Sound
     - key: installer.install_setting.sound.one_line
-      value: "共通オーディオ API とサウンドリソース"
+      value: "\u5171\u901A\u30AA\u30FC\u30C7\u30A3\u30AA API \u3068\u30B5\u30A6\u30F3\u30C9\u30EA\u30BD\u30FC\u30B9"
     - key: installer.install_setting.sound.description
-      value: "オーディオ実装で共有するクリップ、再生・空間オーディオの契約、Unity のオーディオソースコンポーネントとサウンドリソース登録を提供します。"
+      value: "\u30AA\u30FC\u30C7\u30A3\u30AA\u5B9F\u88C5\u3067\u5171\u6709\u3059\u308B\u30AF\u30EA\u30C3\u30D7\u3001\u518D\u751F\u30FB\u7A7A\u9593\u30AA\u30FC\u30C7\u30A3\u30AA\u306E\u5951\u7D04\u3001\nUnity \u306E\u30AA\u30FC\u30C7\u30A3\u30AA\u30BD\u30FC\u30B9\u30B3\u30F3\u30DD\u30FC\u30CD\u30F3\u30C8\u3068\u30B5\u30A6\u30F3\u30C9\u30EA\u30BD\u30FC\u30B9\u767B\u9332\u3092\u63D0\u4F9B\u3057\u307E\u3059\u3002"
     - key: installer.install_setting.effects.label
-      value: "Runiverse OS Effects"
+      value: Runiverse OS Effects
     - key: installer.install_setting.effects.one_line
-      value: "角丸とアウトラインエフェクト"
+      value: "\u89D2\u4E38\u3068\u30A2\u30A6\u30C8\u30E9\u30A4\u30F3\u30A8\u30D5\u30A7\u30AF\u30C8"
     - key: installer.install_setting.effects.description
-      value: "Unity UI の角丸とメッシュのアウトラインエフェクトを提供します。複数オブジェクトのアウトラインを結合するエフェクトも含みます。"
+      value: "Unity UI \u306E\u89D2\u4E38\u3068\u30E1\u30C3\u30B7\u30E5\u306E\u30A2\u30A6\u30C8\u30E9\u30A4\u30F3\u30A8\u30D5\u30A7\u30AF\u30C8\u3092\u63D0\u4F9B\u3057\u307E\u3059\u3002\n\u8907\u6570\u30AA\u30D6\u30B8\u30A7\u30AF\u30C8\u306E\u30A2\u30A6\u30C8\u30E9\u30A4\u30F3\u3092\u7D50\u5408\u3059\u308B\u30A8\u30D5\u30A7\u30AF\u30C8\u3082\u542B\u307F\u307E\u3059\u3002"
     - key: installer.install_setting.fmod.label
-      value: "FMOD for RuniOS"
+      value: FMOD for RuniOS
     - key: installer.install_setting.fmod.one_line
-      value: "RuniOS 向け FMOD オーディオ再生"
+      value: "RuniOS \u5411\u3051 FMOD \u30AA\u30FC\u30C7\u30A3\u30AA\u518D\u751F"
     - key: installer.install_setting.fmod.description
-      value: "RuniOS サウンドリソースと連携する FMOD Core サウンドシステム、オーディオクリップ、再生チャンネルとチャンネルグループを提供します。FMOD for Unity の統合は別途用意する必要があり、Setup ではインストールしません。"
+      value: "RuniOS \u30B5\u30A6\u30F3\u30C9\u30EA\u30BD\u30FC\u30B9\u3068\u9023\u643A\u3059\u308B FMOD Core \u30B5\u30A6\u30F3\u30C9\u30B7\u30B9\u30C6\u30E0\u3001\u30AA\u30FC\u30C7\u30A3\u30AA\u30AF\u30EA\u30C3\u30D7\u3001\n\u518D\u751F\u30C1\u30E3\u30F3\u30CD\u30EB\u3068\u30C1\u30E3\u30F3\u30CD\u30EB\u30B0\u30EB\u30FC\u30D7\u3092\u63D0\u4F9B\u3057\u307E\u3059\u3002\nFMOD for Unity \u306E\u7D71\u5408\u306F\u5225\u9014\u7528\u610F\u3059\u308B\u5FC5\u8981\u304C\u3042\u308A\u3001Setup \u3067\u306F\u30A4\u30F3\u30B9\u30C8\u30FC\u30EB\u3057\u307E\u305B\u3093\u3002"
     - key: installer.install_setting.nbs.label
-      value: "Runiverse OS NBS"
+      value: Runiverse OS NBS
     - key: installer.install_setting.nbs.one_line
-      value: "Note Block Studio ファイルのロードと再生"
+      value: "Note Block Studio \u30D5\u30A1\u30A4\u30EB\u306E\u30ED\u30FC\u30C9\u3068\u518D\u751F"
     - key: installer.install_setting.nbs.description
-      value: "RuniOS リソースパックから Note Block Studio ファイルを読み込み、FMOD で音符を再生します。テンポマップ、カスタム楽器とエディタープレビューに対応します。"
+      value: "RuniOS \u30EA\u30BD\u30FC\u30B9\u30D1\u30C3\u30AF\u304B\u3089 Note Block Studio \u30D5\u30A1\u30A4\u30EB\u3092\u8AAD\u307F\u8FBC\u307F\u3001FMOD \u3067\u97F3\u7B26\u3092\u518D\u751F\u3057\u307E\u3059\u3002\n\u30C6\u30F3\u30DD\u30DE\u30C3\u30D7\u3001\u30AB\u30B9\u30BF\u30E0\u697D\u5668\u3068\u30A8\u30C7\u30A3\u30BF\u30FC\u30D7\u30EC\u30D3\u30E5\u30FC\u306B\u5BFE\u5FDC\u3057\u307E\u3059\u3002"
     - key: installer.install_setting.texture.label
-      value: "Runiverse OS Texture"
+      value: Runiverse OS Texture
     - key: installer.install_setting.texture.one_line
-      value: "非同期ランタイム画像ロード"
+      value: "\u975E\u540C\u671F\u30E9\u30F3\u30BF\u30A4\u30E0\u753B\u50CF\u30ED\u30FC\u30C9"
     - key: installer.install_setting.texture.description
-      value: "FreeImage で画像をデコードし、Burst でミップマップを生成してから Unity のメインスレッドで Texture2D データをアップロードします。メモリ、ストリームと RuniOS IO ノードを入力として受け取ります。"
+      value: "FreeImage \u3067\u753B\u50CF\u3092\u30C7\u30B3\u30FC\u30C9\u3057\u3001Burst \u3067\u30DF\u30C3\u30D7\u30DE\u30C3\u30D7\u3092\u751F\u6210\u3057\u3066\u304B\u3089\nUnity \u306E\u30E1\u30A4\u30F3\u30B9\u30EC\u30C3\u30C9\u3067 Texture2D \u30C7\u30FC\u30BF\u3092\u30A2\u30C3\u30D7\u30ED\u30FC\u30C9\u3057\u307E\u3059\u3002\n\n\u30E1\u30E2\u30EA\u3001\u30B9\u30C8\u30EA\u30FC\u30E0\u3068 RuniOS IO \u30CE\u30FC\u30C9\u3092\u5165\u529B\u3068\u3057\u3066\u53D7\u3051\u53D6\u308A\u307E\u3059\u3002"

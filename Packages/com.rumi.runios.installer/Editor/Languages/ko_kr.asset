@@ -33,102 +33,102 @@ MonoBehaviour:
     - key: installer.install_setting.dependency
       value: "\uC885\uC18D\uC131"
     - key: installer.install_setting.core.label
-      value: "Runiverse OS Core"
+      value: Runiverse OS Core
     - key: installer.install_setting.core.one_line
-      value: "공통 유틸리티와 리소스 관리"
+      value: "\uACF5\uD1B5 \uC720\uD2F8\uB9AC\uD2F0\uC640 \uB9AC\uC18C\uC2A4 \uAD00\uB9AC"
     - key: installer.install_setting.core.description
-      value: "RuniOS 패키지가 공유하는 유틸리티, 비동기 작업, IO 추상화, 리소스 팩과 지역화 기능을 제공합니다."
+      value: "RuniOS \uD328\uD0A4\uC9C0\uAC00 \uACF5\uC720\uD558\uB294 \uC720\uD2F8\uB9AC\uD2F0, \uBE44\uB3D9\uAE30 \uC791\uC5C5, IO \uCD94\uC0C1\uD654, \uB9AC\uC18C\uC2A4 \uD329\uACFC \uC9C0\uC5ED\uD654 \uAE30\uB2A5\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.ui.label
-      value: "Runiverse OS UI"
+      value: Runiverse OS UI
     - key: installer.install_setting.ui.one_line
-      value: "RuniOS의 공식 런타임 UI/UX 시스템"
+      value: "RuniOS\uC758 \uACF5\uC2DD \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C"
     - key: installer.install_setting.ui.description
-      value: "osu!lazer에서 영감을 받은 디자인으로 RuniOS의 여러 기능을 제어할 런타임 UI/UX 시스템입니다. 모든 RuniOS 본체 패키지와 SoftMask for uGUI를 사용하도록 설계되었습니다. UI/UX 구현은 예정되어 있으며 현재 컴포넌트는 리소스를 Unity UI에 연결합니다."
+      value: "osu!lazer\uC5D0\uC11C \uC601\uAC10\uC744 \uBC1B\uC740 \uB514\uC790\uC778\uC73C\uB85C RuniOS\uC758 \uC5EC\uB7EC \uAE30\uB2A5\uC744 \uC81C\uC5B4\uD560 \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C\uC785\uB2C8\uB2E4.\nUI/UX \uAD6C\uD604\uC740 \uC608\uC815\uB418\uC5B4 \uC788\uC73C\uBA70 \uD604\uC7AC \uCEF4\uD3EC\uB10C\uD2B8\uB294 \uB9AC\uC18C\uC2A4\uB97C Unity UI\uC5D0 \uC5F0\uACB0\uD569\uB2C8\uB2E4."
     - key: installer.setup.roots.title
-      value: "Root 패키지 선택"
+      value: "Root \uD328\uD0A4\uC9C0 \uC120\uD0DD"
     - key: installer.tmp_setting.essentials.title
-      value: "TMP 기본 리소스"
+      value: "TMP \uAE30\uBCF8 \uB9AC\uC18C\uC2A4"
     - key: installer.tmp_setting.essentials.info
-      value: "TextMesh Pro 기본 리소스를 Assets/TextMesh Pro에 가져옵니다."
+      value: "TextMesh Pro \uAE30\uBCF8 \uB9AC\uC18C\uC2A4\uB97C Assets/TextMesh Pro\uC5D0 \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.tmp_setting.essentials.update
-      value: "설치된 TMP 리소스 업데이트 필요. TMP Settings를 유지하며 다시 가져옵니다."
+      value: "\uC124\uCE58\uB41C TMP \uB9AC\uC18C\uC2A4 \uC5C5\uB370\uC774\uD2B8 \uD544\uC694. TMP Settings\uB97C \uC720\uC9C0\uD558\uBA70 \uB2E4\uC2DC \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.tmp_setting.essentials.import
-      value: "TMP 기본 리소스 가져오기"
+      value: "TMP \uAE30\uBCF8 \uB9AC\uC18C\uC2A4 \uAC00\uC838\uC624\uAE30"
     - key: installer.tmp_setting.examples.title
-      value: "TMP 예제 및 추가 리소스"
+      value: "TMP \uC608\uC81C \uBC0F \uCD94\uAC00 \uB9AC\uC18C\uC2A4"
     - key: installer.tmp_setting.examples.info
-      value: "TextMesh Pro 사용을 돕는 선택적인 예제와 추가 리소스. 기본 리소스부터 가져오세요."
+      value: "TextMesh Pro \uC0AC\uC6A9\uC744 \uB3D5\uB294 \uC120\uD0DD\uC801\uC778 \uC608\uC81C\uC640 \uCD94\uAC00 \uB9AC\uC18C\uC2A4. \uAE30\uBCF8 \uB9AC\uC18C\uC2A4\uBD80\uD130 \uAC00\uC838\uC624\uC138\uC694."
     - key: installer.tmp_setting.examples.update
-      value: "업데이트된 TMP 예제와 추가 리소스를 다시 가져옵니다."
+      value: "\uC5C5\uB370\uC774\uD2B8\uB41C TMP \uC608\uC81C\uC640 \uCD94\uAC00 \uB9AC\uC18C\uC2A4\uB97C \uB2E4\uC2DC \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.tmp_setting.examples.import
-      value: "TMP 예제 및 추가 리소스 가져오기"
+      value: "TMP \uC608\uC81C \uBC0F \uCD94\uAC00 \uB9AC\uC18C\uC2A4 \uAC00\uC838\uC624\uAE30"
     - key: installer.setup.preview.title
-      value: "변경사항 미리보기"
+      value: "\uBCC0\uACBD\uC0AC\uD56D \uBBF8\uB9AC\uBCF4\uAE30"
     - key: installer.setup.preview.info
-      value: "선택한 root와 dependency를 Package Management가 확인합니다. 미리보기는 참고 정보이며 설치 시 현재 상태를 다시 확인합니다. 선택 해제로 기존 패키지를 제거하지 않습니다. TMP 리소스는 TMP 화면에서 별도로 가져옵니다."
+      value: "\uC120\uD0DD\uD55C root\uC640 dependency\uB97C Package Management\uAC00 \uD655\uC778\uD569\uB2C8\uB2E4. \uBBF8\uB9AC\uBCF4\uAE30\uB294 \uCC38\uACE0 \uC815\uBCF4\uC774\uBA70 \uC124\uCE58 \uC2DC \uD604\uC7AC \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uD655\uC778\uD569\uB2C8\uB2E4. \uC120\uD0DD \uD574\uC81C\uB85C \uAE30\uC874 \uD328\uD0A4\uC9C0\uB97C \uC81C\uAC70\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4. TMP \uB9AC\uC18C\uC2A4\uB294 TMP \uD654\uBA74\uC5D0\uC11C \uBCC4\uB3C4\uB85C \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.setup.preview.empty
-      value: "선택한 root 패키지 없음."
+      value: "\uC120\uD0DD\uD55C root \uD328\uD0A4\uC9C0 \uC5C6\uC74C."
     - key: installer.setup.preview.observing
-      value: "설치 요구사항 확인 중…"
+      value: "\uC124\uCE58 \uC694\uAD6C\uC0AC\uD56D \uD655\uC778 \uC911\u2026"
     - key: installer.setup.preview.ensuring
-      value: "설치 요구사항 적용 중…"
+      value: "\uC124\uCE58 \uC694\uAD6C\uC0AC\uD56D \uC801\uC6A9 \uC911\u2026"
     - key: installer.setup.preview.ready
-      value: "미리보기 완료. 설치 시 현재 상태를 다시 확인합니다."
+      value: "\uBBF8\uB9AC\uBCF4\uAE30 \uC644\uB8CC. \uC124\uCE58 \uC2DC \uD604\uC7AC \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uD655\uC778\uD569\uB2C8\uB2E4."
     - key: installer.setup.preview.graph_error
-      value: "설치 전 dependency graph 오류 해결 필요."
+      value: "\uC124\uCE58 \uC804 dependency graph \uC624\uB958 \uD574\uACB0 \uD544\uC694."
     - key: installer.setup.preview.complete
-      value: "모든 설치 요구사항 충족."
+      value: "\uBAA8\uB4E0 \uC124\uCE58 \uC694\uAD6C\uC0AC\uD56D \uCDA9\uC871."
     - key: installer.setup.preview.assembly_required
-      value: "패키지 설명에 명시된 외부 통합을 먼저 임포트한 뒤 새로 고침하세요."
+      value: "\uD328\uD0A4\uC9C0 \uC124\uBA85\uC5D0 \uBA85\uC2DC\uB41C \uC678\uBD80 \uD1B5\uD569\uC744 \uBA3C\uC800 \uC784\uD3EC\uD2B8\uD55C \uB4A4 \uC0C8\uB85C \uACE0\uCE68\uD558\uC138\uC694."
     - key: installer.setup.preview.failed
-      value: "실패. 진단 내용 확인 필요."
+      value: "\uC2E4\uD328. \uC9C4\uB2E8 \uB0B4\uC6A9 \uD655\uC778 \uD544\uC694."
     - key: installer.setup.preview.cancelled
-      value: "취소됨. 이미 시작한 UPM 요청은 완료까지 기다렸습니다."
+      value: "\uCDE8\uC18C\uB428. \uC774\uBBF8 \uC2DC\uC791\uD55C UPM \uC694\uCCAD\uC740 \uC644\uB8CC\uAE4C\uC9C0 \uAE30\uB2E4\uB838\uC2B5\uB2C8\uB2E4."
     - key: installer.setup.preview.refresh
-      value: "미리보기 새로 고침"
+      value: "\uBBF8\uB9AC\uBCF4\uAE30 \uC0C8\uB85C \uACE0\uCE68"
     - key: installer.setup.preview.cancel
-      value: "취소"
+      value: "\uCDE8\uC18C"
     - key: installer.setup.preview.root
-      value: "선택한 root"
+      value: "\uC120\uD0DD\uD55C root"
     - key: installer.setup.preview.dependency
-      value: "Dependency"
+      value: Dependency
     - key: installer.setup.preview.satisfied
-      value: "이미 충족됨"
+      value: "\uC774\uBBF8 \uCDA9\uC871\uB428"
     - key: installer.setup.preview.required
-      value: "설치 필요"
+      value: "\uC124\uCE58 \uD544\uC694"
     - key: installer.setup.preview.registry_required
-      value: "Registry 준비 필요. 패키지 획득은 UPM에 위임"
+      value: "Registry \uC900\uBE44 \uD544\uC694. \uD328\uD0A4\uC9C0 \uD68D\uB4DD\uC740 UPM\uC5D0 \uC704\uC784"
     - key: installer.setup.preview.delegated
-      value: "Registry 준비됨. 패키지 획득은 위임되며 검증하지 않음"
+      value: "Registry \uC900\uBE44\uB428. \uD328\uD0A4\uC9C0 \uD68D\uB4DD\uC740 \uC704\uC784\uB418\uBA70 \uAC80\uC99D\uD558\uC9C0 \uC54A\uC74C"
     - key: installer.setup.preview.unsupported
-      value: "이 executor는 미리보기를 지원하지 않음"
+      value: "\uC774 executor\uB294 \uBBF8\uB9AC\uBCF4\uAE30\uB97C \uC9C0\uC6D0\uD558\uC9C0 \uC54A\uC74C"
     - key: installer.install_setting.sound.label
-      value: "Runiverse OS Sound"
+      value: Runiverse OS Sound
     - key: installer.install_setting.sound.one_line
-      value: "공통 오디오 API와 사운드 리소스"
+      value: "\uACF5\uD1B5 \uC624\uB514\uC624 API\uC640 \uC0AC\uC6B4\uB4DC \uB9AC\uC18C\uC2A4"
     - key: installer.install_setting.sound.description
-      value: "오디오 구현이 공유하는 클립, 재생·공간 음향 계약, Unity 오디오 소스 컴포넌트와 사운드 리소스 등록 기능을 제공합니다."
+      value: "\uC624\uB514\uC624 \uAD6C\uD604\uC774 \uACF5\uC720\uD558\uB294 \uD074\uB9BD, \uC7AC\uC0DD\xB7\uACF5\uAC04 \uC74C\uD5A5 \uACC4\uC57D,\nUnity \uC624\uB514\uC624 \uC18C\uC2A4 \uCEF4\uD3EC\uB10C\uD2B8\uC640 \uC0AC\uC6B4\uB4DC \uB9AC\uC18C\uC2A4 \uB4F1\uB85D \uAE30\uB2A5\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.effects.label
-      value: "Runiverse OS Effects"
+      value: Runiverse OS Effects
     - key: installer.install_setting.effects.one_line
-      value: "둥근 모서리와 외곽선 효과"
+      value: "\uB465\uADFC \uBAA8\uC11C\uB9AC\uC640 \uC678\uACFD\uC120 \uD6A8\uACFC"
     - key: installer.install_setting.effects.description
-      value: "Unity UI의 둥근 모서리와 메시 외곽선 효과를 제공합니다. 여러 오브젝트의 외곽선을 합치는 효과도 포함합니다."
+      value: "Unity UI\uC758 \uB465\uADFC \uBAA8\uC11C\uB9AC\uC640 \uBA54\uC2DC \uC678\uACFD\uC120 \uD6A8\uACFC\uB97C \uC81C\uACF5\uD569\uB2C8\uB2E4.\n\uC5EC\uB7EC \uC624\uBE0C\uC81D\uD2B8\uC758 \uC678\uACFD\uC120\uC744 \uD569\uCE58\uB294 \uD6A8\uACFC\uB3C4 \uD3EC\uD568\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.fmod.label
-      value: "FMOD for RuniOS"
+      value: FMOD for RuniOS
     - key: installer.install_setting.fmod.one_line
-      value: "RuniOS용 FMOD 오디오 재생"
+      value: "RuniOS\uC6A9 FMOD \uC624\uB514\uC624 \uC7AC\uC0DD"
     - key: installer.install_setting.fmod.description
-      value: "RuniOS 사운드 리소스와 연결된 FMOD Core 사운드 시스템, 오디오 클립, 재생 채널과 채널 그룹을 제공합니다. FMOD for Unity 통합은 별도로 준비해야 하며 Setup에서 설치하지 않습니다."
+      value: "RuniOS \uC0AC\uC6B4\uB4DC \uB9AC\uC18C\uC2A4\uC640 \uC5F0\uACB0\uB41C FMOD Core \uC0AC\uC6B4\uB4DC \uC2DC\uC2A4\uD15C,\uC624\uB514\uC624 \uD074\uB9BD, \uC7AC\uC0DD \uCC44\uB110\uACFC \uCC44\uB110 \uADF8\uB8F9\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4.\nFMOD for Unity \uD1B5\uD569\uC740 \uBCC4\uB3C4\uB85C \uC900\uBE44\uD574\uC57C \uD558\uBA70 Setup\uC5D0\uC11C \uC124\uCE58\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
     - key: installer.install_setting.nbs.label
-      value: "Runiverse OS NBS"
+      value: Runiverse OS NBS
     - key: installer.install_setting.nbs.one_line
-      value: "Note Block Studio 파일 로드와 재생"
+      value: "Note Block Studio \uD30C\uC77C \uB85C\uB4DC\uC640 \uC7AC\uC0DD"
     - key: installer.install_setting.nbs.description
-      value: "RuniOS 리소스 팩에서 Note Block Studio 파일을 읽고 FMOD로 음표를 재생합니다. 템포 맵, 커스텀 악기와 에디터 미리보기를 지원합니다."
+      value: "RuniOS \uB9AC\uC18C\uC2A4 \uD329\uC5D0\uC11C Note Block Studio \uD30C\uC77C\uC744 \uC77D\uACE0 FMOD\uB85C \uC74C\uD45C\uB97C \uC7AC\uC0DD\uD569\uB2C8\uB2E4.\n\uD15C\uD3EC \uB9F5, \uCEE4\uC2A4\uD140 \uC545\uAE30\uC640 \uC5D0\uB514\uD130 \uBBF8\uB9AC\uBCF4\uAE30\uB97C \uC9C0\uC6D0\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.texture.label
-      value: "Runiverse OS Texture"
+      value: Runiverse OS Texture
     - key: installer.install_setting.texture.one_line
-      value: "비동기 런타임 이미지 로드"
+      value: "\uBE44\uB3D9\uAE30 \uB7F0\uD0C0\uC784 \uC774\uBBF8\uC9C0 \uB85C\uB4DC"
     - key: installer.install_setting.texture.description
-      value: "FreeImage로 이미지를 디코드하고 Burst로 밉맵을 생성한 뒤 Unity 메인 스레드에서 Texture2D 데이터를 업로드합니다. 메모리, 스트림과 RuniOS IO 노드를 입력으로 받습니다."
+      value: "FreeImage\uB85C \uC774\uBBF8\uC9C0\uB97C \uB514\uCF54\uB4DC\uD558\uACE0 Burst\uB85C \uBC09\uB9F5\uC744 \uC0DD\uC131\uD55C \uB4A4\nUnity \uBA54\uC778 \uC2A4\uB808\uB4DC\uC5D0\uC11C Texture2D \uB370\uC774\uD130\uB97C \uC5C5\uB85C\uB4DC\uD569\uB2C8\uB2E4.\n\n\uBA54\uBAA8\uB9AC, \uC2A4\uD2B8\uB9BC\uACFC RuniOS IO \uB178\uB4DC\uB97C \uC785\uB825\uC73C\uB85C \uBC1B\uC2B5\uB2C8\uB2E4."
