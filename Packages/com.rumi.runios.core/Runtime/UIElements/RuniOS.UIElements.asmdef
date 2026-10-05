@@ -10,6 +10,7 @@
     "overrideReferences": true,
     "precompiledReferences": [
         "RuniOS.APIMarshal.UnityEngine.UIElementsModule.dll",
+        "RuniOS.APIBridge.UnityEngine.UIElementsModule.dll",
         "ExtendedNumerics.BigDecimal.dll"
     ],
     "autoReferenced": false,
