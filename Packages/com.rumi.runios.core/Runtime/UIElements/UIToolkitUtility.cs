@@ -70,44 +70,13 @@ namespace RuniOS.UIElements
 
         public static void SetValueWithoutNotify<T>(this INotifyValueChanged<T> element, T newValue) => element.SetValueWithoutNotify(newValue);
 
-        /// <summary>
-        /// 요소가 패널에 등록될 때마다 루트 요소에 스타일 시트를 맨 위에 등록합니다
-        /// </summary>
-        [Obsolete("TSS로 수정 예정")]
-        public static void RegisterDefaultStyleSheet(this VisualElement element, StyleSheet styleSheet)
-        {
-            element.RegisterCallback<AttachToPanelEvent>(x =>
-            {
-                VisualElement root = x.destinationPanel.visualTree;
-                if (!element.IsEditorPanel())
-                {
-                    if (!root.styleSheets.Contains(styleSheet))
-                        root.styleSheets.Insert(0, styleSheet);
-
-                    return;
-                }
-
-                /*
-                 * 디버거 찍어보심 아시겠지만 root 안의 rootVisualContainer2 요소에 스타일 시트가 적용되서
-                 * 이렇게 해주지 않으면 유니티의 내장 스타일 시트가 먹어버립니다
-                 */
-
-                for (int i = 0; i < root.hierarchy.childCount; i++)
-                {
-                    VisualElement child = root.hierarchy[i];
-                    if (!child.styleSheets.Contains(styleSheet))
-                        child.styleSheets.Add(styleSheet);
-                }
-            });
-        }
-
         static readonly ConditionalWeakTable<CallbackEventHandler, Dictionary<(Type type, ValueChangedCallback callback), Delegate>> registeredValueChangedCallbacks = [];
-
         public static bool RegisterValueChangedCallback(this CallbackEventHandler element, Type targetType, ValueChangedCallback callback)
         {
             if (!typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
                 return false;
 
+            // AOT 환경에선 작동하지 않지만 IL2CPP에선 작동합니다.
             MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
             return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
 
@@ -131,6 +100,7 @@ namespace RuniOS.UIElements
             if (!typeof(INotifyValueChanged<>).MakeGenericType(targetType).IsInstanceOfType(element))
                 return false;
 
+            // AOT 환경에선 작동하지 않지만 IL2CPP에선 작동합니다.
             MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
             return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
 
