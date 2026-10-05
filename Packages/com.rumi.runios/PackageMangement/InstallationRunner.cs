@@ -1,7 +1,6 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -56,7 +55,7 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public InstallationRunner(IEnumerable<IInstallationExecutor> executors)
         {
-            _executors = (executors ?? throw new ArgumentNullException(nameof(executors))).ToArray();
+            _executors = [.. executors ?? throw new ArgumentNullException(nameof(executors))];
             foreach (IInstallationExecutor executor in _executors)
                 if (executor is null) throw new ArgumentException("An executor cannot be null.", nameof(executors));
         }
@@ -92,8 +91,7 @@ namespace RuniOS.PackageManagement
         /// Thrown when execution is cancelled.<br/>
         /// 실행이 취소되면 발생합니다.
         /// </exception>
-        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<IInstallation> installations, bool force = false,
-            [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<IInstallation> installations, bool force = false, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             DispatchResult dispatch = Dispatch(installations, cancellationToken);
             await foreach (InstallationResult result in ExecuteAsync(dispatch, force, cancellationToken).ConfigureAwait(false))
@@ -138,7 +136,7 @@ namespace RuniOS.PackageManagement
             foreach (IInstallation installation in dispatch.unsupported)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, new[] { new InstallationDiagnostic("installation:unsupported", "No configured executor supports this installation.") });
+                yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, [new InstallationDiagnostic("installation:unsupported", "No configured executor supports this installation.")]);
             }
             foreach (ExecutorBatch batch in dispatch.batches)
             {
@@ -176,10 +174,9 @@ namespace RuniOS.PackageManagement
                 foreach (IInstallation installation in remaining)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, new[]
-                    {
+                    yield return new InstallationPreview(installation, InstallationPreviewStatus.Failed, [
                         new InstallationDiagnostic("installation:preview-failed", failureMessage ?? "The previewer did not return an observation for this installation.")
-                    }, executor);
+                    ], executor);
                 }
             }
         }
@@ -189,7 +186,7 @@ namespace RuniOS.PackageManagement
             foreach (IInstallation installation in dispatch.unsupported)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                yield return new InstallationResult(installation, false, new[] { new InstallationDiagnostic("installation:unsupported", "No configured executor supports this installation.") });
+                yield return new InstallationResult(installation, false, [new InstallationDiagnostic("installation:unsupported", "No configured executor supports this installation.")]);
             }
             foreach (ExecutorBatch batch in dispatch.batches)
             {
@@ -217,10 +214,9 @@ namespace RuniOS.PackageManagement
                 }
                 foreach (IInstallation installation in remaining)
                 {
-                    yield return new InstallationResult(installation, false, new[]
-                    {
+                    yield return new InstallationResult(installation, false, [
                         new InstallationDiagnostic("installation:executor-failed", failureMessage ?? "The executor did not return a final result for this installation.")
-                    }, executor);
+                    ], executor);
                 }
             }
         }
@@ -237,7 +233,7 @@ namespace RuniOS.PackageManagement
                 for (int i = 0; i < _executors.Length; i++)
                 {
                     if (!_executors[i].CanExecute(installation)) continue;
-                    (batches[i] ??= new List<IInstallation>()).Add(installation);
+                    (batches[i] ??= []).Add(installation);
                     matched = true;
                 }
                 if (!matched) unmatched.Add(installation);

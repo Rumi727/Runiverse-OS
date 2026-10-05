@@ -144,7 +144,7 @@ namespace RuniOS.Editor.Installer.Screens
                     parent.Add(new Label("- " + dependency.id));
                 else
                 {
-                    Foldout foldout = new() { text = dependency.id.ToString(), value = false };
+                    Foldout foldout = new() { text = dependency.id.ToString(), value = false, focusable = false };
                     parent.Add(foldout);
                     AddDependencies(foldout, dependency);
                 }

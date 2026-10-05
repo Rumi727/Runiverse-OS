@@ -10,7 +10,7 @@ namespace RuniOS.Editor.Installer.Screens
 {
     sealed class RootPackageSelectionScreen : SetupScreen
     {
-        readonly List<(PackageElement element, float y, float height, float opacity)> packages = [];
+        readonly List<(PackageElement element, float y, float height, float opacity, float progress)> packages = [];
 
         public RootPackageSelectionScreen() : base("installer.setup.roots.title", 200)
         {
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Installer.Screens
                     }
                 };
                 element.expandedChanged += OnExpandedChanged;
-                packages.Add((element, 0, 0, 1));
+                packages.Add((element, 0, 0, 1, 0));
                 Add(element);
             }
 
@@ -44,8 +44,10 @@ namespace RuniOS.Editor.Installer.Screens
             if (changed.expanded)
             {
                 foreach (var package in packages)
+                {
                     if (package.element != changed)
                         package.element.expanded = false;
+                }
 
                 // The legacy selected card is drawn last, over fading siblings.
                 changed.BringToFront();
@@ -81,7 +83,10 @@ namespace RuniOS.Editor.Installer.Screens
 
         protected internal override void OnUpdate(double time, float deltaTime)
         {
-            float availableHeight = scrollView!.contentViewport.layout.height;
+            if (scrollView == null)
+                return;
+
+            float availableHeight = scrollView.contentViewport.layout.height;
             if (float.IsNaN(availableHeight) || availableHeight <= 0)
                 return;
 
@@ -99,25 +104,35 @@ namespace RuniOS.Editor.Installer.Screens
             {
                 var state = packages[i];
                 PackageElement element = state.element;
-                float margins = element.resolvedStyle.marginTop + element.resolvedStyle.marginBottom;
-                // Legacy: the expanded card follows the viewport origin and fills the available area.
-                float targetY = element.expanded ? 0 : nextY;
-                float targetHeight = element.expanded ? Mathf.Max(element.collapsedHeight, availableHeight - margins) : element.collapsedHeight;
+
                 if (state.height == 0)
                 {
                     state.y = nextY;
                     state.height = element.collapsedHeight;
                 }
 
+                float targetY = element.expanded ? 0 : nextY;
                 state.y = SetupAnimationUtility.Follow(state.y, targetY, SetupWindow.followRate, deltaTime);
+
+                float margins = element.resolvedStyle.marginTop + element.resolvedStyle.marginBottom;
+                float targetHeight = element.expanded ? Mathf.Max(element.collapsedHeight, availableHeight - margins) : element.collapsedHeight;
                 state.height = SetupAnimationUtility.Follow(state.height, targetHeight, SetupWindow.followRate, deltaTime);
-                state.opacity = SetupAnimationUtility.Follow(state.opacity, !anyExpanded || element.expanded ? 1 : 0, SetupWindow.followRate, deltaTime);
-                element.style.top = state.y;
+
+                float targetOpacity = !anyExpanded || element.expanded ? 1 : 0;
+                state.opacity = SetupAnimationUtility.Follow(state.opacity, targetOpacity, SetupWindow.followRate, deltaTime);
+
+                float targetProgress = element.expanded ? 1 : 0;
+                state.progress = SetupAnimationUtility.Follow(state.progress, targetProgress, SetupWindow.followRate, deltaTime);
+
+                packages[i] = state;
+
+                element.style.translate = new Translate(0, state.y - (scrollView.contentContainer.resolvedStyle.translate.y * state.progress), 0);
                 element.style.height = state.height;
                 element.style.opacity = state.opacity;
-                packages[i] = state;
-                nextY += element.collapsedHeight + margins;
+
                 element.OnUpdate(deltaTime);
+
+                nextY += element.collapsedHeight + margins;
             }
         }
     }

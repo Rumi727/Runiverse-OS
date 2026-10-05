@@ -36,8 +36,8 @@ namespace RuniOS.Editor.Installer.Screens
             essentialsTitle.AddToClassList("runios-setup__section-title");
             examplesTitle.AddToClassList("runios-setup__section-title");
 
-            essentials = new Button(() => EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources"));
-            examples = new Button(() => EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Examples and Extras"));
+            essentials = new Button(() => EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Essential Resources")) { focusable = false };
+            examples = new Button(() => EditorApplication.ExecuteMenuItem("Window/TextMeshPro/Import TMP Examples and Extras")) { focusable = false };
             VisualElement essentialsBox = new();
             essentialsBox.AddToClassList("runios-setup__resource-box");
             essentialsBox.Add(essentialsTitle);

@@ -218,7 +218,7 @@ namespace RuniOS.Editor.Installer
         /// Opens the Setup window.<br/>
         /// Setup 창을 엽니다.
         /// </summary>
-        [MenuItem("Window/Runiverse OS/Setup")]
+        [MenuItem("RuniOS/Setup")]
         public static void Open() => GetWindow<SetupWindow>(true, "Runiverse OS Setup");
 
         void OnEnable()

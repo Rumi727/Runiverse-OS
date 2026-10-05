@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using RuniOS.PackageManagement;
 using RuniOS.PackageManagement.Unity;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -47,9 +48,9 @@ namespace RuniOS.Editor.Installer.Screens
         {
             contentContainer.AddToClassList("runios-setup__settings");
             styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.rumi.runios/Editor/Screens/SetupScreens.uss"));
-            refresh = new Button(() => _ = RunAsync(true));
-            install = new Button(OnInstallClicked);
-            cancel = new Button(() => cancellation?.Cancel());
+            refresh = new Button(() => _ = RunAsync(true)) { focusable = false };
+            install = new Button(OnInstallClicked) { focusable = false };
+            cancel = new Button(() => cancellation?.Cancel()) { focusable = false };
             Add(info);
             Add(changes);
             Add(status);
@@ -65,38 +66,44 @@ namespace RuniOS.Editor.Installer.Screens
 
         void OnInstallClicked()
         {
-            List<string> embeddedConflicts = new();
+            List<string> embeddedConflicts = [];
             foreach (Row row in rows)
-                if (row.preview is { } preview)
-                    foreach (InstallationDiagnostic diagnostic in preview.diagnostics)
-                        if (diagnostic.code == "upm:embedded-conflict")
-                        {
-                            embeddedConflicts.Add(row.label.text);
-                            break;
-                        }
+            {
+                if (row.preview != null && row.preview.diagnostics.Any(diagnostic => diagnostic.code == "upm:embedded-conflict"))
+                    embeddedConflicts.Add(row.label.text);
+            }
+
             if (embeddedConflicts.Count != 0)
             {
                 string message = InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_message")
                     + "\n\n" + string.Join("\n", embeddedConflicts);
-                bool proceed = EditorUtility.DisplayDialog(
+                bool proceed = EditorUtility.DisplayDialog
+                (
                     InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_title"), message,
                     InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_confirm"),
-                    InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_cancel"));
-                if (!proceed) return;
+                    InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_cancel")
+                );
+                if (!proceed)
+                    return;
             }
-            List<string> versionChanges = new();
+
+            List<string> versionChanges = [];
             foreach (Row row in rows)
+            {
                 if (row.preview?.status == InstallationPreviewStatus.RequiresForce && row.preview.diagnostics.Count != 0)
                     versionChanges.Add(row.label.text + "\n" + row.preview.diagnostics[0].message);
+            }
+
             bool force = false;
             if (versionChanges.Count != 0)
             {
-                string message = InstallerLocalization.GetText("installer.setup.preview.version_change_message")
-                    + "\n\n" + string.Join("\n\n", versionChanges);
-                force = EditorUtility.DisplayDialog(
+                string message = InstallerLocalization.GetText("installer.setup.preview.version_change_message") + "\n\n" + string.Join("\n\n", versionChanges);
+                force = EditorUtility.DisplayDialog
+                (
                     InstallerLocalization.GetText("installer.setup.preview.version_change_title"), message,
                     InstallerLocalization.GetText("installer.setup.preview.version_change_accept"),
-                    InstallerLocalization.GetText("installer.setup.preview.version_change_decline"));
+                    InstallerLocalization.GetText("installer.setup.preview.version_change_decline")
+                );
             }
             _ = RunAsync(false, force);
         }
@@ -122,9 +129,11 @@ namespace RuniOS.Editor.Installer.Screens
                 {
                     foreach (PackageGraphDiagnostic diagnostic in closure.diagnostics)
                         changes.Add(new HelpBox(diagnostic.code + ": " + diagnostic.message, HelpBoxMessageType.Error));
+
                     statusKey = "installer.setup.preview.graph_error";
                     return;
                 }
+
                 if (closure.packages.Count == 0)
                 {
                     statusKey = "installer.setup.preview.empty";
@@ -147,7 +156,7 @@ namespace RuniOS.Editor.Installer.Screens
                 }
                 OnLanguageChanged();
 
-                InstallationRunner runner = new(new IInstallationExecutor[] { new UpmExecutor(), new EmbeddedExecutor() });
+                InstallationRunner runner = new([new UpmExecutor(), new EmbeddedExecutor()]);
                 EditorApplication.LockReloadAssemblies();
                 reloadLocked = true;
                 if (preview)
@@ -159,12 +168,14 @@ namespace RuniOS.Editor.Installer.Screens
                         token.ThrowIfCancellationRequested();
                         succeeded &= observation.status != InstallationPreviewStatus.Failed;
                         foreach (Row row in rows)
-                            if (ReferenceEquals(row.installation, observation.installation))
-                            {
-                                row.preview = observation;
-                                UpdateRow(row);
-                                break;
-                            }
+                        {
+                            if (row.installation != observation.installation)
+                                continue;
+
+                            row.preview = observation;
+                            UpdateRow(row);
+                            break;
+                        }
                     }
                     token.ThrowIfCancellationRequested();
                     statusKey = succeeded ? "installer.setup.preview.ready" : "installer.setup.preview.failed";
@@ -178,12 +189,14 @@ namespace RuniOS.Editor.Installer.Screens
                         token.ThrowIfCancellationRequested();
                         succeeded &= result.succeeded;
                         foreach (Row row in rows)
-                            if (ReferenceEquals(row.installation, result.installation))
-                            {
-                                row.result = result;
-                                UpdateRow(row);
-                                break;
-                            }
+                        {
+                            if (row.installation != result.installation)
+                                continue;
+
+                            row.result = result;
+                            UpdateRow(row);
+                            break;
+                        }
                     }
                     token.ThrowIfCancellationRequested();
                     statusKey = succeeded ? "installer.setup.preview.complete" : "installer.setup.preview.failed";
@@ -221,9 +234,11 @@ namespace RuniOS.Editor.Installer.Screens
         void UpdateButtons()
         {
             refresh.SetEnabled(cancellation == null);
+
             bool canInstall = cancellation == null && closure is { succeeded: true } && rows.Count != 0;
-            foreach (Row row in rows)
-                if (row.preview?.status == InstallationPreviewStatus.Failed) { canInstall = false; break; }
+            if (rows.Any(row => row.preview?.status == InstallationPreviewStatus.Failed))
+                canInstall = false;
+
             install.SetEnabled(canInstall);
             cancel.style.display = cancellation == null ? DisplayStyle.None : DisplayStyle.Flex;
         }
@@ -245,9 +260,12 @@ namespace RuniOS.Editor.Installer.Screens
             string provenance = InstallerLocalization.GetText(row.package.isRoot ? "installer.setup.preview.root" : "installer.setup.preview.dependency");
             row.label.text = PackageElement.GetLabel(row.package.package) + " (" + row.package.package.id + ") — " + provenance;
             bool delegated = row.installation is UpmInstallation { ensurePackage: false };
-            string key = row.result is { } result
-                ? !result.succeeded ? "installer.setup.preview.failed" : delegated ? "installer.setup.preview.delegated" : "installer.setup.preview.satisfied"
-                : row.preview?.status switch
+            string key;
+            if (row.result is { } result)
+                key = !result.succeeded ? "installer.setup.preview.failed" : delegated ? "installer.setup.preview.delegated" : "installer.setup.preview.satisfied";
+            else
+            {
+                key = row.preview?.status switch
                 {
                     InstallationPreviewStatus.Satisfied => "installer.setup.preview.satisfied",
                     InstallationPreviewStatus.RequiresEnsure => delegated ? "installer.setup.preview.registry_required" : "installer.setup.preview.required",
@@ -257,21 +275,24 @@ namespace RuniOS.Editor.Installer.Screens
                     InstallationPreviewStatus.Failed => "installer.setup.preview.failed",
                     _ => "installer.setup.preview.observing"
                 };
+            }
             row.state.text = InstallerLocalization.GetText(key);
             row.diagnostics.Clear();
             IReadOnlyList<InstallationDiagnostic>? diagnostics = row.result?.diagnostics ?? row.preview?.diagnostics;
-            if (diagnostics != null)
-                foreach (InstallationDiagnostic diagnostic in diagnostics)
+            if (diagnostics == null)
+                return;
+
+            foreach (InstallationDiagnostic diagnostic in diagnostics)
+            {
+                string message = diagnostic.code + ": " + diagnostic.message;
+                message = diagnostic.code switch
                 {
-                    string message = diagnostic.code + ": " + diagnostic.message;
-                    if (diagnostic.code == "unity:required-assembly-missing")
-                        message = InstallerLocalization.GetText("installer.setup.preview.assembly_required") + "\n" + message;
-                    else if (diagnostic.code == "upm:embedded-conflict")
-                        message = InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_warning");
-                    row.diagnostics.Add(new HelpBox(message,
-                        diagnostic.code is "upm:version-mismatch" or "upm:embedded-conflict"
-                            ? HelpBoxMessageType.Warning : HelpBoxMessageType.Error));
-                }
+                    "unity:required-assembly-missing" => InstallerLocalization.GetText("installer.setup.preview.assembly_required") + "\n" + message,
+                    "upm:embedded-conflict" => InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_warning"),
+                    _ => message
+                };
+                row.diagnostics.Add(new HelpBox(message, diagnostic.code is "upm:version-mismatch" or "upm:embedded-conflict" ? HelpBoxMessageType.Warning : HelpBoxMessageType.Error));
+            }
         }
     }
 }
