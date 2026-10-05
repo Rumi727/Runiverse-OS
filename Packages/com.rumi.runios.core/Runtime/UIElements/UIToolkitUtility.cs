@@ -1,4 +1,5 @@
-﻿using RuniOS.Reflection;
+﻿#nullable enable
+using RuniOS.Reflection;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -11,17 +12,17 @@ namespace RuniOS.UIElements
         /// <summary>
         /// RuniOS 컨트롤 스타일
         /// </summary>
-        public static StyleSheet rosControlStyle
+        public static ThemeStyleSheet rosControlStyle
         {
             get
             {
                 if (_rosControlStyle == null)
-                    _rosControlStyle = Resources.Load<StyleSheet>("RuniOS/UI Elements/ROS Control Style");
+                    _rosControlStyle = Resources.Load<ThemeStyleSheet>("RuniOS/UI Elements/ROS Control Style");
 
                 return _rosControlStyle;
             }
         }
-        static StyleSheet? _rosControlStyle;
+        static ThemeStyleSheet? _rosControlStyle;
 
 #if UNITY_EDITOR
         /// <summary>
