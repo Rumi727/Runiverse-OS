@@ -28,24 +28,6 @@ MonoBehaviour:
       value: "TextMesh Pro \uD328\uD0A4\uC9C0\uAC00 \uAE54\uB824\uC788\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
     - key: installer.tmp_setting.info
       value: "ROS \uD328\uD0A4\uC9C0\uB294 Unity\uC758 TextMesh Pro \uD328\uD0A4\uC9C0\uB97C \uC0AC\uC6A9\uD569\uB2C8\uB2E4.\n\uC6D0\uD65C\uD55C \uC0AC\uC6A9\uC744 \uC704\uD574 TextMesh Pro\uC758 \uAE30\uBCF8 \uB9AC\uC18C\uC2A4\uB97C \uC784\uD3EC\uD2B8\uD558\uB294 \uAC83\uC744 \uAD8C\uC7A5\uD569\uB2C8\uB2E4."
-    - key: installer.install_setting.install
-      value: "\uC124\uCE58"
-    - key: installer.install_setting.dependency
-      value: "\uC885\uC18D\uC131"
-    - key: installer.install_setting.core.label
-      value: Runiverse OS Core
-    - key: installer.install_setting.core.one_line
-      value: "\uACF5\uD1B5 \uC720\uD2F8\uB9AC\uD2F0\uC640 \uB9AC\uC18C\uC2A4 \uAD00\uB9AC"
-    - key: installer.install_setting.core.description
-      value: "RuniOS \uD328\uD0A4\uC9C0\uAC00 \uACF5\uC720\uD558\uB294 \uC720\uD2F8\uB9AC\uD2F0, \uBE44\uB3D9\uAE30 \uC791\uC5C5, IO \uCD94\uC0C1\uD654, \uB9AC\uC18C\uC2A4 \uD329\uACFC \uC9C0\uC5ED\uD654 \uAE30\uB2A5\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4."
-    - key: installer.install_setting.ui.label
-      value: Runiverse OS UI
-    - key: installer.install_setting.ui.one_line
-      value: "RuniOS\uC758 \uACF5\uC2DD \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C"
-    - key: installer.install_setting.ui.description
-      value: "osu!lazer\uC5D0\uC11C \uC601\uAC10\uC744 \uBC1B\uC740 \uB514\uC790\uC778\uC73C\uB85C RuniOS\uC758 \uC5EC\uB7EC \uAE30\uB2A5\uC744 \uC81C\uC5B4\uD560 \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C\uC785\uB2C8\uB2E4.\nUI/UX \uAD6C\uD604\uC740 \uC608\uC815\uB418\uC5B4 \uC788\uC73C\uBA70 \uD604\uC7AC \uCEF4\uD3EC\uB10C\uD2B8\uB294 \uB9AC\uC18C\uC2A4\uB97C Unity UI\uC5D0 \uC5F0\uACB0\uD569\uB2C8\uB2E4."
-    - key: installer.setup.roots.title
-      value: "Root \uD328\uD0A4\uC9C0 \uC120\uD0DD"
     - key: installer.tmp_setting.essentials.title
       value: "TMP \uAE30\uBCF8 \uB9AC\uC18C\uC2A4"
     - key: installer.tmp_setting.essentials.info
@@ -62,8 +44,10 @@ MonoBehaviour:
       value: "\uC5C5\uB370\uC774\uD2B8\uB41C TMP \uC608\uC81C\uC640 \uCD94\uAC00 \uB9AC\uC18C\uC2A4\uB97C \uB2E4\uC2DC \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.tmp_setting.examples.import
       value: "TMP \uC608\uC81C \uBC0F \uCD94\uAC00 \uB9AC\uC18C\uC2A4 \uAC00\uC838\uC624\uAE30"
+    - key: installer.setup.roots.title
+      value: "\uD328\uD0A4\uC9C0 \uC120\uD0DD"
     - key: installer.setup.preview.title
-      value: "\uBCC0\uACBD\uC0AC\uD56D \uBBF8\uB9AC\uBCF4\uAE30"
+      value: "\uC124\uCE58 \uC2DC\uAC04!"
     - key: installer.setup.preview.info
       value: "\uC120\uD0DD\uD55C root\uC640 dependency\uB97C Package Management\uAC00 \uD655\uC778\uD569\uB2C8\uB2E4. \uBBF8\uB9AC\uBCF4\uAE30\uB294 \uCC38\uACE0 \uC815\uBCF4\uC774\uBA70 \uC124\uCE58 \uC2DC \uD604\uC7AC \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uD655\uC778\uD569\uB2C8\uB2E4. \uC120\uD0DD \uD574\uC81C\uB85C \uAE30\uC874 \uD328\uD0A4\uC9C0\uB97C \uC81C\uAC70\uD558\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4. TMP \uB9AC\uC18C\uC2A4\uB294 TMP \uD654\uBA74\uC5D0\uC11C \uBCC4\uB3C4\uB85C \uAC00\uC838\uC635\uB2C8\uB2E4."
     - key: installer.setup.preview.empty
@@ -122,6 +106,34 @@ MonoBehaviour:
       value: "Registry \uC900\uBE44\uB428. \uD328\uD0A4\uC9C0 \uD68D\uB4DD\uC740 \uC704\uC784\uB418\uBA70 \uAC80\uC99D\uD558\uC9C0 \uC54A\uC74C"
     - key: installer.setup.preview.unsupported
       value: "\uC774 executor\uB294 \uBBF8\uB9AC\uBCF4\uAE30\uB97C \uC9C0\uC6D0\uD558\uC9C0 \uC54A\uC74C"
+    - key: installer.install_setting.install
+      value: "\uC124\uCE58"
+    - key: installer.install_setting.dependency
+      value: "\uC885\uC18D\uC131"
+    - key: installer.install_setting.core.label
+      value: Runiverse OS Core
+    - key: installer.install_setting.core.one_line
+      value: "\uACF5\uD1B5 \uC720\uD2F8\uB9AC\uD2F0\uC640 \uB9AC\uC18C\uC2A4 \uAD00\uB9AC"
+    - key: installer.install_setting.core.description
+      value: "RuniOS \uD328\uD0A4\uC9C0\uAC00 \uACF5\uC720\uD558\uB294 \uC720\uD2F8\uB9AC\uD2F0, \uBE44\uB3D9\uAE30 \uC791\uC5C5, IO \uCD94\uC0C1\uD654, \uB9AC\uC18C\uC2A4 \uD329\uACFC \uC9C0\uC5ED\uD654 \uAE30\uB2A5\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4."
+    - key: installer.install_setting.windows.label
+      value: Runiverse OS Windows
+    - key: installer.install_setting.windows.one_line
+      value: "Windows \uD50C\uB7AB\uD3FC \uC9C0\uC6D0"
+    - key: installer.install_setting.windows.description
+      value: "RuniOS IO API\uB97C \uD1B5\uD574 Windows\uC758 \uC54C\uB824\uC9C4 \uD3F4\uB354\uC640 \uBCFC\uB968 \uB9C8\uC6B4\uD2B8 \uC704\uCE58\uB97C \uC81C\uACF5\uD569\uB2C8\uB2E4."
+    - key: installer.install_setting.linux.label
+      value: Runiverse OS Linux
+    - key: installer.install_setting.linux.one_line
+      value: "Linux \uD50C\uB7AB\uD3FC \uC9C0\uC6D0"
+    - key: installer.install_setting.linux.description
+      value: "RuniOS IO API\uB97C \uD1B5\uD574 Linux\uC758 \uC0AC\uC6A9\uC790 \uB514\uB809\uD130\uB9AC, \uB9C8\uC6B4\uD2B8 \uC704\uCE58\uC640 UDisks2 \uC800\uC7A5 \uC7A5\uCE58 \uC704\uCE58\uB97C \uC81C\uACF5\uD569\uB2C8\uB2E4."
+    - key: installer.install_setting.ui.label
+      value: Runiverse OS UI
+    - key: installer.install_setting.ui.one_line
+      value: "RuniOS\uC758 \uACF5\uC2DD \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C"
+    - key: installer.install_setting.ui.description
+      value: "osu!lazer\uC5D0\uC11C \uC601\uAC10\uC744 \uBC1B\uC740 \uB514\uC790\uC778\uC73C\uB85C RuniOS\uC758 \uC5EC\uB7EC \uAE30\uB2A5\uC744 \uC81C\uC5B4\uD560 \uB7F0\uD0C0\uC784 UI/UX \uC2DC\uC2A4\uD15C\uC785\uB2C8\uB2E4.\nUI/UX \uAD6C\uD604\uC740 \uC608\uC815\uB418\uC5B4 \uC788\uC73C\uBA70 \uD604\uC7AC \uCEF4\uD3EC\uB10C\uD2B8\uB294 \uB9AC\uC18C\uC2A4\uB97C Unity UI\uC5D0 \uC5F0\uACB0\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.sound.label
       value: Runiverse OS Sound
     - key: installer.install_setting.sound.one_line
