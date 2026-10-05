@@ -12,7 +12,7 @@ namespace RuniOS.UIElements
 
         public FlexibleSpace()
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
         }
     }

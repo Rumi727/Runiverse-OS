@@ -74,7 +74,7 @@ namespace RuniOS.UIElements
         /// <param name="compositeConfig">복합 필드의 설정입니다.</param>
         protected RuniBaseCompositeField(string label, CompositeConfig compositeConfig = CompositeConfig.compositedField | CompositeConfig.includeCompositeUSS) : base(label, new VisualElement())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             delegatesFocus = false;

@@ -19,7 +19,7 @@ namespace RuniOS.UIElements.IO
         public PhysicalPathField() : this(string.Empty) { }
         public PhysicalPathField(string label) : base(label, -1, '*', new TextInput())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

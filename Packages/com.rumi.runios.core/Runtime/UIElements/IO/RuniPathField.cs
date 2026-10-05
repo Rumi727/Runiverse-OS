@@ -18,7 +18,7 @@ namespace RuniOS.UIElements.IO
         public RuniPathField() : this(string.Empty) { }
         public RuniPathField(string label) : base(label, -1, '*', new TextInput())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

@@ -27,7 +27,7 @@ namespace RuniOS.UIElements
 
         public Separator(SeparatorDirection direction)
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
             this.direction = direction;

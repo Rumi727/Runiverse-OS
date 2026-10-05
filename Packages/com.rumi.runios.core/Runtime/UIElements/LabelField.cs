@@ -15,7 +15,7 @@ namespace RuniOS.UIElements
         public LabelField(string label) : this(label, string.Empty) { }
         public LabelField(string label, string text) : base(label, new Label())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

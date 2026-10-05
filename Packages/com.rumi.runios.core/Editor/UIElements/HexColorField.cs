@@ -54,7 +54,7 @@ namespace RuniOS.Editor.UIElements
         public HexColorField() : this(string.Empty) { }
         public HexColorField(string label) : base(label, new ColorField(label))
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             labelElement.AddToClassList(labelUssClassName);

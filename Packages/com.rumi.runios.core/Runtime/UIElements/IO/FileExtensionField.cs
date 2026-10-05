@@ -21,7 +21,7 @@ namespace RuniOS.UIElements.IO
         public FileExtensionField() : this(string.Empty) { }
         public FileExtensionField(string label) : base(label, -1, '*', new TextInput())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             AddToClassList(ussClassName);
             

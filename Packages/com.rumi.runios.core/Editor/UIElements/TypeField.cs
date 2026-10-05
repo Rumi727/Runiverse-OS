@@ -85,7 +85,7 @@ namespace RuniOS.Editor.UIElements
         public TypeField(Type? baseType) : this(string.Empty, baseType) { }
         public TypeField(string label, Type? baseType = null) : base(label, new VisualElement())
         {
-            styleSheets.Add(UIElementsUtility.rosControlStyle);
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             
             labelElement.AddToClassList(labelUssClassName);
 
@@ -107,7 +107,7 @@ namespace RuniOS.Editor.UIElements
             RegisterCallback<DetachFromPanelEvent>(_ => Localizations.EditorLocalization.onLanguageUpdate -= UpdateButtonText);
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
-                if (this.IsEditorPanel())
+                if (panel?.contextType == ContextType.Editor)
                     Localizations.EditorLocalization.onLanguageUpdate += UpdateButtonText;
                 
                 UpdateLabel();
@@ -120,7 +120,7 @@ namespace RuniOS.Editor.UIElements
         public void ShowSelector()
         {
 #if UNITY_EDITOR
-            if (this.IsEditorPanel())
+            if (panel?.contextType == ContextType.Editor)
             {
                 RuniFields.ShowTypePicker(x => value = x, baseType);
                 return;
@@ -147,7 +147,7 @@ namespace RuniOS.Editor.UIElements
             if (value.value == null)
             {
 #if UNITY_EDITOR
-                if (this.IsEditorPanel())
+                if (panel?.contextType == ContextType.Editor)
                     ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(GetTextOrKey("gui.none"));
                 else
 #endif
@@ -165,7 +165,7 @@ namespace RuniOS.Editor.UIElements
         void UpdateButtonText()
         {
 #if UNITY_EDITOR
-            if (this.IsEditorPanel())
+            if (panel?.contextType == ContextType.Editor)
                 buttonElement.text = GetTextOrKey("gui.type_field.select_type");
             else
 #endif
