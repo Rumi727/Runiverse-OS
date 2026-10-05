@@ -167,7 +167,15 @@ namespace RuniOS.Textures
                     mipmapData.Value.dependency.Complete();
                 }
 
-                texture = new Texture2D(decodedImage.width, decodedImage.height, decodedImage.textureFormat, mipmapData?.count ?? 1, settings.linear);
+                texture = new Texture2D(decodedImage.width, decodedImage.height, decodedImage.textureFormat, mipmapData?.count ?? 1, settings.linear)
+                {
+                    filterMode = settings.filterMode,
+                    anisoLevel = settings.anisoLevel,
+                    wrapModeU = settings.wrapModeU,
+                    wrapModeV = settings.wrapModeV,
+                    wrapModeW = settings.wrapModeW
+                };
+
                 if (mipmapData != null)
                 {
                     for (int level = 1; level < mipmapData.Value.count; level++)

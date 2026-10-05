@@ -17,12 +17,17 @@ namespace RuniOS.Textures
     /// Whether to discard CPU-side texture data after upload.<br/>
     /// 업로드 후 CPU 측 텍스처 데이터를 제거할지 여부입니다.
     /// </param>
-    public readonly record struct TextureLoadSettings(int mipmapCount = 0, bool linear = false, bool makeNoLongerReadable = false)
+    public readonly record struct TextureLoadSettings(FilterMode filterMode, int anisoLevel, TextureWrapMode wrapModeU, TextureWrapMode wrapModeV, TextureWrapMode wrapModeW, int mipmapCount, bool linear, bool makeNoLongerReadable)
     {
+        public TextureLoadSettings() : this(FilterMode.Bilinear, TextureWrapMode.Repeat) { }
+        public TextureLoadSettings(FilterMode filterMode) : this(filterMode, TextureWrapMode.Repeat) { }
+        public TextureLoadSettings(FilterMode filterMode, TextureWrapMode wrapMode, int mipmapCount = 0, bool linear = false, bool makeNoLongerReadable = false) : this(filterMode, 1, wrapMode, wrapMode, wrapMode, mipmapCount, linear, makeNoLongerReadable) { }
+        public TextureLoadSettings(FilterMode filterMode, int anisoLevel, TextureWrapMode wrapMode, int mipmapCount = 0, bool linear = false, bool makeNoLongerReadable = false) : this(filterMode, anisoLevel, wrapMode, wrapMode, wrapMode, mipmapCount, linear, makeNoLongerReadable) { }
+
         /// <summary>
         /// Gets the default texture load settings.<br/>
         /// 기본 텍스처 로드 설정을 가져옵니다.
         /// </summary>
-        public static TextureLoadSettings defaultValue => default;
+        public static readonly TextureLoadSettings defaultValue = new TextureLoadSettings();
     }
 }
