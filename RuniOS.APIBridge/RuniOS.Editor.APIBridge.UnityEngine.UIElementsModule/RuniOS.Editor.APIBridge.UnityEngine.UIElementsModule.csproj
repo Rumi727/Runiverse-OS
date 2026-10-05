@@ -1,0 +1,52 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <LangVersion>default</LangVersion>
+        <Nullable>enable</Nullable>
+        <RootNamespace>RuniOS.Editor.APIBridge.UnityEngine.UIElements</RootNamespace>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3-dev" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\RuniOS.Editor.APIBridge.UnityEngine.CoreModule\RuniOS.Editor.APIBridge.UnityEngine.CoreModule.csproj" />
+        <ProjectReference Include="..\RuniOS.Editor.APIBridge.UnityEngine.IMGUIModule\RuniOS.Editor.APIBridge.UnityEngine.IMGUIModule.csproj" />
+        <ProjectReference Include="..\RuniOS.APIBridge\RuniOS.APIBridge.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </ProjectReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="UnityEngine.CoreModule" Publicize="true">
+            <HintPath>..\dlls\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule" Publicize="true">
+          <HintPath>..\dlls\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PropertiesModule" Publicize="true">
+          <HintPath>..\dlls\UnityEngine.PropertiesModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.TextRenderingModule" Publicize="true">
+          <HintPath>..\dlls\UnityEngine.TextRenderingModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI" Publicize="true">
+          <HintPath>..\dlls\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UIElementsModule" Publicize="true">
+            <HintPath>..\dlls\UnityEngine.UIElementsModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="sh &quot;$(SolutionDir)postbuild.sh&quot; &quot;$(SolutionDir)&quot; &quot;$(OutputPath)&quot; &quot;$(AssemblyName)&quot;" />
+    </Target>
+
+</Project>

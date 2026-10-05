@@ -1,0 +1,91 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36401.2 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.APIMarshal.UnityEngine.UIElementsModule", "RuniOS.APIMarshal.UnityEngine.UIElementsModule\RuniOS.APIMarshal.UnityEngine.UIElementsModule.csproj", "{78E63050-EFF0-4387-9E8E-E9A172CBB32F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEngine.CoreModule", "RuniOS.Editor.APIBridge.UnityEngine.CoreModule\RuniOS.Editor.APIBridge.UnityEngine.CoreModule.csproj", "{11E66A76-595E-4AB1-864E-8FF613A2F904}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.APIBridge", "RuniOS.APIBridge\RuniOS.APIBridge.csproj", "{E6981477-7638-4B20-9DB7-DC670539AE76}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEngine.IMGUIModule", "RuniOS.Editor.APIBridge.UnityEngine.IMGUIModule\RuniOS.Editor.APIBridge.UnityEngine.IMGUIModule.csproj", "{3853A603-C379-4532-8B2D-B27F81A6273E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEngine.UIElementsModule", "RuniOS.Editor.APIBridge.UnityEngine.UIElementsModule\RuniOS.Editor.APIBridge.UnityEngine.UIElementsModule.csproj", "{783C9212-164A-4316-94DF-4CA3631CC54F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEditor.CoreModule", "RuniOS.Editor.APIBridge.UnityEditor.CoreModule\RuniOS.Editor.APIBridge.UnityEditor.CoreModule.csproj", "{D0D2446F-AC74-438B-AEFF-C594D04ECEC9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEditor.UI", "RuniOS.Editor.APIBridge.UnityEditor.UI\RuniOS.Editor.APIBridge.UnityEditor.UI.csproj", "{C2B13503-073D-43E0-B5F1-87F765506A0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEditor.UIElementsModule", "RuniOS.Editor.APIBridge.UnityEditor.UIElementsModule\RuniOS.Editor.APIBridge.UnityEditor.UIElementsModule.csproj", "{025CD58B-8AC2-4C97-AFBC-D8EEACB64635}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIBridge.UnityEditor.QuickSearchModule", "RuniOS.Editor.APIBridge.UnityEditor.QuickSearchModule\RuniOS.Editor.APIBridge.UnityEditor.QuickSearchModule.csproj", "{3FCD3146-2B80-417E-82B6-045501FB10A8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.APIBridge.UnityEngine.CoreModule", "RuniOS.APIBridge.UnityEngine.CoreModule\RuniOS.APIBridge.UnityEngine.CoreModule.csproj", "{63F6D066-63F6-48AD-81FA-8F1EC9C65960}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.Editor.APIMarshal.UnityEditor.CoreModule", "RuniOS.Editor.APIMarshal.UnityEditor.CoreModule\RuniOS.Editor.APIMarshal.UnityEditor.CoreModule.csproj", "{32248941-3313-43E9-AC71-8ACD9D012522}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RuniOS.APIBridge.UnityEngine.UIElementsModule", "RuniOS.APIBridge.UnityEngine.UIElementsModule\RuniOS.APIBridge.UnityEngine.UIElementsModule.csproj", "{7DDFBADF-570A-4A18-8D1D-0AE73F556ADB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78E63050-EFF0-4387-9E8E-E9A172CBB32F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78E63050-EFF0-4387-9E8E-E9A172CBB32F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78E63050-EFF0-4387-9E8E-E9A172CBB32F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78E63050-EFF0-4387-9E8E-E9A172CBB32F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11E66A76-595E-4AB1-864E-8FF613A2F904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11E66A76-595E-4AB1-864E-8FF613A2F904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11E66A76-595E-4AB1-864E-8FF613A2F904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11E66A76-595E-4AB1-864E-8FF613A2F904}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E6981477-7638-4B20-9DB7-DC670539AE76}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E6981477-7638-4B20-9DB7-DC670539AE76}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E6981477-7638-4B20-9DB7-DC670539AE76}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E6981477-7638-4B20-9DB7-DC670539AE76}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3853A603-C379-4532-8B2D-B27F81A6273E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3853A603-C379-4532-8B2D-B27F81A6273E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3853A603-C379-4532-8B2D-B27F81A6273E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3853A603-C379-4532-8B2D-B27F81A6273E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{783C9212-164A-4316-94DF-4CA3631CC54F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{783C9212-164A-4316-94DF-4CA3631CC54F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{783C9212-164A-4316-94DF-4CA3631CC54F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{783C9212-164A-4316-94DF-4CA3631CC54F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0D2446F-AC74-438B-AEFF-C594D04ECEC9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0D2446F-AC74-438B-AEFF-C594D04ECEC9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0D2446F-AC74-438B-AEFF-C594D04ECEC9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0D2446F-AC74-438B-AEFF-C594D04ECEC9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C2B13503-073D-43E0-B5F1-87F765506A0C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C2B13503-073D-43E0-B5F1-87F765506A0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C2B13503-073D-43E0-B5F1-87F765506A0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C2B13503-073D-43E0-B5F1-87F765506A0C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{025CD58B-8AC2-4C97-AFBC-D8EEACB64635}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{025CD58B-8AC2-4C97-AFBC-D8EEACB64635}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{025CD58B-8AC2-4C97-AFBC-D8EEACB64635}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{025CD58B-8AC2-4C97-AFBC-D8EEACB64635}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3FCD3146-2B80-417E-82B6-045501FB10A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3FCD3146-2B80-417E-82B6-045501FB10A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3FCD3146-2B80-417E-82B6-045501FB10A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3FCD3146-2B80-417E-82B6-045501FB10A8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63F6D066-63F6-48AD-81FA-8F1EC9C65960}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63F6D066-63F6-48AD-81FA-8F1EC9C65960}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63F6D066-63F6-48AD-81FA-8F1EC9C65960}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63F6D066-63F6-48AD-81FA-8F1EC9C65960}.Release|Any CPU.Build.0 = Release|Any CPU
+		{32248941-3313-43E9-AC71-8ACD9D012522}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{32248941-3313-43E9-AC71-8ACD9D012522}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{32248941-3313-43E9-AC71-8ACD9D012522}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{32248941-3313-43E9-AC71-8ACD9D012522}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DDFBADF-570A-4A18-8D1D-0AE73F556ADB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DDFBADF-570A-4A18-8D1D-0AE73F556ADB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DDFBADF-570A-4A18-8D1D-0AE73F556ADB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DDFBADF-570A-4A18-8D1D-0AE73F556ADB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6793C0A8-3DC8-44E1-AC3D-00076951CF45}
+	EndGlobalSection
+EndGlobal
