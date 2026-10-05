@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.Editor.APIMarshal.UnityEngine.UIElements;
 using RuniOS.IO;
+using System.IO;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -30,17 +31,26 @@ namespace RuniOS.UIElements.IO
             textElement.SetValueWithoutNotify(ValueToString(rawValue));
         }
 
-        void FocusOutEventCallback(FocusOutEvent evt) => textElement.SetValueWithoutNotify(rawValue.value);
+        void FocusOutEventCallback(FocusOutEvent evt)
+        {
+            if (!isDelayed)
+                textElement.SetValueWithoutNotify(rawValue.value);
+        }
 
 
 
         public override void SetValueWithoutNotify(PhysicalPath newValue)
         {
             base.SetValueWithoutNotify(newValue);
+            if (isDelayed)
+            {
+                textElement.SetValueWithoutNotify(newValue.value);
+                return;
+            }
             
             string inputValue = newValue.value;
-            if (textElement.text.Length > 0 && textElement.text[^1] == RuniPath.directorySeparatorChar)
-                inputValue += RuniPath.directorySeparatorChar;
+            if (textElement.text.Length > 0 && textElement.text[^1] == Path.DirectorySeparatorChar)
+                inputValue += Path.DirectorySeparatorChar;
             
             textElement.SetValueWithoutNotify(inputValue);
         }
