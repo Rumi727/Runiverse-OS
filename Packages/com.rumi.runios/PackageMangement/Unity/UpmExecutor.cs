@@ -203,24 +203,21 @@ namespace RuniOS.PackageManagement.Unity
         {
             if (!installation.ensurePackage) return null;
             foreach (PackageInfo info in infos)
+            {
                 if (StringComparer.Ordinal.Equals(info.name, installation.packageName))
                 {
                     if (info.source == PackageSource.Embedded) return null;
-                    if (installation.requestedVersion is string requestedVersion
-                        && !StringComparer.Ordinal.Equals(info.version, requestedVersion))
+                    if (installation.requestedVersion is { } requestedVersion && !StringComparer.Ordinal.Equals(info.version, requestedVersion))
                         return new InstallationDiagnostic("upm:version-mismatch", $"Installed version '{info.version}' differs from requested version '{requestedVersion}'.");
-                    if (installation.isGitReference
-                        && (info.source != PackageSource.Git || info.git is null
-                            || installation.requestedGitRevision is string revision && !StringComparer.Ordinal.Equals(info.git.revision, revision)))
+                    if (installation.isGitReference && (info.source != PackageSource.Git || info.git is null || (installation.requestedGitRevision is { } revision && !StringComparer.Ordinal.Equals(info.git.revision, revision))))
                     {
-                        string installed = info.source == PackageSource.Git && info.git is not null
-                            ? $"Git revision '{info.git.revision}'" : $"source '{info.source}'";
-                        string requested = installation.requestedGitRevision is string requestedRevision
-                            ? $"Git revision '{requestedRevision}'" : "the requested Git package";
+                        string installed = info.source == PackageSource.Git && info.git is not null ? $"Git revision '{info.git.revision}'" : $"source '{info.source}'";
+                        string requested = installation.requestedGitRevision is { } requestedRevision ? $"Git revision '{requestedRevision}'" : "the requested Git package";
                         return new InstallationDiagnostic("upm:version-mismatch", $"Installed {installed} differs from {requested}.");
                     }
                     return null;
                 }
+            }
             return null;
         }
         static InstallationDiagnostic? GetEmbeddedConflict(UpmInstallation installation, IEnumerable<PackageInfo> infos)

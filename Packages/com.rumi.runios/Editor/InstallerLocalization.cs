@@ -126,9 +126,9 @@ namespace RuniOS.Editor.Installer
                 if (languages[i] != language)
                     continue;
 
-                LanguageScriptableObject? languageObject = languageObjects[i] ??=
-                    AssetDatabase.LoadAssetAtPath<LanguageScriptableObject>(
-                        "Packages/com.rumi.runios/Editor/Languages/" + language + ".asset");
+                LanguageScriptableObject? languageObject = languageObjects[i];
+                if (languageObject == null)
+                    languageObject = languageObjects[i] = AssetDatabase.LoadAssetAtPath<LanguageScriptableObject>("Packages/com.rumi.runios/Editor/Languages/" + language + ".asset");
 
                 if (languageObject != null && languageObject.texts.TryGetValue(key, out string? value))
                 {

@@ -174,6 +174,7 @@ namespace RuniOS.Editor.Installer
 
         public SetupScreen? activeScreen => targetIndex >= 0 && targetIndex < screens.Count ? screens[targetIndex] : null;
 
+        // ReSharper disable once Unity.RedundantSerializeFieldAttribute
         [field: SerializeField] public int targetIndex
         {
             get;
@@ -190,6 +191,8 @@ namespace RuniOS.Editor.Installer
                 activeScreen?.OnActivated();
             }
         }
+
+        // ReSharper disable once Unity.RedundantSerializeFieldAttribute
         [field: SerializeField] public float animatedIndex
         {
             get;
@@ -200,6 +203,7 @@ namespace RuniOS.Editor.Installer
             }
         }
 
+        // ReSharper disable once Unity.RedundantSerializeFieldAttribute
         [field: SerializeField] public float animatedHeaderExpansion
         {
             get;
