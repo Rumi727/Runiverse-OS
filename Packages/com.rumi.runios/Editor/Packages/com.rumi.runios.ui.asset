@@ -30,5 +30,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a1b4c9ef2e294ae380cb284df5145836, type: 2}
   - {fileID: 11400000, guid: 6fa748e30d0f46409959b6bb2f3e3f9a, type: 2}
   repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
-  commit: "84627157f3c503b7d8a91faf700ab8929b84eb9a"
+  revision: ""
   packagePath: "Packages/com.rumi.runios.ui"

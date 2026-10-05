@@ -41,6 +41,9 @@ namespace RuniOS.PackageManagement.Unity
         /// 누락된 참조 슬롯을 유지하며 필수 어셈블리 정의 에셋을 가져옵니다.
         /// </summary>
         public IReadOnlyList<AssemblyDefinitionAsset?> requiredAssemblyReferences { get; }
+        internal string? requestedVersion { get; private set; }
+        internal bool isGitReference { get; private set; }
+        internal string? requestedGitRevision { get; private set; }
         /// <summary>
         /// Creates complete UPM requirements without binding an executor.<br/>
         /// executor를 결합하지 않고 완결된 UPM 요구사항을 생성합니다.
@@ -82,8 +85,8 @@ namespace RuniOS.PackageManagement.Unity
                 ? Array.Empty<AssemblyDefinitionAsset?>() : new List<AssemblyDefinitionAsset?>(requiredAssemblyReferences).AsReadOnly();
         }
         /// <summary>
-        /// Creates a Git acquisition reference pinned to a full commit hash.<br/>
-        /// 전체 commit hash로 고정한 Git 획득 참조를 생성합니다.
+        /// Creates a Git acquisition reference at the requested revision.<br/>
+        /// 지정한 revision의 Git 획득 참조를 생성합니다.
         /// </summary>
         /// <param name="packageName">
         /// The native package name.<br/>
@@ -93,9 +96,9 @@ namespace RuniOS.PackageManagement.Unity
         /// The UPM-compatible Git URL without a fragment.<br/>
         /// fragment가 없는 UPM 호환 Git URL입니다.
         /// </param>
-        /// <param name="commit">
-        /// The full 40-character commit hash.<br/>
-        /// 40자 전체 commit hash입니다.
+        /// <param name="revision">
+        /// An optional tag, branch, or full commit hash; <see langword="null"/> or an empty string lets UPM use the default branch head.<br/>
+        /// 선택적인 태그, 브랜치 또는 전체 commit hash이며 <see langword="null"/>이나 빈 문자열이면 UPM이 기본 브랜치의 최신 커밋을 사용합니다.
         /// </param>
         /// <param name="packagePath">
         /// The optional package path inside the repository.<br/>
@@ -106,25 +109,25 @@ namespace RuniOS.PackageManagement.Unity
         /// 필수 어셈블리 정의 에셋이며 <see langword="null"/>이면 요구하지 않고 누락된 항목은 미충족 요구사항입니다.
         /// </param>
         /// <returns>
-        /// A pinned Git reference used only when the native package name is absent.<br/>
-        /// native package 이름이 없을 때만 사용하는 고정된 Git 참조를 반환합니다.
+        /// The Git reference passed to UPM.<br/>
+        /// UPM에 전달할 Git 참조를 반환합니다.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// Thrown when the Git reference or commit is invalid.<br/>
-        /// Git 참조 또는 commit이 유효하지 않으면 발생합니다.
+        /// Thrown when the repository URL is invalid.<br/>
+        /// 저장소 URL이 유효하지 않으면 발생합니다.
         /// </exception>
-        public static UpmInstallation Git(string packageName, string repositoryUrl, string commit, string? packagePath = null,
+        public static UpmInstallation Git(string packageName, string repositoryUrl, string? revision = null, string? packagePath = null,
             IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             if (string.IsNullOrWhiteSpace(repositoryUrl) || repositoryUrl.Contains("#")) throw new ArgumentException("A Git URL without a fragment is required.", nameof(repositoryUrl));
-            if (commit is null || commit.Length != 40) throw new ArgumentException("A full 40-character commit hash is required.", nameof(commit));
-            foreach (char character in commit)
-                if (!Uri.IsHexDigit(character)) throw new ArgumentException("The commit hash must be hexadecimal.", nameof(commit));
-            string pin = commit.ToLowerInvariant();
             string reference = repositoryUrl;
             if (!string.IsNullOrEmpty(packagePath))reference += (reference.Contains("?") ? "&" : "?") + "path=" + Uri.EscapeDataString("/" + packagePath!.TrimStart('/'));
-            reference += "#" + pin;
-            return new UpmInstallation(packageName, reference, requiredAssemblyReferences: requiredAssemblyReferences);
+            if (!string.IsNullOrEmpty(revision)) reference += "#" + revision;
+            return new UpmInstallation(packageName, reference, requiredAssemblyReferences: requiredAssemblyReferences)
+            {
+                isGitReference = true,
+                requestedGitRevision = string.IsNullOrEmpty(revision) ? null : revision
+            };
         }
         /// <summary>
         /// Creates an exact-version registry acquisition reference without version solving.<br/>
@@ -162,7 +165,10 @@ namespace RuniOS.PackageManagement.Unity
             IEnumerable<AssemblyDefinitionAsset?>? requiredAssemblyReferences = null)
         {
             if (string.IsNullOrWhiteSpace(version)) throw new ArgumentException("An exact version is required.", nameof(version));
-            return new UpmInstallation(packageName, packageName + "@" + version, registry, ensurePackage, requiredAssemblyReferences);
+            return new UpmInstallation(packageName, packageName + "@" + version, registry, ensurePackage, requiredAssemblyReferences)
+            {
+                requestedVersion = version
+            };
         }
         /// <summary>
         /// Creates a local-directory acquisition reference for an absent package name.<br/>

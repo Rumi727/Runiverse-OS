@@ -21,13 +21,15 @@ API를 사용하는 Editor 어셈블리에서 필요한 어셈블리를 참조�
 
 영어·한국어·일본어를 지원합니다. 언어와 패키지 선택은 `Assets/Runiverse OS/Installer/SetupConfig.asset`에 저장됩니다.
 
-UPM에 같은 이름의 패키지가 있으면 버전이나 출처에 관계없이 이미 설치된 것으로 처리합니다. 기존 패키지 교체와 미선택 패키지 제거는 수행하지 않습니다.
+`RegistryPackage`와 revision을 지정한 `GitPackage`는 요청한 버전 또는 Git revision과 설치 상태가 일치할 때 충족된 것으로 처리합니다. 차이가 있으면 Preview에서 승인한 경우 요청한 상태로 교체하며, 미선택 패키지는 제거하지 않습니다.
+
+요청한 패키지와 같은 이름의 `Embedded` 패키지가 이미 있으면 Preview에 경고를 표시하지만 해당 패키지는 충족된 것으로 처리하며 변경하지 않습니다. Install을 누르면 나머지 설치를 계속할지 확인하고, `force`가 켜져 있어도 Embedded 패키지는 덮어쓰지 않습니다.
 
 ## 패키지 정의
 
 `Assets > Create > Runiverse OS > Installer`에서 패키지 정의 에셋을 만들고 논리적 ID, 표시 이름과 직접 종속성을 작성합니다. 실제 UPM 패키지 이름이 ID와 다르면 `packageName`을 지정합니다.
 
-- `GitPackage`: Git 저장소 URL, 40자 전체 커밋 해시와 선택적인 패키지 경로.
+- `GitPackage`: Git 저장소 URL, 선택적인 태그·브랜치·전체 커밋 해시와 패키지 경로. revision을 비우면 UPM이 기본 브랜치 최신 커밋을 선택합니다.
 - `RegistryPackage`: 레지스트리의 고정 버전과 필요한 scoped registry 설정.
 - `LocalPackage`: 프로젝트 상대 경로나 절대 경로의 로컬 패키지.
 - `EmbeddedPackage`: 프로젝트에 이미 존재하는 embedded 패키지.
@@ -101,18 +103,19 @@ await foreach (InstallationPreview preview in runner.PreviewAsync(installations,
     // preview.installation, executor, status, diagnostics를 표시합니다.
 }
 
-await foreach (InstallationResult result in runner.EnsureAsync(installations, cancellationToken))
+await foreach (InstallationResult result in runner.EnsureAsync(installations, force: false, cancellationToken: cancellationToken))
 {
     // result.installation, executor, succeeded, diagnostics를 확인합니다.
 }
 ```
 
-`PreviewAsync`는 현재 상태를 읽고 `EnsureAsync`는 요구사항을 실행합니다. Preview는 선택 사항이며 실행 성공을 보장하지 않습니다. Ensure는 현재 환경을 다시 확인하므로 Preview 결과를 실행 판단으로 재사용하지 않습니다.
+`PreviewAsync`는 현재 상태를 읽고 `EnsureAsync`는 요구사항을 실행합니다. Preview는 선택 사항이며 실행 성공을 보장하지 않습니다. Ensure는 현재 환경을 다시 확인합니다. 설치된 버전이 요청한 Registry 버전이나 Git revision과 다르면 Preview는 `RequiresForce`를 반환합니다. `force` 기본값은 `false`이며, 이때 Ensure는 registry 설정이나 UPM 요청 전에 해당 executor batch 전체를 중단합니다. Preview 후 상태가 달라져도 같은 검사를 실행 직전에 적용합니다. 사용자가 Preview에서 교체를 승인한 경우에만 `force: true`를 전달합니다. Git 태그는 설치된 Git revision과 요청한 태그 이름을 비교하며, 태그가 가리키는 commit hash 변화는 따로 확인하지 않습니다.
 
 | `InstallationPreviewStatus` | 의미 |
 | --- | --- |
 | `Satisfied` | 현재 요구사항 충족 |
 | `RequiresEnsure` | 실행할 작업이 있음 |
+| `RequiresForce` | 설치된 버전이 요청 정의와 다르며 교체 승인이 필요함 |
 | `Delegated` | 준비 완료. 패키지 획득은 UPM에 위임하며 설치 완료를 확인한 상태는 아님 |
 | `NotSupported` | 대응하는 실행기가 Preview를 제공하지 않음 |
 | `Failed` | 관측 실패, 해결할 수 없는 요구사항 또는 대응하는 실행기 없음 |
@@ -124,7 +127,7 @@ Runner는 `CanExecute`가 수락한 모든 실행기에 요구사항을 전달�
 ### 사용자 정의 설치 방식
 
 1. `IInstallation`을 구현해 설치 요구사항 타입을 정의합니다. 패키지의 `CreateInstallation`에서 반환하거나 직접 생성할 수 있습니다.
-2. `IInstallationExecutor<TInstallation>`의 `EnsureAsync(IEnumerable<TInstallation>, CancellationToken)`을 구현합니다. 기본 `CanExecute`는 해당 타입인지 검사합니다. 별도 조건이 필요하면 비제네릭 `IInstallationExecutor.CanExecute`를 구현하되 수락하는 타입은 유지합니다. `CanExecute`는 설치 작업 없이 지원 여부만 판단합니다.
+2. `IInstallationExecutor<TInstallation>`의 `EnsureAsync(IEnumerable<TInstallation>, bool force, CancellationToken)`을 구현합니다. `force`가 `false`이면 기존 요구사항과 다른 항목을 교체하지 않습니다. 기본 `CanExecute`는 해당 타입인지 검사합니다. 별도 조건이 필요하면 비제네릭 `IInstallationExecutor.CanExecute`를 구현하되 수락하는 타입은 유지합니다. `CanExecute`는 설치 작업 없이 지원 여부만 판단합니다.
 3. 실행기 인스턴스를 `InstallationRunner` 생성자에 전달합니다.
 
 실행기는 입력 항목마다 `InstallationResult` 하나를 반환해야 합니다. 반복된 입력도 각각 결과가 필요하며 결과 대응에는 기본 동등성을 사용합니다. 정상 종료 후 보고하지 않은 항목은 Runner가 실패로 표시합니다. `new InstallationResult(installation, succeeded, diagnostics)`로 결과를 만들면 Runner가 `executor`를 지정합니다.
@@ -133,13 +136,13 @@ Preview를 제공하려면 같은 실행기에서 `IInstallationPreviewer<TInsta
 
 ## Unity 설치 API
 
-`UpmInstallation`은 UPM 패키지 이름과 획득 참조를 담습니다. `Git(packageName, repositoryUrl, commit, packagePath)`, `Registry(packageName, version, registry, ensurePackage)`, `Local(packageName, fullPath)` 정적 메서드로 만들거나 다음 생성자를 사용합니다.
+`UpmInstallation`은 UPM 패키지 이름과 획득 참조를 담습니다. `Git(packageName, repositoryUrl, revision, packagePath)`에서 revision은 선택적인 태그·브랜치·전체 커밋 해시입니다. 생략하면 UPM이 기본 브랜치 최신 커밋을 선택합니다. `Registry(packageName, version, registry, ensurePackage)`, `Local(packageName, fullPath)` 정적 메서드로 만들거나 다음 생성자를 사용합니다.
 
 ```csharp
 new UpmInstallation(packageName, packageReference, registry: null, ensurePackage: true);
 ```
 
-scoped registry가 필요하면 `ScopedRegistryDefinition(name, url, scopes)`를 전달합니다. `UpmExecutor`는 필요한 registry 설정을 준비하고 없는 패키지를 UPM으로 설치합니다. 같은 이름의 패키지가 있으면 버전·출처와 관계없이 충족으로 처리하며 기존 패키지를 교체하거나 제거하지 않습니다. 필요한 `manifest.json`의 `scopedRegistries`는 추가·병합하며 JSON 서식은 변경될 수 있습니다.
+scoped registry가 필요하면 `ScopedRegistryDefinition(name, url, scopes)`를 전달합니다. `UpmExecutor`는 요청한 Registry 버전과 Git revision을 현재 설치 상태와 비교합니다. 버전 차이를 교체하도록 승인하면 업그레이드·다운그레이드 구분 없이 UPM에 요청합니다. 같은 이름의 패키지가 이미 Embedded 상태면 요청 버전과 무관하게 충족된 것으로 처리하고 변경하지 않습니다. package 이름만으로 상태를 판단하는 직접 `UpmInstallation` 생성자와 `Local` 설치는 기존 동작을 유지합니다. 필요한 `manifest.json`의 `scopedRegistries`는 추가·병합하며 JSON 서식은 변경될 수 있습니다.
 
 `ensurePackage: false`는 registry 준비만 요구합니다. 이 경우 성공은 패키지 설치 완료를 뜻하지 않으며 준비된 상태의 Preview는 `Delegated`입니다. `RegistryPackage.CreateInstallation(isRoot)`은 직접 선택한 패키지에는 설치를 요구하고 종속성으로만 포함된 패키지는 UPM의 종속성 설치에 맡깁니다.
 

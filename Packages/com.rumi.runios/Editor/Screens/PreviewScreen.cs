@@ -46,9 +46,9 @@ namespace RuniOS.Editor.Installer.Screens
         public PreviewScreen() : base("installer.setup.preview.title", 300)
         {
             contentContainer.AddToClassList("runios-setup__settings");
-            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.rumi.runios.installer/Editor/Screens/SetupScreens.uss"));
+            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.rumi.runios/Editor/Screens/SetupScreens.uss"));
             refresh = new Button(() => _ = RunAsync(true));
-            install = new Button(() => _ = RunAsync(false));
+            install = new Button(OnInstallClicked);
             cancel = new Button(() => cancellation?.Cancel());
             Add(info);
             Add(changes);
@@ -63,7 +63,45 @@ namespace RuniOS.Editor.Installer.Screens
         protected internal override void OnActivated() => _ = RunAsync(true);
         protected internal override void OnDeactivated() => cancellation?.Cancel();
 
-        async Task RunAsync(bool preview)
+        void OnInstallClicked()
+        {
+            List<string> embeddedConflicts = new();
+            foreach (Row row in rows)
+                if (row.preview is { } preview)
+                    foreach (InstallationDiagnostic diagnostic in preview.diagnostics)
+                        if (diagnostic.code == "upm:embedded-conflict")
+                        {
+                            embeddedConflicts.Add(row.label.text);
+                            break;
+                        }
+            if (embeddedConflicts.Count != 0)
+            {
+                string message = InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_message")
+                    + "\n\n" + string.Join("\n", embeddedConflicts);
+                bool proceed = EditorUtility.DisplayDialog(
+                    InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_title"), message,
+                    InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_confirm"),
+                    InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_cancel"));
+                if (!proceed) return;
+            }
+            List<string> versionChanges = new();
+            foreach (Row row in rows)
+                if (row.preview?.status == InstallationPreviewStatus.RequiresForce && row.preview.diagnostics.Count != 0)
+                    versionChanges.Add(row.label.text + "\n" + row.preview.diagnostics[0].message);
+            bool force = false;
+            if (versionChanges.Count != 0)
+            {
+                string message = InstallerLocalization.GetText("installer.setup.preview.version_change_message")
+                    + "\n\n" + string.Join("\n\n", versionChanges);
+                force = EditorUtility.DisplayDialog(
+                    InstallerLocalization.GetText("installer.setup.preview.version_change_title"), message,
+                    InstallerLocalization.GetText("installer.setup.preview.version_change_accept"),
+                    InstallerLocalization.GetText("installer.setup.preview.version_change_decline"));
+            }
+            _ = RunAsync(false, force);
+        }
+
+        async Task RunAsync(bool preview, bool force = false)
         {
             cancellation?.Cancel();
             CancellationTokenSource source = new();
@@ -134,7 +172,7 @@ namespace RuniOS.Editor.Installer.Screens
                 else
                 {
                     bool succeeded = true;
-                    await foreach (InstallationResult result in runner.EnsureAsync(installations, token))
+                    await foreach (InstallationResult result in runner.EnsureAsync(installations, force, token))
                     {
                         await Awaitable.MainThreadAsync();
                         token.ThrowIfCancellationRequested();
@@ -213,6 +251,7 @@ namespace RuniOS.Editor.Installer.Screens
                 {
                     InstallationPreviewStatus.Satisfied => "installer.setup.preview.satisfied",
                     InstallationPreviewStatus.RequiresEnsure => delegated ? "installer.setup.preview.registry_required" : "installer.setup.preview.required",
+                    InstallationPreviewStatus.RequiresForce => "installer.setup.preview.version_change_required",
                     InstallationPreviewStatus.Delegated => "installer.setup.preview.delegated",
                     InstallationPreviewStatus.NotSupported => "installer.setup.preview.unsupported",
                     InstallationPreviewStatus.Failed => "installer.setup.preview.failed",
@@ -227,7 +266,11 @@ namespace RuniOS.Editor.Installer.Screens
                     string message = diagnostic.code + ": " + diagnostic.message;
                     if (diagnostic.code == "unity:required-assembly-missing")
                         message = InstallerLocalization.GetText("installer.setup.preview.assembly_required") + "\n" + message;
-                    row.diagnostics.Add(new HelpBox(message, HelpBoxMessageType.Error));
+                    else if (diagnostic.code == "upm:embedded-conflict")
+                        message = InstallerLocalization.GetText("installer.setup.preview.embedded_conflict_warning");
+                    row.diagnostics.Add(new HelpBox(message,
+                        diagnostic.code is "upm:version-mismatch" or "upm:embedded-conflict"
+                            ? HelpBoxMessageType.Warning : HelpBoxMessageType.Error));
                 }
         }
     }

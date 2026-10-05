@@ -19,6 +19,11 @@ namespace RuniOS.PackageManagement
         /// </summary>
         RequiresEnsure,
         /// <summary>
+        /// An installed version differs from the requested version and requires explicit approval before replacement.<br/>
+        /// 설치된 버전이 요청한 버전과 달라 교체 전에 명시적인 승인이 필요합니다.
+        /// </summary>
+        RequiresForce,
+        /// <summary>
         /// Preparation is complete; package acquisition is delegated and is not verified.<br/>
         /// 준비가 완료되었으며 package 획득은 위임되고 검증하지 않습니다.
         /// </summary>

@@ -68,6 +68,10 @@ namespace RuniOS.PackageManagement
         /// The descriptors to ensure.<br/>
         /// 요구사항을 만족시킬 descriptor들입니다.
         /// </param>
+        /// <param name="force">
+        /// Whether matching executors may replace existing requirements that differ from the requested definitions.<br/>
+        /// matching된 executor가 요청 정의와 다른 기존 요구사항을 교체할 수 있는지 여부입니다.
+        /// </param>
         /// <param name="cancellationToken">
         /// The token used to cancel enumeration and execution.<br/>
         /// 열거와 실행 취소에 사용하는 토큰입니다.
@@ -88,10 +92,11 @@ namespace RuniOS.PackageManagement
         /// Thrown when execution is cancelled.<br/>
         /// 실행이 취소되면 발생합니다.
         /// </exception>
-        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<IInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<IInstallation> installations, bool force = false,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             DispatchResult dispatch = Dispatch(installations, cancellationToken);
-            await foreach (InstallationResult result in ExecuteAsync(dispatch, cancellationToken).ConfigureAwait(false))
+            await foreach (InstallationResult result in ExecuteAsync(dispatch, force, cancellationToken).ConfigureAwait(false))
                 yield return result;
         }
         /// <summary>
@@ -178,7 +183,8 @@ namespace RuniOS.PackageManagement
                 }
             }
         }
-        static async IAsyncEnumerable<InstallationResult> ExecuteAsync(DispatchResult dispatch, [EnumeratorCancellation] CancellationToken cancellationToken)
+        static async IAsyncEnumerable<InstallationResult> ExecuteAsync(DispatchResult dispatch, bool force,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             foreach (IInstallation installation in dispatch.unsupported)
             {
@@ -190,7 +196,7 @@ namespace RuniOS.PackageManagement
                 cancellationToken.ThrowIfCancellationRequested();
                 IInstallationExecutor executor = batch.executor;
                 var remaining = new List<IInstallation>(batch.installations);
-                IAsyncEnumerator<InstallationResult> enumerator = executor.EnsureAsync(batch.installations, cancellationToken).GetAsyncEnumerator(cancellationToken);
+                IAsyncEnumerator<InstallationResult> enumerator = executor.EnsureAsync(batch.installations, force, cancellationToken).GetAsyncEnumerator(cancellationToken);
                 string? failureMessage = null;
                 try
                 {

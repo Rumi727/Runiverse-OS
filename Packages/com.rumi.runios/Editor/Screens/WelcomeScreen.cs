@@ -15,7 +15,7 @@ namespace RuniOS.Editor.Installer.Screens
 
         public WelcomeScreen() : base("installer.welcome", 0, false, false)
         {
-            const string templatePath = "Packages/com.rumi.runios.installer/Editor/Screens/WelcomeScreen.uxml";
+            const string templatePath = "Packages/com.rumi.runios/Editor/Screens/WelcomeScreen.uxml";
             VisualTreeAsset template = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(templatePath);
             template.CloneTree(contentContainer);
             contentContainer.AddToClassList("runios-setup__welcome");

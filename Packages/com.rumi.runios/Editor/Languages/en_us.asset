@@ -85,6 +85,31 @@ MonoBehaviour:
       value: "Ensuring installation requirements\u2026"
     - key: installer.setup.preview.ready
       value: Preview complete. Install observes the environment again.
+    - key: installer.setup.preview.version_change_title
+      value: Replace package version?
+    - key: installer.setup.preview.version_change_message
+      value: 'One or more installed packages differ from the requested versions.
+
+        Replace them with the requested versions?'
+    - key: installer.setup.preview.version_change_accept
+      value: Replace
+    - key: installer.setup.preview.version_change_decline
+      value: Keep current
+    - key: installer.setup.preview.embedded_conflict_title
+      value: Embedded package conflict
+    - key: installer.setup.preview.embedded_conflict_message
+      value: 'One or more requested packages are already embedded and may contain local changes.
+
+        They will not be changed.
+
+
+        Continue with the remaining installations?'
+    - key: installer.setup.preview.embedded_conflict_confirm
+      value: Continue
+    - key: installer.setup.preview.embedded_conflict_cancel
+      value: Cancel
+    - key: installer.setup.preview.embedded_conflict_warning
+      value: 'Embedded package conflict: this package will not be changed to protect local edits.'
     - key: installer.setup.preview.graph_error
       value: Resolve dependency graph errors before installation.
     - key: installer.setup.preview.complete
@@ -107,6 +132,8 @@ MonoBehaviour:
       value: Already satisfied
     - key: installer.setup.preview.required
       value: Installation required
+    - key: installer.setup.preview.version_change_required
+      value: Version replacement approval required
     - key: installer.setup.preview.registry_required
       value: Registry preparation required; package acquisition delegated to UPM
     - key: installer.setup.preview.delegated

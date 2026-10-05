@@ -71,7 +71,7 @@ namespace RuniOS.Editor.Installer
             {
                 AddToClassList("runios-setup");
 
-                const string templatePath = "Packages/com.rumi.runios.installer/Editor/Setup.uxml";
+                const string templatePath = "Packages/com.rumi.runios/Editor/Setup.uxml";
 
                 VisualTreeAsset? template = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(templatePath);
                 if (template == null)

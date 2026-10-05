@@ -1,11 +1,12 @@
 #nullable enable
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace RuniOS.PackageManagement.Unity
 {
     /// <summary>
-    /// Defines a package pinned to a Git commit with authored direct dependencies.<br/>
-    /// 작성한 직접 dependencies와 Git commit으로 고정한 package를 정의합니다.
+    /// Defines a package at a Git revision with authored direct dependencies.<br/>
+    /// 작성한 직접 dependencies와 Git revision으로 package를 정의합니다.
     /// </summary>
     [CreateAssetMenu(fileName = "GitPackage", menuName = "Runiverse OS/Installer/Git Package")]
     public sealed class GitPackage : PackageAsset
@@ -16,10 +17,11 @@ namespace RuniOS.PackageManagement.Unity
         /// </summary>
         public string repositoryUrl = string.Empty;
         /// <summary>
-        /// Gets or sets the full commit hash.<br/>
-        /// 전체 commit hash를 가져오거나 설정합니다.
+        /// Gets or sets an optional Git tag, branch, or full commit hash.<br/>
+        /// 선택적인 Git 태그, 브랜치 또는 전체 commit hash를 가져오거나 설정합니다.
         /// </summary>
-        public string commit = string.Empty;
+        [FormerlySerializedAs("commit")]
+        public string revision = string.Empty;
         /// <summary>
         /// Gets or sets the optional repository package path.<br/>
         /// 저장소 안의 선택적인 package 경로를 가져오거나 설정합니다.
@@ -29,6 +31,6 @@ namespace RuniOS.PackageManagement.Unity
         public override string exactIdentity => CreateUpmInstallation().packageReference;
         /// <inheritdoc/>
         public override IInstallation CreateInstallation(bool isRoot) => CreateUpmInstallation();
-        UpmInstallation CreateUpmInstallation() => UpmInstallation.Git(nativeName, repositoryUrl, commit, packagePath, requiredAssemblyReferences);
+        UpmInstallation CreateUpmInstallation() => UpmInstallation.Git(nativeName, repositoryUrl, revision, packagePath, requiredAssemblyReferences);
     }
 }

@@ -21,5 +21,5 @@ MonoBehaviour:
   _dependencies:
   - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
   repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
-  commit: "84627157f3c503b7d8a91faf700ab8929b84eb9a"
+  revision: ""
   packagePath: "Packages/com.rumi.runios.sound"

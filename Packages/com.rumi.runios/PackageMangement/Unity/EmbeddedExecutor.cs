@@ -34,7 +34,8 @@ namespace RuniOS.PackageManagement.Unity
             }
         }
         /// <inheritdoc/>
-        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<EmbeddedInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+        public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<EmbeddedInstallation> installations, bool force = false,
+            [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             if (installations is null) throw new ArgumentNullException(nameof(installations));
             HashSet<string> names = await GetEmbeddedNamesAsync(cancellationToken).ConfigureAwait(false);

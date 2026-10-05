@@ -50,7 +50,7 @@ namespace RuniOS.Editor.Installer.Screens
         public PackageElement(PackageAsset package)
         {
             this.package = package;
-            const string templatePath = "Packages/com.rumi.runios.installer/Editor/Screens/Package.uxml";
+            const string templatePath = "Packages/com.rumi.runios/Editor/Screens/Package.uxml";
             AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(templatePath).CloneTree(this);
 
             // Host the template's Package root on this element, preserving its child hierarchy and USS.

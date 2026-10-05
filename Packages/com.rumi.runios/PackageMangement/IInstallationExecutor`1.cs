@@ -27,6 +27,10 @@ namespace RuniOS.PackageManagement
         /// The supported descriptors.<br/>
         /// 지원하는 descriptor들입니다.
         /// </param>
+        /// <param name="force">
+        /// Whether mismatched existing requirements may be replaced.<br/>
+        /// 기존 요구사항과 다른 항목을 교체할 수 있는지 여부입니다.
+        /// </param>
         /// <param name="cancellationToken">
         /// The token used to cancel execution.<br/>
         /// 실행 취소에 사용하는 토큰입니다.
@@ -35,10 +39,10 @@ namespace RuniOS.PackageManagement
         /// One final result per input installation entry.<br/>
         /// 입력 installation 항목별 최종 결과 하나를 반환합니다.
         /// </returns>
-        IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<TInstallation> installations, CancellationToken cancellationToken = default);
+        IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<TInstallation> installations, bool force = false, CancellationToken cancellationToken = default);
 
         bool IInstallationExecutor.CanExecute(IInstallation installation) => installation is TInstallation;
-        IAsyncEnumerable<InstallationResult> IInstallationExecutor.EnsureAsync(IEnumerable<IInstallation> installations, CancellationToken cancellationToken)
-            => EnsureAsync(installations.Cast<TInstallation>(), cancellationToken);
+        IAsyncEnumerable<InstallationResult> IInstallationExecutor.EnsureAsync(IEnumerable<IInstallation> installations, bool force, CancellationToken cancellationToken)
+            => EnsureAsync(installations.Cast<TInstallation>(), force, cancellationToken);
     }
 }

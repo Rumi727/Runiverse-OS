@@ -14,7 +14,7 @@ namespace RuniOS.Editor.Installer.Screens
 
         public RootPackageSelectionScreen() : base("installer.setup.roots.title", 200)
         {
-            const string catalogPath = "Packages/com.rumi.runios.installer/Editor/Screens/RootPackages.asset";
+            const string catalogPath = "Packages/com.rumi.runios/Editor/Screens/RootPackages.asset";
             PackageCatalog catalog = AssetDatabase.LoadAssetAtPath<PackageCatalog>(catalogPath);
             foreach (IPackage? definition in catalog.packages)
             {

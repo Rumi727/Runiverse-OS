@@ -74,6 +74,24 @@ MonoBehaviour:
       value: "\uC124\uCE58 \uC694\uAD6C\uC0AC\uD56D \uC801\uC6A9 \uC911\u2026"
     - key: installer.setup.preview.ready
       value: "\uBBF8\uB9AC\uBCF4\uAE30 \uC644\uB8CC. \uC124\uCE58 \uC2DC \uD604\uC7AC \uC0C1\uD0DC\uB97C \uB2E4\uC2DC \uD655\uC778\uD569\uB2C8\uB2E4."
+    - key: installer.setup.preview.version_change_title
+      value: "\uD328\uD0A4\uC9C0 \uBC84\uC804 \uAD50\uCCB4 \uC2B9\uC778"
+    - key: installer.setup.preview.version_change_message
+      value: "\uC694\uCCAD\uD55C \uBC84\uC804\uACFC \uD604\uC7AC \uC124\uCE58\uB41C \uBC84\uC804\uC774 \uB2E4\uB978 \uD328\uD0A4\uC9C0\uAC00 \uC788\uC2B5\uB2C8\uB2E4.\n\uC694\uCCAD\uD55C \uBC84\uC804\uC73C\uB85C \uAD50\uCCB4\uD560\uAE4C\uC694?"
+    - key: installer.setup.preview.version_change_accept
+      value: "\uAD50\uCCB4"
+    - key: installer.setup.preview.version_change_decline
+      value: "\uD604\uC7AC \uBC84\uC804 \uC720\uC9C0"
+    - key: installer.setup.preview.embedded_conflict_title
+      value: "Embedded \uD328\uD0A4\uC9C0 \uCDA9\uB3CC"
+    - key: installer.setup.preview.embedded_conflict_message
+      value: "\uC694\uCCAD\uD55C \uD328\uD0A4\uC9C0\uAC00 \uC774\uBBF8 Embedded \uC0C1\uD0DC\uC785\uB2C8\uB2E4.\n\uB85C\uCEEC \uC218\uC815\uC0AC\uD56D\uC774 \uC788\uC744 \uC218 \uC788\uC5B4 \uC774 \uD328\uD0A4\uC9C0\uB294 \uBCC0\uACBD\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4.\n\n\uB098\uBA38\uC9C0 \uC124\uCE58\uB97C \uACC4\uC18D\uD560\uAE4C\uC694?"
+    - key: installer.setup.preview.embedded_conflict_confirm
+      value: "\uD655\uC778"
+    - key: installer.setup.preview.embedded_conflict_cancel
+      value: "\uCDE8\uC18C"
+    - key: installer.setup.preview.embedded_conflict_warning
+      value: "Embedded \uCDA9\uB3CC: \uB85C\uCEEC \uC218\uC815 \uBCF4\uD638\uB97C \uC704\uD574 \uC774 \uD328\uD0A4\uC9C0\uB294 \uBCC0\uACBD\uB418\uC9C0 \uC54A\uC2B5\uB2C8\uB2E4."
     - key: installer.setup.preview.graph_error
       value: "\uC124\uCE58 \uC804 dependency graph \uC624\uB958 \uD574\uACB0 \uD544\uC694."
     - key: installer.setup.preview.complete
@@ -96,6 +114,8 @@ MonoBehaviour:
       value: "\uC774\uBBF8 \uCDA9\uC871\uB428"
     - key: installer.setup.preview.required
       value: "\uC124\uCE58 \uD544\uC694"
+    - key: installer.setup.preview.version_change_required
+      value: "\uBC84\uC804 \uAD50\uCCB4 \uC2B9\uC778 \uD544\uC694"
     - key: installer.setup.preview.registry_required
       value: "Registry \uC900\uBE44 \uD544\uC694. \uD328\uD0A4\uC9C0 \uD68D\uB4DD\uC740 UPM\uC5D0 \uC704\uC784"
     - key: installer.setup.preview.delegated

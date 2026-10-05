@@ -18,5 +18,5 @@ MonoBehaviour:
   _dependencies:
   - {fileID: 11400000, guid: 63e4224afcdc40ae8d98e191264b6d4b, type: 2}
   repositoryUrl: "https://github.com/Cysharp/R3.git"
-  commit: "f6eed2dd4208dc4ae171c601e799e85f82aca25e"
+  revision: "1.3.1"
   packagePath: "src/R3.Unity/Assets/R3.Unity"

@@ -28,7 +28,7 @@ namespace RuniOS.Editor.Installer.Screens
         public TMPSettingScreen() : base("installer.tmp_setting.label", 100)
         {
             contentContainer.AddToClassList("runios-setup__settings");
-            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.rumi.runios.installer/Editor/Screens/SetupScreens.uss"));
+            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Packages/com.rumi.runios/Editor/Screens/SetupScreens.uss"));
             Add(info);
             Add(warning);
             Add(resources);
