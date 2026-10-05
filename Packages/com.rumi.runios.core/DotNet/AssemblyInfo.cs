@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using System.Runtime.CompilerServices;
 [assembly: InternalsVisibleTo("RuniOS")]
+[assembly: InternalsVisibleTo("RuniOS.Linux")]
+[assembly: InternalsVisibleTo("RuniOS.Windows")]
 [assembly: InternalsVisibleTo("RuniOS.Sounds")]
 [assembly: InternalsVisibleTo("RuniOS.FMOD")]
 [assembly: InternalsVisibleTo("RuniOS.Effects")]

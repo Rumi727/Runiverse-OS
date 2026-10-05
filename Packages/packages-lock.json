@@ -30,6 +30,20 @@
       "dependencies": {},
       "url": "https://package.openupm.com"
     },
+    "com.rumi.nuget.system.threading.channels": {
+      "version": "file:com.rumi.nuget.system.threading.channels",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
+    "com.rumi.nuget.tmds.dbus.protocol": {
+      "version": "file:com.rumi.nuget.tmds.dbus.protocol",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.nuget.system.threading.channels": "10.0.12"
+      }
+    },
     "com.rumi.runios.core": {
       "version": "file:com.rumi.runios.core",
       "depth": 0,
@@ -72,6 +86,15 @@
         "com.unity.nuget.newtonsoft-json": "3.2.2"
       }
     },
+    "com.rumi.runios.linux": {
+      "version": "file:com.rumi.runios.linux",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "0.0.0",
+        "com.rumi.nuget.tmds.dbus.protocol": "0.95.1"
+      }
+    },
     "com.rumi.runios.nbs": {
       "version": "file:com.rumi.runios.nbs",
       "depth": 0,
@@ -111,6 +134,14 @@
         "com.unity.ui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",
         "com.cysharp.unitask": "2.5.10"
+      }
+    },
+    "com.rumi.runios.windows": {
+      "version": "file:com.rumi.runios.windows",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.rumi.runios.core": "0.0.0"
       }
     },
     "com.singularitygroup.hotreload": {

@@ -1,0 +1,13 @@
+{
+  "name": "com.rumi.runios.windows",
+  "version": "0.0.0",
+  "displayName": "Runiverse OS Windows",
+  "description": "Windows platform implementations for Runiverse OS.",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "com.rumi.runios.core": "0.0.0"
+  },
+  "unity": "6000.7"
+}

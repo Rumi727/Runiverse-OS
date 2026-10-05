@@ -1,0 +1,25 @@
+{
+    "name": "RuniOS.Windows",
+    "rootNamespace": "RuniOS",
+    "references": [
+        "GUID:b19ee5caadd5a5a4d96bc06c230b7b7a",
+        "GUID:c358082e85227cc4f9dee2438a164545",
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:5c01796d064528144a599661eaab93a6"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "WindowsStandalone32",
+        "WindowsStandalone64",
+        "WindowsStandalone32Server",
+        "WindowsStandalone64Server"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

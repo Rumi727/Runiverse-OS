@@ -38,6 +38,9 @@
         <!-- DeviceLocation.isRemovable -->
         <property name="Removable" type="b" access="read"/>
 
+        <!-- DeviceLocation.isOptical -->
+        <property name="Optical" type="b" access="read"/>
+
         <!-- Linux-specific metadata / 향후 icon·badge 선택 -->
         <property name="ConnectionBus" type="s" access="read"/>
     </interface>
