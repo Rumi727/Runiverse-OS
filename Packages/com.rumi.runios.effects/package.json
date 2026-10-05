@@ -9,7 +9,8 @@
   "dependencies": {
     "com.rumi.runios.core": "1.0.0",
     "com.unity.modules.ui": "1.0.0",
-    "com.unity.ui": "1.0.0"
+    "com.unity.ui": "1.0.0",
+    "com.rumi.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
   },
   "unity": "6000.7"
 }

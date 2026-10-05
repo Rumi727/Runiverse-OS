@@ -21,6 +21,7 @@ MonoBehaviour:
   _dependencies:
   - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
   - {fileID: 11400000, guid: a96b940f22434f52898c48b71456aee6, type: 2}
+  - {fileID: 11400000, guid: df490633780445fa89011da12049353c, type: 2}
   repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
   revision: ""
   packagePath: "Packages/com.rumi.runios.effects"

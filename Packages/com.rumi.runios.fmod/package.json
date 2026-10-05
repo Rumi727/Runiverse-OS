@@ -7,7 +7,8 @@
     "name": "Rumi"
   },
   "dependencies": {
-    "com.rumi.runios.core": "1.0.0"
+    "com.rumi.runios.core": "1.0.0",
+    "com.rumi.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
   },
   "unity": "6000.3"
 }

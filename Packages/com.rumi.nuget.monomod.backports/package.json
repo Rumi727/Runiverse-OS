@@ -1,0 +1,8 @@
+{
+  "name": "com.rumi.nuget.monomod.backports",
+  "version": "1.1.2",
+  "displayName": "MonoMod.Backports (NuGet)",
+  "dependencies": {
+    "com.rumi.nuget.monomod.ilhelpers": "1.1.0"
+  }
+}

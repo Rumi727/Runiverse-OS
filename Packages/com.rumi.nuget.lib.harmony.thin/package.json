@@ -1,0 +1,8 @@
+{
+  "name": "com.rumi.nuget.lib.harmony.thin",
+  "version": "2.4.2",
+  "displayName": "Lib.Harmony.Thin (NuGet)",
+  "dependencies": {
+    "com.rumi.nuget.monomod.core": "1.3.6"
+  }
+}
