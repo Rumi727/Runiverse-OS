@@ -168,5 +168,10 @@ namespace RuniOS.Resource
         IAssetRef IAssetRef.WithAssetId(Identifier assetId) => this with { assetId = assetId };
         IAssetRef IAssetRef.WithResourceKey(ResourceKey resourceKey) => this with { resourceKey = resourceKey };
         IAssetRef IAssetRef.WithDirect(object? asset) => this with { directAsset = asset is null ? default : (TAsset)asset };
+
+        public static implicit operator AssetRef<TAsset>(string assetId) => new AssetRef<TAsset>(assetId);
+        public static implicit operator AssetRef<TAsset>(Identifier assetId) => new AssetRef<TAsset>(assetId);
+        public static implicit operator AssetRef<TAsset>(ResourceKey resourceKey) => new AssetRef<TAsset>(resourceKey);
+        public static implicit operator AssetRef<TAsset>(TAsset asset) => new AssetRef<TAsset>(asset);
     }
 }
