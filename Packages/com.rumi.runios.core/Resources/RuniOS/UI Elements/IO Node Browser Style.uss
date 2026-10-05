@@ -1,0 +1,19 @@
+.runios-io-node-browser {
+    flex-grow: 1;
+}
+
+.runios-io-node-browser__navigation-group {
+    flex-shrink: 0;
+}
+
+.runios-io-node-browser__navigation-button {
+    flex-shrink: 0;
+}
+
+.runios-io-node-browser__path-field {
+    flex-shrink: 1;
+}
+
+.runios-io-node-browser__path-field .unity-text-element {
+    -unity-text-align: middle-left;
+}

@@ -1,6 +1,6 @@
 .runios-separator {
     flex-shrink: 0;
-    background-color: var(--unity-colors-separator-background, rgb(255, 255, 255));
+    background-color: rgb(255, 255, 255);
 }
 
 .runios-separator--horizontal {

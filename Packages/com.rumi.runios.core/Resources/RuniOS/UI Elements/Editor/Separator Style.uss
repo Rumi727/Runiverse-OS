@@ -1,0 +1,3 @@
+.runios-separator {
+    background-color: var(--unity-colors-separator-background);
+}

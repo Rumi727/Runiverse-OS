@@ -1,5 +1,10 @@
 
+@import url("project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&guid=dbd0f1685b5297a2bb38f0ce96257875&type=3#IO Node Browser Style");
 @import url("project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/Separator%20Style.uss?fileID=7433441132597879392&guid=259bcdf5ae8892b6b90c10f4cf527635&type=3#Separator Style");
+@import url("project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/Toolbar%20Style.uss?fileID=7433441132597879392&guid=1c4d62e9a5dc577a6806d6c022152e2c&type=3#Toolbar Style");
+@import url("project://database/Packages/com.rumi.runios.core/Resources/RuniOS/UI%20Elements/Flexible%20Space.uss?fileID=7433441132597879392&guid=3385d4340ec847adace8db1b864c93d9&type=3#Flexible Space");
+
+
 
 
 .unity-composite-field > .unity-base-field__input > .unity-composite-field__field--last {
@@ -216,8 +221,4 @@
     margin-right: 2px;
     -unity-text-align: upper-center;
     -unity-font-style: normal;
-}
-
-.runios-flexible-space {
-    flex-grow: 1;
 }

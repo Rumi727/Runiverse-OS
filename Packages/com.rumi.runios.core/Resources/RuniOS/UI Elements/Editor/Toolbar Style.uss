@@ -1,0 +1,104 @@
+.runios-toolbar {
+    background-color: var(--unity-colors-toolbar-background);
+    border-top-color: var(--unity-colors-toolbar-border);
+    border-right-color: var(--unity-colors-toolbar-border);
+    border-bottom-color: var(--unity-colors-toolbar-border);
+    border-left-color: var(--unity-colors-toolbar-border);
+    border-bottom-width: 1px;
+    height: var(--unity-metrics-toolbar-height);
+}
+
+.runios-toolbar .unity-button {
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: -1px;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-right: 4px;
+    padding-left: 4px;
+    background-color: var(--unity-colors-toolbar_button-background);
+}
+
+.runios-toolbar .unity-button:focus {
+    background-color: var(--unity-colors-toolbar_button-background-focus);
+    z-index: 10;
+}
+
+.runios-toolbar .unity-button:hover:enabled {
+    background-color: var(--unity-colors-toolbar_button-background-hover);
+}
+
+.runios-toolbar .unity-button:active:enabled {
+    background-color: var(--unity-colors-toolbar_button-background-checked);
+    z-index: 20;
+}
+
+.runios-toolbar .unity-toggle {
+    height: var(--unity-metrics-toolbar-height);
+    margin-top: 0;
+    margin-right: 0;
+    margin-bottom: 0;
+    margin-left: -1px;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    border-right-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom-left-radius: 0;
+    padding-right: 4px;
+    padding-left: 4px;
+    background-color: var(--unity-colors-toolbar_button-background);
+    border-left-color: var(--unity-colors-toolbar_button-border);
+    border-right-color: var(--unity-colors-toolbar_button-border);
+}
+
+.runios-toolbar .unity-toggle:focus {
+    background-color: var(--unity-colors-toolbar_button-background-focus);
+    z-index: 10;
+    border-left-color: var(--unity-colors-button-border_accent-focus);
+    border-right-color: var(--unity-colors-button-border_accent-focus);
+}
+
+.runios-toolbar .unity-toggle:hover:enabled {
+    background-color: var(--unity-colors-toolbar_button-background-hover);
+}
+
+.runios-toolbar .unity-toggle:active:enabled {
+    background-color: var(--unity-colors-toolbar_button-background-checked);
+    z-index: 20;
+}
+
+.runios-toolbar .unity-toggle:checked {
+    background-color: var(--unity-colors-toolbar_button-background-checked);
+    z-index: 20;
+}
+
+.runios-toolbar .unity-toggle .unity-toggle__label {
+    color: var(--unity-colors-label-text);
+    flex-grow: 1;
+    min-width: auto;
+    -unity-text-align: middle-center;
+}
+
+.runios-toolbar .unity-toggle:focus .unity-toggle__label {
+    color: var(--unity-colors-label-text);
+}
+
+.runios-toolbar .unity-toggle .unity-toggle__input {
+    position: absolute;
+    width: 0;
+    height: 0;
+}
+
+.runios-toolbar .unity-toggle .unity-toggle__checkmark {
+    visibility: hidden;
+}
