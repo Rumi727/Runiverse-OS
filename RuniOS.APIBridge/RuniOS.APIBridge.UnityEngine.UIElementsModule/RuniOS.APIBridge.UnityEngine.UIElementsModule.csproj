@@ -23,6 +23,9 @@
     </ItemGroup>
 
     <ItemGroup>
+        <Reference Include="UnityEngine.CoreModule">
+          <HintPath>..\dlls\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
         <Reference Include="UnityEngine.UIElementsModule" Publicize="true">
             <HintPath>..\dlls\UnityEngine.UIElementsModule.dll</HintPath>
         </Reference>
