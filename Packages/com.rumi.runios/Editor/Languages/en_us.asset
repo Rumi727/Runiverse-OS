@@ -32,31 +32,6 @@ MonoBehaviour:
       value: 'The ROS package utilizes Unity''s TextMesh Pro package.
 
         We recommend importing TextMesh Pro''s essential resources for smooth operation.'
-    - key: installer.install_setting.install
-      value: Install
-    - key: installer.install_setting.dependency
-      value: Dependencies
-    - key: installer.install_setting.core.label
-      value: Runiverse OS Core
-    - key: installer.install_setting.core.one_line
-      value: Shared utilities and resource management
-    - key: installer.install_setting.core.description
-      value: Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages.
-    - key: installer.install_setting.ui.label
-      value: Runiverse OS UI
-    - key: installer.install_setting.ui.one_line
-      value: RuniOS's official runtime UI/UX system
-    - key: installer.install_setting.ui.description
-      value: 'A planned runtime UI/UX system for controlling RuniOS features,
-
-        with a design inspired by osu!lazer.
-
-
-        The UI/UX implementation is planned;
-
-        the currently available components bind resources to Unity UI.'
-    - key: installer.setup.roots.title
-      value: Root packages
     - key: installer.tmp_setting.essentials.title
       value: TMP Essentials
     - key: installer.tmp_setting.essentials.info
@@ -73,8 +48,10 @@ MonoBehaviour:
       value: Reimport the updated TMP examples and extras.
     - key: installer.tmp_setting.examples.import
       value: Import TMP Examples & Extras
+    - key: installer.setup.roots.title
+      value: Select a package
     - key: installer.setup.preview.title
-      value: Preview changes
+      value: Installation time!
     - key: installer.setup.preview.info
       value: Selected roots and their dependencies are observed by Package Management. Preview is advisory; Install checks the environment again. Unchecked roots do not remove installed packages. TMP resources are imported separately on the TMP screen.
     - key: installer.setup.preview.empty
@@ -140,6 +117,41 @@ MonoBehaviour:
       value: Registry ready; package acquisition delegated, not verified
     - key: installer.setup.preview.unsupported
       value: Preview is not supported by this executor
+    - key: installer.install_setting.install
+      value: Install
+    - key: installer.install_setting.dependency
+      value: Dependencies
+    - key: installer.install_setting.core.label
+      value: Runiverse OS Core
+    - key: installer.install_setting.core.one_line
+      value: Shared utilities and resource management
+    - key: installer.install_setting.core.description
+      value: Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages.
+    - key: installer.install_setting.windows.label
+      value: Runiverse OS Windows
+    - key: installer.install_setting.windows.one_line
+      value: Windows platform support
+    - key: installer.install_setting.windows.description
+      value: Provides Windows known folders and volume mount points through the RuniOS IO APIs.
+    - key: installer.install_setting.linux.label
+      value: Runiverse OS Linux
+    - key: installer.install_setting.linux.one_line
+      value: Linux platform support
+    - key: installer.install_setting.linux.description
+      value: Provides Linux user directories, mount points and UDisks2 storage device locations through the RuniOS IO APIs.
+    - key: installer.install_setting.ui.label
+      value: Runiverse OS UI
+    - key: installer.install_setting.ui.one_line
+      value: RuniOS's official runtime UI/UX system
+    - key: installer.install_setting.ui.description
+      value: 'A planned runtime UI/UX system for controlling RuniOS features,
+
+        with a design inspired by osu!lazer.
+
+
+        The UI/UX implementation is planned;
+
+        the currently available components bind resources to Unity UI.'
     - key: installer.install_setting.sound.label
       value: Runiverse OS Sound
     - key: installer.install_setting.sound.one_line
