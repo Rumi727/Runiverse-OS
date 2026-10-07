@@ -62,6 +62,7 @@ namespace RuniOS.UIElements.IO
                     {
                         assetRef = "runios:ui/io_node_browser/back",
                         editorAssetRef = "runios-editor:ui/io_node_browser/back",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/back",
                         applyAsset = x => back.iconImage = x,
                         clearAsset = () => back.iconImage = default
                     });
@@ -74,6 +75,7 @@ namespace RuniOS.UIElements.IO
                     {
                         assetRef = "runios:ui/io_node_browser/forward",
                         editorAssetRef = "runios-editor:ui/io_node_browser/forward",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/forward",
                         applyAsset = x => back.iconImage = x,
                         clearAsset = () => back.iconImage = default
                     });
@@ -86,6 +88,7 @@ namespace RuniOS.UIElements.IO
                     {
                         assetRef = "runios:ui/io_node_browser/up",
                         editorAssetRef = "runios-editor:ui/io_node_browser/up",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/up",
                         applyAsset = x => back.iconImage = x,
                         clearAsset = () => back.iconImage = default
                     });
