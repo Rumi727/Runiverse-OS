@@ -34,7 +34,26 @@ namespace RuniOS.UIElements
             }
         }
 
+        /// <summary>
+        /// Editor-only. It performs no function at runtime. Please use the resource pack system.
+        /// </summary>
         public AssetRef<TAsset>? editorAssetRef
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+
+                field = value;
+                Reload().Forget();
+            }
+        }
+
+        /// <summary>
+        /// Editor-only. It performs no function at runtime. Please use the resource pack system.
+        /// </summary>
+        public AssetRef<TAsset>? editorDarkAssetRef
         {
             get;
             set
@@ -53,7 +72,7 @@ namespace RuniOS.UIElements
             {
 #if UNITY_EDITOR
                 if (isEditorTheme)
-                    return editorAssetRef ?? assetRef;
+                    return (UnityEditor.EditorGUIUtility.isProSkin ? editorDarkAssetRef : editorAssetRef) ?? assetRef;
 #endif
                 return assetRef;
             }
