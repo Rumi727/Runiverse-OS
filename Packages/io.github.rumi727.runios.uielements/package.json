@@ -1,0 +1,16 @@
+{
+  "name": "io.github.rumi727.runios.uielements",
+  "version": "0.0.0",
+  "displayName": "Runiverse OS UI Elements",
+  "description": "User-friendly game engine library for Unity Engine",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "io.github.rumi727.runios.core": "0.0.0",
+    "com.unity.modules.uielements": "1.0.0",
+    "com.cysharp.unitask": "2.5.11",
+    "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
+  },
+  "unity": "6000.7"
+}

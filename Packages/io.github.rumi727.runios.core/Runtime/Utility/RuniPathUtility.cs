@@ -1,7 +1,6 @@
 #nullable enable
 using RuniOS.IO;
 using System.IO;
-using UnityEngine.Networking;
 
 namespace RuniOS.Utility
 {
@@ -17,28 +16,8 @@ namespace RuniOS.Utility
         /// </summary>
         public const char alternativeNameChar = '_';
 
-        /// <summary>
-        /// The prefix used when converting a path value to a local file URL string.<br/>
-        /// 경로 값을 로컬 파일 URL 문자열로 변환할 때 사용하는 접두사를 나타냅니다.
-        /// </summary>
-        public const string urlPathPrefix = "file:///";
-
         static readonly char[] invalidPathChars = Path.GetInvalidPathChars();
         static readonly char[] invalidFileNameChars = Path.GetInvalidFileNameChars();
-
-        /// <summary>
-        /// Converts this path value to a local file URL string.<br/>
-        /// 이 경로 값을 로컬 파일 URL 문자열로 변환합니다.
-        /// </summary>
-        /// <param name="path">
-        /// The path string to convert.<br/>
-        /// 변환할 경로 문자열입니다.
-        /// </param>
-        /// <returns>
-        /// A string prefixed with <see cref="urlPathPrefix"/> and escaped for URL usage.<br/>
-        /// <see cref="urlPathPrefix"/>가 붙고 URL 용도로 이스케이프된 문자열을 반환합니다.
-        /// </returns>
-        public static string UrlPathPrefix(string path) => urlPathPrefix + UnityWebRequest.EscapeURL(path);
 
         /// <summary>
         /// Replaces invalid path characters in the directory portion of the specified path string.<br/>

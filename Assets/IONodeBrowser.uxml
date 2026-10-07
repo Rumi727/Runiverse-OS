@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" authoring-id="-296762466" editor-extension-mode="True">
-    <Style src="project://database/Packages/io.github.rumi727.runios.core/Resources/RuniOS/UI%20Elements/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=dbd0f1685b5297a2bb38f0ce96257875&amp;type=3#IO Node Browser Style"/>
-    <Style src="project://database/Packages/io.github.rumi727.runios.core.editor/Resources/RuniOS/UI%20Elements/Editor/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=84c0ae6187824d259f2eb6dc769c87f1&amp;type=3#IO Node Browser Style"/>
+    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=c14b4c6cb6705a834a10efce3c1a5d72&amp;type=3#IO Node Browser Style"/>
+    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=84c0ae6187824d259f2eb6dc769c87f1&amp;type=3#IO Node Browser Style"/>
     <RuniOS.UIElements.IO.IONodeBrowser/>
 </ui:UXML>

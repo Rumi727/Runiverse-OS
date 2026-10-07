@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "io.github.rumi727.runios.core": "0.0.0",
+    "io.github.rumi727.runios.uielements": "0.0.0",
     "com.unity.modules.imgui": "1.0.0",
     "com.unity.modules.uielements": "1.0.0",
     "com.unity.nuget.newtonsoft-json": "3.2.1",

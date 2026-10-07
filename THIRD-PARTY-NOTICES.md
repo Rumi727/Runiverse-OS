@@ -1593,7 +1593,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON A
 
 ### Pretendard
 
-Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Pretendard/**`
+Files: `Packages/io.github.rumi727.runios.ui/Resources/RuniOS/Fonts/Pretendard/**`
 
 ~~~~text
 Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
@@ -1694,7 +1694,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### Noto Sans
 
-Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Noto Sans/**`
+Files: `Packages/io.github.rumi727.runios.ui/Resources/RuniOS/Fonts/Noto Sans/**`
 
 ~~~~text
 Copyright 2012 Google Inc. All Rights Reserved.
@@ -1794,7 +1794,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### NeoDunggeunmo Pro
 
-Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Neodgm Pro/**`
+Files: `Packages/io.github.rumi727.runios.ui/Resources/RuniOS/Fonts/Neodgm Pro/**`
 
 ~~~~text
 Copyright (c) 2021, Eunbin Jeong (Dalgona.) <project-neodgm@dalgona.dev>,

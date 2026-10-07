@@ -1,0 +1,20 @@
+.runios-io-node-browser__navigation-button {
+    width: 25px;
+    padding-top: 0;
+    padding-right: 0;
+    padding-bottom: 0;
+    padding-left: 0;
+    height: 20px;
+}
+
+.runios-io-node-browser__navigation-button .unity-image {
+    width: 16px;
+    height: 16px;
+}
+
+.runios-io-node-browser__navigation-button#back {
+}
+
+.runios-io-node-browser > .runios-separator {
+    display: none;
+}

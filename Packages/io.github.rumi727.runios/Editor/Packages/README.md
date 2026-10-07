@@ -8,6 +8,7 @@
 | --- | --- |
 | Core | 공통 유틸리티, IO, 비동기 작업, 리소스와 지역화 |
 | Core Editor | 공통 에디터 인스펙터, 필드, 지역화와 리소스 탐색 도구 |
+| UI Elements | UI Toolkit 컨트롤, 리소스 연동과 지역화 |
 | Windows | Windows 알려진 폴더와 볼륨 마운트 위치 |
 | Linux | Linux 사용자 디렉터리, 마운트와 UDisks2 저장 장치 위치 |
 | Sound | 공통 오디오 API, 오디오 소스와 사운드 리소스 |
