@@ -127,6 +127,12 @@ MonoBehaviour:
       value: Shared utilities and resource management
     - key: installer.install_setting.core.description
       value: Provides the shared utilities, asynchronous tasks, IO abstractions, resource packs and localization used by RuniOS packages.
+    - key: installer.install_setting.core_editor.label
+      value: "Runiverse OS Core Editor"
+    - key: installer.install_setting.core_editor.one_line
+      value: "Shared editor tools for RuniOS"
+    - key: installer.install_setting.core_editor.description
+      value: "Provides common editor tools for RuniOS, including inspectors, IMGUI and UI Toolkit fields, localization and resource browsing."
     - key: installer.install_setting.windows.label
       value: Runiverse OS Windows
     - key: installer.install_setting.windows.one_line

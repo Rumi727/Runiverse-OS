@@ -148,12 +148,28 @@
         "io.github.rumi727.nuget.r3": "1.3.1"
       }
     },
+    "io.github.rumi727.runios.core.editor": {
+      "version": "file:io.github.rumi727.runios.core.editor",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "io.github.rumi727.runios.core": "0.0.0",
+        "com.unity.modules.imgui": "1.0.0",
+        "com.unity.modules.uielements": "1.0.0",
+        "com.unity.nuget.newtonsoft-json": "3.2.1",
+        "com.cysharp.unitask": "2.5.11",
+        "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161",
+        "io.github.rumi727.nuget.lib.harmony.thin": "2.4.2",
+        "io.github.rumi727.nuget.r3": "1.3.1"
+      }
+    },
     "io.github.rumi727.runios.effects": {
       "version": "file:io.github.rumi727.runios.effects",
       "depth": 0,
       "source": "embedded",
       "dependencies": {
         "io.github.rumi727.runios.core": "1.0.0",
+        "io.github.rumi727.runios.core.editor": "0.0.0",
         "com.unity.modules.ui": "1.0.0",
         "com.unity.ui": "1.0.0",
         "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
@@ -165,6 +181,8 @@
       "source": "embedded",
       "dependencies": {
         "io.github.rumi727.runios.core": "1.0.0",
+        "io.github.rumi727.runios.core.editor": "0.0.0",
+        "io.github.rumi727.runios.sound": "0.0.0",
         "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
       }
     },
@@ -183,6 +201,7 @@
       "source": "embedded",
       "dependencies": {
         "io.github.rumi727.runios.core": "1.0.0",
+        "io.github.rumi727.runios.core.editor": "0.0.0",
         "io.github.rumi727.runios.sound": "0.0.0",
         "io.github.rumi727.runios.fmod": "0.0.0",
         "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
@@ -194,6 +213,7 @@
       "source": "embedded",
       "dependencies": {
         "io.github.rumi727.runios.core": "1.0.0",
+        "io.github.rumi727.runios.core.editor": "0.0.0",
         "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
       }
     },
@@ -215,6 +235,7 @@
       "source": "embedded",
       "dependencies": {
         "io.github.rumi727.runios.core": "1.0.0",
+        "io.github.rumi727.runios.core.editor": "0.0.0",
         "com.unity.modules.ui": "1.0.0",
         "com.unity.ui": "1.0.0",
         "com.unity.textmeshpro": "3.0.6",

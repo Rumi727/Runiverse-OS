@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "io.github.rumi727.runios.core": "1.0.0",
+    "io.github.rumi727.runios.core.editor": "0.0.0",
     "com.unity.modules.ui": "1.0.0",
     "com.unity.ui": "1.0.0",
     "com.unity.textmeshpro": "3.0.6",

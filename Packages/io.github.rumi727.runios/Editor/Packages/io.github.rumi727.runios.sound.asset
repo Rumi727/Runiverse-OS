@@ -19,6 +19,7 @@ MonoBehaviour:
   descriptionKey: installer.install_setting.sound.description
   packageName: ""
   _dependencies:
+  - {fileID: 11400000, guid: 3786bf20d03f4602a9d0034ab1b91281, type: 2}
   - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
   - {fileID: 11400000, guid: df490633780445fa89011da12049353c, type: 2}
   repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"

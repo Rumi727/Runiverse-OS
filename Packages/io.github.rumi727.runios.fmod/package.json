@@ -8,6 +8,8 @@
   },
   "dependencies": {
     "io.github.rumi727.runios.core": "1.0.0",
+    "io.github.rumi727.runios.core.editor": "0.0.0",
+    "io.github.rumi727.runios.sound": "0.0.0",
     "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
   },
   "unity": "6000.3"

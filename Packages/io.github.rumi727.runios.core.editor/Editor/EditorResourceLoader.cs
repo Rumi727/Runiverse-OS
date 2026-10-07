@@ -1,12 +1,12 @@
 ﻿#nullable enable
-using Cysharp.Threading.Tasks;
 using R3;
 using RuniOS.Resource;
 
 namespace RuniOS.Editor
 {
     /// <summary>
-    /// 에디터에서 리소스를 미리 로딩시키는 클래스입니다.
+    /// Displays resource loading progress in the editor.<br/>
+    /// 에디터에서 리소스 로딩 진행도를 표시합니다.
     /// </summary>
     [InitializeOnLoad]
     public sealed class EditorResourceLoader : AssetPostprocessor
@@ -21,14 +21,5 @@ namespace RuniOS.Editor
         /// <param name="id">한 프로그레스 바에서 여러개의 진행도를 구분할 고유 id</param>
         /// <param name="value">0에서 1 사이의 진행도</param>
         public static void SetProgress(string id, float value) => ProgressInToolbar.SetProgress(progressText, id, value);
-
-        static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths, bool didDomainReload)
-        {
-            if (didDomainReload || importedAssets
-                    .Concat(deletedAssets)
-                    .Concat(movedAssets)
-                    .Any(x => x.Contains("StreamingAssets", StringComparison.OrdinalIgnoreCase)))
-                ResourceManager.Reload().Forget();
-        }
     }
 }

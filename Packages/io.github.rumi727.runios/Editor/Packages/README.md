@@ -7,6 +7,7 @@
 | 패키지 | 기능 |
 | --- | --- |
 | Core | 공통 유틸리티, IO, 비동기 작업, 리소스와 지역화 |
+| Core Editor | 공통 에디터 인스펙터, 필드, 지역화와 리소스 탐색 도구 |
 | Windows | Windows 알려진 폴더와 볼륨 마운트 위치 |
 | Linux | Linux 사용자 디렉터리, 마운트와 UDisks2 저장 장치 위치 |
 | Sound | 공통 오디오 API, 오디오 소스와 사운드 리소스 |
@@ -15,6 +16,8 @@
 | FMOD | FMOD Core 오디오 시스템과 재생 |
 | NBS | Note Block Studio 파일 로드와 FMOD 재생 |
 | Texture | FreeImage·Burst 기반 런타임 이미지 로드 |
+
+`Core Editor`는 직접 선택할 수 있으며, Sound, UI, Effects, FMOD, NBS의 종속 패키지로도 설치됩니다.
 
 종속 패키지로 UniTask, R3, LinkMerge, SoftMask for uGUI, Unity UI / TextMesh Pro, Newtonsoft Json, Burst, Unity Mathematics와 Unity 모듈 정의를 포함합니다.
 

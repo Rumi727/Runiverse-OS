@@ -19,6 +19,7 @@ MonoBehaviour:
   descriptionKey: installer.install_setting.nbs.description
   packageName: ""
   _dependencies:
+  - {fileID: 11400000, guid: 3786bf20d03f4602a9d0034ab1b91281, type: 2}
   - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
   - {fileID: 11400000, guid: e45a25509b694ad4abb89dd57addc373, type: 2}
   - {fileID: 11400000, guid: f36b3a158d8b412991c2f5a93799784c, type: 2}

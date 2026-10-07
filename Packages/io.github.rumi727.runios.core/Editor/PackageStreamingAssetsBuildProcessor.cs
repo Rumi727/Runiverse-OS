@@ -6,7 +6,7 @@ using PackageInfo = UnityEditor.PackageManager.PackageInfo;
 
 namespace RuniOS.Editor
 {
-    public sealed class PackageStreamingAssetsBuildProcessor : BuildPlayerProcessor
+    sealed class PackageStreamingAssetsBuildProcessor : BuildPlayerProcessor
     {
         public override int callbackOrder => -1000;
 

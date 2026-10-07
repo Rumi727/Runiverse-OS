@@ -4,7 +4,7 @@ using UnityEditor.Build;
 namespace RuniOS.Editor
 {
     [InitializeOnLoad]
-    public static class ScriptingDefineSymbolSetter
+    static class ScriptingDefineSymbolSetter
     {
         static ScriptingDefineSymbolSetter()
         {

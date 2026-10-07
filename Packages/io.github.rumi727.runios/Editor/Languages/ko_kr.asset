@@ -116,6 +116,12 @@ MonoBehaviour:
       value: "\uACF5\uD1B5 \uC720\uD2F8\uB9AC\uD2F0\uC640 \uB9AC\uC18C\uC2A4 \uAD00\uB9AC"
     - key: installer.install_setting.core.description
       value: "RuniOS \uD328\uD0A4\uC9C0\uAC00 \uACF5\uC720\uD558\uB294 \uC720\uD2F8\uB9AC\uD2F0, \uBE44\uB3D9\uAE30 \uC791\uC5C5, IO \uCD94\uC0C1\uD654, \uB9AC\uC18C\uC2A4 \uD329\uACFC \uC9C0\uC5ED\uD654 \uAE30\uB2A5\uC744 \uC81C\uACF5\uD569\uB2C8\uB2E4."
+    - key: installer.install_setting.core_editor.label
+      value: "Runiverse OS Core Editor"
+    - key: installer.install_setting.core_editor.one_line
+      value: "RuniOS \uACF5\uD1B5 \uC5D0\uB514\uD130 \uB3C4\uAD6C"
+    - key: installer.install_setting.core_editor.description
+      value: "\uC778\uC2A4\uD399\uD130, IMGUI\u00B7UI Toolkit \uD544\uB4DC, \uC5D0\uB514\uD130 \uC9C0\uC5ED\uD654\uC640 \uB9AC\uC18C\uC2A4 \uD0D0\uC0C9 \uB4F1 RuniOS \uACF5\uD1B5 \uC5D0\uB514\uD130 \uB3C4\uAD6C\uB97C \uC81C\uACF5\uD569\uB2C8\uB2E4."
     - key: installer.install_setting.windows.label
       value: Runiverse OS Windows
     - key: installer.install_setting.windows.one_line
