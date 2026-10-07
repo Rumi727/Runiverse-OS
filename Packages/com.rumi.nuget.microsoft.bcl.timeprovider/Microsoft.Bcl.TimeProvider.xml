@@ -76,7 +76,7 @@
             Gets the elapsed time since the <paramref name="startingTimestamp"/> value retrieved using <see cref="M:System.TimeProvider.GetTimestamp"/>.
             </summary>
             <param name="startingTimestamp">The timestamp marking the beginning of the time period.</param>
-            <returns>A <see cref="T:System.TimeSpan"/> for the elapsed time between the starting timestamp and the time of this call.</returns>
+            <returns>A <see cref="T:System.TimeSpan"/> for the elapsed time between the starting timestamp and the time of this call./></returns>
         </member>
         <member name="M:System.TimeProvider.CreateTimer(System.Threading.TimerCallback,System.Object,System.TimeSpan,System.TimeSpan)">
             <summary>Creates a new <see cref="T:System.Threading.ITimer"/> instance, using <see cref="T:System.TimeSpan"/> values to measure time intervals.</summary>
@@ -91,7 +91,7 @@
             The newly created <see cref="T:System.Threading.ITimer"/> instance.
             </returns>
             <exception cref="T:System.ArgumentNullException"><paramref name="callback"/> is null.</exception>
-            <exception cref="T:System.ArgumentOutOfRangeException">The number of milliseconds in the value of <paramref name="dueTime"/> or <paramref name="period"/> is negative and not equal to <see cref="F:System.Threading.Timeout.Infinite"/>, or is greater than <see cref="F:System.Int32.MaxValue">int.MaxValue</see>.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException">The number of milliseconds in the value of <paramref name="dueTime"/> or <paramref name="period"/> is negative and not equal to <see cref="F:System.Threading.Timeout.Infinite"/>, or is greater than <see cref="F:System.Int32.MaxValue"/>.</exception>
             <remarks>
             <para>
             The delegate specified by the callback parameter is invoked once after <paramref name="dueTime"/> elapses, and thereafter each time the <paramref name="period"/> time interval elapses.
@@ -156,11 +156,11 @@
         </member>
         <member name="T:System.Threading.Tasks.TimeProviderTaskExtensions">
             <summary>
-            Provides extensions methods for <see cref="T:System.Threading.Tasks.Task"/> operations with <see cref="T:System.TimeProvider"/>.
+            Provide extensions methods for <see cref="T:System.Threading.Tasks.Task"/> operations with <see cref="T:System.TimeProvider"/>.
             </summary>
             <remarks>
             The Microsoft.Bcl.TimeProvider library interfaces are intended solely for use in building against pre-.NET 8 surface area.
-            If your code is being built against .NET 8 or higher, then you shouldn't use this library.
+            If your code is being built against .NET 8 or higher, then this library should not be utilized.
             </remarks>
         </member>
         <member name="M:System.Threading.Tasks.TimeProviderTaskExtensions.Delay(System.TimeProvider,System.TimeSpan,System.Threading.CancellationToken)">
@@ -181,7 +181,8 @@
             <param name="timeProvider">The <see cref="T:System.TimeProvider"/> with which to interpret <paramref name="timeout"/>.</param>
             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for a cancellation request.</param>
             <returns>The <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous wait.  It may or may not be the same instance as the current instance.</returns>
-            <exception cref="T:System.ArgumentNullException"><paramref name="task"/> or <paramref name="timeProvider"/> is <see langword="null" />.</exception>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="task"/> argument is null.</exception>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="timeProvider"/> argument is null.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> represents a negative time interval other than <see cref="F:System.Threading.Timeout.InfiniteTimeSpan"/>.</exception>
         </member>
         <member name="M:System.Threading.Tasks.TimeProviderTaskExtensions.WaitAsync``1(System.Threading.Tasks.Task{``0},System.TimeSpan,System.TimeProvider,System.Threading.CancellationToken)">
@@ -192,15 +193,16 @@
             <param name="timeout">The timeout after which the <see cref="T:System.Threading.Tasks.Task"/> should be faulted with a <see cref="T:System.TimeoutException"/> if it hasn't otherwise completed.</param>
             <param name="timeProvider">The <see cref="T:System.TimeProvider"/> with which to interpret <paramref name="timeout"/>.</param>
             <param name="cancellationToken">The <see cref="T:System.Threading.CancellationToken"/> to monitor for a cancellation request.</param>
-            <returns>The <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous wait. It may or may not be the same instance as the current instance.</returns>
-            <exception cref="T:System.ArgumentNullException"><paramref name="task"/> or <paramref name="timeProvider"/> is <see langword="null" />.</exception>
+            <returns>The <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous wait.  It may or may not be the same instance as the current instance.</returns>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="task"/> argument is null.</exception>
+            <exception cref="T:System.ArgumentNullException">The <paramref name="timeProvider"/> argument is null.</exception>
             <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="timeout"/> represents a negative time interval other than <see cref="F:System.Threading.Timeout.InfiniteTimeSpan"/>.</exception>
         </member>
         <member name="M:System.Threading.Tasks.TimeProviderTaskExtensions.CreateCancellationTokenSource(System.TimeProvider,System.TimeSpan)">
             <summary>Initializes a new instance of the <see cref="T:System.Threading.CancellationTokenSource"/> class that will be canceled after the specified <see cref="T:System.TimeSpan"/>. </summary>
             <param name="timeProvider">The <see cref="T:System.TimeProvider"/> with which to interpret the <paramref name="delay"/>. </param>
             <param name="delay">The time interval to wait before canceling this <see cref="T:System.Threading.CancellationTokenSource"/>. </param>
-            <exception cref="T:System.ArgumentOutOfRangeException"><paramref name="delay"/> is negative and not equal to <see cref="F:System.Threading.Timeout.InfiniteTimeSpan" /> or greater than maximum allowed timer duration.</exception>
+            <exception cref="T:System.ArgumentOutOfRangeException"> The <paramref name="delay"/> is negative and not equal to <see cref="F:System.Threading.Timeout.InfiniteTimeSpan" /> or greater than maximum allowed timer duration.</exception>
             <returns><see cref="T:System.Threading.CancellationTokenSource"/> that will be canceled after the specified <paramref name="delay"/>.</returns>
             <remarks>
             <para>
@@ -287,7 +289,7 @@
         </member>
         <member name="F:System.Runtime.InteropServices.StringMarshalling.Custom">
             <summary>
-            Indicates the user is supplying a specific marshaller in <see cref="P:System.Runtime.InteropServices.LibraryImportAttribute.StringMarshallingCustomType"/>.
+            Indicates the user is suppling a specific marshaller in <see cref="P:System.Runtime.InteropServices.LibraryImportAttribute.StringMarshallingCustomType"/>.
             </summary>
         </member>
         <member name="F:System.Runtime.InteropServices.StringMarshalling.Utf8">
@@ -388,7 +390,7 @@
         <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String)">
             <summary>Initializes the attribute with the specified return value condition and a field or property member.</summary>
             <param name="returnValue">
-            The return value condition. If the method returns this value, the associated field or property member will not be null.
+            The return value condition. If the method returns this value, the associated parameter will not be null.
             </param>
             <param name="member">
             The field or property member that is promised to be not-null.
@@ -397,7 +399,7 @@
         <member name="M:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.#ctor(System.Boolean,System.String[])">
             <summary>Initializes the attribute with the specified return value condition and list of field and property members.</summary>
             <param name="returnValue">
-            The return value condition. If the method returns this value, the associated field and property members will not be null.
+            The return value condition. If the method returns this value, the associated parameter will not be null.
             </param>
             <param name="members">
             The list of field and property members that are promised to be not-null.
@@ -408,9 +410,6 @@
         </member>
         <member name="P:System.Diagnostics.CodeAnalysis.MemberNotNullWhenAttribute.Members">
             <summary>Gets field or property member names.</summary>
-        </member>
-        <member name="T:System.ExceptionPolyfills">
-            <summary>Provides downlevel polyfills for static methods on Exception-derived types.</summary>
         </member>
     </members>
 </doc>
