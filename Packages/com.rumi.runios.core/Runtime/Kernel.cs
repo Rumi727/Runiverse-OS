@@ -57,7 +57,6 @@ namespace RuniOS
             Application.quitting += Quitting;
 
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.update -= TimeUpdate;
             UnityEditor.EditorApplication.pauseStateChanged += PauseStateChanged;
 #endif
         }
@@ -69,10 +68,17 @@ namespace RuniOS
             Application.quitting -= Quitting;
 
 #if UNITY_EDITOR
-            UnityEditor.EditorApplication.update += TimeUpdate;
             UnityEditor.EditorApplication.pauseStateChanged -= PauseStateChanged;
 #endif
         }
+
+#if UNITY_EDITOR
+        [UnityEditor.Scripting.LifecycleManagement.OnEnteringEditMode]
+        static void OnEnteringEditMode() => UnityEditor.EditorApplication.update += TimeUpdate;
+
+        [UnityEditor.Scripting.LifecycleManagement.OnExitingEditMode]
+        static void OnExitingEditMode() => UnityEditor.EditorApplication.update -= TimeUpdate;
+#endif
 
 #if UNITY_EDITOR
         static void PauseStateChanged(UnityEditor.PauseState pauseState) => deltaTimeStopwatch.Restart();
