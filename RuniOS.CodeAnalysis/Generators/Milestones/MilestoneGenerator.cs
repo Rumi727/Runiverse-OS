@@ -40,11 +40,7 @@ public sealed class MilestoneGenerator : IIncrementalGenerator
                 .Select(static (x, _) => x.Left.AddRange(x.Right));
         }
 
-        IncrementalValueProvider<bool> isUnityAssembly = context.CompilationProvider
-            .Select(static (compilation, _) =>
-                compilation.GetTypeByMetadataName("Unity.Scripting.RequiredByAssemblyAttribute") != null);
-
-        context.RegisterSourceOutput(allMilestoneMethods.Combine(isUnityAssembly), GenerateModuleInitialization);
+        context.RegisterSourceOutput(allMilestoneMethods, GenerateModuleInitialization);
     }
 
     static bool IsCandidateMethod(SyntaxNode node, CancellationToken cancellationToken)
@@ -135,21 +131,20 @@ public sealed class MilestoneGenerator : IIncrementalGenerator
         context.AddSource(method.hintName, writer.ToString());
     }
 
-    static void GenerateModuleInitialization(SourceProductionContext context, (ImmutableArray<MilestoneMethodInfo> methods, bool hasRequiredByAssemblyAttribute) source)
+    static void GenerateModuleInitialization(SourceProductionContext context, ImmutableArray<MilestoneMethodInfo> methods)
     {
-        (ImmutableArray<MilestoneMethodInfo> methods, bool hasRequiredByAssemblyAttribute) = source;
-        if (!hasRequiredByAssemblyAttribute || methods.IsDefaultOrEmpty)
+        if (methods.IsDefaultOrEmpty)
             return;
 
         SourceWriter writer = new SourceWriter();
         using (writer.Namespace("RuniOS.Milestones.Generated"))
         {
             writer.AppendLineCompilerGenerated();
-            writer.AppendLine("[global::Unity.Scripting.RequiredByAssembly]");
             writer.AppendLine("internal static class __RuniModuleInitialization");
             using (writer.Block())
             {
                 writer.AppendLineCompilerGenerated();
+                writer.AppendLineModuleInitializer();
                 writer.AppendLine("internal static void Initialize()");
                 using (writer.Block())
                 {

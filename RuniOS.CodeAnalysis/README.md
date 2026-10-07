@@ -440,6 +440,7 @@ Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/RuniOS.Analyzers.dll.meta
 | 경로 | 역할 |
 |---|---|
 | Generators/EmbeddedAttributeSourceGenerator.cs | 생성 구현 타입을 참조 어셈블리 조회에서 숨길 Microsoft.CodeAnalysis.EmbeddedAttribute 선언을 compilation에 주입 |
+| Generators/ModuleInitializerAttributeSourceGenerator.cs | internal ModuleInitializerAttribute 정의를 post-initialization 단계에서 한 번 주입 |
 | Generators/TypeRegistry/TypeRegistrySourceGenerator.cs | 모든 TypeRegistry generator가 공유하는 핵심 pipeline, registry 검증, manifest 탐색, output 생성 |
 | Generators/TypeRegistry/AttributedTypeRegistrySourceGenerator.cs | AttributedTypeRegistry<TAttribute> 전용 후보 탐색/매칭/attribute 직접 등록 코드 |
 | Generators/TypeRegistry/GenerateTypeRegistryAttributeSourceGenerator.cs | GenerateTypeRegistry 선언을 compilation에 주입 |
@@ -970,7 +971,7 @@ protected const string onAssemblyUnloadingAttributeMetadataName =
     "Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute";
 ~~~
 
-마지막 두 이름은 “generated lifecycle method를 실제로 장식할 attribute가 compilation에 존재하는가?”를 검사하는 데 사용됩니다.
+마지막 두 이름은 모듈 초기화자가 콜백 등록에 사용할 실제 Unity lifecycle attribute 타입이 참조 어셈블리에 존재하는지 검사합니다. 직접 등록 API인 `Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration`도 함께 검사합니다.
 
 ### 6.2 generatorName
 
@@ -990,11 +991,12 @@ protected override string generatorName => "AttributedTypeRegistry";
 
 ~~~text
 RuniOS.AttributedTypeRegistry.Registration.XXXXXXXX.g.cs
-RuniOS.Generated.__AttributedTypeRegistryRegistration_XXXXXXXX (partial)
+RuniOS.Generated.__AttributedTypeRegistryRegistration
 ~~~
 
-`OnAssemblyLoaded`와 `OnAssemblyUnloading` method declaration은 generator의 post-initialization source에 있습니다. Unity lifecycle generator가 이 declaration을 입력 compilation에서 볼 수 있도록 하고, source generator는 같은 partial type의 registration implementation만 추가합니다. Unity.Scripting API가 없는 어셈블리에는 별도의 compile-only no-op compatibility declaration을 추가해 generator가 전역으로 주입되어도 해당 어셈블리가 깨지지 않도록 합니다. 실제 lifecycle API가 있는 어셈블리에서는 Unity의 원래 타입을 그대로 사용하고, 없는 어셈블리에서만 compatibility declaration이 사용됩니다. 생성 registration 타입과 compatibility attribute에는 `Microsoft.CodeAnalysis.EmbeddedAttribute`가 붙으므로 `InternalsVisibleTo`가 있어도 참조 어셈블리의 Unity 타입과 충돌하지 않습니다.
-등록 타입의 `XXXXXXXX` 부분은 compilation마다 새로 선택되어 서로 다른 어셈블리에 같은 internal generated type 이름이 생기지 않도록 합니다.
+등록 대상이 있을 때만 일반 source output으로 등록 클래스 하나를 생성합니다. `[ModuleInitializer]`가 붙은 `internal static void Initialize()`는 `LifecycleMethodRegistration.Register(Type, Assembly, string, Action)`를 호출하여 `OnAssemblyLoadedAttribute`와 `OnAssemblyUnloadingAttribute` 콜백을 직접 등록합니다. 모듈 초기화자 안에 두 콜백을 static lambda로 생성하고, 각 본문에 모든 registry의 타입 등록·해제 문을 바로 출력합니다. 별도 등록 메서드, Core 메서드, Unity lifecycle generator를 위한 post-initialization 선언, 가짜 Unity lifecycle attribute는 생성하지 않습니다.
+
+`ModuleInitializerAttributeSourceGenerator`는 `RegisterPostInitializationOutput`에서 `System.Runtime.CompilerServices.ModuleInitializerAttribute`의 internal 정의를 한 번 선주입합니다. 이 정의는 일반 source output보다 먼저 compilation에 포함되므로 다른 소스 생성기의 semantic 조회에서도 보입니다. 특성 정의를 `RegisterSourceOutput`에서 조건부로 생성하지 않습니다. 이 특성은 C# compiler가 실제 모듈 초기화자 호출을 생성하도록 하는 표식입니다. 등록 클래스와 제공된 특성에는 `Microsoft.CodeAnalysis.EmbeddedAttribute`가 붙으므로 참조 어셈블리 타입 조회에 노출되지 않습니다.
 
 ### 6.3 Initialize: pipeline 선언
 
@@ -2205,23 +2207,15 @@ registry property implementation과 manifest는 앞 단계에서 이미 생성�
 
 필요한 API가 없으면 `AttributeData.ApplicationSyntaxReference`에서 얻은 등록 대상 어트리뷰트 위치에 ROS0009를 보고하고 해당 registration을 생성하지 않습니다. 따라서 registry property만 선언된 경우에는 이 진단이 발생하지 않으며, Unity lifecycle API가 없는 어셈블리에서 자동 등록 대상 어트리뷰트를 사용한 경우에만 해당 어트리뷰트가 진단 위치가 됩니다.
 
-검사는 정확한 metadata name을 가진 public 타입이 도달 가능한 참조 어셈블리에 있는지 확인합니다. 컴파일 전용 호환 선언처럼 다른 어셈블리의 `internal` fallback 타입은 실제 Unity API로 인정하지 않습니다.
+검사는 정확한 metadata name을 가진 public 타입이 도달 가능한 참조 어셈블리에 있는지 확인합니다. 실제 Unity API가 없으면 대체 lifecycle 선언 없이 ROS0009를 보고합니다.
 
 현재 generator가 기대하는 이름:
 
 ~~~text
 Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute
 Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute
+Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration
 ~~~
-
-반면 현재 Runiverse OS 소스 검색에서 실제 lifecycle 사용 예는 대부분 다음입니다.
-
-~~~text
-Unity.Scripting.LifecycleManagement.OnCodeLoaded
-Unity.Scripting.LifecycleManagement.OnCodeUnloading
-~~~
-
-이는 단순한 using 별칭 차이가 아니라 metadata name 문자열의 차이입니다. 외부 Unity API에 두 API가 모두 있는지, 또는 generator가 현재 프로젝트 API에 맞는지 통합 시 확인해야 합니다. 현재 소스 기준으로는 명시적인 계약 불일치 지점입니다.
 
 ### 10.10 registry별 group 생성
 
@@ -2270,40 +2264,42 @@ string registrationHintName =
 writer를 열고:
 
 ~~~csharp
+string registrationTypeName = $"__{generatorName}Registration";
 SourceWriter writer =
-    GeneratorUtils.CreateRegistrationWriter
-    (
-        generatorName
-    );
+    TypeRegistryEmitter.CreateRegistrationWriter(registrationTypeName);
 ~~~
 
-그 뒤 generated class 안에 다음 두 method를 씁니다.
+그 뒤 generated class 안에 모듈 초기화자 하나를 씁니다.
 
 ~~~csharp
-#pragma warning disable CS0618
-
-private static partial void RegisterGeneratedTypesCore()
+[global::System.Runtime.CompilerServices.ModuleInitializer]
+internal static void Initialize()
 {
-    // registry별 EmitRegisterStatements
+    var assembly = typeof(__AttributedTypeRegistryRegistration).Assembly;
+    global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(
+        typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute), assembly,
+        "RuniOS.Generated.__AttributedTypeRegistryRegistration.Initialize", static () =>
+        {
+            // 모든 registry의 EmitRegisterStatements
+        });
+    global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(
+        typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute), assembly,
+        "RuniOS.Generated.__AttributedTypeRegistryRegistration.Initialize", static () =>
+        {
+            // 모든 registry의 EmitUnregisterStatements
+        });
 }
-
-private static partial void UnregisterGeneratedTypesCore()
-{
-    // registry별 EmitUnregisterStatements
-}
-
-#pragma warning restore CS0618
 ~~~
 
-CS0618를 잠시 끄는 이유는 현재 runtime의 DirectRegister/DirectRegisterRange가 source generator 전용이라는 Obsolete 표시를 가지고 있기 때문입니다.
+콜백 본문까지 모듈 초기화자 안에 인라인으로 출력합니다. 별도 Core/등록/해제 메서드를 호출하지 않습니다. 실제 타입 등록·해제 시점은 Unity lifecycle 콜백으로 유지합니다.
 
-`OnAssemblyLoaded`와 `OnAssemblyUnloading` wrapper method 및 attribute는 post-initialization source에 있고, 위 generated source는 그 wrapper가 호출하는 partial core method를 구현합니다.
+CS0618는 생성 파일 전체에서 잠시 끕니다. lifecycle API 및 source generator 전용 등록 API의 Obsolete 표시를 위한 처리입니다.
 
 마지막으로:
 
 ~~~csharp
 string registrationSource =
-    GeneratorUtils.FinishRegistration(writer);
+    TypeRegistryEmitter.FinishRegistration(writer);
 
 AddGeneratedSource(... registrationSource ...);
 ~~~
@@ -3172,74 +3168,57 @@ namespace MyCompany
 
 ### 16.5 lifecycle registration generated source
 
-Unity lifecycle generator가 먼저 보는 post-initialization source는 다음 구조입니다.
+등록 클래스의 모듈 초기화자 하나에서 인라인 콜백과 모든 타입 등록·해제 문을 생성합니다.
 
 ~~~csharp
 namespace RuniOS.Generated
 {
+    [global::System.Runtime.CompilerServices.CompilerGenerated]
     [global::Microsoft.CodeAnalysis.Embedded]
-    static partial class __AttributedTypeRegistryRegistration_XXXXXXXX
+    internal static class __AttributedTypeRegistryRegistration
     {
-        [global::Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void RegisterGeneratedTypes()
+        [global::System.Runtime.CompilerServices.ModuleInitializer]
+        internal static void Initialize()
         {
-            RegisterGeneratedTypesCore();
-        }
-
-        [global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void UnregisterGeneratedTypes()
-        {
-            UnregisterGeneratedTypesCore();
-        }
-
-        static partial void RegisterGeneratedTypesCore();
-        static partial void UnregisterGeneratedTypesCore();
-    }
-}
-~~~
-
-source generator가 추가하는 implementation source는 다음 구조입니다.
-
-~~~csharp
-namespace RuniOS.Generated
-{
-    internal static partial class
-        __AttributedTypeRegistryRegistration_XXXXXXXX
-    {
-        private static partial void RegisterGeneratedTypesCore()
-        {
-            global::MyCompany.Registries.Services.DirectRegisterRange
-            (
-                new global::RuniOS.Reflection.RegistrationEntry
-                    <
-                        global::MyCompany.ServiceRegistrationAttribute
-                    >[]
+            var assembly = typeof(__AttributedTypeRegistryRegistration).Assembly;
+            global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(
+                typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute), assembly,
+                "RuniOS.Generated.__AttributedTypeRegistryRegistration.Initialize", static () =>
                 {
-                    new
-                        global::RuniOS.Reflection.RegistrationEntry
-                    <
-                        global::MyCompany.ServiceRegistrationAttribute
-                    >
+                    global::MyCompany.Registries.Services.DirectRegisterRange
                     (
-                        typeof(global::MyCompany.LoggingService),
-                        new global::MyCompany.ServiceRegistrationAttribute
-                        (
-                            typeof(global::MyCompany.IService)
-                        )
+                        new global::RuniOS.Reflection.RegistrationEntry
+                            <
+                                global::MyCompany.ServiceRegistrationAttribute
+                            >[]
                         {
-                            priority = 10
+                            new
+                                global::RuniOS.Reflection.RegistrationEntry
+                            <
+                                global::MyCompany.ServiceRegistrationAttribute
+                            >
+                            (
+                                typeof(global::MyCompany.LoggingService),
+                                new global::MyCompany.ServiceRegistrationAttribute
+                                (
+                                    typeof(global::MyCompany.IService)
+                                )
+                                {
+                                    priority = 10
+                                }
+                            )
                         }
-                    )
-                }
-            );
-        }
-
-        private static partial void UnregisterGeneratedTypesCore()
-        {
-            global::MyCompany.Registries.Services.Unregister
-            (
-                typeof(global::MyCompany.LoggingService)
-            );
+                    );
+                });
+            global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(
+                typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute), assembly,
+                "RuniOS.Generated.__AttributedTypeRegistryRegistration.Initialize", static () =>
+                {
+                    global::MyCompany.Registries.Services.Unregister
+                    (
+                        typeof(global::MyCompany.LoggingService)
+                    );
+                });
         }
     }
 }
@@ -3253,7 +3232,7 @@ compile-time:
 
 ~~~text
 attribute/class/property 분석
-  -> post-initialization lifecycle declaration과 generated C# implementation 추가
+  -> 모듈 초기화자와 lifecycle 콜백 본문을 포함하는 generated C# source 추가
   -> 일반 C# compiler가 generated source까지 함께 compile
   -> assembly에 registry property와 lifecycle method가 포함
 ~~~
@@ -3261,8 +3240,11 @@ attribute/class/property 분석
 runtime:
 
 ~~~text
-assembly load
-  -> OnAssemblyLoaded method 호출
+module initialization
+  -> LifecycleMethodRegistration.Register로 콜백 연결
+
+assembly load lifecycle
+  -> OnAssemblyLoaded 인라인 콜백 호출
   -> Registries.Services의 singleton-like backing instance 획득
   -> DirectRegisterRange로 LoggingService registration 삽입
 
@@ -3272,7 +3254,7 @@ resolve 요청
   -> priority/type ordering에 따라 첫 registration 반환
 
 assembly unload
-  -> OnAssemblyUnloading method 호출
+  -> OnAssemblyUnloading 인라인 콜백 호출
   -> 각 implementation type을 Unregister
 ~~~
 
@@ -3554,6 +3536,7 @@ Roslyn incremental pipeline은 syntax provider 결과와 compilation 결합 결�
 | 구성요소 | 입력 | 출력/책임 |
 | --- | --- | --- |
 | EmbeddedAttributeSourceGenerator | generator initialization | 생성 구현 타입을 참조 어셈블리 조회에서 숨길 compiler-recognized attribute 선언 |
+| ModuleInitializerAttributeSourceGenerator | generator initialization | post-initialization 단계의 internal ModuleInitializerAttribute 정의 |
 | GenerateTypeRegistryAttributeSourceGenerator | generator initialization | property marker attribute 선언 |
 | TypeRegistryManifestAttributeSourceGenerator | generator initialization | assembly manifest attribute 선언 |
 | TypeRegistrySourceGenerator | property/candidate/compilation | discovery, validation, bind orchestration, lifecycle source |
@@ -3634,30 +3617,17 @@ csproj에는 다음 post-build target이 있습니다.
 
 ### 21.4 lifecycle API 이름
 
-현재 generator source의 metadata name은 다음입니다.
+생성된 모듈 초기화자는 다음 Unity 타입으로 콜백을 직접 등록합니다.
 
 ~~~text
 Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute
 Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute
+Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration
 ~~~
 
-그러나 현재 Runiverse OS source 검색에서 확인되는 lifecycle 사용 예는 다음입니다.
+`LifecycleMethodRegistration.Register(Type, Assembly, string, Action)`에 등록 클래스의 어셈블리, 초기화 메서드의 전체 이름, 인라인 콜백 delegate를 전달합니다. 타입 등록은 assembly-loaded 콜백에서, 해제는 assembly-unloading 콜백에서 수행합니다. Unity lifecycle generator가 생성된 method attribute를 다시 읽을 필요가 없습니다.
 
-~~~text
-Unity.Scripting.LifecycleManagement.OnCodeLoaded
-Unity.Scripting.LifecycleManagement.OnCodeUnloading
-~~~
-
-이것은 단순히 using을 생략한 차이가 아니라 attribute metadata name 자체의 차이입니다. ROS0009는 자동 등록 대상 어트리뷰트를 바인딩할 때 도달 가능한 참조 어셈블리에서 public OnAssemblyLoaded/OnAssemblyUnloading API를 찾지 못하면 해당 어트리뷰트 위치에서 발생하도록 작성되어 있습니다.
-
-따라서 현재 Unity package와 이 generator를 실제로 함께 사용할 때 다음을 확인해야 합니다.
-
-1. 현재 Unity/RuniOS runtime이 두 API를 모두 제공하는가?
-2. generator가 오래된 lifecycle contract를 보고 있는가?
-3. source의 OnCodeLoaded/OnCodeUnloading 호출부가 다른 시스템의 API인가?
-4. generated registration이 실제 Unity assembly lifecycle callback으로 실행되는가?
-
-이는 이 문서가 source를 읽고 도출한 통합 확인 사항이며, 여기서 API 이름을 한쪽으로 임의 변경하지 않습니다.
+ROS0009는 자동 등록 대상이 있을 때 도달 가능한 참조 어셈블리에서 실제 public Unity API 타입을 찾지 못하면 발생합니다. API가 없는 어셈블리에 가짜 Unity lifecycle attribute나 등록 클래스를 생성하지 않습니다.
 
 ### 21.5 새 generator와 기존 resolver는 아직 별개다
 

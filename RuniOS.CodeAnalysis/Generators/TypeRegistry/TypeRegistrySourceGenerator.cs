@@ -49,21 +49,21 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// Gets the metadata name of the assembly-loaded lifecycle attribute.<br/>
     /// 어셈블리 로드 수명 주기 특성의 메타데이터 이름을 가져옵니다.
     /// </summary>
-    // 생성 콜백은 아래의 짧은 이름과 함께 이 Unity lifecycle 특성 메타데이터 이름을 정확히 사용합니다.
+    // 생성된 모듈 초기화자가 이 특성 타입으로 로드 콜백을 등록합니다.
     protected const string onAssemblyLoadedAttributeMetadataName = "Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute";
 
     /// <summary>
     /// Gets the metadata name of the assembly-unloading lifecycle attribute.<br/>
     /// 어셈블리 언로드 수명 주기 특성의 메타데이터 이름을 가져옵니다.
     /// </summary>
-    // 생성된 unload 콜백도 이 Unity lifecycle 특성 메타데이터 이름을 정확히 사용합니다.
+    // 생성된 모듈 초기화자가 이 특성 타입으로 언로드 콜백을 등록합니다.
     protected const string onAssemblyUnloadingAttributeMetadataName = "Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute";
 
     /// <summary>
     /// Gets the metadata name of the lifecycle callback registration helper.<br/>
     /// 수명 주기 콜백 등록 도우미의 메타데이터 이름을 가져옵니다.
     /// </summary>
-    // 실제 Unity.Scripting API가 없는 compilation에는 generator가 호환용 no-op 선언을 제공합니다.
+    // 생성된 모듈 초기화자가 이 API에 수명 주기 콜백을 직접 등록합니다.
     protected const string lifecycleMethodRegistrationMetadataName = "Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration";
 
     /// <summary>
@@ -82,21 +82,6 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// </param>
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
-        // TODO: Unity 버전이 올라 Roslyn의 RegisterPreCompilationSourceOutput을 사용할 수 있게 되면
-        // Unity lifecycle fallback 및 post-initialization 선언을 제거하고, Unity 어셈블리가 실제로 참조된
-        // compilation에서만 __AttributedTypeRegistryRegistration을 생성하도록 변경한다.
-        // The lifecycle declaration is post-initialization output, so its type name must be chosen before Compilation is available.
-        string registrationTypeName = $"__{generatorName}Registration";
-        // Unity's lifecycle generator must see these declarations before regular generator output is produced.
-        string lifecycleDeclarationSource = TypeRegistryEmitter.RenderRegistrationLifecycleDeclaration(registrationTypeName);
-        context.RegisterPostInitializationOutput
-        (
-            postInitializationContext => postInitializationContext.AddSource
-            (
-                $"RuniOS.{generatorName}.LifecycleRegistration.g.cs",
-                lifecycleDeclarationSource
-            )
-        );
         IncrementalValuesProvider<RegistryDiscoveryItem> currentRegistries = context.SyntaxProvider.ForAttributeWithMetadataName
         (
             registryAttributeMetadataName,
@@ -111,7 +96,7 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
         context.RegisterSourceOutput
         (
             input,
-            (productionContext, value) => Execute(productionContext, value, registrationTypeName)
+            Execute
         );
     }
 
@@ -701,15 +686,10 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     /// The compilation, discovered registries, and registration candidates supplied by the incremental pipeline.<br/>
     /// 증분 파이프라인이 제공하는 컴파일, 발견된 레지스트리, 등록 후보입니다.
     /// </param>
-    /// <param name="registrationTypeName">
-    /// The unique registration type name shared by the lifecycle declaration and implementation sources.<br/>
-    /// lifecycle 선언 소스와 구현 소스가 공유하는 고유 등록 타입 이름입니다.
-    /// </param>
     void Execute
     (
         SourceProductionContext context,
-        ((Compilation, ImmutableArray<RegistryDiscoveryItem>), ImmutableArray<RegistrationCandidate>) input,
-        string registrationTypeName
+        ((Compilation, ImmutableArray<RegistryDiscoveryItem>), ImmutableArray<RegistrationCandidate>) input
     )
     {
         Compilation compilation = input.Item1.Item1;
@@ -838,25 +818,38 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
 
         string registrationStableId = string.Join("|", groups.Select(x => x.registry.stableId));
         string registrationHintName = GeneratorUtils.GetRegistrationHintName(generatorName, registrationStableId);
+        string registrationTypeName = $"__{generatorName}Registration";
         SourceWriter writer = TypeRegistryEmitter.CreateRegistrationWriter(registrationTypeName);
-        writer.AppendLine("#pragma warning disable CS0618");
-        writer.AppendLine();
-        writer.AppendLine("static partial void RegisterGeneratedTypesCore()");
+        writer.AppendLine("[global::System.Runtime.CompilerServices.CompilerGenerated]");
+        writer.AppendLine("[global::System.Runtime.CompilerServices.ModuleInitializer]");
+        writer.AppendLine("internal static void Initialize()");
+        writer.AppendLine("{");
+        writer.Indent();
+        writer.AppendLine($"var assembly = typeof({registrationTypeName}).Assembly;");
+        writer.AppendLine("global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(");
+        writer.Indent();
+        writer.AppendLine("typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyLoadedAttribute), assembly,");
+        writer.AppendLine($"\"RuniOS.Generated.{registrationTypeName}.Initialize\", static () =>");
         writer.AppendLine("{");
         writer.Indent();
         foreach (RegistryRegistrationGroup group in groups)
             EmitRegisterStatements(writer, group.registry, group.registrations);
         writer.Unindent();
-        writer.AppendLine("}");
-        writer.AppendLine();
-        writer.AppendLine("static partial void UnregisterGeneratedTypesCore()");
+        writer.AppendLine("});");
+        writer.Unindent();
+        writer.AppendLine("global::Unity.Scripting.LifecycleManagement.CodeGen.LifecycleMethodRegistration.Register(");
+        writer.Indent();
+        writer.AppendLine("typeof(global::Unity.Scripting.LifecycleManagement.OnAssemblyUnloadingAttribute), assembly,");
+        writer.AppendLine($"\"RuniOS.Generated.{registrationTypeName}.Initialize\", static () =>");
         writer.AppendLine("{");
         writer.Indent();
         foreach (RegistryRegistrationGroup group in groups)
             EmitUnregisterStatements(writer, group.registry, group.registrations);
         writer.Unindent();
+        writer.AppendLine("});");
+        writer.Unindent();
+        writer.Unindent();
         writer.AppendLine("}");
-        writer.AppendLine("#pragma warning restore CS0618");
 
         string registrationSource = TypeRegistryEmitter.FinishRegistration(writer);
         AddGeneratedSource(context, hintOwners, registrationHintName, registrationStableId, registrationSource, Location.None, Report);
@@ -882,64 +875,6 @@ public abstract class TypeRegistrySourceGenerator : IIncrementalGenerator
     {
         return EnumerateReferencedAssemblies(compilation)
             .Any(assembly => assembly.GetTypeByMetadataName(metadataName) is { DeclaredAccessibility: Accessibility.Public });
-    }
-
-    /// <summary>
-    /// Adds compile-only lifecycle API compatibility declarations when Unity.Scripting is not referenced.<br/>
-    /// Unity.Scripting이 참조되지 않은 경우 컴파일 전용 수명 주기 API 호환 선언을 추가합니다.
-    /// </summary>
-    /// <param name="context">
-    /// The source production context receiving the compatibility source.<br/>
-    /// 호환 소스를 받을 소스 생성 컨텍스트입니다.
-    /// </param>
-    /// <param name="compilation">
-    /// The current compilation whose lifecycle API references are inspected.<br/>
-    /// 수명 주기 API 참조를 검사할 현재 컴파일입니다.
-    /// </param>
-    internal static void EmitLifecycleCompatibility(SourceProductionContext context, Compilation compilation)
-    {
-        bool hasLoadedAttribute = HasAvailableLifecycleApi(compilation, onAssemblyLoadedAttributeMetadataName);
-        bool hasUnloadingAttribute = HasAvailableLifecycleApi(compilation, onAssemblyUnloadingAttributeMetadataName);
-        if (hasLoadedAttribute && hasUnloadingAttribute)
-            return;
-
-        context.AddSource
-        (
-            "RuniOS.LifecycleCompatibility.g.cs",
-            SourceText.From
-            (
-                TypeRegistryEmitter.RenderLifecycleCompatibility
-                (
-                    hasLoadedAttribute,
-                    hasUnloadingAttribute
-                ),
-                Encoding.UTF8
-            )
-        );
-    }
-
-    /// <summary>
-    /// Determines whether a public lifecycle API type is available to the current compilation.<br/>
-    /// 현재 컴파일에서 public 수명 주기 API 타입을 사용할 수 있는지 확인합니다.
-    /// </summary>
-    /// <param name="compilation">
-    /// The compilation whose lifecycle API types are inspected.<br/>
-    /// 수명 주기 API 타입을 검사할 컴파일입니다.
-    /// </param>
-    /// <param name="metadataName">
-    /// The metadata name of the API type to inspect.<br/>
-    /// 검사할 API 타입의 메타데이터 이름입니다.
-    /// </param>
-    /// <returns>
-    /// <see langword="true"/> when a public type with the metadata name is available; otherwise, <see langword="false"/>.<br/>
-    /// 해당 메타데이터 이름의 public 타입을 사용할 수 있으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
-    /// </returns>
-    static bool HasAvailableLifecycleApi(Compilation compilation, string metadataName)
-    {
-        if (compilation.GetTypeByMetadataName(metadataName) is { DeclaredAccessibility: Accessibility.Public })
-            return true;
-
-        return HasReferencedLifecycleApi(compilation, metadataName);
     }
 
     /// <summary>

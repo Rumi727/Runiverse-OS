@@ -8,7 +8,6 @@ namespace RuniOS.LowLevel
     /// <summary>
     /// 유니티의 PlayerLoop 시스템에 델리게이트를 등록하거나 제거하는 정적 클래스입니다.
     /// <br/>이 클래스를 통해 등록된 모든 이벤트는 플레이 모드가 종료될 때 자동으로 해제됩니다.
-    /// <br/>코드 진입점으로 <see cref="AwakenAttribute"/> 사용을 권장합니다.
     /// </summary>
     public static class RuniPlayerLoop
     {

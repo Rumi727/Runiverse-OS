@@ -254,7 +254,7 @@ public sealed class MilestoneMethodAnalyzerTests
         }
         """);
 
-        Assert.Equal(5, generatedSources.Length);
+        Assert.Equal(6, generatedSources.Length);
     }
 
     static ImmutableArray<Diagnostic> Analyze(string declarations)

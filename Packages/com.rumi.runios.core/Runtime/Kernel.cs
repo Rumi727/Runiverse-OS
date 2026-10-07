@@ -1,5 +1,4 @@
 #nullable enable
-using RuniOS.Booting;
 using RuniOS.LowLevel;
 using UnityEngine;
 
@@ -51,8 +50,8 @@ namespace RuniOS
 
 
 
-        [Awaken]
-        static void Awaken()
+        [OnEnteringPlayMode]
+        static void OnEnteringPlayMode()
         {
             RuniPlayerLoop.onTimeUpdate += TimeUpdate;
             Application.quitting += Quitting;
@@ -63,14 +62,17 @@ namespace RuniOS
 #endif
         }
 
-#if UNITY_EDITOR
-        [UnityEditor.InitializeOnLoadMethod]
-        static void InitializeOnLoadMethod()
+        [OnExitingPlayMode]
+        static void OnExitingPlayMode()
         {
-            if (!isPlaying)
-                UnityEditor.EditorApplication.update += TimeUpdate;
-        }
+            RuniPlayerLoop.onTimeUpdate -= TimeUpdate;
+            Application.quitting -= Quitting;
+
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.update += TimeUpdate;
+            UnityEditor.EditorApplication.pauseStateChanged -= PauseStateChanged;
 #endif
+        }
 
 #if UNITY_EDITOR
         static void PauseStateChanged(UnityEditor.PauseState pauseState) => deltaTimeStopwatch.Restart();
@@ -109,11 +111,6 @@ namespace RuniOS
 
             if (BootLoader.isDataLoaded)
                 BootLoader.globalData.SaveAll(globalDataPath);*/
-
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.update += TimeUpdate;
-            UnityEditor.EditorApplication.pauseStateChanged -= PauseStateChanged;
-#endif
         }
     }
 }

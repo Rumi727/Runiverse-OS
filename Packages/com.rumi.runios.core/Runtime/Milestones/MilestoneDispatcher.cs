@@ -1,40 +1,15 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Linq;
-using System.Reflection;
-using Unity.Scripting.LifecycleManagement;
-using UnityEngine;
-using UnityEngine.Assemblies;
 
 namespace RuniOS.Milestones
 {
     public static partial class MilestoneDispatcher
     {
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        static void Initialize()
-        {
-            foreach (Assembly assembly in CurrentAssemblies.GetLoadedAssemblies())
-            {
-                try
-                {
-                    Type? type = assembly.GetType("RuniOS.Milestones.Generated.__RuniModuleInitialization", false, false);
-                    if (type == null)
-                        continue;
-
-                    MethodInfo method = type.GetMethod("Initialize", BindingFlags.Static | BindingFlags.NonPublic) ?? throw new MissingMethodException(type.FullName, "Initialize");
-                    method.Invoke(null, null);
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-            }
-        }
-
-        [AutoStaticsCleanup] static readonly Dictionary<Type, Action> _methods = [];
+        static readonly Dictionary<Type, Action> _methods = [];
         internal static IReadOnlyDictionary<Type, Action> methods { get; } = _methods.AsReadOnly();
 
-        [AutoStaticsCleanup] static readonly Dictionary<Type, Func<UniTask>> _asyncMethods = [];
+        static readonly Dictionary<Type, Func<UniTask>> _asyncMethods = [];
         internal static IReadOnlyDictionary<Type, Func<UniTask>> asyncMethods { get; } = _asyncMethods.AsReadOnly();
 
         public static void Register<T>(Action method) where T : MilestoneAttribute => Register(typeof(T), method);
