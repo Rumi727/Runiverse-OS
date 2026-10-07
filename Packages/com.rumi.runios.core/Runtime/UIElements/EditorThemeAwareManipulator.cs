@@ -4,6 +4,9 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
 {
+    /// <summary>
+    /// Editor-only. It performs no function at runtime.
+    /// </summary>
     public class EditorThemeAwareManipulator : Manipulator
     {
         public EditorThemeAwareManipulator() { }
