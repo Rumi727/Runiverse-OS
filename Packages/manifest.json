@@ -2,8 +2,8 @@
   "dependencies": {
     "com.cysharp.r3": "https://github.com/Cysharp/R3.git?path=%2Fsrc%2FR3.Unity%2FAssets%2FR3.Unity#1.3.1",
     "com.quickeye.icon-browser": "https://github.com/ErnSur/unity-editor-icons.git",
-    "com.rumi.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
-    "com.rumi.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/com.rumi.runios.core",
+    "io.github.rumi727.runios.core": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/io.github.rumi727.runios.core",
+    "io.github.rumi727.runios.ui": "https://github.com/Rumi727/Runiverse-OS.git?path=Packages/io.github.rumi727.runios.core",
     "com.unity.ide.rider": "3.1.0",
     "com.unity.ide.visualstudio": "2.0.28",
     "com.unity.memoryprofiler": "1.2.0-pre.1",

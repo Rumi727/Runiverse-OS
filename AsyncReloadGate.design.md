@@ -51,7 +51,7 @@
 권장 위치:
 
 ```text
-Packages/com.rumi.runios.core/Runtime/Tasks/AsyncReloadGate.cs
+Packages/io.github.rumi727.runios.core/Runtime/Tasks/AsyncReloadGate.cs
 ```
 
 권장 네임스페이스와 API:

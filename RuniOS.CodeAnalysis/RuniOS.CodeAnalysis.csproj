@@ -102,7 +102,7 @@
 
     <Target Name="CopyAnalyzerToUnityPackage" AfterTargets="Build">
         <PropertyGroup>
-            <UnityAnalyzerDirectory>$(MSBuildThisFileDirectory)../Packages/com.rumi.runios.core/Plugins/RuniOS.CodeAnalysis/</UnityAnalyzerDirectory>
+            <UnityAnalyzerDirectory>$(MSBuildThisFileDirectory)../Packages/io.github.rumi727.runios.core/Plugins/RuniOS.CodeAnalysis/</UnityAnalyzerDirectory>
         </PropertyGroup>
 
         <MakeDir Directories="$(UnityAnalyzerDirectory)" />

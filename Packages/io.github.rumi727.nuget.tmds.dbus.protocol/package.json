@@ -1,0 +1,8 @@
+{
+  "name": "io.github.rumi727.nuget.tmds.dbus.protocol",
+  "version": "0.95.1",
+  "displayName": "Tmds.DBus.Protocol (NuGet)",
+  "dependencies": {
+    "io.github.rumi727.nuget.system.threading.channels": "10.0.12"
+  }
+}

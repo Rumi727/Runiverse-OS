@@ -1,0 +1,11 @@
+{
+  "name": "io.github.rumi727.nuget.monomod.core",
+  "version": "1.3.6",
+  "displayName": "MonoMod.Core (NuGet)",
+  "dependencies": {
+    "io.github.rumi727.nuget.mono.cecil": "0.11.6",
+    "io.github.rumi727.nuget.monomod.backports": "1.1.2",
+    "io.github.rumi727.nuget.monomod.ilhelpers": "1.1.0",
+    "io.github.rumi727.nuget.monomod.utils": "25.0.14"
+  }
+}

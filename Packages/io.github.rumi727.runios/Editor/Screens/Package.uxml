@@ -1,0 +1,36 @@
+<ui:UXML xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" authoring-id="1303352073" editor-extension-mode="True" noNamespaceSchemaLocation="../../../../UIElementsSchema/UIElements.xsd">
+    <Style src="project://database/Packages/io.github.rumi727.runios.installer/Editor/Screens/Package.uss?fileID=7433441132597879392&amp;guid=b3c3a078bb2a1c589bfe9fe4f63c80d6&amp;type=3#Package"/>
+    <ui:VisualElement name="Package" class="runios-setup-package" style="height: 246px;">
+        <ui:VisualElement name="Header-Viewport" class="runios-setup-package__header-viewport">
+            <ui:VisualElement name="Header" class="runios-setup-package__header">
+                <ui:VisualElement name="Header-Two-Line" class="runios-setup-package__header-two-line">
+                    <ui:VisualElement name="Header-One-Line" class="runios-setup-package__header-one-line">
+                        <ui:Label name="Label" text="Label" class="runios-setup-package__label runios-setup-package__one-line-text"/>
+                        <ui:Label name="Dash" text="-" class="runios-setup-package__one-line-text"/>
+                        <ui:Label name="One-Line-Description" text="One Line Description" class="runios-setup-package__one-line-description runios-setup-package__one-line-text"/>
+                    </ui:VisualElement>
+                    <ui:VisualElement name="Expanded-One-Line-Description-Target" class="runios-setup-package__one-line-description"/>
+                </ui:VisualElement>
+                <ui:Toggle name="Toggle" style="margin-top: 3px;"/>
+            </ui:VisualElement>
+        </ui:VisualElement>
+        <ui:VisualElement name="Content" class="runios-setup-package__content">
+            <ui:VisualElement name="Separator" class="runios-setup-package__separator"/>
+            <ui:ScrollView mode="VerticalAndHorizontal">
+                <ui:Label name="Description" text="Description" class="runios-setup-package__description"/>
+                <ui:VisualElement name="Separator" class="runios-setup-package__separator"/>
+                <ui:Label name="" text="Dependency" class="runios-setup-package__description"/>
+                <ui:VisualElement name="Dependency-Tree">
+                    <ui:Foldout text="com.unity.textmeshpro" value="false">
+                        <ui:Foldout text="com.unity.ui" value="false">
+                            <ui:Label name="" text="- com.unity.modules.ui"/>
+                        </ui:Foldout>
+                    </ui:Foldout>
+                    <ui:Foldout text="com.unity.ui" value="false">
+                        <ui:Label name="" text="- com.unity.modules.ui"/>
+                    </ui:Foldout>
+                </ui:VisualElement>
+            </ui:ScrollView>
+        </ui:VisualElement>
+    </ui:VisualElement>
+</ui:UXML>

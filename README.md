@@ -323,7 +323,7 @@ IONode file = provider.rootNode.CreateChild("assets/runios/lang/ko_kr.json");
 string json = await file.file.ReadAllText();
 ```
 
-자세한 계약은 [I/O 시스템 문서](Packages/com.rumi.runios.core/Runtime/IO/README.md)에서 설명합니다.
+자세한 계약은 [I/O 시스템 문서](Packages/io.github.rumi727.runios.core/Runtime/IO/README.md)에서 설명합니다.
 
 ### 하나의 에셋 참조
 
@@ -342,7 +342,7 @@ AssetRef<Texture2D> byKey = new
 AssetRef<Texture2D> direct = new(existingTexture);
 ```
 
-키와 직접 모드의 세부 동작은 [리소스 시스템 문서](Packages/com.rumi.runios.core/Runtime/Resource/README.md)를 참고하세요.
+키와 직접 모드의 세부 동작은 [리소스 시스템 문서](Packages/io.github.rumi727.runios.core/Runtime/Resource/README.md)를 참고하세요.
 
 ### 리소스 의존성은 등록 순서가 아니라 소유권으로
 
@@ -384,15 +384,15 @@ Undo/Redo도 같은 모델 위에 추가되어 있습니다. Inspector Element�
 
 | 패키지 | 역할 |
 | --- | --- |
-| `com.rumi.runios.core` | 부트스트랩, I/O provider, 리소스팩·에셋 레지스트리, 텍스트·로컬라이징, 비동기 작업, PlayerLoop, 컬렉션·직렬화·유틸리티, 런타임 검사 모델과 Unity 에디터 도구의 기반 |
-| `com.rumi.runios.sound` | 오디오 플레이어 공통 계약과 `RuniAudioSource` 기반. 재생·일시 정지·정지·seek·loop·tempo·pitch·공간 오디오를 하나의 플레이어 표면으로 묶음 |
-| `com.rumi.runios.fmod` | FMOD Core `System`, `Sound`, `Channel`, `ChannelGroup` 래퍼. PCM·메모리·`Stream`·`IONode` 입력, DSP, DSP clock 예약, 네이티브 escape hatch 제공. [문서](Packages/com.rumi.runios.fmod/README.md) |
-| `com.rumi.runios.nbs` | Note Block Studio 파일 파서와 리소스 레지스트리. NBS 0~6, 커스텀 악기, 템포 변경, Sound Stopper, loop, 순·역방향 timeline, FMOD DSP 기반 예약 재생 지원. [문서](Packages/com.rumi.runios.nbs/README.md) |
-| `com.rumi.runios.texture` | FreeImage 기반 런타임 이미지 로더. 메모리·`Stream`·`IONode` 입력, 백그라운드 decode, Burst 밉맵 생성, Unity 메인 스레드 `Texture2D` 업로드. [문서](Packages/com.rumi.runios.texture/README.md) |
-| `com.rumi.runios.effects` | UI 둥근 모서리, 단순 메쉬 외곽선, 여러 오브젝트를 합친 외곽선과 관련 셰이더 |
-| `com.rumi.runios.ui` | UI 런타임 패키지 경계. 구체적인 기본 UI는 아직 개발 중이며, Core 에디터 쪽에는 IMGUI·UIElements 필드와 인스펙터 기반이 먼저 존재 |
-| `com.rumi.runios.installer` | 본체 없이 사용할 bootstrap Installer, exact package dependency closure와 installation 실행, UI Toolkit Setup shell과 SetupScreen 확장 API. [문서](Packages/com.rumi.runios.installer/README.md) |
-| `com.rumi.runios` | Legacy Unity Editor 설치 창, 패키지·scoped registry 설정, TMP 설정, 다국어 설치 화면 |
+| `io.github.rumi727.runios.core` | 부트스트랩, I/O provider, 리소스팩·에셋 레지스트리, 텍스트·로컬라이징, 비동기 작업, PlayerLoop, 컬렉션·직렬화·유틸리티, 런타임 검사 모델과 Unity 에디터 도구의 기반 |
+| `io.github.rumi727.runios.sound` | 오디오 플레이어 공통 계약과 `RuniAudioSource` 기반. 재생·일시 정지·정지·seek·loop·tempo·pitch·공간 오디오를 하나의 플레이어 표면으로 묶음 |
+| `io.github.rumi727.runios.fmod` | FMOD Core `System`, `Sound`, `Channel`, `ChannelGroup` 래퍼. PCM·메모리·`Stream`·`IONode` 입력, DSP, DSP clock 예약, 네이티브 escape hatch 제공. [문서](Packages/io.github.rumi727.runios.fmod/README.md) |
+| `io.github.rumi727.runios.nbs` | Note Block Studio 파일 파서와 리소스 레지스트리. NBS 0~6, 커스텀 악기, 템포 변경, Sound Stopper, loop, 순·역방향 timeline, FMOD DSP 기반 예약 재생 지원. [문서](Packages/io.github.rumi727.runios.nbs/README.md) |
+| `io.github.rumi727.runios.texture` | FreeImage 기반 런타임 이미지 로더. 메모리·`Stream`·`IONode` 입력, 백그라운드 decode, Burst 밉맵 생성, Unity 메인 스레드 `Texture2D` 업로드. [문서](Packages/io.github.rumi727.runios.texture/README.md) |
+| `io.github.rumi727.runios.effects` | UI 둥근 모서리, 단순 메쉬 외곽선, 여러 오브젝트를 합친 외곽선과 관련 셰이더 |
+| `io.github.rumi727.runios.ui` | UI 런타임 패키지 경계. 구체적인 기본 UI는 아직 개발 중이며, Core 에디터 쪽에는 IMGUI·UIElements 필드와 인스펙터 기반이 먼저 존재 |
+| `io.github.rumi727.runios.installer` | 본체 없이 사용할 bootstrap Installer, exact package dependency closure와 installation 실행, UI Toolkit Setup shell과 SetupScreen 확장 API. [문서](Packages/io.github.rumi727.runios.installer/README.md) |
+| `io.github.rumi727.runios` | Legacy Unity Editor 설치 창, 패키지·scoped registry 설정, TMP 설정, 다국어 설치 화면 |
 
 Installer는 설치 대상인 일반 `RuniOS` assembly에 의존하지 않습니다. 외부 package의 Editor assembly가 `RuniOS.Installer`의 `SetupScreen`을 구현하고 TypeCache로 같은 Setup 흐름에 참여합니다. 구체적인 설정 의미는 각 화면이 소유하며 Installer는 shell과 navigation을 조정합니다.
 
@@ -426,7 +426,7 @@ Core 내부에는 Unity 내부 API를 감싸는 `APIBridge`, Harmony 기반 `Mod
 
 이 구조는 NBS 전용 기능으로 끝나지 않습니다. 오디오 클록·리소스 로드·에셋 참조·시각 이벤트를 분리해 두었기 때문에, 다른 리듬게임 포맷이나 일반적인 음악·효과음 시스템으로 확장할 수 있는 여지를 남깁니다.
 
-단, NBS 패키지 README에도 적혀 있듯 해당 패키지는 아직 전체 코드 검토와 테스트가 충분하지 않습니다. 실제 사용 전에는 [NBS 문서](Packages/com.rumi.runios.nbs/README.md)의 주의 사항과 현재 코드를 함께 확인해야 합니다.
+단, NBS 패키지 README에도 적혀 있듯 해당 패키지는 아직 전체 코드 검토와 테스트가 충분하지 않습니다. 실제 사용 전에는 [NBS 문서](Packages/io.github.rumi727.runios.nbs/README.md)의 주의 사항과 현재 코드를 함께 확인해야 합니다.
 
 ## 오래된 프로젝트에서 이어진 것
 
@@ -459,10 +459,10 @@ Runiverse OS는 짧은 기간에 새로 만든 프로젝트가 아닙니다. 아
 
 ## 문서
 
-- [Installer와 Setup](Packages/com.rumi.runios.installer/README.md)
-- [I/O 시스템](Packages/com.rumi.runios.core/Runtime/IO/README.md)
-- [리소스 시스템](Packages/com.rumi.runios.core/Runtime/Resource/README.md)
-- [텍스트 시스템](Packages/com.rumi.runios.core/Runtime/Texts/README.md)
-- [FMOD SoundSystem](Packages/com.rumi.runios.fmod/README.md)
-- [Runiverse OS NBS](Packages/com.rumi.runios.nbs/README.md)
-- [Runiverse OS Texture](Packages/com.rumi.runios.texture/README.md)
+- [Installer와 Setup](Packages/io.github.rumi727.runios.installer/README.md)
+- [I/O 시스템](Packages/io.github.rumi727.runios.core/Runtime/IO/README.md)
+- [리소스 시스템](Packages/io.github.rumi727.runios.core/Runtime/Resource/README.md)
+- [텍스트 시스템](Packages/io.github.rumi727.runios.core/Runtime/Texts/README.md)
+- [FMOD SoundSystem](Packages/io.github.rumi727.runios.fmod/README.md)
+- [Runiverse OS NBS](Packages/io.github.rumi727.runios.nbs/README.md)
+- [Runiverse OS Texture](Packages/io.github.rumi727.runios.texture/README.md)

@@ -392,7 +392,7 @@ SDK-style .csproj의 기본 규칙 때문에 별도 Compile Include를 쓰지 �
 csproj 아래의 CopyAnalyzerToUnityPackage target은 build 뒤 다음 디렉터리로 출력물을 복사합니다.
 
 ~~~text
-../Runiverse OS/Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/
+../Runiverse OS/Packages/io.github.rumi727.runios.core/Plugins/RuniOS.Analyzers/
 ~~~
 
 복사 대상은 다음 두 개입니다.
@@ -421,7 +421,7 @@ labels:
 파일:
 
 ~~~text
-Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/RuniOS.Analyzers.dll.meta
+Packages/io.github.rumi727.runios.core/Plugins/RuniOS.Analyzers/RuniOS.Analyzers.dll.meta
 ~~~
 
 이 label은 Unity가 DLL을 Roslyn analyzer/source generator 용도로 취급하도록 하는 Unity import 계약입니다.
@@ -478,7 +478,7 @@ generator만 보면 TypeRegistry가 무엇인지 알기 어렵습니다. generat
 경로:
 
 ~~~text
-Packages/com.rumi.runios.core/Runtime/Reflection/TypeRegistry.cs
+Packages/io.github.rumi727.runios.core/Runtime/Reflection/TypeRegistry.cs
 ~~~
 
 핵심 API:
@@ -506,7 +506,7 @@ TypeRegistry는 source generator 전용이 아닙니다. generator가 없는 외
 경로:
 
 ~~~text
-Packages/com.rumi.runios.core/Runtime/Reflection/TypeRegistrationAttribute.cs
+Packages/io.github.rumi727.runios.core/Runtime/Reflection/TypeRegistrationAttribute.cs
 ~~~
 
 현재 정의:
@@ -550,7 +550,7 @@ public sealed class StringHandler : HandlerBase
 경로:
 
 ~~~text
-Packages/com.rumi.runios.core/Runtime/Reflection/AttributedTypeRegistry.cs
+Packages/io.github.rumi727.runios.core/Runtime/Reflection/AttributedTypeRegistry.cs
 ~~~
 
 선언:
@@ -3588,7 +3588,7 @@ csproj에는 다음 post-build target이 있습니다.
     <PropertyGroup>
         <UnityAnalyzerDirectory>
             $(MSBuildThisFileDirectory)../Runiverse OS/
-            Packages/com.rumi.runios.core/Plugins/RuniOS.Analyzers/
+            Packages/io.github.rumi727.runios.core/Plugins/RuniOS.Analyzers/
         </UnityAnalyzerDirectory>
     </PropertyGroup>
 

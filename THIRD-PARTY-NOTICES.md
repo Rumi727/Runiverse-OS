@@ -1074,7 +1074,7 @@ Last updated 17th Jun 2024.
 
 ## FreeImage
 
-Files: `Packages/com.rumi.runios.texture/Runtime/**` and FreeImage native binaries
+Files: `Packages/io.github.rumi727.runios.texture/Runtime/**` and FreeImage native binaries
 
 Source: https://freeimage.sourceforge.io/
 
@@ -1217,7 +1217,7 @@ Software distributed under the License is distributed on an "AS IS" basis, WITHO
 
 ## UnityAsyncImageLoader
 
-Files: `Packages/com.rumi.runios.texture/Runtime/**`
+Files: `Packages/io.github.rumi727.runios.texture/Runtime/**`
 
 Source: https://github.com/Looooong/UnityAsyncImageLoader  
 Copyright (c) 2021 Nguyễn Đức Long
@@ -1277,7 +1277,7 @@ SOFTWARE.
 
 ## R3
 
-Files: `com.cysharp.r3` and `Packages/com.rumi.runios.core/Plugins/R3/**`
+Files: `com.cysharp.r3` and `Packages/io.github.rumi727.runios.core/Plugins/R3/**`
 
 Source: https://github.com/Cysharp/R3  
 Copyright (c) 2024 Cysharp, Inc.
@@ -1308,7 +1308,7 @@ SOFTWARE.
 
 ## Harmony 2
 
-Files: `Packages/com.rumi.runios.core/Plugins/Lib.Harmony.Thin/0Harmony.dll`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/Lib.Harmony.Thin/0Harmony.dll`
 
 Source: https://github.com/pardeike/Harmony  
 Copyright (c) 2017 Andreas Pardeike
@@ -1339,7 +1339,7 @@ SOFTWARE.
 
 ## MonoMod
 
-Files: `Packages/com.rumi.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**`
 
 Includes `MonoMod.Core.dll`, `MonoMod.Utils.dll`, `MonoMod.ILHelpers.dll`, `MonoMod.Backports.dll`, and `MonoMod.Iced.dll`.
 
@@ -1372,7 +1372,7 @@ SOFTWARE.
 
 ## Mono.Cecil
 
-Files: `Packages/com.rumi.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**/Mono.Cecil/**`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**/Mono.Cecil/**`
 
 ~~~~text
 Copyright (c) 2008 - 2015 Jb Evain
@@ -1402,15 +1402,15 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 Files:
 
-- `Packages/com.rumi.runios.core/Runtime/Reflection/NullabilityState.cs`
-- `Packages/com.rumi.runios.core/Runtime/Reflection/NullabilityInfo.cs`
-- `Packages/com.rumi.runios.core/Runtime/Reflection/NullabilityInfoContext.cs`
-- `Packages/com.rumi.runios.core/Runtime/Collections/Generic/SerializableKeyValuePair\`2.cs`
-- `Packages/com.rumi.runios.core/Runtime/Structs/SerializableNullable\`1.cs`
-- `Packages/com.rumi.runios.core/DotNet/System/**/*.cs`
-- `Packages/com.rumi.runios.core/Plugins/System.Collections.Immutable/**`
-- `Packages/com.rumi.runios.core/Plugins/System.Runtime.CompilerServices.Unsafe~/**`
-- `Packages/com.rumi.runios.core/Plugins/R3/**`
+- `Packages/io.github.rumi727.runios.core/Runtime/Reflection/NullabilityState.cs`
+- `Packages/io.github.rumi727.runios.core/Runtime/Reflection/NullabilityInfo.cs`
+- `Packages/io.github.rumi727.runios.core/Runtime/Reflection/NullabilityInfoContext.cs`
+- `Packages/io.github.rumi727.runios.core/Runtime/Collections/Generic/SerializableKeyValuePair\`2.cs`
+- `Packages/io.github.rumi727.runios.core/Runtime/Structs/SerializableNullable\`1.cs`
+- `Packages/io.github.rumi727.runios.core/DotNet/System/**/*.cs`
+- `Packages/io.github.rumi727.runios.core/Plugins/System.Collections.Immutable/**`
+- `Packages/io.github.rumi727.runios.core/Plugins/System.Runtime.CompilerServices.Unsafe~/**`
+- `Packages/io.github.rumi727.runios.core/Plugins/R3/**`
 
 Sources:
 
@@ -1445,7 +1445,7 @@ SOFTWARE.
 
 ## System.ValueTuple
 
-Files: `Packages/com.rumi.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**/System.ValueTuple/**`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/Lib.Harmony.Thin/MonoMod.Core/**/System.ValueTuple/**`
 
 ~~~~text
 The MIT License (MIT)
@@ -1475,7 +1475,7 @@ SOFTWARE.
 
 ## System.Runtime.CompilerServices.Unsafe
 
-Files: `Packages/com.rumi.runios.core/Plugins/System.Runtime.CompilerServices.Unsafe~/**`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/System.Runtime.CompilerServices.Unsafe~/**`
 
 ~~~~text
 The MIT License (MIT)
@@ -1505,7 +1505,7 @@ SOFTWARE.
 
 ## ExtendedNumerics.BigDecimal
 
-Files: `Packages/com.rumi.runios.core/Plugins/ExtendedNumerics.BigDecimal/**`
+Files: `Packages/io.github.rumi727.runios.core/Plugins/ExtendedNumerics.BigDecimal/**`
 
 Copyright (c) 2024 Adam White
 
@@ -1535,7 +1535,7 @@ SOFTWARE.
 
 ## DecimalMath
 
-Files: `Packages/com.rumi.runios.core/Runtime/DecimalMath.cs`
+Files: `Packages/io.github.rumi727.runios.core/Runtime/DecimalMath.cs`
 
 Source: https://github.com/raminrahimzada/CSharp-Helper-Classes/tree/master/Math/DecimalMath  
 Author: raminrahimzada
@@ -1546,7 +1546,7 @@ Author: raminrahimzada
 
 ## Easing Functions
 
-File: `Packages/com.rumi.runios.core/Runtime/EasingFunctions.cs`
+File: `Packages/io.github.rumi727.runios.core/Runtime/EasingFunctions.cs`
 
 Source: C.J. Kimberlin; Robert Penner
 
@@ -1593,7 +1593,7 @@ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON A
 
 ### Pretendard
 
-Files: `Packages/com.rumi.runios.core/Resources/RuniOS/Fonts/Pretendard/**`
+Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Pretendard/**`
 
 ~~~~text
 Copyright (c) 2021, Kil Hyung-jin (https://github.com/orioncactus/pretendard),
@@ -1694,7 +1694,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### Noto Sans
 
-Files: `Packages/com.rumi.runios.core/Resources/RuniOS/Fonts/Noto Sans/**`
+Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Noto Sans/**`
 
 ~~~~text
 Copyright 2012 Google Inc. All Rights Reserved.
@@ -1794,7 +1794,7 @@ OTHER DEALINGS IN THE FONT SOFTWARE.
 
 ### NeoDunggeunmo Pro
 
-Files: `Packages/com.rumi.runios.core/Resources/RuniOS/Fonts/Neodgm Pro/**`
+Files: `Packages/io.github.rumi727.runios.core/Resources/RuniOS/Fonts/Neodgm Pro/**`
 
 ~~~~text
 Copyright (c) 2021, Eunbin Jeong (Dalgona.) <project-neodgm@dalgona.dev>,

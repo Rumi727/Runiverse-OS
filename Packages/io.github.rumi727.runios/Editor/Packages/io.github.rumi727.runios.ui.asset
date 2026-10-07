@@ -1,0 +1,34 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 698a52835e9e49928bcc6a05be369bcd, type: 3}
+  m_Name: io.github.rumi727.runios.ui
+  m_EditorClassIdentifier: RuniOS.PackageManagement.Unity::RuniOS.PackageManagement.Unity.GitPackage
+  _id: io.github.rumi727.runios.ui
+  _displayName: "Runiverse OS UI"
+  labelKey: installer.install_setting.ui.label
+  oneLineDescriptionKey: installer.install_setting.ui.one_line
+  descriptionKey: installer.install_setting.ui.description
+  packageName: ""
+  _dependencies:
+  - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
+  - {fileID: 11400000, guid: e45a25509b694ad4abb89dd57addc373, type: 2}
+  - {fileID: 11400000, guid: 7f71a0990aad440dab331e6835f3b251, type: 2}
+  - {fileID: 11400000, guid: f36b3a158d8b412991c2f5a93799784c, type: 2}
+  - {fileID: 11400000, guid: 718f620e135b48119c18e23311193384, type: 2}
+  - {fileID: 11400000, guid: 6b8d86c2ba584755998622365f7fa9e0, type: 2}
+  - {fileID: 11400000, guid: 4205dc14ceec4b95865421bbcb0f7de5, type: 2}
+  - {fileID: 11400000, guid: a96b940f22434f52898c48b71456aee6, type: 2}
+  - {fileID: 11400000, guid: a1b4c9ef2e294ae380cb284df5145836, type: 2}
+  - {fileID: 11400000, guid: 6fa748e30d0f46409959b6bb2f3e3f9a, type: 2}
+  repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
+  revision: ""
+  packagePath: "Packages/io.github.rumi727.runios.ui"

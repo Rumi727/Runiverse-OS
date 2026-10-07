@@ -1,8 +1,0 @@
-{
-  "name": "com.rumi.nuget.tmds.dbus.protocol",
-  "version": "0.95.1",
-  "displayName": "Tmds.DBus.Protocol (NuGet)",
-  "dependencies": {
-    "com.rumi.nuget.system.threading.channels": "10.0.12"
-  }
-}

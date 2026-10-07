@@ -143,8 +143,8 @@ fmod_editor.log
 /[Pa]ackages/com.singularitygroup.hotreload
 
 # NBS instrument sound effects
-/[Pa]ackages/com.rumi.runios.nbs/StreamingAssets/assets/runios/sounds/*.ogg
-/[Pa]ackages/com.rumi.runios.nbs/StreamingAssets/assets/runios/sounds/*.ogg.meta
+/[Pa]ackages/io.github.rumi727.runios.nbs/StreamingAssets/assets/runios/sounds/*.ogg
+/[Pa]ackages/io.github.rumi727.runios.nbs/StreamingAssets/assets/runios/sounds/*.ogg.meta
 
 /ProfilerCaptures/*
 

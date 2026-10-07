@@ -1,0 +1,14 @@
+{
+  "name": "io.github.rumi727.runios.linux",
+  "version": "0.0.0",
+  "displayName": "Runiverse OS Linux",
+  "description": "Linux platform implementations for Runiverse OS.",
+  "author": {
+    "name": "Rumi"
+  },
+  "dependencies": {
+    "io.github.rumi727.runios.core": "0.0.0",
+    "io.github.rumi727.nuget.tmds.dbus.protocol": "0.95.1"
+  },
+  "unity": "6000.7"
+}

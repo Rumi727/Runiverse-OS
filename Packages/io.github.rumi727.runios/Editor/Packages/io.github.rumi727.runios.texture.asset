@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 698a52835e9e49928bcc6a05be369bcd, type: 3}
+  m_Name: io.github.rumi727.runios.texture
+  m_EditorClassIdentifier: RuniOS.PackageManagement.Unity::RuniOS.PackageManagement.Unity.GitPackage
+  _id: io.github.rumi727.runios.texture
+  _displayName: "Runiverse OS Texture"
+  labelKey: installer.install_setting.texture.label
+  oneLineDescriptionKey: installer.install_setting.texture.one_line
+  descriptionKey: installer.install_setting.texture.description
+  packageName: ""
+  _dependencies:
+  - {fileID: 11400000, guid: d06b56e97a9049f281945bbcc76ebb84, type: 2}
+  - {fileID: 11400000, guid: a5f10aaa1bca479f98453b4049838166, type: 2}
+  - {fileID: 11400000, guid: 75f9e5547802430288e73c0c4cd2ddbf, type: 2}
+  - {fileID: 11400000, guid: a1b4c9ef2e294ae380cb284df5145836, type: 2}
+  - {fileID: 11400000, guid: df490633780445fa89011da12049353c, type: 2}
+  repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
+  revision: ""
+  packagePath: "Packages/io.github.rumi727.runios.texture"
