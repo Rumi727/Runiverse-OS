@@ -2,15 +2,18 @@
 using RuniOS.IO;
 using RuniOS.Resource;
 using System.IO;
+using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor
 {
-    [InitializeOnLoad]
-    public static class EditorResourcePack
+    public static partial class EditorResourcePack
     {
-        public static ResourcePack pack { get; }
+        public static ResourcePack? pack { get; private set; }
 
-        static EditorResourcePack()
+        public const string streamingAssetsFolderName = "EditorStreamingAssets";
+
+        [OnAssemblyLoaded]
+        static void OnAssemblyLoaded()
         {
             var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
                 .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Disabled))
@@ -22,6 +25,7 @@ namespace RuniOS.Editor
             pack = ResourcePack.Create("editor", provider, RequiredPackSort.BeforeVanilla);
         }
 
-        public const string streamingAssetsFolderName = "EditorStreamingAssets";
+        [OnAssemblyUnloading]
+        static void OnAssemblyUnloading() => pack?.Dispose();
     }
 }
