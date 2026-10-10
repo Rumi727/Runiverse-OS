@@ -12,7 +12,11 @@
     height: 16px;
 }
 
-.runios-io-node-browser__navigation-button#back {
+.runios-io-node-browser__path-field {
+    margin-left: 0;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-top: 2px;
 }
 
 .runios-io-node-browser > .runios-separator {
