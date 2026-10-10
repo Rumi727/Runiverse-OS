@@ -13,7 +13,3 @@
 .runios-io-node-browser__path-field {
     flex-shrink: 1;
 }
-
-.runios-io-node-browser__path-field .unity-text-element {
-    -unity-text-align: middle-left;
-}
