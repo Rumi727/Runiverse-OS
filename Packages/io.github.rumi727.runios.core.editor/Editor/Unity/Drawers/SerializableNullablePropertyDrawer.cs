@@ -1,54 +1,16 @@
 #nullable enable
 using RuniOS.Editor.APIBridge.UnityEditor;
-using RuniOS.Editor.UIElements;
-using RuniOS.UIElements;
-using RuniOS.UIElements.Nullables;
-using UnityEditor.UIElements;
-using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Unity.Drawers
 {
     [CustomPropertyDrawer(typeof(ISerializableNullable<>), true)]
     public class SerializableNullablePropertyDrawer : PropertyDrawer
     {
-        public override VisualElement CreatePropertyGUI(SerializedProperty property) => CreatePropertyGUI(property.GetPropertyTypeWithoutList(), property);
-
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
             EditorGUI.BeginProperty(position, label, property);
             Draw(position, property, label);
             EditorGUI.EndProperty();
-        }
-
-        public static VisualElement CreatePropertyGUI(Type pairType, SerializedProperty property, string? nullText = null)
-        {
-            string invalidText = GetTextOrKey("serializable_nullable.invalid_serialization_type");
-            
-            Type? valueType = SerializableNullable.GetUnderlyingType(pairType);
-            if (valueType == null)
-                return new LabelField(property.GetFieldLabel(), invalidText);
-
-            (SerializedProperty? fieldProperty, SerializedProperty? toggleProperty) = GetChildProperty(property);
-            if (toggleProperty == null)
-                return new LabelField(property.GetFieldLabel(), invalidText);
-            
-            Type fieldType = typeof(NullableField<>).MakeGenericType(valueType);
-            Type descriptionType = typeof(RuniBaseCompositeField<>.AnonymousFieldDescription<>);
-
-            if (fieldProperty == null)
-            {
-                descriptionType = descriptionType.MakeGenericType(pairType, typeof(LabelField));
-                    
-                object valueDescription = Activator.CreateInstance(descriptionType, SerializableNullable.nameOfInternalValue, new LabelField { value = invalidText });
-                return ((VisualElement)Activator.CreateInstance(fieldType, property.GetFieldLabel(), valueDescription, invalidText)).SetProperty(property);
-            }
-            else
-            {
-                descriptionType = descriptionType.MakeGenericType(pairType, typeof(PropertyField));
-                
-                object valueDescription = Activator.CreateInstance(descriptionType, SerializableNullable.nameOfInternalValue, new PropertyField(fieldProperty));
-                return ((VisualElement)Activator.CreateInstance(fieldType, property.GetFieldLabel(), valueDescription, nullText)).SetProperty(property);
-            }
         }
 
         public static void Draw(Rect position, SerializedProperty property, GUIContent label, string? customNullText = null)
