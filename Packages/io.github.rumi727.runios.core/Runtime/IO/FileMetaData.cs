@@ -34,7 +34,7 @@ namespace RuniOS.IO
     /// The file-system attributes, when available.<br/>
     /// 제공 가능한 경우 파일 시스템 특성입니다.
     /// </param>
-    public readonly partial record struct FileMetaData(string? name, long? size, DateTime? creationTime, DateTime? lastAccessTime, DateTime? lastWriteTime, FileAttributes? attributes)
+    public readonly partial record struct FileMetaData(string name, long? size, DateTime? creationTime, DateTime? lastAccessTime, DateTime? lastWriteTime, FileAttributes? attributes)
     {
         /// <summary>
         /// Initializes metadata with only a file or directory name.<br/>

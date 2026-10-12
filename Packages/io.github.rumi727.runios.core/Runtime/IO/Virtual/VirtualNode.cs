@@ -52,7 +52,7 @@ namespace RuniOS.IO.Virtual
         /// </summary>
         public FileMetaData metaData { get; private set; } = new FileMetaData
         {
-            name = null,
+            name = string.Empty,
             creationTime = DateTime.UtcNow,
             lastWriteTime = DateTime.UtcNow
         };
