@@ -1,0 +1,23 @@
+.runios-io-node-tree-view__cell {
+    flex-direction: row;
+    flex-grow: 1;
+    text-overflow: ellipsis;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.runios-io-node-tree-view__cell#size {
+    -unity-text-align: middle-right;
+}
+
+.runios-io-node-tree-view__name-cell > .runios-io-node-tree-view__loading-image {
+    display: none;
+}
+
+.runios-io-node-tree-view__name-cell--loading > .runios-io-node-tree-view__loading-image {
+    display: flex;
+}
+
+.runios-io-node-tree-view__loading-image {
+    align-self: center;
+}
