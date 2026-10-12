@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Linq.Async;
 using RuniOS.Spans;
 using System.IO;
 using System.IO.Enumeration;
@@ -149,7 +150,8 @@ namespace RuniOS.IO
             );
 
             // 생각보다 I/O가 엄청 빠름 수만개 파일도 0.2초면 끝내버림
-            return enumerable.ToUniTaskAsyncEnumerable();
+            // 하지만 ToUniTaskAsyncEnumerable()를 쓰니까 OneDrive 같은 실제 물리 장치에 마운트된게 아닐 때 렉 생겨서 몇 ms 밖에 안되는거 스레드 풀에 보내는게 나을듯
+            return enumerable.EnumerateOnThreadPool();
         }
         #endregion
 
