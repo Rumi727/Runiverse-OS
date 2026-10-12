@@ -26,6 +26,12 @@
 - This project is under active development. Public API contracts do not need to be preserved solely for compatibility; break them when necessary.
 - When breaking or materially changing a public API contract, explicitly explain the decision, the changed contract, and the resulting impact in the response.
 
+## Commit Attribution
+
+- Add an agent co-author trailer such as `Co-Authored-By` only to commits that include changes the agent actually wrote.
+- Do not add it to commits whose changes were all written by the user, even when the agent staged them, wrote the commit message, and created the commit.
+- When a commit mixes user-written and agent-written changes, add it only if the agent's part is a meaningful contribution. Do not add it for trivial agent changes that a person could make in a moment, such as fixing a typo, correcting a path or asset reference, or other small mechanical edits.
+
 ## Language
 
 - Unless the user explicitly asks for another language, respond in Korean by default.
