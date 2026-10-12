@@ -1,7 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using System.ComponentModel;
 using System.IO;
 using System.Threading;
 
@@ -10,8 +9,7 @@ namespace RuniOS.IO
     /// <summary>
     /// 아무 데이터도 가지지 않는 빈 I/O 프로바이더입니다.
     /// </summary>
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    sealed class EmptyIOProvider : IWritableIOProvider
+    public sealed class EmptyIOProvider : IWritableIOProvider
     {
         public static EmptyIOProvider instance { get; } = new EmptyIOProvider();
 
