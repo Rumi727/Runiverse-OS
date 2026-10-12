@@ -106,6 +106,8 @@ namespace RuniOS.IO
 
         public IONode RemoveExtension() => new IONode(provider, path.GetPathWithoutExtension());
 
+        public IONode CreateInRoot(RuniPath path) => new IONode(provider, path);
+
         /*/// <summary>
         /// Creates a root node from a provider recreated at this node's path.<br/>
         /// 이 노드의 경로를 새 루트로 재생성한 프로바이더의 루트 노드를 생성합니다.
@@ -133,5 +135,13 @@ namespace RuniOS.IO
         /// 새 노드에 바인딩할 경로를 가진 엔트리입니다.
         /// </param>
         public IONode Bind(IOEntry entry) => new IONode(provider, entry.path);
+
+        public IOWriteNode? AsWriteNode()
+        {
+            if (provider is IWritableIOProvider writableProvider)
+                return new IOWriteNode(writableProvider, path);
+
+            return null;
+        }
     }
 }

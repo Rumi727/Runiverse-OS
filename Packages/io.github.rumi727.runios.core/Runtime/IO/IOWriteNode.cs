@@ -112,6 +112,8 @@ namespace RuniOS.IO
         /// </summary>
         public IOWriteNode Recreate() => provider.Recreate(path).rootNode;*/
 
+        public IOWriteNode CreateInRoot(RuniPath path) => new IOWriteNode(provider, path);
+
         /// <summary>
         /// Determines whether this node and another node refer to the same provider target and path.<br/>
         /// 이 노드와 다른 노드가 같은 프로바이더 대상과 경로를 참조하는지 확인합니다.
