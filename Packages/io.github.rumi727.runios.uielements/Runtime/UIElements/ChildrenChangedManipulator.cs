@@ -17,6 +17,8 @@ namespace RuniOS.UIElements
 
             if (target.panel != null)
                 Subscribe(target.panel);
+
+            OnChildrenChanged();
         }
 
         protected override void UnregisterCallbacksFromTarget()
