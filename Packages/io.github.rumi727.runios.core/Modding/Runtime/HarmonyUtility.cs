@@ -41,15 +41,15 @@ namespace RuniOS.Modding
         {
             assembly ??= Assembly.GetCallingAssembly();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] Patching operations started.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.PatchAll(assembly);
             stopwatch.Stop();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
 
         /// <summary>
@@ -59,15 +59,15 @@ namespace RuniOS.Modding
         /// <exception cref="System.ArgumentNullException"> <paramref name="harmony"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public static void Unpatch(Harmony harmony)
         {
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] Unpatching operations started.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] Unpatching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.UnpatchAll(harmony.Id);
             stopwatch.Stop();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] All patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] All patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
 
         /// <summary>
@@ -79,22 +79,22 @@ namespace RuniOS.Modding
         {
             assembly ??= Assembly.GetCallingAssembly();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] Patching operations started.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] Patching operations started.");
 
             Stopwatch stopwatch = Stopwatch.StartNew();
             harmony.UnpatchAll(harmony.Id);
             stopwatch.Stop();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] Existing patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] Existing patches removed in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
 
             stopwatch.Restart();
             harmony.PatchAll(assembly);
             stopwatch.Stop();
             
-            if (logEnable)
-                Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
+            // if (logEnable)
+            //     Debug.Log($"[{harmony.Id}] All patches applied in {stopwatch.Elapsed.TotalSeconds:F4} seconds.");
         }
     }
 }
