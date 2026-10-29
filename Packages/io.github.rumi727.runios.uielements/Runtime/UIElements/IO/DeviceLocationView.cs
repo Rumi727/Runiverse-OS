@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO.Locations;
+using RuniOS.Resource;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -11,8 +12,14 @@ namespace RuniOS.UIElements.IO
     {
         public const string ussClassName = "runios-device-location-view";
         public const string itemUssClassName = "runios-device-location-view__item";
+        public const string itemIconUssClassName = "runios-device-location-view__item-icon";
+        public const string itemInfoUssClassName = "runios-device-location-view__item-info";
         public const string itemLabelUssClassName = "runios-device-location-view__item-label";
         public const string itemSpaceBarUssClassName = "runios-device-location-view__item-space-bar";
+
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) opticalIcon = ("runios-ui:ui/io_browser/devices/64/media-optical", "runios-ui:ui_dark/io_browser/devices/64/media-optical");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) removableIcon = ("runios-ui:ui/io_browser/devices/64/drive-removable-media", "runios-ui:ui_dark/io_browser/devices/64/drive-removable-media");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) harddiskIcon = ("runios-ui:ui/io_browser/devices/64/drive-harddisk", "runios-ui:ui_dark/io_browser/devices/64/drive-harddisk");
 
         public event Action<DeviceLocation>? selected;
 
@@ -44,22 +51,38 @@ namespace RuniOS.UIElements.IO
             Button item = new(() => selected?.Invoke(location)) { name = "item" };
             item.AddToClassList(itemUssClassName);
 
+            (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons = location.isOptical ? opticalIcon : location.isRemovable ? removableIcon : harddiskIcon;
+            Image icon = new() { name = "icon" };
+            icon.AddToClassList(itemIconUssClassName);
+            icon.AddManipulator(new AssetScopeManipulator<VectorImage>
+            {
+                assetRef = icons.icon,
+                editorDarkAssetRef = icons.editorDarkIcon,
+                applyAsset = x => icon.vectorImage = x,
+                clearAsset = () => icon.vectorImage = null
+            });
+            item.Add(icon);
+
+            VisualElement info = new() { name = "info" };
+            info.AddToClassList(itemInfoUssClassName);
+            item.Add(info);
+
             Label label = new(location.displayName) { name = "label" };
             label.AddToClassList(itemLabelUssClassName);
-            item.Add(label);
+            info.Add(label);
 
-            if (location.TryGetSpaceInfo(out StorageSpaceInfo info) && info.totalSize > 0)
+            if (location.TryGetSpaceInfo(out StorageSpaceInfo spaceInfo) && spaceInfo.totalSize > 0)
             {
                 ProgressBar spaceBar = new()
                 {
                     name = "space-bar",
                     lowValue = 0,
-                    highValue = info.totalSize,
-                    value = info.totalSize - info.availableSize,
-                    title = $"{((long)info.availableSize).DataSizeToString()} / {((long)info.totalSize).DataSizeToString()}"
+                    highValue = spaceInfo.totalSize,
+                    value = spaceInfo.totalSize - spaceInfo.availableSize,
+                    title = $"{((long)spaceInfo.availableSize).DataSizeToString()} / {((long)spaceInfo.totalSize).DataSizeToString()}"
                 };
                 spaceBar.AddToClassList(itemSpaceBarUssClassName);
-                item.Add(spaceBar);
+                info.Add(spaceBar);
             }
 
             return item;

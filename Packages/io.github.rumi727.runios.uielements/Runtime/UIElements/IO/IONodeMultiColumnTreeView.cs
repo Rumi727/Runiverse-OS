@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using RuniOS.Resource;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,8 +14,16 @@ namespace RuniOS.UIElements.IO
         public const string cellUssClassName = "runios-io-node-tree-view__cell";
         public const string nameCellUssClassName = "runios-io-node-tree-view__name-cell";
         public const string nameCellLoadingUssClassName = "runios-io-node-tree-view__name-cell--loading";
+        public const string iconUssClassName = "runios-io-node-tree-view__icon";
         public const string nameLabelUssClassName = "runios-io-node-tree-view__name-label";
         public const string loadingImageUssClassName = "runios-io-node-tree-view__loading-image";
+
+        static readonly AssetRef<VectorImage> folderIcon = "runios-ui:ui/io_browser/places/16/folder";
+        static readonly AssetRef<VectorImage> folderEditorDarkIcon = "runios-ui:ui_dark/io_browser/places/16/folder";
+        static readonly AssetRef<VectorImage> unknownIcon = "runios-ui:ui/io_browser/generic/16/unknown";
+        static readonly AssetRef<VectorImage> unknownEditorDarkIcon = "runios-ui:ui_dark/io_browser/generic/16/unknown";
+        static readonly Identifier extensionIconDirectory = "runios-ui:ui/io_browser/extensions/16";
+        static readonly Identifier extensionEditorDarkIconDirectory = "runios-ui:ui_dark/io_browser/extensions/16";
 
         public IIOProvider provider => node.provider;
         public IONode node { get; set; }
@@ -94,6 +103,18 @@ namespace RuniOS.UIElements.IO
             cell.AddToClassList(cellUssClassName);
             cell.AddToClassList(nameCellUssClassName);
 
+            Image icon = new() { name = "icon" };
+            icon.AddToClassList(iconUssClassName);
+            AssetScopeManipulator<VectorImage> iconManipulator = new()
+            {
+                applyAsset = x => icon.vectorImage = x,
+                clearAsset = () => icon.vectorImage = null
+            };
+            icon.AddManipulator(iconManipulator);
+            // 바인딩할 때 아이콘을 바꿀 수 있도록 매니퓰레이터를 userData에 둡니다.
+            icon.userData = iconManipulator;
+            cell.Add(icon);
+
             Label label = new() { name = "name-label" };
             label.AddToClassList(nameLabelUssClassName);
             cell.Add(label);
@@ -125,8 +146,38 @@ namespace RuniOS.UIElements.IO
             IOEntry entry = treeView.GetItemDataForIndex<IOEntry>(index);
             int id = treeView.GetIdForIndex(index);
 
+            AssetScopeManipulator<VectorImage> iconManipulator = (AssetScopeManipulator<VectorImage>)element.Q<Image>("icon").userData!;
+            (iconManipulator.assetRef, iconManipulator.editorDarkAssetRef) = GetIcon(entry);
             element.Q<Label>("name-label").text = entry.metaData.name;
             element.EnableInClassList(nameCellLoadingUssClassName, loader.IsLoading(id));
+        }
+
+        /// <summary>
+        /// 항목에 표시할 아이콘과 에디터 다크 테마 아이콘을 가져옵니다.
+        /// </summary>
+        /// <remarks>
+        /// 파일은 <c>a.tar.gz</c>라면 <c>tar.gz</c>, <c>gz</c> 순서로 확장자 아이콘을 찾습니다.
+        /// </remarks>
+        protected virtual (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) GetIcon(IOEntry entry)
+        {
+            if (entry.isDirectory)
+                return (folderIcon, folderEditorDarkIcon);
+
+            string name = entry.metaData.name.ToLowerInvariant();
+            for (int i = name.IndexOf('.'); i >= 0; i = name.IndexOf('.', i + 1))
+            {
+                string extension = name[(i + 1)..];
+
+                RuniPath path = extensionIconDirectory.path / extension;
+                if (!Identifier.IsPathValid(path))
+                    continue;
+
+                Identifier icon = new Identifier(extensionIconDirectory.nameSpace, path);
+                if (ResourceManager.GetHandle<VectorImage>(icon) != null)
+                    return (icon, new Identifier(extensionEditorDarkIconDirectory.nameSpace, extensionEditorDarkIconDirectory.path / extension));
+            }
+
+            return (unknownIcon, unknownEditorDarkIcon);
         }
 
         void BindSizeCell(VisualElement element, int index)

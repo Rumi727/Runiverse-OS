@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.IO.Locations;
+using RuniOS.Resource;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -22,6 +23,28 @@ namespace RuniOS.UIElements.IO
             KnownDirectoryType.pictures,
             KnownDirectoryType.videos
         ];
+
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) folderIcon = ("runios-ui:ui/io_browser/places/16/folder", "runios-ui:ui_dark/io_browser/places/16/folder");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) computerIcon = ("runios-ui:ui/io_browser/devices/16/computer", "runios-ui:ui_dark/io_browser/devices/16/computer");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) networkIcon = ("runios-ui:ui/io_browser/places/16/network-workgroup", "runios-ui:ui_dark/io_browser/places/16/network-workgroup");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) opticalIcon = ("runios-ui:ui/io_browser/devices/16/media-optical", "runios-ui:ui_dark/io_browser/devices/16/media-optical");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) removableIcon = ("runios-ui:ui/io_browser/devices/16/drive-removable-media", "runios-ui:ui_dark/io_browser/devices/16/drive-removable-media");
+        static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) harddiskIcon = ("runios-ui:ui/io_browser/devices/16/drive-harddisk", "runios-ui:ui_dark/io_browser/devices/16/drive-harddisk");
+
+        static readonly Dictionary<KnownDirectoryType, (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon)> knownDirectoryIcons = new()
+        {
+            [KnownDirectoryType.home] = ("runios-ui:ui/io_browser/places/16/user-home", "runios-ui:ui_dark/io_browser/places/16/user-home"),
+            [KnownDirectoryType.desktop] = ("runios-ui:ui/io_browser/places/16/user-desktop", "runios-ui:ui_dark/io_browser/places/16/user-desktop"),
+            [KnownDirectoryType.documents] = ("runios-ui:ui/io_browser/places/16/folder-documents", "runios-ui:ui_dark/io_browser/places/16/folder-documents"),
+            [KnownDirectoryType.downloads] = ("runios-ui:ui/io_browser/places/16/folder-download", "runios-ui:ui_dark/io_browser/places/16/folder-download"),
+            [KnownDirectoryType.music] = ("runios-ui:ui/io_browser/places/16/folder-music", "runios-ui:ui_dark/io_browser/places/16/folder-music"),
+            [KnownDirectoryType.pictures] = ("runios-ui:ui/io_browser/places/16/folder-pictures", "runios-ui:ui_dark/io_browser/places/16/folder-pictures"),
+            [KnownDirectoryType.videos] = ("runios-ui:ui/io_browser/places/16/folder-videos", "runios-ui:ui_dark/io_browser/places/16/folder-videos"),
+            [KnownDirectoryType.templates] = ("runios-ui:ui/io_browser/places/16/folder-templates", "runios-ui:ui_dark/io_browser/places/16/folder-templates"),
+            [KnownDirectoryType.publicShare] = ("runios-ui:ui/io_browser/places/16/folder-publicshare", "runios-ui:ui_dark/io_browser/places/16/folder-publicshare"),
+            [KnownDirectoryType.favorites] = ("runios-ui:ui/io_browser/places/16/folder-favorites", "runios-ui:ui_dark/io_browser/places/16/folder-favorites"),
+            [KnownDirectoryType.savedGames] = ("runios-ui:ui/io_browser/places/16/folder-games", "runios-ui:ui_dark/io_browser/places/16/folder-games")
+        };
 
         public DeviceLocationView deviceLocationView { get; }
         public IONodeMultiColumnTreeView treeView { get; }
@@ -74,7 +97,7 @@ namespace RuniOS.UIElements.IO
             List<VisualElement> groups = [];
 
             IOBrowserPlaceGroup places = new(GetText("runios-editor:io_browser.places")) { name = "places" };
-            places.Add(new IOBrowserPlace(GetText("runios-editor:io_browser.computer"), () => node = IONode.empty) { name = "computer" });
+            places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
 
             if (IKnownDirectoryProvider.instance is { } knownDirectoryProvider)
             {
@@ -104,7 +127,7 @@ namespace RuniOS.UIElements.IO
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
                 await foreach (NetworkLocation location in networkLocationProvider.EnumerateLocations())
-                    remote.Add(new IOBrowserPlace(location.displayName, () => OpenLocation(location)));
+                    remote.Add(MakePlace(location.displayName, networkIcon, () => OpenLocation(location)));
 
                 if (remote.childCount > 0)
                     groups.Add(remote);
@@ -130,12 +153,25 @@ namespace RuniOS.UIElements.IO
         IOBrowserPlace MakeKnownDirectoryPlace(KnownDirectory directory)
         {
             string text = LocalizationUtility.GetText($"runios-editor:io_browser.known_directory.{directory.type}") ?? directory.type;
-            return new IOBrowserPlace(text, () => Open(directory.path)) { name = directory.type };
+            IOBrowserPlace place = MakePlace(text, knownDirectoryIcons.GetValueOrDefault(directory.type, folderIcon), () => Open(directory.path));
+            place.name = directory.type;
+
+            return place;
+        }
+
+        static IOBrowserPlace MakePlace(string text, (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons, Action clicked)
+        {
+            IOBrowserPlace place = new(text, clicked);
+            place.iconManipulator.assetRef = icons.icon;
+            place.iconManipulator.editorDarkAssetRef = icons.editorDarkIcon;
+
+            return place;
         }
 
         IOBrowserPlace MakeDevicePlace(DeviceLocation location)
         {
-            IOBrowserPlace place = new(location.displayName, () => OpenLocation(location));
+            (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons = location.isOptical ? opticalIcon : location.isRemovable ? removableIcon : harddiskIcon;
+            IOBrowserPlace place = MakePlace(location.displayName, icons, () => OpenLocation(location));
 
             if (location.TryGetSpaceInfo(out StorageSpaceInfo info) && info.totalSize > 0)
             {

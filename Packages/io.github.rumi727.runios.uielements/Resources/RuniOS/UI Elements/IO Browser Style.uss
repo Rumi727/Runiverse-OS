@@ -26,7 +26,20 @@
 
 .runios-device-location-view__item {
     width: 250px;
-    flex-direction: column;
+    flex-direction: row;
+    align-items: center;
+}
+
+.runios-device-location-view__item-icon {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    margin-right: 6px;
+}
+
+.runios-device-location-view__item-info {
+    flex-grow: 1;
+    flex-shrink: 1;
     align-items: stretch;
 }
 
@@ -45,6 +58,18 @@
     padding-right: 6px;
     padding-top: 2px;
     padding-bottom: 2px;
+}
+
+.runios-io-browser-place__header {
+    flex-direction: row;
+    align-items: center;
+}
+
+.runios-io-browser-place__icon {
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    margin-right: 4px;
 }
 
 .runios-io-browser-place:hover {
