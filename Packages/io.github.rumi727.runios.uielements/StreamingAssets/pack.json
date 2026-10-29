@@ -1,0 +1,6 @@
+{
+  "name": "Runiverse OS NBS",
+  "version": "*.*.*",
+  "targetVersion": "*.*.*~*.*.*",
+  "targetRuniOSVersion": "*.*.*~*.*.*"
+}

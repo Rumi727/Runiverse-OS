@@ -1,0 +1,8 @@
+These icons are from the KDE Breeze Icon Theme (breeze-icons 6.31.0).
+Source (SVG): https://invent.kde.org/frameworks/breeze-icons
+They are licensed under the GNU LGPL version 3 or later. See COPYING-ICONS.
+
+places/ and devices/ contain a subset of the original icons used by the file browser; symbolic links were replaced with copies of their targets.
+extensions/ contains the mimetypes icons renamed to file extensions (e.g. image-jpeg.svg -> jpg.svg, jpeg.svg).
+generic/unknown.svg is mimetypes/unknown.svg.
+currentColor values were replaced with the colors defined by each icon's ColorScheme classes, because Unity's SVG parser does not support currentColor.
