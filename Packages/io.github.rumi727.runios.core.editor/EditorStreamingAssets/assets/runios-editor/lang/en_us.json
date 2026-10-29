@@ -235,6 +235,7 @@
   "io_browser.devices": "Devices",
   "io_browser.computer": "Computer",
   "io_browser.show_hidden_files": "Show Hidden Files",
+  "io_browser.open_in_file_manager": "Open in File Manager",
   "io_browser.known_directory.home": "Home",
   "io_browser.known_directory.desktop": "Desktop",
   "io_browser.known_directory.documents": "Documents",

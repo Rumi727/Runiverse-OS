@@ -235,6 +235,7 @@
   "io_browser.devices": "デバイス",
   "io_browser.computer": "コンピューター",
   "io_browser.show_hidden_files": "隠しファイルを表示",
+  "io_browser.open_in_file_manager": "ファイルマネージャーで開く",
   "io_browser.known_directory.home": "ホーム",
   "io_browser.known_directory.desktop": "デスクトップ",
   "io_browser.known_directory.documents": "ドキュメント",

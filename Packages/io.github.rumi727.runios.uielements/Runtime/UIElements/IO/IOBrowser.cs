@@ -1,5 +1,7 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using RuniOS.IO.Locations;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -246,7 +248,20 @@ namespace RuniOS.UIElements.IO
             menu.DropDown(folderMenu.worldBound, folderMenu, DropdownMenuSizeMode.Auto);
         }
 
-        protected virtual void BuildFolderMenu(GenericDropdownMenu menu) => menu.AddItem("Open System Explorer", false, () => { });
+        protected virtual void BuildFolderMenu(GenericDropdownMenu menu)
+        {
+            const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
+            string openInFileManagerText = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
+
+            // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
+            if (IFileManagerProvider.instance is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+            {
+                PhysicalPath path = physicalProvider.targetPath.Combine(node.path);
+                menu.AddItem(openInFileManagerText, false, () => fileManager.ShowFolder(path).Forget());
+            }
+            else
+                menu.AddDisabledItem(openInFileManagerText, false);
+        }
 
         protected abstract void OnNodeChanged();
 
