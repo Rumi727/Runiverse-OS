@@ -20,6 +20,13 @@ namespace RuniOS.Texts.Builders.RichTexts
         {
             LocalizationText localizationText = (LocalizationText)text;
 
+            // 인수가 없으면 format을 해석하지 않고 원문을 그대로 출력합니다.
+            if (localizationText.args.count == 0)
+            {
+                builder.Append(LocalizationUtility.GetTextOrKey(localizationText.identifier, localizationText.languageCode));
+                return;
+            }
+
             IReadOnlyList<CompositeFormatSegment>? segments = LocalizationUtility.GetFormatSegments(localizationText.identifier, localizationText.languageCode);
             if (segments == null)
             {
