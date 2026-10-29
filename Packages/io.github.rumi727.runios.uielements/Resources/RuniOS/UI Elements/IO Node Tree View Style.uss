@@ -4,6 +4,7 @@
     text-overflow: ellipsis;
     -unity-text-align: middle-left;
     white-space: nowrap;
+    justify-content: flex-start;
 }
 
 .runios-io-node-tree-view__cell#size {
@@ -28,4 +29,12 @@
 
 .runios-io-node-tree-view__loading-image {
     align-self: center;
+}
+
+.runios-io-browser .unity-multi-column-view__header-container {
+    flex-shrink: 0;
+}
+
+.runios-io-browser .unity-multi-column-view__cell {
+    justify-content: flex-start;
 }
