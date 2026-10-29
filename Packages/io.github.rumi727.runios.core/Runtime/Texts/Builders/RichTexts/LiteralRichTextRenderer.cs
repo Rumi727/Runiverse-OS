@@ -8,10 +8,10 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// <see cref="LiteralText"/>에 저장된 문자열을 추가해 rich text 출력을 만듭니다.
     /// </summary>
     [TextRenderer(typeof(LiteralText))]
-    public class LiteralRichTextBuilder : RichTextBuilder
+    public class LiteralRichTextRenderer : RichTextRenderer
     {
         /// <inheritdoc/>
-        protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
+        protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context)
         {
             LiteralText literalText = (LiteralText)text;
             builder.Append(literalText.text);

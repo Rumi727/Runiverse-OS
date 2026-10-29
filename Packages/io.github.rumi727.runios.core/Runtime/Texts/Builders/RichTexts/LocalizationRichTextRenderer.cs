@@ -9,14 +9,14 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// <see cref="LocalizationText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
     [TextRenderer(typeof(LocalizationText))]
-    public class LocalizationRichTextBuilder : RichTextBuilder
+    public class LocalizationRichTextRenderer : RichTextRenderer
     {
         /// <inheritdoc/>
         /// <exception cref="FormatException">
-        /// Thrown when a localization format segment refers to a missing argument, or uses alignment or format with a text argument whose builder cannot consume that information.<br/>
+        /// Thrown when a localization format segment refers to a missing argument, or uses alignment or format with a text argument whose renderer cannot consume that information.<br/>
         /// 로컬라이징 format 세그먼트가 존재하지 않는 인수를 참조하거나 정렬 및 format 정보를 처리할 수 없는 텍스트 인수에 해당 정보를 사용하는 경우 발생합니다.
         /// </exception>
-        protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
+        protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context)
         {
             LocalizationText localizationText = (LocalizationText)text;
 
@@ -34,20 +34,20 @@ namespace RuniOS.Texts.Builders.RichTexts
                     builder.Append(segment.literal);
                 else
                 {
-                    if (segment.index < 0 || segment.index >= localizationText.args.Count)
-                        throw new FormatException($"Format argument index {segment.index} is out of range for translation '{localizationText.identifier}'. Argument count is {localizationText.args.Count}.");
+                    if (segment.index < 0 || segment.index >= localizationText.args.count)
+                        throw new FormatException($"Format argument index {segment.index} is out of range for translation '{localizationText.identifier}'. Argument count is {localizationText.args.count}.");
 
                     Text arg = localizationText.args[segment.index];
 
-                    RichTextBuilder textBuilder = FindBuilder(arg);
-                    if (textBuilder is FormattableRichTextBuilder formattableTMPTextRenderer)
-                        formattableTMPTextRenderer.Append(builder, arg, segment.alignment, segment.format, styleState);
+                    RichTextRenderer renderer = FindRenderer(arg);
+                    if (renderer is FormattableRichTextRenderer formattableTMPTextRenderer)
+                        formattableTMPTextRenderer.Append(builder, arg, segment.alignment, segment.format, context);
                     else
                     {
                         if (segment.alignment != 0 || segment.format != null)
                             throw new FormatException($"Format argument {segment.index} in translation '{localizationText.identifier}' uses alignment or format, but '{arg.GetType().Name}' is not formattable.");
 
-                        textBuilder.Append(builder, arg, styleState);
+                        renderer.Append(builder, arg, context);
                     }
                 }
             }

@@ -16,10 +16,10 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// 저장된 값이 <see cref="System.IFormattable"/>을 구현하면 format 문자열을 적용합니다.
     /// </remarks>
     [TextRenderer(typeof(ValueText<>), useForChildren = true)]
-    public class ValueRichTextBuilder<T> : FormattableRichTextBuilder
+    public class ValueRichTextRenderer<T> : FormattableRichTextRenderer
     {
         /// <inheritdoc/>
-        protected override void AppendCore(StringBuilder builder, Text text, int alignment, string? format, TextStyleState styleState)
+        protected override void AppendCore(StringBuilder builder, Text text, int alignment, string? format, TextBuildContext context)
         {
             ValueText<T> valueText = (ValueText<T>)text;
             if (valueText.alignment != null)

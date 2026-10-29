@@ -8,16 +8,16 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// <see cref="GroupText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
     [TextRenderer(typeof(GroupText))]
-    public sealed class GroupRichTextBuilder : RichTextBuilder
+    public sealed class GroupRichTextRenderer : RichTextRenderer
     {
         /// <inheritdoc/>
-        protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
+        protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context)
         {
             GroupText groupText = (GroupText)text;
             for (int i = 0; i < groupText.count; i++)
             {
                 Text item = groupText[i];
-                FindBuilder(item).Append(builder, item, styleState);
+                FindRenderer(item).Append(builder, item, context);
             }
         }
     }

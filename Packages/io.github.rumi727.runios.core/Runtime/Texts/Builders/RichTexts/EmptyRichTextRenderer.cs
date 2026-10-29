@@ -8,9 +8,9 @@ namespace RuniOS.Texts.Builders.RichTexts
     /// <see cref="EmptyText"/> 인스턴스의 rich text 출력을 만듭니다.
     /// </summary>
     [TextRenderer(typeof(EmptyText))]
-    public sealed class EmptyRichTextBuilder : RichTextBuilder
+    public sealed class EmptyRichTextRenderer : RichTextRenderer
     {
         /// <inheritdoc/>
-        protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState) { }
+        protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context) { }
     }
 }
