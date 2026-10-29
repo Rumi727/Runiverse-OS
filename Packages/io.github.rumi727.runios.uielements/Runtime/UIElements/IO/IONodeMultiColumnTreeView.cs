@@ -1,7 +1,9 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.Resource;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -12,6 +14,7 @@ namespace RuniOS.UIElements.IO
     {
         public const string ussClassName = "runios-io-node-tree-view";
         public const string cellUssClassName = "runios-io-node-tree-view__cell";
+        public const string hiddenCellUssClassName = "runios-io-node-tree-view__cell--hidden";
         public const string nameCellUssClassName = "runios-io-node-tree-view__name-cell";
         public const string nameCellLoadingUssClassName = "runios-io-node-tree-view__name-cell--loading";
         public const string iconUssClassName = "runios-io-node-tree-view__icon";
@@ -27,6 +30,22 @@ namespace RuniOS.UIElements.IO
 
         public IIOProvider provider => node.provider;
         public IONode node { get; set; }
+
+        /// <summary>
+        /// 숨김 파일과 폴더를 표시할지 정합니다. 바꾸면 목록을 다시 불러옵니다.
+        /// </summary>
+        public bool showHiddenFiles
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+
+                field = value;
+                Refresh().Forget();
+            }
+        }
 
         public SelectionType selectionType
         {
@@ -90,7 +109,7 @@ namespace RuniOS.UIElements.IO
             treeView = new MultiColumnTreeView([nameColumn, sizeColumn, creationTimeColumn, lastAccessTime, lastWriteTimeColumn]) { sortingMode = ColumnSortingMode.Default, selectionType = SelectionType.Multiple };
             treeView.sortColumnDescriptions.Add(new SortColumnDescription(nameColumn.name, SortDirection.Ascending));
 
-            loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => provider.EnumerateEntries(x.path, false)) { preloadDepth = 1 };
+            loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => EnumerateEntries(x.path)) { preloadDepth = 1 };
             treeView.SetViewController(new LazyMultiColumnTreeViewController<IOEntry>(treeView, loader));
             treeView.itemsChosen += _ =>
             {
@@ -173,6 +192,7 @@ namespace RuniOS.UIElements.IO
             (iconManipulator.assetRef, iconManipulator.editorDarkAssetRef) = GetIcon(entry);
             element.Q<Label>("name-label").text = entry.metaData.name;
             element.EnableInClassList(nameCellLoadingUssClassName, loader.IsLoading(id));
+            element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
         }
 
         /// <summary>
@@ -207,6 +227,8 @@ namespace RuniOS.UIElements.IO
         {
             IOEntry entry = treeView.GetItemDataForIndex<IOEntry>(index);
             int id = treeView.GetIdForIndex(index);
+
+            element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
 
             string text;
             if (entry.metaData.size is { } size)
@@ -250,9 +272,19 @@ namespace RuniOS.UIElements.IO
         {
             T genericElement = (T)element;
             IOEntry entry = treeView.GetItemDataForIndex<IOEntry>(index);
+
+            element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
             action.Invoke(genericElement, entry);
         };
 
-        public UniTask Refresh() => loader.Reset(provider.EnumerateEntries(node.path, false));
+        public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));
+
+        IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path)
+        {
+            IUniTaskAsyncEnumerable<IOEntry> entries = provider.EnumerateEntries(path, false);
+            return showHiddenFiles ? entries : entries.Where(static x => !IsHidden(x));
+        }
+
+        static bool IsHidden(IOEntry entry) => entry.metaData.attributes?.HasFlag(FileAttributes.Hidden) == true;
     }
 }

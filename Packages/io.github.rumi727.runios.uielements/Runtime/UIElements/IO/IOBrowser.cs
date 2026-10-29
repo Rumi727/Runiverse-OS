@@ -57,7 +57,6 @@ namespace RuniOS.UIElements.IO
         public TextField pathField { get; }
 
         public Button folderMenu { get; }
-        protected GenericDropdownMenu folderMenuDropdown { get; }
 
         public TwoPaneSplitView splitView { get; }
 
@@ -143,8 +142,6 @@ namespace RuniOS.UIElements.IO
                     applyAsset = x => folderMenu.iconImage = x,
                     clearAsset = () => folderMenu.iconImage = default
                 });
-                folderMenuDropdown = new GenericDropdownMenu();
-                folderMenuDropdown.AddItem("Open System Explorer", false, () => { });
                 header.Add(folderMenu);
             }
             hierarchy.Add(header);
@@ -201,7 +198,15 @@ namespace RuniOS.UIElements.IO
             pathField.style.width = (xMax - x).Clamp(0);
         }
 
-        protected void FolderMenuDropDown() => folderMenuDropdown.DropDown(folderMenu.worldBound, folderMenu, DropdownMenuSizeMode.Auto);
+        // 체크 상태 같은 항목이 현재 상태를 반영하도록, 열 때마다 메뉴를 새로 구성합니다.
+        protected void FolderMenuDropDown()
+        {
+            GenericDropdownMenu menu = new();
+            BuildFolderMenu(menu);
+            menu.DropDown(folderMenu.worldBound, folderMenu, DropdownMenuSizeMode.Auto);
+        }
+
+        protected virtual void BuildFolderMenu(GenericDropdownMenu menu) => menu.AddItem("Open System Explorer", false, () => { });
 
         protected abstract void OnNodeChanged();
 

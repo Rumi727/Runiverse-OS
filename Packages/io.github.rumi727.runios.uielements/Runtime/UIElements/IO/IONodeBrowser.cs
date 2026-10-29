@@ -49,6 +49,12 @@ namespace RuniOS.UIElements.IO
             this.node = node;
         }
 
+        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        {
+            base.BuildFolderMenu(menu);
+            menu.AddItem(LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files", treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+        }
+
         protected override void OnNodeChanged()
         {
             treeView.node = node;

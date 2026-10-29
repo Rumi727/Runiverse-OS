@@ -74,6 +74,12 @@ namespace RuniOS.UIElements.IO
             OnNodeChanged();
         }
 
+        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        {
+            base.BuildFolderMenu(menu);
+            menu.AddItem(GetText("runios-editor:io_browser.show_hidden_files"), treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+        }
+
         // 노드가 없으면 홈 화면으로 장치 목록을 표시합니다.
         protected override void OnNodeChanged()
         {
