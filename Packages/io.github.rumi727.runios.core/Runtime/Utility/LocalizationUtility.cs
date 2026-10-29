@@ -38,6 +38,8 @@ namespace RuniOS.Utility
             return asset?.GetValueOrDefault(identifier.path.value);
         }
 
+        public static string GetTextOrKey(Identifier identifier, string? languageCode = null) => GetText(identifier, languageCode) ?? identifier;
+
         public static IReadOnlyList<CompositeFormatSegment>? GetFormatSegments(Identifier identifier, string? languageCode = null)
         {
             languageCode ??= "ko_kr"; /* TODO : 이거 바꿔라 */
