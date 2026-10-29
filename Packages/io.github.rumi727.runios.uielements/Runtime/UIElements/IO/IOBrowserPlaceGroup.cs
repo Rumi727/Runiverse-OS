@@ -26,6 +26,7 @@ namespace RuniOS.UIElements.IO
 
         public IOBrowserPlaceGroup(string text)
         {
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
             header = new Label(text) { name = "header" };

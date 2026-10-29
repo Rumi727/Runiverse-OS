@@ -31,6 +31,7 @@ namespace RuniOS.UIElements.IO
 
         public IOBrowserPlace(string text, Action? clicked)
         {
+            this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
             header = new VisualElement { name = "header" };
