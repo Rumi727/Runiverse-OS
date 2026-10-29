@@ -1,0 +1,27 @@
+.runios-io-browser-place-group__header {
+    -unity-font-style: bold;
+    padding-left: 4px;
+    margin-top: 4px;
+}
+
+.runios-io-browser-place {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.runios-io-browser-place:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.runios-io-browser-place__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.runios-io-browser-place__label {
+    padding-left: 0;
+    padding-right: 0;
+}

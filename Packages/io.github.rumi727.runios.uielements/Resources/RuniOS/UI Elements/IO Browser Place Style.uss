@@ -1,0 +1,14 @@
+.runios-io-browser-place__header {
+    flex-direction: row;
+    align-items: center;
+}
+
+.runios-io-browser-place__icon {
+    flex-shrink: 0;
+}
+
+.runios-io-browser-place__label {
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

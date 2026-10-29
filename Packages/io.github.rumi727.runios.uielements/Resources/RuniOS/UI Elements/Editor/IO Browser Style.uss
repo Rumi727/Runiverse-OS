@@ -37,3 +37,16 @@
 .runios-io-browser > .runios-separator {
     display: none;
 }
+
+.runios-file-system-browser__place-space-bar {
+    height: 4px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-top: 1px;
+    margin-bottom: 0;
+}
+
+.runios-file-system-browser__place-space-bar .unity-progress-bar__background {
+    min-height: 4px;
+    height: 4px;
+}

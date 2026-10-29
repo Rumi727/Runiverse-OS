@@ -1,0 +1,13 @@
+.runios-device-location-view__item {
+    width: 250px;
+}
+
+.runios-device-location-view__item--selected {
+    background-color: rgba(61, 174, 233, 0.3);
+}
+
+.runios-device-location-view__item-icon {
+    width: 48px;
+    height: 48px;
+    margin-right: 6px;
+}

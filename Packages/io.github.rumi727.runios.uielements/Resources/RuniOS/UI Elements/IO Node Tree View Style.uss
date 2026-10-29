@@ -12,11 +12,8 @@
 }
 
 .runios-io-node-tree-view__icon {
-    width: 16px;
-    height: 16px;
     flex-shrink: 0;
     align-self: center;
-    margin-right: 4px;
 }
 
 .runios-io-node-tree-view__name-cell > .runios-io-node-tree-view__loading-image {

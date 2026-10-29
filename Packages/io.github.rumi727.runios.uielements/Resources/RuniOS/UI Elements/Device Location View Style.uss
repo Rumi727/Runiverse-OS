@@ -1,0 +1,25 @@
+.runios-device-location-view {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
+}
+
+.runios-device-location-view__item {
+    flex-direction: row;
+    align-items: center;
+}
+
+.runios-device-location-view__item-icon {
+    flex-shrink: 0;
+}
+
+.runios-device-location-view__item-info {
+    flex-grow: 1;
+    flex-shrink: 1;
+    align-items: stretch;
+}
+
+.runios-device-location-view__item-label {
+    -unity-text-align: middle-left;
+}
