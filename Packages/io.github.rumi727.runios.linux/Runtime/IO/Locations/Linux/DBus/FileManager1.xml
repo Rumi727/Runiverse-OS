@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<node>
+    <interface name="org.freedesktop.FileManager1">
+        <!-- 폴더를 파일 관리자에서 엽니다 -->
+        <method name="ShowFolders">
+            <arg type="as" name="URIs" direction="in"/>
+            <arg type="s" name="StartupId" direction="in"/>
+        </method>
+        <!-- 항목의 상위 폴더를 열고 항목을 선택합니다 -->
+        <method name="ShowItems">
+            <arg type="as" name="URIs" direction="in"/>
+            <arg type="s" name="StartupId" direction="in"/>
+        </method>
+    </interface>
+</node>
