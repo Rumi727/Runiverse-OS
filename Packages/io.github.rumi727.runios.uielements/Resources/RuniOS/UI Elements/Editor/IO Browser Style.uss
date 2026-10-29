@@ -1,39 +1,39 @@
-.runios-io-node-browser .runios-io-node-browser__header-button {
+.runios-io-browser .runios-io-browser__header-button {
     padding-top: 0;
     padding-right: 0;
     padding-bottom: 0;
     padding-left: 0;
 }
 
-.runios-io-node-browser .runios-io-node-browser__navigation-button {
+.runios-io-browser .runios-io-browser__navigation-button {
     width: 25px;
 }
 
-.runios-io-node-browser__navigation-button .unity-image {
+.runios-io-browser__navigation-button .unity-image {
     width: 16px;
     height: 16px;
 }
 
-.runios-io-node-browser__path-prefix-label {
+.runios-io-browser__path-prefix-label {
     padding-left: 0;
     padding-right: 0;
     margin-left: 2px;
     margin-right: 1px;
 }
 
-.runios-io-node-browser__path-field {
+.runios-io-browser__path-field {
     margin-left: 0;
     margin-right: 2px;
     margin-bottom: 2px;
     margin-top: 2px;
 }
 
-.runios-io-node-browser .runios-io-node-browser__folder-menu {
+.runios-io-browser .runios-io-browser__folder-menu {
     margin-left: 0;
     border-right-width: 0;
     width: auto;
 }
 
-.runios-io-node-browser > .runios-separator {
+.runios-io-browser > .runios-separator {
     display: none;
 }

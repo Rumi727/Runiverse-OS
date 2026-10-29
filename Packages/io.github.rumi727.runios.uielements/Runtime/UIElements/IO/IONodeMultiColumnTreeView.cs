@@ -102,9 +102,9 @@ namespace RuniOS.UIElements.IO
             loadingImage.AddToClassList(loadingImageUssClassName);
             loadingImage.AddManipulator(new AssetScopeManipulator<Texture2D>
             {
-                assetRef = "runios:ui/io_node_browser/loading",
-                editorAssetRef = "runios-editor:ui/io_node_browser/loading",
-                editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/loading",
+                assetRef = "runios:ui/io_browser/loading",
+                editorAssetRef = "runios-editor:ui/io_browser/loading",
+                editorDarkAssetRef = "runios-editor:ui_dark/io_browser/loading",
                 applyAsset = x => loadingImage.image = x,
                 clearAsset = () => loadingImage.image = null
             });

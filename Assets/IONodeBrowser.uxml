@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" authoring-id="-296762466" editor-extension-mode="True">
-    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=c14b4c6cb6705a834a10efce3c1a5d72&amp;type=3#IO Node Browser Style"/>
-    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Node%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=84c0ae6187824d259f2eb6dc769c87f1&amp;type=3#IO Node Browser Style"/>
+    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=c14b4c6cb6705a834a10efce3c1a5d72&amp;type=3#IO Browser Style"/>
+    <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Browser%20Style.uss?fileID=7433441132597879392&amp;guid=84c0ae6187824d259f2eb6dc769c87f1&amp;type=3#IO Browser Style"/>
     <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Node%20Tree%20View%20Style.uss?fileID=7433441132597879392&amp;guid=e9e49e06b78945dfb2b880f68ae1e81c&amp;type=3#IO Node Tree View Style"/>
     <Style src="project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Node%20Tree%20View%20Style.uss?fileID=7433441132597879392&amp;guid=32892c078d4e44bab42311dea83fdd24&amp;type=3#IO Node Tree View Style"/>
     <RuniOS.UIElements.IO.IONodeBrowser target-path="/home/rumi"/>

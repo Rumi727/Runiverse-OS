@@ -1,0 +1,15 @@
+.runios-io-browser {
+    flex-grow: 1;
+}
+
+.runios-io-browser__header {
+    flex-shrink: 0;
+}
+
+.runios-io-browser .runios-io-browser__path-field {
+    flex-shrink: 1;
+}
+
+.runios-io-browser__path-prefix-label {
+    -unity-text-align: middle-right;
+}

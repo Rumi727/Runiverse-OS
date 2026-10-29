@@ -9,25 +9,25 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class IONodeBrowser : VisualElement
     {
-        public const string ussClassName = "runios-io-node-browser";
-        public const string headerUssClassName = "runios-io-node-browser__header";
+        public const string ussClassName = "runios-io-browser";
+        public const string headerUssClassName = "runios-io-browser__header";
 
-        public const string headerButtonUssClassName = "runios-io-node-browser__header-button";
+        public const string headerButtonUssClassName = "runios-io-browser__header-button";
 
-        public const string navigationGroupUssClassName = "runios-io-node-browser__navigation-group";
-        public const string navigationButtonUssClassName = "runios-io-node-browser__navigation-button";
+        public const string navigationGroupUssClassName = "runios-io-browser__navigation-group";
+        public const string navigationButtonUssClassName = "runios-io-browser__navigation-button";
 
-        public const string backUssClassName = "runios-io-node-browser__back-button";
-        public const string forwardUssClassName = "runios-io-node-browser__forward-button";
-        public const string upUssClassName = "runios-io-node-browser__up-button";
+        public const string backUssClassName = "runios-io-browser__back-button";
+        public const string forwardUssClassName = "runios-io-browser__forward-button";
+        public const string upUssClassName = "runios-io-browser__up-button";
 
-        public const string pathPrefixLabelUssClassName = "runios-io-node-browser__path-prefix-label";
-        public const string pathFieldUssClassName = "runios-io-node-browser__path-field";
+        public const string pathPrefixLabelUssClassName = "runios-io-browser__path-prefix-label";
+        public const string pathFieldUssClassName = "runios-io-browser__path-field";
 
-        public const string folderMenuButtonUssClassName = "runios-io-node-browser__folder-menu";
+        public const string folderMenuButtonUssClassName = "runios-io-browser__folder-menu";
 
-        public const string navigationPaneUssClassName = "runios-io-node-browser__navigation-pane";
-        public const string contentPaneUssClassName = "runios-io-node-browser__content-pane";
+        public const string navigationPaneUssClassName = "runios-io-browser__navigation-pane";
+        public const string contentPaneUssClassName = "runios-io-browser__content-pane";
 
         public IIOProvider provider => node.provider;
         public IONode node
@@ -104,9 +104,9 @@ namespace RuniOS.UIElements.IO
                     back.AddToClassList(backUssClassName);
                     back.AddManipulator(new AssetScopeManipulator<Texture2D>
                     {
-                        assetRef = "runios:ui/io_node_browser/back",
-                        editorAssetRef = "runios-editor:ui/io_node_browser/back",
-                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/back",
+                        assetRef = "runios:ui/io_browser/back",
+                        editorAssetRef = "runios-editor:ui/io_browser/back",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_browser/back",
                         applyAsset = x => back.iconImage = x,
                         clearAsset = () => back.iconImage = default
                     });
@@ -118,9 +118,9 @@ namespace RuniOS.UIElements.IO
                     forward.AddToClassList(forwardUssClassName);
                     forward.AddManipulator(new AssetScopeManipulator<Texture2D>
                     {
-                        assetRef = "runios:ui/io_node_browser/forward",
-                        editorAssetRef = "runios-editor:ui/io_node_browser/forward",
-                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/forward",
+                        assetRef = "runios:ui/io_browser/forward",
+                        editorAssetRef = "runios-editor:ui/io_browser/forward",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_browser/forward",
                         applyAsset = x => forward.iconImage = x,
                         clearAsset = () => forward.iconImage = default
                     });
@@ -132,9 +132,9 @@ namespace RuniOS.UIElements.IO
                     up.AddToClassList(upUssClassName);
                     up.AddManipulator(new AssetScopeManipulator<Texture2D>
                     {
-                        assetRef = "runios:ui/io_node_browser/up",
-                        editorAssetRef = "runios-editor:ui/io_node_browser/up",
-                        editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/up",
+                        assetRef = "runios:ui/io_browser/up",
+                        editorAssetRef = "runios-editor:ui/io_browser/up",
+                        editorDarkAssetRef = "runios-editor:ui_dark/io_browser/up",
                         applyAsset = x => up.iconImage = x,
                         clearAsset = () => up.iconImage = default
                     });
@@ -157,9 +157,9 @@ namespace RuniOS.UIElements.IO
                 folderMenu.AddToClassList(folderMenuButtonUssClassName);
                 folderMenu.AddManipulator(new AssetScopeManipulator<Texture2D>
                 {
-                    assetRef = "runios:ui/io_node_browser/menu",
-                    editorAssetRef = "runios-editor:ui/io_node_browser/menu",
-                    editorDarkAssetRef = "runios-editor:ui_dark/io_node_browser/menu",
+                    assetRef = "runios:ui/io_browser/menu",
+                    editorAssetRef = "runios-editor:ui/io_browser/menu",
+                    editorDarkAssetRef = "runios-editor:ui_dark/io_browser/menu",
                     applyAsset = x => folderMenu.iconImage = x,
                     clearAsset = () => folderMenu.iconImage = default
                 });
