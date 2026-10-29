@@ -162,10 +162,10 @@ string richText = RichTextBuilder.Build(text);
 The builder finds a renderer based on the runtime type of the `Text`.
 
 ```text
-LiteralText      -> LiteralRichTextBuilder
-ValueText        -> ValueRichTextBuilder
-GroupText        -> GroupRichTextBuilder
-LocalizationText -> LocalizationRichTextBuilder
+LiteralText      -> LiteralRichTextRenderer
+ValueText        -> ValueRichTextRenderer
+GroupText        -> GroupRichTextRenderer
+LocalizationText -> LocalizationRichTextRenderer
 ```
 
 `GroupText` renders its children in order.\
@@ -174,15 +174,15 @@ LocalizationText -> LocalizationRichTextBuilder
 ## Extensibility
 
 The text system is not hardcoded to handle only built-in text types.\
-You can add a new `Text` type and a builder that renders it.
+You can add a new `Text` type and a renderer that renders it.
 
-A builder uses `CustomTextRendererAttribute` to declare which `Text` type it handles.
+A renderer uses `TextRendererAttribute` to declare which `Text` type it handles.
 
 ```csharp
-[CustomTextRenderer(typeof(MyText))]
-public sealed class MyRichTextBuilder : RichTextBuilder
+[TextRenderer(typeof(MyText))]
+public sealed class MyRichTextRenderer : RichTextRenderer
 {
-    protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
+    protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context)
     {
         MyText myText = (MyText)text;
         // render myText
@@ -190,8 +190,15 @@ public sealed class MyRichTextBuilder : RichTextBuilder
 }
 ```
 
-`RichTextBuilder` finds the registered builder from the runtime type of the `Text`.\
+`RichTextBuilder` finds the registered renderer from the runtime type of the `Text`.\
 This means the text structure can be extended when needed.
+
+**Renderers must be stateless.**\
+Only one renderer instance is created and cached per text type, and it is shared by every build.\
+When texts of the same type are nested, the same instance is re-entered within a single build.\
+Keep per-build state in `TextBuildContext` or in local variables, not in instance fields.
+
+`Text` is mutable and not thread-safe, so building concurrently on multiple threads is not supported.
 
 TMP rich text tag output is the exception.\
 TMP has a fixed set of supported tags, so that part is hardcoded in `RichTextUtility` for rendering performance.
@@ -242,7 +249,7 @@ Build rich text string
 Update TMP layout
 ```
 
-Rendering reduces temporary allocation through `StringBuilderCache`, `TextStyleStateCache`, and builder caching.
+Rendering reduces temporary allocation through `StringBuilderCache`, `TextStyleStateCache`, and renderer caching.
 
 However, the final rich text `string` still has to be produced for TMP when the value changes.\
 TMP layout cost can also happen when the displayed string changes.

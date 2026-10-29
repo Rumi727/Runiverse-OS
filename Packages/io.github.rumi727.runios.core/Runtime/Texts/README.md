@@ -162,10 +162,10 @@ string richText = RichTextBuilder.Build(text);
 빌더는 `Text`의 런타임 타입을 보고 렌더러를 찾습니다.
 
 ```text
-LiteralText      -> LiteralRichTextBuilder
-ValueText        -> ValueRichTextBuilder
-GroupText        -> GroupRichTextBuilder
-LocalizationText -> LocalizationRichTextBuilder
+LiteralText      -> LiteralRichTextRenderer
+ValueText        -> ValueRichTextRenderer
+GroupText        -> GroupRichTextRenderer
+LocalizationText -> LocalizationRichTextRenderer
 ```
 
 `GroupText`는 자식들을 순서대로 렌더링합니다.\
@@ -174,15 +174,15 @@ LocalizationText -> LocalizationRichTextBuilder
 ## 확장성
 
 텍스트 시스템은 특정 텍스트 타입만 하드코딩해서 처리하지 않습니다.\
-새로운 `Text` 타입과 그 타입을 처리하는 빌더를 직접 추가할 수 있습니다.
+새로운 `Text` 타입과 그 타입을 처리하는 렌더러를 직접 추가할 수 있습니다.
 
-빌더는 `CustomTextRendererAttribute`로 자신이 처리할 `Text` 타입을 표시합니다.
+렌더러는 `TextRendererAttribute`로 자신이 처리할 `Text` 타입을 표시합니다.
 
 ```csharp
-[CustomTextRenderer(typeof(MyText))]
-public sealed class MyRichTextBuilder : RichTextBuilder
+[TextRenderer(typeof(MyText))]
+public sealed class MyRichTextRenderer : RichTextRenderer
 {
-    protected override void AppendCore(StringBuilder builder, Text text, TextStyleState styleState)
+    protected override void AppendCore(StringBuilder builder, Text text, TextBuildContext context)
     {
         MyText myText = (MyText)text;
         // render myText
@@ -190,8 +190,15 @@ public sealed class MyRichTextBuilder : RichTextBuilder
 }
 ```
 
-`RichTextBuilder`는 런타임 타입을 기준으로 등록된 빌더를 찾아 사용합니다.\
+`RichTextBuilder`는 런타임 타입을 기준으로 등록된 렌더러를 찾아 사용합니다.\
 따라서 텍스트 구조는 필요에 따라 직접 확장할 수 있습니다.
+
+**렌더러는 상태를 가지면 안 됩니다.**\
+렌더러 인스턴스는 텍스트 타입마다 하나만 생성되어 캐시되고, 모든 빌드가 공유합니다.\
+같은 타입의 텍스트가 중첩되면 하나의 빌드 안에서도 같은 인스턴스에 다시 진입합니다.\
+빌드별 상태는 인스턴스 필드가 아니라 `TextBuildContext`나 지역 변수에 보관해야 합니다.
+
+`Text`는 뮤터블하고 thread-safe하지 않으므로, 여러 스레드에서 동시에 빌드하는 것은 전제하지 않습니다.
 
 단, TMP rich text 태그 출력은 예외입니다.\
 TMP가 지원하는 태그가 정해져 있고, 이 부분은 렌더링 성능을 위해 `RichTextUtility`에 하드코딩되어 있습니다.
@@ -242,7 +249,7 @@ rich text 문자열 생성
 TMP 레이아웃 갱신
 ```
 
-렌더링 쪽은 `StringBuilderCache`, `TextStyleStateCache`, builder cache를 통해 임시 할당을 줄입니다.
+렌더링 쪽은 `StringBuilderCache`, `TextStyleStateCache`, renderer cache를 통해 임시 할당을 줄입니다.
 
 하지만 값이 바뀌면 TMP에 넘길 최종 rich text `string`은 여전히 만들어져야 합니다.\
 표시 문자열이 바뀌면 TMP 레이아웃 비용도 발생할 수 있습니다.
