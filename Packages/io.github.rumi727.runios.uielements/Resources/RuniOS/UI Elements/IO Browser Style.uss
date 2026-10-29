@@ -13,3 +13,7 @@
 .runios-io-browser__path-prefix-label {
     -unity-text-align: middle-right;
 }
+
+.runios-io-browser__content-pane > * {
+    flex-grow: 1;
+}
