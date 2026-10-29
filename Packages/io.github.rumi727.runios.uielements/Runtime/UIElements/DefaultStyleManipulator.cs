@@ -30,11 +30,12 @@ namespace RuniOS.UIElements
             target.styleSheets.Remove(baseStyle);
         }
 
-        protected override void OnThemeChanged(bool isEditorTheme)
+        protected override void OnThemeChanged(EditorTheme editorTheme)
         {
-            base.OnThemeChanged(isEditorTheme);
+            base.OnThemeChanged(editorTheme);
 
 #if UNITY_EDITOR
+            bool isEditorTheme = editorTheme != EditorTheme.none;
             if (editorStyle == null || isEditorTheme == editorStyleApplied)
                 return;
 

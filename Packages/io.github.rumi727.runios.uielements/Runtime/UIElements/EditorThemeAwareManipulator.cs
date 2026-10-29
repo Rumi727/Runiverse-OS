@@ -10,12 +10,13 @@ namespace RuniOS.UIElements
     public class EditorThemeAwareManipulator : Manipulator
     {
         public EditorThemeAwareManipulator() { }
-        public EditorThemeAwareManipulator(Action<bool>? onThemeChanged) => this.onThemeChanged = onThemeChanged;
+        public EditorThemeAwareManipulator(Action<EditorTheme>? onThemeChanged) => this.onThemeChanged = onThemeChanged;
 
-        public event Action<bool>? onThemeChanged;
+        public event Action<EditorTheme>? onThemeChanged;
 
 #if UNITY_EDITOR
         const string uiBuilderThemePropertyName = "__unity-ui-builder-linked-active-theme-stylesheet";
+        const string editorDarkStyleSheetNamePrefix = "DefaultCommonDark";
 
         IVisualElementScheduledItem? updateItem;
         object? lastBuilderTheme;
@@ -77,10 +78,16 @@ namespace RuniOS.UIElements
 
             lastBuilderTheme = theme;
 
-            bool isEditorTheme = target.panel?.contextType == ContextType.Editor &&
-                (!hasBuilderThemeProperty || (theme is StyleSheet && theme is not ThemeStyleSheet));
+            EditorTheme editorTheme = EditorTheme.none;
+            if (target.panel?.contextType == ContextType.Editor)
+            {
+                if (!hasBuilderThemeProperty)
+                    editorTheme = UnityEditor.EditorGUIUtility.isProSkin ? EditorTheme.dark : EditorTheme.light;
+                else if (theme is StyleSheet styleSheet && theme is not ThemeStyleSheet)
+                    editorTheme = styleSheet.name.StartsWith(editorDarkStyleSheetNamePrefix, StringComparison.Ordinal) ? EditorTheme.dark : EditorTheme.light;
+            }
 
-            OnThemeChanged(isEditorTheme);
+            OnThemeChanged(editorTheme);
 
             if (hasBuilderThemeProperty)
             {
@@ -92,6 +99,6 @@ namespace RuniOS.UIElements
         }
 #endif
 
-        protected virtual void OnThemeChanged(bool isEditorTheme) => onThemeChanged?.Invoke(isEditorTheme);
+        protected virtual void OnThemeChanged(EditorTheme editorTheme) => onThemeChanged?.Invoke(editorTheme);
     }
 }

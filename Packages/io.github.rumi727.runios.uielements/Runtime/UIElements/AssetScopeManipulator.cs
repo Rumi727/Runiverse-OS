@@ -71,8 +71,8 @@ namespace RuniOS.UIElements
             get
             {
 #if UNITY_EDITOR
-                if (isEditorTheme)
-                    return (UnityEditor.EditorGUIUtility.isProSkin ? (editorDarkAssetRef ?? editorAssetRef) : editorAssetRef) ?? assetRef;
+                if (editorTheme != EditorTheme.none)
+                    return (editorTheme == EditorTheme.dark ? (editorDarkAssetRef ?? editorAssetRef) : editorAssetRef) ?? assetRef;
 #endif
                 return assetRef;
             }
@@ -85,14 +85,14 @@ namespace RuniOS.UIElements
 
 #if UNITY_EDITOR
         readonly EditorThemeAwareManipulator editorThemeAwareManipulator;
-        bool isEditorTheme;
+        EditorTheme editorTheme;
 
-        void OnThemeChanged(bool isEditorTheme)
+        void OnThemeChanged(EditorTheme editorTheme)
         {
-            if (this.isEditorTheme == isEditorTheme)
+            if (this.editorTheme == editorTheme)
                 return;
 
-            this.isEditorTheme = isEditorTheme;
+            this.editorTheme = editorTheme;
             Reload().Forget();
         }
 #endif
