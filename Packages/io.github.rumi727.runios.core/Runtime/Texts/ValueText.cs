@@ -61,18 +61,42 @@ namespace RuniOS.Texts
         /// Gets the value represented by this text.<br/>
         /// 이 텍스트가 나타내는 값을 가져옵니다.
         /// </summary>
-        public T value { get; set; } = value;
+        public T value
+        {
+            get;
+            set
+            {
+                field = value;
+                NotifyChanged();
+            }
+        } = value;
 
         /// <summary>
         /// Gets or sets the stored composite-format alignment width.<br/>
         /// 저장된 복합 format 정렬 너비를 가져오거나 설정합니다.
         /// </summary>
-        public int? alignment { get; set; } = alignment;
+        public int? alignment
+        {
+            get;
+            set
+            {
+                field = value;
+                NotifyChanged();
+            }
+        } = alignment;
 
         /// <summary>
         /// Gets or sets the stored format string used when the value implements <see cref="System.IFormattable"/>.<br/>
         /// 값이 <see cref="System.IFormattable"/>을 구현할 때 사용할 저장된 format 문자열을 가져오거나 설정합니다.
         /// </summary>
-        public string? format { get; set; } = format;
+        public string? format
+        {
+            get;
+            set
+            {
+                field = value;
+                NotifyChanged();
+            }
+        } = format;
     }
 }

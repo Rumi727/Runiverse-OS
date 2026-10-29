@@ -21,6 +21,14 @@ namespace RuniOS.Texts
         /// Gets or sets the literal string represented by this text.<br/>
         /// 이 텍스트가 나타내는 리터럴 문자열을 가져오거나 설정합니다.
         /// </summary>
-        public string text { get; set; } = text;
+        public string text
+        {
+            get;
+            set
+            {
+                field = value;
+                NotifyChanged();
+            }
+        } = text;
     }
 }

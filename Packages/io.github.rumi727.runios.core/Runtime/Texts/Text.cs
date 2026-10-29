@@ -7,8 +7,23 @@ namespace RuniOS.Texts
     /// Represents a styled text element that can be resolved or rendered by text pipelines.<br/>
     /// 텍스트 파이프라인에서 해석되거나 렌더링될 수 있는 스타일 적용 텍스트 요소를 나타냅니다.
     /// </summary>
-    public abstract partial class Text
+    public abstract partial class Text : ITextChangeSource
     {
+        /// <summary>
+        /// Occurs when the content or style of this text changes.<br/>
+        /// Changes of child texts are not propagated to this event.
+        /// <br/><br/>
+        /// 이 텍스트의 내용이나 스타일이 변경되면 발생합니다.<br/>
+        /// 자식 텍스트의 변경은 이 이벤트로 전파되지 않습니다.
+        /// </summary>
+        public event Action? onChanged;
+
+        /// <summary>
+        /// Raises <see cref="onChanged"/>.<br/>
+        /// <see cref="onChanged"/>를 발생시킵니다.
+        /// </summary>
+        protected void NotifyChanged() => onChanged?.Invoke();
+
         /// <summary>
         /// Gets the style assigned to this text, if any.<br/>
         /// 이 텍스트에 할당된 스타일이 있으면 가져옵니다.
@@ -38,6 +53,8 @@ namespace RuniOS.Texts
         public Text SetStyle<T>(StyleKey<T> property, T value)
         {
             (style ??= new TextStyle()).Set(property, value);
+            NotifyChanged();
+
             return this;
         }
 
@@ -60,6 +77,8 @@ namespace RuniOS.Texts
         public Text UnsetStyle<T>(StyleKey<T> property)
         {
             style?.Unset(property);
+            NotifyChanged();
+
             return this;
         }
 
@@ -74,6 +93,8 @@ namespace RuniOS.Texts
         public Text ClearStyle()
         {
             style?.Clear();
+            NotifyChanged();
+
             return this;
         }
 
@@ -92,6 +113,8 @@ namespace RuniOS.Texts
         public Text CopyStyleFrom(Text target)
         {
             style = target.style?.Clone();
+            NotifyChanged();
+
             return this;
         }
     }

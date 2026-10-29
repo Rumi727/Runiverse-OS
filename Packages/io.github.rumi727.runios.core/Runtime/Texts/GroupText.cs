@@ -42,7 +42,11 @@ namespace RuniOS.Texts
         public Text this[int index]
         {
             get => items[index];
-            set => items[index] = value;
+            set
+            {
+                items[index] = value;
+                NotifyChanged();
+            }
         }
 
         /// <summary>
@@ -70,6 +74,8 @@ namespace RuniOS.Texts
         public GroupText Add(Text text)
         {
             items.Add(text);
+            NotifyChanged();
+
             return this;
         }
         void ICollection<Text>.Add(Text item) => Add(item);
@@ -86,7 +92,11 @@ namespace RuniOS.Texts
         /// The text element to insert.<br/>
         /// 삽입할 텍스트 요소입니다.
         /// </param>
-        public void Insert(int index, Text item) => items.Insert(index, item);
+        public void Insert(int index, Text item)
+        {
+            items.Insert(index, item);
+            NotifyChanged();
+        }
 
         /// <summary>
         /// Removes the first occurrence of a text element from this group.<br/>
@@ -100,7 +110,14 @@ namespace RuniOS.Texts
         /// <see langword="true"/> if <paramref name="item"/> was removed; otherwise, <see langword="false"/>.<br/>
         /// <paramref name="item"/>이 제거되었으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>를 반환합니다.
         /// </returns>
-        public bool Remove(Text item) => items.Remove(item);
+        public bool Remove(Text item)
+        {
+            if (!items.Remove(item))
+                return false;
+
+            NotifyChanged();
+            return true;
+        }
         /// <summary>
         /// Removes the text element at the specified index.<br/>
         /// 지정된 인덱스의 텍스트 요소를 제거합니다.
@@ -109,13 +126,21 @@ namespace RuniOS.Texts
         /// The zero-based index of the text element to remove.<br/>
         /// 제거할 텍스트 요소의 0부터 시작하는 인덱스입니다.
         /// </param>
-        public void RemoveAt(int index) => items.RemoveAt(index);
+        public void RemoveAt(int index)
+        {
+            items.RemoveAt(index);
+            NotifyChanged();
+        }
 
         /// <summary>
         /// Removes all text elements from this group.<br/>
         /// 이 그룹에서 모든 텍스트 요소를 제거합니다.
         /// </summary>
-        public void Clear() => items.Clear();
+        public void Clear()
+        {
+            items.Clear();
+            NotifyChanged();
+        }
 
         /// <summary>
         /// Determines whether this group contains the specified text element.<br/>
