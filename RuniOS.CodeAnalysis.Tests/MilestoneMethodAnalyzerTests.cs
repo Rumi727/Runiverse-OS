@@ -58,7 +58,7 @@ public sealed class MilestoneMethodAnalyzerTests
         ImmutableArray<Diagnostic> diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
             .GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
         SyntaxTree syntaxTree = compilation.SyntaxTrees.Single();
-        TextSpan attributeSpan = syntaxTree.GetRoot().DescendantNodes().OfType<AttributeSyntax>().Single().GetLocation().SourceSpan;
+        TextSpan attributeSpan = syntaxTree.GetRoot().DescendantNodes().OfType<AttributeSyntax>().Single(static attribute => attribute.Name.ToString() == "OnResourcesReady").GetLocation().SourceSpan;
 
         Assert.Equal(6, diagnostics.Length);
         Assert.All(diagnostics, diagnostic => Assert.Equal(attributeSpan, diagnostic.Location.SourceSpan));
