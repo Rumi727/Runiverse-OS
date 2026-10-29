@@ -180,7 +180,8 @@ namespace RuniOS.Resource
                     }
                 }
 
-                await UniTask.WhenAll(reloadables.Select(ReloadSafe));
+                // 열거 도중 컬랙션 변경 가능성 있음
+                await UniTask.WhenAll(reloadables.ToArray().Select(ReloadSafe));
             }
         }
 
