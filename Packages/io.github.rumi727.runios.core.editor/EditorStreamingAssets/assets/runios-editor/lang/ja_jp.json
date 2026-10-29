@@ -230,6 +230,7 @@
   "io_node_tree_view.last_access_time": "アクセス日時",
   "io_node_tree_view.last_write_time": "更新日時",
   "io_node_tree_view.item_count": "{0} 個の項目",
+  "io_node_tree_view.show_in_file_manager": "ファイルマネージャーで表示",
   "io_browser.places": "場所",
   "io_browser.remote": "リモート",
   "io_browser.devices": "デバイス",

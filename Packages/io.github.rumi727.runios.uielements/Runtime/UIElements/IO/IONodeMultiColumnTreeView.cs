@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
+using RuniOS.IO.Locations;
 using RuniOS.Resource;
 using System.IO;
 using UnityEngine;
@@ -117,6 +118,13 @@ namespace RuniOS.UIElements.IO
                 foreach (IOEntry entry in selectedEntries)
                     opened?.Invoke(entry);
             };
+
+            // 오른쪽 버튼을 누를 때 컬렉션 뷰가 이미 선택을 바꾸므로, 뗄 때 선택된 항목으로 메뉴를 엽니다.
+            RegisterCallback<PointerUpEvent>(e =>
+            {
+                if (e.button == (int)MouseButton.RightMouse)
+                    ShowContextMenu(e.position);
+            });
 
             Add(treeView);
 
@@ -276,6 +284,31 @@ namespace RuniOS.UIElements.IO
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
             action.Invoke(genericElement, entry);
         };
+
+        void ShowContextMenu(Vector2 position)
+        {
+            IOEntry[] entries = selectedEntries;
+            if (entries.Length == 0)
+                return;
+
+            GenericDropdownMenu menu = new();
+            BuildContextMenu(menu, entries);
+            menu.DropDown(new Rect(position, Vector2.zero), this, DropdownMenuSizeMode.Auto);
+        }
+
+        protected virtual void BuildContextMenu(GenericDropdownMenu menu, IOEntry[] entries)
+        {
+            string showInFileManagerText = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
+
+            // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
+            if (IFileManagerProvider.instance is { } fileManager && provider is PhysicalIOProvider physicalProvider)
+            {
+                PhysicalPath[] paths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
+                menu.AddItem(showInFileManagerText, false, () => fileManager.ShowItems(paths).Forget());
+            }
+            else
+                menu.AddDisabledItem(showInFileManagerText, false);
+        }
 
         public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));
 

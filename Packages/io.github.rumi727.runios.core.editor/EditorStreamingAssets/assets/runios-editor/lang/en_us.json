@@ -230,6 +230,7 @@
   "io_node_tree_view.last_access_time": "Date Accessed",
   "io_node_tree_view.last_write_time": "Date Modified",
   "io_node_tree_view.item_count": "{0} items",
+  "io_node_tree_view.show_in_file_manager": "Show in File Manager",
   "io_browser.places": "Places",
   "io_browser.remote": "Remote",
   "io_browser.devices": "Devices",

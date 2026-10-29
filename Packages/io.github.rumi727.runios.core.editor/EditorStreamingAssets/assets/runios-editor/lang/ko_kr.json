@@ -229,6 +229,7 @@
   "io_node_tree_view.last_access_time": "액세스한 날짜",
   "io_node_tree_view.last_write_time": "수정한 날짜",
   "io_node_tree_view.item_count": "{0}개 항목",
+  "io_node_tree_view.show_in_file_manager": "파일 관리자에서 보기",
   "io_browser.places": "위치",
   "io_browser.remote": "원격",
   "io_browser.devices": "장치",
