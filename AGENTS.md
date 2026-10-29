@@ -39,7 +39,14 @@
 
 - Add an agent co-author trailer such as `Co-Authored-By` only to commits that include changes the agent actually wrote.
 - Do not add it to commits whose changes were all written by the user, even when the agent staged them, wrote the commit message, and created the commit.
-- When a commit mixes user-written and agent-written changes, add it only if the agent's part is a meaningful contribution. Do not add it for trivial agent changes that a person could make in a moment, such as fixing a typo, correcting a path or asset reference, or other small mechanical edits.
+- Add it only when the agent's changes reflect its own independent judgment, such as designing an approach, working out a non-obvious implementation, or diagnosing and resolving a problem the user did not already pin down. Writing a substantial amount of code is not enough by itself.
+- Do not add it when the agent's changes are, even if large:
+  - simple or trivial edits that a person could make in a moment, such as fixing a typo, correcting a path or asset reference, or other small mechanical edits;
+  - repetitive or mechanical work, such as renames, bulk replacements, applying the same pattern across files, or moving code;
+  - simple bug fixes whose cause and fix are straightforward;
+  - changes the user explicitly specified, where the agent only carried out what the user described without contributing its own design or reasoning.
+- When a commit mixes user-written and agent-written changes, apply the same criteria to the agent's part alone.
+- When unsure whether the agent's contribution qualifies, do not add it.
 
 ## Language
 
