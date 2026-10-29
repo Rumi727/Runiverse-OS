@@ -46,6 +46,9 @@ namespace RuniOS.UIElements.IO
             [KnownDirectoryType.savedGames] = ("runios-ui:ui/io_browser/places/16/folder-games", "runios-ui:ui_dark/io_browser/places/16/folder-games")
         };
 
+        // 같은 경로가 같은 노드가 되도록 경로 루트(리눅스는 /, 윈도우는 C:\, D:\ 등)마다 프로바이더를 하나만 둡니다.
+        static readonly Dictionary<PhysicalPath, PhysicalIOProvider> rootProviders = new();
+
         public DeviceLocationView deviceLocationView { get; }
         public IONodeMultiColumnTreeView treeView { get; }
 
@@ -209,7 +212,10 @@ namespace RuniOS.UIElements.IO
             PhysicalPath physicalPath = PhysicalPath.From(path);
             PhysicalPath root = PhysicalPath.From(physicalPath.GetPathRoot());
 
-            return new PhysicalIOProvider(root, SandboxPolicy.Disabled).rootNode.CreateChild(physicalPath.GetRelativePath(root));
+            if (!rootProviders.TryGetValue(root, out PhysicalIOProvider? provider))
+                rootProviders[root] = provider = new PhysicalIOProvider(root, SandboxPolicy.Disabled);
+
+            return provider.rootNode.CreateChild(physicalPath.GetRelativePath(root));
         }
 
         public void OpenLocation(FileLocation location)
