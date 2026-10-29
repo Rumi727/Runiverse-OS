@@ -9,6 +9,7 @@
   "dependencies": {
     "io.github.rumi727.runios.core": "0.0.0",
     "com.unity.modules.uielements": "1.0.0",
+    "com.unity.modules.vectorgraphics": "1.0.0",
     "com.cysharp.unitask": "2.5.11",
     "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161"
   },
