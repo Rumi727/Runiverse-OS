@@ -20,7 +20,7 @@ namespace RuniOS.Editor.Unity.Drawers.Attributes
                 position.width -= 4;
 
                 Texture icon = EditorGUIUtility.IconContent("console.erroricon").image;
-                string text = GetTextOrKey("gui.field_is_null");
+                string text = GetTextOrKey("runios-editor:gui.field_is_null");
 
                 EditorGUI.LabelField(position, new GUIContent(text, icon), RuniStyles.contentBox);
             }

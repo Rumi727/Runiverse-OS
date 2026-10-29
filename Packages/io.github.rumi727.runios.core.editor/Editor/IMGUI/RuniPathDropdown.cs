@@ -56,7 +56,7 @@ namespace RuniOS.Editor.IMGUI
         readonly Dictionary<RuniPath, RuniPathDropdownItem> buildRootPaths = new();
         protected override AdvancedDropdownItem BuildRoot()
         {
-            RuniPathDropdownItem root = new RuniPathDropdownItem(RuniPath.empty,  GetTextOrKey("gui.root"));
+            RuniPathDropdownItem root = new RuniPathDropdownItem(RuniPath.empty,  GetTextOrKey("runios-editor:gui.root"));
 
             buildRootPaths.Clear();
             for (int i = 0; i < cachedPaths.Count; i++)
@@ -64,7 +64,7 @@ namespace RuniOS.Editor.IMGUI
                 RuniPath path = cachedPaths[i];
                 if (path.IsEmpty())
                 {
-                    root.AddChild(new RuniPathDropdownItem(RuniPath.empty, GetTextOrKey("gui.none")));
+                    root.AddChild(new RuniPathDropdownItem(RuniPath.empty, GetTextOrKey("runios-editor:gui.none")));
 
                     if (cachedPaths.Count > 1)
                         root.AddSeparator();

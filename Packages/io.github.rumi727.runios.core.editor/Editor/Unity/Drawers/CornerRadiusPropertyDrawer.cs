@@ -68,10 +68,10 @@ namespace RuniOS.Editor.Unity.Drawers
 
                 EditorGUI.BeginChangeCheck();
 
-                Field(GetTextOrKey("gui.top_left"), ref cornerRadius.topLeft);
-                Field(GetTextOrKey("gui.top_right"), ref cornerRadius.topRight);
-                Field(GetTextOrKey("gui.bottom_right"), ref cornerRadius.bottomRight);
-                Field(GetTextOrKey("gui.bottom_left"), ref cornerRadius.bottomLeft);
+                Field(GetTextOrKey("runios-editor:gui.top_left"), ref cornerRadius.topLeft);
+                Field(GetTextOrKey("runios-editor:gui.top_right"), ref cornerRadius.topRight);
+                Field(GetTextOrKey("runios-editor:gui.bottom_right"), ref cornerRadius.bottomRight);
+                Field(GetTextOrKey("runios-editor:gui.bottom_left"), ref cornerRadius.bottomLeft);
 
                 if (EditorGUI.EndChangeCheck())
                     WriteProperty();

@@ -62,7 +62,7 @@ namespace RuniOS.Editor.IMGUI
         
         protected override AdvancedDropdownItem BuildRoot()
         {
-            EnumDropdownItem root = new EnumDropdownItem((Enum)enumType.GetDefaultValueNotNull(),  GetTextOrKey("gui.root"));
+            EnumDropdownItem root = new EnumDropdownItem((Enum)enumType.GetDefaultValueNotNull(),  GetTextOrKey("runios-editor:gui.root"));
             if (!enumType.IsEnum)
                 return root;
             

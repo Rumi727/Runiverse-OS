@@ -154,10 +154,10 @@ namespace RuniOS.Editor.Resource
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
 
-            if (GUILayout.Button(GetTextOrKey("gui.apply")))
+            if (GUILayout.Button(GetTextOrKey("runios-editor:gui.apply")))
                 targetDrawer?.SaveChanges();
             
-            if (GUILayout.Button(GetTextOrKey("gui.revert")))
+            if (GUILayout.Button(GetTextOrKey("runios-editor:gui.revert")))
                 targetDrawer?.DiscardChanges();
 
             EditorGUILayout.EndHorizontal();

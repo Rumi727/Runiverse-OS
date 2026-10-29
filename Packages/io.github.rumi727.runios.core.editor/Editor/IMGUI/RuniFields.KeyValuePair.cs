@@ -26,7 +26,7 @@ namespace RuniOS.Editor.IMGUI
             {
                 position.width = fieldWidth;
 
-                GUIContent keyLabel = TrTempContent("gui.key");
+                GUIContent keyLabel = TrTempContent("runios-editor:gui.key");
 
                 BeginLabelWidth(keyLabel);
                 EditorGUI.PrefixLabel(position, keyLabel);
@@ -39,7 +39,7 @@ namespace RuniOS.Editor.IMGUI
             {
                 position.width = fieldWidth.Ceil();
 
-                GUIContent valueLabel = TrTempContent("gui.value");
+                GUIContent valueLabel = TrTempContent("runios-editor:gui.value");
 
                 BeginLabelWidth(valueLabel);
                 EditorGUI.PrefixLabel(position, valueLabel);

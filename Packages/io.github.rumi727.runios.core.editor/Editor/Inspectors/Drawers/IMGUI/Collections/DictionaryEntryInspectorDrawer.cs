@@ -83,10 +83,10 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
 
             EndWideMode();
             
-            string keyLabel = GetTextOrKey("gui.key");
+            string keyLabel = GetTextOrKey("runios-editor:gui.key");
             GUIContent keyLabelContent = new GUIContent(keyLabel);
             
-            string valueLabel = GetTextOrKey("gui.value");
+            string valueLabel = GetTextOrKey("runios-editor:gui.value");
             GUIContent valueLabelContent = new GUIContent(valueLabel);
             
             if (isField)

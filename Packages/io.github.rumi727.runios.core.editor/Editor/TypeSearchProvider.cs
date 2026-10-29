@@ -16,7 +16,7 @@ namespace RuniOS.Editor
         readonly HashSet<Assembly> assemblies = new();
         readonly QueryEngine<Type> queryEngine = new();
 
-        public TypeSearchProvider(Type baseType) : base("type", GetTextOrKey("gui.type"))
+        public TypeSearchProvider(Type baseType) : base("type", GetTextOrKey("runios-editor:gui.type"))
         {
             this.baseType = baseType;
 
@@ -34,12 +34,12 @@ namespace RuniOS.Editor
 
         IEnumerable<SearchProposition> FetchPropositions(SearchContext context, SearchPropositionOptions options)
         {
-            yield return new SearchProposition(null, GetTextOrKey("type_search_provider.name"), $"{nameToken}:", GetTextOrKey("type_search_provider.name.help"));
-            yield return new SearchProposition(null, GetTextOrKey("type_search_provider.namespace"), $"{namespaceToken}:", GetTextOrKey("type_search_provider.namespace.help"));
+            yield return new SearchProposition(null, GetTextOrKey("runios-editor:type_search_provider.name"), $"{nameToken}:", GetTextOrKey("runios-editor:type_search_provider.name.help"));
+            yield return new SearchProposition(null, GetTextOrKey("runios-editor:type_search_provider.namespace"), $"{namespaceToken}:", GetTextOrKey("runios-editor:type_search_provider.namespace.help"));
 
             // We want to provide a list of all the assemblies that contain types derived from the base type.
             foreach (string? assemblyName in assemblies.Select(x => x.GetName().Name))
-                yield return new SearchProposition(GetTextOrKey("type_search_provider.assembly"), assemblyName, $"{assemblyToken}={assemblyName}", GetTextOrKey("type_search_provider.assembly.help"));
+                yield return new SearchProposition(GetTextOrKey("runios-editor:type_search_provider.assembly"), assemblyName, $"{assemblyToken}={assemblyName}", GetTextOrKey("runios-editor:type_search_provider.assembly.help"));
         }
 
         IEnumerator FetchItems(SearchContext context, List<SearchItem> items, SearchProvider provider)
@@ -71,9 +71,9 @@ namespace RuniOS.Editor
 
         static IEnumerable<SearchColumn> FetchColumns(SearchContext? context = null, IEnumerable<SearchItem>? searchDatas = null)
         {
-            yield return new SearchColumn(GetTextOrKey("gui.name"), "label") { width = 400 };
-            yield return new SearchColumn(GetTextOrKey("type_search_provider.namespace")) { getter = GetNamespace, width = 250 };
-            yield return new SearchColumn(GetTextOrKey("type_search_provider.assembly")) { getter = GetAssemblyName, width = 250 };
+            yield return new SearchColumn(GetTextOrKey("runios-editor:gui.name"), "label") { width = 400 };
+            yield return new SearchColumn(GetTextOrKey("runios-editor:type_search_provider.namespace")) { getter = GetNamespace, width = 250 };
+            yield return new SearchColumn(GetTextOrKey("runios-editor:type_search_provider.assembly")) { getter = GetAssemblyName, width = 250 };
         }
 
         static object? GetNamespace(SearchColumnEventArgs args)

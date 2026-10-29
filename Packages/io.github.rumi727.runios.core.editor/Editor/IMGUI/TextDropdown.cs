@@ -53,11 +53,11 @@ namespace RuniOS.Editor.IMGUI
         
         protected override AdvancedDropdownItem BuildRoot()
         {
-            TextDropdownItem root = new TextDropdownItem(string.Empty,  GetTextOrKey("gui.root"));
+            TextDropdownItem root = new TextDropdownItem(string.Empty,  GetTextOrKey("runios-editor:gui.root"));
 
             if (cachedPaths.Any(string.IsNullOrEmpty))
             {
-                root.AddChild(new TextDropdownItem(string.Empty, GetTextOrKey("gui.none")));
+                root.AddChild(new TextDropdownItem(string.Empty, GetTextOrKey("runios-editor:gui.none")));
                 if (cachedPaths.Count > 1)
                     root.AddSeparator();
             }

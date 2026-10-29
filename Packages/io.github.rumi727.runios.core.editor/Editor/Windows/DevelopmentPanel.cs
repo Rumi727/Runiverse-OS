@@ -10,7 +10,7 @@ namespace RuniOS.Editor.Windows
 {
     public sealed class DevelopmentPanel : ScriptableObject, IControlPanel
     {
-        public string label => "control_panel.development";
+        public string label => "runios-editor:control_panel.development";
 
         public int sort => 1000000;
 
@@ -25,14 +25,14 @@ namespace RuniOS.Editor.Windows
         
         public void OnGUI()
         {
-            EditorGUILayout.HelpBox(GetTextOrKey("control_panel.development.warning"), MessageType.Warning);
+            EditorGUILayout.HelpBox(GetTextOrKey("runios-editor:control_panel.development.warning"), MessageType.Warning);
             Space();
 
             {
-                GUILayout.Label(GetTextOrKey("control_panel.development.driven_property"), ControlPanel.bigLabelStyle);
+                GUILayout.Label(GetTextOrKey("runios-editor:control_panel.development.driven_property"), ControlPanel.bigLabelStyle);
                 drivenPropertyDatas.SyncKeysWithEnumerable(DrivenPropertyManager.drivenProperties, x => new DrivenPropertyDataExtension(x));
                 if (DrivenPropertyManager.drivenProperties.Count <= 0)
-                    GUILayout.Label(GetTextOrKey("control_panel.development.driven_property.zero_count"));
+                    GUILayout.Label(GetTextOrKey("runios-editor:control_panel.development.driven_property.zero_count"));
 
                 drivenPropertyScrollPosition = EditorGUILayout.BeginScrollView(drivenPropertyScrollPosition, GUILayout.ExpandHeight(false), GUILayout.Height(400));
                 
@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Windows
                             EditorGUILayout.BeginHorizontal();
                             EditorGUILayout.PropertyField(extData.property);
 
-                            string buttonText = GetTextOrKey("control_panel.development.driven_property.unregister");
+                            string buttonText = GetTextOrKey("runios-editor:control_panel.development.driven_property.unregister");
                             if (GUILayout.Button(buttonText, GUILayout.Width(GetXSize(buttonText, GUI.skin.button)), GUILayout.Height(EditorGUIUtility.singleLineHeight)))
                                 DrivenPropertyManager.UnregisterProperty(data.driver, data.target, data.propertyPath);
 
@@ -65,9 +65,9 @@ namespace RuniOS.Editor.Windows
                             EditorGUILayout.BeginHorizontal();
                             Space(EditorGUI.indentLevel * 15);
 
-                            DrawObject(GetTextOrKey("control_panel.development.driven_property.driver"), data.driver, extData.driverEditor);
+                            DrawObject(GetTextOrKey("runios-editor:control_panel.development.driven_property.driver"), data.driver, extData.driverEditor);
                             GUILayout.Label("→", GUILayout.Width(GetLabelXSize("→")));
-                            DrawObject(GetTextOrKey("control_panel.development.driven_property.target"), data.driver, extData.driverEditor);
+                            DrawObject(GetTextOrKey("runios-editor:control_panel.development.driven_property.target"), data.driver, extData.driverEditor);
 
                             static void DrawObject(string label, Object obj, UnityEditor.Editor? editor)
                             {

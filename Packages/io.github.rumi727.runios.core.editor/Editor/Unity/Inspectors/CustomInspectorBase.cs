@@ -67,7 +67,7 @@ namespace RuniOS.Editor.Unity.Inspectors
             }
             catch (Exception)
             {
-                GUILayout.Label(GetTextOrKey("inspector.property_none").Replace("{name}", propertyName));
+                GUILayout.Label(GetTextOrKey("runios-editor:inspector.property_none").Replace("{name}", propertyName));
                 return null;
             }
 
@@ -266,7 +266,7 @@ namespace RuniOS.Editor.Unity.Inspectors
             SerializedProperty? property = GetProperty(propertyName);
             if (property == null)
             {
-                EditorGUI.LabelField(position, GetTextOrKey("inspector.property_none").Replace("{name}", propertyName));
+                EditorGUI.LabelField(position, GetTextOrKey("runios-editor:inspector.property_none").Replace("{name}", propertyName));
                 return false;
             }
 

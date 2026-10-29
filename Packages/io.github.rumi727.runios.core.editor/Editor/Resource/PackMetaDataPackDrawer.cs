@@ -56,7 +56,7 @@ namespace RuniOS.Editor.Resource
 
             if (packMetaDatas.Length == 0)
             {
-                if (GUILayout.Button(GetTextOrKey("pack_drawer.pack_meta_data.create")))
+                if (GUILayout.Button(GetTextOrKey("runios-editor:pack_drawer.pack_meta_data.create")))
                 {
                     string json = JsonConvert.SerializeObject(new PackMetaData(), Formatting.Indented);
                     foreach (var target in targets)

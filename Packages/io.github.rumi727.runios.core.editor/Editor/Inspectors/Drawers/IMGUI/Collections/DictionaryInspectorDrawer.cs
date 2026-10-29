@@ -112,7 +112,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 if (!EditorGUIUtility.hierarchyMode)
                     rect.xMin += iconRect.width - 10;
 
-                GUIContent content = new GUIContent(EditorGUIUtility.IconContent("console.warnicon.sml")) { tooltip = GetTextOrKey("inspector.invalid.collection.duplicate_key") };
+                GUIContent content = new GUIContent(EditorGUIUtility.IconContent("console.warnicon.sml")) { tooltip = GetTextOrKey("runios-editor:inspector.invalid.collection.duplicate_key") };
                 GUI.Label(iconRect, content);
             }
 

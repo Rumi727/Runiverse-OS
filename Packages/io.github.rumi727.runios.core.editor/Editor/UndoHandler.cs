@@ -83,15 +83,15 @@ namespace RuniOS.Editor
             lastUndoName = name;
         }
         
-        public static string GetVariableUndoName(object instance, string path) => GetUndoName("undo.modify.property_in_object", instance, path);
+        public static string GetVariableUndoName(object instance, string path) => GetUndoName("runios-editor:undo.modify.property_in_object", instance, path);
 
-        public static string GetAddElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.add", instance, path ?? GetTextOrKey("gui.collection"));
+        public static string GetAddElementUndoName(object instance, string? path = null) => GetUndoName("runios-editor:undo.collection.add", instance, path ?? GetTextOrKey("runios-editor:gui.collection"));
 
-        public static string GetRemoveElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.remove", instance, path ?? GetTextOrKey("gui.collection"));
+        public static string GetRemoveElementUndoName(object instance, string? path = null) => GetUndoName("runios-editor:undo.collection.remove", instance, path ?? GetTextOrKey("runios-editor:gui.collection"));
         
-        public static string GetMoveElementUndoName(object instance, string? path = null) => GetUndoName("undo.collection.move", instance, path ?? GetTextOrKey("gui.collection"));
+        public static string GetMoveElementUndoName(object instance, string? path = null) => GetUndoName("runios-editor:undo.collection.move", instance, path ?? GetTextOrKey("runios-editor:gui.collection"));
         
-        public static string GetDiscardUndoName(object instance) => GetUndoName("undo.discard", instance, string.Empty);
+        public static string GetDiscardUndoName(object instance) => GetUndoName("runios-editor:undo.discard", instance, string.Empty);
         
         static string GetUndoName(string key, object instance, string path) => string.Format(GetTextOrKey(key), instance, path);
 

@@ -52,10 +52,10 @@ namespace RuniOS.Editor.IMGUI
 
                 position.y += EditorGUIUtility.singleLineHeight + 2;
 
-                Field(GetTextOrKey("gui.top_left"), ref value.topLeft);
-                Field(GetTextOrKey("gui.top_right"), ref value.topRight);
-                Field(GetTextOrKey("gui.bottom_right"), ref value.bottomRight);
-                Field(GetTextOrKey("gui.bottom_left"), ref value.bottomLeft);
+                Field(GetTextOrKey("runios-editor:gui.top_left"), ref value.topLeft);
+                Field(GetTextOrKey("runios-editor:gui.top_right"), ref value.topRight);
+                Field(GetTextOrKey("runios-editor:gui.bottom_right"), ref value.bottomRight);
+                Field(GetTextOrKey("runios-editor:gui.bottom_left"), ref value.bottomLeft);
 
                 void Field(string label, ref float value)
                 {

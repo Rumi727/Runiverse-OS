@@ -118,7 +118,7 @@ namespace RuniOS.Editor.IMGUI
                     return EditorGUI.EnumPopup(position, enumValue);
             }
 
-            EditorGUI.LabelField(position, GetTextOrKey("gui.invalid_type"));
+            EditorGUI.LabelField(position, GetTextOrKey("runios-editor:gui.invalid_type"));
             return value;
         }
     }

@@ -16,7 +16,7 @@ namespace RuniOS.Editor.Resource.Sounds
             if (DrawSettingLayout())
                 Space();
 
-            GUILayout.Label(TrTempContent("gui.info"), RuniStyles.largeLabel);
+            GUILayout.Label(TrTempContent("runios-editor:gui.info"), RuniStyles.largeLabel);
             DrawInfoLayout();
         }
 

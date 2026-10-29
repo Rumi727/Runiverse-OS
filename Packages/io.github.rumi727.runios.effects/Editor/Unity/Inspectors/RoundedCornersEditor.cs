@@ -10,17 +10,17 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.corner.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_radius", TrTempContent("inspector.rounded_corners.corner.radius"));
-            DrawPropertyLayout("_softness", TrTempContent("inspector.rounded_corners.corner.softness", "inspector.rounded_corners.corner.softness.tooltip"));
+            GUILayout.Label(GetTextOrKey("runios-editor:inspector.rounded_corners.corner.header"), EditorStyles.boldLabel);
+            DrawPropertyLayout("_radius", TrTempContent("runios-editor:inspector.rounded_corners.corner.radius"));
+            DrawPropertyLayout("_softness", TrTempContent("runios-editor:inspector.rounded_corners.corner.softness", "runios-editor:inspector.rounded_corners.corner.softness.tooltip"));
             
             Space();
             
-            GUILayout.Label(GetTextOrKey("inspector.rounded_corners.outline.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_outlineColor", TrTempContent("inspector.rounded_corners.outline.outline_color"));
-            DrawPropertyLayout("_outlineWidth", TrTempContent("inspector.rounded_corners.outline.outline_width"));
-            DrawPropertyLayout("_outlineSoftness", TrTempContent("inspector.rounded_corners.outline.outline_softness", "inspector.rounded_corners.outline.outline_softness.tooltip"));
-            DrawPropertyLayout("_insideOutline", TrTempContent("inspector.rounded_corners.outline.inside_outline"));
+            GUILayout.Label(GetTextOrKey("runios-editor:inspector.rounded_corners.outline.header"), EditorStyles.boldLabel);
+            DrawPropertyLayout("_outlineColor", TrTempContent("runios-editor:inspector.rounded_corners.outline.outline_color"));
+            DrawPropertyLayout("_outlineWidth", TrTempContent("runios-editor:inspector.rounded_corners.outline.outline_width"));
+            DrawPropertyLayout("_outlineSoftness", TrTempContent("runios-editor:inspector.rounded_corners.outline.outline_softness", "runios-editor:inspector.rounded_corners.outline.outline_softness.tooltip"));
+            DrawPropertyLayout("_insideOutline", TrTempContent("runios-editor:inspector.rounded_corners.outline.inside_outline"));
         }
     }
 }

@@ -148,7 +148,7 @@ namespace RuniOS.Editor.UIElements
             {
 #if UNITY_EDITOR
                 if (panel?.contextType == ContextType.Editor)
-                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(GetTextOrKey("gui.none"));
+                    ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify(GetTextOrKey("runios-editor:gui.none"));
                 else
 #endif
                     ((INotifyValueChanged<string>)textElement).SetValueWithoutNotify("None");
@@ -166,7 +166,7 @@ namespace RuniOS.Editor.UIElements
         {
 #if UNITY_EDITOR
             if (panel?.contextType == ContextType.Editor)
-                buttonElement.text = GetTextOrKey("gui.type_field.select_type");
+                buttonElement.text = GetTextOrKey("runios-editor:gui.type_field.select_type");
             else
 #endif
                 buttonElement.text = "Select Type...";

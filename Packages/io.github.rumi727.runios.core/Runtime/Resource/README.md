@@ -77,17 +77,12 @@ runios:lang
 runios:ui/click
 ```
 
-네임스페이스가 없는 축약 형식은 사용하는 API에 따라 기본 네임스페이스를 정합니다.
+네임스페이스가 없는 축약 형식은 명시적으로 전달된 기본 네임스페이스를 사용하며, 없으면 `Identifier.defaultNamespace`(`runios`)를 사용합니다.
 
-- `Identifier.Parse("path")`처럼 `defaultNamespace`를 생략하거나, `"path"` -> `Identifier` 변환을 사용하는 경우 호출 어셈블리의 `[assembly: DefaultIdentifierNamespace("...")]` 값이 사용됩니다.
-- 호출 어셈블리에 `DefaultIdentifierNamespaceAttribute`가 없으면 시스템 폴백인 `runios`가 사용됩니다.
-- `Identifier.Parse`와 `"path"` -> `Identifier` 변환은 비권장 편의 API입니다. 텍스트 파싱과 호출 어셈블리 확인이 필요하므로 UI나 저작 도구처럼 편의성이 중요한 곳에만 사용하세요.
-- 생성자는 호출 어셈블리를 보지 않습니다. 네임스페이스와 경로를 이미 알고 있으면 `new Identifier(nameSpace, path)`가 권장되는 빠른 경로입니다.
-- JSON 로더처럼 의미 있는 호출자가 없는 코드 경로도 명시적으로 `Identifier.defaultNamespace`를 전달하므로 `runios`를 폴백으로 사용합니다.
+- `Identifier.Parse("path", "my_game")`처럼 `defaultNamespace`를 전달하면 그 값이 사용됩니다.
+- `Identifier.Parse("path")`처럼 `defaultNamespace`를 생략하거나, `"path"` -> `Identifier` 변환을 사용하면 `runios`가 사용됩니다.
 - JSON 로더가 소유 네임스페이스를 알고 있으면 `IdentifierJsonContext`를 `JsonSerializerSettings.Context`로 전달해 축약형 ID의 기본 네임스페이스를 지정할 수 있습니다.
 - 리소스 팩 파일은 `assets/{namespace}/...` 폴더 이름에서 네임스페이스를 가져오므로 이 기본값 규칙에 의존하지 않습니다.
-
-이 규칙은 프레임워크가 `runios` 네임스페이스를 쓰더라도, 게임이나 모드의 축약 ID가 프레임워크 네임스페이스로 고정되지 않도록 하기 위한 것입니다.
 
 `ResourcePack.defaultPack`은 `vanilla` 팩이며 `StreamingIOProvider.instance`를 사용합니다.\
 `RequiredPackSort.BeforeVanilla`, `RequiredPackSort.AfterVanilla`를 통해 필수 팩의 위치를 `vanilla` 앞뒤로 둘 수 있습니다.
@@ -100,29 +95,21 @@ runios:ui/click
 Identifier id = new Identifier("runios", "ui/click");
 ```
 
-게임이나 패키지 어셈블리에는 기본 식별자 네임스페이스를 지정할 수 있습니다.
+네임스페이스를 생략하면 어디서 호출하든 `runios`가 사용됩니다.
 
 ```csharp
-#nullable enable
-using RuniOS.Resource;
+Identifier id = "ui/click";
+// runios:ui/click
 
-[assembly: DefaultIdentifierNamespace("my_game")]
-```
-
-그 어셈블리 안에서 `Identifier.Parse`의 기본 네임스페이스를 생략하거나 문자열 암시 변환을 사용하면 `my_game`이 사용됩니다.
-
-```csharp
-Identifier id = Identifier.Parse("ui/click");
-// my_game:ui/click
-
-Identifier sameId = "ui/click";
+Identifier ownedId = Identifier.Parse("ui/click", "my_game");
 // my_game:ui/click
 ```
 
-런타임 코드, 저장 데이터, 대량 로드 경로에서는 네임스페이스를 명시하는 생성자를 사용하세요.
+`runios`가 아닌 ID는 네임스페이스를 명시하세요. 리터럴은 `"namespace:path"` 형식이 가장 간결하며, 네임스페이스와 경로가 이미 분리된 값이면 생성자를 사용합니다.
 
 ```csharp
-Identifier id = new Identifier("my_game", "ui/click");
+Identifier id = "my_game:ui/click";
+Identifier sameId = new Identifier("my_game", "ui/click");
 ```
 
 공유 코드, 저장 데이터, 문서 예제처럼 호출 위치가 의미를 바꾸면 안 되는 곳에서는 네임스페이스를 명시하는 편이 안전합니다.

@@ -71,7 +71,7 @@ namespace RuniOS.Editor.Windows
         
         void OnDisable() => EditorLocalization.onLanguageUpdate -= TitleUpdate;
 
-        void TitleUpdate() => titleContent = new GUIContent(GetTextOrKey("control_panel.title"), EditorGUIUtility.isProSkin ? _iconDark : _icon);
+        void TitleUpdate() => titleContent = new GUIContent(GetTextOrKey("runios-editor:control_panel.title"), EditorGUIUtility.isProSkin ? _iconDark : _icon);
         
         void Update()
         {
@@ -124,7 +124,7 @@ namespace RuniOS.Editor.Windows
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
 
-                string toggleLabelText = GetTextOrKey("control_panel.refresh_delay");
+                string toggleLabelText = GetTextOrKey("runios-editor:control_panel.refresh_delay");
                 
                 BeginLabelWidth(toggleLabelText);
                 isDelayedRepaint = EditorGUILayout.Toggle(toggleLabelText, isDelayedRepaint, GUILayout.ExpandWidth(false));

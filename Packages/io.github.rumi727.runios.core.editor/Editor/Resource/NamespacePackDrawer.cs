@@ -48,7 +48,7 @@ namespace RuniOS.Editor.Resource
             {
                 EditorGUI.BeginChangeCheck();
 
-                string label = string.Format(GetTextOrKey("gui.element.index"), index);
+                string label = string.Format(GetTextOrKey("runios-editor:gui.element.index"), index);
                 
                 EditorGUI.BeginDisabledGroup(index < orgCount);
                 string oldText = nameSpaces[index]; 
@@ -57,7 +57,7 @@ namespace RuniOS.Editor.Resource
 
                 if (EditorGUI.EndChangeCheck())
                 {
-                    string undoName = GetTextOrKey("undo.modify.property_in_object");
+                    string undoName = GetTextOrKey("runios-editor:undo.modify.property_in_object");
                     undoName = string.Format(undoName, typeof(List<string>).Name, $"[{index}]");
                         
                     UndoHandler.instance.Record(() => nameSpaces[index] = oldText, () => nameSpaces[index] = newText, undoName, UndoHandler.instance.GetTokenForCurrentUnityGroup());

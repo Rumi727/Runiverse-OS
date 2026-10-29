@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
             SerializedProperty? pairs = GetChildProperty(property);
             if (pairs == null)
             {
-                GUI.Label(position, GetTextOrKey("serializable_dictionary_property_drawer.not_found.pairs"));
+                GUI.Label(position, GetTextOrKey("runios-editor:serializable_dictionary_property_drawer.not_found.pairs"));
                 return;
             }
 

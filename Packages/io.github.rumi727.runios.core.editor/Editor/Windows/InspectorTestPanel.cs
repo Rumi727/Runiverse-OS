@@ -14,7 +14,7 @@ namespace RuniOS.Editor.Windows
 {
     public sealed class InspectorTestPanel : ScriptableObject, IControlPanel
     {
-        public string label => "control_panel.inspector_test";
+        public string label => "runios-editor:control_panel.inspector_test";
 
         public int sort => 500;
 

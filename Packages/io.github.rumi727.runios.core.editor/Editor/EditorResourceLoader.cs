@@ -13,7 +13,7 @@ namespace RuniOS.Editor
     {
         static EditorResourceLoader() => ResourceManager.reloadStartEvent += x => x.progress.Subscribe(x => SetProgress(typeof(EditorResourceLoader).FullName ?? nameof(EditorResourceLoader), x));
 
-        public const string progressText = "internal.editor_resource_loader.loading";
+        public const string progressText = "runios-editor:internal.editor_resource_loader.loading";
 
         /// <summary>
         /// <see cref="ProgressInToolbar.SetProgress"/> 메소드랑 기능적으론 동일하지만, progressText 매개변수의 값이 <see cref="progressText"/> 상수로 설정됩니다.

@@ -22,12 +22,12 @@ namespace RuniOS.Editor.IMGUI
         static Type? typeFieldSelectedType;
         static Type? DoTypeField(Rect position, Type? value, Type? baseType)
         {
-            string buttonText = GetTextOrKey("gui.type_field.select_type");
+            string buttonText = GetTextOrKey("runios-editor:gui.type_field.select_type");
             float buttonWidth = GetXSize(buttonText, GUI.skin.button);
 
             position.width -= buttonWidth + 3;
 
-            EditorGUI.LabelField(position, value?.SerializeToString() ?? GetTextOrKey("gui.none"));
+            EditorGUI.LabelField(position, value?.SerializeToString() ?? GetTextOrKey("runios-editor:gui.none"));
 
             position.x += position.width + 3;
             position.width = buttonWidth;
@@ -61,7 +61,7 @@ namespace RuniOS.Editor.IMGUI
             var context = SearchService.CreateContext(provider, "type:");
             var viewState = new SearchViewState(context)
             {
-                title = GetTextOrKey("gui.type"),
+                title = GetTextOrKey("runios-editor:gui.type"),
                 queryBuilderEnabled = true,
                 hideTabs = true,
                 tableConfig = TypeSearchProvider.GetDefaultTableConfig(),

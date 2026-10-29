@@ -1,11 +1,8 @@
 #nullable enable
 using Newtonsoft.Json;
-using RuniOS.Spans;
 using RuniOS.IO;
 using RuniOS.Json.Converters.Resource;
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace RuniOS.Resource
@@ -24,11 +21,11 @@ namespace RuniOS.Resource
         /// 직렬화기 및 명시적인 소유 네임스페이스가 없는 코드 경로에서 사용하는 시스템 폴백 네임스페이스를 가져옵니다.
         /// </summary>
         /// <remarks>
-        /// Prefer constructors with an explicit namespace for runtime and persistent IDs.<br/>
-        /// <see cref="Parse(string, string?)"/> with a <see langword="null"/> or empty default namespace and the implicit string conversion are convenience APIs that use the calling assembly default namespace.
+        /// Prefer an explicit namespace, such as <c>"namespace:path"</c> or a constructor, for runtime and persistent IDs.<br/>
+        /// When a string without a namespace is passed to <see cref="Parse(string, string?)"/> with a <see langword="null"/> or empty default namespace, or to the implicit string conversion, this namespace is used.
         /// <br/><br/>
-        /// 런타임 및 영속 ID에는 명시적인 네임스페이스를 받는 생성자를 우선 사용하세요.<br/>
-        /// <see cref="Parse(string, string?)"/>에 <see langword="null"/> 또는 빈 기본 네임스페이스를 전달한 경우와 문자열 암시 변환은 호출 어셈블리의 기본 네임스페이스를 사용하는 편의 API입니다.
+        /// 런타임 및 영속 ID에는 <c>"namespace:path"</c> 또는 생성자처럼 명시적인 네임스페이스를 우선 사용하세요.<br/>
+        /// 네임스페이스가 없는 문자열을 <see langword="null"/> 또는 빈 기본 네임스페이스로 <see cref="Parse(string, string?)"/>에 전달하거나 문자열 암시 변환에 전달하면 이 네임스페이스를 사용합니다.
         /// </remarks>
         public const string defaultNamespace = "runios";
 
@@ -50,11 +47,11 @@ namespace RuniOS.Resource
         /// 식별자의 경로 구성 요소입니다.
         /// </param>
         /// <remarks>
-        /// This constructor is the preferred fast path when the namespace is already known.<br/>
-        /// <see cref="Parse(string, string?)"/> and the implicit string conversion are heavier convenience APIs intended for UI or authoring code.
+        /// Use this constructor when the namespace and path are already separate values.<br/>
+        /// For literals, the implicit conversion from <c>"namespace:path"</c> is the shorter equivalent.
         /// <br/><br/>
-        /// 네임스페이스를 이미 알고 있을 때는 이 생성자가 권장되는 빠른 경로입니다.<br/>
-        /// <see cref="Parse(string, string?)"/>와 문자열 암시 변환은 UI 또는 저작 코드용의 더 무거운 편의 API입니다.
+        /// 네임스페이스와 경로가 이미 분리된 값일 때 이 생성자를 사용하세요.<br/>
+        /// 리터럴에는 <c>"namespace:path"</c> 암시 변환이 더 짧은 동등한 방법입니다.
         /// </remarks>
         /// <exception cref="InvalidIdentifierException">
         /// Thrown when <paramref name="nameSpace"/> or <paramref name="path"/> is invalid.<br/>
@@ -86,11 +83,11 @@ namespace RuniOS.Resource
         /// 식별자의 경로 구성 요소입니다.
         /// </param>
         /// <remarks>
-        /// This constructor is the preferred fast path when the namespace is already known.<br/>
-        /// <see cref="Parse(string, string?)"/> and the implicit string conversion are heavier convenience APIs intended for UI or authoring code.
+        /// Use this constructor when the namespace and path are already separate values.<br/>
+        /// For literals, the implicit conversion from <c>"namespace:path"</c> is the shorter equivalent.
         /// <br/><br/>
-        /// 네임스페이스를 이미 알고 있을 때는 이 생성자가 권장되는 빠른 경로입니다.<br/>
-        /// <see cref="Parse(string, string?)"/>와 문자열 암시 변환은 UI 또는 저작 코드용의 더 무거운 편의 API입니다.
+        /// 네임스페이스와 경로가 이미 분리된 값일 때 이 생성자를 사용하세요.<br/>
+        /// 리터럴에는 <c>"namespace:path"</c> 암시 변환이 더 짧은 동등한 방법입니다.
         /// </remarks>
         /// <exception cref="InvalidIdentifierException">
         /// Thrown when <paramref name="nameSpace"/> or <paramref name="path"/> is invalid.<br/>
@@ -230,41 +227,13 @@ namespace RuniOS.Resource
         /// 변환할 식별자 문자열입니다.
         /// </param>
         /// <remarks>
-        /// This is a convenience API. It performs parsing and may inspect the calling assembly when <paramref name="identifier"/> has no namespace.<br/>
-        /// Prefer <see cref="Identifier(string, RuniPath)"/> or <see cref="Identifier(string, string)"/> when performance, persistence, or explicit ownership matters.
+        /// The <c>namespace:path</c> form costs about the same as <see cref="Identifier(string, string)"/> and is the preferred way to write identifier literals.<br/>
+        /// The <c>path</c> form always uses <see cref="defaultNamespace"/>.
         /// <br/><br/>
-        /// 이 API는 편의 API입니다. 파싱을 수행하며, <paramref name="identifier"/>에 네임스페이스가 없으면 호출 어셈블리를 확인할 수 있습니다.<br/>
-        /// 성능, 영속성, 명시적 소유권이 중요하면 <see cref="Identifier(string, RuniPath)"/> 또는 <see cref="Identifier(string, string)"/>를 우선 사용하세요.
+        /// <c>namespace:path</c> 형식은 <see cref="Identifier(string, string)"/>와 비슷한 비용이며, 식별자 리터럴을 작성할 때 권장되는 방법입니다.<br/>
+        /// <c>path</c> 형식은 항상 <see cref="defaultNamespace"/>를 사용합니다.
         /// </remarks>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static implicit operator Identifier(string identifier) => Parse(identifier, GetDefaultNamespace(Assembly.GetCallingAssembly()));
-
-
-
-        /// <summary>
-        /// Gets the default identifier namespace of the calling assembly.<br/>
-        /// 호출 어셈블리의 기본 식별자 네임스페이스를 가져옵니다.
-        /// </summary>
-        /// <returns>
-        /// The namespace from <see cref="DefaultIdentifierNamespaceAttribute"/> on the calling assembly, or <see cref="defaultNamespace"/> if none is set.<br/>
-        /// 호출 어셈블리의 <see cref="DefaultIdentifierNamespaceAttribute"/> 네임스페이스입니다. 지정되지 않았으면 <see cref="defaultNamespace"/>입니다.
-        /// </returns>
-        [MethodImpl(MethodImplOptions.NoInlining)]
-        public static string GetCurrentNamespace() => GetDefaultNamespace(Assembly.GetCallingAssembly());
-
-        /// <summary>
-        /// Gets the default identifier namespace configured for <paramref name="assembly"/>.<br/>
-        /// <paramref name="assembly"/>에 설정된 기본 식별자 네임스페이스를 가져옵니다.
-        /// </summary>
-        /// <param name="assembly">
-        /// The assembly whose default namespace should be resolved.<br/>
-        /// 기본 네임스페이스를 확인할 어셈블리입니다.
-        /// </param>
-        /// <returns>
-        /// The namespace from <see cref="DefaultIdentifierNamespaceAttribute"/>, or <see cref="defaultNamespace"/> if the attribute is not present.<br/>
-        /// <see cref="DefaultIdentifierNamespaceAttribute"/>의 네임스페이스입니다. 특성이 없으면 <see cref="defaultNamespace"/>입니다.
-        /// </returns>
-        public static string GetDefaultNamespace(Assembly assembly) => assembly.GetCustomAttribute<DefaultIdentifierNamespaceAttribute>()?.nameSpace ?? defaultNamespace;
+        public static implicit operator Identifier(string identifier) => Parse(identifier);
 
 
 
@@ -277,60 +246,34 @@ namespace RuniOS.Resource
         /// 구문 분석할 식별자 문자열입니다.
         /// </param>
         /// <param name="defaultNamespace">
-        /// The namespace used when <paramref name="identifier"/> has no namespace. If this is <see langword="null"/> or empty, the default namespace of the calling assembly is used.<br/>
-        /// <paramref name="identifier"/>에 네임스페이스가 없을 때 사용할 네임스페이스입니다. <see langword="null"/>이거나 비어 있으면 호출 어셈블리의 기본 네임스페이스를 사용합니다.
+        /// The namespace used when <paramref name="identifier"/> has no namespace. If this is <see langword="null"/> or empty, <see cref="Identifier.defaultNamespace"/> is used.<br/>
+        /// <paramref name="identifier"/>에 네임스페이스가 없을 때 사용할 네임스페이스입니다. <see langword="null"/>이거나 비어 있으면 <see cref="Identifier.defaultNamespace"/>를 사용합니다.
         /// </param>
         /// <returns>
         /// The parsed <see cref="Identifier"/>.<br/>
         /// 구문 분석된 <see cref="Identifier"/>입니다.
         /// </returns>
         /// <remarks>
-        /// This is a convenience API intended for UI and authoring code. It is heavier than the constructors because it parses text and can inspect the calling assembly.<br/>
-        /// Prefer <see cref="Identifier(string, RuniPath)"/> or <see cref="Identifier(string, string)"/> when the namespace and path are already known.
-        /// <br/><br/>
-        /// 이 API는 UI 및 저작 코드용 편의 API입니다. 텍스트를 파싱하고 호출 어셈블리를 확인할 수 있으므로 생성자보다 무겁습니다.<br/>
-        /// 네임스페이스와 경로를 이미 알고 있으면 <see cref="Identifier(string, RuniPath)"/> 또는 <see cref="Identifier(string, string)"/>를 우선 사용하세요.
+        /// The <c>namespace:path</c> form costs about the same as <see cref="Identifier(string, string)"/>.<br/>
+        /// <c>namespace:path</c> 형식은 <see cref="Identifier(string, string)"/>와 비슷한 비용입니다.
         /// </remarks>
         /// <exception cref="InvalidIdentifierException">
         /// Thrown when <paramref name="identifier"/> has an invalid format or contains invalid namespace or path characters.<br/>
         /// <paramref name="identifier"/>의 형식이 유효하지 않거나 네임스페이스 또는 경로에 유효하지 않은 문자가 있으면 발생합니다.
         /// </exception>
         // ReSharper restore Unity.ExpensiveCode
-        [MethodImpl(MethodImplOptions.NoInlining)]
         public static Identifier Parse(string identifier, string? defaultNamespace = null)
         {
-            // 식별자 문자열을 구분자 (':')를 기준으로 분리합니다.
-            var splitSpan = identifier.AsSpan().Split(separator);
+            int separatorIndex = identifier.AsSpan().IndexOf(separator);
 
-            string nameSpace = string.Empty;
-            string path = string.Empty;
+            // 구분자가 없는 경우, 전체 문자열을 경로로 간주하고 네임스페이스는 기본값으로 설정합니다.
+            if (separatorIndex < 0)
+                return new Identifier(string.IsNullOrEmpty(defaultNamespace) ? Identifier.defaultNamespace : defaultNamespace, identifier);
 
-            // 분리된 각 부분을 순회하여 네임스페이스와 경로를 할당합니다.
-            int splitCount = 0;
-            foreach (var item in splitSpan)
-            {
-                if (splitCount == 0)
-                    nameSpace = new string(item); // 첫 번째 부분은 네임스페이스로 간주합니다.
-                else if (splitCount == 1)
-                    path = new string(item); // 두 번째 부분은 경로로 간주합니다.
+            if (identifier.AsSpan(separatorIndex + 1).IndexOf(separator) >= 0)
+                throw new InvalidIdentifierException($"Invalid identifier format: '{identifier}'. Contains too many '{separator}' separators.");
 
-                splitCount++;
-            }
-
-            // 분리된 부분의 개수에 따라 유효성을 검사하고 값을 조정합니다.
-            if (splitCount <= 0)
-                return empty;
-            else if (splitCount == 1)
-            {
-                // 구분자가 없는 경우, 전체 문자열을 경로로 간주하고 네임스페이스는 기본값으로 설정합니다.
-                path = nameSpace;
-                nameSpace = string.IsNullOrEmpty(defaultNamespace) ? GetDefaultNamespace(Assembly.GetCallingAssembly()) : defaultNamespace;
-            }
-            else if (splitCount > 2)
-                throw new InvalidIdentifierException($"Invalid identifier format: '{identifier}'. Contains too many '{separator}' separators."); // 구분자가 너무 많은 경우 예외를 발생시킵니다.
-
-            // 구문 분석된 네임스페이스와 경로로 새 Identifier 인스턴스를 생성하여 반환합니다.
-            return new Identifier(nameSpace, path);
+            return new Identifier(identifier.Substring(0, separatorIndex), identifier.Substring(separatorIndex + 1));
         }
 
         /// <summary>

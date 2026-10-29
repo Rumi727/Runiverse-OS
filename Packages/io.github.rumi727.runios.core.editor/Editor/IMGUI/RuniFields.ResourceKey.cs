@@ -20,7 +20,7 @@ namespace RuniOS.Editor.IMGUI
         static ResourceKey DoResourceKeyField(Rect position, ResourceKey value, bool isBelowLabel, Func<IAssetRegistry, bool>? predicate)
         {
             position.height = EditorGUIUtility.singleLineHeight;
-            position = DrawMultiRowsLabel(position, EditorGUIUtility.wideMode & isBelowLabel, new GUIContent(GetTextOrKey("gui.registry")), new GUIContent(GetTextOrKey("gui.asset")));
+            position = DrawMultiRowsLabel(position, EditorGUIUtility.wideMode & isBelowLabel, new GUIContent(GetTextOrKey("runios-editor:gui.registry")), new GUIContent(GetTextOrKey("runios-editor:gui.asset")));
 
             value.registryId = RegistryIdField(position, value.registryId, predicate);
             position.y += EditorGUIUtility.singleLineHeight + EditorGUIBridge.kControlVerticalSpacingLegacy;

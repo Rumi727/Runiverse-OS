@@ -49,20 +49,20 @@ namespace RuniOS.Editor.Unity.Drawers
             (SerializedProperty? key, SerializedProperty? value) = GetChildProperty(property);
             if (key == null)
             {
-                EditorGUI.LabelField(position, label, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.key"));
+                EditorGUI.LabelField(position, label, GetTextOrKey("runios-editor:serializable_key_value_pair_property_drawer.not_found.key"));
                 return;
             }
             else if (value == null)
             {
-                EditorGUI.LabelField(position, label, GetTextOrKey("serializable_key_value_pair_property_drawer.not_found.value"));
+                EditorGUI.LabelField(position, label, GetTextOrKey("runios-editor:serializable_key_value_pair_property_drawer.not_found.value"));
                 return;
             }
 
-            string keyLabel = GetTextOrKey("gui.key");
+            string keyLabel = GetTextOrKey("runios-editor:gui.key");
             GUIContent keyLabelContent = new GUIContent(keyLabel);
             float keyHeight = EditorGUI.GetPropertyHeight(key, keyLabelContent);
 
-            string valueLabel = GetTextOrKey("gui.value");
+            string valueLabel = GetTextOrKey("runios-editor:gui.value");
             GUIContent valueLabelContent = new GUIContent(valueLabel);
             float valueHeight = EditorGUI.GetPropertyHeight(value, valueLabelContent);
 
@@ -119,11 +119,11 @@ namespace RuniOS.Editor.Unity.Drawers
             if (key == null || value == null)
                 return EditorGUIUtility.singleLineHeight + wideHeight;
 
-            string keyLabel = GetTextOrKey("gui.key");
+            string keyLabel = GetTextOrKey("runios-editor:gui.key");
             GUIContent keyLabelContent = new GUIContent(keyLabel);
             float keyHeight = EditorGUI.GetPropertyHeight(key, keyLabelContent);
 
-            string valueLabel = GetTextOrKey("gui.value");
+            string valueLabel = GetTextOrKey("runios-editor:gui.value");
             GUIContent valueLabelContent = new GUIContent(valueLabel);
             float valueHeight = EditorGUI.GetPropertyHeight(value, valueLabelContent);
 

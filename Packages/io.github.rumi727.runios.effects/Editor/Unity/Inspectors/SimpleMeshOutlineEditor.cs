@@ -11,13 +11,13 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
     {
         public override void OnInspectorGUI()
         {
-            GUILayout.Label(TrTempContent("inspector.simple_mesh_outline.appearance.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_color", TrTempContent("inspector.simple_mesh_outline.appearance.color"));
+            GUILayout.Label(TrTempContent("runios-editor:inspector.simple_mesh_outline.appearance.header"), EditorStyles.boldLabel);
+            DrawPropertyLayout("_color", TrTempContent("runios-editor:inspector.simple_mesh_outline.appearance.color"));
             
             Space();
             
-            DrawPropertyLayout("_width", TrTempContent("inspector.simple_mesh_outline.appearance.width"));
-            DrawPropertyLayout("_usePixelWidth", TrTempContent("inspector.simple_mesh_outline.appearance.use_pixel_width", "inspector.simple_mesh_outline.appearance.use_pixel_width.tooltip"));
+            DrawPropertyLayout("_width", TrTempContent("runios-editor:inspector.simple_mesh_outline.appearance.width"));
+            DrawPropertyLayout("_usePixelWidth", TrTempContent("runios-editor:inspector.simple_mesh_outline.appearance.use_pixel_width", "runios-editor:inspector.simple_mesh_outline.appearance.use_pixel_width.tooltip"));
             
             Space();
             

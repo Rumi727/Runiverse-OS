@@ -23,9 +23,9 @@ namespace RuniOS.Editor.IMGUI
             {
                 string panelValue;
                 if (isFolder)
-                    panelValue = EditorUtility.OpenFolderPanel(GetTextOrKey("file_path.open_folder.title"), string.Empty, string.Empty);
+                    panelValue = EditorUtility.OpenFolderPanel(GetTextOrKey("runios-editor:file_path.open_folder.title"), string.Empty, string.Empty);
                 else
-                    panelValue = EditorUtility.OpenFilePanel(GetTextOrKey("file_path.open_file.title"), string.Empty, string.Empty);
+                    panelValue = EditorUtility.OpenFilePanel(GetTextOrKey("runios-editor:file_path.open_file.title"), string.Empty, string.Empty);
                 
                 if (!string.IsNullOrEmpty(panelValue))
                     path = (PhysicalPath)panelValue;
