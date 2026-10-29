@@ -31,6 +31,13 @@
             <LogicalName>RuniOS.CodeAnalysis.Diagnostics.MilestoneDiagnostics.ko.resources</LogicalName>
             <DependentUpon>MilestoneDiagnostics.cs</DependentUpon>
         </EmbeddedResource>
+        <EmbeddedResource Update="Diagnostics/IdentifierDiagnostics.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.IdentifierDiagnostics.resources</LogicalName>
+        </EmbeddedResource>
+        <EmbeddedResource Update="Diagnostics/IdentifierDiagnostics.ko.resx">
+            <LogicalName>RuniOS.CodeAnalysis.Diagnostics.IdentifierDiagnostics.ko.resources</LogicalName>
+            <DependentUpon>IdentifierDiagnostics.cs</DependentUpon>
+        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>

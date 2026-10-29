@@ -40,3 +40,7 @@
 | ROS0033 | RuniOS.Milestones  | Error    | containingTypeMustNotBeGeneric                   |
 | ROS0034 | RuniOS.Milestones  | Error    | invalidReturnType                                |
 | ROS0035 | RuniOS.Milestones  | Error    | containingTypeMustBePublicOrInternal             |
+| ROS0036 | RuniOS.Identifier   | Error    | tooManySeparators                                |
+| ROS0037 | RuniOS.Identifier   | Error    | invalidNamespace                                 |
+| ROS0038 | RuniOS.Identifier   | Error    | invalidPath                                      |
+| ROS0039 | RuniOS.Identifier   | Warning  | defaultNamespace                                 |

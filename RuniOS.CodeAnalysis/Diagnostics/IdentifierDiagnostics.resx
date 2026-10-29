@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ROS0036_Title" xml:space="preserve">
+    <value>Identifier has too many separators</value>
+  </data>
+  <data name="ROS0036_Message" xml:space="preserve">
+    <value>Identifier '{0}' contains more than one ':' separator</value>
+  </data>
+  <data name="ROS0037_Title" xml:space="preserve">
+    <value>Identifier namespace is invalid</value>
+  </data>
+  <data name="ROS0037_Message" xml:space="preserve">
+    <value>Identifier '{0}' has an invalid namespace. Allowed characters are 'a-z', '0-9', '.', '-', and '_'</value>
+  </data>
+  <data name="ROS0038_Title" xml:space="preserve">
+    <value>Identifier path is invalid</value>
+  </data>
+  <data name="ROS0038_Message" xml:space="preserve">
+    <value>Identifier '{0}' has an invalid path. Allowed characters are 'a-z', '0-9', '.', '/', '-', and '_'</value>
+  </data>
+  <data name="ROS0039_Title" xml:space="preserve">
+    <value>Identifier has no namespace</value>
+  </data>
+  <data name="ROS0039_Message" xml:space="preserve">
+    <value>Identifier '{0}' has no namespace and resolves to 'runios:{1}'</value>
+  </data>
+</root>
