@@ -36,6 +36,7 @@ namespace RuniOS.UIElements.IO
         public IONodeBrowser(IONode node)
         {
             treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
+            treeView.opened += OpenEntry;
             contentPane.Add(treeView);
 
             this.node = node;

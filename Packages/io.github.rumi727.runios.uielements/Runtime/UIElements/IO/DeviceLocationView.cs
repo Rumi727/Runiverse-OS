@@ -12,6 +12,7 @@ namespace RuniOS.UIElements.IO
     {
         public const string ussClassName = "runios-device-location-view";
         public const string itemUssClassName = "runios-device-location-view__item";
+        public const string itemSelectedUssClassName = "runios-device-location-view__item--selected";
         public const string itemIconUssClassName = "runios-device-location-view__item-icon";
         public const string itemInfoUssClassName = "runios-device-location-view__item-info";
         public const string itemLabelUssClassName = "runios-device-location-view__item-label";
@@ -21,12 +22,14 @@ namespace RuniOS.UIElements.IO
         static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) removableIcon = ("runios-ui:ui/io_browser/devices/64/drive-removable-media", "runios-ui:ui_dark/io_browser/devices/64/drive-removable-media");
         static readonly (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) harddiskIcon = ("runios-ui:ui/io_browser/devices/64/drive-harddisk", "runios-ui:ui_dark/io_browser/devices/64/drive-harddisk");
 
-        public event Action<DeviceLocation>? selected;
+        /// <summary>
+        /// 장치를 더블 클릭하면 발생합니다.
+        /// </summary>
+        public event Action<DeviceLocation>? opened;
 
         public DeviceLocationView()
         {
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
-
             AddToClassList(ussClassName);
         }
 
@@ -48,8 +51,22 @@ namespace RuniOS.UIElements.IO
 
         VisualElement MakeItem(DeviceLocation location)
         {
-            Button item = new(() => selected?.Invoke(location)) { name = "item" };
+            Button item = new() { name = "item" };
             item.AddToClassList(itemUssClassName);
+            item.RegisterCallback<ClickEvent>(e =>
+            {
+                // 클릭은 선택, 더블 클릭은 열기입니다.
+                if (e.clickCount == 2)
+                {
+                    opened?.Invoke(location);
+                    return;
+                }
+
+                foreach (VisualElement child in Children())
+                    child.RemoveFromClassList(itemSelectedUssClassName);
+
+                item.AddToClassList(itemSelectedUssClassName);
+            });
 
             (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons = location.isOptical ? opticalIcon : location.isRemovable ? removableIcon : harddiskIcon;
             Image icon = new() { name = "icon" };

@@ -55,10 +55,11 @@ namespace RuniOS.UIElements.IO
         public FileSystemBrowser()
         {
             deviceLocationView = new DeviceLocationView { name = "device-location-view" };
-            deviceLocationView.selected += OpenLocation;
+            deviceLocationView.opened += OpenLocation;
             contentPane.Add(deviceLocationView);
 
             treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
+            treeView.opened += OpenEntry;
             contentPane.Add(treeView);
 
             this.AddManipulator(new LocalizationManipulator(() => RefreshNavigation().Forget()));

@@ -40,6 +40,11 @@ namespace RuniOS.UIElements.IO
             }
         } = IONode.empty;
 
+        /// <summary>
+        /// 내용 영역에서 파일을 열면 발생합니다. 파일을 여는 동작은 구독자가 정합니다.
+        /// </summary>
+        public event Action<IONode>? fileOpened;
+
         public Toolbar header { get; }
 
         public ToolbarGroup navigationGroup { get; }
@@ -174,6 +179,19 @@ namespace RuniOS.UIElements.IO
         }
 
         public virtual void Up() => node = node.GetParent();
+
+        /// <summary>
+        /// 폴더는 그 폴더로 이동하고, 파일은 <see cref="fileOpened"/>를 발생시킵니다.
+        /// </summary>
+        protected void OpenEntry(IOEntry entry)
+        {
+            IONode entryNode = node.Bind(entry);
+
+            if (entry.isDirectory)
+                node = entryNode;
+            else
+                fileOpened?.Invoke(entryNode);
+        }
 
         public void AlignPathField()
         {

@@ -28,6 +28,17 @@ namespace RuniOS.UIElements.IO
         public IIOProvider provider => node.provider;
         public IONode node { get; set; }
 
+        /// <summary>
+        /// 선택된 항목을 가져옵니다.
+        /// </summary>
+        // DefaultMultiColumnTreeViewController.GetItemForIndex가 정렬을 반영하지 않아 selectedItems가 화면과 어긋나므로, 선택된 id로 항목을 찾습니다.
+        public IOEntry[] selectedEntries => treeView.selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+
+        /// <summary>
+        /// 항목을 더블 클릭하거나 Enter 키로 고르면 발생합니다.
+        /// </summary>
+        public event Action<IOEntry>? opened;
+
         protected MultiColumnTreeView treeView { get; }
         protected LazyTreeLoader<IOEntry> loader { get; }
 
@@ -75,6 +86,12 @@ namespace RuniOS.UIElements.IO
 
             loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => provider.EnumerateEntries(x.path, false)) { preloadDepth = 1 };
             treeView.SetViewController(new LazyMultiColumnTreeViewController<IOEntry>(treeView, loader));
+            treeView.itemsChosen += _ =>
+            {
+                // opened 구독자가 node를 바꾸면 그 자리에서 트리가 다시 로드되어 이전 id로는 항목을 찾을 수 없으므로, 열기 전에 항목을 모두 가져옵니다.
+                foreach (IOEntry entry in selectedEntries)
+                    opened?.Invoke(entry);
+            };
 
             Add(treeView);
 
