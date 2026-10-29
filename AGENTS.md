@@ -26,6 +26,15 @@
 - This project is under active development. Public API contracts do not need to be preserved solely for compatibility; break them when necessary.
 - When breaking or materially changing a public API contract, explicitly explain the decision, the changed contract, and the resulting impact in the response.
 
+## Commit Granularity
+
+- Do not put all pending work into a single commit. Split it into commits that each represent one logical change, such as a new contract, a bug fix, a rename, a feature built on top of them, and documentation updates.
+- Order the commits so that each change comes after the changes it depends on.
+- Intermediate commits are allowed to fail to compile; prefer clear logical boundaries over keeping every commit buildable.
+- Keep user-written changes and agent-written changes in separate commits where practical, so `Co-Authored-By` can be applied accurately.
+- When one file contains several logical changes, split them across commits instead of committing the file as a whole.
+- Commit only the changes that belong to the requested work. Leave the user's unrelated working-tree and staged changes untouched.
+
 ## Commit Attribution
 
 - Add an agent co-author trailer such as `Co-Authored-By` only to commits that include changes the agent actually wrote.
