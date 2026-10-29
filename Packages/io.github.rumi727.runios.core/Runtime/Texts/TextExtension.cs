@@ -175,7 +175,7 @@ namespace RuniOS.Texts
             /// A localized text instance.<br/>
             /// 로컬라이징 텍스트 인스턴스를 반환합니다.
             /// </returns>
-            public static LocalizationText Local(Identifier identifier, string? languageCode = "") => new LocalizationText(identifier, [], languageCode);
+            public static LocalizationText Local(Identifier identifier, string? languageCode = null) => new LocalizationText(identifier, [], languageCode);
 
             /// <summary>
             /// Creates a localized text value with enumerable format arguments.<br/>
@@ -197,29 +197,7 @@ namespace RuniOS.Texts
             /// A localized text instance.<br/>
             /// 로컬라이징 텍스트 인스턴스를 반환합니다.
             /// </returns>
-            public static LocalizationText Local(Identifier identifier, IEnumerable<Text> args, string? languageCode = "") => new LocalizationText(identifier, args.ToArray(), languageCode);
-
-            /// <summary>
-            /// Creates a localized text value with indexed format arguments.<br/>
-            /// 인덱싱 가능한 format 인수를 가진 로컬라이징 텍스트 값을 만듭니다.
-            /// </summary>
-            /// <param name="identifier">
-            /// The localization identifier to resolve.<br/>
-            /// 해석할 로컬라이징 식별자입니다.
-            /// </param>
-            /// <param name="args">
-            /// The text arguments used by the localized format string.<br/>
-            /// 로컬라이징된 format 문자열에서 사용할 텍스트 인수입니다.
-            /// </param>
-            /// <param name="languageCode">
-            /// The language code to use, or <see langword="null"/> to use the current default language.<br/>
-            /// 사용할 언어 코드이며, <see langword="null"/>이면 현재 기본 언어를 사용합니다.
-            /// </param>
-            /// <returns>
-            /// A localized text instance.<br/>
-            /// 로컬라이징 텍스트 인스턴스를 반환합니다.
-            /// </returns>
-            public static LocalizationText Local(Identifier identifier, IList<Text> args, string? languageCode = "") => new LocalizationText(identifier, args, languageCode);
+            public static LocalizationText Local(Identifier identifier, IEnumerable<Text> args, string? languageCode = null) => new LocalizationText(identifier, args, languageCode);
 
             /// <summary>
             /// Creates a localized text value with format arguments.<br/>
@@ -237,7 +215,7 @@ namespace RuniOS.Texts
             /// A localized text instance.<br/>
             /// 로컬라이징 텍스트 인스턴스를 반환합니다.
             /// </returns>
-            public static LocalizationText Local(Identifier identifier, params Text[] args) => new LocalizationText(identifier, args);
+            public static LocalizationText Local(Identifier identifier, params ReadOnlySpan<Text> args) => new LocalizationText(identifier, args);
 
             public string ToRichText() => RichTextBuilder.Build(text);
             public void BuildTo(StringBuilder builder) => RichTextBuilder.BuildTo(text, builder);
