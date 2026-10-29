@@ -145,7 +145,9 @@ namespace RuniOS.IO
                     IgnoreInaccessible = true,
                     MatchCasing = MatchCasing.CaseSensitive,
                     MatchType = MatchType.Simple,
-                    ReturnSpecialDirectories = false
+                    ReturnSpecialDirectories = false,
+                    // 숨김·시스템 항목을 건너뛰는 기본값 대신 모든 항목을 반환하고, 숨길지는 사용하는 쪽이 정합니다.
+                    AttributesToSkip = 0
                 }
             );
 
