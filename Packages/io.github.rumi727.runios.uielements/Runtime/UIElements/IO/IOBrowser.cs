@@ -30,15 +30,23 @@ namespace RuniOS.UIElements.IO
         public IIOProvider provider => node.provider;
         public IONode node
         {
-            get;
+            get => _node;
             set
             {
-                field = value;
+                // 같은 위치를 다시 열면 새로고침만 하고 기록하지 않습니다.
+                if (_node != value)
+                {
+                    backHistory.Push(_node);
+                    forwardHistory.Clear();
+                }
 
-                pathField.SetValueWithoutNotify(ToPath(value));
-                OnNodeChanged();
+                SetNode(value);
             }
-        } = IONode.empty;
+        }
+        IONode _node = IONode.empty;
+
+        readonly Stack<IONode> backHistory = new();
+        readonly Stack<IONode> forwardHistory = new();
 
         /// <summary>
         /// 내용 영역에서 파일을 열면 발생합니다. 파일을 여는 동작은 구독자가 정합니다.
@@ -77,6 +85,7 @@ namespace RuniOS.UIElements.IO
                 navigationGroup.AddToClassList(navigationGroupUssClassName);
                 {
                     back = new Button(Back) { name = "back" };
+                    back.SetEnabled(false);
                     back.AddToClassList(headerButtonUssClassName);
                     back.AddToClassList(navigationButtonUssClassName);
                     back.AddToClassList(backUssClassName);
@@ -91,6 +100,7 @@ namespace RuniOS.UIElements.IO
                     navigationGroup.Add(back);
 
                     forward = new Button(Forward) { name = "forward" };
+                    forward.SetEnabled(false);
                     forward.AddToClassList(headerButtonUssClassName);
                     forward.AddToClassList(navigationButtonUssClassName);
                     forward.AddToClassList(forwardUssClassName);
@@ -167,12 +177,42 @@ namespace RuniOS.UIElements.IO
 
         public void Back()
         {
+            if (!backHistory.TryPop(out IONode previous))
+                return;
 
+            forwardHistory.Push(_node);
+            SetNode(previous);
         }
 
         public void Forward()
         {
+            if (!forwardHistory.TryPop(out IONode next))
+                return;
 
+            backHistory.Push(_node);
+            SetNode(next);
+        }
+
+        /// <summary>
+        /// 뒤로·앞으로 기록을 지우고 지정한 위치에서 새로 시작합니다.
+        /// </summary>
+        protected void ResetNode(IONode value)
+        {
+            backHistory.Clear();
+            forwardHistory.Clear();
+
+            SetNode(value);
+        }
+
+        void SetNode(IONode value)
+        {
+            _node = value;
+
+            back.SetEnabled(backHistory.Count > 0);
+            forward.SetEnabled(forwardHistory.Count > 0);
+
+            pathField.SetValueWithoutNotify(ToPath(value));
+            OnNodeChanged();
         }
 
         public virtual void Up() => node = node.GetParent();

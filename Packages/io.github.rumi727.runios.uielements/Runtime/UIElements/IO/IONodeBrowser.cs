@@ -23,7 +23,7 @@ namespace RuniOS.UIElements.IO
                 if (value == null || targetPath == value)
                     return;
 
-                node = new PhysicalIOProvider(value.Value).rootNode;
+                ResetNode(new PhysicalIOProvider(value.Value).rootNode);
             }
         }
 
@@ -46,7 +46,7 @@ namespace RuniOS.UIElements.IO
             treeView.opened += OpenEntry;
             contentPane.Add(treeView);
 
-            this.node = node;
+            ResetNode(node);
         }
 
         protected override void BuildFolderMenu(GenericDropdownMenu menu)
