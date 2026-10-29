@@ -28,6 +28,12 @@ namespace RuniOS.UIElements.IO
         public IIOProvider provider => node.provider;
         public IONode node { get; set; }
 
+        public SelectionType selectionType
+        {
+            get => treeView.selectionType;
+            set => treeView.selectionType = value;
+        }
+
         /// <summary>
         /// 선택된 항목을 가져옵니다.
         /// </summary>
@@ -81,7 +87,7 @@ namespace RuniOS.UIElements.IO
             lastWriteTimeColumn.bindCell += BindCell<Label>((element, entry) => element.text = entry.metaData.lastWriteTime.ToString());
             lastWriteTimeColumn.comparison = CompareByIndex(lastWriteTimeColumn, (x, y) => Nullable.Compare(x.metaData.lastWriteTime, y.metaData.lastWriteTime));
 
-            treeView = new MultiColumnTreeView([nameColumn, sizeColumn, creationTimeColumn, lastAccessTime, lastWriteTimeColumn]) { sortingMode = ColumnSortingMode.Default };
+            treeView = new MultiColumnTreeView([nameColumn, sizeColumn, creationTimeColumn, lastAccessTime, lastWriteTimeColumn]) { sortingMode = ColumnSortingMode.Default, selectionType = SelectionType.Multiple };
             treeView.sortColumnDescriptions.Add(new SortColumnDescription(nameColumn.name, SortDirection.Ascending));
 
             loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => provider.EnumerateEntries(x.path, false)) { preloadDepth = 1 };

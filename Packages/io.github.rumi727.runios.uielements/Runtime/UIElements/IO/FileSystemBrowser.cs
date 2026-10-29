@@ -52,6 +52,13 @@ namespace RuniOS.UIElements.IO
         public DeviceLocationView deviceLocationView { get; }
         public IONodeMultiColumnTreeView treeView { get; }
 
+        [UxmlAttribute]
+        public SelectionType selectionType
+        {
+            get => treeView.selectionType;
+            set => treeView.selectionType = value;
+        }
+
         public FileSystemBrowser()
         {
             deviceLocationView = new DeviceLocationView { name = "device-location-view" };

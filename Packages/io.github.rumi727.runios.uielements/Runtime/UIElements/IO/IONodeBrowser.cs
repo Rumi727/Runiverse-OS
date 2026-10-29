@@ -29,6 +29,13 @@ namespace RuniOS.UIElements.IO
 
         public IONodeMultiColumnTreeView treeView { get; }
 
+        [UxmlAttribute]
+        public SelectionType selectionType
+        {
+            get => treeView.selectionType;
+            set => treeView.selectionType = value;
+        }
+
         public IONodeBrowser() : this(IONode.empty) { }
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
