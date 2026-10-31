@@ -140,7 +140,7 @@ namespace RuniOS.UIElements.IO
 
                 pathField = new TextField { name = "path-field", isDelayed = true };
                 pathField.AddToClassList(pathFieldUssClassName);
-                pathField.RegisterValueChangedCallback(x => node = ToNode(x.newValue));
+                pathField.RegisterValueChangedCallback(x => node = PathFieldToNode(x.newValue));
                 header.Add(pathField);
 
                 folderMenu = new Button(FolderMenuDropDown) { name = "folder-menu" };
@@ -213,7 +213,7 @@ namespace RuniOS.UIElements.IO
             back.SetEnabled(backHistory.Count > 0);
             forward.SetEnabled(forwardHistory.Count > 0);
 
-            pathField.SetValueWithoutNotify(ToPath(value));
+            pathField.SetValueWithoutNotify(NodeToPathField(value));
             OnNodeChanged();
         }
 
@@ -265,8 +265,8 @@ namespace RuniOS.UIElements.IO
 
         protected abstract void OnNodeChanged();
 
-        protected virtual string ToPath(IONode node) => node.path.value;
+        protected virtual string NodeToPathField(IONode node) => node.path.value;
 
-        protected virtual IONode ToNode(string path) => new IONode(provider, (RuniPath)path);
+        protected virtual IONode PathFieldToNode(string path) => new IONode(provider, (RuniPath)path);
     }
 }

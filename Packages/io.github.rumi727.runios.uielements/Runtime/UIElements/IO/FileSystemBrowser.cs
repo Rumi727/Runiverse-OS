@@ -211,9 +211,9 @@ namespace RuniOS.UIElements.IO
             return place;
         }
 
-        public void Open(PhysicalPath path) => node = ToNode(path);
+        public void Open(PhysicalPath path) => node = PathFieldToNode(path);
 
-        protected override string ToPath(IONode node)
+        protected override string NodeToPathField(IONode node)
         {
             if (node.provider is PhysicalIOProvider physicalProvider)
                 return physicalProvider.targetPath.Combine(node.path);
@@ -223,7 +223,7 @@ namespace RuniOS.UIElements.IO
 
         // 빈 경로는 홈 화면을 뜻합니다.
         // 바로 가기 등으로 다른 위치를 가리켜도 접근할 수 있도록, 샌드박스 없이 경로 루트에서부터 엽니다.
-        protected override IONode ToNode(string path)
+        protected override IONode PathFieldToNode(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
                 return IONode.empty;
