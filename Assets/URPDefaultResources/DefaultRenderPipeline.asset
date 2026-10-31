@@ -1,4 +1,3 @@
-%UNITY 7.0
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &11400000
@@ -13,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bf2edee5c58d82540a51f03df9d42094, type: 3}
   m_Name: DefaultRenderPipeline
   m_EditorClassIdentifier: Unity.RenderPipelines.Universal.Runtime::UnityEngine.Rendering.Universal.UniversalRenderPipelineAsset
-  k_AssetVersion: 14
-  k_AssetPreviousVersion: 14
+  k_AssetVersion: 15
+  k_AssetPreviousVersion: 15
   m_RendererType: 1
   m_RendererData: {fileID: 0}
   m_RendererDataList:
@@ -29,6 +28,12 @@ MonoBehaviour:
   m_MSAA: 1
   m_RenderScale: 1
   m_UpscalingFilter: 0
+  m_ScalingMode: 0
+  m_SelectedUpscalerName: 
+  m_UpscalerPriority:
+  - upscalerId: unity.auto
+    upscalerName: Auto (Bilinear or Nearest-Neighbor)
+  m_UpscalerOptions: []
   m_FsrOverrideSharpness: 0
   m_FsrSharpness: 0.92
   m_EnableLODCrossFade: 1
@@ -141,5 +146,5 @@ MonoBehaviour:
   m_ShaderVariantLogLevel: 0
   m_ShadowCascades: 0
   m_Textures:
-    blueNoise64LTex: {fileID: 0}
-    bayerMatrixTex: {fileID: 0}
+    blueNoise64LTex: {fileID: 2800000, guid: e3d24661c1e055f45a7560c033dbb837, type: 3}
+    bayerMatrixTex: {fileID: 2800000, guid: f9ee4ed84c1d10c49aabb9b210b0fc44, type: 3}
