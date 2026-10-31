@@ -1,3 +1,4 @@
+%UNITY 7.0
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
 --- !u!114 &1
@@ -39,6 +40,7 @@ MonoBehaviour:
     - com.realitystop.linkmerge
     - com.coffee.softmask-for-ugui
     - com.cysharp.unitask
+    - com.greenbamboogames.builtinuiresbrowser
     m_IsDefault: 0
     m_IsUnityRegistry: 0
     m_Capabilities: 0
@@ -52,7 +54,7 @@ MonoBehaviour:
     m_Modified: 0
     m_ErrorMessage: 
     m_UserModificationsEntityId:
-      m_rawData: 1099511639135
+      m_rawData: 1099511640380
     m_OriginalEntityId:
-      m_rawData: 1099511639133
+      m_rawData: 1099511640378
   m_LoadAssets: 0
