@@ -14,6 +14,6 @@
     -unity-text-align: middle-right;
 }
 
-.runios-io-browser__content-pane > * {
-    flex-grow: 1;
-}
+
+
+

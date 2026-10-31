@@ -49,46 +49,43 @@ namespace RuniOS.UIElements.IO
         // 같은 경로가 같은 노드가 되도록 경로 루트(리눅스는 /, 윈도우는 C:\, D:\ 등)마다 프로바이더를 하나만 둡니다.
         static readonly Dictionary<PhysicalPath, PhysicalIOProvider> rootProviders = new();
 
-        public DeviceLocationView deviceLocationView { get; }
-        public IONodeMultiColumnTreeView treeView { get; }
+        /// <summary>
+        /// 활성 탭의 장치 목록입니다.
+        /// </summary>
+        public DeviceLocationView deviceLocationView => ((FileSystemBrowserTab)activeTab).deviceLocationView;
 
+        /// <summary>
+        /// 활성 탭의 트리 뷰입니다.
+        /// </summary>
+        public IONodeMultiColumnTreeView treeView => ((FileSystemBrowserTab)activeTab).treeView;
+
+        /// <summary>
+        /// 모든 탭의 트리 뷰에 적용되고, 새로 여는 탭에도 적용됩니다.
+        /// </summary>
         [UxmlAttribute]
         public SelectionType selectionType
         {
-            get => treeView.selectionType;
-            set => treeView.selectionType = value;
-        }
+            get;
+            set
+            {
+                field = value;
+                foreach (IOBrowserTab tab in tabs)
+                    ((FileSystemBrowserTab)tab).treeView.selectionType = value;
+            }
+        } = SelectionType.Multiple;
 
         public FileSystemBrowser()
         {
-            deviceLocationView = new DeviceLocationView { name = "device-location-view" };
-            deviceLocationView.opened += OpenLocation;
-            contentPane.Add(deviceLocationView);
-
-            treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
-            treeView.opened += OpenEntry;
-            contentPane.Add(treeView);
-
             this.AddManipulator(new LocalizationManipulator(() => RefreshNavigation().Forget()));
-
-            OnNodeChanged();
+            AddTab(IONode.empty);
         }
+
+        protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab();
 
         protected override void BuildFolderMenu(GenericDropdownMenu menu)
         {
             base.BuildFolderMenu(menu);
             menu.AddItem(GetText("runios-editor:io_browser.show_hidden_files"), treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
-        }
-
-        // 노드가 없으면 홈 화면으로 장치 목록을 표시합니다.
-        protected override void OnNodeChanged()
-        {
-            bool isHome = node == IONode.empty;
-
-            deviceLocationView.style.display = isHome ? DisplayStyle.Flex : DisplayStyle.None;
-            treeView.style.display = isHome ? DisplayStyle.None : DisplayStyle.Flex;
-
-            Refresh().Forget();
         }
 
         // 루트에서 위로 이동하면 홈 화면으로 돌아갑니다.
@@ -100,14 +97,7 @@ namespace RuniOS.UIElements.IO
                 base.Up();
         }
 
-        public UniTask Refresh()
-        {
-            if (node == IONode.empty)
-                return deviceLocationView.Refresh();
-
-            treeView.node = node;
-            return treeView.Refresh();
-        }
+        public UniTask Refresh() => ((FileSystemBrowserTab)activeTab).Refresh();
 
         public async UniTask RefreshNavigation()
         {

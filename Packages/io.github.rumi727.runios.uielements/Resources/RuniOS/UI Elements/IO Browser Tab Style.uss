@@ -1,0 +1,7 @@
+.unity-tab-view__content-viewport {
+    flex-shrink: 0;
+}
+
+.unity-tab__header {
+    align-self: stretch;
+}

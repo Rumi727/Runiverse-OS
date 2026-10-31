@@ -3,9 +3,11 @@
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Flexible%20Space.uss?fileID=7433441132597879392&guid=a8a6bbdbb9cebf125962dbd35a57d40a&type=3#Flexible Space");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Toolbar%20Style.uss?fileID=7433441132597879392&guid=1d6bad097e204a851a9cb0e5ef4a4526&type=3#Toolbar Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Browser%20Style.uss?fileID=7433441132597879392&guid=c14b4c6cb6705a834a10efce3c1a5d72&type=3#IO Browser Style");
+@import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Browser%20Tab%20Style.uss?fileID=7433441132597879392&guid=9cdb66b1ada9030d68d241286b0a503c&type=3#IO Browser Tab Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Node%20Tree%20View%20Style.uss?fileID=7433441132597879392&guid=e9e49e06b78945dfb2b880f68ae1e81c&type=3#IO Node Tree View Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/IO%20Browser%20Place%20Style.uss?fileID=7433441132597879392&guid=2653f7e089b1405c8ca65600b1ad314b&type=3#IO Browser Place Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Device%20Location%20View%20Style.uss?fileID=7433441132597879392&guid=b73842d7e78c4fc287a61a71d8914d2a&type=3#Device Location View Style");
+
 
 
 

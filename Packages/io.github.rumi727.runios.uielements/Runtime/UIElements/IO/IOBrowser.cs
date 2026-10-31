@@ -29,26 +29,17 @@ namespace RuniOS.UIElements.IO
         public const string navigationPaneUssClassName = "runios-io-browser__navigation-pane";
         public const string contentPaneUssClassName = "runios-io-browser__content-pane";
 
+        public const string tabUssClassName = "runios-io-browser__tab";
+
         public IIOProvider provider => node.provider;
         public IONode node
         {
-            get => _node;
-            set
-            {
-                // 같은 위치를 다시 열면 새로고침만 하고 기록하지 않습니다.
-                if (_node != value)
-                {
-                    backHistory.Push(_node);
-                    forwardHistory.Clear();
-                }
-
-                SetNode(value);
-            }
+            get => activeTab.node;
+            set => activeTab.node = value;
         }
-        IONode _node = IONode.empty;
 
-        readonly Stack<IONode> backHistory = new();
-        readonly Stack<IONode> forwardHistory = new();
+        public IOBrowserTab activeTab => (IOBrowserTab)contentPane.activeTab;
+        public IEnumerable<IOBrowserTab> tabs => contentPane.Children().Cast<IOBrowserTab>();
 
         /// <summary>
         /// 내용 영역에서 파일을 열면 발생합니다. 파일을 여는 동작은 구독자가 정합니다.
@@ -72,7 +63,7 @@ namespace RuniOS.UIElements.IO
 
         public ScrollView navigationPane { get; }
 
-        public VisualElement contentPane { get; }
+        public TabView contentPane { get; }
 
         protected IOBrowser()
         {
@@ -166,9 +157,9 @@ namespace RuniOS.UIElements.IO
                 navigationPane.AddToClassList(navigationPaneUssClassName);
                 splitView.Add(navigationPane);
 
-                contentPane = new VisualElement { name = "content-pane" };
+                contentPane = new TabView { name = "content-pane", reorderable = true };
                 contentPane.AddToClassList(contentPaneUssClassName);
-
+                contentPane.activeTabChanged += (_, _) => UpdateHeader();
                 splitView.Add(contentPane);
             }
             hierarchy.Add(splitView);
@@ -177,59 +168,76 @@ namespace RuniOS.UIElements.IO
             contentPane.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
         }
 
-        public void Back()
-        {
-            if (!backHistory.TryPop(out IONode previous))
-                return;
+        public void Back() => activeTab.Back();
 
-            forwardHistory.Push(_node);
-            SetNode(previous);
-        }
-
-        public void Forward()
-        {
-            if (!forwardHistory.TryPop(out IONode next))
-                return;
-
-            backHistory.Push(_node);
-            SetNode(next);
-        }
-
-        /// <summary>
-        /// 뒤로·앞으로 기록을 지우고 지정한 위치에서 새로 시작합니다.
-        /// </summary>
-        protected void ResetNode(IONode value)
-        {
-            backHistory.Clear();
-            forwardHistory.Clear();
-
-            SetNode(value);
-        }
-
-        void SetNode(IONode value)
-        {
-            _node = value;
-
-            back.SetEnabled(backHistory.Count > 0);
-            forward.SetEnabled(forwardHistory.Count > 0);
-
-            pathField.SetValueWithoutNotify(NodeToPathField(value));
-            OnNodeChanged();
-        }
+        public void Forward() => activeTab.Forward();
 
         public virtual void Up() => node = node.GetParent();
 
         /// <summary>
-        /// 폴더는 그 폴더로 이동하고, 파일은 <see cref="fileOpened"/>를 발생시킵니다.
+        /// 지정한 위치를 여는 새 탭을 추가하고 활성화합니다.
         /// </summary>
-        protected void OpenEntry(IOEntry entry)
+        public IOBrowserTab AddTab(IONode node)
         {
-            IONode entryNode = node.Bind(entry);
+            IOBrowserTab tab = CreateTab();
+            tab.name = "tab";
+            tab.AddToClassList(tabUssClassName);
+            tab.nodeChanged += OnTabNodeChanged;
+            tab.fileOpened += x => fileOpened?.Invoke(x);
 
-            if (entry.isDirectory)
-                node = entryNode;
-            else
-                fileOpened?.Invoke(entryNode);
+            // 닫기 버튼도 CloseTab으로 닫히도록, 직접 닫은 뒤 TabView의 기본 닫기 동작은 취소합니다.
+            tab.closing += () =>
+            {
+                CloseTab(tab);
+                return false;
+            };
+
+            contentPane.Add(tab);
+            contentPane.activeTab = tab;
+
+            UpdateTabHeaderDisplay();
+
+            // 생성이 모두 끝난 뒤에 위치를 정해, 탭의 내용 갱신(OnNodeChanged)이 생성자에서 호출되지 않게 합니다.
+            tab.ResetNode(node);
+            return tab;
+        }
+
+        /// <summary>
+        /// 탭을 닫습니다. 탭이 하나만 남아 있으면 닫지 않습니다.
+        /// </summary>
+        public void CloseTab(IOBrowserTab tab)
+        {
+            if (contentPane.childCount <= 1)
+                return;
+
+            // TabView는 활성 탭이 제거되면 첫 탭을 활성화하므로, 제거하기 전에 옆 탭을 활성화합니다.
+            if (tab == contentPane.activeTab)
+            {
+                int index = contentPane.selectedTabIndex;
+                contentPane.selectedTabIndex = index + 1 < contentPane.childCount ? index + 1 : index - 1;
+            }
+
+            tab.RemoveFromHierarchy();
+            UpdateTabHeaderDisplay();
+        }
+
+        // 탭이 하나뿐이면 탭 헤더를 숨깁니다.
+        void UpdateTabHeaderDisplay() => contentPane.contentViewport.style.display = contentPane.childCount > 1 ? DisplayStyle.Flex : DisplayStyle.None;
+
+        void OnTabNodeChanged(IOBrowserTab tab)
+        {
+            tab.RefreshLabel();
+
+            if (tab == contentPane.activeTab)
+                UpdateHeader();
+        }
+
+        void UpdateHeader()
+        {
+            back.SetEnabled(activeTab.canGoBack);
+            forward.SetEnabled(activeTab.canGoForward);
+
+            pathField.SetValueWithoutNotify(NodeToPathField(node));
         }
 
         public void AlignPathField()
@@ -263,7 +271,10 @@ namespace RuniOS.UIElements.IO
                 menu.AddDisabledItem(openInFileManagerText, false);
         }
 
-        protected abstract void OnNodeChanged();
+        /// <summary>
+        /// 이 브라우저의 빈 탭을 만듭니다. 위치는 <see cref="AddTab"/>이 탭을 추가한 뒤 정합니다.
+        /// </summary>
+        protected abstract IOBrowserTab CreateTab();
 
         protected virtual string NodeToPathField(IONode node) => node.path.value;
 

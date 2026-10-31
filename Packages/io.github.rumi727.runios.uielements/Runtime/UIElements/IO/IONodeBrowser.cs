@@ -23,31 +23,37 @@ namespace RuniOS.UIElements.IO
                 if (value == null || targetPath == value)
                     return;
 
-                ResetNode(new PhysicalIOProvider(value.Value).rootNode);
+                activeTab.ResetNode(new PhysicalIOProvider(value.Value).rootNode);
             }
         }
 
-        public IONodeMultiColumnTreeView treeView { get; }
+        /// <summary>
+        /// 활성 탭의 트리 뷰입니다.
+        /// </summary>
+        public IONodeMultiColumnTreeView treeView => ((IONodeBrowserTab)activeTab).treeView;
 
+        /// <summary>
+        /// 모든 탭의 트리 뷰에 적용되고, 새로 여는 탭에도 적용됩니다.
+        /// </summary>
         [UxmlAttribute]
         public SelectionType selectionType
         {
-            get => treeView.selectionType;
-            set => treeView.selectionType = value;
-        }
+            get;
+            set
+            {
+                field = value;
+                foreach (IOBrowserTab tab in tabs)
+                    ((IONodeBrowserTab)tab).selectionType = value;
+            }
+        } = SelectionType.Multiple;
 
         public IONodeBrowser() : this(IONode.empty) { }
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
 
-        public IONodeBrowser(IONode node)
-        {
-            treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
-            treeView.opened += OpenEntry;
-            contentPane.Add(treeView);
+        public IONodeBrowser(IONode node) => AddTab(node);
 
-            ResetNode(node);
-        }
+        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
 
         protected override void BuildFolderMenu(GenericDropdownMenu menu)
         {
@@ -55,12 +61,6 @@ namespace RuniOS.UIElements.IO
             menu.AddItem(LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files", treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
         }
 
-        protected override void OnNodeChanged()
-        {
-            treeView.node = node;
-            Refresh().Forget();
-        }
-
-        public UniTask Refresh() => treeView.Refresh();
+        public UniTask Refresh() => ((IONodeBrowserTab)activeTab).Refresh();
     }
 }
