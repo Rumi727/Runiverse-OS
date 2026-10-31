@@ -211,14 +211,14 @@ namespace RuniOS.UIElements.IO
             return place;
         }
 
-        public void Open(PhysicalPath path) => node = PathFieldToNode(path);
+        public void Open(PhysicalPath path) => node = GetNodeFromPhysicalRoot(path);
 
         protected override string NodeToPathField(IONode node)
         {
             if (node.provider is PhysicalIOProvider physicalProvider)
                 return physicalProvider.targetPath.Combine(node.path);
 
-            return string.Empty;
+            return node.path.value;
         }
 
         // 빈 경로는 홈 화면을 뜻합니다.
@@ -228,23 +228,41 @@ namespace RuniOS.UIElements.IO
             if (string.IsNullOrWhiteSpace(path))
                 return IONode.empty;
 
-            PhysicalPath physicalPath = PhysicalPath.From(path);
-            PhysicalPath root = PhysicalPath.From(physicalPath.GetPathRoot());
+            return GetNodeFromPhysicalRoot(PhysicalPath.From(path));
+        }
+
+        public void OpenLocation(FileLocation location) => node = GetNodeFromPhysicalRoot(location.ioProvider.rootNode);
+
+        static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
+
+        /// <summary>
+        /// 물리 루트에서 시작된 노드를 반환합니다.
+        /// </summary>
+        public static IONode GetNodeFromPhysicalRoot(PhysicalPath path)
+        {
+            PhysicalPath targetPath = path;
+            PhysicalPath root = PhysicalPath.From(targetPath.GetPathRoot());
 
             if (!rootProviders.TryGetValue(root, out PhysicalIOProvider? provider))
                 rootProviders[root] = provider = new PhysicalIOProvider(root, SandboxPolicy.Disabled);
 
-            return provider.rootNode.CreateChild(physicalPath.GetRelativePath(root));
+            return provider.rootNode.CreateChild(targetPath.GetRelativePath(root));
         }
 
-        public void OpenLocation(FileLocation location)
+        /// <summary>
+        /// 물리 경로 노드일 경우, 루트에서 시작된 노드를 반환합니다.
+        /// </summary>
+        public static IONode GetNodeFromPhysicalRoot(IONode node)
         {
-            if (location.ioProvider is PhysicalIOProvider physicalProvider)
-                Open(physicalProvider.targetPath);
-            else
-                node = location.ioProvider.rootNode;
+            if (node.provider is not PhysicalIOProvider physicalProvider)
+                return node;
+
+            return GetNodeFromPhysicalRoot(physicalProvider.targetPath.Combine(node.path));
         }
 
-        static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
+        /// <summary>
+        /// 물리 경로 위치일 경우, 루트에서 시작된 노드를 반환합니다.
+        /// </summary>
+        public static IONode GetNodeFromPhysicalRoot(FileLocation location) => GetNodeFromPhysicalRoot(location.ioProvider.rootNode);
     }
 }
