@@ -1,6 +1,5 @@
 ﻿#nullable enable
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Reflection/NullabilityInfoContext.cs
-#if !NET
 #pragma warning disable
 // ReSharper disable all
 namespace System.Reflection
@@ -11,6 +10,7 @@ namespace System.Reflection
 #endif
         static class NetstandardHelpers
     {
+#if !NET
         public static MemberInfo GetMemberWithSameMetadataDefinitionAs(this Type type, MemberInfo member)
         {
             const BindingFlags all = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance;
@@ -38,9 +38,9 @@ namespace System.Reflection
  
         public static bool IsGenericMethodParameter(this Type type)
             => type.IsGenericParameter && type.DeclaringMethod is not null;
+#endif
  
         public static ReadOnlySpan<ParameterInfo> GetParametersAsSpan(this MethodBase metaMethod)
             => metaMethod.GetParameters();
     }
-#endif
 }
