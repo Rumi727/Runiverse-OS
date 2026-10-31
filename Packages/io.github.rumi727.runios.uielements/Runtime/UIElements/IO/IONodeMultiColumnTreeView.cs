@@ -21,6 +21,8 @@ namespace RuniOS.UIElements.IO
         public const string iconUssClassName = "runios-io-node-tree-view__icon";
         public const string nameLabelUssClassName = "runios-io-node-tree-view__name-label";
         public const string loadingImageUssClassName = "runios-io-node-tree-view__loading-image";
+        public const string nameCellRenamingUssClassName = "runios-io-node-tree-view__name-cell--renaming";
+        public const string renameFieldUssClassName = "runios-io-node-tree-view__rename-field";
 
         static readonly AssetRef<VectorImage> folderIcon = "runios-ui:ui/io_browser/places/16/folder";
         static readonly AssetRef<VectorImage> folderEditorDarkIcon = "runios-ui:ui_dark/io_browser/places/16/folder";
@@ -76,6 +78,9 @@ namespace RuniOS.UIElements.IO
         protected Column lastAccessTime { get; }
         protected Column lastWriteTimeColumn { get; }
 
+        // 행이 다시 바인딩되거나 재사용되어도 편집 상태가 유지되도록, 행 요소가 아니라 항목 id로 기록합니다.
+        int? renamingId;
+
         public IONodeMultiColumnTreeView() : this(IONode.empty) { }
 
         public IONodeMultiColumnTreeView(IONode node)
@@ -128,6 +133,16 @@ namespace RuniOS.UIElements.IO
                     ShowContextMenu(e.position);
             });
 
+            // 편집 필드 안에서 누른 F2가 편집을 다시 시작해 입력한 내용을 덮어쓰지 않게 합니다.
+            RegisterCallback<KeyDownEvent>(e =>
+            {
+                if (e.keyCode != KeyCode.F2 || renamingId != null)
+                    return;
+
+                BeginRename();
+                e.StopPropagation();
+            });
+
             Add(treeView);
 
             this.AddManipulator(new LocalizationManipulator(OnLanguageChanged));
@@ -149,7 +164,7 @@ namespace RuniOS.UIElements.IO
 
         static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
 
-        static VisualElement MakeNameCell()
+        VisualElement MakeNameCell()
         {
             VisualElement cell = new() { name = "name" };
             cell.AddToClassList(cellUssClassName);
@@ -170,6 +185,12 @@ namespace RuniOS.UIElements.IO
             Label label = new() { name = "name-label" };
             label.AddToClassList(nameLabelUssClassName);
             cell.Add(label);
+
+            TextField renameField = new() { name = "rename-field", isDelayed = true };
+            renameField.AddToClassList(renameFieldUssClassName);
+            renameField.RegisterValueChangedCallback(OnRenameFieldChanged);
+            renameField.RegisterCallback<FocusOutEvent>(_ => EndRename());
+            cell.Add(renameField);
 
             Image loadingImage = new() { name = "loading-image" };
             loadingImage.AddToClassList(loadingImageUssClassName);
@@ -202,7 +223,11 @@ namespace RuniOS.UIElements.IO
             (iconManipulator.assetRef, iconManipulator.editorDarkAssetRef) = GetIcon(entry);
             element.Q<Label>("name-label").text = entry.metaData.name;
             element.EnableInClassList(nameCellLoadingUssClassName, loader.IsLoading(id));
+            element.EnableInClassList(nameCellRenamingUssClassName, id == renamingId);
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+
+            // 값이 확정될 때 어느 항목의 이름을 바꿀지 알 수 있도록 id를 둡니다.
+            element.Q<TextField>("rename-field").userData = id;
         }
 
         /// <summary>
@@ -300,6 +325,14 @@ namespace RuniOS.UIElements.IO
 
         protected virtual void BuildContextMenu(GenericDropdownMenu menu, IOEntry[] entries)
         {
+            string renameText = GetText("runios-editor:io_node_tree_view.rename");
+            if (entries.Length == 1 && provider is IWritableIOProvider)
+                menu.AddItem(renameText, false, BeginRename);
+            else
+                menu.AddDisabledItem(renameText, false);
+
+            menu.AddSeparator(string.Empty);
+
             string showInFileManagerText = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
 
             // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
@@ -310,6 +343,132 @@ namespace RuniOS.UIElements.IO
             }
             else
                 menu.AddDisabledItem(showInFileManagerText, false);
+        }
+
+        /// <summary>
+        /// 선택된 항목이 하나이고 쓰기 가능한 프로바이더일 때, 그 항목의 이름 셀을 편집 상태로 바꿉니다.
+        /// </summary>
+        public void BeginRename()
+        {
+            if (provider is not IWritableIOProvider || treeView.selectedIds.Count() != 1)
+                return;
+
+            BeginRename(treeView.selectedIds.First());
+        }
+
+        void BeginRename(int id)
+        {
+            renamingId = id;
+
+            // 편집 필드가 보이도록 행을 화면에 두고 다시 바인딩합니다.
+            treeView.ScrollToItemById(id);
+            treeView.RefreshItems();
+
+            TextField? renameField = treeView.GetRootElementForId(id)?.Q<TextField>("rename-field");
+            if (renameField == null)
+            {
+                // 행이 아직 만들어지지 않았으면 포커스를 잃을 필드도 없으므로 편집 상태로 남기지 않습니다.
+                EndRename();
+                return;
+            }
+
+            IOEntry entry = treeView.GetItemDataForId<IOEntry>(id);
+            string name = entry.metaData.name;
+
+            // 파일은 확장자를 뺀 이름만 선택합니다. .bashrc처럼 점으로 시작하는 이름은 확장자가 없는 것으로 보고 전체를 선택합니다.
+            int extensionIndex = name.LastIndexOf(FileExtension.extensionSeparatorChar);
+            int selectionLength = !entry.isDirectory && extensionIndex > 0 ? extensionIndex : name.Length;
+
+            renameField.SetValueWithoutNotify(name);
+
+            // 편집 필드는 USS 클래스로 표시되므로, 스타일이 다시 계산되기 전에는 display: none이라 포커스를 받을 수 없습니다.
+            // 스케줄러는 스타일·레이아웃 갱신과 따로 돌아서 다음 틱에도 아직 숨겨져 있을 수 있으므로, 필드가 배치된 뒤에 포커스합니다.
+            renameField.RegisterCallback<GeometryChangedEvent>(OnRenameFieldGeometryChanged);
+
+            void OnRenameFieldGeometryChanged(GeometryChangedEvent _)
+            {
+                renameField.UnregisterCallback<GeometryChangedEvent>(OnRenameFieldGeometryChanged);
+
+                // 이벤트 처리 중에 포커스하면 포커스 이벤트가 이 처리 뒤로 미뤄져 기본 전체 선택이 선택 범위를 덮으므로, 다음 틱에 포커스합니다.
+                renameField.schedule.Execute(() =>
+                {
+                    if (renamingId != id)
+                        return;
+
+                    renameField.Focus();
+                    renameField.SelectRange(selectionLength, 0);
+                });
+            }
+        }
+
+        void EndRename()
+        {
+            renamingId = null;
+            treeView.RefreshItems();
+        }
+
+        void OnRenameFieldChanged(ChangeEvent<string> evt)
+        {
+            if (evt.target is not TextField { userData: int id })
+                return;
+
+            Rename(id, evt.newValue).Forget();
+        }
+
+        async UniTask Rename(int id, string name)
+        {
+            IOEntry entry = treeView.GetItemDataForId<IOEntry>(id);
+            if (name == entry.metaData.name || node.AsWriteNode() is not { } writeNode)
+                return;
+
+            // RuniPath에서 /는 구분자라, 이름에 들어가면 하위 경로로 이동해 버리므로 이름으로 받지 않습니다.
+            if (name.Contains(RuniPath.directorySeparatorChar))
+            {
+                Debug.LogError($"The name '{name}' cannot contain '{RuniPath.directorySeparatorChar}'.");
+                return;
+            }
+
+            RuniPath destinationPath = entry.path.GetParentPath() / name;
+            IOWriteNode entryNode = writeNode.Bind(entry);
+
+            // 대상이 이미 있는지는 덮어쓰지 않는 이동이 판단하므로 미리 확인하지 않습니다.
+            try
+            {
+                if (entry.isDirectory)
+                    await entryNode.dir.Move(destinationPath);
+                else
+                    await entryNode.file.Move(destinationPath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
+            // 이동하는 동안 트리가 다시 로드되었으면 이미 바뀐 이름으로 표시되어 있습니다.
+            if (!treeView.viewController.Exists(id))
+                return;
+
+            // 이름을 바꾼 디렉터리의 자식들은 이전 경로를 가지고 있으므로, 항목을 새로 추가해 자식을 다시 로드하게 합니다.
+            int parentId = treeView.viewController.GetParentId(id);
+            bool isExpanded = treeView.IsExpanded(id);
+
+            // Enter로 확정하면 아직 편집 필드에 포커스가 있으므로, 제거되는 항목의 편집 상태를 지우고 숨겨질 필드 대신 트리에 포커스를 둡니다.
+            if (renamingId == id)
+            {
+                renamingId = null;
+                treeView.Focus();
+            }
+
+            loader.RemoveItem(id);
+            int renamedId = loader.AddItem(entry with { path = destinationPath, metaData = entry.metaData with { name = name } }, parentId);
+
+            treeView.RefreshItems();
+            if (isExpanded)
+                treeView.ExpandItem(renamedId);
+
+            treeView.SetSelectionById(renamedId);
+            treeView.ScrollToItemById(renamedId);
         }
 
         public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));

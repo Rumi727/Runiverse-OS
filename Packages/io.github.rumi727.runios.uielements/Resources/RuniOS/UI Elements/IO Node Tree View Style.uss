@@ -39,6 +39,23 @@
     align-self: center;
 }
 
+.runios-io-node-tree-view__rename-field {
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.runios-io-node-tree-view__name-cell > .runios-io-node-tree-view__rename-field {
+    display: none;
+}
+
+.runios-io-node-tree-view__name-cell--renaming > .runios-io-node-tree-view__rename-field {
+    display: flex;
+}
+
+.runios-io-node-tree-view__name-cell--renaming > .runios-io-node-tree-view__name-label {
+    display: none;
+}
+
 .runios-io-browser .unity-multi-column-view__header-container {
     flex-shrink: 0;
 }
