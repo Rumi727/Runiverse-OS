@@ -9,25 +9,24 @@
 }
 
 .runios-toolbar .unity-button {
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: -1px;
-    border-top-width: 0;
-    border-bottom-width: 0;
-    border-right-width: 1px;
-    border-left-width: 1px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-    padding-right: 4px;
-    padding-left: 4px;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    padding-right: 6px;
+    padding-left: 6px;
     background-color: var(--unity-colors-toolbar_button-background);
+    border-top-width: 0;
+    border-right-width: 0;
+    border-bottom-width: 0;
+    border-left-width: 0;
 }
 
 .runios-toolbar .unity-button:focus {
-    background-color: var(--unity-colors-toolbar_button-background-focus);
     z-index: 10;
 }
 
@@ -41,28 +40,24 @@
 }
 
 .runios-toolbar .unity-toggle {
-    height: var(--unity-metrics-toolbar-height);
-    margin-top: 0;
-    margin-right: 0;
-    margin-bottom: 0;
-    margin-left: -1px;
+    margin-top: 2px;
+    margin-right: 2px;
+    margin-bottom: 2px;
+    margin-left: 2px;
     border-top-width: 0;
     border-bottom-width: 0;
-    border-right-width: 1px;
-    border-left-width: 1px;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-    padding-right: 4px;
-    padding-left: 4px;
+    border-right-width: 0;
+    border-left-width: 0;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+    padding-right: 6px;
+    padding-left: 6px;
     background-color: var(--unity-colors-toolbar_button-background);
-    border-left-color: var(--unity-colors-toolbar_button-border);
-    border-right-color: var(--unity-colors-toolbar_button-border);
 }
 
 .runios-toolbar .unity-toggle:focus {
-    background-color: var(--unity-colors-toolbar_button-background-focus);
     z-index: 10;
     border-left-color: var(--unity-colors-button-border_accent-focus);
     border-right-color: var(--unity-colors-button-border_accent-focus);
@@ -101,4 +96,46 @@
 
 .runios-toolbar .unity-toggle .unity-toggle__checkmark {
     visibility: hidden;
+}
+
+.runios-toolbar-group .runios-toolbar-group__first-child.unity-button {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__middle-child.unity-button {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__last-child.unity-button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__first-child.unity-toggle {
+    margin-right: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__middle-child.unity-toggle {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__last-child.unity-toggle {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
 }
