@@ -5,7 +5,8 @@ PluginImporter:
   serializedVersion: 3
   iconMap: {}
   executionOrder: {}
-  defineConstraints: []
+  defineConstraints:
+  - '!NET'
   isPreloaded: 0
   isOverridable: 1
   isExplicitlyReferenced: 1
