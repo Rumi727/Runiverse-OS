@@ -92,6 +92,64 @@ namespace RuniOS.UIElements
         }
 
         /// <summary>
+        /// Adds an item under the specified parent without reloading the tree.<br/>
+        /// 트리를 다시 로드하지 않고 지정한 부모 아래에 항목을 추가합니다.
+        /// </summary>
+        /// <remarks>
+        /// The added item's children are loaded lazily like other items.<br/>
+        /// If the parent is loaded later, the item is not deduplicated against the loaded children.
+        /// <br/><br/>
+        /// 추가한 항목의 자식은 다른 항목처럼 필요할 때 로드됩니다.<br/>
+        /// 부모를 나중에 로드하면 로드된 자식과 중복을 검사하지 않습니다.
+        /// </remarks>
+        /// <param name="item">
+        /// The item to add.<br/>
+        /// 추가할 항목입니다.
+        /// </param>
+        /// <param name="parentId">
+        /// The identifier of the parent item, or <c>-1</c> to add the item to the root.<br/>
+        /// 부모 항목의 식별자이며, 루트에 추가하려면 <c>-1</c>입니다.
+        /// </param>
+        /// <returns>
+        /// The identifier assigned to the added item.<br/>
+        /// 추가한 항목에 할당된 식별자를 반환합니다.
+        /// </returns>
+        public int AddItem(T item, int parentId)
+        {
+            int id = nextId++;
+            treeView.AddItem<T>(new TreeViewItem<T>(id, item), parentId, rebuildTree: false);
+
+            refresh.Resume();
+            return id;
+        }
+
+        /// <summary>
+        /// Removes the item and its descendants from the tree without reloading the tree, and discards their load state.<br/>
+        /// 트리를 다시 로드하지 않고 항목과 그 하위 항목을 트리에서 제거하며, 이들의 로드 상태를 버립니다.
+        /// </summary>
+        /// <param name="id">
+        /// The identifier of the item to remove.<br/>
+        /// 제거할 항목의 식별자입니다.
+        /// </param>
+        public void RemoveItem(int id)
+        {
+            // 트리에서 제거하면 하위 항목을 찾을 수 없으므로, 제거하기 전에 하위 항목까지 로드 상태를 지웁니다.
+            // 이미 실행 중인 로드는 부모가 없어진 것을 보고 스스로 멈춥니다.
+            foreach (int removedId in treeView.viewController.GetAllItemIds([id]))
+            {
+                loadingDepths.Remove(removedId);
+                loadedIds.Remove(removedId);
+                pendingRequestedIds.Remove(removedId);
+                pendingPreloadIds.Remove(removedId);
+            }
+
+            treeView.TryRemoveItem(id, rebuildTree: false);
+            refresh.Resume();
+        }
+
+        bool Exists(int id) => id == rootId || treeView.viewController.Exists(id);
+
+        /// <summary>
         /// Returns whether the item should be treated as having children.<br/>
         /// Until the item is loaded, <paramref name="hasLoadedChildren"/> is supplemented by the may-have-children hint.
         /// <br/><br/>
@@ -281,6 +339,10 @@ namespace RuniOS.UIElements
                     // 소스가 취소를 무시하더라도 Reset 이후의 트리에 이전 항목이 추가되면 안 됩니다.
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    // 로드하는 동안 RemoveItem으로 부모가 제거되었으면, 없는 부모에 항목을 추가하지 않습니다.
+                    if (!Exists(parentId))
+                        break;
+
                     int childId = nextId++;
                     treeView.AddItem<T>(new TreeViewItem<T>(childId, child), parentId, rebuildTree: false);
                     childIds.Add(childId);
@@ -291,7 +353,8 @@ namespace RuniOS.UIElements
             }
             finally
             {
-                if (!cancellationToken.IsCancellationRequested)
+                // 제거된 부모의 로드 상태는 RemoveItem이 이미 지웠습니다.
+                if (!cancellationToken.IsCancellationRequested && Exists(parentId))
                 {
                     loadingDepths.Remove(parentId, out int depth);
                     loadedIds.Add(parentId);
