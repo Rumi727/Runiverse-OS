@@ -1,6 +1,8 @@
 ﻿#nullable enable
 using RuniOS.Reflection;
 using System.Reflection;
+using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
+using NullabilityInfoContext = RuniOS.Reflection.NullabilityInfoContext;
 
 namespace RuniOS.Inspectors.Csharp
 {

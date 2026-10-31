@@ -4,6 +4,8 @@ using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
+using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
+using NullabilityInfoContext = RuniOS.Reflection.NullabilityInfoContext;
 
 namespace RuniOS.Inspectors.Csharp
 {

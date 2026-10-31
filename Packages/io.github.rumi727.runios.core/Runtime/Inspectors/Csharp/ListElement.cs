@@ -5,6 +5,7 @@ using RuniOS.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
+using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
 
 namespace RuniOS.Inspectors.Csharp
 {

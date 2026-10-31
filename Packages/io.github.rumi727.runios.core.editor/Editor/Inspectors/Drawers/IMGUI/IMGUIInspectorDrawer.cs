@@ -9,6 +9,7 @@ using RuniOS.Undos;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using NullabilityState = RuniOS.Reflection.NullabilityState;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
