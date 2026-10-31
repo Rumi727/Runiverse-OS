@@ -11,4 +11,6 @@
     -unity-text-align: middle-left;
     white-space: nowrap;
     text-overflow: ellipsis;
+    overflow: hidden;
+    flex-shrink: 1;
 }
