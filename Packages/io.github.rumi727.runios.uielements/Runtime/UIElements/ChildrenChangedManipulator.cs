@@ -17,8 +17,6 @@ namespace RuniOS.UIElements
 
             if (target.panel != null)
                 Subscribe(target.panel);
-
-            OnChildrenChanged();
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -30,8 +28,17 @@ namespace RuniOS.UIElements
                 Unsubscribe(target.panel);
         }
 
-        protected virtual void OnAttach(AttachToPanelEvent evt) => Subscribe(evt.destinationPanel);
-        protected virtual void OnDetach(DetachFromPanelEvent evt) => Unsubscribe(evt.originPanel);
+        protected virtual void OnAttach(AttachToPanelEvent evt)
+        {
+            Subscribe(evt.destinationPanel);
+            OnChildrenChanged();
+        }
+
+        protected virtual void OnDetach(DetachFromPanelEvent evt)
+        {
+            Unsubscribe(evt.originPanel);
+            OnChildrenChanged();
+        }
 
         void Subscribe(IPanel panel) => BaseVisualElementPanelBridge.__GetInstanceFrom(panel).hierarchyChanged += OnHierarchyChanged;
         void Unsubscribe(IPanel panel) => BaseVisualElementPanelBridge.__GetInstanceFrom(panel).hierarchyChanged -= OnHierarchyChanged;
@@ -58,6 +65,6 @@ namespace RuniOS.UIElements
             }
         }
 
-        protected void OnChildrenChanged() => onChildrenChanged?.Invoke();
+        protected virtual void OnChildrenChanged() => onChildrenChanged?.Invoke();
     }
 }
