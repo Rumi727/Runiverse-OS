@@ -9,7 +9,7 @@ using UnityEngine.UIElements;
 /// </summary>
 public sealed class IOBrowserTestWindow : EditorWindow
 {
-    [MenuItem("Window/RuniOS/IO Browser Test")]
+    [MenuItem("RuniOS/IO Browser Test")]
     static void Open() => GetWindow<IOBrowserTestWindow>("IO Browser Test");
 
     void CreateGUI() => rootVisualElement.Add(new FileSystemBrowser { style = { flexGrow = 1 } });
