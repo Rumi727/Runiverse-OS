@@ -276,6 +276,74 @@ namespace RuniOS.IO.Virtual
             return UniTask.CompletedTask;
         }
 
+        // 노드를 떼어 낸 뒤 붙이는 데 실패하면 노드가 트리에서 사라지므로, 떼어 내기 전에 붙일 수 있는지 모두 확인합니다.
+
+        /// <inheritdoc/>
+        public UniTask MoveFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            VirtualFileBase? file = rootDirectory.GetNode(sourcePath)?.AsFile();
+            if (file == null)
+                VirtualDirectoryBase.ThrowFileNotFound(sourcePath);
+
+            if (sourcePath == destinationPath)
+                return UniTask.CompletedTask;
+
+            string name = destinationPath.GetFileName();
+            VirtualNode.ThrowIfInvalidFileName(name);
+
+            VirtualDirectoryBase? directory = rootDirectory.GetNode(destinationPath.GetParentPath())?.AsDirectory();
+            if (directory == null)
+                VirtualDirectoryBase.ThrowDirectoryNotFound(destinationPath.GetParentPath());
+
+            VirtualNode? existingNode = directory.GetChildNode(name);
+            if (existingNode != null)
+            {
+                if (existingNode is VirtualDirectoryBase)
+                    VirtualDirectoryBase.ThrowPathIsDirectoryException(destinationPath, name);
+
+                if (!overwrite)
+                    throw new IOException($"The destination '{destinationPath}' already exists.");
+
+                existingNode.Delete();
+            }
+
+            file.Detach();
+            directory.AttachChild(name, file);
+
+            return UniTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public UniTask MoveDirectory(RuniPath sourcePath, RuniPath destinationPath, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            VirtualDirectoryBase? sourceDirectory = rootDirectory.GetNode(sourcePath)?.AsDirectory();
+            if (sourceDirectory == null)
+                VirtualDirectoryBase.ThrowDirectoryNotFound(sourcePath);
+
+            // 빈 경로(루트)는 모든 경로의 상위입니다.
+            if (sourcePath.IsEmpty() || destinationPath.StartsWith(sourcePath))
+                throw new IOException($"The directory '{sourcePath}' cannot be moved to itself or its descendant '{destinationPath}'.");
+
+            string name = destinationPath.GetFileName();
+            VirtualNode.ThrowIfInvalidNodeName(name);
+
+            VirtualDirectoryBase? directory = rootDirectory.GetNode(destinationPath.GetParentPath())?.AsDirectory();
+            if (directory == null)
+                VirtualDirectoryBase.ThrowDirectoryNotFound(destinationPath.GetParentPath());
+
+            if (directory.GetChildNode(name) != null)
+                throw new IOException($"The destination '{destinationPath}' already exists.");
+
+            sourceDirectory.Detach();
+            directory.AttachChild(name, sourceDirectory);
+
+            return UniTask.CompletedTask;
+        }
+
         static RuniPath GetRelativePath(VirtualDirectoryBase directory, VirtualNode node)
         {
             node.ThrowIfNotAttachedException();

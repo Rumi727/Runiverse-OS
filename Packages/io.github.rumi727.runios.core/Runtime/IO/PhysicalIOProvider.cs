@@ -218,6 +218,34 @@ namespace RuniOS.IO
             return UniTask.CompletedTask;
         }
 
+        /// <inheritdoc/>
+        public UniTask MoveFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
+        {
+            string source = ResolveFullPath(sourcePath);
+            string destination = ResolveFullPath(destinationPath);
+
+            // 같은 파일인지는 OS가 판단하도록, 덮어쓰지 않는 이동을 먼저 시도합니다.
+            // 대상이 없거나 대상이 원본과 같은 파일(대소문자만 다른 이름 등)이면 여기서 이름이 바뀝니다.
+            try
+            {
+                File.Move(source, destination);
+            }
+            catch (IOException) when (overwrite && File.Exists(destination))
+            {
+                // 대상이 원본과 다른 파일이므로 원자적으로 교체합니다.
+                File.Replace(source, destination, null);
+            }
+
+            return UniTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public UniTask MoveDirectory(RuniPath sourcePath, RuniPath destinationPath, CancellationToken cancellationToken = default)
+        {
+            Directory.Move(ResolveFullPath(sourcePath), ResolveFullPath(destinationPath));
+            return UniTask.CompletedTask;
+        }
+
         /// <summary>
         /// Combines <paramref name="path"/> with <see cref="targetPath"/> and validates the result against the configured sandbox policy.<br/>
         /// <paramref name="path"/>를 <see cref="targetPath"/>와 결합하고 설정된 샌드박스 정책으로 결과를 검증합니다.
