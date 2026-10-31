@@ -178,9 +178,14 @@ namespace RuniOS.UIElements.IO
 
         static IOBrowserPlace MakePlace(string text, (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons, Action clicked)
         {
-            IOBrowserPlace place = new(text, clicked);
-            place.iconManipulator.assetRef = icons.icon;
-            place.iconManipulator.editorDarkAssetRef = icons.editorDarkIcon;
+            IOBrowserPlace place = new(text, clicked)
+            {
+                iconManipulator =
+                {
+                    assetRef = icons.icon,
+                    editorDarkAssetRef = icons.editorDarkIcon
+                }
+            };
 
             return place;
         }
