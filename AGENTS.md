@@ -76,6 +76,7 @@
 - Everything that is a design decision belongs in the theme USS, even when it affects layout: colors, backgrounds, borders, border radius, opacity, images and icons, and sizes, padding, and margins whose values a theme may choose differently.
 - When unsure, put the rule in the theme USS. Follow existing base USS files such as `Toolbar Style.uss` and `IO Browser Place Style.uss` as references.
 - The control theme file `ROS Control Style.tss` itself contains legacy rules that do not follow this separation. Ignore those rules and do not use them as a reference.
+- USS combinators (`>` and descendant) match against the logical parent (`VisualElement.parent`), not the hierarchy parent, while the ancestor filter used before matching is built from the hierarchy. Children added through a custom `contentContainer` have the control itself as their logical parent, and elements moved elsewhere in the hierarchy (such as a popup moved into an overlay) lose their logical ancestors from the hierarchy. Do not select such children with ancestor selectors; have the control add a class to them instead (for example `RuniMenu.childUssClassName`).
 
 ## Standalone RuniOS.CodeAnalysis
 
