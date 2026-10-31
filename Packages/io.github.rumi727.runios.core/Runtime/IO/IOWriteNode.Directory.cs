@@ -61,6 +61,24 @@ namespace RuniOS.IO
             /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
             /// </param>
             public UniTask Delete(CancellationToken cancellationToken = default) => node.provider.DeleteDirectory(node.path, cancellationToken);
+
+            /// <summary>
+            /// Moves the directory represented by this node, including its contents, to another path in the same provider.<br/>
+            /// 이 노드가 나타내는 디렉터리를 내용과 함께 같은 프로바이더 안의 다른 경로로 이동합니다.
+            /// </summary>
+            /// <param name="destinationPath">
+            /// The provider-relative path the directory is moved to.<br/>
+            /// 디렉터리를 이동할 프로바이더 기준 경로입니다.
+            /// </param>
+            /// <param name="cancellationToken">
+            /// The cancellation token used to cancel the operation.<br/>
+            /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+            /// </param>
+            /// <exception cref="System.IO.IOException">
+            /// Thrown when a file or directory already exists at <paramref name="destinationPath"/>, or when <paramref name="destinationPath"/> is this directory or one of its descendants.<br/>
+            /// <paramref name="destinationPath"/>에 파일이나 디렉터리가 이미 있거나, <paramref name="destinationPath"/>가 이 디렉터리 자신 또는 그 하위 경로인 경우 발생합니다.
+            /// </exception>
+            public UniTask Move(RuniPath destinationPath, CancellationToken cancellationToken = default) => node.provider.MoveDirectory(node.path, destinationPath, cancellationToken);
         }
     }
 }
