@@ -236,6 +236,7 @@
   "io_browser.computer": "컴퓨터",
   "io_browser.show_hidden_files": "숨김 파일 표시",
   "io_browser.open_in_file_manager": "파일 관리자에서 열기",
+  "io_browser.new_tab": "새 탭",
   "io_browser.known_directory.home": "홈",
   "io_browser.known_directory.desktop": "바탕 화면",
   "io_browser.known_directory.documents": "문서",

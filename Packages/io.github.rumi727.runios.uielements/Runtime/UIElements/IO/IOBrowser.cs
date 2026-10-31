@@ -71,6 +71,10 @@ namespace RuniOS.UIElements.IO
 
             AddToClassList(ussClassName);
 
+            // 포커스를 받을 수 없는 자식을 클릭해도 포커스가 브라우저에 남아, 키 입력이 브라우저까지 전달되게 합니다.
+            // ReSharper disable once VirtualMemberCallInConstructor
+            focusable = true;
+
             header = new Toolbar { name = "header" };
             header.AddToClassList(headerUssClassName);
             {
@@ -166,6 +170,8 @@ namespace RuniOS.UIElements.IO
 
             pathField.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
             contentPane.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
+
+            RegisterCallback<KeyDownEvent>(OnKeyDown);
         }
 
         public void Back() => activeTab.Back();
@@ -199,6 +205,9 @@ namespace RuniOS.UIElements.IO
 
             // 생성이 모두 끝난 뒤에 위치를 정해, 탭의 내용 갱신(OnNodeChanged)이 생성자에서 호출되지 않게 합니다.
             tab.ResetNode(node);
+
+            // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
+            Focus();
             return tab;
         }
 
@@ -219,6 +228,9 @@ namespace RuniOS.UIElements.IO
 
             tab.RemoveFromHierarchy();
             UpdateTabHeaderDisplay();
+
+            // 닫은 탭 안에 포커스가 있었으면 함께 사라지므로, 브라우저로 포커스를 되돌립니다.
+            Focus();
         }
 
         // 탭이 하나뿐이면 탭 헤더를 숨깁니다.
@@ -240,6 +252,21 @@ namespace RuniOS.UIElements.IO
             pathField.SetValueWithoutNotify(NodeToPathField(node));
         }
 
+        void OnKeyDown(KeyDownEvent evt)
+        {
+            if (!evt.actionKey)
+                return;
+
+            if (evt.keyCode == KeyCode.T)
+                AddTab(node);
+            else if (evt.keyCode == KeyCode.W)
+                CloseTab(activeTab);
+            else
+                return;
+
+            evt.StopPropagation();
+        }
+
         public void AlignPathField()
         {
             float xMax = pathField.layout.xMax;
@@ -258,6 +285,10 @@ namespace RuniOS.UIElements.IO
 
         protected virtual void BuildFolderMenu(GenericDropdownMenu menu)
         {
+            const string newTabKey = "runios-editor:io_browser.new_tab";
+            menu.AddItem(LocalizationUtility.GetText(newTabKey) ?? newTabKey, false, () => AddTab(node));
+            menu.AddSeparator(string.Empty);
+
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
             string openInFileManagerText = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
 
