@@ -74,6 +74,16 @@
             <ui:Vector3IntField label="Vector3Int"/>
             <ui:RectIntField label="RectInt"/>
             <ui:BoundsIntField label="BoundsInt"/>
+            <RuniOS.UIElements.Toolbar>
+                <RuniOS.UIElements.ToolbarGroup>
+                    <ui:Toggle label="Toggle"/>
+                    <ui:Button text="Button"/>
+                    <ui:Button text="Button"/>
+                </RuniOS.UIElements.ToolbarGroup>
+                <ui:Toggle label="Toggle"/>
+                <ui:Button text="Button"/>
+                <ui:Button text="Button"/>
+            </RuniOS.UIElements.Toolbar>
         </ui:VisualElement>
     </ui:ScrollView>
 </ui:UXML>
