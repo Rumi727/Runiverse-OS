@@ -66,7 +66,7 @@ namespace RuniOS.Reflection
 
             TAttribute[] attributes = implementationType.GetCustomAttributes<TAttribute>().ToArray();
             {
-                if (!registrationsByImplementationType.TryGetValue(implementationType, out List<TAttribute> list))
+                if (!registrationsByImplementationType.TryGetValue(implementationType, out List<TAttribute>? list))
                     registrationsByImplementationType[implementationType] = list = [];
 
                 list.AddRange(attributes);
@@ -87,7 +87,7 @@ namespace RuniOS.Reflection
 
                 TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
                 {
-                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
+                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute>? list))
                         registrationsByImplementationType[item] = list = [];
 
                     list.AddRange(attributes);
@@ -109,7 +109,7 @@ namespace RuniOS.Reflection
 
                 TAttribute[] attributes = item.GetCustomAttributes<TAttribute>().ToArray();
                 {
-                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute> list))
+                    if (!registrationsByImplementationType.TryGetValue(item, out List<TAttribute>? list))
                         registrationsByImplementationType[item] = list = [];
 
                     list.AddRange(attributes);
@@ -142,7 +142,7 @@ namespace RuniOS.Reflection
             {
                 foreach (RegistrationEntry<TAttribute> entry in entries)
                 {
-                    if (!registrationsByImplementationType.TryGetValue(entry.implementationType, out List<TAttribute> list))
+                    if (!registrationsByImplementationType.TryGetValue(entry.implementationType, out List<TAttribute>? list))
                         registrationsByImplementationType[entry.implementationType] = list = [];
 
                     list.Add(entry.attribute);

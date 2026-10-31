@@ -25,7 +25,7 @@ namespace RuniOS.Editor.UIElements
         {
             get
             {
-                if (currentPropertyFieldStack.TryPeek(out PropertyField result))
+                if (currentPropertyFieldStack.TryPeek(out PropertyField? result))
                     return result;
 
                 return null;

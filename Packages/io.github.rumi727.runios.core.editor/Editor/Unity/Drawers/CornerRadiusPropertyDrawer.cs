@@ -126,7 +126,7 @@ namespace RuniOS.Editor.Unity.Drawers
 
         AnimBool GetAnimBool(SerializedProperty property)
         {
-            if (!cachedAnimBool.TryGetValue(property.propertyPath, out AnimBool animBool))
+            if (!cachedAnimBool.TryGetValue(property.propertyPath, out AnimBool? animBool))
             {
                 animBool = new AnimBool(property.isExpanded);
                 cachedAnimBool[property.propertyPath] = animBool;

@@ -38,7 +38,7 @@ namespace RuniOS.Editor.Resource
                         {
                             try
                             {
-                                PackDrawer drawer = (PackDrawer)Activator.CreateInstance(x, ImmutableArray<PackDrawer.PathPair>.Empty);
+                                PackDrawer drawer = (PackDrawer)Activator.CreateInstance(x, ImmutableArray<PackDrawer.PathPair>.Empty)!;
                                 drawer.OnEnable();
 
                                 return drawer;
@@ -87,7 +87,7 @@ namespace RuniOS.Editor.Resource
 
             // ReSharper disable once UseCollectionExpression
             return drawers.Where(x => x.IsMatch(paths.Select(x => x.relativePath)))
-                .Select(x => (PackDrawer)Activator.CreateInstance(x.GetType(), paths.ToImmutableArray()))
+                .Select(x => (PackDrawer)Activator.CreateInstance(x.GetType(), paths.ToImmutableArray())!)
                 .FirstOrDefault();
         }
 

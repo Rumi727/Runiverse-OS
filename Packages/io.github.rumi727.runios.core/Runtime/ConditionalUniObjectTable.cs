@@ -1,6 +1,7 @@
 ﻿#nullable enable
 using RuniOS.Collections.Generic;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using UnityEngine;
 
 namespace RuniOS
@@ -34,7 +35,7 @@ namespace RuniOS
             return uniObjects.TryAdd(key, value);
         }
         
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
             ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
             Clean();
@@ -55,7 +56,7 @@ namespace RuniOS
             ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
             Clean();
             
-            if (uniObjects.TryGetValue(key, out TValue value))
+            if (uniObjects.TryGetValue(key, out TValue? value))
                 return value;
 
             return uniObjects[key] = Activator.CreateInstance<TValue>();

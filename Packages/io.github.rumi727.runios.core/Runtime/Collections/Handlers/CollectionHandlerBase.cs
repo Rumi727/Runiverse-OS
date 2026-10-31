@@ -16,7 +16,7 @@ namespace RuniOS.Collections.Handlers
         {
             Type? handlerType = collectionRegistry.Resolve(targetCollection.GetType());
             if (handlerType != null)
-                return (CollectionHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
+                return (CollectionHandlerBase)Activator.CreateInstance(handlerType, targetCollection)!;
 
             return new VirtualListHandler(targetCollection);
         }

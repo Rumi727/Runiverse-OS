@@ -118,7 +118,7 @@ namespace RuniOS.Inspectors.Csharp
                         object? item = instances[i];
                         if (variableType.IsPointer)
                         {
-                            if (((Pointer)property.GetValue(item)).ToIntPtr() != ((Pointer)value!).ToIntPtr())
+                            if (((Pointer)property.GetValue(item)!).ToIntPtr() != ((Pointer)value!).ToIntPtr())
                                 return true;
                         }
                         else if (!Equals(property.GetValue(item), value))

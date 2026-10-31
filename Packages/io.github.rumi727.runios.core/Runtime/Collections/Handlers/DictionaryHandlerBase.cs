@@ -15,7 +15,7 @@ namespace RuniOS.Collections.Handlers
         {
             Type? handlerType = dictionaryRegistry.Resolve(targetCollection.GetType());
             if (handlerType != null && typeof(DictionaryHandlerBase).IsAssignableFrom(handlerType))
-                return (DictionaryHandlerBase)Activator.CreateInstance(handlerType, targetCollection);
+                return (DictionaryHandlerBase)Activator.CreateInstance(handlerType, targetCollection)!;
 
             throw new InvalidOperationException($"{targetCollection} is an invalid dictionary type. An dictionary type with an {nameof(DictionaryHandlerBase)} implementation is required.");
         }

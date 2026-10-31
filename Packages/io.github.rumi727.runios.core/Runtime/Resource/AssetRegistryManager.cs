@@ -37,7 +37,7 @@ namespace RuniOS.Resource
             registries.Add(registry);
             registriesByClassType[registry.GetType()] = registry;
 
-            if (!registriesByProvidedAssetType.TryGetValue(registry.providedAssetType, out HashSet<IAssetRegistry> registrySet))
+            if (!registriesByProvidedAssetType.TryGetValue(registry.providedAssetType, out HashSet<IAssetRegistry>? registrySet))
                 registriesByProvidedAssetType[registry.providedAssetType] = registrySet = [];
 
             registrySet.Add(registry);
@@ -63,7 +63,7 @@ namespace RuniOS.Resource
             registriesById.Remove(registry.registryId);
             registriesByClassType.Remove(registry.GetType());
 
-            if (registriesByProvidedAssetType.TryGetValue(registry.providedAssetType, out HashSet<IAssetRegistry> registrySet))
+            if (registriesByProvidedAssetType.TryGetValue(registry.providedAssetType, out HashSet<IAssetRegistry>? registrySet))
             {
                 registrySet.Remove(registry);
                 if (registrySet.Count == 0)
@@ -162,7 +162,7 @@ namespace RuniOS.Resource
         /// </remarks>
         public static IAssetHandle? GetHandle(Type providedAssetType, Identifier assetId)
         {
-            if (!orderedRegistriesByProvidedAssetType.TryGetValue(providedAssetType, out IAssetRegistry[] candidates))
+            if (!orderedRegistriesByProvidedAssetType.TryGetValue(providedAssetType, out IAssetRegistry[]? candidates))
                 return null;
 
             foreach (IAssetRegistry registry in candidates)

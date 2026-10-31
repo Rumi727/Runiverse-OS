@@ -62,7 +62,7 @@ namespace RuniOS.Texts.Builders.RichTexts
                 if (rendererType == null)
                     throw new InvalidOperationException($"{x} is an invalid entry type. An entry type with an {nameof(RichTextRenderer)} implementation is required.");
 
-                return (RichTextRenderer)Activator.CreateInstance(rendererType);
+                return (RichTextRenderer)Activator.CreateInstance(rendererType)!;
             });
         }
 

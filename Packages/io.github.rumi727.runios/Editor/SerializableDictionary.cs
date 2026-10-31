@@ -7,7 +7,7 @@ using System.Runtime.Serialization;
 namespace RuniOS.Editor.Installer
 {
     [Serializable]
-    class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver
+    class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializationCallbackReceiver where TKey : notnull
     {
         // 필드랑 프로퍼티 이름 바꾸지 마세요.
         // 직렬화에 사용합니다.

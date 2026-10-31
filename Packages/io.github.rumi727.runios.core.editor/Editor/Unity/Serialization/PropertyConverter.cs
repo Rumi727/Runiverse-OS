@@ -29,7 +29,7 @@ namespace RuniOS.Editor.Unity.Serialization
         public static PropertyConverter? FindConverter(Type propertyType)
         {
             Type? drawerType = registry.Resolve(propertyType);
-            return drawerType != null ? (PropertyConverter)Activator.CreateInstance(drawerType) : null;
+            return drawerType != null ? (PropertyConverter)Activator.CreateInstance(drawerType)! : null;
         }
 
 

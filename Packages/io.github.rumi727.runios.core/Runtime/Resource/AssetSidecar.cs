@@ -66,7 +66,7 @@ namespace RuniOS.Resource
         {
             value = default;
 
-            if (!this.value.TryGetValue(key, out JObject jObject))
+            if (!this.value.TryGetValue(key, out JObject? jObject))
                 return false;
 
             try

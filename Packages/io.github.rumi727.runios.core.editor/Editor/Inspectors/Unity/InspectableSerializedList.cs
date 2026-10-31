@@ -99,7 +99,7 @@ namespace RuniOS.Editor.Inspectors.Unity
             return index;
         }
         
-        public void Insert(int index, object value)
+        public void Insert(int index, object? value)
         {
             if (index < 0 || index >= count)
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -108,7 +108,7 @@ namespace RuniOS.Editor.Inspectors.Unity
             OnInsert(index);
         }
 
-        public void Remove(object value) => throw new NotImplementedException();
+        public void Remove(object? value) => throw new NotImplementedException();
         
         public void RemoveAt(int index)
         {

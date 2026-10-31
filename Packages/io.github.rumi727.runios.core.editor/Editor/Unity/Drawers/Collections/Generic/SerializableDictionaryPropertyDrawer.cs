@@ -45,7 +45,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
 
             if (!isInArray)
             {
-                if (!cachedAnimFloat.TryGetValue(property.propertyPath, out AnimFloat animFloat))
+                if (!cachedAnimFloat.TryGetValue(property.propertyPath, out AnimFloat? animFloat))
                     return;
 
                 if (pairs.isExpanded || animFloat.isAnimating)
@@ -86,7 +86,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
 
             if (!property.IsInArray())
             {
-                if (!cachedAnimFloat.TryGetValue(property.propertyPath, out AnimFloat animFloat))
+                if (!cachedAnimFloat.TryGetValue(property.propertyPath, out AnimFloat? animFloat))
                 {
                     animFloat = new AnimFloat(height);
                     cachedAnimFloat[property.propertyPath] = animFloat;
@@ -106,7 +106,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
 
         public SerializedProperty? GetChildProperty(SerializedProperty property)
         {
-            if (!cachedPairs.TryGetValue(property.propertyPath, out SerializedProperty pairs))
+            if (!cachedPairs.TryGetValue(property.propertyPath, out SerializedProperty? pairs))
             {
                 pairs = property.FindPropertyRelative(nameof(ISerializableDictionary.pairs));
                 cachedPairs[property.propertyPath] = pairs;
@@ -117,7 +117,7 @@ namespace RuniOS.Editor.Unity.Drawers.Collections.Generic
 
         public ReorderableList GetReorderableList(SerializedProperty property)
         {
-            if (!cachedReorderableList.TryGetValue(property.propertyPath, out ReorderableList reorderableList))
+            if (!cachedReorderableList.TryGetValue(property.propertyPath, out ReorderableList? reorderableList))
             {
                 SerializedProperty? pairs = GetChildProperty(property);
                 reorderableList = new ReorderableList(property.serializedObject, pairs)

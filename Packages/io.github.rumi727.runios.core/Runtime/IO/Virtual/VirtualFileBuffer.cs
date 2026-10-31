@@ -35,7 +35,7 @@ namespace RuniOS.IO.Virtual
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 GetChunkIndex(index, out long chunkIndex, out int offset);
-                if (chunks.TryGetValue(chunkIndex, out byte[] buffer))
+                if (chunks.TryGetValue(chunkIndex, out byte[]? buffer))
                     return buffer[offset];
 
                 return 0;
@@ -46,7 +46,7 @@ namespace RuniOS.IO.Virtual
                     throw new ArgumentOutOfRangeException(nameof(index));
 
                 GetChunkIndex(index, out long chunkIndex, out int chunkOffset);
-                if (!chunks.TryGetValue(chunkIndex, out byte[] buffer))
+                if (!chunks.TryGetValue(chunkIndex, out byte[]? buffer))
                 {
                     buffer = new byte[chunkSize];
                     chunks[chunkIndex] = buffer;
@@ -106,7 +106,7 @@ namespace RuniOS.IO.Virtual
 
                 if (chunkOffset != 0)
                 {
-                    if (chunks.TryGetValue(chunkIndex, out byte[] array))
+                    if (chunks.TryGetValue(chunkIndex, out byte[]? array))
                         Array.Clear(array, chunkOffset, array.Length - chunkOffset);
                 }
             }

@@ -69,7 +69,7 @@ namespace RuniOS.Editor.IMGUI
             Array array = enumType.GetEnumValues();
             for (int i = 0; i < array.Length; i++)
             {
-                Enum item = (Enum)array.GetValue(i);
+                Enum item = (Enum)array.GetValue(i)!;
                 root.AddChild(new EnumDropdownItem(item, item.ToString()));
             }
 

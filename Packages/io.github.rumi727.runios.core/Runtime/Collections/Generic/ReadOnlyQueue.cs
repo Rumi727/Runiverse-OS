@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Collections.Generic
 {
@@ -20,7 +21,7 @@ namespace RuniOS.Collections.Generic
         public T Peek() => queue.Peek();
         public T[] ToArray() => queue.ToArray();
 
-        public bool TryPeek(out T result) => queue.TryPeek(out result);
+        public bool TryPeek([MaybeNullWhen(false)] out T result) => queue.TryPeek(out result);
         
         public IEnumerator<T> GetEnumerator() => queue.GetEnumerator();
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

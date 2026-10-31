@@ -211,7 +211,7 @@ namespace RuniOS.IO.Virtual
             ThrowIfDeletedException();
 
             // 캐시에서 먼저 시도
-            if (rootDirectoryCache.TryGetValue(fullPath?.Combine(path) ?? path, out VirtualNode cachedNode))
+            if (rootDirectoryCache.TryGetValue(fullPath?.Combine(path) ?? path, out VirtualNode? cachedNode))
                 return cachedNode;
 
             if (path.IsEmpty())

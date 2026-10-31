@@ -210,7 +210,7 @@ namespace RuniOS.Utility
             }
 
             // Can find multiple indexers without specified parameters, but only one with specified ones
-            Func<Type, PropertyInfo> func = parameters is null ?
+            Func<Type, PropertyInfo?> func = parameters is null ?
                 t => t.GetProperties(all).SingleOrDefault(property => property.GetIndexParameters().Length > 0)
                 : t => t.GetProperties(all).FirstOrDefault(property => property.GetIndexParameters().Select(param => param.ParameterType).SequenceEqual(parameters));
 

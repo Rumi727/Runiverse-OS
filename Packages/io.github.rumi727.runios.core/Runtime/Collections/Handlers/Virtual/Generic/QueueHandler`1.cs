@@ -13,7 +13,7 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
         {
             ((Queue<T>)targetCollection).Clear();
             for (int i = 0; i < synchronizedList.Count; i++)
-                ((Queue<T>)targetCollection).Enqueue((T)synchronizedList[i]);
+                ((Queue<T>)targetCollection).Enqueue((T)synchronizedList[i]!);
         }
     }
 }

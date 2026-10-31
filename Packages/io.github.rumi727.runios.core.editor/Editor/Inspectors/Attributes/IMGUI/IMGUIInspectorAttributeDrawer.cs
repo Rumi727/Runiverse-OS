@@ -24,7 +24,7 @@ namespace RuniOS.Editor.Inspectors.Attributes.IMGUI
                 return null;
 
             args[0] = attribute;
-            return (IMGUIInspectorAttributeDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null);
+            return (IMGUIInspectorAttributeDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null)!;
         }
 
         public void Draw(IMGUIInspectorDrawer drawer, Rect position, GUIContent? label, InspectorFlags flags, DrawerContext context = default)

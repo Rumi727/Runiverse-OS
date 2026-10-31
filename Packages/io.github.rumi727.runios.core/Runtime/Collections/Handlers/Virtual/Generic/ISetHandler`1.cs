@@ -24,7 +24,7 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
 
             ((ICollection<T>)targetCollection).Clear();
             for (int i = 0; i < synchronizedList.Count; i++)
-                ((ISet<T>)targetCollection).Add((T)synchronizedList[i]);
+                ((ISet<T>)targetCollection).Add((T)synchronizedList[i]!);
         }
         
         readonly HashSet<object?> tempKeyTable = [];

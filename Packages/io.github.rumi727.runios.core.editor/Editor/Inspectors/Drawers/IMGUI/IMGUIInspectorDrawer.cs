@@ -52,7 +52,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             args[1] = inheritedAttributes;
             args[2] = undoRecorder;
 
-            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null);
+            return (IMGUIInspectorDrawer)Activator.CreateInstance(type, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.CreateInstance, null, args, null)!;
         }
 
         public abstract bool isField { get; }

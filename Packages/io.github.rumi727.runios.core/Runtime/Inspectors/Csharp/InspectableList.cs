@@ -357,7 +357,7 @@ namespace RuniOS.Inspectors.Csharp
             return minCount;
         }
 
-        public void Insert(int index, object value)
+        public void Insert(int index, object? value)
         {
             if (index < 0 || index > count)
                 throw new ArgumentOutOfRangeException(nameof(index));
@@ -385,7 +385,7 @@ namespace RuniOS.Inspectors.Csharp
             OnInsert(index);
         }
 
-        public void Remove(object value)
+        public void Remove(object? value)
         {
             if (parentElement == null || !isArray)
             {
@@ -572,7 +572,7 @@ namespace RuniOS.Inspectors.Csharp
             return false;
         }
 
-        public int IndexOf(object value)
+        public int IndexOf(object? value)
         {
             var handler = listHandler;
             ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));

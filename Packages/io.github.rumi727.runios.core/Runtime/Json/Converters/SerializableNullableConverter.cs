@@ -41,7 +41,7 @@ namespace RuniOS.Json.Converters
             // HasValue 속성을 리플렉션을 통해 가져와 값을 확인합니다.
             bool hasValue = (bool)(nullableType.GetProperty(SerializableNullable.nameOfInternalHasValue, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 ?? throw new JsonSerializationException($"'{nullableType.FullName}' type does not contain a readable '{SerializableNullable.nameOfInternalHasValue}' property for serialization."))
-                .GetValue(value);
+                .GetValue(value)!;
             
             if (hasValue)
             {
@@ -78,7 +78,7 @@ namespace RuniOS.Json.Converters
         {
             // JSON 토큰이 null이면 해당 타입의 기본 인스턴스를 생성하여 반환합니다 (HasValue = false).
             if (reader.TokenType == JsonToken.Null)
-                return Activator.CreateInstance(objectType);
+                return Activator.CreateInstance(objectType)!;
 
             // ISerializableNullable<T>에서 T의 실제 타입을 가져옵니다.
             Type? innerType = SerializableNullable.GetUnderlyingType(objectType);
@@ -90,7 +90,7 @@ namespace RuniOS.Json.Converters
 
             // 역직렬화된 내부 값을 사용하여 ISerializableNullable<T> 인스턴스를 생성합니다.
             // 이 생성자는 (T value) 또는 (T? value) 형태의 생성자일 것입니다.
-            return Activator.CreateInstance(objectType, innerValue);
+            return Activator.CreateInstance(objectType, innerValue)!;
         }
     }
 }

@@ -13,7 +13,7 @@ namespace RuniOS.Collections.Handlers.Virtual.Generic
         {
             ((Stack<T>)targetCollection).Clear();
             for (int i = synchronizedList.Count - 1; i >= 0; i--)
-                ((Stack<T>)targetCollection).Push((T)synchronizedList[i]);
+                ((Stack<T>)targetCollection).Push((T)synchronizedList[i]!);
         }
     }
 }

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace RuniOS.Collections.Generic
 {
     [Serializable]
-    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>, ISerializableDictionary
+    public class SerializableDictionary<TKey, TValue> : Dictionary<TKey, TValue>, ISerializableDictionary<TKey, TValue, SerializableKeyValuePair<TKey?, TValue?>>, ISerializableDictionary where TKey : notnull
     {
         // 필드랑 프로퍼티 이름 바꾸지 마세요.
         // 직렬화에 사용합니다.

@@ -77,7 +77,7 @@ namespace RuniOS.Editor.Unity.Inspectors
 
                 if (tps.isArray && tps.propertyType != SerializedPropertyType.String)
                 {
-                    AnimatedReorderableList animatedReorderableList;
+                    AnimatedReorderableList? animatedReorderableList;
                     {
                         string key = tps.GetGlobalIdentifier();
                         if (!animatedReorderableLists.TryGetValue(key, out animatedReorderableList))

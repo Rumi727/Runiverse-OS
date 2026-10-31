@@ -67,7 +67,7 @@ namespace RuniOS.Reflection
             BlockExpression block = Expression.Block(Expression.Convert(Expression.Convert(param, value.GetType()), type));
             Delegate run = Expression.Lambda(block, param).Compile();
             
-            return run.DynamicInvoke(value);
+            return run.DynamicInvoke(value)!;
         }
 
         /// <summary>

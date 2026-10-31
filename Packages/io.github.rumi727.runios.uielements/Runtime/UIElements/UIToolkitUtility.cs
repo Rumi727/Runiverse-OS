@@ -49,7 +49,7 @@ namespace RuniOS.UIElements
 
             // AOT 환경에선 작동하지 않지만 IL2CPP에선 작동합니다.
             MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
-            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
+            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback])!;
 
             static bool Callback<T>(INotifyValueChanged<T> control, ValueChangedCallback callback)
             {
@@ -73,7 +73,7 @@ namespace RuniOS.UIElements
 
             // AOT 환경에선 작동하지 않지만 IL2CPP에선 작동합니다.
             MethodInfo methodInfo = ReflectionUtility.GetMethodInfo(Callback<object>).GetGenericMethodDefinition();
-            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback]);
+            return (bool)methodInfo.MakeGenericMethod(targetType).Invoke(null, [element, callback])!;
 
             static bool Callback<T>(INotifyValueChanged<T> control, ValueChangedCallback callback)
             {

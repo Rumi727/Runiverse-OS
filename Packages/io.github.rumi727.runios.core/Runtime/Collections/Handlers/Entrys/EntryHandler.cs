@@ -14,7 +14,7 @@ namespace RuniOS.Collections.Handlers.Entrys
             
             Type? type = registry.Resolve(targetEntry.GetType());
             if (type != null)
-                return ((EntryHandler)Activator.CreateInstance(type, targetEntry)).entry;
+                return ((EntryHandler)Activator.CreateInstance(type, targetEntry)!).entry;
 
             throw new InvalidOperationException($"{targetEntry} is an invalid entry type. An entry type with an {nameof(EntryHandler)} implementation is required.");
         }
@@ -26,7 +26,7 @@ namespace RuniOS.Collections.Handlers.Entrys
                 if (!resolvedTargetType.CanGetDefaultValueNotNull())
                     throw new InvalidOperationException($"Cannot create an instance of {targetType}. A public constructor without parameters is required.");
                     
-                return ((EntryHandler)Activator.CreateInstance(drawerType, resolvedTargetType.GetDefaultValueNotNull())).CreateInstance(key, value);
+                return ((EntryHandler)Activator.CreateInstance(drawerType, resolvedTargetType.GetDefaultValueNotNull())!).CreateInstance(key, value);
             }
 
             throw new InvalidOperationException($"{targetType} is an invalid entry type. An entry type with an {nameof(EntryHandler)} implementation is required.");

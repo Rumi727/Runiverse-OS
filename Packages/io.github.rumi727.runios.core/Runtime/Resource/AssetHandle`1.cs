@@ -112,7 +112,7 @@ namespace RuniOS.Resource
             {
                 WeakReference<AssetScope<TAsset>> weakRef = assetScopes[i];
 
-                if (weakRef.TryGetTarget(out AssetScope<TAsset> outAssetScope))
+                if (weakRef.TryGetTarget(out AssetScope<TAsset>? outAssetScope))
                 {
                     // 1. 현재 제거하려는 Scope를 찾았을 경우
                     if (assetScope == outAssetScope)
