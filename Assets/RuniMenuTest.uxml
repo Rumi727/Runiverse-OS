@@ -1,0 +1,24 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <RuniOS.UIElements.Toolbar>
+        <RuniOS.UIElements.RuniMenu text="UXML Menu" open-delay="300" close-delay="150">
+            <RuniOS.UIElements.RuniMenuItem text="New Tab" shortcuts="Action+T" />
+            <RuniOS.UIElements.RuniMenuItem text="Checked, stays open" is-checked="true" close-on-click="false" />
+            <RuniOS.UIElements.RuniMenuItem text="Ctrl+Shift+1" shortcuts="Ctrl+Shift+1" />
+            <RuniOS.UIElements.Separator />
+            <RuniOS.UIElements.RuniMenu text="UXML submenu">
+                <RuniOS.UIElements.RuniMenuItem text="F5" shortcuts="F5" />
+                <RuniOS.UIElements.RuniMenuItem text="Redo (two shortcuts)" shortcuts="Action+Y,Action+Shift+Z" />
+                <RuniOS.UIElements.RuniMenu text="Deeper">
+                    <RuniOS.UIElements.RuniMenuItem text="Bottom" />
+                </RuniOS.UIElements.RuniMenu>
+            </RuniOS.UIElements.RuniMenu>
+            <ui:Button text="Plain UXML Button" />
+        </RuniOS.UIElements.RuniMenu>
+    </RuniOS.UIElements.Toolbar>
+    <RuniOS.UIElements.RuniMenu text="UXML Expanded" expanded="true">
+        <RuniOS.UIElements.RuniMenuItem text="Visible inline" shortcuts="Action+E" />
+        <RuniOS.UIElements.RuniMenu text="Nested expanded" expanded="true">
+            <RuniOS.UIElements.RuniMenuItem text="Also inline" />
+        </RuniOS.UIElements.RuniMenu>
+    </RuniOS.UIElements.RuniMenu>
+</ui:UXML>

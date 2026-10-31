@@ -1,0 +1,123 @@
+.runi-menu-test__section {
+    margin-top: 6px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+    padding-top: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: rgba(128, 128, 128, 0.4);
+    border-right-color: rgba(128, 128, 128, 0.4);
+    border-bottom-color: rgba(128, 128, 128, 0.4);
+    border-left-color: rgba(128, 128, 128, 0.4);
+}
+
+.runi-menu-test__section-title {
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.runi-menu-test__row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.runi-menu-test__context-area {
+    height: 120px;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.runi-menu-test__context-area:focus {
+    background-color: rgba(128, 128, 128, 0.25);
+}
+
+.runi-menu-test__corner-area {
+    height: 160px;
+    background-color: rgba(128, 128, 128, 0.15);
+}
+
+.runi-menu-test__log {
+    flex-shrink: 0;
+    height: 190px;
+    padding-left: 6px;
+    white-space: normal;
+    -unity-font-style: normal;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+/* 계층에 붙인 메뉴(툴바, 섹션, UXML)의 헤더를 버튼처럼 보이게 합니다. */
+
+.runi-menu-test__section > .runios-menu,
+.runi-menu-test TemplateContainer > .runios-menu {
+    align-self: flex-start;
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+.runios-toolbar > .runios-menu > .runios-menu__header,
+.runi-menu-test__section > .runios-menu > .runios-menu__header,
+.runi-menu-test TemplateContainer > .runios-menu > .runios-menu__header {
+    min-height: 20px;
+    margin: 1px 2px;
+    padding: 0 8px;
+    border-width: 1px;
+    border-radius: 3px;
+    border-color: rgba(128, 128, 128, 0.5);
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.runios-toolbar > .runios-menu > .runios-menu__header:hover,
+.runi-menu-test__section > .runios-menu > .runios-menu__header:hover,
+.runi-menu-test TemplateContainer > .runios-menu > .runios-menu__header:hover {
+    background-color: rgba(128, 128, 128, 0.35);
+}
+
+.runios-toolbar > .runios-menu.runios-menu--open > .runios-menu__header,
+.runi-menu-test__section > .runios-menu.runios-menu--open > .runios-menu__header,
+.runi-menu-test TemplateContainer > .runios-menu.runios-menu--open > .runios-menu__header {
+    background-color: rgba(58, 121, 187, 0.6);
+}
+
+/* 선택 사항인 최소 너비 테스트 */
+.runi-menu-test--min-width.runios-menu__popup--floating {
+    min-width: 150px;
+}
+
+/* 전환 테스트: 팝업에 직접 클래스를 붙입니다. transition은 --floating에 선언합니다. */
+
+.runi-menu-test--fade.runios-menu__popup--floating {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.12s;
+}
+
+.runi-menu-test--slow-fade.runios-menu__popup--floating {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 1.5s;
+}
+
+.runi-menu-test--slide.runios-menu__popup--floating {
+    opacity: 0;
+    translate: 0 -12px;
+    transition-property: opacity, translate;
+    transition-duration: 0.2s, 0.5s;
+}
+
+.runi-menu-test--fade.runios-menu__popup--floating.runios-menu__popup--open,
+.runi-menu-test--slow-fade.runios-menu__popup--floating.runios-menu__popup--open {
+    opacity: 1;
+}
+
+.runi-menu-test--slide.runios-menu__popup--floating.runios-menu__popup--open {
+    opacity: 1;
+    translate: 0 0;
+}
