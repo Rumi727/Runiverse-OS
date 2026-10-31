@@ -35,6 +35,7 @@ namespace RuniOS.UIElements.IO
         /// <summary>
         /// 숨김 파일과 폴더를 표시할지 정합니다. 바꾸면 목록을 다시 불러옵니다.
         /// </summary>
+        [UxmlAttribute]
         public bool showHiddenFiles
         {
             get;
@@ -48,6 +49,7 @@ namespace RuniOS.UIElements.IO
             }
         }
 
+        [UxmlAttribute]
         public SelectionType selectionType
         {
             get => treeView.selectionType;
