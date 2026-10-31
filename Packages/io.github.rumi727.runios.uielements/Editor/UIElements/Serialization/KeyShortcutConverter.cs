@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.Spans;
 using RuniOS.UIElements;
 using System.Text;
 using UnityEditor.UIElements;
@@ -20,9 +21,9 @@ namespace RuniOS.Editor.UIElements.Serialization
             EventModifiers modifiers = EventModifiers.None;
             KeyCode keyCode = KeyCode.None;
 
-            foreach (string token in value.Split('+'))
+            foreach (var token in value.AsSpan().Split('+'))
             {
-                string part = token.Trim();
+                var part = token.Trim();
                 if (part.Equals("Action", StringComparison.OrdinalIgnoreCase))
                     actionKey = true;
                 else if (part.Equals("Ctrl", StringComparison.OrdinalIgnoreCase))
@@ -35,10 +36,15 @@ namespace RuniOS.Editor.UIElements.Serialization
                     modifiers |= EventModifiers.Command;
                 else if (part.Length == 1 && char.IsDigit(part[0]))
                     keyCode = KeyCode.Alpha0 + (part[0] - '0');
+#if NET
                 else if (Enum.TryParse(part, true, out KeyCode parsed))
                     keyCode = parsed;
+#else
+                else if (Enum.TryParse(part.ToString(), true, out KeyCode parsed))
+                    keyCode = parsed;
+#endif
                 else
-                    Debug.LogError($"'{part}' is not a valid key in shortcut '{value}'.");
+                    Debug.LogError($"'{part.ToString()}' is not a valid key in shortcut '{value}'.");
             }
 
             return new KeyShortcut(keyCode, actionKey, modifiers);
