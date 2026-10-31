@@ -69,6 +69,14 @@
 
 - Put `#nullable enable` at the very top of C# files.
 
+## USS Theme Separation
+
+- Each control's styles are split into a base USS imported by the control theme (`ROS Control Style.tss`) and theme USS files imported by a specific theme (for example `Editor/... Style.uss` imported by `ROS Editor Theme.tss`).
+- The base control USS may contain only rules the control cannot work without and whose values every theme is guaranteed to share: structural layout such as `flex-direction`, `flex-grow`/`flex-shrink`, `align-items`, `position` and overlay insets, `display`/`visibility` toggles that implement a state, `overflow`, `white-space`, and text alignment.
+- Everything that is a design decision belongs in the theme USS, even when it affects layout: colors, backgrounds, borders, border radius, opacity, images and icons, and sizes, padding, and margins whose values a theme may choose differently.
+- When unsure, put the rule in the theme USS. Follow existing base USS files such as `Toolbar Style.uss` and `IO Browser Place Style.uss` as references.
+- The control theme file `ROS Control Style.tss` itself contains legacy rules that do not follow this separation. Ignore those rules and do not use them as a reference.
+
 ## Standalone RuniOS.CodeAnalysis
 
 - `RuniOS.CodeAnalysis` is a standalone Roslyn/.NET project, independent of the Unity runtime and editor projects.
