@@ -82,10 +82,18 @@ namespace RuniOS.UIElements.IO
 
         protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab();
 
-        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        protected override void BuildFolderMenu(RuniMenu menu)
         {
             base.BuildFolderMenu(menu);
-            menu.AddItem(GetText("runios-editor:io_browser.show_hidden_files"), treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+
+            RuniMenuItem showHiddenFiles = new(string.Empty, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+            menu.opened += () =>
+            {
+                showHiddenFiles.text = GetText("runios-editor:io_browser.show_hidden_files");
+                showHiddenFiles.isChecked = treeView.showHiddenFiles;
+            };
+
+            menu.Add(showHiddenFiles);
         }
 
         // 루트에서 위로 이동하면 홈 화면으로 돌아갑니다.

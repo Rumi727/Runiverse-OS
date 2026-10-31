@@ -312,37 +312,57 @@ namespace RuniOS.UIElements.IO
             action.Invoke(genericElement, entry);
         };
 
+        RuniMenu? contextMenu;
+
         void ShowContextMenu(Vector2 position)
         {
-            IOEntry[] entries = selectedEntries;
-            if (entries.Length == 0)
+            if (selectedEntries.Length == 0)
                 return;
 
-            GenericDropdownMenu menu = new();
-            BuildContextMenu(menu, entries);
-            menu.DropDown(new Rect(position, Vector2.zero), this, DropdownMenuSizeMode.Auto);
+            if (contextMenu == null)
+            {
+                contextMenu = new RuniMenu();
+                BuildContextMenu(contextMenu);
+            }
+
+            contextMenu.DropDown(new Rect(position, Vector2.zero), this);
         }
 
-        protected virtual void BuildContextMenu(GenericDropdownMenu menu, IOEntry[] entries)
+        /// <summary>
+        /// 컨텍스트 메뉴를 처음 열 때 한 번 구성합니다. 선택된 항목에 따라 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신하고,
+        /// 각 동작은 실행할 때의 <see cref="selectedEntries"/>를 읽습니다.
+        /// </summary>
+        protected virtual void BuildContextMenu(RuniMenu menu)
         {
-            string renameText = GetText("runios-editor:io_node_tree_view.rename");
-            if (entries.Length == 1 && provider is IWritableIOProvider)
-                menu.AddItem(renameText, false, BeginRename);
-            else
-                menu.AddDisabledItem(renameText, false);
-
-            menu.AddSeparator(string.Empty);
-
-            string showInFileManagerText = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
-
-            // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-            if (IFileManagerProvider.instance is { } fileManager && provider is PhysicalIOProvider physicalProvider)
+            RuniMenuItem rename = new(string.Empty, BeginRename);
+            menu.opened += () =>
             {
-                PhysicalPath[] paths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
-                menu.AddItem(showInFileManagerText, false, () => fileManager.ShowItems(paths).Forget());
-            }
-            else
-                menu.AddDisabledItem(showInFileManagerText, false);
+                rename.text = GetText("runios-editor:io_node_tree_view.rename");
+                rename.SetEnabled(selectedEntries.Length == 1 && provider is IWritableIOProvider);
+            };
+
+            menu.Add(rename);
+
+            menu.Add(new Separator());
+
+            RuniMenuItem showInFileManager = new(string.Empty, () =>
+            {
+                if (IFileManagerProvider.instance is { } fileManager && provider is PhysicalIOProvider physicalProvider)
+                {
+                    PhysicalPath[] paths = selectedEntries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
+                    fileManager.ShowItems(paths).Forget();
+                }
+            });
+
+            menu.opened += () =>
+            {
+                showInFileManager.text = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
+
+                // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
+                showInFileManager.SetEnabled(IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
+            };
+
+            menu.Add(showInFileManager);
         }
 
         /// <summary>

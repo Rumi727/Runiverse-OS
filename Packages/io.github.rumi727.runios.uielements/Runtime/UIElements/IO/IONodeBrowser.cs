@@ -55,10 +55,18 @@ namespace RuniOS.UIElements.IO
 
         protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
 
-        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        protected override void BuildFolderMenu(RuniMenu menu)
         {
             base.BuildFolderMenu(menu);
-            menu.AddItem(LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files", treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+
+            RuniMenuItem showHiddenFiles = new(string.Empty, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+            menu.opened += () =>
+            {
+                showHiddenFiles.text = LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files";
+                showHiddenFiles.isChecked = treeView.showHiddenFiles;
+            };
+
+            menu.Add(showHiddenFiles);
         }
 
         public UniTask Refresh() => ((IONodeBrowserTab)activeTab).Refresh();

@@ -275,31 +275,49 @@ namespace RuniOS.UIElements.IO
             pathField.style.width = (xMax - x).Clamp(0);
         }
 
-        // 체크 상태 같은 항목이 현재 상태를 반영하도록, 열 때마다 메뉴를 새로 구성합니다.
+        RuniMenu? folderDropdown;
+
         protected void FolderMenuDropDown()
         {
-            GenericDropdownMenu menu = new();
-            BuildFolderMenu(menu);
-            menu.DropDown(folderMenu.worldBound, folderMenu, DropdownMenuSizeMode.Auto);
+            if (folderDropdown == null)
+            {
+                folderDropdown = new RuniMenu();
+                BuildFolderMenu(folderDropdown);
+            }
+
+            folderDropdown.DropDown(folderMenu.worldBound, folderMenu);
         }
 
-        protected virtual void BuildFolderMenu(GenericDropdownMenu menu)
+        static readonly KeyShortcut newTabShortcut = new(KeyCode.T, actionKey: true);
+
+        /// <summary>
+        /// 폴더 메뉴를 처음 열 때 한 번 구성합니다. 열 때마다 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신합니다.
+        /// </summary>
+        protected virtual void BuildFolderMenu(RuniMenu menu)
         {
             const string newTabKey = "runios-editor:io_browser.new_tab";
-            menu.AddItem(LocalizationUtility.GetText(newTabKey) ?? newTabKey, false, () => AddTab(node));
-            menu.AddSeparator(string.Empty);
+            RuniMenuItem newTab = new(string.Empty, () => AddTab(node)) { shortcuts = [newTabShortcut] };
+            menu.opened += () => newTab.text = LocalizationUtility.GetText(newTabKey) ?? newTabKey;
+            menu.Add(newTab);
+
+            menu.Add(new Separator());
 
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
-            string openInFileManagerText = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
-
-            // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
-            if (IFileManagerProvider.instance is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+            RuniMenuItem openInFileManager = new(string.Empty, () =>
             {
-                PhysicalPath path = physicalProvider.targetPath.Combine(node.path);
-                menu.AddItem(openInFileManagerText, false, () => fileManager.ShowFolder(path).Forget());
-            }
-            else
-                menu.AddDisabledItem(openInFileManagerText, false);
+                if (IFileManagerProvider.instance is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
+            });
+
+            menu.opened += () =>
+            {
+                openInFileManager.text = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
+
+                // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
+                openInFileManager.SetEnabled(IFileManagerProvider.instance != null && node.provider is PhysicalIOProvider);
+            };
+
+            menu.Add(openInFileManager);
         }
 
         /// <summary>
