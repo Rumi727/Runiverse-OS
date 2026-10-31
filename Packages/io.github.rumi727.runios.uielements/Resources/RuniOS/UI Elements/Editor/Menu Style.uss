@@ -1,0 +1,108 @@
+.runios-menu--nested > .runios-menu__header {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+/* 하위 메뉴 헤더의 아이콘 자리는 항목의 체크·아이콘 자리와 같은 너비로 맞춥니다. */
+.runios-menu--nested > .runios-menu__header > .runios-menu__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+}
+
+.runios-menu:disabled > .runios-menu__header {
+    opacity: 0.5;
+}
+
+.runios-menu__arrow {
+    width: 12px;
+    height: 12px;
+    margin-left: 8px;
+    background-image: var(--unity-icons-foldout);
+}
+
+.runios-menu--nested:enabled > .runios-menu__header:hover {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.runios-menu--nested:focus > .runios-menu__header,
+.runios-menu--nested.runios-menu--open > .runios-menu__header {
+    background-color: var(--unity-colors-highlight-background);
+}
+
+.runios-menu__popup {
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    background-color: var(--unity-colors-context_menu-background);
+    border-top-color: var(--unity-colors-dropdown-border);
+    border-right-color: var(--unity-colors-dropdown-border);
+    border-bottom-color: var(--unity-colors-dropdown-border);
+    border-left-color: var(--unity-colors-dropdown-border);
+}
+
+/* 메뉴 자식은 조상 선택자 대신 RuniMenu가 붙이는 .runios-menu__child로 고릅니다. */
+.runios-separator.runios-menu__child {
+    margin-top: 2px;
+    margin-bottom: 2px;
+}
+
+/*
+ * 순수 라벨과 라벨이 있는 필드는 체크·아이콘 자리만큼 들여 써서 RuniMenuItem의 글자와 줄을 맞춥니다.
+ * 필드는 라벨에 직접 주므로 라벨이 없는 필드는 들여 쓰지 않습니다. 필드 자체의 margin-left(3px)는 뺀 값입니다.
+ */
+.unity-label.runios-menu__child {
+    margin-left: 26px;
+}
+
+.unity-base-field.runios-menu__child > .unity-base-field__label {
+    margin-left: 23px;
+}
+
+.runios-menu-item {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.runios-menu-item:hover:enabled {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.runios-menu-item:focus {
+    background-color: var(--unity-colors-highlight-background);
+}
+
+.runios-menu-item:disabled {
+    opacity: 0.5;
+}
+
+.runios-menu-item__check {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    background-image: var(--unity-icons-menu-item_checked);
+}
+
+.runios-menu-item__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    border-radius: 2px;
+}
+
+/* 아이콘과 체크가 함께 있으면 아이콘 뒤에 체크 상태를 표시합니다. */
+.runios-menu-item--has-icon.runios-menu-item--checked > .runios-menu-item__icon {
+    background-color: rgba(58, 121, 187, 0.4);
+}
+
+.runios-menu-item__shortcut {
+    margin-left: 16px;
+    opacity: 0.7;
+}

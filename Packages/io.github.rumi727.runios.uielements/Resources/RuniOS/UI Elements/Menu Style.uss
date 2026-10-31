@@ -1,0 +1,104 @@
+.runios-menu__header {
+    flex-direction: row;
+    align-items: center;
+}
+
+.runios-menu__icon {
+    flex-shrink: 0;
+}
+
+.runios-menu__label {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.runios-menu__arrow {
+    display: none;
+    flex-shrink: 0;
+}
+
+.runios-menu--nested > .runios-menu__header > .runios-menu__arrow {
+    display: flex;
+}
+
+.runios-menu__overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.runios-menu__popup {
+    display: none;
+}
+
+.runios-menu--expanded > .runios-menu__popup,
+.runios-menu__popup--floating {
+    display: flex;
+}
+
+/*
+ * 열려 있는 팝업의 크기는 RuniMenu가 내용 크기로 계산해 패널 안에 맞춥니다.
+ * 최소 너비가 필요하면 min-width를 주면 됩니다. 예: .runios-menu__popup--floating { min-width: 120px; }
+ */
+.runios-menu__popup--floating {
+    position: absolute;
+}
+
+.runios-menu__scroll-view {
+    flex-grow: 1;
+}
+
+/* 내용이 팝업보다 좁을 때도 항목 강조가 팝업 너비를 채우게 합니다. */
+.runios-menu__content {
+    min-width: 100%;
+}
+
+/*
+ * 팝업이 떠 있는 동안에는 조상 선택자로 메뉴 자식을 고를 수 없으므로, RuniMenu가 직계 자식에 붙이는 클래스로 고릅니다.
+ */
+.runios-menu__child {
+    flex-shrink: 0;
+}
+
+.runios-menu-item {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* 체크와 아이콘은 같은 자리를 나눠 씁니다. 아이콘이 있으면 아이콘을, 없으면 체크를 보여 줍니다. */
+.runios-menu-item__check {
+    flex-shrink: 0;
+    visibility: hidden;
+}
+
+.runios-menu-item--checked > .runios-menu-item__check {
+    visibility: visible;
+}
+
+.runios-menu-item--has-icon > .runios-menu-item__check {
+    display: none;
+}
+
+.runios-menu-item__icon {
+    display: none;
+    flex-shrink: 0;
+}
+
+.runios-menu-item--has-icon > .runios-menu-item__icon {
+    display: flex;
+}
+
+.runios-menu-item__label {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.runios-menu-item__shortcut {
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+    white-space: nowrap;
+}

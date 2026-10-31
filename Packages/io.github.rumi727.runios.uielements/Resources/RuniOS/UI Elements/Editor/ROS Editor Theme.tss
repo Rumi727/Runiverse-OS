@@ -6,6 +6,7 @@
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Node%20Tree%20View%20Style.uss?fileID=7433441132597879392&guid=32892c078d4e44bab42311dea83fdd24&type=3#IO Node Tree View Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/IO%20Browser%20Place%20Style.uss?fileID=7433441132597879392&guid=d8651e7bd0d1474daa98136adbc60d98&type=3#IO Browser Place Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/Device%20Location%20View%20Style.uss?fileID=7433441132597879392&guid=dfeb602430c044aba720e357a58597ae&type=3#Device Location View Style");
+@import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/Menu%20Style.uss?fileID=7433441132597879392&guid=92438795d0da4ea9839bc25ecb475e9a&type=3#Menu Style");
 
 
 
