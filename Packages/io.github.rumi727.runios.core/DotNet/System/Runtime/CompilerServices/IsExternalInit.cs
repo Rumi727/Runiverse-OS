@@ -1,4 +1,5 @@
 ﻿#nullable enable
+#if !NET
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/IsExternalInit.cs
 using System.ComponentModel;
 
@@ -15,3 +16,4 @@ namespace System.Runtime.CompilerServices
 #endif
         static class IsExternalInit { }
 }
+#endif

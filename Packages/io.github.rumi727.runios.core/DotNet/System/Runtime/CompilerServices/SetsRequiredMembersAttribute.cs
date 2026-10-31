@@ -1,4 +1,5 @@
 #nullable enable
+#if !NET
 // Source : https://github.com/dotnet/runtime/blob/main/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/RequiredMemberAttribute.cs
 // ReSharper disable once CheckNamespace
 namespace System.Diagnostics.CodeAnalysis
@@ -13,3 +14,4 @@ namespace System.Diagnostics.CodeAnalysis
 #endif
         sealed class SetsRequiredMembersAttribute : Attribute;
 }
+#endif

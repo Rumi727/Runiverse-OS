@@ -1,4 +1,5 @@
 #nullable enable
+#if !NET
 // Source : https://source.dot.net/#System.Private.CoreLib/src/runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/CollectionBuilderAttribute.cs
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices
@@ -31,3 +32,4 @@ namespace System.Runtime.CompilerServices
         public string MethodName { get; }
     }
 }
+#endif

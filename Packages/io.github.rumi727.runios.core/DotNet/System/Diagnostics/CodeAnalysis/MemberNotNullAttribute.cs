@@ -1,4 +1,5 @@
 #nullable enable
+#if !NET
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Diagnostics/CodeAnalysis/NullableAttributes.cs
 // ReSharper disable InconsistentNaming
 #pragma warning disable IDE1006 // 명명 스타일
@@ -30,3 +31,4 @@ namespace System.Diagnostics.CodeAnalysis
     }
 #pragma warning restore IDE1006 // 명명 스타일
 }
+#endif

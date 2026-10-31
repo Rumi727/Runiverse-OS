@@ -1,4 +1,5 @@
 #nullable enable
+#if !NET
 // Source : https://source.dot.net/#System.Private.CoreLib/src/runtime/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/InterpolatedStringHandlerAttribute.cs
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices
@@ -14,3 +15,4 @@ namespace System.Runtime.CompilerServices
         public InterpolatedStringHandlerAttribute() { }
     }
 }
+#endif

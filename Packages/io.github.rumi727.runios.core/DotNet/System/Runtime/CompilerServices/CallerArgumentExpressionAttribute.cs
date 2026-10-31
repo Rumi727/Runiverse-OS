@@ -1,4 +1,5 @@
 ﻿#nullable enable
+#if !NET
 // Source : https://source.dot.net/#System.Private.CoreLib/src/libraries/System.Private.CoreLib/src/System/Runtime/CompilerServices/CallerArgumentExpressionAttribute.cs
 // ReSharper disable once CheckNamespace
 namespace System.Runtime.CompilerServices
@@ -12,3 +13,4 @@ namespace System.Runtime.CompilerServices
         public string ParameterName { get; } = parameterName;
     }
 }
+#endif
