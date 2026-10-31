@@ -42,5 +42,5 @@ namespace System.Reflection
         public static ReadOnlySpan<ParameterInfo> GetParametersAsSpan(this MethodBase metaMethod)
             => metaMethod.GetParameters();
     }
-#endif
 }
+#endif
