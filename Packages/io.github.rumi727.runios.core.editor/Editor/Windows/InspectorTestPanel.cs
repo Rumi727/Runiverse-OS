@@ -140,11 +140,11 @@ namespace RuniOS.Editor.Windows
 
             public Test()
             {
-                readOnlySet = hashSet.AsReadOnly();
+                readOnlySet = LinqExtras.AsReadOnly(hashSet);
                 readOnlyQueue = queue.AsReadOnly();
                 readOnlyStack = stack.AsReadOnly();
                 
-                readOnlySetVector2 = hashSetVector2.AsReadOnly();
+                readOnlySetVector2 = LinqExtras.AsReadOnly(hashSetVector2);
                 readOnlyQueueVector2 = queueVector2.AsReadOnly();
                 readOnlyStackVector2 = stackVector2.AsReadOnly();
             }

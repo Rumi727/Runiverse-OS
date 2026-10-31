@@ -182,7 +182,7 @@ namespace RuniOS.Resource
         /// A read-only set containing all registered registries.<br/>
         /// 등록된 모든 레지스트리를 포함하는 읽기 전용 집합을 반환합니다.
         /// </returns>
-        public static ReadOnlySet<IAssetRegistry> GetAll() => registries.AsReadOnly();
+        public static ReadOnlySet<IAssetRegistry> GetAll() => LinqExtras.AsReadOnly(registries);
 
         /// <summary>
         /// Gets all registries that promise to provide the specified asset type.<br/>
@@ -199,7 +199,7 @@ namespace RuniOS.Resource
         public static ReadOnlySet<IAssetRegistry> GetAllForAsset(Type providedAssetType)
         {
             if (registriesByProvidedAssetType.TryGetValue(providedAssetType, out var list))
-                return list.AsReadOnly();
+                return LinqExtras.AsReadOnly(list);
 
             return ReadOnlySet<IAssetRegistry>.empty;
         }
