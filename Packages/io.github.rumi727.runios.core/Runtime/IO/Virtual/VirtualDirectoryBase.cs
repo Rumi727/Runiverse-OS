@@ -161,7 +161,7 @@ namespace RuniOS.IO.Virtual
 
             bool isCreated = false;
             VirtualDirectoryBase childDirectory = this;
-            foreach (var directoryNameSpan in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
+            foreach (var directoryNameSpan in path.value.AsSpan().Split(RuniPath.directorySeparatorChar, StringSplitOptions.None))
             {
                 string directoryName = new string(directoryNameSpan);
                 VirtualNode? childNode = childDirectory.GetChildNode(directoryName);
@@ -223,7 +223,7 @@ namespace RuniOS.IO.Virtual
             VirtualNode? childNode = this;
             VirtualDirectoryBase childDirectory = this;
 
-            foreach (var directoryName in path.value.AsSpan().Split(RuniPath.directorySeparatorChar))
+            foreach (var directoryName in path.value.AsSpan().Split(RuniPath.directorySeparatorChar, StringSplitOptions.None))
             {
                 if (childNode != childDirectory)
                 {

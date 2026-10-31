@@ -31,7 +31,7 @@ namespace RuniOS.IO.Locations.Linux
             int suffixFieldIndex = 0;
 
             bool separatorFound = false;
-            foreach (ReadOnlySpan<char> item in line.Split(' '))
+            foreach (ReadOnlySpan<char> item in line.Split(' ', StringSplitOptions.None))
             {
                 if (!separatorFound)
                 {

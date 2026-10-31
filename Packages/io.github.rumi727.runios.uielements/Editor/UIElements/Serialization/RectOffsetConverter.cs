@@ -11,7 +11,7 @@ namespace RuniOS.Editor.UIElements.Serialization
             RectOffset result = new RectOffset();
 
             int index = 0;
-            foreach (var splittedValue in value.AsSpan().Split(','))
+            foreach (var splittedValue in value.AsSpan().Split(',', StringSplitOptions.None))
             {
                 if (float.TryParse(splittedValue, out float parseResult))
                 {

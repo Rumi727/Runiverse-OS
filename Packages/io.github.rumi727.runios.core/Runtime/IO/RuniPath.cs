@@ -334,7 +334,7 @@ namespace RuniOS.IO
             return string.Create(length, path, static (span, path) =>
             {
                 int dst = 0;
-                foreach (var item in path.AsSpan().Trim(directorySeparatorChar).Split(directorySeparatorChar))
+                foreach (var item in path.AsSpan().Trim(directorySeparatorChar).Split(directorySeparatorChar, StringSplitOptions.None))
                 {
                     if (item.IsEmpty)
                         continue;
@@ -361,7 +361,7 @@ namespace RuniOS.IO
                 return 0;
 
             int length = 0;
-            foreach (var item in path.Split(directorySeparatorChar))
+            foreach (var item in path.Split(directorySeparatorChar, StringSplitOptions.None))
             {
                 if (item.IsEmpty)
                     continue;

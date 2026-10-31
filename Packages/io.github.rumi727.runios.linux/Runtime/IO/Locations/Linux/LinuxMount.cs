@@ -82,7 +82,7 @@ namespace RuniOS.IO.Locations.Linux
 
         static bool HasOption(string options, ReadOnlySpan<char> target)
         {
-            foreach (ReadOnlySpan<char> item in options.AsSpan().Split(','))
+            foreach (ReadOnlySpan<char> item in options.AsSpan().Split(',', StringSplitOptions.None))
             {
                 if (item.SequenceEqual(target))
                     return true;
