@@ -1,3 +1,7 @@
+.unity-tree-view__item-content {
+    flex-shrink: 1;
+}
+
 .runios-io-node-tree-view__cell {
     flex-direction: row;
     flex-grow: 1;
@@ -5,15 +9,22 @@
     -unity-text-align: middle-left;
     white-space: nowrap;
     justify-content: flex-start;
-}
-
-.runios-io-node-tree-view__cell#size {
-    -unity-text-align: middle-right;
+    overflow: hidden;
 }
 
 .runios-io-node-tree-view__icon {
     flex-shrink: 0;
     align-self: center;
+}
+
+.runios-io-node-tree-view__name-label {
+    flex-shrink: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.runios-io-node-tree-view__cell#size {
+    -unity-text-align: middle-right;
 }
 
 .runios-io-node-tree-view__name-cell > .runios-io-node-tree-view__loading-image {
