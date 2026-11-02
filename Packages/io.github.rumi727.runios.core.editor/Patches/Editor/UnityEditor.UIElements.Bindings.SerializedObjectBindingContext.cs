@@ -1,5 +1,6 @@
 ﻿#nullable enable
 using HarmonyLib;
+using RuniOS.Editor.APIBridge.UnityEditor.UIElements.Bindings;
 using RuniOS.Editor.Unity.Serialization;
 using RuniOS.Reflection;
 using System.Linq.Expressions;
@@ -25,7 +26,7 @@ namespace RuniOS.Editor.Patches
                 {
                     public static class SerializedObjectBindingContextPatch
                     {
-                        public static Type targetType { get; } = AccessTools.TypeByName("UnityEditor.UIElements.Bindings.SerializedObjectBindingContext");
+                        public static Type targetType { get; } = SerializedObjectBindingContextBridge.__targetType;
 
                         [HarmonyPatch]
                         public static class CreateBindingObjectForProperty
