@@ -293,6 +293,7 @@ namespace RuniOS.UIElements.IO
         }
 
         static readonly KeyShortcut newTabShortcut = new(KeyCode.T, actionKey: true);
+        static readonly KeyShortcut closeTabShortcut = new(KeyCode.W, actionKey: true);
         static readonly KeyShortcut refreshShortcut = new(KeyCode.F5);
 
         /// <summary>
@@ -304,6 +305,20 @@ namespace RuniOS.UIElements.IO
             RuniMenuItem newTab = new(string.Empty, () => AddTab(node)) { shortcuts = [newTabShortcut] };
             menu.opened += () => newTab.text = LocalizationUtility.GetText(newTabKey) ?? newTabKey;
             menu.Add(newTab);
+
+            const string closeTabKey = "runios-editor:io_browser.close_tab";
+            RuniMenuItem closeTab = new(string.Empty, () => CloseTab(activeTab)) { shortcuts = [closeTabShortcut] };
+            menu.opened += () =>
+            {
+                closeTab.text = LocalizationUtility.GetText(closeTabKey) ?? closeTabKey;
+
+                // 마지막 탭은 닫히지 않습니다.
+                closeTab.SetEnabled(contentPane.childCount > 1);
+            };
+
+            menu.Add(closeTab);
+
+            menu.Add(new Separator());
 
             const string refreshKey = "runios-editor:io_browser.refresh";
             RuniMenuItem refresh = new(string.Empty, () => Refresh().Forget()) { shortcuts = [refreshShortcut] };
