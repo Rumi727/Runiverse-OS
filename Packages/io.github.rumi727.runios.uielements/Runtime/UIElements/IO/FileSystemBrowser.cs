@@ -109,8 +109,6 @@ namespace RuniOS.UIElements.IO
                 base.Up();
         }
 
-        public UniTask Refresh() => ((FileSystemBrowserTab)activeTab).Refresh();
-
         public async UniTask RefreshNavigation()
         {
             List<VisualElement> groups = [];

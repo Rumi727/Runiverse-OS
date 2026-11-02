@@ -1,4 +1,5 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using UnityEngine.UIElements;
 
@@ -112,5 +113,10 @@ namespace RuniOS.UIElements.IO
         }
 
         protected abstract void OnNodeChanged();
+
+        /// <summary>
+        /// 현재 위치의 내용을 다시 읽어 옵니다.
+        /// </summary>
+        public abstract UniTask Refresh();
     }
 }

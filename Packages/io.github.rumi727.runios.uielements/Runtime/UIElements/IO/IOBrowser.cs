@@ -181,6 +181,11 @@ namespace RuniOS.UIElements.IO
         public virtual void Up() => node = node.GetParent();
 
         /// <summary>
+        /// 활성 탭의 내용을 다시 읽어 옵니다.
+        /// </summary>
+        public UniTask Refresh() => activeTab.Refresh();
+
+        /// <summary>
         /// 지정한 위치를 여는 새 탭을 추가하고 활성화합니다.
         /// </summary>
         public IOBrowserTab AddTab(IONode node)
@@ -254,12 +259,11 @@ namespace RuniOS.UIElements.IO
 
         void OnKeyDown(KeyDownEvent evt)
         {
-            if (!evt.actionKey)
-                return;
-
-            if (evt.keyCode == KeyCode.T)
+            if (evt.keyCode == KeyCode.F5 && !evt.actionKey)
+                Refresh().Forget();
+            else if (evt.keyCode == KeyCode.T && evt.actionKey)
                 AddTab(node);
-            else if (evt.keyCode == KeyCode.W)
+            else if (evt.keyCode == KeyCode.W && evt.actionKey)
                 CloseTab(activeTab);
             else
                 return;
@@ -289,6 +293,7 @@ namespace RuniOS.UIElements.IO
         }
 
         static readonly KeyShortcut newTabShortcut = new(KeyCode.T, actionKey: true);
+        static readonly KeyShortcut refreshShortcut = new(KeyCode.F5);
 
         /// <summary>
         /// 폴더 메뉴를 처음 열 때 한 번 구성합니다. 열 때마다 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신합니다.
@@ -299,6 +304,11 @@ namespace RuniOS.UIElements.IO
             RuniMenuItem newTab = new(string.Empty, () => AddTab(node)) { shortcuts = [newTabShortcut] };
             menu.opened += () => newTab.text = LocalizationUtility.GetText(newTabKey) ?? newTabKey;
             menu.Add(newTab);
+
+            const string refreshKey = "runios-editor:io_browser.refresh";
+            RuniMenuItem refresh = new(string.Empty, () => Refresh().Forget()) { shortcuts = [refreshShortcut] };
+            menu.opened += () => refresh.text = LocalizationUtility.GetText(refreshKey) ?? refreshKey;
+            menu.Add(refresh);
 
             menu.Add(new Separator());
 

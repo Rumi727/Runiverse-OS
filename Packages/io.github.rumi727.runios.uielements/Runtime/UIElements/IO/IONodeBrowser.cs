@@ -1,5 +1,4 @@
 #nullable enable
-using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using UnityEngine.UIElements;
 
@@ -71,7 +70,5 @@ namespace RuniOS.UIElements.IO
 
             menu.Add(showHiddenFiles);
         }
-
-        public UniTask Refresh() => ((IONodeBrowserTab)activeTab).Refresh();
     }
 }

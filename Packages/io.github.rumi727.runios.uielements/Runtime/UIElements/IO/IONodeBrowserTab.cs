@@ -34,6 +34,6 @@ namespace RuniOS.UIElements.IO
             Refresh().Forget();
         }
 
-        public UniTask Refresh() => treeView.Refresh();
+        public override UniTask Refresh() => treeView.Refresh();
     }
 }

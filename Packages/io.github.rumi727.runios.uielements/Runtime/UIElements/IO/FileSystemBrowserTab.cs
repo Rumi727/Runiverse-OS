@@ -64,7 +64,7 @@ namespace RuniOS.UIElements.IO
             return base.GetLabel();
         }
 
-        public UniTask Refresh()
+        public override UniTask Refresh()
         {
             if (node == IONode.empty)
                 return deviceLocationView.Refresh();
