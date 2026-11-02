@@ -404,6 +404,9 @@ namespace RuniOS.UIElements.IO
 
         RuniMenu? contextMenu;
 
+        static readonly KeyShortcut renameShortcut = new(KeyCode.F2);
+        static readonly KeyShortcut deleteShortcut = new(KeyCode.Delete);
+
         // 빈 곳에서 열어도 새로 만들기를 할 수 있도록, 선택이 없어도 메뉴를 엽니다.
         void ShowContextMenu(Vector2 position)
         {
@@ -426,7 +429,7 @@ namespace RuniOS.UIElements.IO
 
             menu.Add(new Separator());
 
-            RuniMenuItem rename = new(string.Empty, BeginRename);
+            RuniMenuItem rename = new(string.Empty, BeginRename) { shortcuts = [renameShortcut] };
             menu.opened += () =>
             {
                 rename.text = GetText("runios-editor:io_node_tree_view.rename");
@@ -435,7 +438,7 @@ namespace RuniOS.UIElements.IO
 
             menu.Add(rename);
 
-            RuniMenuItem delete = new(string.Empty, () => Delete().Forget());
+            RuniMenuItem delete = new(string.Empty, () => Delete().Forget()) { shortcuts = [deleteShortcut] };
             menu.opened += () =>
             {
                 delete.text = GetText("runios-editor:io_node_tree_view.delete");

@@ -21,6 +21,11 @@ namespace RuniOS.UIElements.IO
         // 클릭하다 조금 움직인 것을 드래그로 보지 않도록, 이만큼 움직여야 시작합니다.
         const float startDistance = 8;
 
+        // 놓을 때 누르고 있으면 메뉴 없이 바로 그 동작을 하는 보조 키입니다.
+        static readonly KeyShortcut moveShortcut = new(KeyCode.None, modifiers: EventModifiers.Shift);
+        static readonly KeyShortcut copyShortcut = new(KeyCode.None, actionKey: true);
+        static readonly KeyShortcut cancelShortcut = new(KeyCode.Escape);
+
         // element는 target인 요소이며, 놓을 때 메뉴를 그 요소에 엽니다. operation이 null이면 놓을 때 메뉴로 묻습니다.
         readonly record struct DropLocation(IIODropTarget target, VisualElement element, IONode directory, IODropOperation? operation);
 
@@ -264,16 +269,16 @@ namespace RuniOS.UIElements.IO
         {
             RuniMenu menu = new();
 
-            AddItem(IODropOperation.Move, CanMove(data, location.directory));
-            AddItem(IODropOperation.Copy, CanCopy(data, location.directory));
+            AddItem(IODropOperation.Move, moveShortcut, CanMove(data, location.directory));
+            AddItem(IODropOperation.Copy, copyShortcut, CanCopy(data, location.directory));
             menu.Add(new Separator());
-            menu.Add(new RuniMenuItem(GetText("runios-editor:io_node_tree_view.drop.cancel"), null));
+            menu.Add(new RuniMenuItem(GetText("runios-editor:io_node_tree_view.drop.cancel"), null) { shortcuts = [cancelShortcut] });
 
             menu.DropDown(new Rect(position, Vector2.zero), location.element);
 
-            void AddItem(IODropOperation operation, bool enabled)
+            void AddItem(IODropOperation operation, KeyShortcut shortcut, bool enabled)
             {
-                RuniMenuItem item = new(GetOperationText(operation), () => Drop(data, location, operation).Forget());
+                RuniMenuItem item = new(GetOperationText(operation), () => Drop(data, location, operation).Forget()) { shortcuts = [shortcut] };
                 item.SetEnabled(enabled);
                 menu.Add(item);
             }
