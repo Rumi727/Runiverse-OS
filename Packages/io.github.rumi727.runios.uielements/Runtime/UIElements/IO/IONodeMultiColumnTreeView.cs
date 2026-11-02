@@ -314,11 +314,9 @@ namespace RuniOS.UIElements.IO
 
         RuniMenu? contextMenu;
 
+        // 빈 곳에서 열어도 새로 만들기를 할 수 있도록, 선택이 없어도 메뉴를 엽니다.
         void ShowContextMenu(Vector2 position)
         {
-            if (selectedEntries.Length == 0)
-                return;
-
             if (contextMenu == null)
             {
                 contextMenu = new RuniMenu();
@@ -334,6 +332,10 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         protected virtual void BuildContextMenu(RuniMenu menu)
         {
+            AddNewItemMenu(menu, () => this);
+
+            menu.Add(new Separator());
+
             RuniMenuItem rename = new(string.Empty, BeginRename);
             menu.opened += () =>
             {
@@ -358,11 +360,104 @@ namespace RuniOS.UIElements.IO
             {
                 showInFileManager.text = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
 
-                // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-                showInFileManager.SetEnabled(IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
+                // 선택된 항목이 있고, 실제 경로가 있는 항목이고, 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
+                showInFileManager.SetEnabled(selectedEntries.Length > 0 && IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
             };
 
             menu.Add(showInFileManager);
+        }
+
+        /// <summary>
+        /// 폴더와 빈 파일, 텍스트·마크다운·JSON 파일을 만드는 "새로 만들기" 하위 메뉴를 <paramref name="menu"/>에 추가합니다.
+        /// </summary>
+        /// <param name="menu">하위 메뉴를 넣을 메뉴입니다. 이 메뉴가 열릴 때 하위 메뉴의 활성 상태를 갱신합니다.</param>
+        /// <param name="getTreeView">
+        /// 메뉴를 열거나 항목을 고를 때마다 대상 트리 뷰를 가져옵니다. 탭처럼 대상이 바뀌는 메뉴에서 쓰기 위한 것이며,
+        /// <see langword="null"/>을 반환하거나 쓰기 가능한 프로바이더가 아니면 하위 메뉴를 비활성화합니다.
+        /// </param>
+        public static void AddNewItemMenu(RuniMenu menu, Func<IONodeMultiColumnTreeView?> getTreeView)
+        {
+            RuniMenu newMenu = new() { name = "new" };
+            menu.opened += () =>
+            {
+                newMenu.text = GetText("runios-editor:io_node_tree_view.new");
+                newMenu.SetEnabled(getTreeView() is { provider: IWritableIOProvider });
+            };
+
+            menu.Add(newMenu);
+
+            AddItem("runios-editor:io_node_tree_view.new_folder", "runios-editor:io_node_tree_view.new_folder_name", null);
+            newMenu.Add(new Separator());
+            AddItem("runios-editor:io_node_tree_view.new_file", "runios-editor:io_node_tree_view.new_file_name", string.Empty);
+            AddItem("runios-editor:io_node_tree_view.new_text_file", "runios-editor:io_node_tree_view.new_text_file_name", ".txt");
+            AddItem("runios-editor:io_node_tree_view.new_markdown_file", "runios-editor:io_node_tree_view.new_markdown_file_name", ".md");
+            AddItem("runios-editor:io_node_tree_view.new_json_file", "runios-editor:io_node_tree_view.new_json_file_name", ".json");
+
+            // extension이 null이면 폴더를 만듭니다.
+            void AddItem(string textKey, string nameKey, string? extension)
+            {
+                RuniMenuItem item = new(string.Empty, () =>
+                {
+                    if (getTreeView() is not { } treeView)
+                        return;
+
+                    string name = GetText(nameKey);
+                    (extension == null ? treeView.CreateDirectory(name) : treeView.CreateFile(name, extension)).Forget();
+                });
+
+                newMenu.opened += () => item.text = GetText(textKey);
+                newMenu.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// 현재 폴더에 새 폴더를 만들고 바로 이름을 바꾸는 상태로 들어갑니다. 같은 이름이 있으면 <c>name (2)</c>처럼 번호를 붙입니다.
+        /// </summary>
+        public UniTask CreateDirectory(string name) => Create(name, string.Empty, true);
+
+        /// <summary>
+        /// 현재 폴더에 빈 파일을 만들고 바로 이름을 바꾸는 상태로 들어갑니다. 같은 이름이 있으면 <c>name (2).ext</c>처럼 확장자 앞에 번호를 붙입니다.
+        /// </summary>
+        /// <param name="name">확장자를 뺀 이름입니다.</param>
+        /// <param name="extension"><c>.txt</c>처럼 점을 포함한 확장자이며, 확장자가 없으면 빈 문자열입니다.</param>
+        public UniTask CreateFile(string name, string extension = "") => Create(name, extension, false);
+
+        async UniTask Create(string name, string extension, bool isDirectory)
+        {
+            IONode directoryNode = node;
+            if (directoryNode.AsWriteNode() is not { } directory)
+                return;
+
+            // 같은 이름이 있으면 번호를 붙입니다. GetEntry는 없는 경로에서도 예외를 던지지 않습니다.
+            IOWriteNode child = directory.CreateChild(name + extension);
+            for (int number = 2; await directory.provider.GetEntry(child.path) != null; number++)
+                child = directory.CreateChild($"{name} ({number}){extension}");
+
+            try
+            {
+                if (isDirectory)
+                    await child.dir.Create();
+                else
+                {
+                    // 확인한 뒤에 같은 이름의 파일이 생겼더라도 내용이 지워지지 않도록, CreateFile 대신 자르지 않는 OpenWrite로 만듭니다.
+                    await using (await child.file.OpenWrite()) { }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
+            // 만드는 동안 다른 폴더로 이동했으면 그 목록에 추가하지 않습니다.
+            if (node != directoryNode || await directory.provider.GetEntry(child.path) is not { } entry)
+                return;
+
+            int id = loader.AddItem(entry, -1);
+
+            treeView.RefreshItems();
+            treeView.SetSelectionById(id);
+            BeginRename(id);
         }
 
         /// <summary>

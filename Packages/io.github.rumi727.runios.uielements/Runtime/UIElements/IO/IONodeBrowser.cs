@@ -57,6 +57,9 @@ namespace RuniOS.UIElements.IO
 
         protected override void BuildFolderMenu(RuniMenu menu)
         {
+            IONodeMultiColumnTreeView.AddNewItemMenu(menu, () => treeView);
+            menu.Add(new Separator());
+
             base.BuildFolderMenu(menu);
 
             RuniMenuItem showHiddenFiles = new(string.Empty, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
