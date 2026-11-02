@@ -52,13 +52,14 @@ namespace RuniOS.UIElements
 
         /// <summary>
         /// 실행 중인 플랫폼의 표기로 단축키를 표시합니다. 단축키가 없으면 빈 문자열입니다.
+        /// <see cref="keyCode"/>가 <see cref="KeyCode.None"/>이면, 끌어다 놓을 때처럼 보조 키만으로 정하는 동작을 위해 보조 키만 표시합니다.
         /// </summary>
         public override readonly string ToString()
         {
-            if (keyCode == KeyCode.None)
+            EventModifiers all = modifiers | (actionKey ? actionModifier : EventModifiers.None);
+            if (keyCode == KeyCode.None && (all & keyModifiers) == 0)
                 return string.Empty;
 
-            EventModifiers all = modifiers | (actionKey ? actionModifier : EventModifiers.None);
             StringBuilder builder = StringBuilderCache.Acquire();
 
             if (isMacOS)
@@ -72,7 +73,9 @@ namespace RuniOS.UIElements
                 if ((all & EventModifiers.Command) != 0)
                     builder.Append('⌘');
 
-                builder.Append(GetKeyText(keyCode));
+                if (keyCode != KeyCode.None)
+                    builder.Append(GetKeyText(keyCode));
+
                 return StringBuilderCache.GetStringAndRelease(builder);
             }
 
@@ -85,7 +88,12 @@ namespace RuniOS.UIElements
             if ((all & EventModifiers.Command) != 0)
                 builder.Append("Win+");
 
-            builder.Append(GetKeyText(keyCode));
+            // 보조 키만 표시하면 마지막 +를 뺍니다.
+            if (keyCode != KeyCode.None)
+                builder.Append(GetKeyText(keyCode));
+            else
+                builder.Length--;
+
             return StringBuilderCache.GetStringAndRelease(builder);
         }
 

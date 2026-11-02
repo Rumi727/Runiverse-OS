@@ -50,7 +50,7 @@ namespace RuniOS.UIElements
             set
             {
                 field = value;
-                shortcutLabel.text = string.Join(", ", value.Where(static x => x.keyCode != KeyCode.None));
+                shortcutLabel.text = string.Join(", ", value.Select(static x => x.ToString()).Where(static x => x.Length > 0));
             }
         } = [];
 
