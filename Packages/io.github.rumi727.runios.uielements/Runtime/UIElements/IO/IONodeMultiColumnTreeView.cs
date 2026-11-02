@@ -244,8 +244,18 @@ namespace RuniOS.UIElements.IO
             TextField renameField = new() { name = "rename-field", isDelayed = true };
             renameField.AddToClassList(renameFieldUssClassName);
             renameField.RegisterValueChangedCallback(OnRenameFieldChanged);
-            renameField.RegisterCallback<FocusOutEvent>(_ => EndRename());
             cell.Add(renameField);
+
+            // 필드 자신에 있던 포커스가 안쪽 입력으로 옮겨 갈 때도 필드에 FocusOut이 오므로, 편집하는 안쪽 입력이 포커스를 잃을 때만 끝냅니다.
+            // 이 두 경우 모두 relatedTarget이 필드 자신으로 바뀌어 전달되므로 relatedTarget으로는 구분할 수 없습니다.
+            renameField.Q(TextField.textInputUssName).Q<TextElement>().RegisterCallback<FocusOutEvent>(e =>
+            {
+                EndRename();
+
+                // Enter와 Esc는 포커스를 필드 자신으로 옮기므로, 숨겨질 필드 대신 트리에 포커스를 둡니다.
+                if (e.relatedTarget == renameField)
+                    treeView.Focus();
+            });
 
             Image loadingImage = new() { name = "loading-image" };
             loadingImage.AddToClassList(loadingImageUssClassName);
