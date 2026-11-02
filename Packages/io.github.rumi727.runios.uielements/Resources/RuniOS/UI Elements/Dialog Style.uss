@@ -1,0 +1,23 @@
+.runios-dialog__overlay {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+}
+
+.runios-dialog--no-title > .runios-dialog__title,
+.runios-dialog--no-message > .runios-dialog__message {
+    display: none;
+}
+
+.runios-dialog__message {
+    white-space: normal;
+}
+
+.runios-dialog__buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+}
