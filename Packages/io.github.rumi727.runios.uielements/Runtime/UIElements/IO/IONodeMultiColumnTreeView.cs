@@ -177,13 +177,24 @@ namespace RuniOS.UIElements.IO
                     ShowContextMenu(e.position);
             });
 
-            // 편집 필드 안에서 누른 F2가 편집을 다시 시작해 입력한 내용을 덮어쓰지 않게 합니다.
+            // 편집 필드 안에서 누른 F2가 편집을 다시 시작해 입력한 내용을 덮어쓰거나, Delete가 항목을 지우지 않게 합니다.
             RegisterCallback<KeyDownEvent>(e =>
             {
-                if (e.keyCode != KeyCode.F2 || renamingId != null)
+                if (renamingId != null)
                     return;
 
-                BeginRename();
+                switch (e.keyCode)
+                {
+                    case KeyCode.F2:
+                        BeginRename();
+                        break;
+                    case KeyCode.Delete:
+                        Delete(e.shiftKey).Forget();
+                        break;
+                    default:
+                        return;
+                }
+
                 e.StopPropagation();
             });
 
@@ -388,6 +399,15 @@ namespace RuniOS.UIElements.IO
             };
 
             menu.Add(rename);
+
+            RuniMenuItem delete = new(string.Empty, () => Delete().Forget());
+            menu.opened += () =>
+            {
+                delete.text = GetText("runios-editor:io_node_tree_view.delete");
+                delete.SetEnabled(selectedEntries.Length > 0 && canWrite);
+            };
+
+            menu.Add(delete);
 
             menu.Add(new Separator());
 
@@ -634,6 +654,107 @@ namespace RuniOS.UIElements.IO
 
             treeView.SetSelectionById(renamedId);
             treeView.ScrollToItemById(renamedId);
+        }
+
+        /// <summary>
+        /// 선택된 항목을 확인받은 뒤 지웁니다. 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 지워지므로 따로 지우지 않습니다.
+        /// <br/>
+        /// 실제 경로이고 모든 항목을 휴지통으로 보낼 수 있으면 휴지통으로 보내고, 하나라도 보낼 수 없으면 모두 영구 삭제할지 묻습니다.
+        /// 휴지통으로 보내다 실패하면 영구 삭제로 넘어가지 않습니다.
+        /// </summary>
+        /// <param name="permanently"><see langword="true"/>이면 휴지통을 쓰지 않고 영구 삭제할지 묻습니다.</param>
+        public async UniTask Delete(bool permanently = false)
+        {
+            IONode directoryNode = node;
+            if (!canWrite || directoryNode.AsWriteNode() is not { } directory)
+                return;
+
+            HashSet<int> selected = selectedIds.ToHashSet();
+            int[] ids = selected.Where(id => !HasSelectedAncestor(id)).ToArray();
+            if (ids.Length == 0)
+                return;
+
+            IOEntry[] entries = ids.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+
+            ITrashProvider? trash = null;
+            PhysicalPath[] trashPaths = Array.Empty<PhysicalPath>();
+            if (!permanently && ITrashProvider.instance is { } trashProvider && provider is PhysicalIOProvider physicalProvider)
+            {
+                trashPaths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
+
+                bool[] canMoveToTrash = await UniTask.WhenAll(trashPaths.Select(trashProvider.CanMoveToTrash));
+                if (canMoveToTrash.All(static x => x))
+                    trash = trashProvider;
+            }
+
+            string key = trash != null ? "runios-editor:io_node_tree_view.move_to_trash" : "runios-editor:io_node_tree_view.delete_permanently";
+            string message = entries.Length == 1
+                ? string.Format(GetText(key + ".message"), entries[0].metaData.name)
+                : string.Format(GetText(key + ".message_multiple"), entries.Length);
+
+            // 되돌릴 수 없는 영구 삭제는 Enter 한 번에 실행되지 않도록 취소에 포커스를 둡니다.
+            RuniDialog dialog = new(GetText(key), message);
+            Button confirm = dialog.AddButton(GetText(key + ".confirm"));
+            Button cancel = dialog.AddButton(GetText("runios-editor:io_node_tree_view.delete.cancel"));
+            dialog.defaultButton = trash != null ? confirm : cancel;
+
+            if (await dialog.ShowAsync(this) != confirm)
+                return;
+
+            if (trash != null)
+            {
+                try
+                {
+                    await trash.MoveToTrash(trashPaths);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
+            }
+            else
+            {
+                foreach (IOEntry entry in entries)
+                {
+                    IOWriteNode entryNode = directory.Bind(entry);
+
+                    try
+                    {
+                        if (entry.isDirectory)
+                            await entryNode.dir.Delete();
+                        else
+                            await entryNode.file.Delete();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
+            }
+
+            // 지우는 동안 다른 폴더로 이동했으면 그 목록에서 뺄 것이 없습니다.
+            if (node != directoryNode)
+                return;
+
+            // 일부만 지워졌을 수 있으므로 실제로 없어진 항목만 뺍니다.
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (await directory.provider.GetEntry(entries[i].path) == null && treeView.viewController.Exists(ids[i]))
+                    loader.RemoveItem(ids[i]);
+            }
+
+            treeView.RefreshItems();
+
+            bool HasSelectedAncestor(int id)
+            {
+                for (int parentId = treeView.viewController.GetParentId(id); parentId != -1; parentId = treeView.viewController.GetParentId(parentId))
+                {
+                    if (selected.Contains(parentId))
+                        return true;
+                }
+
+                return false;
+            }
         }
 
         public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));
