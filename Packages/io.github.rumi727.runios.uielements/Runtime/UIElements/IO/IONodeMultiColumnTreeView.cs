@@ -377,21 +377,27 @@ namespace RuniOS.UIElements.IO
 
             menu.Add(new Separator());
 
+            // 선택된 항목이 있으면 그 항목들을 보여 주고, 없으면 빈 곳에서 연 메뉴이므로 폴더 메뉴처럼 현재 폴더를 엽니다.
             RuniMenuItem showInFileManager = new(string.Empty, () =>
             {
-                if (IFileManagerProvider.instance is { } fileManager && provider is PhysicalIOProvider physicalProvider)
-                {
-                    PhysicalPath[] paths = selectedEntries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
-                    fileManager.ShowItems(paths).Forget();
-                }
+                if (IFileManagerProvider.instance is not { } fileManager || provider is not PhysicalIOProvider physicalProvider)
+                    return;
+
+                IOEntry[] entries = selectedEntries;
+                if (entries.Length > 0)
+                    fileManager.ShowItems(entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray()).Forget();
+                else
+                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
             });
 
             menu.opened += () =>
             {
-                showInFileManager.text = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
+                showInFileManager.text = selectedEntries.Length > 0
+                    ? GetText("runios-editor:io_node_tree_view.show_in_file_manager")
+                    : GetText("runios-editor:io_browser.open_in_file_manager");
 
-                // 선택된 항목이 있고, 실제 경로가 있는 항목이고, 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-                showInFileManager.SetEnabled(selectedEntries.Length > 0 && IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
+                // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
+                showInFileManager.SetEnabled(IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
             };
 
             menu.Add(showInFileManager);
