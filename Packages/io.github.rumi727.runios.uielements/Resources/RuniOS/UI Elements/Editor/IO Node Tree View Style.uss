@@ -1,3 +1,8 @@
+.runios-io-node-tree-view {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
 .runios-io-node-tree-view__cell--hidden {
     opacity: 0.5;
 }
