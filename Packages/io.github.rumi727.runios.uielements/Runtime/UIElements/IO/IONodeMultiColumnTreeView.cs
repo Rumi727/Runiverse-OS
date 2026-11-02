@@ -126,6 +126,32 @@ namespace RuniOS.UIElements.IO
                     opened?.Invoke(entry);
             };
 
+            // 컬렉션 뷰는 항목이 없는 곳을 눌러도 선택을 바꾸지 않으므로, 목록의 빈 곳을 누르면 선택을 해제합니다.
+            // 오른쪽 버튼에서는 빈 곳에서 연 메뉴가 이전 선택을 대상으로 하지 않게 됩니다.
+            RegisterCallback<PointerDownEvent>(e =>
+            {
+                if (e.button is ((int)MouseButton.LeftMouse or (int)MouseButton.RightMouse) && IsEmptyArea(e.target))
+                    treeView.ClearSelection();
+            });
+
+            // 목록 아래 빈 영역이 어느 요소에 속하는지는 컬렉션 뷰의 내부 배치에 달려 있으므로,
+            // 이 요소까지 올라가는 동안 항목 행·컬럼 헤더·스크롤바를 만나지 않으면 빈 곳으로 봅니다.
+            bool IsEmptyArea(IEventHandler target)
+            {
+                for (VisualElement? element = target as VisualElement; element != null; element = element.hierarchy.parent)
+                {
+                    if (element == this)
+                        return true;
+
+                    if (element.ClassListContains(BaseVerticalCollectionView.itemUssClassName)
+                        || element.ClassListContains(MultiColumnController.headerContainerUssClassName)
+                        || element.ClassListContains(Scroller.ussClassName))
+                        return false;
+                }
+
+                return false;
+            }
+
             // 오른쪽 버튼을 누를 때 컬렉션 뷰가 이미 선택을 바꾸므로, 뗄 때 선택된 항목으로 메뉴를 엽니다.
             RegisterCallback<PointerUpEvent>(e =>
             {
