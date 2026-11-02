@@ -688,8 +688,7 @@ namespace RuniOS.UIElements.IO
             if (!canWrite || directoryNode.AsWriteNode() is not { } directory)
                 return;
 
-            HashSet<int> selected = selectedIds.ToHashSet();
-            int[] ids = selected.Where(id => !HasSelectedAncestor(id)).ToArray();
+            int[] ids = GetTopmostIds(selectedIds);
             if (ids.Length == 0)
                 return;
 
@@ -763,12 +762,19 @@ namespace RuniOS.UIElements.IO
             }
 
             treeView.RefreshItems();
+        }
 
-            bool HasSelectedAncestor(int id)
+        // 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로, 조상이 함께 들어 있지 않은 항목만 남깁니다.
+        int[] GetTopmostIds(IEnumerable<int> ids)
+        {
+            HashSet<int> idSet = ids.ToHashSet();
+            return idSet.Where(id => !HasAncestorIn(id)).ToArray();
+
+            bool HasAncestorIn(int id)
             {
                 for (int parentId = treeView.viewController.GetParentId(id); parentId != -1; parentId = treeView.viewController.GetParentId(parentId))
                 {
-                    if (selected.Contains(parentId))
+                    if (idSet.Contains(parentId))
                         return true;
                 }
 
