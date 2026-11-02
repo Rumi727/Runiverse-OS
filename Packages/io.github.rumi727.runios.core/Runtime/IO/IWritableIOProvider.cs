@@ -30,6 +30,11 @@ namespace RuniOS.IO
         /// Opens a stream for writing to the file at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로의 파일에 쓰기 위한 스트림을 엽니다.
         /// </summary>
+        /// <remarks>
+        /// Creates the file if it does not exist. An existing file is not truncated; writing starts at the beginning and overwrites only the written range.
+        /// <br/><br/>
+        /// 파일이 없으면 만듭니다. 기존 파일은 자르지 않으며, 처음부터 쓴 범위만 덮어씁니다.
+        /// </remarks>
         /// <param name="path">
         /// The provider-relative file path to write.<br/>
         /// 쓸 프로바이더 기준 파일 경로입니다.

@@ -83,6 +83,11 @@ namespace RuniOS.IO
             /// Opens a stream for writing to the file represented by this node.<br/>
             /// 이 노드가 나타내는 파일에 쓰기 위한 스트림을 엽니다.
             /// </summary>
+            /// <remarks>
+            /// Creates the file if it does not exist. An existing file is not truncated; writing starts at the beginning and overwrites only the written range.
+            /// <br/><br/>
+            /// 파일이 없으면 만듭니다. 기존 파일은 자르지 않으며, 처음부터 쓴 범위만 덮어씁니다.
+            /// </remarks>
             /// <param name="cancellationToken">
             /// The cancellation token used to cancel the operation.<br/>
             /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
