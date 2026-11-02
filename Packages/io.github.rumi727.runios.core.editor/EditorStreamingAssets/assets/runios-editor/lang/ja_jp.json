@@ -260,6 +260,8 @@
   "io_browser.show_hidden_files": "隠しファイルを表示",
   "io_browser.open_in_file_manager": "ファイルマネージャーで開く",
   "io_browser.new_tab": "新しいタブ",
+  "io_browser.close_tab": "タブを閉じる",
+  "io_browser.refresh": "再読み込み",
   "io_browser.known_directory.home": "ホーム",
   "io_browser.known_directory.desktop": "デスクトップ",
   "io_browser.known_directory.documents": "ドキュメント",

@@ -260,6 +260,8 @@
   "io_browser.show_hidden_files": "Show Hidden Files",
   "io_browser.open_in_file_manager": "Open in File Manager",
   "io_browser.new_tab": "New Tab",
+  "io_browser.close_tab": "Close Tab",
+  "io_browser.refresh": "Refresh",
   "io_browser.known_directory.home": "Home",
   "io_browser.known_directory.desktop": "Desktop",
   "io_browser.known_directory.documents": "Documents",
