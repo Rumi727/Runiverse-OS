@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Patches
                         [HarmonyPatch]
                         public static class CreateBindingObjectForProperty
                         {
-                            public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(targetType, nameof(CreateBindingObjectForProperty));
+                            public static MethodBase TargetMethod() => targetType.GetMethod(nameof(CreateBindingObjectForProperty), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
 
 //#if UNITY_6000_0_OR_NEWER
 #if FALSE
@@ -124,6 +124,7 @@ namespace RuniOS.Editor.Patches
                             }
 #endif
 
+                            static readonly MethodInfo defaultBindGenericDefinition = typeof(SerializedObjectBindingContextBridge).GetMethod(nameof(SerializedObjectBindingContextBridge.DefaultBind))!;
                             static readonly object[] defaultBindParms = new object[5];
                             public static bool CustomPreCondition(object instance, VisualElement element, SerializedProperty prop)
                             {
@@ -133,18 +134,6 @@ namespace RuniOS.Editor.Patches
                                     if (ActiveEditorTracker.sharedTracker.inspectorMode != InspectorMode.Normal)
                                         return false;
 #endif
-                                    // DefaultBind 메소드를 포함하는 대상 인스턴스의 타입을 가져옵니다.
-                                    Type targetType = instance.GetType();
-                                    // 대상 인스턴스에서 "DefaultBind" 제네릭 메소드의 정의를 찾아옵니다.
-                                    MethodInfo? defaultBindGenericDefinition = targetType.DeclaredMethod("DefaultBind");
-
-                                    // DefaultBind 메소드 정의를 찾을 수 없거나 제네릭 메소드가 아닌 경우 예외를 발생시킵니다.
-                                    if (defaultBindGenericDefinition == null || !defaultBindGenericDefinition.IsGenericMethodDefinition)
-                                    {
-                                        Debug.LogError($"Definition of generic method 'DefaultBind<TValue>' not found in '{targetType}'");
-                                        return false;
-                                    }
-
                                     // SerializedProperty로부터 필드의 실제 타입(propertyType)을 가져옵니다.
                                     prop.GetFieldInfoFromProperty(out Type? propertyType);
 
@@ -219,7 +208,7 @@ namespace RuniOS.Editor.Patches
                                                 Debug.LogException(e);
                                                 Debug.LogError($"Binding operation failed due to an exception in binder {binder.GetType().Name} at {property.propertyPath}!");
 
-                                                return propertyType.GetDefaultValue(); // 예외 발생 시에도 기본값 반환
+                                                return ReflectionUtility.GetDefaultValue(propertyType); // 예외 발생 시에도 기본값 반환
                                             }
                                         }
 
@@ -373,8 +362,8 @@ namespace RuniOS.Editor.Patches
                                     // DefaultBind 메소드의 제네릭 버전을 propertyType에 맞춰 만듭니다.
                                     MethodInfo defaultBind = defaultBindGenericDefinition.MakeGenericMethod(propertyType);
 
-                                    // DefaultBind 메소드를 호출합니다.
-                                    defaultBind.Invoke(instance, defaultBindParms);
+                                    // 브릿지를 통해 DefaultBind 메소드를 호출합니다.
+                                    defaultBind.Invoke(SerializedObjectBindingContextBridge.__GetInstanceFrom(instance), defaultBindParms);
 
                                     return true; // 바인딩 설정 성공
                                 }

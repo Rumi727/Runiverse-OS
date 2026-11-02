@@ -25,23 +25,23 @@ namespace RuniOS.Editor.Patches
                     public static class Reset
 #endif
                     {
-                        public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(typeof(PropertyField),
+                        public static MethodBase TargetMethod() => typeof(PropertyField).GetMethod(
 #if UNITY_6000_6_OR_NEWER
                             nameof(ResetInternal),
 #else
                             nameof(Reset),
 #endif
-                            [typeof(SerializedProperty)]);
+                            BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly, null, [typeof(SerializedProperty)], null)!;
 
                         public static void Prefix(PropertyField __instance) => EditorUIElementsUtility.propertyExtensionDatas.Remove(__instance);
 
                         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
                         {
                             CodeMatcher matcher = new CodeMatcher(instructions, generator);
-                            CodeMatch methodMatch = CodeMatch.Calls(typeof(PropertyDrawer).DeclaredMethod(nameof(PropertyDrawer.CreatePropertyGUI)));
-                            
+                            CodeMatch methodMatch = CodeMatch.Calls(typeof(PropertyDrawer).GetMethod(nameof(PropertyDrawer.CreatePropertyGUI), [typeof(SerializedProperty)])!);
+
                             matcher.MatchStartForward(methodMatch);
-                            
+
                             if (matcher.IsInvalid)
                             {
                                 Debug.LogWarning($"Harmony Transpiler: Could not find insertion point for {nameof(PropertyDrawer.CreatePropertyGUI)} check in " +
