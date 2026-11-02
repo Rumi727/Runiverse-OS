@@ -62,7 +62,11 @@ namespace RuniOS.UIElements.IO
         /// 선택된 항목을 가져옵니다.
         /// </summary>
         // DefaultMultiColumnTreeViewController.GetItemForIndex가 정렬을 반영하지 않아 selectedItems가 화면과 어긋나므로, 선택된 id로 항목을 찾습니다.
-        public IOEntry[] selectedEntries => treeView.selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+        public IOEntry[] selectedEntries => selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+
+        // 컬렉션 뷰는 트리를 다시 채우거나 항목을 제거해도 선택 id 목록에서 사라진 id를 지우지 않으므로(인덱스만 다시 만듭니다),
+        // 트리에 실제로 있는 항목의 id만 씁니다. 없는 id로 항목을 찾으면 경로가 빈 기본값, 즉 루트가 나옵니다.
+        IEnumerable<int> selectedIds => treeView.selectedIds.Where(treeView.viewController.Exists);
 
         /// <summary>
         /// 항목을 더블 클릭하거나 Enter 키로 고르면 발생합니다.
@@ -491,10 +495,10 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         public void BeginRename()
         {
-            if (provider is not IWritableIOProvider || treeView.selectedIds.Count() != 1)
+            if (provider is not IWritableIOProvider || selectedIds.Count() != 1)
                 return;
 
-            BeginRename(treeView.selectedIds.First());
+            BeginRename(selectedIds.First());
         }
 
         void BeginRename(int id)
