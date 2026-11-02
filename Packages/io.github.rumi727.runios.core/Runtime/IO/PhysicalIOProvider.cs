@@ -219,6 +219,16 @@ namespace RuniOS.IO
         }
 
         /// <inheritdoc/>
+        public UniTask CopyFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
+        {
+            string source = ResolveFullPath(sourcePath);
+            string destination = ResolveFullPath(destinationPath);
+
+            // 큰 파일을 복사하는 동안 호출한 스레드가 멈추지 않도록 스레드 풀에서 복사합니다.
+            return UniTask.RunOnThreadPool(() => File.Copy(source, destination, overwrite), cancellationToken: cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public UniTask MoveFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
         {
             string source = ResolveFullPath(sourcePath);
