@@ -2,6 +2,10 @@
     flex-shrink: 1;
 }
 
+.runios-io-node-tree-view > .unity-collection-view {
+    flex-grow: 1;
+}
+
 .runios-io-node-tree-view__cell {
     flex-direction: row;
     flex-grow: 1;

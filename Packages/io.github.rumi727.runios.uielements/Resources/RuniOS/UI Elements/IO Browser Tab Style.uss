@@ -5,3 +5,19 @@
 .unity-tab__header {
     align-self: stretch;
 }
+
+.runios-io-browser__content-pane > .unity-tab-view__content-container {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab > .unity-tab__content-container {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab > .runios-io-node-tree-view {
+    flex-grow: 1;
+}
