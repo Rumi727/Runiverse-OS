@@ -17,3 +17,40 @@
     width: 16px;
     height: 16px;
 }
+
+/* 끄는 항목 표시가 포인터를 가리지 않도록 오른쪽 아래로 띄웁니다. */
+.runios-io-node-tree-view__drag-ghost {
+    margin-left: 12px;
+    margin-top: 12px;
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-left-radius: 3px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    border-bottom-left-radius: 3px;
+    background-color: var(--unity-colors-context_menu-background);
+    border-top-color: var(--unity-colors-dropdown-border);
+    border-right-color: var(--unity-colors-dropdown-border);
+    border-bottom-color: var(--unity-colors-dropdown-border);
+    border-left-color: var(--unity-colors-dropdown-border);
+}
+
+.runios-io-node-tree-view__drag-ghost--rejected {
+    opacity: 0.5;
+}
+
+.runios-io-node-tree-view__drag-ghost-operation {
+    opacity: 0.7;
+}
+
+/* 선택된 행과 구분되도록 선택 색보다 옅게 칠합니다. 행은 컬렉션 뷰의 선택·호버 규칙보다 우선하도록 항목 클래스와 함께 고릅니다. */
+.runios-io-node-tree-view__drop-target,
+.unity-collection-view__item.runios-io-node-tree-view__drop-target {
+    background-color: rgba(64, 128, 255, 0.25);
+}

@@ -11,7 +11,7 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements.IO
 {
     [UxmlElement]
-    public partial class IONodeMultiColumnTreeView : VisualElement
+    public partial class IONodeMultiColumnTreeView : VisualElement, IIODragSource, IIODropTarget
     {
         public const string ussClassName = "runios-io-node-tree-view";
         public const string cellUssClassName = "runios-io-node-tree-view__cell";
@@ -23,6 +23,12 @@ namespace RuniOS.UIElements.IO
         public const string loadingImageUssClassName = "runios-io-node-tree-view__loading-image";
         public const string nameCellRenamingUssClassName = "runios-io-node-tree-view__name-cell--renaming";
         public const string renameFieldUssClassName = "runios-io-node-tree-view__rename-field";
+        public const string dropTargetUssClassName = "runios-io-node-tree-view__drop-target";
+        public const string dragGhostUssClassName = "runios-io-node-tree-view__drag-ghost";
+        public const string dragGhostRejectedUssClassName = "runios-io-node-tree-view__drag-ghost--rejected";
+        public const string dragGhostTitleUssClassName = "runios-io-node-tree-view__drag-ghost-title";
+        public const string dragGhostOperationUssClassName = "runios-io-node-tree-view__drag-ghost-operation";
+        public const string dragGhostOperationHiddenUssClassName = "runios-io-node-tree-view__drag-ghost-operation--hidden";
 
         static readonly AssetRef<VectorImage> folderIcon = "runios-ui:ui/io_browser/places/16/folder";
         static readonly AssetRef<VectorImage> folderEditorDarkIcon = "runios-ui:ui_dark/io_browser/places/16/folder";
@@ -106,6 +112,13 @@ namespace RuniOS.UIElements.IO
 
         // 마지막으로 로드한 위치이며, 새로 고침인지 다른 위치로의 이동인지 구분합니다.
         IONode? loadedNode;
+
+        // 끄는 항목을 놓을 위치로 강조한 요소입니다.
+        VisualElement? dropHighlight;
+
+        // 끄는 동안 포인터를 따라다니는 고스트와, 그 안에서 할 동작을 보여 주는 라벨입니다.
+        VisualElement? dragGhost;
+        Label? dragGhostOperationLabel;
 
         public IONodeMultiColumnTreeView() : this(IONode.empty) { }
 
@@ -207,6 +220,8 @@ namespace RuniOS.UIElements.IO
                 e.StopPropagation();
             });
 
+            this.AddManipulator(new IODragManipulator(this));
+
             Add(treeView);
 
             this.AddManipulator(new LocalizationManipulator(OnLanguageChanged));
@@ -300,8 +315,9 @@ namespace RuniOS.UIElements.IO
             element.EnableInClassList(nameCellRenamingUssClassName, id == renamingId);
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
 
-            // 값이 확정될 때 어느 항목의 이름을 바꿀지 알 수 있도록 id를 둡니다.
+            // 값이 확정될 때 어느 항목의 이름을 바꿀지, 끌어다 놓을 때 어느 항목 위인지 알 수 있도록 id를 둡니다.
             element.Q<TextField>("rename-field").userData = id;
+            element.userData = id;
         }
 
         /// <summary>
@@ -780,6 +796,108 @@ namespace RuniOS.UIElements.IO
 
                 return false;
             }
+        }
+
+        // 항목 행을 누르면 선택된 항목을 끕니다. 행을 누를 때 컬렉션 뷰가 이미 선택을 바꿉니다.
+        IODragData? IIODragSource.GetDragData(PointerDownEvent evt)
+        {
+            if (renamingId != null || GetItemIdAt(evt.position) == -1)
+                return null;
+
+            IOEntry[] entries = GetTopmostIds(selectedIds).Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+            return entries.Length > 0 ? new IODragData(this, provider, entries) : null;
+        }
+
+        VisualElement IIODragSource.OnDragStart(IODragData data)
+        {
+            string title = data.entries.Length == 1
+                ? data.entries[0].metaData.name
+                : string.Format(GetText("runios-editor:io_node_tree_view.item_count"), data.entries.Length);
+
+            // 패널 맨 위에 붙으므로, 이 요소의 조상에서 받던 스타일을 직접 붙입니다.
+            dragGhost = new VisualElement { name = "drag-ghost" };
+            dragGhost.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
+            dragGhost.AddToClassList(dragGhostUssClassName);
+
+            Label titleLabel = new(title) { name = "title" };
+            titleLabel.AddToClassList(dragGhostTitleUssClassName);
+            dragGhost.Add(titleLabel);
+
+            dragGhostOperationLabel = new Label { name = "operation" };
+            dragGhostOperationLabel.AddToClassList(dragGhostOperationUssClassName);
+            dragGhost.Add(dragGhostOperationLabel);
+
+            return dragGhost;
+        }
+
+        // 놓을 수 없으면 고스트를 흐리게 하고, 놓을 때 할 동작이 정해져 있으면 보여 줍니다.
+        void IIODragSource.OnDragUpdate(IODragData data, bool canDrop, IODropOperation? operation)
+        {
+            if (dragGhost == null || dragGhostOperationLabel == null)
+                return;
+
+            dragGhost.EnableInClassList(dragGhostRejectedUssClassName, !canDrop);
+            dragGhostOperationLabel.EnableInClassList(dragGhostOperationHiddenUssClassName, operation == null);
+            if (operation != null)
+                dragGhostOperationLabel.text = GetText(operation == IODropOperation.Move ? "runios-editor:io_node_tree_view.drop.move" : "runios-editor:io_node_tree_view.drop.copy");
+        }
+
+        void IIODragSource.OnDragEnd(IODragData data)
+        {
+            dragGhost = null;
+            dragGhostOperationLabel = null;
+        }
+
+        bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
+        {
+            int id = GetDropDirectoryId(position);
+            directory = id == -1 ? node : new IONode(provider, treeView.GetItemDataForId<IOEntry>(id).path);
+
+            return canWrite;
+        }
+
+        // 놓을 수 있을 때 항목이 들어갈 폴더의 행을, 현재 폴더면 트리 전체를 강조합니다.
+        void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop)
+        {
+            VisualElement? element = null;
+            if (canDrop)
+            {
+                int id = GetDropDirectoryId(position);
+                element = (id == -1 ? null : treeView.GetRootElementForId(id)) ?? this;
+            }
+
+            SetDropHighlight(element);
+        }
+
+        void IIODropTarget.OnDragLeave() => SetDropHighlight(null);
+
+        void SetDropHighlight(VisualElement? element)
+        {
+            if (dropHighlight == element)
+                return;
+
+            dropHighlight?.RemoveFromClassList(dropTargetUssClassName);
+            dropHighlight = element;
+            dropHighlight?.AddToClassList(dropTargetUssClassName);
+        }
+
+        // 폴더 위에 놓으면 그 폴더 안으로, 파일 위에 놓으면 그 파일이 들어 있는 폴더로 들어갑니다. 빈 곳이나 현재 폴더 바로 아래 파일이면 현재 폴더인 -1입니다.
+        int GetDropDirectoryId(Vector2 position)
+        {
+            int id = GetItemIdAt(position);
+            return id == -1 || treeView.GetItemDataForId<IOEntry>(id).isDirectory ? id : treeView.viewController.GetParentId(id);
+        }
+
+        // 행이 재사용되므로, 포인터 아래 행의 이름 셀에 바인딩할 때 둔 id로 항목을 찾습니다. 행이 아니면 -1입니다.
+        int GetItemIdAt(Vector2 position)
+        {
+            for (VisualElement? element = panel?.Pick(position); element != null && element != this; element = element.parent)
+            {
+                if (element.ClassListContains(BaseVerticalCollectionView.itemUssClassName))
+                    return element.Q(className: nameCellUssClassName)?.userData is int id && treeView.viewController.Exists(id) ? id : -1;
+            }
+
+            return -1;
         }
 
         /// <summary>

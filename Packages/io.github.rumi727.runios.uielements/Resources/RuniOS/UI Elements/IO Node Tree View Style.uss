@@ -67,3 +67,12 @@
 .runios-io-browser .unity-multi-column-view__cell {
     justify-content: flex-start;
 }
+
+.runios-io-node-tree-view__drag-ghost-title,
+.runios-io-node-tree-view__drag-ghost-operation {
+    white-space: nowrap;
+}
+
+.runios-io-node-tree-view__drag-ghost-operation--hidden {
+    display: none;
+}
