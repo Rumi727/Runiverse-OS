@@ -99,6 +99,14 @@ namespace RuniOS.UIElements.IO
         // 행이 다시 바인딩되거나 재사용되어도 편집 상태가 유지되도록, 행 요소가 아니라 항목 id로 기록합니다.
         int? renamingId;
 
+        // 같은 위치를 다시 로드할 때, 로드 전에 펼쳐져 있거나 선택되어 있던 항목의 경로입니다.
+        // 다시 로드되면서 id가 바뀌므로 경로로 찾아 되살리고, 되살린 경로는 뺍니다.
+        readonly HashSet<RuniPath> restoringExpandedPaths = [];
+        readonly HashSet<RuniPath> restoringSelectedPaths = [];
+
+        // 마지막으로 로드한 위치이며, 새로 고침인지 다른 위치로의 이동인지 구분합니다.
+        IONode? loadedNode;
+
         public IONodeMultiColumnTreeView() : this(IONode.empty) { }
 
         public IONodeMultiColumnTreeView(IONode node)
@@ -137,6 +145,7 @@ namespace RuniOS.UIElements.IO
 
             loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => EnumerateEntries(x.path)) { preloadDepth = 1 };
             treeView.SetViewController(new LazyMultiColumnTreeViewController<IOEntry>(treeView, loader));
+            loader.childrenLoaded += RestoreChildren;
             treeView.itemsChosen += _ =>
             {
                 // opened 구독자가 node를 바꾸면 그 자리에서 트리가 다시 로드되어 이전 id로는 항목을 찾을 수 없으므로, 열기 전에 항목을 모두 가져옵니다.
@@ -767,7 +776,78 @@ namespace RuniOS.UIElements.IO
             }
         }
 
-        public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));
+        /// <summary>
+        /// 현재 위치의 목록을 다시 불러옵니다. 마지막으로 불러온 위치와 같으면 펼침·선택·스크롤 상태를 되살립니다.
+        /// </summary>
+        public async UniTask Refresh()
+        {
+            restoringExpandedPaths.Clear();
+            restoringSelectedPaths.Clear();
+
+            bool restore = loadedNode == node;
+            loadedNode = node;
+
+            ScrollView scrollView = treeView.Q<ScrollView>();
+            Vector2 scrollOffset = scrollView.scrollOffset;
+
+            if (restore)
+            {
+                foreach (int id in treeView.viewController.GetAllItemIds())
+                {
+                    if (treeView.IsExpanded(id))
+                        restoringExpandedPaths.Add(treeView.GetItemDataForId<IOEntry>(id).path);
+                }
+
+                foreach (IOEntry entry in selectedEntries)
+                    restoringSelectedPaths.Add(entry.path);
+            }
+
+            await loader.Reset(EnumerateEntries(node.path));
+
+            if (!restore)
+                return;
+
+            // 다시 채운 목록이 아직 배치되지 않았으면 스크롤 범위가 작아 위치가 잘리므로, 배치된 뒤에 한 번 더 맞춥니다.
+            scrollView.scrollOffset = scrollOffset;
+            if (scrollView.scrollOffset != scrollOffset)
+                scrollView.contentContainer.RegisterCallback<GeometryChangedEvent>(OnContentGeometryChanged);
+
+            void OnContentGeometryChanged(GeometryChangedEvent _)
+            {
+                scrollView.contentContainer.UnregisterCallback<GeometryChangedEvent>(OnContentGeometryChanged);
+                scrollView.scrollOffset = scrollOffset;
+            }
+        }
+
+        void RestoreChildren(int parentId, IReadOnlyList<int> childIds)
+        {
+            if (restoringExpandedPaths.Count == 0 && restoringSelectedPaths.Count == 0)
+                return;
+
+            bool IsRestoring(int id)
+            {
+                RuniPath path = treeView.GetItemDataForId<IOEntry>(id).path;
+                return restoringExpandedPaths.Contains(path) || restoringSelectedPaths.Contains(path);
+            }
+
+            if (!childIds.Any(IsRestoring))
+                return;
+
+            // 로더가 rebuildTree 없이 추가한 항목은 새로 고침 전까지 펼치거나 선택할 수 없으므로, 트리를 먼저 갱신합니다.
+            treeView.RefreshItems();
+
+            foreach (int id in childIds)
+            {
+                RuniPath path = treeView.GetItemDataForId<IOEntry>(id).path;
+
+                // 펼치면 로더가 자식을 로드하고, 그 자식들도 여기서 다시 되살립니다.
+                if (restoringExpandedPaths.Remove(path))
+                    treeView.ExpandItem(id, refresh: false);
+
+                if (restoringSelectedPaths.Remove(path))
+                    treeView.AddToSelectionById(id);
+            }
+        }
 
         IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path)
         {
