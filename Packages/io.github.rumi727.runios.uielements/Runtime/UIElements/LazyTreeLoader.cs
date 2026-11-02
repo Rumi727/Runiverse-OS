@@ -50,6 +50,15 @@ namespace RuniOS.UIElements
         /// </summary>
         public int maxConcurrentLoads { get; set; } = 1;
 
+        /// <summary>
+        /// Occurs when the children of an item have been loaded, with the parent identifier (<c>-1</c> for the root) and the identifiers of the loaded children.<br/>
+        /// Not raised for loads canceled by <see cref="Reset"/> or whose parent was removed.
+        /// <br/><br/>
+        /// 항목의 자식 로드가 끝나면, 부모 식별자(루트는 <c>-1</c>)와 로드된 자식들의 식별자와 함께 발생합니다.<br/>
+        /// <see cref="Reset"/>으로 취소되었거나 부모가 제거된 로드에서는 발생하지 않습니다.
+        /// </summary>
+        public event Action<int, IReadOnlyList<int>>? childrenLoaded;
+
         readonly Func<T, bool> mayHaveChildren;
         readonly Func<T, IUniTaskAsyncEnumerable<T>> getChildren;
 
@@ -363,6 +372,8 @@ namespace RuniOS.UIElements
                     refresh.Resume();
 
                     PreloadChildren(childIds, depth);
+
+                    childrenLoaded?.Invoke(parentId, childIds);
                 }
             }
         }
