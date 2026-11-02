@@ -22,7 +22,7 @@ namespace RuniOS.UIElements.IO
 
         public IONodeBrowserTab()
         {
-            treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
+            treeView = new IONodeMultiColumnTreeView { name = "tree-view", contextMenuEnabled = true };
             treeView.opened += OpenEntry;
 
             Add(treeView);

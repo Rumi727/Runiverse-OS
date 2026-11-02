@@ -34,7 +34,7 @@ namespace RuniOS.UIElements.IO
             deviceLocationView.opened += x => node = FileSystemBrowser.GetNodeFromPhysicalRoot(x);
             Add(deviceLocationView);
 
-            treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
+            treeView = new IONodeMultiColumnTreeView { name = "tree-view", contextMenuEnabled = true };
             treeView.opened += OpenEntry;
             Add(treeView);
 

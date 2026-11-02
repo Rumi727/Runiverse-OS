@@ -59,6 +59,20 @@ namespace RuniOS.UIElements.IO
         }
 
         /// <summary>
+        /// 이름 바꾸기와 새로 만들기 같은 수정을 막을지 정합니다.
+        /// </summary>
+        [UxmlAttribute]
+        public bool readOnly { get; set; }
+
+        /// <summary>
+        /// 우클릭 메뉴를 열지 정합니다.
+        /// </summary>
+        [UxmlAttribute]
+        public bool contextMenuEnabled { get; set; }
+
+        bool canWrite => !readOnly && provider is IWritableIOProvider;
+
+        /// <summary>
         /// 선택된 항목을 가져옵니다.
         /// </summary>
         // DefaultMultiColumnTreeViewController.GetItemForIndex가 정렬을 반영하지 않아 selectedItems가 화면과 어긋나므로, 선택된 id로 항목을 찾습니다.
@@ -159,7 +173,7 @@ namespace RuniOS.UIElements.IO
             // 오른쪽 버튼을 누를 때 컬렉션 뷰가 이미 선택을 바꾸므로, 뗄 때 선택된 항목으로 메뉴를 엽니다.
             RegisterCallback<PointerUpEvent>(e =>
             {
-                if (e.button == (int)MouseButton.RightMouse)
+                if (e.button == (int)MouseButton.RightMouse && contextMenuEnabled)
                     ShowContextMenu(e.position);
             });
 
@@ -370,7 +384,7 @@ namespace RuniOS.UIElements.IO
             menu.opened += () =>
             {
                 rename.text = GetText("runios-editor:io_node_tree_view.rename");
-                rename.SetEnabled(selectedEntries.Length == 1 && provider is IWritableIOProvider);
+                rename.SetEnabled(selectedEntries.Length == 1 && canWrite);
             };
 
             menu.Add(rename);
@@ -409,7 +423,7 @@ namespace RuniOS.UIElements.IO
         /// <param name="menu">하위 메뉴를 넣을 메뉴입니다. 이 메뉴가 열릴 때 하위 메뉴의 활성 상태를 갱신합니다.</param>
         /// <param name="getTreeView">
         /// 메뉴를 열거나 항목을 고를 때마다 대상 트리 뷰를 가져옵니다. 탭처럼 대상이 바뀌는 메뉴에서 쓰기 위한 것이며,
-        /// <see langword="null"/>을 반환하거나 쓰기 가능한 프로바이더가 아니면 하위 메뉴를 비활성화합니다.
+        /// <see langword="null"/>을 반환하거나, <see cref="readOnly"/>이거나, 쓰기 가능한 프로바이더가 아니면 하위 메뉴를 비활성화합니다.
         /// </param>
         public static void AddNewItemMenu(RuniMenu menu, Func<IONodeMultiColumnTreeView?> getTreeView)
         {
@@ -417,7 +431,7 @@ namespace RuniOS.UIElements.IO
             menu.opened += () =>
             {
                 newMenu.text = GetText("runios-editor:io_node_tree_view.new");
-                newMenu.SetEnabled(getTreeView() is { provider: IWritableIOProvider });
+                newMenu.SetEnabled(getTreeView() is { canWrite: true });
             };
 
             menu.Add(newMenu);
@@ -461,7 +475,7 @@ namespace RuniOS.UIElements.IO
         async UniTask Create(string name, string extension, bool isDirectory)
         {
             IONode directoryNode = node;
-            if (directoryNode.AsWriteNode() is not { } directory)
+            if (!canWrite || directoryNode.AsWriteNode() is not { } directory)
                 return;
 
             // 같은 이름이 있으면 번호를 붙입니다. GetEntry는 없는 경로에서도 예외를 던지지 않습니다.
@@ -497,11 +511,11 @@ namespace RuniOS.UIElements.IO
         }
 
         /// <summary>
-        /// 선택된 항목이 하나이고 쓰기 가능한 프로바이더일 때, 그 항목의 이름 셀을 편집 상태로 바꿉니다.
+        /// 선택된 항목이 하나이고 <see cref="readOnly"/>가 아니며 쓰기 가능한 프로바이더일 때, 그 항목의 이름 셀을 편집 상태로 바꿉니다.
         /// </summary>
         public void BeginRename()
         {
-            if (provider is not IWritableIOProvider || selectedIds.Count() != 1)
+            if (!canWrite || selectedIds.Count() != 1)
                 return;
 
             BeginRename(selectedIds.First());
