@@ -14,6 +14,11 @@
 .runios-io-browser-place:hover {
     background-color: rgba(128, 128, 128, 0.2);
 }
+
+/* 트리 뷰에 놓을 때와 같은 색으로 칠합니다. */
+.runios-io-browser-place--drop-target {
+    background-color: rgba(64, 128, 255, 0.25);
+}
 
 .runios-io-browser-place__icon {
     width: 16px;

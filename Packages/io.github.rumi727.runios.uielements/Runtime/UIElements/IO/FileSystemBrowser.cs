@@ -144,7 +144,7 @@ namespace RuniOS.UIElements.IO
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
                 await foreach (NetworkLocation location in networkLocationProvider.EnumerateLocations())
-                    remote.Add(MakePlace(location.displayName, networkIcon, () => OpenLocation(location)));
+                    remote.Add(MakeLocationPlace(location, networkIcon));
 
                 if (remote.childCount > 0)
                     groups.Add(remote);
@@ -172,6 +172,7 @@ namespace RuniOS.UIElements.IO
             string text = LocalizationUtility.GetText($"runios-editor:io_browser.known_directory.{directory.type}") ?? directory.type;
             IOBrowserPlace place = MakePlace(text, knownDirectoryIcons.GetValueOrDefault(directory.type, folderIcon), () => Open(directory.path));
             place.name = directory.type;
+            place.dropDirectory = GetNodeFromPhysicalRoot(directory.path);
 
             return place;
         }
@@ -190,10 +191,20 @@ namespace RuniOS.UIElements.IO
             return place;
         }
 
+        // 읽기 전용 위치에는 끌어다 놓을 수 없습니다.
+        IOBrowserPlace MakeLocationPlace(FileLocation location, (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons)
+        {
+            IOBrowserPlace place = MakePlace(location.displayName, icons, () => OpenLocation(location));
+            if (!location.isReadOnly)
+                place.dropDirectory = GetNodeFromPhysicalRoot(location.ioProvider.rootNode);
+
+            return place;
+        }
+
         IOBrowserPlace MakeDevicePlace(DeviceLocation location)
         {
             (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons = location.isOptical ? opticalIcon : location.isRemovable ? removableIcon : harddiskIcon;
-            IOBrowserPlace place = MakePlace(location.displayName, icons, () => OpenLocation(location));
+            IOBrowserPlace place = MakeLocationPlace(location, icons);
 
             if (location.TryGetSpaceInfo(out StorageSpaceInfo info) && info.totalSize > 0)
             {
