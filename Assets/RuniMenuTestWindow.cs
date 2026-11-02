@@ -5,6 +5,7 @@ using RuniOS.UIElements;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.Scripting.LifecycleManagement;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -13,6 +14,7 @@ using Toolbar = RuniOS.UIElements.Toolbar;
 /// <summary>
 /// RuniMenu를 다양한 구성과 극단적인 경우로 직접 열어 보는 테스트 창입니다.
 /// </summary>
+[NoAutoStaticsCleanup]
 public sealed class RuniMenuTestWindow : EditorWindow
 {
     [MenuItem("RuniOS/Runi Menu Test")]
@@ -44,7 +46,7 @@ public sealed class RuniMenuTestWindow : EditorWindow
     EnumField sizeModeField = null!;
     DropdownField transitionField = null!;
     Toggle minWidthToggle = null!;
-    Label logLabel = null!;
+    Label? logLabel = null;
 
     void CreateGUI()
     {
@@ -77,7 +79,7 @@ public sealed class RuniMenuTestWindow : EditorWindow
 
         VisualElement row = CreateRow();
         openDelayField = new IntegerField("Open delay (ms)") { value = 500 };
-        closeDelayField = new IntegerField("Close delay (ms)") { value = 0 };
+        closeDelayField = new IntegerField("Close delay (ms)") { value = 500 };
         openOnHoverToggle = new Toggle("Open on hover") { value = true };
         openOnFocusToggle = new Toggle("Open on focus") { value = true };
         row.Add(openDelayField);
@@ -351,9 +353,14 @@ public sealed class RuniMenuTestWindow : EditorWindow
         };
         menu.Add(swap);
 
-        RuniMenu sub = new("Submenu with icon");
-        sub.iconManipulator.assetRef = folderIcon.icon;
-        sub.iconManipulator.editorDarkAssetRef = folderIcon.editorDarkIcon;
+        RuniMenu sub = new("Submenu with icon")
+        {
+            iconManipulator =
+            {
+                assetRef = folderIcon.icon,
+                editorDarkAssetRef = folderIcon.editorDarkIcon
+            }
+        };
         sub.Add(Item("Inside", new KeyShortcut(KeyCode.I, true), computerIcon));
         menu.Add(sub);
 
@@ -403,7 +410,7 @@ public sealed class RuniMenuTestWindow : EditorWindow
             if (i % 50 == 49)
                 menu.Add(new Separator());
 
-            RuniMenuItem item = Item($"Item {i}", i % 10 == 0 ? new KeyShortcut(KeyCode.Alpha0 + i / 10 % 10, true) : default);
+            RuniMenuItem item = Item($"Item {i}", i % 10 == 0 ? new KeyShortcut(KeyCode.Alpha0 + ((i / 10) % 10), true) : default);
             if (i % 7 == 0)
                 item.SetEnabled(false);
 
@@ -460,7 +467,7 @@ public sealed class RuniMenuTestWindow : EditorWindow
 
         menu.Add(new IntegerField("IntegerField") { value = 42 });
         menu.Add(new Label("Plain Label (not focusable)"));
-        menu.Add(new UnityEngine.UIElements.ProgressBar { title = "ProgressBar", value = 70 });
+        menu.Add(new ProgressBar { title = "ProgressBar", value = 70 });
 
         Foldout foldout = new() { text = "Foldout with items (not direct children)" };
         foldout.Add(Item("Item inside foldout"));
@@ -596,7 +603,7 @@ public sealed class RuniMenuTestWindow : EditorWindow
 
         RuniMenuItem removeSelf = Item("Remove myself (stays open)");
         removeSelf.closeOnClick = false;
-        removeSelf.clicked += () => removeSelf.RemoveFromHierarchy();
+        removeSelf.clicked += removeSelf.RemoveFromHierarchy;
         menu.Add(removeSelf);
 
         menu.Add(new Separator());
