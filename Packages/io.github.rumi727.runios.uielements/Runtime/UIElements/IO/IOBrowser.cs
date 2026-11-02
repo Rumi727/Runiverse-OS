@@ -172,6 +172,9 @@ namespace RuniOS.UIElements.IO
             contentPane.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
 
             RegisterCallback<KeyDownEvent>(OnKeyDown);
+
+            // 방향키는 KeyDown과 별도로 보내지는 NavigationMove로 트리 뷰가 처리하므로, 트리 뷰에 닿기 전에 가로챕니다.
+            RegisterCallback<NavigationMoveEvent>(OnNavigationMove, TrickleDown.TrickleDown);
         }
 
         public void Back() => activeTab.Back();
@@ -269,6 +272,25 @@ namespace RuniOS.UIElements.IO
                 return;
 
             evt.StopPropagation();
+        }
+
+        void OnNavigationMove(NavigationMoveEvent evt)
+        {
+            if (!evt.altKey)
+                return;
+
+            if (evt.direction == NavigationMoveEvent.Direction.Left)
+                Back();
+            else if (evt.direction == NavigationMoveEvent.Direction.Right)
+                Forward();
+            else if (evt.direction == NavigationMoveEvent.Direction.Up)
+                Up();
+            else
+                return;
+
+            // 전파를 멈춰도 포커스 이동은 따로 일어나므로, 포커스도 옮기지 않도록 합니다.
+            evt.StopPropagation();
+            focusController?.IgnoreEvent(evt);
         }
 
         public void AlignPathField()
