@@ -94,7 +94,7 @@ namespace RuniOS.UIElements
         readonly Popup _popup;
         readonly ScrollView scrollView;
 
-        public override VisualElement contentContainer { get; }
+        public sealed override VisualElement contentContainer { get; }
 
         /// <summary>
         /// 이 요소가 들어 있는 팝업의 메뉴입니다. 다른 <see cref="RuniMenu"/> 안에 있지 않으면 <see langword="null"/>입니다.
@@ -140,6 +140,7 @@ namespace RuniOS.UIElements
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
+            // ReSharper disable once VirtualMemberCallInConstructor
             focusable = true;
 
             header = new VisualElement { name = "header" };
@@ -319,10 +320,10 @@ namespace RuniOS.UIElements
                 target.UnregisterCallback<DetachFromPanelEvent>(OnTargetDetach);
                 targetElement = null;
 
-                if (overlay != null)
                 Focusable? previous = previousFocus;
                 previousFocus = null;
 
+                if (overlay != null)
                     overlay.pickingMode = PickingMode.Ignore;
 
                 if (giveFocusBack && previous is VisualElement { canGrabFocus: true } previousElement)
@@ -495,10 +496,12 @@ namespace RuniOS.UIElements
             float width = desiredWidth;
             if (openParent == null)
             {
-                if (sizeMode == DropdownMenuSizeMode.Fixed)
-                    width = anchor.width;
-                else if (sizeMode == DropdownMenuSizeMode.Auto)
-                    width = Math.Max(width, anchor.width);
+                width = sizeMode switch
+                {
+                    DropdownMenuSizeMode.Fixed => anchor.width,
+                    DropdownMenuSizeMode.Auto => Math.Max(width, anchor.width),
+                    _ => width
+                };
             }
 
             // USS의 min-width는 그대로 존중합니다.
@@ -765,11 +768,9 @@ namespace RuniOS.UIElements
             Close(false);
         }
 
-        sealed class Popup : VisualElement
+        sealed class Popup(RuniMenu menu) : VisualElement
         {
-            public Popup(RuniMenu menu) => this.menu = menu;
-
-            public RuniMenu menu { get; }
+            public RuniMenu menu { get; } = menu;
         }
     }
 }

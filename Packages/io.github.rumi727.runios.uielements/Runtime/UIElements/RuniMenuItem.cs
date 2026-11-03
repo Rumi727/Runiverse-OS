@@ -1,5 +1,4 @@
 #nullable enable
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
@@ -76,6 +75,7 @@ namespace RuniOS.UIElements
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
+            // ReSharper disable once VirtualMemberCallInConstructor
             focusable = true;
 
             check = new VisualElement { name = "check" };
