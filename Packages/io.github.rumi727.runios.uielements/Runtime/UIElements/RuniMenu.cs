@@ -124,6 +124,7 @@ namespace RuniOS.UIElements
         VisualElement? overlay;
         VisualElement? targetElement;
         Rect dropDownPosition;
+        bool modal;
 
         bool focusFirstOnOpen;
 
@@ -238,7 +239,10 @@ namespace RuniOS.UIElements
         /// </summary>
         /// <param name="position">패널 좌표계의 기준 영역입니다.</param>
         /// <param name="targetElement">팝업을 표시할 패널을 정하고, 닫을 때 포커스를 돌려받는 요소입니다.</param>
-        public void DropDown(Rect position, VisualElement targetElement)
+        /// <param name="modal">
+        /// <see langword="false"/>이면 오버레이가 포인터를 막지 않고 포커스도 가져가지 않으므로, 배경이 계속 포인터를 받고 바깥을 눌러도 닫히지 않습니다. 호출한 쪽이 <see cref="Close"/>로 닫아야 합니다.
+        /// </param>
+        public void DropDown(Rect position, VisualElement targetElement, bool modal = true)
         {
             if (targetElement.panel is not { } panel)
                 return;
@@ -263,7 +267,8 @@ namespace RuniOS.UIElements
                 overlay.RegisterCallback<GeometryChangedEvent>(OnLayoutChanged);
             }
 
-            overlay.pickingMode = PickingMode.Position;
+            this.modal = modal;
+            overlay.pickingMode = modal ? PickingMode.Position : PickingMode.Ignore;
             if (overlay.parent != panel.visualTree)
                 panel.visualTree.Add(overlay);
             else
@@ -378,7 +383,7 @@ namespace RuniOS.UIElements
 
             if (focusFirstOnOpen)
                 MoveFocus(1);
-            else if (openParent == null)
+            else if (openParent == null && modal)
                 contentContainer.Focus();
         }
 
