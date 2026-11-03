@@ -17,6 +17,7 @@ namespace RuniOS.UIElements.IO
     /// <br/>
     /// 전송이 오래 걸리면 처리한 개수와 현재 항목을 보여 주는 진행 대화 상자를 띄우며, 취소하면 남은 항목을 처리하지 않습니다.
     /// 쓰던 파일은 프로바이더가 취소를 지원하는 범위에서 멈추고, 이미 처리한 항목은 되돌리지 않습니다.
+    /// 두 프로바이더가 모두 <see cref="IIOProvider.isThreadSafe"/>이면 대화 상자를 띄울 때를 빼고 백그라운드 스레드에서 처리합니다.
     /// <br/>
     /// 이동과 링크는 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있습니다. 프로바이더가 다르면 항상 원본을 읽어 대상에 새로 쓰는 복사입니다.
     /// 링크는 덮어쓰거나 합칠 수 없어, 같은 이름이 있으면 이름 바꾸기·건너뛰기·취소만 고를 수 있습니다.
@@ -34,6 +35,7 @@ namespace RuniOS.UIElements.IO
         readonly IIOProvider sourceProvider;
         readonly IWritableIOProvider destinationProvider;
         readonly bool sameProvider;
+        readonly bool background;
         readonly IODropOperation operation;
         readonly VisualElement dialogTarget;
 
@@ -48,6 +50,7 @@ namespace RuniOS.UIElements.IO
         readonly RuniDialog progress;
         CancellationTokenSource? progressTimer;
         int processedCount;
+        string currentName = string.Empty;
 
         IOTransfer(IIOProvider sourceProvider, IWritableIOProvider destinationProvider, IODropOperation operation, VisualElement dialogTarget)
         {
@@ -57,9 +60,13 @@ namespace RuniOS.UIElements.IO
             this.dialogTarget = dialogTarget;
 
             sameProvider = ReferenceEquals(sourceProvider, destinationProvider);
+            background = sourceProvider.isThreadSafe && destinationProvider.isThreadSafe;
 
             progress = new RuniDialog(GetText("runios-editor:io_transfer.progress.title"), string.Empty);
             progress.AddButton(GetText("runios-editor:io_transfer.progress.cancel"));
+
+            // 전송은 백그라운드에서 진행될 수 있으므로, 진행 상황은 대화 상자가 떠 있는 동안 메인 스레드에서 주기적으로 읽어 보여 줍니다.
+            progress.schedule.Execute(UpdateProgressMessage).Every(100);
         }
 
         /// <summary>
@@ -116,10 +123,16 @@ namespace RuniOS.UIElements.IO
             ShowProgressAfterDelay().Forget();
             try
             {
+                // 메인 스레드에서 항목마다 기다리면 기다릴 때마다 다음 업데이트까지 미뤄지므로, 두 프로바이더 모두 허용하면 대화 상자를 띄울 때만 빼고 백그라운드에서 처리합니다.
+                if (background)
+                    await UniTask.SwitchToThreadPool();
+
                 await TransferAll(entries, directoryPath);
             }
             finally
             {
+                await UniTask.SwitchToMainThread();
+
                 progressTimer?.Cancel();
                 progress.Close();
             }
@@ -132,11 +145,12 @@ namespace RuniOS.UIElements.IO
             if (await UniTask.Delay(progressDelay, DelayType.UnscaledDeltaTime, cancellationToken: progressTimer.Token).SuppressCancellationThrow())
                 return;
 
+            UpdateProgressMessage();
             await progress.ShowAsync(dialogTarget);
             cancellation.Cancel();
         }
 
-        void SetCurrent(string name) => progress.message = string.Format(GetText("runios-editor:io_transfer.progress.message"), processedCount, name);
+        void UpdateProgressMessage() => progress.message = string.Format(GetText("runios-editor:io_transfer.progress.message"), processedCount, currentName);
 
         async UniTask TransferAll(IEnumerable<IOEntry> entries, RuniPath directoryPath)
         {
@@ -151,7 +165,7 @@ namespace RuniOS.UIElements.IO
 
                 try
                 {
-                    SetCurrent(entry.path.GetFileName());
+                    currentName = entry.path.GetFileName();
                     await Transfer(entry, directoryPath / entry.path.GetFileName());
                     processedCount++;
                 }
@@ -208,10 +222,8 @@ namespace RuniOS.UIElements.IO
                 await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath, cancellation.Token) : destinationProvider.MoveFile(entry.path, destinationPath, overwrite, cancellation.Token));
             else if (!entry.isDirectory)
                 await CopyFile(entry.path, destinationPath, overwrite);
-            else if (sameProvider)
-                await destinationProvider.CopyDirectory(entry.path, destinationPath, cancellation.Token);
             else
-                await CopyDirectoryAcrossProviders(entry.path, destinationPath);
+                await CopyDirectory(entry.path, destinationPath);
         }
 
         // 이미 있는 폴더 안으로 자식을 하나씩 옮기거나 복사합니다.
@@ -223,18 +235,18 @@ namespace RuniOS.UIElements.IO
             await TransferAll(children, destinationPath);
         }
 
-        // 다른 프로바이더로는 프로바이더의 폴더 복사를 쓸 수 없으므로, 원본을 읽어 대상에 새로 씁니다.
-        async UniTask CopyDirectoryAcrossProviders(RuniPath sourcePath, RuniPath destinationPath)
+        // 같은 프로바이더여도 프로바이더의 폴더 복사에 맡기지 않고 직접 돌아, 진행 개수와 취소가 파일 단위로 동작하게 합니다.
+        async UniTask CopyDirectory(RuniPath sourcePath, RuniPath destinationPath)
         {
             await destinationProvider.CreateDirectory(destinationPath, cancellation.Token);
             await foreach (IOEntry child in sourceProvider.EnumerateEntries(sourcePath, false, cancellation.Token))
             {
                 RuniPath childDestinationPath = destinationPath / child.path.GetFileName();
                 if (child.isDirectory)
-                    await CopyDirectoryAcrossProviders(child.path, childDestinationPath);
+                    await CopyDirectory(child.path, childDestinationPath);
                 else
                 {
-                    SetCurrent(child.path.GetFileName());
+                    currentName = child.path.GetFileName();
                     await CopyFile(child.path, childDestinationPath, false);
                     processedCount++;
                 }
@@ -253,9 +265,18 @@ namespace RuniOS.UIElements.IO
                     await destinationProvider.CopyFile(sourcePath, temporaryPath, false, cancellation.Token);
                 else
                 {
-                    await using Stream source = await sourceProvider.OpenRead(sourcePath, cancellation.Token);
-                    await using Stream destination = await destinationProvider.CreateFile(temporaryPath, cancellation.Token);
-                    await source.CopyToAsync(destination, 81920, cancellation.Token);
+                    // 비동기 스트림 API는 스레드 풀을 거쳐 읽고 쓰고 닫을 때마다 기다리게 되므로, 동기로 읽고 쓰고 닫으며 덩어리마다 취소를 확인합니다.
+                    // 특히 FileStream을 비동기로 닫으면 남은 쓰기를 스레드 풀에서 비우느라 파일마다 다음 업데이트까지 미뤄집니다.
+                    using Stream source = await sourceProvider.OpenRead(sourcePath, cancellation.Token);
+                    using Stream destination = await destinationProvider.CreateFile(temporaryPath, cancellation.Token);
+
+                    byte[] buffer = new byte[81920];
+                    int read;
+                    while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        cancellation.Token.ThrowIfCancellationRequested();
+                        destination.Write(buffer, 0, read);
+                    }
                 }
 
                 // 임시 파일을 다 썼다면 이름을 바꿔 끼우는 일은 취소하지 않고 끝냅니다.
@@ -295,6 +316,9 @@ namespace RuniOS.UIElements.IO
             if (resolutionForAll is { } resolution && (resolution != Resolution.Overwrite || canOverwrite))
                 return resolution;
 
+            // 대화 상자는 메인 스레드에서만 띄울 수 있습니다.
+            await UniTask.SwitchToMainThread();
+
             // 진행 대화 상자가 아직 없다면 이 대화 상자를 덮지 않도록 띄우기를 미루고, 이미 있다면 그 위에 띄웁니다.
             progressTimer?.Cancel();
 
@@ -319,6 +343,9 @@ namespace RuniOS.UIElements.IO
             Button? result = await dialog.ShowAsync(dialogTarget);
             if (!progress.isOpen)
                 ShowProgressAfterDelay().Forget();
+
+            if (background)
+                await UniTask.SwitchToThreadPool();
 
             Resolution? chosen = null;
             if (result == overwrite)
