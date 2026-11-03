@@ -64,6 +64,68 @@ namespace RuniOS.IO
         bool IsSameTarget(IIOProvider other);
 
         /// <summary>
+        /// Determines whether names under the specified provider-relative path are compared case-sensitively.<br/>
+        /// 지정된 프로바이더 기준 경로 아래의 이름을 대소문자를 구분해 비교하는지 확인합니다.
+        /// </summary>
+        /// <remarks>
+        /// Implementations that cannot determine this should return <see langword="true"/>. The result may still be approximate, such as when it is determined by platform.<br/>
+        /// Treating a case-sensitive location as case-insensitive makes different items look like the same item, so use the result only where that errs on the safe side, such as refusing an operation.<br/>
+        /// The default implementation returns <see langword="true"/>.
+        /// <br/><br/>
+        /// 알 수 없는 구현은 <see langword="true"/>를 반환해야 합니다. 플랫폼으로 판단하는 경우처럼 결과가 정확하지 않을 수도 있습니다.<br/>
+        /// 대소문자를 구분하는 위치를 구분하지 않는다고 보면 서로 다른 항목을 같은 항목으로 보게 되므로, 작업을 거부하는 것처럼 그렇게 잘못 봐도 안전한 곳에서만 결과를 씁니다.<br/>
+        /// 기본 구현은 <see langword="true"/>를 반환합니다.
+        /// </remarks>
+        /// <param name="path">
+        /// The provider-relative path to check.<br/>
+        /// 확인할 프로바이더 기준 경로입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if names are compared case-sensitively or it cannot be determined; otherwise, <see langword="false"/>.<br/>
+        /// 대소문자를 구분하거나 알 수 없으면 <see langword="true"/>를 반환하고, 구분하지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        bool IsCaseSensitive(RuniPath path) => true;
+
+        /// <summary>
+        /// Converts a path of another provider to a path of this provider when it refers to a location this provider can also reach.<br/>
+        /// 다른 프로바이더의 경로가 이 프로바이더에서도 가리킬 수 있는 위치이면, 이 프로바이더 기준 경로로 바꿉니다.
+        /// </summary>
+        /// <remarks>
+        /// <see langword="false"/> means it is unknown whether this provider can reach the location, not that the location is different.<br/>
+        /// Implementations that cannot determine this may return <see langword="false"/>.<br/>
+        /// The default implementation returns <paramref name="otherPath"/> unchanged when <see cref="IsSameTarget"/> is <see langword="true"/>.
+        /// <br/><br/>
+        /// <see langword="false"/>는 다른 위치라는 뜻이 아니라, 이 프로바이더가 그 위치를 가리킬 수 있는지 알 수 없다는 뜻입니다.<br/>
+        /// 알아낼 수 없는 구현은 <see langword="false"/>를 반환해도 됩니다.<br/>
+        /// 기본 구현은 <see cref="IsSameTarget"/>이 <see langword="true"/>이면 <paramref name="otherPath"/>를 그대로 반환합니다.
+        /// </remarks>
+        /// <param name="other">
+        /// The provider that <paramref name="otherPath"/> belongs to.<br/>
+        /// <paramref name="otherPath"/>가 속한 프로바이더입니다.
+        /// </param>
+        /// <param name="otherPath">
+        /// The path relative to <paramref name="other"/>.<br/>
+        /// <paramref name="other"/> 기준 경로입니다.
+        /// </param>
+        /// <param name="path">
+        /// When this method returns <see langword="true"/>, contains the same location as a path relative to this provider.<br/>
+        /// 이 메서드가 <see langword="true"/>를 반환하면 같은 위치를 이 프로바이더 기준 경로로 포함합니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the location is known to be reachable from this provider; otherwise, <see langword="false"/>.<br/>
+        /// 이 프로바이더에서도 가리킬 수 있다고 알 수 있으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        bool TryGetPath(IIOProvider other, RuniPath otherPath, out RuniPath path)
+        {
+            path = otherPath;
+            if (IsSameTarget(other))
+                return true;
+
+            path = default;
+            return false;
+        }
+
+        /// <summary>
         /// Determines whether a directory exists at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로에 디렉터리가 있는지 확인합니다.
         /// </summary>
