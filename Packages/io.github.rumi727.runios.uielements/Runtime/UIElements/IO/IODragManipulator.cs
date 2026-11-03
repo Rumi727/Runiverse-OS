@@ -1,7 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
-using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -13,7 +12,7 @@ namespace RuniOS.UIElements.IO
     /// </summary>
     /// <remarks>
     /// Shift를 누르고 놓으면 이동하고, 동작 키(Ctrl·Command)를 누르고 놓으면 복사하며, 보조 키가 없으면 놓은 자리에서 메뉴로 묻습니다.
-    /// 이동은 같은 프로바이더 안에서만 할 수 있습니다.
+    /// 이동은 대상 프로바이더가 원본 항목을 가리킬 수 있을 때(<see cref="IIOProvider.TryGetPath"/>)만 할 수 있습니다.
     /// </remarks>
     /// <param name="source">끌 항목을 정하고 고스트를 만드는 요소입니다. 보통 이 조작기를 붙이는 요소 자신입니다.</param>
     public sealed class IODragManipulator(IIODragSource source) : Manipulator
@@ -241,24 +240,14 @@ namespace RuniOS.UIElements.IO
                 IODropOperation.Move => CanMove(data, directory),
                 IODropOperation.Copy => CanCopy(data, directory),
 
-                // 같은 프로바이더에서 이동할 수 없으면 원래 있던 폴더에 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
-                _ => CanMove(data, directory) || (CanCopy(data, directory) && !data.provider.IsSameTarget(directory.provider))
+                // 대상 프로바이더가 원본을 가리킬 수 있는데 이동할 수 없으면, 원래 있던 폴더에 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
+                _ => CanMove(data, directory) || (CanCopy(data, directory) && !directory.provider.TryGetPath(data.provider, data.entries[0].path, out _))
             };
         }
 
-        static bool CanCopy(IODragData data, IONode directory) =>
-            directory.provider is IWritableIOProvider
+        static bool CanCopy(IODragData data, IONode directory) => IOTransfer.CanCopy(data.provider, data.entries, directory);
 
-            // 폴더를 자기 자신이나 그 안으로 넣으면 끝나지 않습니다.
-            && !(data.provider.IsSameTarget(directory.provider) && data.entries.Any(x => x.isDirectory && directory.path.StartsWith(x.path)));
-
-        // 이미 그 폴더에 있는 항목만 옮기면 바뀌는 것이 없습니다.
-        static bool CanMove(IODragData data, IONode directory) =>
-            CanCopy(data, directory)
-            && data.provider.IsSameTarget(directory.provider)
-            && data.provider is IWritableIOProvider
-            && !data.source.readOnly
-            && data.entries.Any(x => x.path.GetParentPath() != directory.path);
+        static bool CanMove(IODragData data, IONode directory) => !data.source.readOnly && IOTransfer.CanMove(data.provider, data.entries, directory);
 
         static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
 
@@ -286,61 +275,16 @@ namespace RuniOS.UIElements.IO
 
         static async UniTask Drop(IODragData data, DropLocation location, IODropOperation operation)
         {
-            IONode directory = location.directory;
-            if (directory.provider is not IWritableIOProvider destinationProvider)
+            if (location.directory.AsWriteNode() is not { } directory)
                 return;
 
-            bool sameProvider = data.provider.IsSameTarget(destinationProvider);
-            foreach (IOEntry entry in data.entries)
-            {
-                // 이미 그 폴더에 있는 항목은 옮겨도 바뀌지 않으므로 건너뜁니다.
-                if (operation == IODropOperation.Move && entry.path.GetParentPath() == directory.path)
-                    continue;
-
-                RuniPath destinationPath = directory.path / entry.path.GetFileName();
-
-                // 대상이 이미 있는지는 덮어쓰지 않는 이동·복사가 판단하므로 미리 확인하지 않습니다.
-                // 같은 프로바이더면 같은 대상을 가리키므로, 이동과 복사를 대상 프로바이더에서 수행합니다.
-                try
-                {
-                    if (!sameProvider)
-                        await CopyAcrossProviders(data.provider, entry, destinationProvider, destinationPath);
-                    else if (operation == IODropOperation.Move)
-                        await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath) : destinationProvider.MoveFile(entry.path, destinationPath));
-                    else
-                        await (entry.isDirectory ? destinationProvider.CopyDirectory(entry.path, destinationPath) : destinationProvider.CopyFile(entry.path, destinationPath));
-                }
-                catch (Exception e)
-                {
-                    Debug.LogException(e);
-                }
-            }
+            await IOTransfer.Run(data.provider, data.entries, directory, operation, location.element);
 
             // 새로 고침은 펼침·선택·스크롤을 유지하므로, 바뀐 내용만 반영됩니다.
             // 사이드바처럼 목록이 아닌 곳에 놓아도 놓은 폴더가 원본 목록에 펼쳐져 있을 수 있으므로, 원본은 항상 새로 고칩니다.
             data.source.Refresh().Forget();
             if (location.target is IONodeMultiColumnTreeView targetTreeView && targetTreeView != data.source)
                 targetTreeView.Refresh().Forget();
-        }
-
-        // 다른 프로바이더로는 프로바이더의 복사를 쓸 수 없으므로, 원본을 읽어 대상에 새로 씁니다.
-        static async UniTask CopyAcrossProviders(IIOProvider sourceProvider, IOEntry entry, IWritableIOProvider destinationProvider, RuniPath destinationPath)
-        {
-            if (await destinationProvider.GetEntry(destinationPath) != null)
-                throw new IOException($"The destination '{destinationPath}' already exists.");
-
-            if (!entry.isDirectory)
-            {
-                await using Stream source = await sourceProvider.OpenRead(entry.path);
-                await using Stream destination = await destinationProvider.CreateFile(destinationPath);
-                await source.CopyToAsync(destination);
-
-                return;
-            }
-
-            await destinationProvider.CreateDirectory(destinationPath);
-            await foreach (IOEntry child in sourceProvider.EnumerateEntries(entry.path, false))
-                await CopyAcrossProviders(sourceProvider, child, destinationProvider, destinationPath / child.path.GetFileName());
         }
     }
 }
