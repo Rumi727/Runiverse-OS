@@ -8,13 +8,14 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements.IO
 {
     /// <summary>
-    /// IO 항목을 다른 폴더로 옮기거나 복사하며, 같은 이름이 이미 있으면 대화 상자로 어떻게 할지 묻습니다.
+    /// IO 항목을 다른 폴더로 옮기거나 복사하거나 링크하며, 같은 이름이 이미 있으면 대화 상자로 어떻게 할지 묻습니다.
     /// </summary>
     /// <remarks>
     /// 파일은 덮어쓰기·이름 바꾸기·건너뛰기를, 폴더는 합치기·이름 바꾸기·건너뛰기를 고를 수 있으며, 취소하면 남은 항목을 처리하지 않습니다.
     /// 폴더를 합치면 그 안의 항목도 같은 방식으로 처리합니다.
     /// <br/>
-    /// 이동은 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있습니다. 프로바이더가 다르면 항상 원본을 읽어 대상에 새로 쓰는 복사입니다.
+    /// 이동과 링크는 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있습니다. 프로바이더가 다르면 항상 원본을 읽어 대상에 새로 쓰는 복사입니다.
+    /// 링크는 덮어쓰거나 합칠 수 없어, 같은 이름이 있으면 이름 바꾸기·건너뛰기·취소만 고를 수 있습니다.
     /// </remarks>
     public sealed class IOTransfer
     {
@@ -67,7 +68,15 @@ namespace RuniOS.UIElements.IO
             && entries.Any(x => !PathEquals(x.path.GetParentPath(), directory.path));
 
         /// <summary>
-        /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다.
+        /// <paramref name="directory"/> 안에 항목의 심볼릭 링크를 만들 수 있는지 확인합니다.
+        /// 원본과 대상이 같은 프로바이더 인스턴스여야 하며, 그 프로바이더가 <see cref="ISymbolicLinkIOProvider"/>여야 합니다.
+        /// </summary>
+        /// <param name="sourceProvider">링크가 가리킬 항목이 들어 있는 프로바이더입니다.</param>
+        public static bool CanLink(IIOProvider sourceProvider, IONode directory) =>
+            ReferenceEquals(sourceProvider, directory.provider) && sourceProvider is ISymbolicLinkIOProvider;
+
+        /// <summary>
+        /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사하거나 링크합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다.
         /// </summary>
         /// <param name="sourceProvider"><paramref name="entries"/>가 들어 있는 프로바이더입니다.</param>
         /// <param name="dialogTarget">이름이 겹칠 때 띄우는 대화 상자를 표시할 패널을 정하는 요소입니다.</param>
@@ -112,7 +121,8 @@ namespace RuniOS.UIElements.IO
 
             // 종류가 다르면 덮어쓰거나 합칠 수 없고, 자기 자신에게 덮어쓰면 원본을 덮어쓰게 됩니다.
             bool isSelf = sameProvider && PathEquals(destinationPath, entry.path);
-            bool canOverwrite = entry.isDirectory == existing.isDirectory && !isSelf;
+            // 링크는 이미 있는 항목을 대체하거나 합치지 않으므로 덮어쓸 수 없습니다.
+            bool canOverwrite = entry.isDirectory == existing.isDirectory && !isSelf && operation != IODropOperation.Link;
             RuniPath renamedPath = await GetAvailablePath(destinationPath, entry.isDirectory);
 
             switch (await Resolve(entry, canOverwrite, renamedPath))
@@ -137,7 +147,9 @@ namespace RuniOS.UIElements.IO
         // 대상이 없거나 덮어쓸 파일입니다. 폴더는 대상이 없을 때만 들어옵니다.
         async UniTask TransferItem(IOEntry entry, RuniPath destinationPath, bool overwrite)
         {
-            if (operation == IODropOperation.Move)
+            if (operation == IODropOperation.Link)
+                await ((ISymbolicLinkIOProvider)destinationProvider).CreateSymbolicLink(destinationPath, entry.path, entry.isDirectory);
+            else if (operation == IODropOperation.Move)
                 await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath) : destinationProvider.MoveFile(entry.path, destinationPath, overwrite));
             else if (!entry.isDirectory)
                 await CopyFile(entry.path, destinationPath, overwrite);

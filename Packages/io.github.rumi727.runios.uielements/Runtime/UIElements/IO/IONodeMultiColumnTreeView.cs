@@ -842,7 +842,12 @@ namespace RuniOS.UIElements.IO
             dragGhost.EnableInClassList(dragGhostRejectedUssClassName, !canDrop);
             dragGhostOperationLabel.EnableInClassList(dragGhostOperationHiddenUssClassName, operation == null);
             if (operation != null)
-                dragGhostOperationLabel.text = GetText(operation == IODropOperation.Move ? "runios-editor:io_node_tree_view.drop.move" : "runios-editor:io_node_tree_view.drop.copy");
+                dragGhostOperationLabel.text = GetText(operation switch
+                {
+                    IODropOperation.Move => "runios-editor:io_node_tree_view.drop.move",
+                    IODropOperation.Copy => "runios-editor:io_node_tree_view.drop.copy",
+                    _ => "runios-editor:io_node_tree_view.drop.link"
+                });
         }
 
         void IIODragSource.OnDragEnd(IODragData data)

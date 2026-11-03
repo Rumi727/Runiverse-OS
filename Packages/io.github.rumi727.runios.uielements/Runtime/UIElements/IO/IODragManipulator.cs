@@ -11,8 +11,8 @@ namespace RuniOS.UIElements.IO
     /// 끄는 동안 포인터를 잡으므로, 같은 패널 안에서만 놓을 수 있습니다. Esc를 누르면 취소합니다.
     /// </summary>
     /// <remarks>
-    /// Shift를 누르고 놓으면 이동하고, 동작 키(Ctrl·Command)를 누르고 놓으면 복사하며, 보조 키가 없으면 놓은 자리에서 메뉴로 묻습니다.
-    /// 이동은 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있고, 다르면 복사만 할 수 있습니다.
+    /// Shift를 누르고 놓으면 이동하고, 동작 키(Ctrl·Command)를 누르고 놓으면 복사하고, 둘을 함께 누르고 놓으면 링크하며, 보조 키가 없으면 놓은 자리에서 메뉴로 묻습니다.
+    /// 이동과 링크는 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있고, 다르면 복사만 할 수 있습니다.
     /// </remarks>
     /// <param name="source">끌 항목을 정하고 고스트를 만드는 요소입니다. 보통 이 조작기를 붙이는 요소 자신입니다.</param>
     public sealed class IODragManipulator(IIODragSource source) : Manipulator
@@ -23,6 +23,7 @@ namespace RuniOS.UIElements.IO
         // 놓을 때 누르고 있으면 메뉴 없이 바로 그 동작을 하는 보조 키입니다.
         static readonly KeyShortcut moveShortcut = new(KeyCode.None, modifiers: EventModifiers.Shift);
         static readonly KeyShortcut copyShortcut = new(KeyCode.None, actionKey: true);
+        static readonly KeyShortcut linkShortcut = new(KeyCode.None, actionKey: true, modifiers: EventModifiers.Shift);
         static readonly KeyShortcut cancelShortcut = new(KeyCode.Escape);
 
         // element는 target인 요소이며, 놓을 때 메뉴를 그 요소에 엽니다. operation이 null이면 놓을 때 메뉴로 묻습니다.
@@ -232,6 +233,7 @@ namespace RuniOS.UIElements.IO
             {
                 (false, true) => IODropOperation.Move,
                 (true, false) => IODropOperation.Copy,
+                (true, true) => IODropOperation.Link,
                 _ => null
             };
 
@@ -239,6 +241,7 @@ namespace RuniOS.UIElements.IO
             {
                 IODropOperation.Move => CanMove(data, directory),
                 IODropOperation.Copy => CanCopy(data, directory),
+                IODropOperation.Link => CanLink(data, directory),
 
                 // 같은 프로바이더인데 원래 있던 폴더에 놓았으면, 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
                 _ => CanMove(data, directory) || (CanCopy(data, directory) && !(ReferenceEquals(directory.provider, data.provider) && data.entries[0].path.GetParentPath().value == directory.path.value))
@@ -249,10 +252,16 @@ namespace RuniOS.UIElements.IO
 
         static bool CanMove(IODragData data, IONode directory) => !data.source.readOnly && IOTransfer.CanMove(data.provider, data.entries, directory);
 
+        static bool CanLink(IODragData data, IONode directory) => IOTransfer.CanLink(data.provider, directory);
+
         static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
 
-        static string GetOperationText(IODropOperation operation) =>
-            GetText(operation == IODropOperation.Move ? "runios-editor:io_node_tree_view.drop.move" : "runios-editor:io_node_tree_view.drop.copy");
+        static string GetOperationText(IODropOperation operation) => GetText(operation switch
+        {
+            IODropOperation.Move => "runios-editor:io_node_tree_view.drop.move",
+            IODropOperation.Copy => "runios-editor:io_node_tree_view.drop.copy",
+            _ => "runios-editor:io_node_tree_view.drop.link"
+        });
 
         static void ShowMenu(Vector2 position, IODragData data, DropLocation location)
         {
@@ -260,6 +269,7 @@ namespace RuniOS.UIElements.IO
 
             AddItem(IODropOperation.Move, moveShortcut, CanMove(data, location.directory));
             AddItem(IODropOperation.Copy, copyShortcut, CanCopy(data, location.directory));
+            AddItem(IODropOperation.Link, linkShortcut, CanLink(data, location.directory));
             menu.Add(new Separator());
             menu.Add(new RuniMenuItem(GetText("runios-editor:io_node_tree_view.drop.cancel"), null) { shortcuts = [cancelShortcut] });
 

@@ -7,6 +7,7 @@ namespace RuniOS.UIElements.IO
     public enum IODropOperation
     {
         Move,
-        Copy
+        Copy,
+        Link
     }
 }
