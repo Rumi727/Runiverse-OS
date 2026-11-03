@@ -157,6 +157,14 @@ namespace RuniOS.UIElements.IO
                 pathField.RegisterCallback<FocusOutEvent>(_ => EndEditPath());
                 pathField.RegisterCallback<KeyDownEvent>(x =>
                 {
+                    if (x.keyCode is KeyCode.Return or KeyCode.KeypadEnter)
+                    {
+                        // Enter는 필드가 처리하면서 포커스를 필드 자신으로 옮기므로, 처리가 끝난 뒤 브라우저로 포커스를 되돌립니다.
+                        // 값이 바뀌지 않았을 때도 필드가 포커스를 잃어 경로 편집이 끝납니다.
+                        schedule.Execute(Focus);
+                        return;
+                    }
+
                     if (x.keyCode != KeyCode.Escape)
                         return;
 
@@ -191,7 +199,13 @@ namespace RuniOS.UIElements.IO
 
                 contentPane = new IOBrowserTabView { name = "content-pane", reorderable = true };
                 contentPane.AddToClassList(contentPaneUssClassName);
-                contentPane.activeTabChanged += (_, _) => UpdateHeader();
+                contentPane.activeTabChanged += (_, _) =>
+                {
+                    UpdateHeader();
+
+                    // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
+                    Focus();
+                };
                 splitView.Add(contentPane);
             }
             hierarchy.Add(splitView);
