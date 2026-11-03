@@ -54,14 +54,14 @@ namespace RuniOS.UIElements.IO
 
         protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
 
+        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
+
         protected override void BuildFolderMenu(RuniMenu menu)
         {
             IONodeMultiColumnTreeView.AddNewItemMenu(menu, () => treeView);
             menu.Add(new Separator());
 
             base.BuildFolderMenu(menu);
-        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
-
 
             RuniMenuItem showHiddenFiles = new(string.Empty, ToggleShowHiddenFiles) { shortcuts = [showHiddenFilesShortcut] };
             menu.opened += () =>
