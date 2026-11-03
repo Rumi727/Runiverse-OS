@@ -216,7 +216,7 @@ namespace RuniOS.UIElements.IO
 
                 foundTarget = dropTarget;
                 if (!dropTarget.TryGetDropDirectory(position, out IONode directory)
-                    || !TryGetOperation(data, directory, actionKey, shiftKey, out IODropOperation? operation))
+                    || !TryGetOperation(data, directory,actionKey, shiftKey, out IODropOperation? operation))
                     return null;
 
                 return new DropLocation(dropTarget, element, directory, operation);
@@ -243,8 +243,8 @@ namespace RuniOS.UIElements.IO
                 IODropOperation.Copy => CanCopy(data, directory),
                 IODropOperation.Link => CanLink(data, directory),
 
-                // 같은 프로바이더인데 원래 있던 폴더에 놓았으면, 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
-                _ => CanMove(data, directory) || (CanCopy(data, directory) && !(ReferenceEquals(directory.provider, data.provider) && data.entries[0].path.GetParentPath().value == directory.path.value))
+                // 드래그를 시작했으면 어디에 놓든 존중합니다. 같은 폴더여도 복사나 링크를 원할 수 있으므로 묻고, 이동은 CanMove가 막습니다.
+                _ => CanMove(data, directory) || CanCopy(data, directory)
             };
         }
 
