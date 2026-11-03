@@ -12,7 +12,11 @@ namespace RuniOS.UIElements.IO
     /// </summary>
     public class IOBrowserTabView : TabView, IIODropTarget
     {
+        // 끄는 항목을 헤더 위에 이만큼 두면 그 탭을 엽니다.
+        const long dragOpenDelay = 500;
+
         IOBrowserTab? hoveredTab;
+        IVisualElementScheduledItem? dragHoverSchedule;
 
         /// <summary>
         /// 위치가 <paramref name="directory"/>인 탭의 내용을 다시 읽어 옵니다.
@@ -36,7 +40,11 @@ namespace RuniOS.UIElements.IO
         {
             IOBrowserTab? tab = GetTab(position);
             if (hoveredTab != tab)
+            {
                 ((IIODropTarget?)hoveredTab)?.OnDragLeave();
+                dragHoverSchedule?.Pause();
+                dragHoverSchedule = tab == null ? null : schedule.Execute(() => activeTab = tab).StartingIn(dragOpenDelay);
+            }
 
             hoveredTab = tab;
             ((IIODropTarget?)tab)?.OnDragOver(data, position, canDrop);
@@ -46,6 +54,9 @@ namespace RuniOS.UIElements.IO
         {
             ((IIODropTarget?)hoveredTab)?.OnDragLeave();
             hoveredTab = null;
+
+            dragHoverSchedule?.Pause();
+            dragHoverSchedule = null;
         }
 
         IOBrowserTab? GetTab(Vector2 position) => Children().OfType<IOBrowserTab>().FirstOrDefault(x => x.tabHeader.worldBound.Contains(position));
