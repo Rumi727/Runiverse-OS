@@ -77,7 +77,10 @@ namespace RuniOS.UIElements.IO
         [UxmlAttribute]
         public bool contextMenuEnabled { get; set; }
 
-        bool canWrite => !readOnly && provider is IWritableIOProvider;
+        /// <summary>
+        /// 이 목록에서 항목을 바꿀 수 있는지 여부입니다. <see cref="readOnly"/>이거나 쓰기 가능한 프로바이더가 아니면 <see langword="false"/>입니다.
+        /// </summary>
+        public bool canWrite => !readOnly && provider is IWritableIOProvider;
 
         /// <summary>
         /// 선택된 항목을 가져옵니다.

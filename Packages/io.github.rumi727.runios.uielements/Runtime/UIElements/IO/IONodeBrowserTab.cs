@@ -22,6 +22,12 @@ namespace RuniOS.UIElements.IO
             }
         } = SelectionType.Multiple;
 
+        public override bool readOnly
+        {
+            get => treeView.readOnly;
+            set => treeView.readOnly = value;
+        }
+
         public IONodeBrowserTab()
         {
             AddToClassList(ussClassName);

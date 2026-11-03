@@ -64,10 +64,11 @@ namespace RuniOS.UIElements.IO
             this.AddManipulator(clickable);
         }
 
+        // 읽기 전용인 브라우저 안에 있으면 놓을 수 없습니다.
         bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
         {
             directory = dropDirectory ?? default;
-            return dropDirectory != null;
+            return dropDirectory != null && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
         }
 
         void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => EnableInClassList(dropTargetUssClassName, canDrop);

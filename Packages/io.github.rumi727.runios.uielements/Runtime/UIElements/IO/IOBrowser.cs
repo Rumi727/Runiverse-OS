@@ -39,6 +39,21 @@ namespace RuniOS.UIElements.IO
             set => activeTab.node = value;
         }
 
+        /// <summary>
+        /// 이 브라우저 안에서 항목을 바꾸지 못하게 할지 정합니다. 장소와 경로 버튼에도 놓을 수 없게 됩니다.
+        /// 모든 탭에 적용되고, 새로 여는 탭에도 적용됩니다.
+        /// </summary>
+        public bool readOnly
+        {
+            get;
+            set
+            {
+                field = value;
+                foreach (IOBrowserTab tab in tabs)
+                    tab.readOnly = value;
+            }
+        }
+
         public IOBrowserTab activeTab => (IOBrowserTab)contentPane.activeTab;
         public IEnumerable<IOBrowserTab> tabs => contentPane.Children().Cast<IOBrowserTab>();
 
@@ -237,6 +252,7 @@ namespace RuniOS.UIElements.IO
         public IOBrowserTab AddTab(IONode node)
         {
             IOBrowserTab tab = CreateTab();
+            tab.readOnly = readOnly;
             tab.name = "tab";
             tab.AddToClassList(tabUssClassName);
             tab.nodeChanged += OnTabNodeChanged;

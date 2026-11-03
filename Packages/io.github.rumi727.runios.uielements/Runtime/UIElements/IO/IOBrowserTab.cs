@@ -118,11 +118,16 @@ namespace RuniOS.UIElements.IO
             return node.name;
         }
 
-        // 홈 화면(장치 목록)에는 놓을 수 없습니다.
+        /// <summary>
+        /// 이 탭의 내용 뷰에서 항목을 바꾸지 못하게 할지 정합니다. 보통 <see cref="IOBrowser.readOnly"/>가 정합니다.
+        /// </summary>
+        public abstract bool readOnly { get; set; }
+
+        // 홈 화면(장치 목록)이나 읽기 전용인 탭에는 놓을 수 없습니다.
         bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
         {
             directory = node;
-            return node != IONode.empty;
+            return node != IONode.empty && !readOnly;
         }
 
         void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => tabHeader.EnableInClassList(headerDropTargetUssClassName, canDrop);

@@ -195,9 +195,10 @@ namespace RuniOS.UIElements.IO
 
             bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
             {
+                // 팝업은 오버레이로 옮겨지지만 이 메뉴 자체는 경로 표시줄에 붙어 있으므로, 조상에서 브라우저를 찾을 수 있습니다.
                 RuniMenuItem? item = GetItem(position);
                 directory = item?.userData is IONode node ? node : default;
-                return item != null;
+                return item != null && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
             }
 
             void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => SetHighlight(canDrop ? GetItem(position) : null);
@@ -239,11 +240,11 @@ namespace RuniOS.UIElements.IO
                 AddToClassList(crumbUssClassName);
             }
 
-            // 홈 화면(장치 목록)에는 놓을 수 없습니다.
+            // 홈 화면(장치 목록)이나 읽기 전용인 브라우저에는 놓을 수 없습니다.
             bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
             {
                 directory = _node;
-                return _node != IONode.empty;
+                return _node != IONode.empty && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
             }
 
             void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => EnableInClassList(crumbDropTargetUssClassName, canDrop);

@@ -250,7 +250,7 @@ namespace RuniOS.UIElements.IO
 
         static bool CanCopy(IODragData data, IONode directory) => IOTransfer.CanCopy(data.provider, data.entries, directory);
 
-        static bool CanMove(IODragData data, IONode directory) => !data.source.readOnly && IOTransfer.CanMove(data.provider, data.entries, directory);
+        static bool CanMove(IODragData data, IONode directory) => data.source.canWrite && IOTransfer.CanMove(data.provider, data.entries, directory);
 
         static bool CanLink(IODragData data, IONode directory) => IOTransfer.CanLink(data.provider, directory);
 
