@@ -23,6 +23,7 @@ namespace RuniOS.UIElements.IO
 
         public const string pathPrefixLabelUssClassName = "runios-io-browser__path-prefix-label";
         public const string pathFieldUssClassName = "runios-io-browser__path-field";
+        public const string breadcrumbBarUssClassName = "runios-io-browser__breadcrumb-bar";
 
         public const string folderMenuButtonUssClassName = "runios-io-browser__folder-menu";
 
@@ -55,6 +56,12 @@ namespace RuniOS.UIElements.IO
         public Button up { get; }
 
         public Label pathPrefixLabel { get; }
+
+        public IOBreadcrumbBar breadcrumbBar { get; }
+
+        /// <summary>
+        /// 경로를 직접 입력하는 필드입니다. <see cref="breadcrumbBar"/>의 빈 곳을 누르거나 Ctrl+L을 누르면 <see cref="breadcrumbBar"/> 대신 나타납니다.
+        /// </summary>
         public TextField pathField { get; }
 
         public Button folderMenu { get; }
@@ -133,9 +140,30 @@ namespace RuniOS.UIElements.IO
                 pathPrefixLabel.AddToClassList(pathPrefixLabelUssClassName);
                 header.Add(pathPrefixLabel);
 
+                breadcrumbBar = new IOBreadcrumbBar { name = "breadcrumb-bar" };
+                breadcrumbBar.AddToClassList(breadcrumbBarUssClassName);
+                breadcrumbBar.nodeSelected += x => node = x;
+                breadcrumbBar.editRequested += EditPath;
+                header.Add(breadcrumbBar);
+
                 pathField = new TextField { name = "path-field", isDelayed = true };
                 pathField.AddToClassList(pathFieldUssClassName);
-                pathField.RegisterValueChangedCallback(x => node = PathFieldToNode(x.newValue));
+                pathField.style.display = DisplayStyle.None;
+                pathField.RegisterValueChangedCallback(x =>
+                {
+                    node = PathFieldToNode(x.newValue);
+                    EndEditPath();
+                });
+                pathField.RegisterCallback<FocusOutEvent>(_ => EndEditPath());
+                pathField.RegisterCallback<KeyDownEvent>(x =>
+                {
+                    if (x.keyCode != KeyCode.Escape)
+                        return;
+
+                    EndEditPath();
+                    Focus();
+                    x.StopPropagation();
+                }, TrickleDown.TrickleDown);
                 header.Add(pathField);
 
                 folderMenu = new Button(FolderMenuDropDown) { name = "folder-menu" };
@@ -169,6 +197,7 @@ namespace RuniOS.UIElements.IO
             hierarchy.Add(splitView);
 
             pathField.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
+            breadcrumbBar.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
             contentPane.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
 
             RegisterCallback<KeyDownEvent>(OnKeyDown);
@@ -258,12 +287,34 @@ namespace RuniOS.UIElements.IO
             forward.SetEnabled(activeTab.canGoForward);
 
             pathField.SetValueWithoutNotify(NodeToPathField(node));
+            breadcrumbBar.SetCrumbs(NodeToBreadcrumbs(node));
+        }
+
+        void EditPath()
+        {
+            breadcrumbBar.style.display = DisplayStyle.None;
+            pathField.style.display = DisplayStyle.Flex;
+
+            // 표시가 바뀐 스타일이 적용된 뒤에야 포커스를 받을 수 있습니다.
+            pathField.schedule.Execute(() =>
+            {
+                pathField.Focus();
+                pathField.SelectAll();
+            }).StartingIn(1);
+        }
+
+        void EndEditPath()
+        {
+            pathField.style.display = DisplayStyle.None;
+            breadcrumbBar.style.display = DisplayStyle.Flex;
         }
 
         void OnKeyDown(KeyDownEvent evt)
         {
             if (evt.keyCode == KeyCode.F5 && !evt.actionKey)
                 Refresh().Forget();
+            else if (evt.keyCode == KeyCode.L && evt.actionKey)
+                EditPath();
             else if (evt.keyCode == KeyCode.T && evt.actionKey)
                 AddTab(node);
             else if (evt.keyCode == KeyCode.W && evt.actionKey)
@@ -297,10 +348,14 @@ namespace RuniOS.UIElements.IO
 
         public void AlignPathField()
         {
-            float xMax = pathField.layout.xMax;
+            VisualElement active = pathField.style.display == DisplayStyle.None ? breadcrumbBar : pathField;
+
+            float xMax = active.layout.xMax;
             float x = contentPane.ChangeCoordinatesTo(header, Vector2.zero).x;
 
-            pathField.style.width = (xMax - x).Clamp(0);
+            float width = (xMax - x).Clamp(0);
+            pathField.style.width = width;
+            breadcrumbBar.style.width = width;
         }
 
         RuniMenu? folderDropdown;
@@ -378,6 +433,21 @@ namespace RuniOS.UIElements.IO
         protected abstract IOBrowserTab CreateTab();
 
         protected virtual string NodeToPathField(IONode node) => node.path.value;
+
+        /// <summary>
+        /// 경로 표시줄의 버튼으로 쓸 이름과 노드를 앞에서부터 순서대로 가져옵니다.
+        /// </summary>
+        protected virtual IEnumerable<(string name, IONode node)> NodeToBreadcrumbs(IONode node)
+        {
+            IONode current = node.rootNode;
+            yield return (RuniPath.directorySeparatorChar.ToString(), current);
+
+            foreach (string segment in node.path.GetSegments())
+            {
+                current = current.CreateChild(segment);
+                yield return (segment, current);
+            }
+        }
 
         protected virtual IONode PathFieldToNode(string path) => new IONode(provider, (RuniPath)path);
     }

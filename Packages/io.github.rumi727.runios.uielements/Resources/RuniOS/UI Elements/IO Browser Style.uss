@@ -6,7 +6,8 @@
     flex-shrink: 0;
 }
 
-.runios-io-browser .runios-io-browser__path-field {
+.runios-io-browser .runios-io-browser__path-field,
+.runios-io-browser .runios-io-browser__breadcrumb-bar {
     flex-shrink: 1;
 }
 
@@ -17,3 +18,31 @@
 
 
 
+.runios-io-breadcrumb-bar {
+    flex-direction: row;
+    overflow: hidden;
+}
+
+.runios-io-breadcrumb-bar__scroll-view {
+    flex-grow: 1;
+}
+
+.runios-io-breadcrumb-bar__content {
+    flex-direction: row;
+    flex-grow: 1;
+}
+
+.runios-io-breadcrumb-bar__crumb,
+.runios-io-breadcrumb-bar__arrow {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
+.runios-io-breadcrumb-bar__edit-button {
+    flex-shrink: 0;
+}
+
+.runios-io-breadcrumb-bar__blank {
+    flex-grow: 1;
+    flex-shrink: 0;
+}

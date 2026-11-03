@@ -11,6 +11,7 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class FileSystemBrowser : IOBrowser
     {
+        public new const string ussClassName = "runios-file-system-browser";
         public const string placeSpaceBarUssClassName = "runios-file-system-browser__place-space-bar";
 
         static readonly KnownDirectoryType[] placeDirectoryTypes =
@@ -77,6 +78,8 @@ namespace RuniOS.UIElements.IO
         public FileSystemBrowser()
         {
             this.AddManipulator(new LocalizationManipulator(() => RefreshNavigation().Forget()));
+            AddToClassList(ussClassName);
+
             AddTab(IONode.empty);
         }
 
@@ -245,6 +248,20 @@ namespace RuniOS.UIElements.IO
                 return physicalProvider.targetPath.Combine(node.path);
 
             return node.path.value;
+        }
+
+        // 홈 화면(장치 목록) 버튼 뒤에, 경로 루트(리눅스는 /, 윈도우는 C:\ 등)부터 OS 경로 그대로 이어 붙입니다.
+        protected override IEnumerable<(string name, IONode node)> NodeToBreadcrumbs(IONode node)
+        {
+            yield return (GetText("runios-editor:io_browser.computer"), IONode.empty);
+
+            if (node.provider is not PhysicalIOProvider physicalProvider)
+                yield break;
+
+            yield return (physicalProvider.targetPath.ToString(), node.rootNode);
+
+            foreach ((string name, IONode node) crumb in base.NodeToBreadcrumbs(node).Skip(1))
+                yield return crumb;
         }
 
         // 빈 경로는 홈 화면을 뜻합니다.
