@@ -254,6 +254,7 @@
   "io_node_tree_view.delete_permanently.message_multiple": "Do you really want to permanently delete these {0} items?\nThis action cannot be undone.",
   "io_node_tree_view.drop.move": "Move Here",
   "io_node_tree_view.drop.copy": "Copy Here",
+  "io_node_tree_view.drop.link": "Link Here",
   "io_node_tree_view.drop.cancel": "Cancel",
   "io_transfer.conflict.file_title": "File Already Exists",
   "io_transfer.conflict.directory_title": "Folder Already Exists",

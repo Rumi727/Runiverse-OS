@@ -253,6 +253,7 @@
   "io_node_tree_view.delete_permanently.message_multiple": "{0}개 항목을 영구 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.",
   "io_node_tree_view.drop.move": "여기로 이동",
   "io_node_tree_view.drop.copy": "여기로 복사",
+  "io_node_tree_view.drop.link": "여기에 링크",
   "io_node_tree_view.drop.cancel": "취소",
   "io_transfer.conflict.file_title": "파일이 이미 있음",
   "io_transfer.conflict.directory_title": "폴더가 이미 있음",
