@@ -60,6 +60,9 @@ namespace RuniOS.IO
         /// <inheritdoc/>
         public bool isIndependent => false;
 
+        /// <inheritdoc/>
+        public bool isThreadSafe => true;
+
         /*/// <inheritdoc/>
         public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));*/
 
@@ -164,17 +167,20 @@ namespace RuniOS.IO
         #endregion
 
         #region Read
+        // 비동기 파일 API는 스레드 풀을 거쳐, 메인 스레드에서 기다리면 호출마다 다음 업데이트까지 미뤄집니다.
+        // 로컬 파일 하나를 읽고 쓰는 일은 그보다 훨씬 빠르므로 바로 처리합니다.
+
         /// <inheritdoc cref="IIOProvider.OpenRead(RuniPath, CancellationToken)"/>
         public FileStream OpenRead(RuniPath path) => File.OpenRead(ResolveFullPath(path));
         UniTask<Stream> IIOProvider.OpenRead(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenRead(path));
 
         /// <inheritdoc/>
         public UniTask<byte[]> ReadAllBytes(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllBytesAsync(ResolveFullPath(path), cancellationToken).AsUniTask();
+            UniTask.FromResult(File.ReadAllBytes(ResolveFullPath(path)));
 
         /// <inheritdoc/>
         public UniTask<string> ReadAllText(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllTextAsync(ResolveFullPath(path), cancellationToken).AsUniTask();
+            UniTask.FromResult(File.ReadAllText(ResolveFullPath(path)));
 
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default) =>
@@ -198,16 +204,25 @@ namespace RuniOS.IO
         UniTask<Stream> IWritableIOProvider.CreateFile(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(CreateFile(path));
 
         /// <inheritdoc/>
-        public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default) =>
-            File.WriteAllBytesAsync(ResolveFullPath(path), bytes, cancellationToken).AsUniTask();
+        public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllBytes(ResolveFullPath(path), bytes);
+            return UniTask.CompletedTask;
+        }
 
         /// <inheritdoc/>
-        public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default) =>
-            File.WriteAllTextAsync(ResolveFullPath(path), text, cancellationToken).AsUniTask();
+        public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllText(ResolveFullPath(path), text);
+            return UniTask.CompletedTask;
+        }
 
         /// <inheritdoc/>
-        public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default) =>
-            File.WriteAllLinesAsync(ResolveFullPath(path), lines, cancellationToken).AsUniTask();
+        public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllLines(ResolveFullPath(path), lines);
+            return UniTask.CompletedTask;
+        }
         #endregion
 
         /// <inheritdoc/>
@@ -230,8 +245,8 @@ namespace RuniOS.IO
             string source = ResolveFullPath(sourcePath);
             string destination = ResolveFullPath(destinationPath);
 
-            // 큰 파일을 복사하는 동안 호출한 스레드가 멈추지 않도록 스레드 풀에서 복사합니다.
-            return UniTask.RunOnThreadPool(() => File.Copy(source, destination, overwrite), cancellationToken: cancellationToken);
+            File.Copy(source, destination, overwrite);
+            return UniTask.CompletedTask;
         }
 
         /// <inheritdoc/>

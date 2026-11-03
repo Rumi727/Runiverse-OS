@@ -51,6 +51,19 @@ namespace RuniOS.IO
         /// </remarks>
         bool isIndependent { get; }
 
+        /// <summary>
+        /// Gets whether this provider's members may be called from a background thread.<br/>
+        /// 이 프로바이더의 멤버를 백그라운드 스레드에서 호출해도 되는지 여부를 가져옵니다.
+        /// </summary>
+        /// <remarks>
+        /// When <see langword="true"/>, callers can run a long sequence of operations entirely on a background thread instead of waiting on the main thread for each one.<br/>
+        /// The default implementation returns <see langword="false"/>, so the provider is only used from the calling thread.
+        /// <br/><br/>
+        /// <see langword="true"/>이면 호출하는 쪽은 긴 작업을 메인 스레드에서 하나씩 기다리는 대신 백그라운드 스레드에서 한 번에 처리할 수 있습니다.<br/>
+        /// 기본 구현은 <see langword="false"/>를 반환하므로, 프로바이더는 호출한 스레드에서만 사용됩니다.
+        /// </remarks>
+        bool isThreadSafe => false;
+
         /*/// <summary>
         /// Creates a read-only provider rooted at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로를 새 루트로 삼는 읽기 전용 프로바이더를 생성합니다.
