@@ -85,12 +85,14 @@ namespace RuniOS.UIElements.IO
         protected override void BuildFolderMenu(RuniMenu menu)
         {
             // 홈 화면(장치 목록)에서는 트리 뷰가 이전 폴더를 가리킨 채 숨겨져 있으므로 만들 수 없게 합니다.
+        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
+
             IONodeMultiColumnTreeView.AddNewItemMenu(menu, () => node == IONode.empty ? null : treeView);
             menu.Add(new Separator());
 
             base.BuildFolderMenu(menu);
 
-            RuniMenuItem showHiddenFiles = new(string.Empty, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+            RuniMenuItem showHiddenFiles = new(string.Empty, ToggleShowHiddenFiles) { shortcuts = [showHiddenFilesShortcut] };
             menu.opened += () =>
             {
                 showHiddenFiles.text = GetText("runios-editor:io_browser.show_hidden_files");

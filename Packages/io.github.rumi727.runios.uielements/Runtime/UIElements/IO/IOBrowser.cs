@@ -268,6 +268,8 @@ namespace RuniOS.UIElements.IO
                 AddTab(node);
             else if (evt.keyCode == KeyCode.W && evt.actionKey)
                 CloseTab(activeTab);
+            else if (showHiddenFilesShortcut.Matches(evt))
+                ToggleShowHiddenFiles();
             else
                 return;
 
@@ -317,6 +319,9 @@ namespace RuniOS.UIElements.IO
         static readonly KeyShortcut newTabShortcut = new(KeyCode.T, actionKey: true);
         static readonly KeyShortcut closeTabShortcut = new(KeyCode.W, actionKey: true);
         static readonly KeyShortcut refreshShortcut = new(KeyCode.F5);
+        protected static readonly KeyShortcut showHiddenFilesShortcut = new(KeyCode.H, actionKey: true);
+
+        protected virtual void ToggleShowHiddenFiles() { }
 
         /// <summary>
         /// 폴더 메뉴를 처음 열 때 한 번 구성합니다. 열 때마다 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신합니다.

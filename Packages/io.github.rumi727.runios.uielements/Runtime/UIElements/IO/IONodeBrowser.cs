@@ -60,8 +60,10 @@ namespace RuniOS.UIElements.IO
             menu.Add(new Separator());
 
             base.BuildFolderMenu(menu);
+        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
 
-            RuniMenuItem showHiddenFiles = new(string.Empty, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+
+            RuniMenuItem showHiddenFiles = new(string.Empty, ToggleShowHiddenFiles) { shortcuts = [showHiddenFilesShortcut] };
             menu.opened += () =>
             {
                 showHiddenFiles.text = LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files";
