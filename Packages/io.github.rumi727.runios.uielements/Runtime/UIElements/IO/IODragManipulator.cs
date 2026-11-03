@@ -12,7 +12,7 @@ namespace RuniOS.UIElements.IO
     /// </summary>
     /// <remarks>
     /// Shift를 누르고 놓으면 이동하고, 동작 키(Ctrl·Command)를 누르고 놓으면 복사하며, 보조 키가 없으면 놓은 자리에서 메뉴로 묻습니다.
-    /// 이동은 대상 프로바이더가 원본 항목을 가리킬 수 있을 때(<see cref="IIOProvider.TryGetPath"/>)만 할 수 있습니다.
+    /// 이동은 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있고, 다르면 복사만 할 수 있습니다.
     /// </remarks>
     /// <param name="source">끌 항목을 정하고 고스트를 만드는 요소입니다. 보통 이 조작기를 붙이는 요소 자신입니다.</param>
     public sealed class IODragManipulator(IIODragSource source) : Manipulator
@@ -240,8 +240,8 @@ namespace RuniOS.UIElements.IO
                 IODropOperation.Move => CanMove(data, directory),
                 IODropOperation.Copy => CanCopy(data, directory),
 
-                // 대상 프로바이더가 원본을 가리킬 수 있는데 이동할 수 없으면, 원래 있던 폴더에 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
-                _ => CanMove(data, directory) || (CanCopy(data, directory) && !directory.provider.TryGetPath(data.provider, data.entries[0].path, out _))
+                // 같은 프로바이더인데 원래 있던 폴더에 놓았으면, 조금 끌다 놓은 것이므로 묻지 않습니다. 복사하려면 동작 키를 누릅니다.
+                _ => CanMove(data, directory) || (CanCopy(data, directory) && !(ReferenceEquals(directory.provider, data.provider) && data.entries[0].path.GetParentPath().value == directory.path.value))
             };
         }
 
