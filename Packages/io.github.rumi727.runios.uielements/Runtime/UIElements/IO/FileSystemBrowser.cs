@@ -117,6 +117,7 @@ namespace RuniOS.UIElements.IO
 
             IOBrowserPlaceGroup places = new(GetText("runios-editor:io_browser.places")) { name = "places" };
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
+            places.Add(MakeCurrentDirectoryPlace());
 
             if (IKnownDirectoryProvider.instance is { } knownDirectoryProvider)
             {
@@ -166,6 +167,18 @@ namespace RuniOS.UIElements.IO
             navigationPane.Clear();
             foreach (VisualElement group in groups)
                 navigationPane.Add(group);
+        }
+
+        // 프로세스의 작업 폴더이며, 에디터에서는 프로젝트 폴더, 빌드에서는 실행한 위치입니다.
+        IOBrowserPlace MakeCurrentDirectoryPlace()
+        {
+            PhysicalPath path = PhysicalPath.From(Environment.CurrentDirectory);
+
+            IOBrowserPlace place = MakePlace(GetText("runios-editor:io_browser.current_directory"), folderIcon, () => Open(path));
+            place.name = "current-directory";
+            place.dropDirectory = GetNodeFromPhysicalRoot(path);
+
+            return place;
         }
 
         // 번역 키가 없는 종류는 종류 이름을 그대로 표시합니다.
