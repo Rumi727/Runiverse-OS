@@ -8,6 +8,8 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class FileSystemBrowserTab : IOBrowserTab
     {
+        public new const string ussClassName = "runios-file-system-browser-tab";
+
         public override IONode node
         {
             get => base.node;
@@ -30,6 +32,8 @@ namespace RuniOS.UIElements.IO
 
         public FileSystemBrowserTab()
         {
+            AddToClassList(ussClassName);
+
             deviceLocationView = new DeviceLocationView { name = "device-location-view" };
             deviceLocationView.opened += x => node = FileSystemBrowser.GetNodeFromPhysicalRoot(x);
             Add(deviceLocationView);

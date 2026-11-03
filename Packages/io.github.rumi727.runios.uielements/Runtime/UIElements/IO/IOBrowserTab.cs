@@ -11,6 +11,7 @@ namespace RuniOS.UIElements.IO
     /// </summary>
     public abstract class IOBrowserTab : Tab, IIODropTarget
     {
+        public new const string ussClassName = "runios-io-browser-tab";
         public const string headerDropTargetUssClassName = "runios-io-browser-tab__header--drop-target";
 
         public virtual IONode node
@@ -49,6 +50,8 @@ namespace RuniOS.UIElements.IO
         protected IOBrowserTab()
         {
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
+            AddToClassList(ussClassName);
+
             closeable = true;
         }
 

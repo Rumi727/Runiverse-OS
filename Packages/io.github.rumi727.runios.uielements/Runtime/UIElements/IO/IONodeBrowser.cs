@@ -7,6 +7,8 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class IONodeBrowser : IOBrowser
     {
+        public new const string ussClassName = "runios-io-node-browser";
+
         [UxmlAttribute]
         SerializableNullable<PhysicalPath> targetPath
         {
@@ -50,7 +52,11 @@ namespace RuniOS.UIElements.IO
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
 
-        public IONodeBrowser(IONode node) => AddTab(node);
+        public IONodeBrowser(IONode node)
+        {
+            AddToClassList(ussClassName);
+            AddTab(node);
+        }
 
         protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
 

@@ -7,6 +7,8 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class IONodeBrowserTab : IOBrowserTab
     {
+        public new const string ussClassName = "runios-io-node-browser-tab";
+
         public IONodeMultiColumnTreeView treeView { get; }
 
         [UxmlAttribute]
@@ -22,6 +24,8 @@ namespace RuniOS.UIElements.IO
 
         public IONodeBrowserTab()
         {
+            AddToClassList(ussClassName);
+
             treeView = new IONodeMultiColumnTreeView { name = "tree-view", contextMenuEnabled = true };
             treeView.opened += OpenEntry;
 
