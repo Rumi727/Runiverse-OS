@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using System.IO;
+using System.Threading;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -13,6 +14,9 @@ namespace RuniOS.UIElements.IO
     /// <remarks>
     /// 파일은 덮어쓰기·이름 바꾸기·건너뛰기를, 폴더는 합치기·이름 바꾸기·건너뛰기를 고를 수 있으며, 취소하면 남은 항목을 처리하지 않습니다.
     /// 폴더를 합치면 그 안의 항목도 같은 방식으로 처리합니다.
+    /// <br/>
+    /// 전송이 오래 걸리면 처리한 개수와 현재 항목을 보여 주는 진행 대화 상자를 띄우며, 취소하면 남은 항목을 처리하지 않습니다.
+    /// 쓰던 파일은 프로바이더가 취소를 지원하는 범위에서 멈추고, 이미 처리한 항목은 되돌리지 않습니다.
     /// <br/>
     /// 이동과 링크는 원본과 대상이 같은 프로바이더 인스턴스일 때만 할 수 있습니다. 프로바이더가 다르면 항상 원본을 읽어 대상에 새로 쓰는 복사입니다.
     /// 링크는 덮어쓰거나 합칠 수 없어, 같은 이름이 있으면 이름 바꾸기·건너뛰기·취소만 고를 수 있습니다.
@@ -36,7 +40,14 @@ namespace RuniOS.UIElements.IO
         // "모두 적용"을 고른 처리 방법이며, 파일과 폴더를 따로 기억합니다.
         Resolution? fileResolution;
         Resolution? directoryResolution;
-        bool cancelled;
+
+        // 진행 대화 상자를 띄우기까지 기다리는 시간(밀리초)입니다.
+        const int progressDelay = 500;
+
+        readonly CancellationTokenSource cancellation = new();
+        readonly RuniDialog progress;
+        CancellationTokenSource? progressTimer;
+        int processedCount;
 
         IOTransfer(IIOProvider sourceProvider, IWritableIOProvider destinationProvider, IODropOperation operation, VisualElement dialogTarget)
         {
@@ -46,6 +57,9 @@ namespace RuniOS.UIElements.IO
             this.dialogTarget = dialogTarget;
 
             sameProvider = ReferenceEquals(sourceProvider, destinationProvider);
+
+            progress = new RuniDialog(GetText("runios-editor:io_transfer.progress.title"), string.Empty);
+            progress.AddButton(GetText("runios-editor:io_transfer.progress.cancel"));
         }
 
         /// <summary>
@@ -81,15 +95,15 @@ namespace RuniOS.UIElements.IO
             ReferenceEquals(sourceProvider, directory.provider) && sourceProvider is ISymbolicLinkIOProvider;
 
         /// <summary>
-        /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사하거나 링크합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다.
+        /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사하거나 링크합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다. 오래 걸리면 진행 대화 상자를 띄우며, 취소해도 예외 없이 끝납니다.
         /// </summary>
         /// <param name="sourceProvider"><paramref name="entries"/>가 들어 있는 프로바이더입니다.</param>
         /// <param name="operation"></param>
-        /// <param name="dialogTarget">이름이 겹칠 때 띄우는 대화 상자를 표시할 패널을 정하는 요소입니다.</param>
+        /// <param name="dialogTarget">이름이 겹칠 때와 진행 중에 띄우는 대화 상자를 표시할 패널을 정하는 요소입니다.</param>
         /// <param name="entries"></param>
         /// <param name="directory"></param>
         public static UniTask Run(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IOWriteNode directory, IODropOperation operation, VisualElement dialogTarget) =>
-            new IOTransfer(sourceProvider, directory.provider, operation, dialogTarget).TransferAll(entries, directory.path);
+            new IOTransfer(sourceProvider, directory.provider, operation, dialogTarget).TransferWithProgress(entries, directory.path);
 
         static bool PathEquals(RuniPath x, RuniPath y) => string.Equals(x.value, y.value, StringComparison.Ordinal);
 
@@ -97,11 +111,38 @@ namespace RuniOS.UIElements.IO
             PathEquals(path, ancestorPath)
             || path.value.StartsWith(ancestorPath.value + RuniPath.directorySeparatorChar, StringComparison.Ordinal);
 
+        async UniTask TransferWithProgress(IEnumerable<IOEntry> entries, RuniPath directoryPath)
+        {
+            ShowProgressAfterDelay().Forget();
+            try
+            {
+                await TransferAll(entries, directoryPath);
+            }
+            finally
+            {
+                progressTimer?.Cancel();
+                progress.Close();
+            }
+        }
+
+        // 진행 대화 상자를 닫는 것도 취소로 보므로, 전송이 끝나 닫을 때는 이미 끝난 전송을 취소할 뿐입니다.
+        async UniTaskVoid ShowProgressAfterDelay()
+        {
+            progressTimer = new CancellationTokenSource();
+            if (await UniTask.Delay(progressDelay, DelayType.UnscaledDeltaTime, cancellationToken: progressTimer.Token).SuppressCancellationThrow())
+                return;
+
+            await progress.ShowAsync(dialogTarget);
+            cancellation.Cancel();
+        }
+
+        void SetCurrent(string name) => progress.message = string.Format(GetText("runios-editor:io_transfer.progress.message"), processedCount, name);
+
         async UniTask TransferAll(IEnumerable<IOEntry> entries, RuniPath directoryPath)
         {
             foreach (IOEntry entry in entries)
             {
-                if (cancelled)
+                if (cancellation.IsCancellationRequested)
                     return;
 
                 // 이미 그 폴더에 있는 항목은 옮겨도 바뀌지 않으므로 건너뜁니다.
@@ -110,7 +151,13 @@ namespace RuniOS.UIElements.IO
 
                 try
                 {
+                    SetCurrent(entry.path.GetFileName());
                     await Transfer(entry, directoryPath / entry.path.GetFileName());
+                    processedCount++;
+                }
+                catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+                {
+                    return;
                 }
                 catch (Exception e)
                 {
@@ -121,7 +168,7 @@ namespace RuniOS.UIElements.IO
 
         async UniTask Transfer(IOEntry entry, RuniPath destinationPath)
         {
-            if (await destinationProvider.GetEntry(destinationPath) is not { } existing)
+            if (await destinationProvider.GetEntry(destinationPath, cancellation.Token) is not { } existing)
             {
                 await TransferItem(entry, destinationPath, false);
                 return;
@@ -147,7 +194,7 @@ namespace RuniOS.UIElements.IO
                 case Resolution.Skip:
                     break;
                 default:
-                    cancelled = true;
+                    cancellation.Cancel();
                     break;
             }
         }
@@ -156,13 +203,13 @@ namespace RuniOS.UIElements.IO
         async UniTask TransferItem(IOEntry entry, RuniPath destinationPath, bool overwrite)
         {
             if (operation == IODropOperation.Link)
-                await ((ISymbolicLinkIOProvider)destinationProvider).CreateSymbolicLink(destinationPath, entry.path, entry.isDirectory);
+                await ((ISymbolicLinkIOProvider)destinationProvider).CreateSymbolicLink(destinationPath, entry.path, entry.isDirectory, cancellation.Token);
             else if (operation == IODropOperation.Move)
-                await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath) : destinationProvider.MoveFile(entry.path, destinationPath, overwrite));
+                await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath, cancellation.Token) : destinationProvider.MoveFile(entry.path, destinationPath, overwrite, cancellation.Token));
             else if (!entry.isDirectory)
                 await CopyFile(entry.path, destinationPath, overwrite);
             else if (sameProvider)
-                await destinationProvider.CopyDirectory(entry.path, destinationPath);
+                await destinationProvider.CopyDirectory(entry.path, destinationPath, cancellation.Token);
             else
                 await CopyDirectoryAcrossProviders(entry.path, destinationPath);
         }
@@ -172,21 +219,25 @@ namespace RuniOS.UIElements.IO
         async UniTask Merge(IOEntry entry, RuniPath destinationPath)
         {
             // 이동하면서 원본 폴더가 바뀌므로, 자식 목록을 먼저 모두 가져옵니다.
-            List<IOEntry> children = await sourceProvider.EnumerateEntries(entry.path, false).ToListAsync();
+            List<IOEntry> children = await sourceProvider.EnumerateEntries(entry.path, false, cancellation.Token).ToListAsync(cancellation.Token);
             await TransferAll(children, destinationPath);
         }
 
         // 다른 프로바이더로는 프로바이더의 폴더 복사를 쓸 수 없으므로, 원본을 읽어 대상에 새로 씁니다.
         async UniTask CopyDirectoryAcrossProviders(RuniPath sourcePath, RuniPath destinationPath)
         {
-            await destinationProvider.CreateDirectory(destinationPath);
-            await foreach (IOEntry child in sourceProvider.EnumerateEntries(sourcePath, false))
+            await destinationProvider.CreateDirectory(destinationPath, cancellation.Token);
+            await foreach (IOEntry child in sourceProvider.EnumerateEntries(sourcePath, false, cancellation.Token))
             {
                 RuniPath childDestinationPath = destinationPath / child.path.GetFileName();
                 if (child.isDirectory)
                     await CopyDirectoryAcrossProviders(child.path, childDestinationPath);
                 else
+                {
+                    SetCurrent(child.path.GetFileName());
                     await CopyFile(child.path, childDestinationPath, false);
+                    processedCount++;
+                }
             }
         }
 
@@ -199,14 +250,15 @@ namespace RuniOS.UIElements.IO
             try
             {
                 if (sameProvider)
-                    await destinationProvider.CopyFile(sourcePath, temporaryPath);
+                    await destinationProvider.CopyFile(sourcePath, temporaryPath, false, cancellation.Token);
                 else
                 {
-                    await using Stream source = await sourceProvider.OpenRead(sourcePath);
-                    await using Stream destination = await destinationProvider.CreateFile(temporaryPath);
-                    await source.CopyToAsync(destination);
+                    await using Stream source = await sourceProvider.OpenRead(sourcePath, cancellation.Token);
+                    await using Stream destination = await destinationProvider.CreateFile(temporaryPath, cancellation.Token);
+                    await source.CopyToAsync(destination, 81920, cancellation.Token);
                 }
 
+                // 임시 파일을 다 썼다면 이름을 바꿔 끼우는 일은 취소하지 않고 끝냅니다.
                 await destinationProvider.MoveFile(temporaryPath, destinationPath, overwrite);
             }
             catch
@@ -230,7 +282,7 @@ namespace RuniOS.UIElements.IO
 
             RuniPath directoryPath = path.GetParentPath();
             RuniPath availablePath = path;
-            for (int number = 2; await destinationProvider.GetEntry(availablePath) != null; number++)
+            for (int number = 2; await destinationProvider.GetEntry(availablePath, cancellation.Token) != null; number++)
                 availablePath = directoryPath / $"{name} ({number}){extension}";
 
             return availablePath;
@@ -242,6 +294,9 @@ namespace RuniOS.UIElements.IO
             Resolution? resolutionForAll = entry.isDirectory ? directoryResolution : fileResolution;
             if (resolutionForAll is { } resolution && (resolution != Resolution.Overwrite || canOverwrite))
                 return resolution;
+
+            // 진행 대화 상자가 아직 없다면 이 대화 상자를 덮지 않도록 띄우기를 미루고, 이미 있다면 그 위에 띄웁니다.
+            progressTimer?.Cancel();
 
             string kind = entry.isDirectory ? "directory" : "file";
             RuniDialog dialog = new(
@@ -262,6 +317,9 @@ namespace RuniOS.UIElements.IO
             dialog.defaultButton = rename;
 
             Button? result = await dialog.ShowAsync(dialogTarget);
+            if (!progress.isOpen)
+                ShowProgressAfterDelay().Forget();
+
             Resolution? chosen = null;
             if (result == overwrite)
                 chosen = Resolution.Overwrite;
