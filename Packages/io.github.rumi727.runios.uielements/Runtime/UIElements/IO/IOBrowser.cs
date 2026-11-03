@@ -70,7 +70,7 @@ namespace RuniOS.UIElements.IO
 
         public ScrollView navigationPane { get; }
 
-        public TabView contentPane { get; }
+        public IOBrowserTabView contentPane { get; }
 
         protected IOBrowser()
         {
@@ -189,7 +189,7 @@ namespace RuniOS.UIElements.IO
                 navigationPane.AddToClassList(navigationPaneUssClassName);
                 splitView.Add(navigationPane);
 
-                contentPane = new TabView { name = "content-pane", reorderable = true };
+                contentPane = new IOBrowserTabView { name = "content-pane", reorderable = true };
                 contentPane.AddToClassList(contentPaneUssClassName);
                 contentPane.activeTabChanged += (_, _) => UpdateHeader();
                 splitView.Add(contentPane);

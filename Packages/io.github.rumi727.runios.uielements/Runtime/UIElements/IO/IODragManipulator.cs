@@ -295,6 +295,8 @@ namespace RuniOS.UIElements.IO
             data.source.Refresh().Forget();
             if (location.target is IONodeMultiColumnTreeView targetTreeView && targetTreeView != data.source)
                 targetTreeView.Refresh().Forget();
+            else if (location.target is IOBrowserTabView tabView)
+                tabView.Refresh(location.directory);
         }
     }
 }

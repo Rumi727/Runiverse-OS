@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -8,8 +9,10 @@ namespace RuniOS.UIElements.IO
     /// <summary>
     /// <see cref="IOBrowser"/>의 탭 하나입니다. 탭마다 위치와 뒤로·앞으로 기록, 내용 뷰를 따로 가집니다.
     /// </summary>
-    public abstract class IOBrowserTab : Tab
+    public abstract class IOBrowserTab : Tab, IIODropTarget
     {
+        public const string headerDropTargetUssClassName = "runios-io-browser-tab__header--drop-target";
+
         public virtual IONode node
         {
             get => _node;
@@ -111,6 +114,17 @@ namespace RuniOS.UIElements.IO
 
             return node.name;
         }
+
+        // 홈 화면(장치 목록)에는 놓을 수 없습니다.
+        bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
+        {
+            directory = node;
+            return node != IONode.empty;
+        }
+
+        void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => tabHeader.EnableInClassList(headerDropTargetUssClassName, canDrop);
+
+        void IIODropTarget.OnDragLeave() => tabHeader.RemoveFromClassList(headerDropTargetUssClassName);
 
         protected abstract void OnNodeChanged();
 

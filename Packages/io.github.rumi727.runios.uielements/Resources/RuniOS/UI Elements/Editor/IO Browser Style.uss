@@ -123,3 +123,8 @@
     width: 16px;
     height: 16px;
 }
+
+/* 트리 뷰에 놓을 때와 같은 색으로 칠합니다. */
+.runios-io-browser-tab__header--drop-target {
+    background-color: rgba(64, 128, 255, 0.25);
+}
