@@ -3,8 +3,14 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.Linq.Async;
 using RuniOS.Spans;
+#if !NET
+using System.ComponentModel;
+#endif
 using System.IO;
 using System.IO.Enumeration;
+#if !NET
+using System.Runtime.InteropServices;
+#endif
 using System.Threading;
 
 namespace RuniOS.IO
@@ -16,7 +22,7 @@ namespace RuniOS.IO
     /// 실제 로컬 파일 시스템 디렉터리를 <see cref="IWritableIOProvider"/> API로 제공합니다.<br/>
     /// 모든 프로바이더 기준 <see cref="RuniPath"/> 값은 <see cref="targetPath"/> 아래에서 해석됩니다.
     /// </summary>
-    public class PhysicalIOProvider : IWritableIOProvider
+    public class PhysicalIOProvider : IWritableIOProvider, ISymbolicLinkIOProvider
     {
         /// <summary>
         /// Initializes a new <see cref="PhysicalIOProvider"/> with the specified physical root and sandbox policy.<br/>
@@ -256,6 +262,40 @@ namespace RuniOS.IO
             return UniTask.CompletedTask;
         }
 
+        /// <remarks>
+        /// The link stores <paramref name="target"/> as a path relative to the directory containing the link, so it stays valid when that directory is moved together with its target.<br/>
+        /// On Windows, creating a symbolic link requires administrator rights or Developer Mode.
+        /// <br/><br/>
+        /// 링크에는 <paramref name="target"/>을 링크가 있는 디렉터리 기준 상대 경로로 저장하므로, 그 디렉터리를 대상과 함께 옮겨도 링크가 유지됩니다.<br/>
+        /// Windows에서 심볼릭 링크를 만들려면 관리자 권한이나 개발자 모드가 필요합니다.
+        /// </remarks>
+        /// <inheritdoc/>
+        public UniTask CreateSymbolicLink(RuniPath path, RuniPath target, bool isDirectory, CancellationToken cancellationToken = default)
+        {
+            string linkPath = ResolveFullPath(path);
+            string relativeTarget = Path.GetRelativePath(Path.GetDirectoryName(linkPath)!, ResolveFullPath(target));
+
+#if NET
+            if (isDirectory)
+                Directory.CreateSymbolicLink(linkPath, relativeTarget);
+            else
+                File.CreateSymbolicLink(linkPath, relativeTarget);
+#else
+            // .NET Standard 프로파일에는 File·Directory.CreateSymbolicLink가 없어 운영체제 함수를 직접 부릅니다.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // 개발자 모드가 켜져 있으면 관리자 권한 없이도 만들 수 있도록 합니다.
+                uint flags = Native.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE | (isDirectory ? Native.SYMBOLIC_LINK_FLAG_DIRECTORY : 0);
+                if (!Native.CreateSymbolicLinkW(linkPath, relativeTarget, flags))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+            else if (Native.symlink(relativeTarget, linkPath) != 0)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+#endif
+
+            return UniTask.CompletedTask;
+        }
+
         /// <summary>
         /// Combines <paramref name="path"/> with <see cref="targetPath"/> and validates the result against the configured sandbox policy.<br/>
         /// <paramref name="path"/>를 <see cref="targetPath"/>와 결합하고 설정된 샌드박스 정책으로 결과를 검증합니다.
@@ -383,5 +423,20 @@ namespace RuniOS.IO
         );
 
         void IDisposable.Dispose() { }
+
+#if !NET
+        static class Native
+        {
+            public const uint SYMBOLIC_LINK_FLAG_DIRECTORY = 0x1;
+            public const uint SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE = 0x2;
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.U1)]
+            public static extern bool CreateSymbolicLinkW(string symlinkFileName, string targetFileName, uint flags);
+
+            [DllImport("libc", SetLastError = true)]
+            public static extern int symlink(string target, string linkPath);
+        }
+#endif
     }
 }
