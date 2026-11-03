@@ -123,6 +123,7 @@ namespace RuniOS.UIElements
         // DropDown으로 열렸을 때만 씁니다.
         VisualElement? overlay;
         VisualElement? targetElement;
+        Focusable? previousFocus;
         Rect dropDownPosition;
         bool modal;
 
@@ -256,6 +257,7 @@ namespace RuniOS.UIElements
 
             this.targetElement = targetElement;
             targetElement.RegisterCallback<DetachFromPanelEvent>(OnTargetDetach);
+            previousFocus = panel.focusController?.focusedElement;
 
             if (overlay == null)
             {
@@ -281,7 +283,7 @@ namespace RuniOS.UIElements
         /// <summary>
         /// 이 메뉴와 그 아래 하위 메뉴를 닫습니다.
         /// </summary>
-        /// <param name="giveFocusBack">하위 메뉴면 헤더로, <see cref="DropDown"/>으로 열었으면 targetElement로 포커스를 돌려줄지 여부입니다.</param>
+        /// <param name="giveFocusBack">하위 메뉴면 헤더로, <see cref="DropDown"/>으로 열었으면 열기 직전에 포커스를 가졌던 요소로(받을 수 없으면 targetElement로) 포커스를 돌려줄지 여부입니다.</param>
         public void Close(bool giveFocusBack = true)
         {
             if (!isOpen)
@@ -318,9 +320,14 @@ namespace RuniOS.UIElements
                 targetElement = null;
 
                 if (overlay != null)
+                Focusable? previous = previousFocus;
+                previousFocus = null;
+
                     overlay.pickingMode = PickingMode.Ignore;
 
-                if (giveFocusBack && target.canGrabFocus)
+                if (giveFocusBack && previous is VisualElement { canGrabFocus: true } previousElement)
+                    previousElement.Focus();
+                else if (giveFocusBack && target.canGrabFocus)
                     target.Focus();
                 else if (popupHasFocus)
                     focused?.Blur();
@@ -723,7 +730,7 @@ namespace RuniOS.UIElements
             if (evt.target != overlay)
                 return;
 
-            Close(false);
+            Close();
             evt.StopPropagation();
         }
 
