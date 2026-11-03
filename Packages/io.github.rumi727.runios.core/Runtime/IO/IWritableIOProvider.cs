@@ -149,9 +149,20 @@ namespace RuniOS.IO
             if (!overwrite && await GetEntry(destinationPath, cancellationToken) != null)
                 throw new IOException($"The destination '{destinationPath}' already exists.");
 
-            await using Stream source = await OpenRead(sourcePath, cancellationToken);
-            await using Stream destination = await CreateFile(destinationPath, cancellationToken);
-            await source.CopyToAsync(destination, 81920, cancellationToken);
+            try
+            {
+                await using Stream source = await OpenRead(sourcePath, cancellationToken);
+                await using Stream destination = await CreateFile(destinationPath, cancellationToken);
+                await source.CopyToAsync(destination, 81920, cancellationToken);
+            }
+            catch
+            {
+                // 없던 대상에 쓰다 실패하거나 취소되면, 반쯤 쓴 파일을 남기지 않습니다. 덮어쓰던 파일은 이미 잘렸으므로 되돌릴 수 없습니다.
+                if (!overwrite && await FileExists(destinationPath))
+                    await DeleteFile(destinationPath);
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -245,9 +256,20 @@ namespace RuniOS.IO
             if (!overwrite && await GetEntry(destinationPath, cancellationToken) != null)
                 throw new IOException($"The destination '{destinationPath}' already exists.");
 
-            await using (Stream source = await OpenRead(sourcePath, cancellationToken))
-            await using (Stream destination = await CreateFile(destinationPath, cancellationToken))
-                await source.CopyToAsync(destination, 81920, cancellationToken);
+            try
+            {
+                await using (Stream source = await OpenRead(sourcePath, cancellationToken))
+                await using (Stream destination = await CreateFile(destinationPath, cancellationToken))
+                    await source.CopyToAsync(destination, 81920, cancellationToken);
+            }
+            catch
+            {
+                // 없던 대상에 쓰다 실패하거나 취소되면, 반쯤 쓴 파일을 남기지 않습니다. 덮어쓰던 파일은 이미 잘렸으므로 되돌릴 수 없습니다.
+                if (!overwrite && await FileExists(destinationPath))
+                    await DeleteFile(destinationPath);
+
+                throw;
+            }
 
             await DeleteFile(sourcePath, cancellationToken);
         }
