@@ -71,7 +71,7 @@ namespace RuniOS.UIElements.IO
             {
                 field = value;
                 foreach (IOBrowserTab tab in tabs)
-                    ((FileSystemBrowserTab)tab).treeView.selectionType = value;
+                    ((FileSystemBrowserTab)tab).selectionType = value;
             }
         } = SelectionType.Multiple;
 
@@ -83,7 +83,7 @@ namespace RuniOS.UIElements.IO
             AddTab(IONode.empty);
         }
 
-        protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab();
+        protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab { selectionType = selectionType };
 
         protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
 

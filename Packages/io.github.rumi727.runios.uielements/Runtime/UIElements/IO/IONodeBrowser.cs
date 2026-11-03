@@ -58,7 +58,7 @@ namespace RuniOS.UIElements.IO
             AddTab(node);
         }
 
-        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
+        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab { selectionType = selectionType };
 
         protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
 
