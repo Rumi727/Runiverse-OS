@@ -74,7 +74,7 @@ namespace RuniOS.UIElements
         /// <summary>
         /// 열린 하위 메뉴가 있을 때, 다른 항목으로 옮겨 간 뒤 그 하위 메뉴가 닫힐 때까지의 시간(ms)입니다.
         /// </summary>
-        [UxmlAttribute] public long closeDelay { get; set; }
+        [UxmlAttribute] public long closeDelay { get; set; } = 500;
 
         [UxmlAttribute] public bool openOnHover { get; set; } = true;
         [UxmlAttribute] public bool openOnFocus { get; set; } = true;
