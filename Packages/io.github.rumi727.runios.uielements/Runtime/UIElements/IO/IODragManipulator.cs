@@ -34,8 +34,9 @@ namespace RuniOS.UIElements.IO
         Vector2 startPosition;
         Vector2 lastPosition;
 
-        // 끄는 동안에만 있습니다.
+        // 끄는 동안에만 있습니다. root는 고스트를 붙인 패널 맨 위 요소입니다.
         VisualElement? ghost;
+        VisualElement? root;
         IIODropTarget? hoveredTarget;
 
         bool dragging => ghost != null;
@@ -48,6 +49,7 @@ namespace RuniOS.UIElements.IO
             target.RegisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
             target.RegisterCallback<KeyDownEvent>(OnKeyDown);
             target.RegisterCallback<KeyUpEvent>(OnKeyUp);
+            target.RegisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
         }
 
         protected override void UnregisterCallbacksFromTarget()
@@ -58,6 +60,7 @@ namespace RuniOS.UIElements.IO
             target.UnregisterCallback<PointerCaptureOutEvent>(OnPointerCaptureOut);
             target.UnregisterCallback<KeyDownEvent>(OnKeyDown);
             target.UnregisterCallback<KeyUpEvent>(OnKeyUp);
+            target.UnregisterCallback<DetachFromPanelEvent>(OnDetachFromPanel);
 
             End();
         }
@@ -107,10 +110,17 @@ namespace RuniOS.UIElements.IO
                 return;
             }
 
-            // 놓은 뒤 메뉴를 열거나 작업을 시작하므로, 드래그를 먼저 끝냅니다.
+            // 놓은 뒤 메뉴를 열거나 작업을 시작하므로, 드래그를 먼저 끝냅니다. 놓을 곳을 찾다 예외가 나도 고스트가 남지 않게 합니다.
             IODragData droppedData = data;
-            DropLocation? location = FindDropLocation(droppedData, evt.position, evt.actionKey, evt.shiftKey, out _);
-            End();
+            DropLocation? location;
+            try
+            {
+                location = FindDropLocation(droppedData, evt.position, evt.actionKey, evt.shiftKey, out _);
+            }
+            finally
+            {
+                End();
+            }
 
             if (location is { } dropLocation)
             {
@@ -128,6 +138,9 @@ namespace RuniOS.UIElements.IO
             if (dragging)
                 End();
         }
+
+        // 끄던 요소가 패널에서 떨어지면 더는 포인터 이벤트를 받지 못하므로 끝냅니다.
+        void OnDetachFromPanel(DetachFromPanelEvent evt) => End();
 
         void OnKeyDown(KeyDownEvent evt)
         {
@@ -158,7 +171,12 @@ namespace RuniOS.UIElements.IO
             ghost.pickingMode = PickingMode.Ignore;
             ghost.Query().ForEach(static x => x.pickingMode = PickingMode.Ignore);
 
-            target.panel.visualTree.Add(ghost);
+            // 포인터 캡처가 해제 이벤트 없이 풀려도 놓거나 움직인 것을 받도록, 패널 맨 위에서도 듣습니다.
+            // 캡처가 있으면 이 요소의 처리기가 전파를 멈추므로 두 번 처리되지 않습니다.
+            root = target.panel.visualTree;
+            root.Add(ghost);
+            root.RegisterCallback<PointerMoveEvent>(OnPointerMove);
+            root.RegisterCallback<PointerUpEvent>(OnPointerUp);
         }
 
         void UpdateDrag(Vector2 position, bool actionKey, bool shiftKey)
@@ -201,6 +219,10 @@ namespace RuniOS.UIElements.IO
             ghost.RemoveFromHierarchy();
             ghost = null;
 
+            root?.UnregisterCallback<PointerMoveEvent>(OnPointerMove);
+            root?.UnregisterCallback<PointerUpEvent>(OnPointerUp);
+            root = null;
+
             target.ReleasePointer(pointerId);
             source.OnDragEnd(endedData);
         }
@@ -209,7 +231,7 @@ namespace RuniOS.UIElements.IO
         // foundTarget은 놓을 수 없더라도 포인터 아래에 있는 놓을 대상입니다.
         DropLocation? FindDropLocation(IODragData data, Vector2 position, bool actionKey, bool shiftKey, out IIODropTarget? foundTarget)
         {
-            for (VisualElement? element = target.panel.Pick(position); element != null; element = element.parent)
+            for (VisualElement? element = root?.panel?.Pick(position); element != null; element = element.parent)
             {
                 if (element is not IIODropTarget dropTarget)
                     continue;
