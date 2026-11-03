@@ -61,6 +61,35 @@ namespace RuniOS.IO
         public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath && sandboxPolicy == otherPhysical.sandboxPolicy;
 
         /// <inheritdoc/>
+        /// <remarks>
+        /// Determined by platform: the default file systems of Windows and macOS are case-insensitive. Individual volumes or directories may differ.
+        /// <br/><br/>
+        /// 플랫폼으로 판단하며, Windows와 macOS의 기본 파일 시스템은 대소문자를 구분하지 않습니다. 볼륨이나 디렉터리마다 다를 수 있습니다.
+        /// </remarks>
+        public bool IsCaseSensitive(RuniPath path) => !(OperatingSystem.IsWindows() || OperatingSystem.IsMacOS());
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// For another <see cref="PhysicalIOProvider"/>, converts the path when its physical path is under <see cref="targetPath"/>, even if the roots differ.<br/>
+        /// Paths are compared case-sensitively, so paths that differ only in case are not converted even on case-insensitive file systems.
+        /// <br/><br/>
+        /// 다른 <see cref="PhysicalIOProvider"/>이면 루트가 달라도 실제 경로가 <see cref="targetPath"/> 아래에 있을 때 경로를 바꿉니다.<br/>
+        /// 경로는 대소문자를 구분해 비교하므로, 대소문자를 구분하지 않는 파일 시스템에서도 대소문자만 다른 경로는 바꾸지 않습니다.
+        /// </remarks>
+        public bool TryGetPath(IIOProvider other, RuniPath otherPath, out RuniPath path)
+        {
+            if (other is not PhysicalIOProvider otherPhysical)
+            {
+                path = default;
+                return false;
+            }
+
+            // 플랫폼으로 판단한 IsCaseSensitive로 대소문자를 무시하면, 대소문자를 구분하는 볼륨에서 다른 항목의 경로로 바꿔 그 항목을 덮어쓰거나 옮길 수 있습니다.
+            // 바꾸지 못하면 프로바이더 간 복사로 처리되어 안전하므로, 항상 대소문자를 구분해 비교합니다.
+            return (otherPhysical.targetPath / otherPath).TryGetRelativePath(targetPath, out path);
+        }
+
+        /// <inheritdoc/>
         public UniTask<bool> DirectoryExists(RuniPath path, CancellationToken cancellationToken = default) => UniTask.FromResult(Directory.Exists(ResolveFullPath(path)));
 
         /// <inheritdoc/>
