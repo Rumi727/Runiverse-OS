@@ -132,7 +132,7 @@ namespace RuniOS.UIElements.IO
             folderMenu.Close(false);
             folderMenu.Clear();
             foreach (string name in names)
-                {
+            {
                 IONode child = node.CreateChild(name);
                 folderMenu.Add(new RuniMenuItem(name, () => nodeSelected?.Invoke(child)) { userData = child });
             }
