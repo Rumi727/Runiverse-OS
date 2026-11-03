@@ -31,3 +31,5 @@
   * 많이 괜찮아짐
 * INoticeProvider, IDeviceProvider 등 여러 데스크탑 계약을 산발적으로 두지 않고 한 곳으로 모으는 Provider 관리자 비슷한거 만들기
 * Resource 시스템을 더 추상화하여 AssetRef가 더 이상 리소스 레지스트리만을 참조로 하는게 아닌 다양한 에셋 출처를 사용할 수 있게 승격하기
+* OS 기능을 사용하기 위한 provider 종류들(IDeviceLocationProvider, IFileManagerProvider 등)을 일괄 관리하는 매니저 설계 만들기
+  * provider 등록/해제와 함께, D-Bus 서비스(udisks2, FileManager1 등)가 없는 환경에서의 가용성/실패 처리도 한 곳에서 다룰 것
