@@ -871,38 +871,6 @@ namespace RuniOS.UIElements.IO
             treeView.RefreshItems();
         }
 
-        // 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로, 조상이 함께 들어 있지 않은 항목만 남깁니다.
-        int[] GetTopmostIds(IEnumerable<int> ids)
-        {
-            HashSet<int> idSet = ids.ToHashSet();
-            return idSet.Where(id => !HasAncestorIn(id)).ToArray();
-
-            bool HasAncestorIn(int id)
-            {
-                for (int parentId = treeView.viewController.GetParentId(id); parentId != -1; parentId = treeView.viewController.GetParentId(parentId))
-                {
-                    if (idSet.Contains(parentId))
-                        return true;
-                }
-
-                return false;
-            }
-        }
-
-        // 항목 행을 누르면 선택된 항목을 끕니다. 행을 누를 때 컬렉션 뷰가 이미 선택을 바꿉니다.
-        IODragData? IIODragSource.GetDragData(PointerDownEvent evt)
-        {
-            if (renamingId != null || GetItemIdAt(evt.position) == -1)
-                return null;
-
-            IOEntry[] entries = GetTopmostIds(selectedIds).Select(treeView.GetItemDataForId<IOEntry>).ToArray();
-            return entries.Length > 0 ? new IODragData(this, provider, entries) : null;
-        }
-
-        VisualElement IIODragSource.OnDragStart(IODragData data)
-        {
-            string title = data.entries.Length == 1
-                ? data.entries[0].metaData.name
         /// <summary>
         /// 선택된 항목을 <see cref="IOClipboard"/>에 복사하거나 잘라냅니다. 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로 따로 담지 않습니다.
         /// 잘라내기는 <see cref="readOnly"/>가 아니고 쓰기 가능한 프로바이더일 때만 합니다.
@@ -967,6 +935,38 @@ namespace RuniOS.UIElements.IO
 
         bool IsCut(IOEntry entry) => IOClipboard.isCut && IOClipboard.nodes.Any(x => x.IsSameTarget(node.Bind(entry)));
 
+        // 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로, 조상이 함께 들어 있지 않은 항목만 남깁니다.
+        int[] GetTopmostIds(IEnumerable<int> ids)
+        {
+            HashSet<int> idSet = ids.ToHashSet();
+            return idSet.Where(id => !HasAncestorIn(id)).ToArray();
+
+            bool HasAncestorIn(int id)
+            {
+                for (int parentId = treeView.viewController.GetParentId(id); parentId != -1; parentId = treeView.viewController.GetParentId(parentId))
+                {
+                    if (idSet.Contains(parentId))
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
+        // 항목 행을 누르면 선택된 항목을 끕니다. 행을 누를 때 컬렉션 뷰가 이미 선택을 바꿉니다.
+        IODragData? IIODragSource.GetDragData(PointerDownEvent evt)
+        {
+            if (renamingId != null || GetItemIdAt(evt.position) == -1)
+                return null;
+
+            IOEntry[] entries = GetTopmostIds(selectedIds).Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+            return entries.Length > 0 ? new IODragData(this, provider, entries) : null;
+        }
+
+        VisualElement IIODragSource.OnDragStart(IODragData data)
+        {
+            string title = data.entries.Length == 1
+                ? data.entries[0].metaData.name
                 : string.Format(GetText("runios-editor:io_node_tree_view.item_count"), data.entries.Length);
 
             // 패널 맨 위에 붙으므로, 이 요소의 조상에서 받던 스타일을 직접 붙입니다.
