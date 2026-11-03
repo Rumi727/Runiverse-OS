@@ -22,7 +22,7 @@ namespace RuniOS.IO
     /// 실제 로컬 파일 시스템 디렉터리를 <see cref="IWritableIOProvider"/> API로 제공합니다.<br/>
     /// 모든 프로바이더 기준 <see cref="RuniPath"/> 값은 <see cref="targetPath"/> 아래에서 해석됩니다.
     /// </summary>
-    public class PhysicalIOProvider : IWritableIOProvider, ISymbolicLinkIOProvider
+    public class PhysicalIOProvider : IWritableIOProvider
     {
         /// <summary>
         /// Initializes a new <see cref="PhysicalIOProvider"/> with the specified physical root and sandbox policy.<br/>
@@ -62,6 +62,9 @@ namespace RuniOS.IO
 
         /// <inheritdoc/>
         public bool isThreadSafe => true;
+
+        /// <inheritdoc/>
+        public bool supportsSymbolicLink => true;
 
         /*/// <inheritdoc/>
         public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));*/

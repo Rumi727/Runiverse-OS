@@ -19,6 +19,17 @@ namespace RuniOS.IO
         new IOWriteNode rootNode => new IOWriteNode(this);
         IONode IIOProvider.rootNode => rootNode;
 
+        /// <summary>
+        /// Gets whether this provider supports <see cref="CreateSymbolicLink"/>.<br/>
+        /// 이 프로바이더가 <see cref="CreateSymbolicLink"/>를 지원하는지 여부를 가져옵니다.
+        /// </summary>
+        /// <remarks>
+        /// Unlike copying, a symbolic link cannot be emulated with other operations, so the default implementation returns <see langword="false"/>.
+        /// <br/><br/>
+        /// 복사와 달리 심볼릭 링크는 다른 작업으로 흉내 낼 수 없으므로, 기본 구현은 <see langword="false"/>를 반환합니다.
+        /// </remarks>
+        bool supportsSymbolicLink => false;
+
         /*/// <summary>
         /// Creates a writable provider rooted at the specified provider-relative path.<br/>
         /// 지정된 프로바이더 기준 경로를 새 루트로 삼는 쓰기 가능 프로바이더를 생성합니다.
@@ -211,6 +222,33 @@ namespace RuniOS.IO
                     await CopyFile(entry.path, childDestinationPath, cancellationToken: cancellationToken);
             }
         }
+
+        /// <summary>
+        /// Creates a symbolic link at the specified provider-relative path that points to another path in this provider.<br/>
+        /// 지정된 프로바이더 기준 경로에, 이 프로바이더 안의 다른 경로를 가리키는 심볼릭 링크를 만듭니다.
+        /// </summary>
+        /// <param name="path">
+        /// The provider-relative path of the symbolic link to create.<br/>
+        /// 만들 심볼릭 링크의 프로바이더 기준 경로입니다.
+        /// </param>
+        /// <param name="target">
+        /// The provider-relative path the symbolic link points to.<br/>
+        /// 심볼릭 링크가 가리킬 프로바이더 기준 경로입니다.
+        /// </param>
+        /// <param name="isDirectory">
+        /// <see langword="true"/> if <paramref name="target"/> is a directory; otherwise, <see langword="false"/>.<br/>
+        /// <paramref name="target"/>이 디렉터리이면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token used to cancel the operation.<br/>
+        /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+        /// </param>
+        /// <exception cref="NotSupportedException">
+        /// Thrown when <see cref="supportsSymbolicLink"/> is <see langword="false"/>.<br/>
+        /// <see cref="supportsSymbolicLink"/>가 <see langword="false"/>인 경우 발생합니다.
+        /// </exception>
+        UniTask CreateSymbolicLink(RuniPath path, RuniPath target, bool isDirectory, CancellationToken cancellationToken = default) =>
+            throw new NotSupportedException("This provider does not support symbolic links.");
 
         /// <summary>
         /// Moves the file at the specified provider-relative path to another path in this provider.<br/>

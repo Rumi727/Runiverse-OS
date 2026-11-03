@@ -87,12 +87,12 @@ namespace RuniOS.UIElements.IO
 
         /// <summary>
         /// <paramref name="directory"/> 안에 항목의 심볼릭 링크를 만들 수 있는지 확인합니다.
-        /// 원본과 대상이 같은 프로바이더 인스턴스여야 하며, 그 프로바이더가 <see cref="ISymbolicLinkIOProvider"/>여야 합니다.
+        /// 원본과 대상이 같은 프로바이더 인스턴스여야 하며, 그 프로바이더가 <see cref="IWritableIOProvider.supportsSymbolicLink"/>여야 합니다.
         /// </summary>
         /// <param name="sourceProvider">링크가 가리킬 항목이 들어 있는 프로바이더입니다.</param>
         /// <param name="directory"></param>
         public static bool CanLink(IIOProvider sourceProvider, IONode directory) =>
-            ReferenceEquals(sourceProvider, directory.provider) && sourceProvider is ISymbolicLinkIOProvider;
+            ReferenceEquals(sourceProvider, directory.provider) && sourceProvider is IWritableIOProvider { supportsSymbolicLink: true };
 
         /// <summary>
         /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사하거나 링크합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다. 오래 걸리면 진행 대화 상자를 띄우며, 취소해도 예외 없이 끝납니다.
@@ -203,7 +203,7 @@ namespace RuniOS.UIElements.IO
         async UniTask TransferItem(IOEntry entry, RuniPath destinationPath, bool overwrite)
         {
             if (operation == IODropOperation.Link)
-                await ((ISymbolicLinkIOProvider)destinationProvider).CreateSymbolicLink(destinationPath, entry.path, entry.isDirectory, cancellation.Token);
+                await destinationProvider.CreateSymbolicLink(destinationPath, entry.path, entry.isDirectory, cancellation.Token);
             else if (operation == IODropOperation.Move)
                 await (entry.isDirectory ? destinationProvider.MoveDirectory(entry.path, destinationPath, cancellation.Token) : destinationProvider.MoveFile(entry.path, destinationPath, overwrite, cancellation.Token));
             else if (!entry.isDirectory)
