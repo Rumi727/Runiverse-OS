@@ -303,9 +303,17 @@ namespace RuniOS.Utility
         /// </returns>
         public static bool TryGetRelativePath(ReadOnlySpan<char> path, scoped ReadOnlySpan<char> relativeTo, out ReadOnlySpan<char> result)
         {
-            if (path == relativeTo)
+            // span의 ==는 내용이 아니라 같은 메모리를 가리키는지 비교하므로, 내용은 SequenceEqual로 비교합니다.
+            if (path.SequenceEqual(relativeTo))
             {
                 result = ReadOnlySpan<char>.Empty;
+                return true;
+            }
+
+            // 빈 경로(루트)는 모든 경로의 상위입니다.
+            if (relativeTo.IsEmpty)
+            {
+                result = path;
                 return true;
             }
 
@@ -337,7 +345,8 @@ namespace RuniOS.Utility
         /// </returns>
         public static bool StartsWith(scoped ReadOnlySpan<char> path, scoped ReadOnlySpan<char> startPath)
         {
-            if (path == startPath)
+            // span의 ==는 내용이 아니라 같은 메모리를 가리키는지 비교하므로, 내용은 SequenceEqual로 비교합니다. 빈 경로(루트)는 모든 경로의 상위입니다.
+            if (startPath.IsEmpty || path.SequenceEqual(startPath))
                 return true;
             if (path.Length <= startPath.Length)
                 return false;
