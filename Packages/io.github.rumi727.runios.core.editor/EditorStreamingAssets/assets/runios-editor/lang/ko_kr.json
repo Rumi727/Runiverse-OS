@@ -267,6 +267,8 @@
   "io_transfer.conflict.skip": "건너뛰기",
   "io_transfer.conflict.cancel": "취소",
   "io_transfer.conflict.apply_to_all": "남은 항목에 모두 적용",
+  "io_node_tree_view.copy_path": "논리 경로 복사",
+  "io_node_tree_view.copy_physical_path": "물리 경로 복사",
   "io_node_tree_view.show_in_file_manager": "파일 관리자에서 보기",
   "io_browser.places": "위치",
   "io_browser.remote": "원격",
