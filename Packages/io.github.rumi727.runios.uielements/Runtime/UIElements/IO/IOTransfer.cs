@@ -52,6 +52,8 @@ namespace RuniOS.UIElements.IO
         /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 복사할 수 있는지 확인합니다. 폴더를 자기 자신이나 그 안으로는 복사할 수 없습니다.
         /// </summary>
         /// <param name="sourceProvider"><paramref name="entries"/>가 들어 있는 프로바이더입니다.</param>
+        /// <param name="entries"></param>
+        /// <param name="directory"></param>
         public static bool CanCopy(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IONode directory) =>
             directory.provider is IWritableIOProvider
             && (!ReferenceEquals(sourceProvider, directory.provider) || !entries.Any(x => x.isDirectory && IsSameOrDescendant(directory.path, x.path)));
@@ -61,6 +63,8 @@ namespace RuniOS.UIElements.IO
         /// 원본과 대상이 같은 프로바이더 인스턴스여야 하며, 이미 그 폴더에 있는 항목만 옮기면 바뀌는 것이 없으므로 옮길 수 없습니다.
         /// </summary>
         /// <param name="sourceProvider"><paramref name="entries"/>가 들어 있는 프로바이더입니다.</param>
+        /// <param name="entries"></param>
+        /// <param name="directory"></param>
         public static bool CanMove(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IONode directory) =>
             ReferenceEquals(sourceProvider, directory.provider)
             && sourceProvider is IWritableIOProvider
@@ -72,6 +76,7 @@ namespace RuniOS.UIElements.IO
         /// 원본과 대상이 같은 프로바이더 인스턴스여야 하며, 그 프로바이더가 <see cref="ISymbolicLinkIOProvider"/>여야 합니다.
         /// </summary>
         /// <param name="sourceProvider">링크가 가리킬 항목이 들어 있는 프로바이더입니다.</param>
+        /// <param name="directory"></param>
         public static bool CanLink(IIOProvider sourceProvider, IONode directory) =>
             ReferenceEquals(sourceProvider, directory.provider) && sourceProvider is ISymbolicLinkIOProvider;
 
@@ -79,7 +84,10 @@ namespace RuniOS.UIElements.IO
         /// <paramref name="entries"/>를 <paramref name="directory"/> 안으로 옮기거나 복사하거나 링크합니다. 항목마다 실패하면 로그를 남기고 다음 항목을 처리합니다.
         /// </summary>
         /// <param name="sourceProvider"><paramref name="entries"/>가 들어 있는 프로바이더입니다.</param>
+        /// <param name="operation"></param>
         /// <param name="dialogTarget">이름이 겹칠 때 띄우는 대화 상자를 표시할 패널을 정하는 요소입니다.</param>
+        /// <param name="entries"></param>
+        /// <param name="directory"></param>
         public static UniTask Run(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IOWriteNode directory, IODropOperation operation, VisualElement dialogTarget) =>
             new IOTransfer(sourceProvider, directory.provider, operation, dialogTarget).TransferAll(entries, directory.path);
 
@@ -191,7 +199,7 @@ namespace RuniOS.UIElements.IO
             try
             {
                 if (sameProvider)
-                    await destinationProvider.CopyFile(sourcePath, temporaryPath, false);
+                    await destinationProvider.CopyFile(sourcePath, temporaryPath);
                 else
                 {
                     await using Stream source = await sourceProvider.OpenRead(sourcePath);
