@@ -7,6 +7,10 @@
     opacity: 0.5;
 }
 
+.runios-io-node-tree-view__cell--cut {
+    opacity: 0.5;
+}
+
 .runios-io-node-tree-view__icon {
     width: 16px;
     height: 16px;

@@ -16,6 +16,7 @@ namespace RuniOS.UIElements.IO
         public const string ussClassName = "runios-io-node-tree-view";
         public const string cellUssClassName = "runios-io-node-tree-view__cell";
         public const string hiddenCellUssClassName = "runios-io-node-tree-view__cell--hidden";
+        public const string cutCellUssClassName = "runios-io-node-tree-view__cell--cut";
         public const string nameCellUssClassName = "runios-io-node-tree-view__name-cell";
         public const string nameCellLoadingUssClassName = "runios-io-node-tree-view__name-cell--loading";
         public const string iconUssClassName = "runios-io-node-tree-view__icon";
@@ -112,6 +113,9 @@ namespace RuniOS.UIElements.IO
 
         // 마지막으로 로드한 위치이며, 새로 고침인지 다른 위치로의 이동인지 구분합니다.
         IONode? loadedNode;
+
+        // 클립보드가 마지막으로 알려 준 시점에 잘라낸 항목이 있었는지입니다. 잘라낸 항목이 사라졌을 때 이동했을 수 있는 목록을 새로 고칩니다.
+        bool cutShown;
 
         // 끄는 항목을 놓을 위치로 강조한 요소입니다.
         VisualElement? dropHighlight;
@@ -213,12 +217,29 @@ namespace RuniOS.UIElements.IO
                     case KeyCode.Delete:
                         Delete(e.shiftKey).Forget();
                         break;
+                    case KeyCode.C when copyShortcut.Matches(e):
+                        Copy(false);
+                        break;
+                    case KeyCode.X when cutShortcut.Matches(e):
+                        Copy(true);
+                        break;
+                    case KeyCode.V when pasteShortcut.Matches(e):
+                        Paste().Forget();
+                        break;
                     default:
                         return;
                 }
 
                 e.StopPropagation();
             });
+
+            // 정적 이벤트라 패널에서 떼어질 때 구독을 해제해야 이 요소가 남지 않습니다.
+            RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                cutShown = IOClipboard.isCut;
+                IOClipboard.changed += OnClipboardChanged;
+            });
+            RegisterCallback<DetachFromPanelEvent>(_ => IOClipboard.changed -= OnClipboardChanged);
 
             this.AddManipulator(new IODragManipulator(this));
 
@@ -314,6 +335,7 @@ namespace RuniOS.UIElements.IO
             element.EnableInClassList(nameCellLoadingUssClassName, loader.IsLoading(id));
             element.EnableInClassList(nameCellRenamingUssClassName, id == renamingId);
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
 
             // 값이 확정될 때 어느 항목의 이름을 바꿀지, 끌어다 놓을 때 어느 항목 위인지 알 수 있도록 id를 둡니다.
             element.Q<TextField>("rename-field").userData = id;
@@ -354,6 +376,7 @@ namespace RuniOS.UIElements.IO
             int id = treeView.GetIdForIndex(index);
 
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
 
             string text;
             if (entry.metaData.size is { } size)
@@ -399,6 +422,7 @@ namespace RuniOS.UIElements.IO
             IOEntry entry = treeView.GetItemDataForIndex<IOEntry>(index);
 
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
             action.Invoke(genericElement, entry);
         };
 
@@ -406,6 +430,9 @@ namespace RuniOS.UIElements.IO
 
         static readonly KeyShortcut renameShortcut = new(KeyCode.F2);
         static readonly KeyShortcut deleteShortcut = new(KeyCode.Delete);
+        static readonly KeyShortcut cutShortcut = new(KeyCode.X, true);
+        static readonly KeyShortcut copyShortcut = new(KeyCode.C, true);
+        static readonly KeyShortcut pasteShortcut = new(KeyCode.V, true);
 
         // 빈 곳에서 열어도 새로 만들기를 할 수 있도록, 선택이 없어도 메뉴를 엽니다.
         void ShowContextMenu(Vector2 position)
@@ -429,7 +456,36 @@ namespace RuniOS.UIElements.IO
 
             menu.Add(new Separator());
 
-            RuniMenuItem rename = new(string.Empty, BeginRename) { shortcuts = [renameShortcut] };
+            RuniMenuItem cut = new(string.Empty, () => Copy(true)) { shortcuts = [cutShortcut] };
+            menu.opened += () =>
+            {
+                cut.text = GetText("runios-editor:io_node_tree_view.cut");
+                cut.SetEnabled(selectedEntries.Length > 0 && canWrite);
+            };
+
+            menu.Add(cut);
+
+            RuniMenuItem copy = new(string.Empty, () => Copy(false)) { shortcuts = [copyShortcut] };
+            menu.opened += () =>
+            {
+                copy.text = GetText("runios-editor:io_node_tree_view.copy");
+                copy.SetEnabled(selectedEntries.Length > 0);
+            };
+
+            menu.Add(copy);
+
+            RuniMenuItem paste = new(string.Empty, () => Paste().Forget()) { shortcuts = [pasteShortcut] };
+            menu.opened += () =>
+            {
+                paste.text = GetText("runios-editor:io_node_tree_view.paste");
+                paste.SetEnabled(IOClipboard.nodes.Length > 0 && canWrite);
+            };
+
+            menu.Add(paste);
+
+            menu.Add(new Separator());
+
+            RuniMenuItem rename =new(string.Empty, BeginRename) { shortcuts = [renameShortcut] };
             menu.opened += () =>
             {
                 rename.text = GetText("runios-editor:io_node_tree_view.rename");
@@ -815,6 +871,70 @@ namespace RuniOS.UIElements.IO
         {
             string title = data.entries.Length == 1
                 ? data.entries[0].metaData.name
+        /// <summary>
+        /// 선택된 항목을 <see cref="IOClipboard"/>에 복사하거나 잘라냅니다. 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로 따로 담지 않습니다.
+        /// 잘라내기는 <see cref="readOnly"/>가 아니고 쓰기 가능한 프로바이더일 때만 합니다.
+        /// </summary>
+        /// <param name="cut"><see langword="true"/>이면 복사 대신 잘라냅니다.</param>
+        public void Copy(bool cut)
+        {
+            int[] ids = GetTopmostIds(selectedIds);
+            if (ids.Length == 0 || (cut && !canWrite))
+                return;
+
+            IOClipboard.Set(ids.Select(id => node.Bind(treeView.GetItemDataForId<IOEntry>(id))).ToArray(), cut);
+        }
+
+        /// <summary>
+        /// <see cref="IOClipboard"/>의 항목을 붙여넣습니다. 폴더 하나만 선택되어 있으면 그 폴더 안에, 아니면 현재 폴더에 넣습니다.
+        /// 잘라낸 항목은 원본과 같은 프로바이더 인스턴스일 때만 옮기고, 붙여넣은 뒤 클립보드를 비웁니다.
+        /// </summary>
+        public async UniTask Paste()
+        {
+            IOEntry[] selected = selectedEntries;
+            IONode target = selected is [{ isDirectory: true } selectedDirectory] ? node.Bind(selectedDirectory) : node;
+            if (!canWrite || target.AsWriteNode() is not { } directory)
+                return;
+
+            bool cut = IOClipboard.isCut;
+
+            // 클립보드에 둔 뒤 지워졌거나 종류가 바뀐 항목은 빼고, 지금의 항목 정보를 가져옵니다.
+            List<(IIOProvider provider, IOEntry entry)> sources = [];
+            foreach (IONode source in IOClipboard.nodes)
+            {
+                if (await source.provider.GetEntry(source.path) is { } entry)
+                    sources.Add((source.provider, entry));
+            }
+
+            foreach (IGrouping<IIOProvider, (IIOProvider provider, IOEntry entry)> group in sources.GroupBy(static x => x.provider))
+            {
+                IOEntry[] entries = group.Select(static x => x.entry).ToArray();
+                if (!(cut ? IOTransfer.CanMove(group.Key, entries, directory) : IOTransfer.CanCopy(group.Key, entries, directory)))
+                    continue;
+
+                await IOTransfer.Run(group.Key, entries, directory, cut ? IODropOperation.Move : IODropOperation.Copy, this);
+            }
+
+            // 비우면 잘라낸 항목을 보여 주던 목록이 스스로 새로 고치므로, 이 목록도 따로 새로 고치지 않습니다.
+            if (cut)
+                IOClipboard.Clear();
+            else
+                await Refresh();
+        }
+
+        void OnClipboardChanged()
+        {
+            bool wasCut = cutShown;
+            cutShown = IOClipboard.isCut;
+
+            if (wasCut && !cutShown)
+                Refresh().Forget();
+            else
+                treeView.RefreshItems();
+        }
+
+        bool IsCut(IOEntry entry) => IOClipboard.isCut && IOClipboard.nodes.Any(x => x.IsSameTarget(node.Bind(entry)));
+
                 : string.Format(GetText("runios-editor:io_node_tree_view.item_count"), data.entries.Length);
 
             // 패널 맨 위에 붙으므로, 이 요소의 조상에서 받던 스타일을 직접 붙입니다.
