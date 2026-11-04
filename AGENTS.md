@@ -61,7 +61,8 @@
 
 ## Verification
 
-- Do not run .NET build commands such as `dotnet build`, `dotnet test`, or generated `.csproj`/`.sln` builds for verification.
+- Do not run .NET build commands such as `dotnet build`, `dotnet test`, or generated `.csproj`/`.sln` builds for verification of the Unity project. Unity compiles its own assemblies in a different way from the generated projects, so these commands do not reproduce its result.
+- This restriction does not apply to standalone .NET projects that are independent of the Unity project, such as `RuniOS.APIBridge` and `RuniOS.CodeAnalysis`. Their build output is what the Unity project consumes (for example the bridge DLLs under `Packages/**/Plugins`), so run `dotnet build` there when a change requires regenerated output.
 - Do not run syntax-only compile checks unless the user explicitly asks.
 - For Unity/C# changes, prefer lightweight inspection such as reading the changed files and checking the intended API usage.
 
