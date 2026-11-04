@@ -4,6 +4,7 @@ using RuniOS.Collections.Generic;
 using RuniOS.Linq;
 using RuniOS.Tasks;
 using RuniOS.Texts;
+using System.Collections.ObjectModel;
 
 namespace RuniOS.Resource
 {
@@ -58,7 +59,7 @@ namespace RuniOS.Resource
         /// Gets the reloadable resources attached to this manager.<br/>
         /// 이 관리자에 연결된 다시 로드 가능한 리소스를 가져옵니다.
         /// </summary>
-        public static ReadOnlySet<IReloadable> reloadables { get; } = LinqExtras.AsReadOnly(_reloadables);
+        public static ReadOnlySet<IReloadable> reloadables { get; } = _reloadables.AsReadOnly();
 
         static readonly AsyncReloadGate reloadGate = new();
 

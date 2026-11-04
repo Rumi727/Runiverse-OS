@@ -90,7 +90,6 @@ namespace RuniOS.Linq
         public static ReadOnlyCollection<T> AsReadOnly<T>(this T[] list) => new ReadOnlyCollection<T>(list);
         public static ReadOnlyQueue<T> AsReadOnly<T>(this Queue<T> list) => new ReadOnlyQueue<T>(list);
         public static ReadOnlyStack<T> AsReadOnly<T>(this Stack<T> list) => new ReadOnlyStack<T>(list);
-        public static RuniOS.Collections.Generic.ReadOnlySet<T> AsReadOnly<T>(this ISet<T> list) => new RuniOS.Collections.Generic.ReadOnlySet<T>(list);
 
 #if !NET
         public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
