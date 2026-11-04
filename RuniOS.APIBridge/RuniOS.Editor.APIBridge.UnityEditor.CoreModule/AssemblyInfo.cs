@@ -26,5 +26,7 @@ using UnityEditorInternal;
 [assembly: GenerateAPIBridgeForType(typeof(PropertyEditor), onlyByMyself = true, includeMember = ["inspectorMode", "CreateIMGUIContainer", "RebuildContentsContainers", "editorsElement"])]
 [assembly: GenerateAPIBridgeForType(typeof(Editor), onlyByMyself = true, includeMember = ["inspectorMode"])]
 [assembly: GenerateAPIBridgeForType(typeof(ProjectWindowUtil), onlyByMyself = true, includeMember = ["GetActiveFolderPath"], forceStatic = true)]
+[assembly: GenerateAPIBridgeForType(typeof(PlayerSettings), onlyByMyself = true, includeMember = ["GetApiCompatibilityLevelInternal"], forceStatic = true)]
+[assembly: GenerateAPIBridgeForType(typeof(PlayerSettingsEditor), onlyByMyself = true, includeMember = ["SetApiCompatibilityLevelForTarget", "SetReason"])]
 
 [assembly: GenerateAPIBridgeForType(typeof(ReorderableListWrapper), onlyByMyself = true, includeMember = ["GetPropertyIdentifier"])]
