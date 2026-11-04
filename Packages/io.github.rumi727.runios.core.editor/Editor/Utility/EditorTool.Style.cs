@@ -233,7 +233,7 @@ namespace RuniOS.Editor
         {
             System.Text.StringBuilder stringBuilder = System.Text.StringBuilderCache.Acquire();
 
-            string text = value.ToString()!;
+            string text = value.ToString() ?? string.Empty;
             for (int i = 0; i < text.Length; i++)
             {
                 char c = text[i];

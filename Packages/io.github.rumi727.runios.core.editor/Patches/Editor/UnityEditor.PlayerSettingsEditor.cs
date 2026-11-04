@@ -23,7 +23,7 @@ namespace RuniOS.Editor.Patches
                 [HarmonyPatch]
                 public static class SetApiCompatibilityLevelForTarget
                 {
-                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetApiCompatibilityLevelForTarget), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)!;
+                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetApiCompatibilityLevelForTarget), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly) ?? throw new MissingMethodException(PlayerSettingsEditorBridge.__targetType.FullName, nameof(PlayerSettingsEditorBridge.SetApiCompatibilityLevelForTarget));
 
                     public static bool Prefix(string targetGroup) => PlayerSettingsBridge.GetApiCompatibilityLevelInternal(targetGroup) != net;
                 }
@@ -31,7 +31,7 @@ namespace RuniOS.Editor.Patches
                 [HarmonyPatch]
                 public static class SetEditorAssembliesCompatibilityLevel
                 {
-                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetEditorAssembliesCompatibilityLevel), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)!;
+                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetEditorAssembliesCompatibilityLevel), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly) ?? throw new MissingMethodException(PlayerSettingsEditorBridge.__targetType.FullName, nameof(PlayerSettingsEditorBridge.SetEditorAssembliesCompatibilityLevel));
 
                     public static bool Prefix() => PlayerSettings.GetEditorAssembliesCompatibilityLevel() != editorNet;
                 }
@@ -40,7 +40,7 @@ namespace RuniOS.Editor.Patches
                 [HarmonyPatch]
                 public static class SetReason
                 {
-                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetReason), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly)!;
+                    public static MethodBase TargetMethod() => PlayerSettingsEditorBridge.__targetType.GetMethod(nameof(PlayerSettingsEditorBridge.SetReason), BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly) ?? throw new MissingMethodException(PlayerSettingsEditorBridge.__targetType.FullName, nameof(PlayerSettingsEditorBridge.SetReason));
 
                     public static bool Prefix(string reason)
                     {
