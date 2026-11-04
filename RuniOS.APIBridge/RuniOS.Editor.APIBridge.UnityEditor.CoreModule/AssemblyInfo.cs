@@ -12,9 +12,9 @@ using UnityEditorInternal;
 //[assembly: GenerateAPIBridgeForType(typeof(AudioFilterGUI))]
 //[assembly: GenerateAPIBridgeForType(typeof(AudioUtil), forceStatic = true)]
 
-[assembly: GenerateAPIBridgeForType(typeof(EditorGUI), onlyByMyself = true, excludeMember = ["s_PropertyStack", "AdvancedLazyPopup"], forceStatic = true)]
+[assembly: GenerateAPIBridgeForType(typeof(EditorGUI), onlyByMyself = true, includeMember = ["MultiFieldPrefixLabel", "kControlVerticalSpacingLegacy", "s_FoldoutHash", "HasKeyboardFocus"], forceStatic = true)]
 //[assembly: GenerateAPIBridgeForType(typeof(EditorGUI.VUMeter), forceStatic = true)]
-[assembly: GenerateAPIBridgeForType(typeof(EditorGUIUtility), onlyByMyself = true, forceStatic = true)]
+[assembly: GenerateAPIBridgeForType(typeof(EditorGUIUtility), onlyByMyself = true, includeMember = ["contextWidth", "s_FieldWidth", "s_LabelWidth", "s_LastControlID"], forceStatic = true)]
 [assembly: GenerateAPIBridgeForType(typeof(GUIView), includeMember = ["current", "Repaint"], onlyByMyself = true)]
 [assembly: GenerateAPIBridgeForType(typeof(InspectorWindow), onlyByMyself = true, includeMember = ["RepaintAllInspectors"])]
 [assembly: GenerateAPIBridgeForType(typeof(ScriptAttributeUtility), onlyByMyself = true, includeMember = ["GetFieldInfoFromProperty"])]
@@ -27,4 +27,4 @@ using UnityEditorInternal;
 [assembly: GenerateAPIBridgeForType(typeof(Editor), onlyByMyself = true, includeMember = ["inspectorMode"])]
 [assembly: GenerateAPIBridgeForType(typeof(ProjectWindowUtil), onlyByMyself = true, includeMember = ["GetActiveFolderPath"], forceStatic = true)]
 
-[assembly: GenerateAPIBridgeForType(typeof(ReorderableListWrapper), onlyByMyself = true)]
+[assembly: GenerateAPIBridgeForType(typeof(ReorderableListWrapper), onlyByMyself = true, includeMember = ["GetPropertyIdentifier"])]
