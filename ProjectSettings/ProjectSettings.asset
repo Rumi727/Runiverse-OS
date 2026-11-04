@@ -835,7 +835,7 @@ PlayerSettings:
   managedCodeVariant: {}
   apiCompatibilityLevelPerPlatform:
     Standalone: 7
-  editorAssembliesCompatibilityLevel: 2
+  editorAssembliesCompatibilityLevel: 4
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
   windowsCopyVCRuntime: 1
