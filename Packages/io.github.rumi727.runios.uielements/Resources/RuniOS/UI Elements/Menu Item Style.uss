@@ -1,0 +1,39 @@
+.runios-menu-item {
+    flex-direction: row;
+    align-items: center;
+}
+
+/* 체크와 아이콘은 같은 자리를 나눠 씁니다. 아이콘이 있으면 아이콘을, 없으면 체크를 보여 줍니다. */
+.runios-menu-item__check {
+    flex-shrink: 0;
+    visibility: hidden;
+}
+
+.runios-menu-item--checked > .runios-menu-item__check {
+    visibility: visible;
+}
+
+.runios-menu-item--has-icon > .runios-menu-item__check {
+    display: none;
+}
+
+.runios-menu-item__icon {
+    display: none;
+    flex-shrink: 0;
+}
+
+.runios-menu-item--has-icon > .runios-menu-item__icon {
+    display: flex;
+}
+
+.runios-menu-item__label {
+    flex-grow: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+}
+
+.runios-menu-item__shortcut {
+    flex-shrink: 0;
+    -unity-text-align: middle-right;
+    white-space: nowrap;
+}

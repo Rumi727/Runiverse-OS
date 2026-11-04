@@ -1,9 +1,3 @@
-.runios-io-browser-place-group__header {
-    -unity-font-style: bold;
-    padding-left: 4px;
-    margin-top: 4px;
-}
-
 .runios-io-browser-place {
     padding-left: 6px;
     padding-right: 6px;
@@ -14,7 +8,7 @@
 .runios-io-browser-place:hover {
     background-color: rgba(128, 128, 128, 0.2);
 }
-
+
 /* 트리 뷰에 놓을 때와 같은 색으로 칠합니다. */
 .runios-io-browser-place--drop-target {
     background-color: rgba(64, 128, 255, 0.25);

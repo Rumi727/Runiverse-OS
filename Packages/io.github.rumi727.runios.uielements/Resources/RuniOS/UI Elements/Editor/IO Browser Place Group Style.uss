@@ -1,0 +1,5 @@
+.runios-io-browser-place-group__header {
+    -unity-font-style: bold;
+    padding-left: 4px;
+    margin-top: 4px;
+}

@@ -3,10 +3,6 @@
     flex-shrink: 0;
 }
 
-.runios-toolbar-group {
-    flex-direction: row;
-}
-
 .runios-toolbar * {
     flex-shrink: 0;
 }
