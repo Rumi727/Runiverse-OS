@@ -21,7 +21,7 @@ namespace RuniOS.Editor.UIElements.Serialization
             EventModifiers modifiers = EventModifiers.None;
             KeyCode keyCode = KeyCode.None;
 
-            foreach (var token in value.AsSpan().Split('+'))
+            foreach (var token in value.AsSpan().Split('+', StringSplitOptions.None))
             {
                 var part = token.Trim();
                 if (part.Equals("Action", StringComparison.OrdinalIgnoreCase))
