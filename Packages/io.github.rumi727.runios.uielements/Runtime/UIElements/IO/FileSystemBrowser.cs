@@ -11,6 +11,7 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class FileSystemBrowser : IOBrowser
     {
+        public new const string ussClassName = "runios-file-system-browser";
         public const string placeSpaceBarUssClassName = "runios-file-system-browser__place-space-bar";
 
         static readonly KnownDirectoryType[] placeDirectoryTypes =
@@ -70,22 +71,38 @@ namespace RuniOS.UIElements.IO
             {
                 field = value;
                 foreach (IOBrowserTab tab in tabs)
-                    ((FileSystemBrowserTab)tab).treeView.selectionType = value;
+                    ((FileSystemBrowserTab)tab).selectionType = value;
             }
         } = SelectionType.Multiple;
 
         public FileSystemBrowser()
         {
             this.AddManipulator(new LocalizationManipulator(() => RefreshNavigation().Forget()));
+            AddToClassList(ussClassName);
+
             AddTab(IONode.empty);
         }
 
-        protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab();
+        protected override IOBrowserTab CreateTab() => new FileSystemBrowserTab { selectionType = selectionType };
 
-        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
+
+        protected override void BuildFolderMenu(RuniMenu menu)
         {
+            // 홈 화면(장치 목록)에서는 트리 뷰가 이전 폴더를 가리킨 채 숨겨져 있으므로 만들 수 없게 합니다.
+            IONodeMultiColumnTreeView.AddNewItemMenu(menu, () => node == IONode.empty ? null : treeView);
+            menu.Add(new Separator());
+
             base.BuildFolderMenu(menu);
-            menu.AddItem(GetText("runios-editor:io_browser.show_hidden_files"), treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+
+            RuniMenuItem showHiddenFiles = new(string.Empty, ToggleShowHiddenFiles) { shortcuts = [showHiddenFilesShortcut] };
+            menu.opened += () =>
+            {
+                showHiddenFiles.text = GetText("runios-editor:io_browser.show_hidden_files");
+                showHiddenFiles.isChecked = treeView.showHiddenFiles;
+            };
+
+            menu.Add(showHiddenFiles);
         }
 
         // 루트에서 위로 이동하면 홈 화면으로 돌아갑니다.
@@ -97,14 +114,13 @@ namespace RuniOS.UIElements.IO
                 base.Up();
         }
 
-        public UniTask Refresh() => ((FileSystemBrowserTab)activeTab).Refresh();
-
         public async UniTask RefreshNavigation()
         {
             List<VisualElement> groups = [];
 
             IOBrowserPlaceGroup places = new(GetText("runios-editor:io_browser.places")) { name = "places" };
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
+            places.Add(MakeCurrentDirectoryPlace());
 
             if (IKnownDirectoryProvider.instance is { } knownDirectoryProvider)
             {
@@ -134,7 +150,7 @@ namespace RuniOS.UIElements.IO
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
                 await foreach (NetworkLocation location in networkLocationProvider.EnumerateLocations())
-                    remote.Add(MakePlace(location.displayName, networkIcon, () => OpenLocation(location)));
+                    remote.Add(MakeLocationPlace(location, networkIcon));
 
                 if (remote.childCount > 0)
                     groups.Add(remote);
@@ -156,12 +172,25 @@ namespace RuniOS.UIElements.IO
                 navigationPane.Add(group);
         }
 
+        // 프로세스의 작업 폴더이며, 에디터에서는 프로젝트 폴더, 빌드에서는 실행한 위치입니다.
+        IOBrowserPlace MakeCurrentDirectoryPlace()
+        {
+            PhysicalPath path = PhysicalPath.From(Environment.CurrentDirectory);
+
+            IOBrowserPlace place = MakePlace(GetText("runios-editor:io_browser.current_directory"), folderIcon, () => Open(path));
+            place.name = "current-directory";
+            place.dropDirectory = GetNodeFromPhysicalRoot(path);
+
+            return place;
+        }
+
         // 번역 키가 없는 종류는 종류 이름을 그대로 표시합니다.
         IOBrowserPlace MakeKnownDirectoryPlace(KnownDirectory directory)
         {
             string text = LocalizationUtility.GetText($"runios-editor:io_browser.known_directory.{directory.type}") ?? directory.type;
             IOBrowserPlace place = MakePlace(text, knownDirectoryIcons.GetValueOrDefault(directory.type, folderIcon), () => Open(directory.path));
             place.name = directory.type;
+            place.dropDirectory = GetNodeFromPhysicalRoot(directory.path);
 
             return place;
         }
@@ -180,10 +209,20 @@ namespace RuniOS.UIElements.IO
             return place;
         }
 
+        // 읽기 전용 위치에는 끌어다 놓을 수 없습니다.
+        IOBrowserPlace MakeLocationPlace(FileLocation location, (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons)
+        {
+            IOBrowserPlace place = MakePlace(location.displayName, icons, () => OpenLocation(location));
+            if (!location.isReadOnly)
+                place.dropDirectory = GetNodeFromPhysicalRoot(location.ioProvider.rootNode);
+
+            return place;
+        }
+
         IOBrowserPlace MakeDevicePlace(DeviceLocation location)
         {
             (AssetRef<VectorImage> icon, AssetRef<VectorImage> editorDarkIcon) icons = location.isOptical ? opticalIcon : location.isRemovable ? removableIcon : harddiskIcon;
-            IOBrowserPlace place = MakePlace(location.displayName, icons, () => OpenLocation(location));
+            IOBrowserPlace place = MakeLocationPlace(location, icons);
 
             if (location.TryGetSpaceInfo(out StorageSpaceInfo info) && info.totalSize > 0)
             {
@@ -209,6 +248,20 @@ namespace RuniOS.UIElements.IO
                 return physicalProvider.targetPath.Combine(node.path);
 
             return node.path.value;
+        }
+
+        // 홈 화면(장치 목록) 버튼 뒤에, 경로 루트(리눅스는 /, 윈도우는 C:\ 등)부터 OS 경로 그대로 이어 붙입니다.
+        protected override IEnumerable<(string name, IONode node)> NodeToBreadcrumbs(IONode node)
+        {
+            yield return (GetText("runios-editor:io_browser.computer"), IONode.empty);
+
+            if (node.provider is not PhysicalIOProvider physicalProvider)
+                yield break;
+
+            yield return (physicalProvider.targetPath.ToString(), node.rootNode);
+
+            foreach ((string name, IONode node) crumb in base.NodeToBreadcrumbs(node).Skip(1))
+                yield return crumb;
         }
 
         // 빈 경로는 홈 화면을 뜻합니다.

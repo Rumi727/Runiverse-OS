@@ -1,5 +1,7 @@
 ﻿#nullable enable
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace RuniOS.IO.Virtual
 {
@@ -74,18 +76,35 @@ namespace RuniOS.IO.Virtual
             if (count < 0 || count > buffer.Length - offset)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            if (Position >= Length)
-                return 0;
+            return Read(buffer.AsSpan(offset, count));
+        }
 
-            int available = Min(count, Length - Position).ClampToInt();
-            if (available <= 0)
-                return 0;
+        /// <inheritdoc/>
+        public override int Read(Span<byte> buffer)
+        {
+            if (!CanRead)
+                throw new NotSupportedException();
 
-            for (int i = 0; i < available; i++)
-                buffer[offset + i] = fileBuffer[Position + i];
+            int read = fileBuffer.Read(Position, buffer);
+            Position += read;
+            return read;
+        }
 
-            Position += available;
-            return available;
+        // 메모리 안의 작업이라 기다릴 것이 없으므로, 기본 구현처럼 스레드 풀로 보내지 않고 바로 끝냅니다.
+        // 스레드 풀로 보내면 메인 스레드에서 기다릴 때마다 다음 업데이트까지 미뤄집니다.
+
+        /// <inheritdoc/>
+        public override Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(Read(buffer, offset, count));
+        }
+
+        /// <inheritdoc/>
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return new ValueTask<int>(Read(buffer.Span));
         }
 
         /// <inheritdoc/>
@@ -101,17 +120,33 @@ namespace RuniOS.IO.Virtual
             if (count < 0 || count > buffer.Length - offset)
                 throw new ArgumentOutOfRangeException(nameof(count));
 
-            checked
-            {
-                long endPosition = Position + count;
-                if (endPosition > Length)
-                    fileBuffer.SetLength(endPosition);
+            Write(buffer.AsSpan(offset, count));
+        }
 
-                for (int i = 0; i < count; i++)
-                    fileBuffer[Position + i] = buffer[i + offset];
+        /// <inheritdoc/>
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            if (!CanWrite)
+                throw new NotSupportedException();
 
-                Position = endPosition;
-            }
+            fileBuffer.Write(Position, buffer);
+            Position += buffer.Length;
+        }
+
+        /// <inheritdoc/>
+        public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Write(buffer, offset, count);
+            return Task.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            Write(buffer.Span);
+            return default;
         }
 
         /// <inheritdoc/>
@@ -125,5 +160,12 @@ namespace RuniOS.IO.Virtual
 
         /// <inheritdoc/>
         public override void Flush() { }
+
+        /// <inheritdoc/>
+        public override Task FlushAsync(CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
     }
 }

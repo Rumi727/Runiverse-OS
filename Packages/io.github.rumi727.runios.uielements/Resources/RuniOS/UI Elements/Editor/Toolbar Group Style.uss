@@ -1,0 +1,41 @@
+.runios-toolbar-group .runios-toolbar-group__first-child.unity-button {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__middle-child.unity-button {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__last-child.unity-button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__first-child.unity-toggle {
+    margin-right: 0;
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__middle-child.unity-toggle {
+    border-bottom-right-radius: 0;
+    border-top-right-radius: 0;
+    margin-right: 0;
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+.runios-toolbar-group .runios-toolbar-group__last-child.unity-toggle {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    margin-left: 0;
+}

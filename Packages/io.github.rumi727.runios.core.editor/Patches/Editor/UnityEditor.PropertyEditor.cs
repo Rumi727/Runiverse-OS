@@ -15,7 +15,7 @@ namespace RuniOS.Editor.Patches
                 [HarmonyPatch]
                 public static class RebuildContentsContainers
                 {
-                    public static MethodBase TargetMethod() => AccessTools.DeclaredMethod(PropertyEditorBridge.__targetType, nameof(PropertyEditorBridge.RebuildContentsContainers));
+                    public static MethodBase TargetMethod() => PropertyEditorBridge.__targetType.GetMethod(nameof(PropertyEditorBridge.RebuildContentsContainers), BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly)!;
 
                     public static void Postfix(EditorWindow __instance)
                     {

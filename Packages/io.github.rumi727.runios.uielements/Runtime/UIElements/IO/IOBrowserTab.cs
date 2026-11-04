@@ -1,5 +1,7 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -7,8 +9,11 @@ namespace RuniOS.UIElements.IO
     /// <summary>
     /// <see cref="IOBrowser"/>의 탭 하나입니다. 탭마다 위치와 뒤로·앞으로 기록, 내용 뷰를 따로 가집니다.
     /// </summary>
-    public abstract class IOBrowserTab : Tab
+    public abstract class IOBrowserTab : Tab, IIODropTarget
     {
+        public new const string ussClassName = "runios-io-browser-tab";
+        public const string headerDropTargetUssClassName = "runios-io-browser-tab__header--drop-target";
+
         public virtual IONode node
         {
             get => _node;
@@ -45,6 +50,8 @@ namespace RuniOS.UIElements.IO
         protected IOBrowserTab()
         {
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
+            AddToClassList(ussClassName);
+
             closeable = true;
         }
 
@@ -111,6 +118,27 @@ namespace RuniOS.UIElements.IO
             return node.name;
         }
 
+        /// <summary>
+        /// 이 탭의 내용 뷰에서 항목을 바꾸지 못하게 할지 정합니다. 보통 <see cref="IOBrowser.readOnly"/>가 정합니다.
+        /// </summary>
+        public abstract bool readOnly { get; set; }
+
+        // 홈 화면(장치 목록)이나 읽기 전용인 탭에는 놓을 수 없습니다.
+        bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
+        {
+            directory = node;
+            return node != IONode.empty && !readOnly;
+        }
+
+        void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => tabHeader.EnableInClassList(headerDropTargetUssClassName, canDrop);
+
+        void IIODropTarget.OnDragLeave() => tabHeader.RemoveFromClassList(headerDropTargetUssClassName);
+
         protected abstract void OnNodeChanged();
+
+        /// <summary>
+        /// 현재 위치의 내용을 다시 읽어 옵니다.
+        /// </summary>
+        public abstract UniTask Refresh();
     }
 }

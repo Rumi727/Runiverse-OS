@@ -1,7 +1,23 @@
-.unity-tab-view__content-viewport {
+.runios-io-browser__content-pane > .unity-tab-view__content-viewport {
     flex-shrink: 0;
 }
 
-.unity-tab__header {
+.runios-io-browser__content-pane > .unity-tab-view__content-viewport > .unity-tab-view__header-container > .unity-tab__header {
     align-self: stretch;
+}
+
+.runios-io-browser__content-pane > .unity-tab-view__content-container {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab > .unity-tab__content-container {
+    flex-grow: 1;
+}
+
+.runios-io-browser__tab > .runios-io-node-tree-view {
+    flex-grow: 1;
 }

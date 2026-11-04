@@ -2,6 +2,10 @@
     flex-shrink: 1;
 }
 
+.runios-io-node-tree-view > .unity-collection-view {
+    flex-grow: 1;
+}
+
 .runios-io-node-tree-view__cell {
     flex-direction: row;
     flex-grow: 1;
@@ -39,10 +43,28 @@
     align-self: center;
 }
 
-.runios-io-browser .unity-multi-column-view__header-container {
-    flex-shrink: 0;
+.runios-io-node-tree-view__rename-field {
+    flex-grow: 1;
+    flex-shrink: 1;
 }
 
-.runios-io-browser .unity-multi-column-view__cell {
-    justify-content: flex-start;
+.runios-io-node-tree-view__name-cell > .runios-io-node-tree-view__rename-field {
+    display: none;
+}
+
+.runios-io-node-tree-view__name-cell--renaming > .runios-io-node-tree-view__rename-field {
+    display: flex;
+}
+
+.runios-io-node-tree-view__name-cell--renaming > .runios-io-node-tree-view__name-label {
+    display: none;
+}
+
+.runios-io-node-tree-view__drag-ghost-title,
+.runios-io-node-tree-view__drag-ghost-operation {
+    white-space: nowrap;
+}
+
+.runios-io-node-tree-view__drag-ghost-operation--hidden {
+    display: none;
 }

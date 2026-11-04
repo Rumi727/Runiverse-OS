@@ -8,6 +8,8 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class FileSystemBrowserTab : IOBrowserTab
     {
+        public new const string ussClassName = "runios-file-system-browser-tab";
+
         public override IONode node
         {
             get => base.node;
@@ -25,16 +27,24 @@ namespace RuniOS.UIElements.IO
             }
         } = SelectionType.Multiple;
 
+        public override bool readOnly
+        {
+            get => treeView.readOnly;
+            set => treeView.readOnly = value;
+        }
+
         public DeviceLocationView deviceLocationView { get; }
         public IONodeMultiColumnTreeView treeView { get; }
 
         public FileSystemBrowserTab()
         {
+            AddToClassList(ussClassName);
+
             deviceLocationView = new DeviceLocationView { name = "device-location-view" };
             deviceLocationView.opened += x => node = FileSystemBrowser.GetNodeFromPhysicalRoot(x);
             Add(deviceLocationView);
 
-            treeView = new IONodeMultiColumnTreeView { name = "tree-view" };
+            treeView = new IONodeMultiColumnTreeView { name = "tree-view", contextMenuEnabled = true };
             treeView.opened += OpenEntry;
             Add(treeView);
 
@@ -64,7 +74,7 @@ namespace RuniOS.UIElements.IO
             return base.GetLabel();
         }
 
-        public UniTask Refresh()
+        public override UniTask Refresh()
         {
             if (node == IONode.empty)
                 return deviceLocationView.Refresh();

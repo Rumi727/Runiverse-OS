@@ -1,5 +1,4 @@
 #nullable enable
-using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using UnityEngine.UIElements;
 
@@ -8,6 +7,8 @@ namespace RuniOS.UIElements.IO
     [UxmlElement]
     public partial class IONodeBrowser : IOBrowser
     {
+        public new const string ussClassName = "runios-io-node-browser";
+
         [UxmlAttribute]
         SerializableNullable<PhysicalPath> targetPath
         {
@@ -51,16 +52,31 @@ namespace RuniOS.UIElements.IO
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
 
-        public IONodeBrowser(IONode node) => AddTab(node);
-
-        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab();
-
-        protected override void BuildFolderMenu(GenericDropdownMenu menu)
+        public IONodeBrowser(IONode node)
         {
-            base.BuildFolderMenu(menu);
-            menu.AddItem(LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files", treeView.showHiddenFiles, () => treeView.showHiddenFiles = !treeView.showHiddenFiles);
+            AddToClassList(ussClassName);
+            AddTab(node);
         }
 
-        public UniTask Refresh() => ((IONodeBrowserTab)activeTab).Refresh();
+        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab { selectionType = selectionType };
+
+        protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
+
+        protected override void BuildFolderMenu(RuniMenu menu)
+        {
+            IONodeMultiColumnTreeView.AddNewItemMenu(menu, () => treeView);
+            menu.Add(new Separator());
+
+            base.BuildFolderMenu(menu);
+
+            RuniMenuItem showHiddenFiles = new(string.Empty, ToggleShowHiddenFiles) { shortcuts = [showHiddenFilesShortcut] };
+            menu.opened += () =>
+            {
+                showHiddenFiles.text = LocalizationUtility.GetText("runios-editor:io_browser.show_hidden_files") ?? "runios-editor:io_browser.show_hidden_files";
+                showHiddenFiles.isChecked = treeView.showHiddenFiles;
+            };
+
+            menu.Add(showHiddenFiles);
+        }
     }
 }

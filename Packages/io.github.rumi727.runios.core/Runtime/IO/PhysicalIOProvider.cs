@@ -3,8 +3,14 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.Linq.Async;
 using RuniOS.Spans;
+#if !NET
+using System.ComponentModel;
+#endif
 using System.IO;
 using System.IO.Enumeration;
+#if !NET
+using System.Runtime.InteropServices;
+#endif
 using System.Threading;
 
 namespace RuniOS.IO
@@ -53,6 +59,12 @@ namespace RuniOS.IO
 
         /// <inheritdoc/>
         public bool isIndependent => false;
+
+        /// <inheritdoc/>
+        public bool isThreadSafe => true;
+
+        /// <inheritdoc/>
+        public bool supportsSymbolicLink => true;
 
         /*/// <inheritdoc/>
         public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));*/
@@ -158,17 +170,20 @@ namespace RuniOS.IO
         #endregion
 
         #region Read
+        // 비동기 파일 API는 스레드 풀을 거쳐, 메인 스레드에서 기다리면 호출마다 다음 업데이트까지 미뤄집니다.
+        // 로컬 파일 하나를 읽고 쓰는 일은 그보다 훨씬 빠르므로 바로 처리합니다.
+
         /// <inheritdoc cref="IIOProvider.OpenRead(RuniPath, CancellationToken)"/>
         public FileStream OpenRead(RuniPath path) => File.OpenRead(ResolveFullPath(path));
         UniTask<Stream> IIOProvider.OpenRead(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(OpenRead(path));
 
         /// <inheritdoc/>
         public UniTask<byte[]> ReadAllBytes(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllBytesAsync(ResolveFullPath(path), cancellationToken).AsUniTask();
+            UniTask.FromResult(File.ReadAllBytes(ResolveFullPath(path)));
 
         /// <inheritdoc/>
         public UniTask<string> ReadAllText(RuniPath path, CancellationToken cancellationToken = default) =>
-            File.ReadAllTextAsync(ResolveFullPath(path), cancellationToken).AsUniTask();
+            UniTask.FromResult(File.ReadAllText(ResolveFullPath(path)));
 
         /// <inheritdoc/>
         public IUniTaskAsyncEnumerable<string> ReadLines(RuniPath path, CancellationToken cancellationToken = default) =>
@@ -192,16 +207,25 @@ namespace RuniOS.IO
         UniTask<Stream> IWritableIOProvider.CreateFile(RuniPath path, CancellationToken cancellationToken) => UniTask.FromResult<Stream>(CreateFile(path));
 
         /// <inheritdoc/>
-        public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default) =>
-            File.WriteAllBytesAsync(ResolveFullPath(path), bytes, cancellationToken).AsUniTask();
+        public UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllBytes(ResolveFullPath(path), bytes);
+            return UniTask.CompletedTask;
+        }
 
         /// <inheritdoc/>
-        public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default) =>
-            File.WriteAllTextAsync(ResolveFullPath(path), text, cancellationToken).AsUniTask();
+        public UniTask WriteAllText(RuniPath path, string text, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllText(ResolveFullPath(path), text);
+            return UniTask.CompletedTask;
+        }
 
         /// <inheritdoc/>
-        public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default) =>
-            File.WriteAllLinesAsync(ResolveFullPath(path), lines, cancellationToken).AsUniTask();
+        public UniTask WriteLines(RuniPath path, IEnumerable<string> lines, CancellationToken cancellationToken = default)
+        {
+            File.WriteAllLines(ResolveFullPath(path), lines);
+            return UniTask.CompletedTask;
+        }
         #endregion
 
         /// <inheritdoc/>
@@ -215,6 +239,78 @@ namespace RuniOS.IO
         public UniTask DeleteFile(RuniPath path, CancellationToken cancellationToken = default)
         {
             File.Delete(ResolveFullPath(path));
+            return UniTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public UniTask CopyFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
+        {
+            string source = ResolveFullPath(sourcePath);
+            string destination = ResolveFullPath(destinationPath);
+
+            File.Copy(source, destination, overwrite);
+            return UniTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public UniTask MoveFile(RuniPath sourcePath, RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default)
+        {
+            string source = ResolveFullPath(sourcePath);
+            string destination = ResolveFullPath(destinationPath);
+
+            // 같은 파일인지는 OS가 판단하도록, 덮어쓰지 않는 이동을 먼저 시도합니다.
+            // 대상이 없거나 대상이 원본과 같은 파일(대소문자만 다른 이름 등)이면 여기서 이름이 바뀝니다.
+            try
+            {
+                File.Move(source, destination);
+            }
+            catch (IOException) when (overwrite && File.Exists(destination))
+            {
+                // 대상이 원본과 다른 파일이므로 원자적으로 교체합니다.
+                File.Replace(source, destination, null);
+            }
+
+            return UniTask.CompletedTask;
+        }
+
+        /// <inheritdoc/>
+        public UniTask MoveDirectory(RuniPath sourcePath, RuniPath destinationPath, CancellationToken cancellationToken = default)
+        {
+            Directory.Move(ResolveFullPath(sourcePath), ResolveFullPath(destinationPath));
+            return UniTask.CompletedTask;
+        }
+
+        /// <remarks>
+        /// The link stores <paramref name="target"/> as a path relative to the directory containing the link, so it stays valid when that directory is moved together with its target.<br/>
+        /// On Windows, creating a symbolic link requires administrator rights or Developer Mode.
+        /// <br/><br/>
+        /// 링크에는 <paramref name="target"/>을 링크가 있는 디렉터리 기준 상대 경로로 저장하므로, 그 디렉터리를 대상과 함께 옮겨도 링크가 유지됩니다.<br/>
+        /// Windows에서 심볼릭 링크를 만들려면 관리자 권한이나 개발자 모드가 필요합니다.
+        /// </remarks>
+        /// <inheritdoc/>
+        public UniTask CreateSymbolicLink(RuniPath path, RuniPath target, bool isDirectory, CancellationToken cancellationToken = default)
+        {
+            string linkPath = ResolveFullPath(path);
+            string relativeTarget = Path.GetRelativePath(Path.GetDirectoryName(linkPath)!, ResolveFullPath(target));
+
+#if NET
+            if (isDirectory)
+                Directory.CreateSymbolicLink(linkPath, relativeTarget);
+            else
+                File.CreateSymbolicLink(linkPath, relativeTarget);
+#else
+            // .NET Standard 프로파일에는 File·Directory.CreateSymbolicLink가 없어 운영체제 함수를 직접 부릅니다.
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // 개발자 모드가 켜져 있으면 관리자 권한 없이도 만들 수 있도록 합니다.
+                uint flags = Native.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE | (isDirectory ? Native.SYMBOLIC_LINK_FLAG_DIRECTORY : 0);
+                if (!Native.CreateSymbolicLinkW(linkPath, relativeTarget, flags))
+                    throw new Win32Exception(Marshal.GetLastWin32Error());
+            }
+            else if (Native.symlink(relativeTarget, linkPath) != 0)
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+#endif
+
             return UniTask.CompletedTask;
         }
 
@@ -345,5 +441,20 @@ namespace RuniOS.IO
         );
 
         void IDisposable.Dispose() { }
+
+#if !NET
+        static class Native
+        {
+            public const uint SYMBOLIC_LINK_FLAG_DIRECTORY = 0x1;
+            public const uint SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE = 0x2;
+
+            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+            [return: MarshalAs(UnmanagedType.U1)]
+            public static extern bool CreateSymbolicLinkW(string symlinkFileName, string targetFileName, uint flags);
+
+            [DllImport("libc", SetLastError = true)]
+            public static extern int symlink(string target, string linkPath);
+        }
+#endif
     }
 }

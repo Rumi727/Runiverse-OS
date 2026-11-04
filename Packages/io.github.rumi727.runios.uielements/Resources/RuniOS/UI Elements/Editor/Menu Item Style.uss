@@ -1,0 +1,42 @@
+.runios-menu-item {
+    padding-left: 6px;
+    padding-right: 6px;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.runios-menu-item:hover:enabled {
+    background-color: rgba(128, 128, 128, 0.2);
+}
+
+.runios-menu-item:focus {
+    background-color: var(--unity-colors-highlight-background);
+}
+
+.runios-menu-item:disabled {
+    opacity: 0.5;
+}
+
+.runios-menu-item__check {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    background-image: var(--unity-icons-menu-item_checked);
+}
+
+.runios-menu-item__icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 4px;
+    border-radius: 2px;
+}
+
+/* 아이콘과 체크가 함께 있으면 아이콘 뒤에 체크 상태를 표시합니다. */
+.runios-menu-item--has-icon.runios-menu-item--checked > .runios-menu-item__icon {
+    background-color: rgba(58, 121, 187, 0.4);
+}
+
+.runios-menu-item__shortcut {
+    margin-left: 16px;
+    opacity: 0.7;
+}

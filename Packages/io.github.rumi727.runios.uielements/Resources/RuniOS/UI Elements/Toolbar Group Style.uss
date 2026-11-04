@@ -1,0 +1,3 @@
+.runios-toolbar-group {
+    flex-direction: row;
+}

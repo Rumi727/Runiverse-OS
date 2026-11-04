@@ -1,4 +1,5 @@
 #nullable enable
+using RuniOS.APIBridge.UnityEngine.UIElements;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements
@@ -14,6 +15,8 @@ namespace RuniOS.UIElements
 
         protected override void RegisterCallbacksOnTarget()
         {
+            // Rank below every user theme, including the panel theme, regardless of where it is attached.
+            StyleSheetBridge.__GetInstanceFrom(baseStyle).priority = StyleSheetPriorityBridge.Builtin;
             target.styleSheets.Add(baseStyle);
 
             base.RegisterCallbacksOnTarget();

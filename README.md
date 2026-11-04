@@ -458,7 +458,7 @@ Runiverse OS는 짧은 기간에 새로 만든 프로젝트가 아닙니다. 아
 
 ## 문서
 
-- [Installer와 Setup](Packages/io.github.rumi727.runios.installer/README.md)
+- [Installer와 Setup](Packages/io.github.rumi727.runios/README.md)
 - [I/O 시스템](Packages/io.github.rumi727.runios.core/Runtime/IO/README.md)
 - [리소스 시스템](Packages/io.github.rumi727.runios.core/Runtime/Resource/README.md)
 - [텍스트 시스템](Packages/io.github.rumi727.runios.core/Runtime/Texts/README.md)

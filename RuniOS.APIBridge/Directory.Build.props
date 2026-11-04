@@ -1,0 +1,7 @@
+<Project>
+
+    <PropertyGroup>
+        <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
+    </PropertyGroup>
+
+</Project>

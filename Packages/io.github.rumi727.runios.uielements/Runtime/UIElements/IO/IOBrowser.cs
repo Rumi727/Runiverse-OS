@@ -23,6 +23,7 @@ namespace RuniOS.UIElements.IO
 
         public const string pathPrefixLabelUssClassName = "runios-io-browser__path-prefix-label";
         public const string pathFieldUssClassName = "runios-io-browser__path-field";
+        public const string breadcrumbBarUssClassName = "runios-io-browser__breadcrumb-bar";
 
         public const string folderMenuButtonUssClassName = "runios-io-browser__folder-menu";
 
@@ -36,6 +37,21 @@ namespace RuniOS.UIElements.IO
         {
             get => activeTab.node;
             set => activeTab.node = value;
+        }
+
+        /// <summary>
+        /// 이 브라우저 안에서 항목을 바꾸지 못하게 할지 정합니다. 장소와 경로 버튼에도 놓을 수 없게 됩니다.
+        /// 모든 탭에 적용되고, 새로 여는 탭에도 적용됩니다.
+        /// </summary>
+        public bool readOnly
+        {
+            get;
+            set
+            {
+                field = value;
+                foreach (IOBrowserTab tab in tabs)
+                    tab.readOnly = value;
+            }
         }
 
         public IOBrowserTab activeTab => (IOBrowserTab)contentPane.activeTab;
@@ -55,6 +71,12 @@ namespace RuniOS.UIElements.IO
         public Button up { get; }
 
         public Label pathPrefixLabel { get; }
+
+        public IOBreadcrumbBar breadcrumbBar { get; }
+
+        /// <summary>
+        /// 경로를 직접 입력하는 필드입니다. <see cref="breadcrumbBar"/>의 빈 곳을 누르거나 Ctrl+L을 누르면 <see cref="breadcrumbBar"/> 대신 나타납니다.
+        /// </summary>
         public TextField pathField { get; }
 
         public Button folderMenu { get; }
@@ -63,7 +85,7 @@ namespace RuniOS.UIElements.IO
 
         public ScrollView navigationPane { get; }
 
-        public TabView contentPane { get; }
+        public IOBrowserTabView contentPane { get; }
 
         protected IOBrowser()
         {
@@ -133,9 +155,38 @@ namespace RuniOS.UIElements.IO
                 pathPrefixLabel.AddToClassList(pathPrefixLabelUssClassName);
                 header.Add(pathPrefixLabel);
 
+                breadcrumbBar = new IOBreadcrumbBar { name = "breadcrumb-bar" };
+                breadcrumbBar.AddToClassList(breadcrumbBarUssClassName);
+                breadcrumbBar.nodeSelected += x => node = x;
+                breadcrumbBar.editRequested += EditPath;
+                header.Add(breadcrumbBar);
+
                 pathField = new TextField { name = "path-field", isDelayed = true };
                 pathField.AddToClassList(pathFieldUssClassName);
-                pathField.RegisterValueChangedCallback(x => node = PathFieldToNode(x.newValue));
+                pathField.style.display = DisplayStyle.None;
+                pathField.RegisterValueChangedCallback(x =>
+                {
+                    node = PathFieldToNode(x.newValue);
+                    EndEditPath();
+                });
+                pathField.RegisterCallback<FocusOutEvent>(_ => EndEditPath());
+                pathField.RegisterCallback<KeyDownEvent>(x =>
+                {
+                    if (x.keyCode is KeyCode.Return or KeyCode.KeypadEnter)
+                    {
+                        // Enter는 필드가 처리하면서 포커스를 필드 자신으로 옮기므로, 처리가 끝난 뒤 브라우저로 포커스를 되돌립니다.
+                        // 값이 바뀌지 않았을 때도 필드가 포커스를 잃어 경로 편집이 끝납니다.
+                        schedule.Execute(Focus);
+                        return;
+                    }
+
+                    if (x.keyCode != KeyCode.Escape)
+                        return;
+
+                    EndEditPath();
+                    Focus();
+                    x.StopPropagation();
+                }, TrickleDown.TrickleDown);
                 header.Add(pathField);
 
                 folderMenu = new Button(FolderMenuDropDown) { name = "folder-menu" };
@@ -161,17 +212,27 @@ namespace RuniOS.UIElements.IO
                 navigationPane.AddToClassList(navigationPaneUssClassName);
                 splitView.Add(navigationPane);
 
-                contentPane = new TabView { name = "content-pane", reorderable = true };
+                contentPane = new IOBrowserTabView { name = "content-pane", reorderable = true };
                 contentPane.AddToClassList(contentPaneUssClassName);
-                contentPane.activeTabChanged += (_, _) => UpdateHeader();
+                contentPane.activeTabChanged += (_, _) =>
+                {
+                    UpdateHeader();
+
+                    // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
+                    Focus();
+                };
                 splitView.Add(contentPane);
             }
             hierarchy.Add(splitView);
 
             pathField.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
+            breadcrumbBar.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
             contentPane.RegisterCallback<GeometryChangedEvent>(_ => AlignPathField());
 
             RegisterCallback<KeyDownEvent>(OnKeyDown);
+
+            // 방향키는 KeyDown과 별도로 보내지는 NavigationMove로 트리 뷰가 처리하므로, 트리 뷰에 닿기 전에 가로챕니다.
+            RegisterCallback<NavigationMoveEvent>(OnNavigationMove, TrickleDown.TrickleDown);
         }
 
         public void Back() => activeTab.Back();
@@ -181,11 +242,17 @@ namespace RuniOS.UIElements.IO
         public virtual void Up() => node = node.GetParent();
 
         /// <summary>
+        /// 활성 탭의 내용을 다시 읽어 옵니다.
+        /// </summary>
+        public UniTask Refresh() => activeTab.Refresh();
+
+        /// <summary>
         /// 지정한 위치를 여는 새 탭을 추가하고 활성화합니다.
         /// </summary>
         public IOBrowserTab AddTab(IONode node)
         {
             IOBrowserTab tab = CreateTab();
+            tab.readOnly = readOnly;
             tab.name = "tab";
             tab.AddToClassList(tabUssClassName);
             tab.nodeChanged += OnTabNodeChanged;
@@ -250,56 +317,144 @@ namespace RuniOS.UIElements.IO
             forward.SetEnabled(activeTab.canGoForward);
 
             pathField.SetValueWithoutNotify(NodeToPathField(node));
+            breadcrumbBar.SetCrumbs(NodeToBreadcrumbs(node));
+        }
+
+        void EditPath()
+        {
+            breadcrumbBar.style.display = DisplayStyle.None;
+            pathField.style.display = DisplayStyle.Flex;
+
+            // 표시가 바뀐 스타일이 적용된 뒤에야 포커스를 받을 수 있습니다.
+            pathField.schedule.Execute(() =>
+            {
+                pathField.Focus();
+                pathField.SelectAll();
+            }).StartingIn(1);
+        }
+
+        void EndEditPath()
+        {
+            pathField.style.display = DisplayStyle.None;
+            breadcrumbBar.style.display = DisplayStyle.Flex;
         }
 
         void OnKeyDown(KeyDownEvent evt)
         {
-            if (!evt.actionKey)
-                return;
-
-            if (evt.keyCode == KeyCode.T)
+            if (evt.keyCode == KeyCode.F5 && !evt.actionKey)
+                Refresh().Forget();
+            else if (evt.keyCode == KeyCode.L && evt.actionKey)
+                EditPath();
+            else if (evt.keyCode == KeyCode.T && evt.actionKey)
                 AddTab(node);
-            else if (evt.keyCode == KeyCode.W)
+            else if (evt.keyCode == KeyCode.W && evt.actionKey)
                 CloseTab(activeTab);
+            else if (showHiddenFilesShortcut.Matches(evt))
+                ToggleShowHiddenFiles();
             else
                 return;
 
             evt.StopPropagation();
         }
 
+        void OnNavigationMove(NavigationMoveEvent evt)
+        {
+            if (!evt.altKey)
+                return;
+
+            if (evt.direction == NavigationMoveEvent.Direction.Left)
+                Back();
+            else if (evt.direction == NavigationMoveEvent.Direction.Right)
+                Forward();
+            else if (evt.direction == NavigationMoveEvent.Direction.Up)
+                Up();
+            else
+                return;
+
+            // 전파를 멈춰도 포커스 이동은 따로 일어나므로, 포커스도 옮기지 않도록 합니다.
+            evt.StopPropagation();
+            focusController?.IgnoreEvent(evt);
+        }
+
         public void AlignPathField()
         {
-            float xMax = pathField.layout.xMax;
+            VisualElement active = pathField.style.display == DisplayStyle.None ? breadcrumbBar : pathField;
+
+            float xMax = active.layout.xMax;
             float x = contentPane.ChangeCoordinatesTo(header, Vector2.zero).x;
 
-            pathField.style.width = (xMax - x).Clamp(0);
+            float width = (xMax - x).Clamp(0);
+            pathField.style.width = width;
+            breadcrumbBar.style.width = width;
         }
 
-        // 체크 상태 같은 항목이 현재 상태를 반영하도록, 열 때마다 메뉴를 새로 구성합니다.
+        RuniMenu? folderDropdown;
+
         protected void FolderMenuDropDown()
         {
-            GenericDropdownMenu menu = new();
-            BuildFolderMenu(menu);
-            menu.DropDown(folderMenu.worldBound, folderMenu, DropdownMenuSizeMode.Auto);
+            if (folderDropdown == null)
+            {
+                folderDropdown = new RuniMenu();
+                BuildFolderMenu(folderDropdown);
+            }
+
+            folderDropdown.DropDown(folderMenu.worldBound, folderMenu);
         }
 
-        protected virtual void BuildFolderMenu(GenericDropdownMenu menu)
+        static readonly KeyShortcut newTabShortcut = new(KeyCode.T, actionKey: true);
+        static readonly KeyShortcut closeTabShortcut = new(KeyCode.W, actionKey: true);
+        static readonly KeyShortcut refreshShortcut = new(KeyCode.F5);
+        protected static readonly KeyShortcut showHiddenFilesShortcut = new(KeyCode.H, actionKey: true);
+
+        protected virtual void ToggleShowHiddenFiles() { }
+
+        /// <summary>
+        /// 폴더 메뉴를 처음 열 때 한 번 구성합니다. 열 때마다 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신합니다.
+        /// </summary>
+        protected virtual void BuildFolderMenu(RuniMenu menu)
         {
             const string newTabKey = "runios-editor:io_browser.new_tab";
-            menu.AddItem(LocalizationUtility.GetText(newTabKey) ?? newTabKey, false, () => AddTab(node));
-            menu.AddSeparator(string.Empty);
+            RuniMenuItem newTab = new(string.Empty, () => AddTab(node)) { shortcuts = [newTabShortcut] };
+            menu.opened += () => newTab.text = LocalizationUtility.GetText(newTabKey) ?? newTabKey;
+            menu.Add(newTab);
+
+            const string closeTabKey = "runios-editor:io_browser.close_tab";
+            RuniMenuItem closeTab = new(string.Empty, () => CloseTab(activeTab)) { shortcuts = [closeTabShortcut] };
+            menu.opened += () =>
+            {
+                closeTab.text = LocalizationUtility.GetText(closeTabKey) ?? closeTabKey;
+
+                // 마지막 탭은 닫히지 않습니다.
+                closeTab.SetEnabled(contentPane.childCount > 1);
+            };
+
+            menu.Add(closeTab);
+
+            menu.Add(new Separator());
+
+            const string refreshKey = "runios-editor:io_browser.refresh";
+            RuniMenuItem refresh = new(string.Empty, () => Refresh().Forget()) { shortcuts = [refreshShortcut] };
+            menu.opened += () => refresh.text = LocalizationUtility.GetText(refreshKey) ?? refreshKey;
+            menu.Add(refresh);
+
+            menu.Add(new Separator());
 
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
-            string openInFileManagerText = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
-
-            // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
-            if (IFileManagerProvider.instance is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+            RuniMenuItem openInFileManager = new(string.Empty, () =>
             {
-                PhysicalPath path = physicalProvider.targetPath.Combine(node.path);
-                menu.AddItem(openInFileManagerText, false, () => fileManager.ShowFolder(path).Forget());
-            }
-            else
-                menu.AddDisabledItem(openInFileManagerText, false);
+                if (IFileManagerProvider.instance is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
+            });
+
+            menu.opened += () =>
+            {
+                openInFileManager.text = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
+
+                // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
+                openInFileManager.SetEnabled(IFileManagerProvider.instance != null && node.provider is PhysicalIOProvider);
+            };
+
+            menu.Add(openInFileManager);
         }
 
         /// <summary>
@@ -308,6 +463,21 @@ namespace RuniOS.UIElements.IO
         protected abstract IOBrowserTab CreateTab();
 
         protected virtual string NodeToPathField(IONode node) => node.path.value;
+
+        /// <summary>
+        /// 경로 표시줄의 버튼으로 쓸 이름과 노드를 앞에서부터 순서대로 가져옵니다.
+        /// </summary>
+        protected virtual IEnumerable<(string name, IONode node)> NodeToBreadcrumbs(IONode node)
+        {
+            IONode current = node.rootNode;
+            yield return (RuniPath.directorySeparatorChar.ToString(), current);
+
+            foreach (string segment in node.path.GetSegments())
+            {
+                current = current.CreateChild(segment);
+                yield return (segment, current);
+            }
+        }
 
         protected virtual IONode PathFieldToNode(string path) => new IONode(provider, (RuniPath)path);
     }

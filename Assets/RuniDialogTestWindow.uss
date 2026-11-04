@@ -1,0 +1,47 @@
+.runi-dialog-test__section {
+    margin-top: 6px;
+    margin-right: 6px;
+    margin-bottom: 6px;
+    margin-left: 6px;
+    padding-top: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: rgba(128, 128, 128, 0.4);
+    border-right-color: rgba(128, 128, 128, 0.4);
+    border-bottom-color: rgba(128, 128, 128, 0.4);
+    border-left-color: rgba(128, 128, 128, 0.4);
+}
+
+.runi-dialog-test__section-title {
+    -unity-font-style: bold;
+    margin-bottom: 4px;
+}
+
+.runi-dialog-test__row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.runi-dialog-test__log {
+    flex-shrink: 0;
+    height: 190px;
+    padding-left: 6px;
+    white-space: normal;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.runi-dialog-test--fade.runios-dialog__overlay {
+    opacity: 0;
+    transition-property: opacity;
+    transition-duration: 0.3s;
+}
+
+.runi-dialog-test--fade.runios-dialog__overlay.runios-dialog__overlay--open {
+    opacity: 1;
+}

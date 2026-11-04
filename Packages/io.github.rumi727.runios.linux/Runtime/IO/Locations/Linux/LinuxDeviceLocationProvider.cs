@@ -180,7 +180,13 @@ namespace RuniOS.IO.Locations.Linux
         static void OnAssemblyLoaded() => IDeviceLocationProvider.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => IDeviceLocationProvider.Unregister(instance);
+        static void OnAssemblyUnloading()
+        {
+            IDeviceLocationProvider.Unregister(instance);
+
+            // 공유 연결의 소켓 수신 대기가 언로드되는 ALC를 붙잡지 않도록 연결을 끊습니다.
+            DBusConnection.System.Dispose();
+        }
 #endif
     }
 }

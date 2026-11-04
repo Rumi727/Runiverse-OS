@@ -48,6 +48,9 @@ namespace RuniOS.IO
         public bool isIndependent => providers.All(x => x.isIndependent);
 
         /// <inheritdoc/>
+        public bool isThreadSafe => providers.All(x => x.isThreadSafe);
+
+        /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other)
         {
             if (ReferenceEquals(this, other))

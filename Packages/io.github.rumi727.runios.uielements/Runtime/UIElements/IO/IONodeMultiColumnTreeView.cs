@@ -11,16 +11,25 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements.IO
 {
     [UxmlElement]
-    public partial class IONodeMultiColumnTreeView : VisualElement
+    public partial class IONodeMultiColumnTreeView : VisualElement, IIODragSource, IIODropTarget
     {
         public const string ussClassName = "runios-io-node-tree-view";
         public const string cellUssClassName = "runios-io-node-tree-view__cell";
         public const string hiddenCellUssClassName = "runios-io-node-tree-view__cell--hidden";
+        public const string cutCellUssClassName = "runios-io-node-tree-view__cell--cut";
         public const string nameCellUssClassName = "runios-io-node-tree-view__name-cell";
         public const string nameCellLoadingUssClassName = "runios-io-node-tree-view__name-cell--loading";
         public const string iconUssClassName = "runios-io-node-tree-view__icon";
         public const string nameLabelUssClassName = "runios-io-node-tree-view__name-label";
         public const string loadingImageUssClassName = "runios-io-node-tree-view__loading-image";
+        public const string nameCellRenamingUssClassName = "runios-io-node-tree-view__name-cell--renaming";
+        public const string renameFieldUssClassName = "runios-io-node-tree-view__rename-field";
+        public const string dropTargetUssClassName = "runios-io-node-tree-view__drop-target";
+        public const string dragGhostUssClassName = "runios-io-node-tree-view__drag-ghost";
+        public const string dragGhostRejectedUssClassName = "runios-io-node-tree-view__drag-ghost--rejected";
+        public const string dragGhostTitleUssClassName = "runios-io-node-tree-view__drag-ghost-title";
+        public const string dragGhostOperationUssClassName = "runios-io-node-tree-view__drag-ghost-operation";
+        public const string dragGhostOperationHiddenUssClassName = "runios-io-node-tree-view__drag-ghost-operation--hidden";
 
         static readonly AssetRef<VectorImage> folderIcon = "runios-ui:ui/io_browser/places/16/folder";
         static readonly AssetRef<VectorImage> folderEditorDarkIcon = "runios-ui:ui_dark/io_browser/places/16/folder";
@@ -57,10 +66,31 @@ namespace RuniOS.UIElements.IO
         }
 
         /// <summary>
+        /// 이름 바꾸기와 새로 만들기 같은 수정을 막을지 정합니다.
+        /// </summary>
+        [UxmlAttribute]
+        public bool readOnly { get; set; }
+
+        /// <summary>
+        /// 우클릭 메뉴를 열지 정합니다.
+        /// </summary>
+        [UxmlAttribute]
+        public bool contextMenuEnabled { get; set; }
+
+        /// <summary>
+        /// 이 목록에서 항목을 바꿀 수 있는지 여부입니다. <see cref="readOnly"/>이거나 쓰기 가능한 프로바이더가 아니면 <see langword="false"/>입니다.
+        /// </summary>
+        public bool canWrite => !readOnly && provider is IWritableIOProvider;
+
+        /// <summary>
         /// 선택된 항목을 가져옵니다.
         /// </summary>
         // DefaultMultiColumnTreeViewController.GetItemForIndex가 정렬을 반영하지 않아 selectedItems가 화면과 어긋나므로, 선택된 id로 항목을 찾습니다.
-        public IOEntry[] selectedEntries => treeView.selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+        public IOEntry[] selectedEntries => selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+
+        // 컬렉션 뷰는 트리를 다시 채우거나 항목을 제거해도 선택 id 목록에서 사라진 id를 지우지 않으므로(인덱스만 다시 만듭니다),
+        // 트리에 실제로 있는 항목의 id만 씁니다. 없는 id로 항목을 찾으면 경로가 빈 기본값, 즉 루트가 나옵니다.
+        IEnumerable<int> selectedIds => treeView.selectedIds.Where(treeView.viewController.Exists);
 
         /// <summary>
         /// 항목을 더블 클릭하거나 Enter 키로 고르면 발생합니다.
@@ -75,6 +105,27 @@ namespace RuniOS.UIElements.IO
         protected Column creationTimeColumn { get; }
         protected Column lastAccessTime { get; }
         protected Column lastWriteTimeColumn { get; }
+
+        // 행이 다시 바인딩되거나 재사용되어도 편집 상태가 유지되도록, 행 요소가 아니라 항목 id로 기록합니다.
+        int? renamingId;
+
+        // 같은 위치를 다시 로드할 때, 로드 전에 펼쳐져 있거나 선택되어 있던 항목의 경로입니다.
+        // 다시 로드되면서 id가 바뀌므로 경로로 찾아 되살리고, 되살린 경로는 뺍니다.
+        readonly HashSet<RuniPath> restoringExpandedPaths = [];
+        readonly HashSet<RuniPath> restoringSelectedPaths = [];
+
+        // 마지막으로 로드한 위치이며, 새로 고침인지 다른 위치로의 이동인지 구분합니다.
+        IONode? loadedNode;
+
+        // 클립보드가 마지막으로 알려 준 시점에 잘라낸 항목이 있었는지입니다. 잘라낸 항목이 사라졌을 때 이동했을 수 있는 목록을 새로 고칩니다.
+        bool cutShown;
+
+        // 끄는 항목을 놓을 위치로 강조한 요소입니다.
+        VisualElement? dropHighlight;
+
+        // 끄는 동안 포인터를 따라다니는 고스트와, 그 안에서 할 동작을 보여 주는 라벨입니다.
+        VisualElement? dragGhost;
+        Label? dragGhostOperationLabel;
 
         public IONodeMultiColumnTreeView() : this(IONode.empty) { }
 
@@ -114,6 +165,7 @@ namespace RuniOS.UIElements.IO
 
             loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => EnumerateEntries(x.path)) { preloadDepth = 1 };
             treeView.SetViewController(new LazyMultiColumnTreeViewController<IOEntry>(treeView, loader));
+            loader.childrenLoaded += RestoreChildren;
             treeView.itemsChosen += _ =>
             {
                 // opened 구독자가 node를 바꾸면 그 자리에서 트리가 다시 로드되어 이전 id로는 항목을 찾을 수 없으므로, 열기 전에 항목을 모두 가져옵니다.
@@ -121,12 +173,78 @@ namespace RuniOS.UIElements.IO
                     opened?.Invoke(entry);
             };
 
+            // 컬렉션 뷰는 항목이 없는 곳을 눌러도 선택을 바꾸지 않으므로, 목록의 빈 곳을 누르면 선택을 해제합니다.
+            // 오른쪽 버튼에서는 빈 곳에서 연 메뉴가 이전 선택을 대상으로 하지 않게 됩니다.
+            RegisterCallback<PointerDownEvent>(e =>
+            {
+                if (e.button is ((int)MouseButton.LeftMouse or (int)MouseButton.RightMouse) && IsEmptyArea(e.target))
+                    treeView.ClearSelection();
+            });
+
+            // 목록 아래 빈 영역이 어느 요소에 속하는지는 컬렉션 뷰의 내부 배치에 달려 있으므로,
+            // 이 요소까지 올라가는 동안 항목 행·컬럼 헤더·스크롤바를 만나지 않으면 빈 곳으로 봅니다.
+            bool IsEmptyArea(IEventHandler target)
+            {
+                for (VisualElement? element = target as VisualElement; element != null; element = element.hierarchy.parent)
+                {
+                    if (element == this)
+                        return true;
+
+                    if (element.ClassListContains(BaseVerticalCollectionView.itemUssClassName)
+                        || element.ClassListContains(MultiColumnController.headerContainerUssClassName)
+                        || element.ClassListContains(Scroller.ussClassName))
+                        return false;
+                }
+
+                return false;
+            }
+
             // 오른쪽 버튼을 누를 때 컬렉션 뷰가 이미 선택을 바꾸므로, 뗄 때 선택된 항목으로 메뉴를 엽니다.
             RegisterCallback<PointerUpEvent>(e =>
             {
-                if (e.button == (int)MouseButton.RightMouse)
+                if (e.button == (int)MouseButton.RightMouse && contextMenuEnabled)
                     ShowContextMenu(e.position);
             });
+
+            // 편집 필드 안에서 누른 F2가 편집을 다시 시작해 입력한 내용을 덮어쓰거나, Delete가 항목을 지우지 않게 합니다.
+            RegisterCallback<KeyDownEvent>(e =>
+            {
+                if (renamingId != null)
+                    return;
+
+                switch (e.keyCode)
+                {
+                    case KeyCode.F2:
+                        BeginRename();
+                        break;
+                    case KeyCode.Delete:
+                        Delete(e.shiftKey).Forget();
+                        break;
+                    case KeyCode.C when copyShortcut.Matches(e):
+                        Copy(false);
+                        break;
+                    case KeyCode.X when cutShortcut.Matches(e):
+                        Copy(true);
+                        break;
+                    case KeyCode.V when pasteShortcut.Matches(e):
+                        Paste().Forget();
+                        break;
+                    default:
+                        return;
+                }
+
+                e.StopPropagation();
+            });
+
+            // 정적 이벤트라 패널에서 떼어질 때 구독을 해제해야 이 요소가 남지 않습니다.
+            RegisterCallback<AttachToPanelEvent>(_ =>
+            {
+                cutShown = IOClipboard.isCut;
+                IOClipboard.changed += OnClipboardChanged;
+            });
+            RegisterCallback<DetachFromPanelEvent>(_ => IOClipboard.changed -= OnClipboardChanged);
+
+            this.AddManipulator(new IODragManipulator(this));
 
             Add(treeView);
 
@@ -149,7 +267,7 @@ namespace RuniOS.UIElements.IO
 
         static string GetText(string key) => LocalizationUtility.GetText(key) ?? key;
 
-        static VisualElement MakeNameCell()
+        VisualElement MakeNameCell()
         {
             VisualElement cell = new() { name = "name" };
             cell.AddToClassList(cellUssClassName);
@@ -170,6 +288,22 @@ namespace RuniOS.UIElements.IO
             Label label = new() { name = "name-label" };
             label.AddToClassList(nameLabelUssClassName);
             cell.Add(label);
+
+            TextField renameField = new() { name = "rename-field", isDelayed = true };
+            renameField.AddToClassList(renameFieldUssClassName);
+            renameField.RegisterValueChangedCallback(OnRenameFieldChanged);
+            cell.Add(renameField);
+
+            // 필드 자신에 있던 포커스가 안쪽 입력으로 옮겨 갈 때도 필드에 FocusOut이 오므로, 편집하는 안쪽 입력이 포커스를 잃을 때만 끝냅니다.
+            // 이 두 경우 모두 relatedTarget이 필드 자신으로 바뀌어 전달되므로 relatedTarget으로는 구분할 수 없습니다.
+            renameField.Q(TextField.textInputUssName).Q<TextElement>().RegisterCallback<FocusOutEvent>(e =>
+            {
+                EndRename();
+
+                // Enter와 Esc는 포커스를 필드 자신으로 옮기므로, 숨겨질 필드 대신 트리에 포커스를 둡니다.
+                if (e.relatedTarget == renameField)
+                    treeView.Focus();
+            });
 
             Image loadingImage = new() { name = "loading-image" };
             loadingImage.AddToClassList(loadingImageUssClassName);
@@ -202,7 +336,13 @@ namespace RuniOS.UIElements.IO
             (iconManipulator.assetRef, iconManipulator.editorDarkAssetRef) = GetIcon(entry);
             element.Q<Label>("name-label").text = entry.metaData.name;
             element.EnableInClassList(nameCellLoadingUssClassName, loader.IsLoading(id));
+            element.EnableInClassList(nameCellRenamingUssClassName, id == renamingId);
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
+
+            // 값이 확정될 때 어느 항목의 이름을 바꿀지, 끌어다 놓을 때 어느 항목 위인지 알 수 있도록 id를 둡니다.
+            element.Q<TextField>("rename-field").userData = id;
+            element.userData = id;
         }
 
         /// <summary>
@@ -239,6 +379,7 @@ namespace RuniOS.UIElements.IO
             int id = treeView.GetIdForIndex(index);
 
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
 
             string text;
             if (entry.metaData.size is { } size)
@@ -284,35 +425,716 @@ namespace RuniOS.UIElements.IO
             IOEntry entry = treeView.GetItemDataForIndex<IOEntry>(index);
 
             element.EnableInClassList(hiddenCellUssClassName, IsHidden(entry));
+            element.EnableInClassList(cutCellUssClassName, IsCut(entry));
             action.Invoke(genericElement, entry);
         };
 
+        RuniMenu? contextMenu;
+
+        static readonly KeyShortcut renameShortcut = new(KeyCode.F2);
+        static readonly KeyShortcut deleteShortcut = new(KeyCode.Delete);
+        static readonly KeyShortcut cutShortcut = new(KeyCode.X, true);
+        static readonly KeyShortcut copyShortcut = new(KeyCode.C, true);
+        static readonly KeyShortcut pasteShortcut = new(KeyCode.V, true);
+
+        // 빈 곳에서 열어도 새로 만들기를 할 수 있도록, 선택이 없어도 메뉴를 엽니다.
         void ShowContextMenu(Vector2 position)
         {
-            IOEntry[] entries = selectedEntries;
-            if (entries.Length == 0)
+            if (contextMenu == null)
+            {
+                contextMenu = new RuniMenu();
+                BuildContextMenu(contextMenu);
+            }
+
+            contextMenu.DropDown(new Rect(position, Vector2.zero), this);
+        }
+
+        /// <summary>
+        /// 컨텍스트 메뉴를 처음 열 때 한 번 구성합니다. 선택된 항목에 따라 바뀌는 상태는 <see cref="RuniMenu.opened"/>에서 갱신하고,
+        /// 각 동작은 실행할 때의 <see cref="selectedEntries"/>를 읽습니다.
+        /// </summary>
+        protected virtual void BuildContextMenu(RuniMenu menu)
+        {
+            AddNewItemMenu(menu, () => this);
+
+            menu.Add(new Separator());
+
+            RuniMenuItem cut = new(string.Empty, () => Copy(true)) { shortcuts = [cutShortcut] };
+            menu.opened += () =>
+            {
+                cut.text = GetText("runios-editor:io_node_tree_view.cut");
+                cut.SetEnabled(selectedEntries.Length > 0 && canWrite);
+            };
+
+            menu.Add(cut);
+
+            RuniMenuItem copy = new(string.Empty, () => Copy(false)) { shortcuts = [copyShortcut] };
+            menu.opened += () =>
+            {
+                copy.text = GetText("runios-editor:io_node_tree_view.copy");
+                copy.SetEnabled(selectedEntries.Length > 0);
+            };
+
+            menu.Add(copy);
+
+            RuniMenuItem paste = new(string.Empty, () => Paste().Forget()) { shortcuts = [pasteShortcut] };
+            menu.opened += () =>
+            {
+                paste.text = GetText("runios-editor:io_node_tree_view.paste");
+                paste.SetEnabled(IOClipboard.nodes.Length > 0 && canWrite);
+            };
+
+            menu.Add(paste);
+
+            menu.Add(new Separator());
+
+            RuniMenuItem rename =new(string.Empty, BeginRename) { shortcuts = [renameShortcut] };
+            menu.opened += () =>
+            {
+                rename.text = GetText("runios-editor:io_node_tree_view.rename");
+                rename.SetEnabled(selectedEntries.Length == 1 && canWrite);
+            };
+
+            menu.Add(rename);
+
+            RuniMenuItem delete = new(string.Empty, () => Delete().Forget()) { shortcuts = [deleteShortcut] };
+            menu.opened += () =>
+            {
+                delete.text = GetText("runios-editor:io_node_tree_view.delete");
+                delete.SetEnabled(selectedEntries.Length > 0 && canWrite);
+            };
+
+            menu.Add(delete);
+
+            menu.Add(new Separator());
+
+            // 선택된 항목이 있으면 그 항목들의 경로를 줄바꿈으로 이어 복사하고, 없으면 빈 곳에서 연 메뉴이므로 현재 폴더의 경로를 복사합니다.
+            RuniMenuItem copyPath = new(string.Empty, () =>
+            {
+                IOEntry[] entries = selectedEntries;
+                GUIUtility.systemCopyBuffer = entries.Length > 0
+                    ? string.Join('\n', entries.Select(x => x.path.ToString()))
+                    : node.path.ToString();
+            });
+
+            menu.opened += () => copyPath.text = GetText("runios-editor:io_node_tree_view.copy_path");
+            menu.Add(copyPath);
+
+            // 논리 경로 대신 프로바이더의 실제 경로로 복사합니다. 실제 경로가 있는 프로바이더에서만 쓸 수 있습니다.
+            RuniMenuItem copyPhysicalPath = new(string.Empty, () =>
+            {
+                if (provider is not PhysicalIOProvider physicalProvider)
+                    return;
+
+                IOEntry[] entries = selectedEntries;
+                GUIUtility.systemCopyBuffer = entries.Length > 0
+                    ? string.Join('\n', entries.Select(x => physicalProvider.targetPath.Combine(x.path).ToString()))
+                    : physicalProvider.targetPath.Combine(node.path).ToString();
+            });
+
+            menu.opened += () =>
+            {
+                copyPhysicalPath.text = GetText("runios-editor:io_node_tree_view.copy_physical_path");
+                copyPhysicalPath.SetEnabled(provider is PhysicalIOProvider);
+            };
+
+            menu.Add(copyPhysicalPath);
+
+            // 선택된 항목이 있으면 그 항목들을 보여 주고, 없으면 빈 곳에서 연 메뉴이므로 폴더 메뉴처럼 현재 폴더를 엽니다.
+            RuniMenuItem showInFileManager = new(string.Empty, () =>
+            {
+                if (IFileManagerProvider.instance is not { } fileManager || provider is not PhysicalIOProvider physicalProvider)
+                    return;
+
+                IOEntry[] entries = selectedEntries;
+                if (entries.Length > 0)
+                    fileManager.ShowItems(entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray()).Forget();
+                else
+                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
+            });
+
+            menu.opened += () =>
+            {
+                showInFileManager.text = selectedEntries.Length > 0
+                    ? GetText("runios-editor:io_node_tree_view.show_in_file_manager")
+                    : GetText("runios-editor:io_browser.open_in_file_manager");
+
+                // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
+                showInFileManager.SetEnabled(IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
+            };
+
+            menu.Add(showInFileManager);
+        }
+
+        /// <summary>
+        /// 폴더와 빈 파일, 텍스트·마크다운·JSON 파일을 만드는 "새로 만들기" 하위 메뉴를 <paramref name="menu"/>에 추가합니다.
+        /// </summary>
+        /// <param name="menu">하위 메뉴를 넣을 메뉴입니다. 이 메뉴가 열릴 때 하위 메뉴의 활성 상태를 갱신합니다.</param>
+        /// <param name="getTreeView">
+        /// 메뉴를 열거나 항목을 고를 때마다 대상 트리 뷰를 가져옵니다. 탭처럼 대상이 바뀌는 메뉴에서 쓰기 위한 것이며,
+        /// <see langword="null"/>을 반환하거나, <see cref="readOnly"/>이거나, 쓰기 가능한 프로바이더가 아니면 하위 메뉴를 비활성화합니다.
+        /// </param>
+        public static void AddNewItemMenu(RuniMenu menu, Func<IONodeMultiColumnTreeView?> getTreeView)
+        {
+            RuniMenu newMenu = new() { name = "new" };
+            menu.opened += () =>
+            {
+                newMenu.text = GetText("runios-editor:io_node_tree_view.new");
+                newMenu.SetEnabled(getTreeView() is { canWrite: true });
+            };
+
+            menu.Add(newMenu);
+
+            AddItem("runios-editor:io_node_tree_view.new_folder", "runios-editor:io_node_tree_view.new_folder_name", null);
+            newMenu.Add(new Separator());
+            AddItem("runios-editor:io_node_tree_view.new_file", "runios-editor:io_node_tree_view.new_file_name", string.Empty);
+            AddItem("runios-editor:io_node_tree_view.new_text_file", "runios-editor:io_node_tree_view.new_text_file_name", ".txt");
+            AddItem("runios-editor:io_node_tree_view.new_markdown_file", "runios-editor:io_node_tree_view.new_markdown_file_name", ".md");
+            AddItem("runios-editor:io_node_tree_view.new_json_file", "runios-editor:io_node_tree_view.new_json_file_name", ".json");
+
+            // extension이 null이면 폴더를 만듭니다.
+            void AddItem(string textKey, string nameKey, string? extension)
+            {
+                RuniMenuItem item = new(string.Empty, () =>
+                {
+                    if (getTreeView() is not { } treeView)
+                        return;
+
+                    string name = GetText(nameKey);
+                    (extension == null ? treeView.CreateDirectory(name) : treeView.CreateFile(name, extension)).Forget();
+                });
+
+                newMenu.opened += () => item.text = GetText(textKey);
+                newMenu.Add(item);
+            }
+        }
+
+        /// <summary>
+        /// 현재 폴더에 새 폴더를 만들고 바로 이름을 바꾸는 상태로 들어갑니다. 같은 이름이 있으면 <c>name (2)</c>처럼 번호를 붙입니다.
+        /// </summary>
+        public UniTask CreateDirectory(string name) => Create(name, string.Empty, true);
+
+        /// <summary>
+        /// 현재 폴더에 빈 파일을 만들고 바로 이름을 바꾸는 상태로 들어갑니다. 같은 이름이 있으면 <c>name (2).ext</c>처럼 확장자 앞에 번호를 붙입니다.
+        /// </summary>
+        /// <param name="name">확장자를 뺀 이름입니다.</param>
+        /// <param name="extension"><c>.txt</c>처럼 점을 포함한 확장자이며, 확장자가 없으면 빈 문자열입니다.</param>
+        public UniTask CreateFile(string name, string extension = "") => Create(name, extension, false);
+
+        async UniTask Create(string name, string extension, bool isDirectory)
+        {
+            IONode directoryNode = node;
+            if (!canWrite || directoryNode.AsWriteNode() is not { } directory)
                 return;
 
-            GenericDropdownMenu menu = new();
-            BuildContextMenu(menu, entries);
-            menu.DropDown(new Rect(position, Vector2.zero), this, DropdownMenuSizeMode.Auto);
+            // 같은 이름이 있으면 번호를 붙입니다. GetEntry는 없는 경로에서도 예외를 던지지 않습니다.
+            IOWriteNode child = directory.CreateChild(name + extension);
+            for (int number = 2; await directory.provider.GetEntry(child.path) != null; number++)
+                child = directory.CreateChild($"{name} ({number}){extension}");
+
+            try
+            {
+                if (isDirectory)
+                    await child.dir.Create();
+                else
+                {
+                    // 확인한 뒤에 같은 이름의 파일이 생겼더라도 내용이 지워지지 않도록, CreateFile 대신 자르지 않는 OpenWrite로 만듭니다.
+                    await using (await child.file.OpenWrite()) { }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
+            // 만드는 동안 다른 폴더로 이동했으면 그 목록에 추가하지 않습니다.
+            if (node != directoryNode || await directory.provider.GetEntry(child.path) is not { } entry)
+                return;
+
+            int id = loader.AddItem(entry, -1);
+
+            treeView.RefreshItems();
+            treeView.SetSelectionById(id);
+            BeginRename(id);
         }
 
-        protected virtual void BuildContextMenu(GenericDropdownMenu menu, IOEntry[] entries)
+        /// <summary>
+        /// 선택된 항목이 하나이고 <see cref="readOnly"/>가 아니며 쓰기 가능한 프로바이더일 때, 그 항목의 이름 셀을 편집 상태로 바꿉니다.
+        /// </summary>
+        public void BeginRename()
         {
-            string showInFileManagerText = GetText("runios-editor:io_node_tree_view.show_in_file_manager");
+            if (!canWrite || selectedIds.Count() != 1)
+                return;
 
-            // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-            if (IFileManagerProvider.instance is { } fileManager && provider is PhysicalIOProvider physicalProvider)
+            BeginRename(selectedIds.First());
+        }
+
+        void BeginRename(int id)
+        {
+            renamingId = id;
+
+            // 편집 필드가 보이도록 행을 화면에 두고 다시 바인딩합니다.
+            treeView.ScrollToItemById(id);
+            treeView.RefreshItems();
+
+            TextField? renameField = treeView.GetRootElementForId(id)?.Q<TextField>("rename-field");
+            if (renameField == null)
             {
-                PhysicalPath[] paths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
-                menu.AddItem(showInFileManagerText, false, () => fileManager.ShowItems(paths).Forget());
+                // 행이 아직 만들어지지 않았으면 포커스를 잃을 필드도 없으므로 편집 상태로 남기지 않습니다.
+                EndRename();
+                return;
+            }
+
+            IOEntry entry = treeView.GetItemDataForId<IOEntry>(id);
+            string name = entry.metaData.name;
+
+            // 파일은 확장자를 뺀 이름만 선택합니다. .bashrc처럼 점으로 시작하는 이름은 확장자가 없는 것으로 보고 전체를 선택합니다.
+            int extensionIndex = name.LastIndexOf(FileExtension.extensionSeparatorChar);
+            int selectionLength = !entry.isDirectory && extensionIndex > 0 ? extensionIndex : name.Length;
+
+            renameField.SetValueWithoutNotify(name);
+
+            // 편집 필드는 USS 클래스로 표시되므로, 스타일이 다시 계산되기 전에는 display: none이라 포커스를 받을 수 없습니다.
+            // 스케줄러는 스타일·레이아웃 갱신과 따로 돌아서 다음 틱에도 아직 숨겨져 있을 수 있으므로, 필드가 배치된 뒤에 포커스합니다.
+            renameField.RegisterCallback<GeometryChangedEvent>(OnRenameFieldGeometryChanged);
+
+            void OnRenameFieldGeometryChanged(GeometryChangedEvent _)
+            {
+                renameField.UnregisterCallback<GeometryChangedEvent>(OnRenameFieldGeometryChanged);
+
+                // 이벤트 처리 중에 포커스하면 포커스 이벤트가 이 처리 뒤로 미뤄져 기본 전체 선택이 선택 범위를 덮으므로, 다음 틱에 포커스합니다.
+                renameField.schedule.Execute(() =>
+                {
+                    if (renamingId != id)
+                        return;
+
+                    renameField.Focus();
+                    renameField.SelectRange(selectionLength, 0);
+                });
+            }
+        }
+
+        void EndRename()
+        {
+            renamingId = null;
+            treeView.RefreshItems();
+        }
+
+        void OnRenameFieldChanged(ChangeEvent<string> evt)
+        {
+            if (evt.target is not TextField { userData: int id })
+                return;
+
+            Rename(id, evt.newValue).Forget();
+        }
+
+        async UniTask Rename(int id, string name)
+        {
+            IOEntry entry = treeView.GetItemDataForId<IOEntry>(id);
+            if (name == entry.metaData.name || node.AsWriteNode() is not { } writeNode)
+                return;
+
+            // RuniPath에서 /는 구분자라, 이름에 들어가면 하위 경로로 이동해 버리므로 이름으로 받지 않습니다.
+            if (name.Contains(RuniPath.directorySeparatorChar))
+            {
+                Debug.LogError($"The name '{name}' cannot contain '{RuniPath.directorySeparatorChar}'.");
+                return;
+            }
+
+            RuniPath destinationPath = entry.path.GetParentPath() / name;
+            IOWriteNode entryNode = writeNode.Bind(entry);
+
+            // 대상이 이미 있는지는 덮어쓰지 않는 이동이 판단하므로 미리 확인하지 않습니다.
+            try
+            {
+                if (entry.isDirectory)
+                    await entryNode.dir.Move(destinationPath);
+                else
+                    await entryNode.file.Move(destinationPath);
+            }
+            catch (Exception e)
+            {
+                Debug.LogException(e);
+                return;
+            }
+
+            // 이동하는 동안 트리가 다시 로드되었으면 이미 바뀐 이름으로 표시되어 있습니다.
+            if (!treeView.viewController.Exists(id))
+                return;
+
+            // 이름을 바꾼 디렉터리의 자식들은 이전 경로를 가지고 있으므로, 항목을 새로 추가해 자식을 다시 로드하게 합니다.
+            int parentId = treeView.viewController.GetParentId(id);
+            bool isExpanded = treeView.IsExpanded(id);
+
+            // Enter로 확정하면 아직 편집 필드에 포커스가 있으므로, 제거되는 항목의 편집 상태를 지우고 숨겨질 필드 대신 트리에 포커스를 둡니다.
+            if (renamingId == id)
+            {
+                renamingId = null;
+                treeView.Focus();
+            }
+
+            loader.RemoveItem(id);
+            int renamedId = loader.AddItem(entry with { path = destinationPath, metaData = entry.metaData with { name = name } }, parentId);
+
+            treeView.RefreshItems();
+            if (isExpanded)
+                treeView.ExpandItem(renamedId);
+
+            treeView.SetSelectionById(renamedId);
+            treeView.ScrollToItemById(renamedId);
+        }
+
+        /// <summary>
+        /// 선택된 항목을 확인받은 뒤 지웁니다. 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 지워지므로 따로 지우지 않습니다.
+        /// <br/>
+        /// 실제 경로이고 모든 항목을 휴지통으로 보낼 수 있으면 휴지통으로 보내고, 하나라도 보낼 수 없으면 모두 영구 삭제할지 묻습니다.
+        /// 휴지통으로 보내다 실패하면 영구 삭제로 넘어가지 않습니다.
+        /// </summary>
+        /// <param name="permanently"><see langword="true"/>이면 휴지통을 쓰지 않고 영구 삭제할지 묻습니다.</param>
+        public async UniTask Delete(bool permanently = false)
+        {
+            IONode directoryNode = node;
+            if (!canWrite || directoryNode.AsWriteNode() is not { } directory)
+                return;
+
+            int[] ids = GetTopmostIds(selectedIds);
+            if (ids.Length == 0)
+                return;
+
+            IOEntry[] entries = ids.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+
+            ITrashProvider? trash = null;
+            PhysicalPath[] trashPaths = Array.Empty<PhysicalPath>();
+            if (!permanently && ITrashProvider.instance is { } trashProvider && provider is PhysicalIOProvider physicalProvider)
+            {
+                trashPaths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
+
+                bool[] canMoveToTrash = await UniTask.WhenAll(trashPaths.Select(trashProvider.CanMoveToTrash));
+                if (canMoveToTrash.All(static x => x))
+                    trash = trashProvider;
+            }
+
+            string key = trash != null ? "runios-editor:io_node_tree_view.move_to_trash" : "runios-editor:io_node_tree_view.delete_permanently";
+            string message = entries.Length == 1
+                ? string.Format(GetText(key + ".message"), entries[0].metaData.name)
+                : string.Format(GetText(key + ".message_multiple"), entries.Length);
+
+            // 되돌릴 수 없는 영구 삭제는 Enter 한 번에 실행되지 않도록 취소에 포커스를 둡니다.
+            RuniDialog dialog = new(GetText(key), message);
+            Button confirm = dialog.AddButton(GetText(key + ".confirm"));
+            Button cancel = dialog.AddButton(GetText("runios-editor:io_node_tree_view.delete.cancel"));
+            dialog.defaultButton = trash != null ? confirm : cancel;
+
+            if (await dialog.ShowAsync(this) != confirm)
+                return;
+
+            if (trash != null)
+            {
+                try
+                {
+                    await trash.MoveToTrash(trashPaths);
+                }
+                catch (Exception e)
+                {
+                    Debug.LogException(e);
+                }
             }
             else
-                menu.AddDisabledItem(showInFileManagerText, false);
+            {
+                foreach (IOEntry entry in entries)
+                {
+                    IOWriteNode entryNode = directory.Bind(entry);
+
+                    try
+                    {
+                        if (entry.isDirectory)
+                            await entryNode.dir.Delete();
+                        else
+                            await entryNode.file.Delete();
+                    }
+                    catch (Exception e)
+                    {
+                        Debug.LogException(e);
+                    }
+                }
+            }
+
+            // 지우는 동안 다른 폴더로 이동했으면 그 목록에서 뺄 것이 없습니다.
+            if (node != directoryNode)
+                return;
+
+            // 일부만 지워졌을 수 있으므로 실제로 없어진 항목만 뺍니다.
+            for (int i = 0; i < ids.Length; i++)
+            {
+                if (await directory.provider.GetEntry(entries[i].path) == null && treeView.viewController.Exists(ids[i]))
+                    loader.RemoveItem(ids[i]);
+            }
+
+            treeView.RefreshItems();
         }
 
-        public UniTask Refresh() => loader.Reset(EnumerateEntries(node.path));
+        /// <summary>
+        /// 선택된 항목을 <see cref="IOClipboard"/>에 복사하거나 잘라냅니다. 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로 따로 담지 않습니다.
+        /// 잘라내기는 <see cref="readOnly"/>가 아니고 쓰기 가능한 프로바이더일 때만 합니다.
+        /// </summary>
+        /// <param name="cut"><see langword="true"/>이면 복사 대신 잘라냅니다.</param>
+        public void Copy(bool cut)
+        {
+            int[] ids = GetTopmostIds(selectedIds);
+            if (ids.Length == 0 || (cut && !canWrite))
+                return;
+
+            IOClipboard.Set(ids.Select(id => node.Bind(treeView.GetItemDataForId<IOEntry>(id))).ToArray(), cut);
+        }
+
+        /// <summary>
+        /// <see cref="IOClipboard"/>의 항목을 붙여넣습니다. 폴더 하나만 선택되어 있으면 그 폴더 안에, 아니면 현재 폴더에 넣습니다.
+        /// 잘라낸 항목은 원본과 같은 프로바이더 인스턴스일 때만 옮기고, 붙여넣은 뒤 클립보드를 비웁니다.
+        /// </summary>
+        public async UniTask Paste()
+        {
+            IOEntry[] selected = selectedEntries;
+            IONode target = selected is [{ isDirectory: true } selectedDirectory] ? node.Bind(selectedDirectory) : node;
+            if (!canWrite || target.AsWriteNode() is not { } directory)
+                return;
+
+            bool cut = IOClipboard.isCut;
+
+            // 클립보드에 둔 뒤 지워졌거나 종류가 바뀐 항목은 빼고, 지금의 항목 정보를 가져옵니다.
+            List<(IIOProvider provider, IOEntry entry)> sources = [];
+            foreach (IONode source in IOClipboard.nodes)
+            {
+                if (await source.provider.GetEntry(source.path) is { } entry)
+                    sources.Add((source.provider, entry));
+            }
+
+            foreach (IGrouping<IIOProvider, (IIOProvider provider, IOEntry entry)> group in sources.GroupBy(static x => x.provider))
+            {
+                IOEntry[] entries = group.Select(static x => x.entry).ToArray();
+                if (!(cut ? IOTransfer.CanMove(group.Key, entries, directory) : IOTransfer.CanCopy(group.Key, entries, directory)))
+                    continue;
+
+                await IOTransfer.Run(group.Key, entries, directory, cut ? IODropOperation.Move : IODropOperation.Copy, this);
+            }
+
+            // 비우면 잘라낸 항목을 보여 주던 목록이 스스로 새로 고치므로, 이 목록도 따로 새로 고치지 않습니다.
+            if (cut)
+                IOClipboard.Clear();
+            else
+                await Refresh();
+        }
+
+        void OnClipboardChanged()
+        {
+            bool wasCut = cutShown;
+            cutShown = IOClipboard.isCut;
+
+            if (wasCut && !cutShown)
+                Refresh().Forget();
+            else
+                treeView.RefreshItems();
+        }
+
+        bool IsCut(IOEntry entry) => IOClipboard.isCut && IOClipboard.nodes.Any(x => x.IsSameTarget(node.Bind(entry)));
+
+        // 선택된 폴더 안에서 함께 선택된 항목은 폴더와 같이 처리되므로, 조상이 함께 들어 있지 않은 항목만 남깁니다.
+        int[] GetTopmostIds(IEnumerable<int> ids)
+        {
+            HashSet<int> idSet = ids.ToHashSet();
+            return idSet.Where(id => !HasAncestorIn(id)).ToArray();
+
+            bool HasAncestorIn(int id)
+            {
+                for (int parentId = treeView.viewController.GetParentId(id); parentId != -1; parentId = treeView.viewController.GetParentId(parentId))
+                {
+                    if (idSet.Contains(parentId))
+                        return true;
+                }
+
+                return false;
+            }
+        }
+
+        // 항목 행을 누르면 선택된 항목을 끕니다. 행을 누를 때 컬렉션 뷰가 이미 선택을 바꿉니다.
+        IODragData? IIODragSource.GetDragData(PointerDownEvent evt)
+        {
+            if (renamingId != null || GetItemIdAt(evt.position) == -1)
+                return null;
+
+            IOEntry[] entries = GetTopmostIds(selectedIds).Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+            return entries.Length > 0 ? new IODragData(this, provider, entries) : null;
+        }
+
+        VisualElement IIODragSource.OnDragStart(IODragData data)
+        {
+            string title = data.entries.Length == 1
+                ? data.entries[0].metaData.name
+                : string.Format(GetText("runios-editor:io_node_tree_view.item_count"), data.entries.Length);
+
+            // 패널 맨 위에 붙으므로, 이 요소의 조상에서 받던 스타일을 직접 붙입니다.
+            dragGhost = new VisualElement { name = "drag-ghost" };
+            dragGhost.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
+            dragGhost.AddToClassList(dragGhostUssClassName);
+
+            Label titleLabel = new(title) { name = "title" };
+            titleLabel.AddToClassList(dragGhostTitleUssClassName);
+            dragGhost.Add(titleLabel);
+
+            dragGhostOperationLabel = new Label { name = "operation" };
+            dragGhostOperationLabel.AddToClassList(dragGhostOperationUssClassName);
+            dragGhost.Add(dragGhostOperationLabel);
+
+            return dragGhost;
+        }
+
+        // 놓을 수 없으면 고스트를 흐리게 하고, 놓을 때 할 동작이 정해져 있으면 보여 줍니다.
+        void IIODragSource.OnDragUpdate(IODragData data, bool canDrop, IODropOperation? operation)
+        {
+            if (dragGhost == null || dragGhostOperationLabel == null)
+                return;
+
+            dragGhost.EnableInClassList(dragGhostRejectedUssClassName, !canDrop);
+            dragGhostOperationLabel.EnableInClassList(dragGhostOperationHiddenUssClassName, operation == null);
+            if (operation != null)
+                dragGhostOperationLabel.text = GetText(operation switch
+                {
+                    IODropOperation.Move => "runios-editor:io_node_tree_view.drop.move",
+                    IODropOperation.Copy => "runios-editor:io_node_tree_view.drop.copy",
+                    _ => "runios-editor:io_node_tree_view.drop.link"
+                });
+        }
+
+        void IIODragSource.OnDragEnd(IODragData data)
+        {
+            dragGhost = null;
+            dragGhostOperationLabel = null;
+        }
+
+        bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
+        {
+            int id = GetDropDirectoryId(position);
+            directory = id == -1 ? node : new IONode(provider, treeView.GetItemDataForId<IOEntry>(id).path);
+
+            return canWrite;
+        }
+
+        // 놓을 수 있을 때 항목이 들어갈 폴더의 행을, 현재 폴더면 트리 전체를 강조합니다.
+        void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop)
+        {
+            VisualElement? element = null;
+            if (canDrop)
+            {
+                int id = GetDropDirectoryId(position);
+                element = (id == -1 ? null : treeView.GetRootElementForId(id)) ?? this;
+            }
+
+            SetDropHighlight(element);
+        }
+
+        void IIODropTarget.OnDragLeave() => SetDropHighlight(null);
+
+        void SetDropHighlight(VisualElement? element)
+        {
+            if (dropHighlight == element)
+                return;
+
+            dropHighlight?.RemoveFromClassList(dropTargetUssClassName);
+            dropHighlight = element;
+            dropHighlight?.AddToClassList(dropTargetUssClassName);
+        }
+
+        // 폴더 위에 놓으면 그 폴더 안으로, 파일 위에 놓으면 그 파일이 들어 있는 폴더로 들어갑니다. 빈 곳이나 현재 폴더 바로 아래 파일이면 현재 폴더인 -1입니다.
+        int GetDropDirectoryId(Vector2 position)
+        {
+            int id = GetItemIdAt(position);
+            return id == -1 || treeView.GetItemDataForId<IOEntry>(id).isDirectory ? id : treeView.viewController.GetParentId(id);
+        }
+
+        // 행이 재사용되므로, 포인터 아래 행의 이름 셀에 바인딩할 때 둔 id로 항목을 찾습니다. 행이 아니면 -1입니다.
+        int GetItemIdAt(Vector2 position)
+        {
+            for (VisualElement? element = panel?.Pick(position); element != null && element != this; element = element.parent)
+            {
+                if (element.ClassListContains(BaseVerticalCollectionView.itemUssClassName))
+                    return element.Q(className: nameCellUssClassName)?.userData is int id && treeView.viewController.Exists(id) ? id : -1;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// 현재 위치의 목록을 다시 불러옵니다. 마지막으로 불러온 위치와 같으면 펼침·선택·스크롤 상태를 되살립니다.
+        /// </summary>
+        public async UniTask Refresh()
+        {
+            restoringExpandedPaths.Clear();
+            restoringSelectedPaths.Clear();
+
+            bool restore = loadedNode == node;
+            loadedNode = node;
+
+            ScrollView scrollView = treeView.Q<ScrollView>();
+            Vector2 scrollOffset = scrollView.scrollOffset;
+
+            if (restore)
+            {
+                foreach (int id in treeView.viewController.GetAllItemIds())
+                {
+                    if (treeView.IsExpanded(id))
+                        restoringExpandedPaths.Add(treeView.GetItemDataForId<IOEntry>(id).path);
+                }
+
+                foreach (IOEntry entry in selectedEntries)
+                    restoringSelectedPaths.Add(entry.path);
+            }
+
+            await loader.Reset(EnumerateEntries(node.path));
+
+            if (!restore)
+                return;
+
+            // 다시 채운 목록이 아직 배치되지 않았으면 스크롤 범위가 작아 위치가 잘리므로, 배치된 뒤에 한 번 더 맞춥니다.
+            scrollView.scrollOffset = scrollOffset;
+            if (scrollView.scrollOffset != scrollOffset)
+                scrollView.contentContainer.RegisterCallback<GeometryChangedEvent>(OnContentGeometryChanged);
+
+            void OnContentGeometryChanged(GeometryChangedEvent _)
+            {
+                scrollView.contentContainer.UnregisterCallback<GeometryChangedEvent>(OnContentGeometryChanged);
+                scrollView.scrollOffset = scrollOffset;
+            }
+        }
+
+        void RestoreChildren(int parentId, IReadOnlyList<int> childIds)
+        {
+            if (restoringExpandedPaths.Count == 0 && restoringSelectedPaths.Count == 0)
+                return;
+
+            bool IsRestoring(int id)
+            {
+                RuniPath path = treeView.GetItemDataForId<IOEntry>(id).path;
+                return restoringExpandedPaths.Contains(path) || restoringSelectedPaths.Contains(path);
+            }
+
+            if (!childIds.Any(IsRestoring))
+                return;
+
+            // 로더가 rebuildTree 없이 추가한 항목은 새로 고침 전까지 펼치거나 선택할 수 없으므로, 트리를 먼저 갱신합니다.
+            treeView.RefreshItems();
+
+            foreach (int id in childIds)
+            {
+                RuniPath path = treeView.GetItemDataForId<IOEntry>(id).path;
+
+                // 펼치면 로더가 자식을 로드하고, 그 자식들도 여기서 다시 되살립니다.
+                if (restoringExpandedPaths.Remove(path))
+                    treeView.ExpandItem(id, refresh: false);
+
+                if (restoringSelectedPaths.Remove(path))
+                    treeView.AddToSelectionById(id);
+            }
+        }
 
         IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path)
         {

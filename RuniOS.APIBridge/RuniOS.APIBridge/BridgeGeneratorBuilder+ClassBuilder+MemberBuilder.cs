@@ -69,6 +69,7 @@ namespace RuniOS.APIBridge
                     }
                     foreach (var member in members)
                     {
+                        bool isIncludedMember = builder.includeMembers.Contains(member.Name);
                         AppendLine();
                         
                         bool isStaticMember = member.IsStatic;
@@ -100,9 +101,13 @@ namespace RuniOS.APIBridge
                                     {
                                         fieldTypeIsNonPublic = true;
                                         if (builder.onlyByMyself && !SymbolEqualityComparer.Default.Equals(targetSymbol, namedTypeSymbol))
-                                            break;
-                                        
-                                        builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedTypeSymbol.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
+                                        {
+                                            // 화이트리스트에 있는 멤버는 해당 타입의 브릿지가 이미 있는 것으로 취급하고 생성합니다.
+                                            if (!isIncludedMember)
+                                                break;
+                                        }
+                                        else
+                                            builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedTypeSymbol.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
                                     }
                                 }
 
@@ -175,9 +180,13 @@ namespace RuniOS.APIBridge
                                     {
                                         propertyTypeIsNonPublic = true;
                                         if (builder.onlyByMyself && !SymbolEqualityComparer.Default.Equals(targetSymbol, namedTypeSymbol))
-                                            break;
-                                        
-                                        builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedTypeSymbol.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
+                                        {
+                                            // 화이트리스트에 있는 멤버는 해당 타입의 브릿지가 이미 있는 것으로 취급하고 생성합니다.
+                                            if (!isIncludedMember)
+                                                break;
+                                        }
+                                        else
+                                            builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedTypeSymbol.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
                                     }
                                 }
 
@@ -273,9 +282,13 @@ namespace RuniOS.APIBridge
                                         if (namedReturnType.IsNonPublicMember())
                                         {
                                             if (builder.onlyByMyself && !SymbolEqualityComparer.Default.Equals(targetSymbol, namedReturnType))
-                                                break;
-                                            
-                                            builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedReturnType.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
+                                            {
+                                                // 화이트리스트에 있는 멤버는 해당 타입의 브릿지가 이미 있는 것으로 취급하고 생성합니다.
+                                                if (!isIncludedMember)
+                                                    break;
+                                            }
+                                            else
+                                                builder.nonPublicTypeSymbols.Add(new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, namedReturnType.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself));
                                             returnTypeIsNonPublic = true;
                                         }
                                     }
@@ -291,10 +304,14 @@ namespace RuniOS.APIBridge
                                     // ReSharper disable once LocalVariableHidesPrimaryConstructorParameter
                                     INamedTypeSymbol targetSymbol = builder.targetSymbol;
                                     if (builder.onlyByMyself && nonPublicPars.Any(x => !SymbolEqualityComparer.Default.Equals(targetSymbol, x)))
-                                        break;
-                                    
-                                    builder.nonPublicTypeSymbols.AddRange(nonPublicPars
-                                        .Select(x => new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, x.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself)));
+                                    {
+                                        // 화이트리스트에 있는 멤버는 해당 타입의 브릿지가 이미 있는 것으로 취급하고 생성합니다.
+                                        if (!isIncludedMember)
+                                            break;
+                                    }
+                                    else
+                                        builder.nonPublicTypeSymbols.AddRange(nonPublicPars
+                                            .Select(x => new BridgeGenerationData(bridgeNamespace, builder.targetAssemblies, x.OriginalDefinition, ImmutableArray<string>.Empty, ImmutableArray<string>.Empty, false, false, ImmutableHashSet<int>.Empty, false, builder.onlyByMyself)));
                                 }
 
                                 if (returnTypeIsDelegate && returnTypeIsNonPublic)

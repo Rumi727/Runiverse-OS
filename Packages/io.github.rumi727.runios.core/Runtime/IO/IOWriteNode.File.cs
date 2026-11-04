@@ -83,6 +83,11 @@ namespace RuniOS.IO
             /// Opens a stream for writing to the file represented by this node.<br/>
             /// 이 노드가 나타내는 파일에 쓰기 위한 스트림을 엽니다.
             /// </summary>
+            /// <remarks>
+            /// Creates the file if it does not exist. An existing file is not truncated; writing starts at the beginning and overwrites only the written range.
+            /// <br/><br/>
+            /// 파일이 없으면 만듭니다. 기존 파일은 자르지 않으며, 처음부터 쓴 범위만 덮어씁니다.
+            /// </remarks>
             /// <param name="cancellationToken">
             /// The cancellation token used to cancel the operation.<br/>
             /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
@@ -102,6 +107,50 @@ namespace RuniOS.IO
             /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
             /// </param>
             public UniTask Delete(CancellationToken cancellationToken = default) => node.provider.DeleteFile(node.path, cancellationToken);
+
+            /// <summary>
+            /// Moves the file represented by this node to another path in the same provider.<br/>
+            /// 이 노드가 나타내는 파일을 같은 프로바이더 안의 다른 경로로 이동합니다.
+            /// </summary>
+            /// <param name="destinationPath">
+            /// The provider-relative path the file is moved to.<br/>
+            /// 파일을 이동할 프로바이더 기준 경로입니다.
+            /// </param>
+            /// <param name="overwrite">
+            /// <see langword="true"/> to replace an existing file at <paramref name="destinationPath"/>; otherwise, <see langword="false"/>.<br/>
+            /// <paramref name="destinationPath"/>에 있는 기존 파일을 교체하려면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+            /// </param>
+            /// <param name="cancellationToken">
+            /// The cancellation token used to cancel the operation.<br/>
+            /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+            /// </param>
+            /// <exception cref="IOException">
+            /// Thrown when <paramref name="overwrite"/> is <see langword="false"/> and another file or directory already exists at <paramref name="destinationPath"/>.<br/>
+            /// <paramref name="overwrite"/>가 <see langword="false"/>이고 <paramref name="destinationPath"/>에 다른 파일이나 디렉터리가 이미 있는 경우 발생합니다.
+            /// </exception>
+            public UniTask Move(RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default) => node.provider.MoveFile(node.path, destinationPath, overwrite, cancellationToken);
+
+            /// <summary>
+            /// Copies the file represented by this node to another path in the same provider.<br/>
+            /// 이 노드가 나타내는 파일을 같은 프로바이더 안의 다른 경로로 복사합니다.
+            /// </summary>
+            /// <param name="destinationPath">
+            /// The provider-relative path the file is copied to.<br/>
+            /// 파일을 복사할 프로바이더 기준 경로입니다.
+            /// </param>
+            /// <param name="overwrite">
+            /// <see langword="true"/> to replace an existing file at <paramref name="destinationPath"/>; otherwise, <see langword="false"/>.<br/>
+            /// <paramref name="destinationPath"/>에 있는 기존 파일을 교체하려면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+            /// </param>
+            /// <param name="cancellationToken">
+            /// The cancellation token used to cancel the operation.<br/>
+            /// 작업을 취소하는 데 사용되는 취소 토큰입니다.
+            /// </param>
+            /// <exception cref="IOException">
+            /// Thrown when <paramref name="destinationPath"/> is this file, or when <paramref name="overwrite"/> is <see langword="false"/> and another file or directory already exists at <paramref name="destinationPath"/>.<br/>
+            /// <paramref name="destinationPath"/>가 이 파일 자신이거나, <paramref name="overwrite"/>가 <see langword="false"/>이고 <paramref name="destinationPath"/>에 다른 파일이나 디렉터리가 이미 있는 경우 발생합니다.
+            /// </exception>
+            public UniTask Copy(RuniPath destinationPath, bool overwrite = false, CancellationToken cancellationToken = default) => node.provider.CopyFile(node.path, destinationPath, overwrite, cancellationToken);
         }
     }
 }
