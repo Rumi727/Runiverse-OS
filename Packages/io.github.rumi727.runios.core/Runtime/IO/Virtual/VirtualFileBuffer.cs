@@ -146,7 +146,7 @@ namespace RuniOS.IO.Virtual
                 int size = Min(chunkSize - chunkOffset, count - copied);
 
                 Span<byte> target = destination.Slice(copied, size);
-                if (chunks.TryGetValue(chunkIndex, out byte[] buffer))
+                if (chunks.TryGetValue(chunkIndex, out byte[]? buffer))
                     buffer.AsSpan(chunkOffset, size).CopyTo(target);
                 else
                     target.Clear();
@@ -187,7 +187,7 @@ namespace RuniOS.IO.Virtual
                 GetChunkIndex(position + written, out long chunkIndex, out int chunkOffset);
                 int size = Min(chunkSize - chunkOffset, source.Length - written);
 
-                if (!chunks.TryGetValue(chunkIndex, out byte[] buffer))
+                if (!chunks.TryGetValue(chunkIndex, out byte[]? buffer))
                 {
                     buffer = new byte[chunkSize];
                     chunks[chunkIndex] = buffer;
