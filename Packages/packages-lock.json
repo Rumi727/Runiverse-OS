@@ -233,12 +233,6 @@
         "io.github.rumi727.nuget.monomod.core": "1.3.6"
       }
     },
-    "io.github.rumi727.nuget.microsoft.bcl.timeprovider": {
-      "version": "file:io.github.rumi727.nuget.microsoft.bcl.timeprovider",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
     "io.github.rumi727.nuget.mono.cecil": {
       "version": "file:io.github.rumi727.nuget.mono.cecil",
       "depth": 0,
@@ -284,31 +278,13 @@
       "version": "file:io.github.rumi727.nuget.r3",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {
-        "io.github.rumi727.nuget.microsoft.bcl.timeprovider": "10.0.12",
-        "io.github.rumi727.nuget.system.componentmodel.annotations": "5.0.0",
-        "io.github.rumi727.nuget.system.threading.channels": "10.0.12"
-      }
-    },
-    "io.github.rumi727.nuget.system.componentmodel.annotations": {
-      "version": "file:io.github.rumi727.nuget.system.componentmodel.annotations",
-      "depth": 0,
-      "source": "embedded",
-      "dependencies": {}
-    },
-    "io.github.rumi727.nuget.system.threading.channels": {
-      "version": "file:io.github.rumi727.nuget.system.threading.channels",
-      "depth": 0,
-      "source": "embedded",
       "dependencies": {}
     },
     "io.github.rumi727.nuget.tmds.dbus.protocol": {
       "version": "file:io.github.rumi727.nuget.tmds.dbus.protocol",
       "depth": 0,
       "source": "embedded",
-      "dependencies": {
-        "io.github.rumi727.nuget.system.threading.channels": "10.0.12"
-      }
+      "dependencies": {}
     },
     "io.github.rumi727.runios": {
       "version": "file:io.github.rumi727.runios",
