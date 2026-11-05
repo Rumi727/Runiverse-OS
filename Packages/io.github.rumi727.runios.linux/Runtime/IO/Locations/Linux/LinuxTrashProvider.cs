@@ -167,7 +167,7 @@ namespace RuniOS.IO.Locations.Linux
                 throw new IOException($"Could not create the trash directory '{path}' (errno {Marshal.GetLastWin32Error()}).");
         }
 
-        static bool IsSymbolicLink(string path) => (File.GetAttributes(path) & FileAttributes.ReparsePoint) != 0;
+        static bool IsSymbolicLink(string path) => new FileInfo(path).LinkTarget != null;
 
         UniTask<bool> ITrashProvider.CanMoveToTrash(PhysicalPath path) => CanMoveToTrash(path);
         UniTask ITrashProvider.MoveToTrash(IEnumerable<PhysicalPath> paths) => MoveToTrash(paths);
