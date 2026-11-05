@@ -95,7 +95,7 @@ namespace RuniOS.Reflection
             return hash.ToHashCode();
         }
 
-        static Nullability From(System.Reflection.NullabilityInfo info)
+        static Nullability From(NullabilityInfo info)
         {
             NullState readState = ToNullState(info.ReadState);
             NullState writeState = ToNullState(info.WriteState);
@@ -109,7 +109,7 @@ namespace RuniOS.Reflection
                 children.Add(From(elementType));
             else
             {
-                foreach (System.Reflection.NullabilityInfo argument in info.GenericTypeArguments)
+                foreach (NullabilityInfo argument in info.GenericTypeArguments)
                     children.Add(From(argument));
             }
 
