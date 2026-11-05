@@ -7,7 +7,7 @@ global using System.Linq;
 //global using UnityEngine;
 
 global using RuniOS.Utility;
-global using RuniOS.Utility.Attributes;
+//global using RuniOS.Utility.Attributes;
 
 global using static RuniOS.Utility.MathUtility;
 
