@@ -16,6 +16,7 @@ namespace RuniOS.UIElements.IO
         /// <paramref name="position"/>에 놓을 때 항목이 들어갈 폴더를 가져옵니다.
         /// </summary>
         /// <param name="position">패널 좌표의 포인터 위치입니다.</param>
+        /// <param name="directory"></param>
         /// <returns>이 요소에 놓을 수 없으면 <see langword="false"/>입니다.</returns>
         bool TryGetDropDirectory(Vector2 position, out IONode directory);
 

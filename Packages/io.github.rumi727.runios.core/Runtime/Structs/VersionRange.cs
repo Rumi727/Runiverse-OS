@@ -36,8 +36,8 @@ namespace RuniOS
                 return;
             }
 
-            string[]? versions = value.RemoveAllWhitespace().Split(separator);
-            if (versions == null || versions.Length <= 0)
+            string[] versions = value.RemoveAllWhitespace().Split(separator);
+            if (versions.Length <= 0)
                 min = max = Version.all;
             else
             {

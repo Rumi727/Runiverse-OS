@@ -64,7 +64,7 @@ namespace RuniOS.Editor.IMGUI
 
             for (int i = 0; i < cachedPaths.Count; i++)
             {
-                string name = cachedPaths[i] ?? string.Empty;
+                string name = cachedPaths[i];
                 if (!string.IsNullOrEmpty(name))
                     root.AddChild(new TextDropdownItem(name, name));
             }

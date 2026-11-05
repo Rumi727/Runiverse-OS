@@ -27,13 +27,7 @@ namespace RuniOS.Texts.Builders.RichTexts
                 return;
             }
 
-            IReadOnlyList<CompositeFormatSegment>? segments = LocalizationUtility.GetFormatSegments(localizationText.identifier, localizationText.languageCode);
-            if (segments == null)
-            {
-                builder.Append(localizationText.identifier);
-                return;
-            }
-
+            IReadOnlyList<CompositeFormatSegment> segments = LocalizationUtility.GetFormatSegments(localizationText.identifier, localizationText.languageCode);
             for (int i = 0; i < segments.Count; i++)
             {
                 CompositeFormatSegment segment = segments[i];

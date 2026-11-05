@@ -4,21 +4,15 @@ using System.Reflection;
 
 namespace RuniOS.Inspectors.Csharp
 {
-    public class MethodElement : MemberElement, IInspectorActionElement
+    public class MethodElement(InspectableObject inspectable, MethodInfo method) : MemberElement(inspectable, method), IInspectorActionElement
     {
         public MethodElement(Type targetType, MethodInfo method) : this(new InspectableObject(targetType), method) { }
-        public MethodElement(object instance, MethodInfo method) : this(new InspectableObject(instance), method) { } 
-        public MethodElement(InspectableObject inspectable, MethodInfo method) : base(inspectable, method)
-        {
-            this.method = method;
-            if (method.ReturnParameter != null)
-                returnNullabilityInfo = Nullability.Create(method.ReturnParameter);
-        }
+        public MethodElement(object instance, MethodInfo method) : this(new InspectableObject(instance), method) { }
 
         public Type returnType => method.ReturnType;
-        public Nullability? returnNullabilityInfo { get; }
-        
-        public MethodInfo method { get; }
+        public Nullability? returnNullabilityInfo { get; } = Nullability.Create(method.ReturnParameter);
+
+        public MethodInfo method { get; } = method;
 
         public override bool isPublic => method.IsPublic;
         

@@ -102,7 +102,7 @@ namespace RuniOS.IO.Locations.Linux
                         continue;
 
                     PhysicalPath physicalPath = PhysicalPath.From(mountPath);
-                    if (!mountsByPoint.TryGetValue(physicalPath, out LinuxMount? linuxMount) || linuxMount == null)
+                    if (!mountsByPoint.TryGetValue(physicalPath, out LinuxMount? linuxMount))
                         continue;
 
                     if (selectedMount == null || IsBetterRepresentativeMount(linuxMount, selectedMount))

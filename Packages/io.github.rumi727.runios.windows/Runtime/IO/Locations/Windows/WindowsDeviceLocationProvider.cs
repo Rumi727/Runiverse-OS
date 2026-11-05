@@ -47,7 +47,7 @@ namespace RuniOS.IO.Locations.Windows
                     continue;
 
                 PhysicalPath rootPath = PhysicalPath.From(driveInfo.Name);
-                if (!mountsByPoint.TryGetValue(rootPath, out WindowsMount? mount) || mount is null)
+                if (!mountsByPoint.TryGetValue(rootPath, out WindowsMount? mount))
                     continue;
 
                 yield return new WindowsDeviceLocation(mount, driveInfo);

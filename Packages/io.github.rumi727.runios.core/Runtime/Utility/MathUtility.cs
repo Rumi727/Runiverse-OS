@@ -427,6 +427,7 @@ namespace RuniOS.Utility
             return result;
         }
 
+        // ReSharper disable once InvalidXmlDocComment 뭔 개소리야 씹탱 하나밖에 없잖아;
         /// <inheritdoc cref="GCD{T}(ReadOnlySpan{T})"/>
         public static T GCD<T>(IEnumerable<T> numbers) where T : IBinaryInteger<T>
         {

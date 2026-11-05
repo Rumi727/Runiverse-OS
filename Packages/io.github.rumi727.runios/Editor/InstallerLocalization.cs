@@ -132,7 +132,7 @@ namespace RuniOS.Editor.Installer
 
                 if (languageObject != null && languageObject.texts.TryGetValue(key, out string? value))
                 {
-                    text = value ?? string.Empty;
+                    text = value;
                     return true;
                 }
 

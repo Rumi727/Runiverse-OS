@@ -4,8 +4,8 @@ using Cysharp.Threading.Tasks.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
-using System.Text;
 
+// ReSharper disable UnusedMethodReturnValue.Local
 namespace RuniOS.IO.Locations.Windows
 {
     public sealed partial class WindowsMountProvider : IMountProvider

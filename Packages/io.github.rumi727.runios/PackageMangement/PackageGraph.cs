@@ -97,7 +97,7 @@ namespace RuniOS.PackageManagement
                     return;
                 }
                 if (invalid.Contains(package)) return;
-                if (!nodes.TryGetValue(package, out Node? node) || node is null)
+                if (!nodes.TryGetValue(package, out Node? node))
                 {
                     try
                     {
@@ -114,7 +114,7 @@ namespace RuniOS.PackageManagement
                         return;
                     }
                     nodes.Add(package, node);
-                    if (keys.TryGetValue(node.identity, out Node? duplicate) && duplicate is not null)
+                    if (keys.TryGetValue(node.identity, out Node? duplicate))
                         errors.Add(new PackageGraphDiagnostic("graph:duplicate-definition", $"Distinct instances define '{node.identity}'.", package, duplicate.package, owner, referenceIndex, ErrorPath(package), RelatedPath(duplicate)));
                     else keys.Add(node.identity, node);
                 }
@@ -127,7 +127,7 @@ namespace RuniOS.PackageManagement
                         errors.Add(new PackageGraphDiagnostic("graph:cycle", $"A dependency cycle reaches '{node.identity}'.", package, owner: owner, referenceIndex: referenceIndex, path: ErrorPath(package)));
                     return;
                 }
-                if (selected.TryGetValue(node.identity.id, out Node? previous) && previous is not null && previous.identity != node.identity)
+                if (selected.TryGetValue(node.identity.id, out Node? previous) && previous.identity != node.identity)
                     errors.Add(new PackageGraphDiagnostic("graph:identity-conflict", $"'{previous.identity}' conflicts with '{node.identity}'.", package, previous.package, owner, referenceIndex, ErrorPath(package), RelatedPath(previous)));
                 else selected[node.identity.id] = node;
                 parents[node] = owner is not null && nodes.TryGetValue(owner, out Node? parent) ? parent : null;

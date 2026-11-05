@@ -218,7 +218,7 @@ namespace RuniOS.Editor.Unity.Inspectors
             bool changed = EditorGUI.EndChangeCheck();
             if (changed)
             {
-                foreach (TTarget? item in targets.OfType<TTarget>())
+                foreach (TTarget item in targets.OfType<TTarget>())
                     writeFunc.Invoke(item, value);
             }
 

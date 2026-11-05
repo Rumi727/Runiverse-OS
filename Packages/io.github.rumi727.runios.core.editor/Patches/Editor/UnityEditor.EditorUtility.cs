@@ -5,6 +5,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 
+// ReSharper disable UnusedMethodReturnValue.Local
 namespace RuniOS.Editor.Patches
 {
     public static partial class Patches
@@ -153,7 +154,7 @@ namespace RuniOS.Editor.Patches
                         if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory))
                             gtk_file_chooser_set_current_folder(dialog, Path.GetFullPath(directory));
                         if (!string.IsNullOrEmpty(currentName))
-                            gtk_file_chooser_set_current_name(dialog, currentName!);
+                            gtk_file_chooser_set_current_name(dialog, currentName);
                         if (action == actionSave)
                             gtk_file_chooser_set_do_overwrite_confirmation(dialog, true);
 

@@ -53,7 +53,7 @@ namespace RuniOS.PackageManagement.Unity
         public ScopedRegistryDefinition(string name, string url, IEnumerable<string> scopes)
         {
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("A registry name is required.", nameof(name));
-            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) || uri is null || (uri.Scheme != "http" && uri.Scheme != "https"))
+            if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) || (uri.Scheme != "http" && uri.Scheme != "https"))
                 throw new ArgumentException("An absolute HTTP registry URL is required.", nameof(url));
             ArgumentNullException.ThrowIfNull(scopes);
             string[] values = scopes.Distinct(StringComparer.Ordinal).ToArray();

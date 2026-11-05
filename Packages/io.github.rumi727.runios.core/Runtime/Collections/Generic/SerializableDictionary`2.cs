@@ -1,6 +1,5 @@
 #nullable enable
 using System.Collections;
-using System.Runtime.Serialization;
 using UnityEngine;
 
 namespace RuniOS.Collections.Generic
@@ -17,7 +16,6 @@ namespace RuniOS.Collections.Generic
         public SerializableDictionary(IEqualityComparer<TKey> comparer) : base(comparer) { }
         public SerializableDictionary(IDictionary<TKey, TValue> dictionary) : base(dictionary) { }
         public SerializableDictionary(int capacity, IEqualityComparer<TKey> comparer) : base(capacity, comparer) { }
-        public SerializableDictionary(SerializationInfo info, StreamingContext context) : base(info, context) { }
         public SerializableDictionary(ICollection<KeyValuePair<TKey, TValue>> collection, IEqualityComparer<TKey> comparer) : base(collection, comparer) { }
         public SerializableDictionary(IDictionary<TKey, TValue> dictionary, IEqualityComparer<TKey> comparer) : base(dictionary, comparer) { }
 

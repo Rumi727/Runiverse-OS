@@ -114,7 +114,7 @@ namespace RuniOS.Inspectors.Csharp
                     var handlers = inspectable.dictionaryHandlers;
                     for (int i = 0; i < handlers.Count; i++)
                     {
-                        DictionaryHandlerBase? item = handlers[i];
+                        DictionaryHandlerBase item = handlers[i];
                         if (variableType.IsPointer)
                         {
                             if (((Pointer)item[targetKey]!).ToIntPtr() != ((Pointer)value!).ToIntPtr())
@@ -162,7 +162,7 @@ namespace RuniOS.Inspectors.Csharp
                     var handlers = inspectable.dictionaryHandlers;
                     for (int i = 0; i < handlers.Count; i++)
                     {
-                        DictionaryHandlerBase? handler = handlers[i];
+                        DictionaryHandlerBase handler = handlers[i];
                         valuesBuffer.Add(handler[targetKey]);
                     }
 
@@ -194,7 +194,7 @@ namespace RuniOS.Inspectors.Csharp
                 var handlers = inspectable.dictionaryHandlers;
                 for (int i = 0; i < handlers.Count; i++)
                 {
-                    DictionaryHandlerBase? instance = handlers[i];
+                    DictionaryHandlerBase instance = handlers[i];
                     if (!valueEnumerator.MoveNext())
                         return;
 

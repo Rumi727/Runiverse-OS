@@ -121,7 +121,7 @@ namespace RuniOS.PackageManagement.Unity
         {
             if (string.IsNullOrWhiteSpace(repositoryUrl) || repositoryUrl.Contains("#")) throw new ArgumentException("A Git URL without a fragment is required.", nameof(repositoryUrl));
             string reference = repositoryUrl;
-            if (!string.IsNullOrEmpty(packagePath))reference += (reference.Contains("?") ? "&" : "?") + "path=" + Uri.EscapeDataString("/" + packagePath!.TrimStart('/'));
+            if (!string.IsNullOrEmpty(packagePath))reference += (reference.Contains("?") ? "&" : "?") + "path=" + Uri.EscapeDataString("/" + packagePath.TrimStart('/'));
             if (!string.IsNullOrEmpty(revision)) reference += "#" + revision;
             return new UpmInstallation(packageName, reference, requiredAssemblyReferences: requiredAssemblyReferences)
             {

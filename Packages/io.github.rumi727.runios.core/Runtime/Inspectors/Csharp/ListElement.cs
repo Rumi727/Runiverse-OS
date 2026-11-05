@@ -114,7 +114,7 @@ namespace RuniOS.Inspectors.Csharp
                     var handlers = inspectable.listHandlers;
                     for (int i = 0; i < handlers.Count; i++)
                     {
-                        ListHandlerBase? item = handlers[i];
+                        ListHandlerBase item = handlers[i];
                         if (variableType.IsPointer)
                         {
                             if (((Pointer)item[index]!).ToIntPtr() != ((Pointer)value!).ToIntPtr())
@@ -161,7 +161,7 @@ namespace RuniOS.Inspectors.Csharp
                     var handlers = inspectable.listHandlers;
                     for (int i = 0; i < handlers.Count; i++)
                     {
-                        ListHandlerBase? handler = handlers[i];
+                        ListHandlerBase handler = handlers[i];
                         valuesBuffer.Add(handler[index]);
                     }
 

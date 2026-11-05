@@ -135,13 +135,10 @@ namespace RuniOS.UIElements
                 VisualElement? lastElement = null;
                 for (int j = i * fieldsByLine; j < lastIndex; j++)
                 {
-                    IElementDescription? description = descriptions[j];
+                    IElementDescription description = descriptions[j];
                     SetupElement(description);
                     
-                    VisualElement? element = description?.element;
-                    if (element == null)
-                        continue;
-                    
+                    VisualElement element = description.element;
                     if (compositeConfig.HasFlag(CompositeConfig.includeCompositeUSS) && description is IAnonymousFieldDescription)
                     {
                         if (isFirst)

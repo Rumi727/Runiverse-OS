@@ -96,8 +96,8 @@ namespace RuniOS
                 return;
             }
 
-            string[]? versions = value.RemoveAllWhitespace().Split(separator);
-            if (versions == null || versions.Length <= 0)
+            string[] versions = value.RemoveAllWhitespace().Split(separator);
+            if (versions.Length <= 0)
                 _major = _minor = _patch = null;
             else switch (versions.Length)
             {
@@ -422,7 +422,7 @@ namespace RuniOS
         /// <see cref="Vector3"/>를 <see cref="Version"/> 인스턴스로 명시적으로 변환합니다.
         /// <br/>
         /// <see cref="Vector3.x"/>, <see cref="Vector3.y"/>, <see cref="Vector3.z"/>가 각각 <see cref="major"/>, <see cref="minor"/>, <see cref="patch"/>로 매핑됩니다.
-        /// 각 구성 요소는 <see cref="MathUtility.FloorToInt(float)"/>를 통해 정수로 변환됩니다.
+        /// 각 구성 요소는 <see cref="MathUtility.FloorToInt{T}(T)"/>를 통해 정수로 변환됩니다.
         /// </summary>
         /// <param name="value">변환할 <see cref="Vector3"/> 값입니다.</param>
         /// <returns>변환된 <see cref="Version"/> 인스턴스입니다.</returns>

@@ -161,8 +161,7 @@ namespace RuniOS.PackageManagement
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         if (!await enumerator.MoveNextAsync().ConfigureAwait(false)) break;
-                        InstallationPreview? preview = enumerator.Current;
-                        if (preview is null) { failureMessage = "A previewer returned a null result."; break; }
+                        InstallationPreview preview = enumerator.Current;
                         cancellationToken.ThrowIfCancellationRequested();
                         remaining.Remove(preview.installation);
                         yield return new InstallationPreview(preview, executor);
@@ -202,8 +201,7 @@ namespace RuniOS.PackageManagement
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         if (!await enumerator.MoveNextAsync().ConfigureAwait(false)) break;
-                        InstallationResult? result = enumerator.Current;
-                        if (result is null) { failureMessage = "An executor returned a null result."; break; }
+                        InstallationResult result = enumerator.Current;
                         cancellationToken.ThrowIfCancellationRequested();
                         remaining.Remove(result.installation);
                         yield return new InstallationResult(result, executor);
