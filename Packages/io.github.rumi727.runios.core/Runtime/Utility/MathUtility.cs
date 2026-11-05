@@ -1452,18 +1452,34 @@ namespace RuniOS.Utility
         #endregion
 
         #region Plus
-        public static Color32 Plus(this Color32 a, Color32 b) => new Color32((byte)(a.r + b.r), (byte)(a.g + b.g), (byte)(a.b + b.b), (byte)(a.a + b.a));
+        extension(Color32)
+        {
+            public static Color32 operator +(Color32 a, Color32 b) => new Color32((byte)(a.r + b.r), (byte)(a.g + b.g), (byte)(a.b + b.b), (byte)(a.a + b.a));
+        }
         #endregion
 
         #region Minus
-        public static Color32 Minus(this Color32 a, Color32 b) => new Color32((byte)(a.r - b.r), (byte)(a.g - b.g), (byte)(a.b - b.b), (byte)(a.a - b.a));
+        extension(Color32)
+        {
+            public static Color32 operator -(Color32 a, Color32 b) => new Color32((byte)(a.r - b.r), (byte)(a.g - b.g), (byte)(a.b - b.b), (byte)(a.a - b.a));
+        }
         #endregion
 
         #region Multiply
-        public static Vector3 Multiply(this Vector3 a, Vector3 b) => new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
-        public static Vector4 Multiply(this Vector4 a, Vector4 b) => new Vector4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+        extension(Vector3)
+        {
+            public static Vector3 operator *(Vector3 a, Vector3 b) => new Vector3(a.x * b.x, a.y * b.y, a.z * b.z);
+        }
 
-        public static Color32 Multiply(this Color32 a, Color32 b) => new Color32((byte)(a.r * b.r), (byte)(a.g * b.g), (byte)(a.b * b.b), (byte)(a.a * b.a));
+        extension(Vector4)
+        {
+            public static Vector4 operator *(Vector4 a, Vector4 b) => new Vector4(a.x * b.x, a.y * b.y, a.z * b.z, a.w * b.w);
+        }
+
+        extension(Color32)
+        {
+            public static Color32 operator *(Color32 a, Color32 b) => new Color32((byte)(a.r * b.r), (byte)(a.g * b.g), (byte)(a.b * b.b), (byte)(a.a * b.a));
+        }
         #endregion
 
         #region Discard Least Significant Decimal
@@ -1497,12 +1513,35 @@ namespace RuniOS.Utility
         #endregion
 
         #region Divide
-        public static Vector2 Divide(this Vector2 a, Vector2 b) => new Vector3(a.x / b.x, a.y / b.y);
-        public static Vector3 Divide(this Vector3 a, Vector3 b) => new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
-        public static Vector4 Divide(this Vector4 a, Vector4 b) => new Vector4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
+        extension(Vector3)
+        {
+            public static Vector3 operator /(Vector3 a, Vector3 b) => new Vector3(a.x / b.x, a.y / b.y, a.z / b.z);
+        }
 
-        public static Color Divide(this Color a, Color b) => new Color(a.r / b.r, a.g / b.g, a.b / b.b, a.a / b.a);
-        public static Color32 Divide(this Color32 a, Color32 b) => new Color32((byte)(a.r / b.r), (byte)(a.g / b.g), (byte)(a.b / b.b), (byte)(a.a / b.a));
+        extension(Vector4)
+        {
+            public static Vector4 operator /(Vector4 a, Vector4 b) => new Vector4(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);
+        }
+
+        extension(Vector2Int)
+        {
+            public static Vector2Int operator /(Vector2Int a, Vector2Int b) => new Vector2Int(a.x / b.x, a.y / b.y);
+        }
+
+        extension(Vector3Int)
+        {
+            public static Vector3Int operator /(Vector3Int a, Vector3Int b) => new Vector3Int(a.x / b.x, a.y / b.y, a.z / b.z);
+        }
+
+        extension(Color)
+        {
+            public static Color operator /(Color a, Color b) => new Color(a.r / b.r, a.g / b.g, a.b / b.b, a.a / b.a);
+        }
+
+        extension(Color32)
+        {
+            public static Color32 operator /(Color32 a, Color32 b) => new Color32((byte)(a.r / b.r), (byte)(a.g / b.g), (byte)(a.b / b.b), (byte)(a.a / b.a));
+        }
         #endregion
     }
 }
