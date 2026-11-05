@@ -1059,7 +1059,7 @@ namespace RuniOS.NBS
 
         static ulong GetDSPClockAtTimestamp(DSPClockSnapshot snapshot, long timestamp)
         {
-            double samples = ((timestamp - snapshot.timestamp) / (double)Stopwatch.Frequency) * snapshot.sampleRate;
+            double samples = Stopwatch.GetElapsedTime(snapshot.timestamp, timestamp).TotalSeconds * snapshot.sampleRate;
             if (samples >= 0)
             {
                 if (samples >= ulong.MaxValue - snapshot.dspClock)
