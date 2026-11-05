@@ -29,8 +29,7 @@ namespace RuniOS.Sounds
         /// </remarks>
         public void AddGroup(SoundChannelGroup group, bool propagateDSPClock = true)
         {
-            if (group == null)
-                throw new ArgumentNullException(nameof(group));
+            ArgumentNullException.ThrowIfNull(group);
 
             UseNativePair(this, group, (parent, child) => parent.addGroup(child, propagateDSPClock).ThrowIfNotOk());
         }

@@ -42,7 +42,7 @@ namespace RuniOS.PackageManagement.Unity
         /// </exception>
         public static async Task<T> RunAsync<T>(Func<T> action, CancellationToken cancellationToken = default)
         {
-            if (action is null) throw new ArgumentNullException(nameof(action));
+            ArgumentNullException.ThrowIfNull(action);
             cancellationToken.ThrowIfCancellationRequested();
             await Awaitable.MainThreadAsync();
             cancellationToken.ThrowIfCancellationRequested();

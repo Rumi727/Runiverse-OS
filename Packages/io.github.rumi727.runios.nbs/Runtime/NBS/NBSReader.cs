@@ -35,8 +35,7 @@ namespace RuniOS.NBS
         /// </exception>
         public static NoteBlockClip Read(Stream stream)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             try
             {

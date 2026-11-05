@@ -31,7 +31,7 @@ namespace RuniOS.PackageManagement.Unity
         /// <inheritdoc/>
         public async IAsyncEnumerable<InstallationPreview> PreviewAsync(IEnumerable<UpmInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            ArgumentNullException.ThrowIfNull(installations);
             UpmInstallation[] batch = installations.ToArray();
             if (batch.Length == 0) yield break;
             InstallationPreview[] previews = await PreviewBatchAsync(batch, cancellationToken).ConfigureAwait(false);
@@ -45,7 +45,7 @@ namespace RuniOS.PackageManagement.Unity
         public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<UpmInstallation> installations, bool force = false,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            ArgumentNullException.ThrowIfNull(installations);
             UpmInstallation[] batch = installations.ToArray();
             if (batch.Length == 0) yield break;
             InstallationResult[] results = await EnsureBatchAsync(batch, force, cancellationToken).ConfigureAwait(false);

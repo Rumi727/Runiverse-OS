@@ -291,8 +291,7 @@ namespace RuniOS.NBS
         /// <exception cref="ArgumentNullException">Thrown when <paramref name="clipMetadata"/> is <see langword="null"/>.<br/><paramref name="clipMetadata"/>가 <see langword="null"/>인 경우 발생합니다.</exception>
         public NBSPlaybackSchedule CreateSchedule(float tempo, float pitch, INBSClipMetadataProvider clipMetadata)
         {
-            if (clipMetadata == null)
-                throw new ArgumentNullException(nameof(clipMetadata));
+            ArgumentNullException.ThrowIfNull(clipMetadata);
 
             return new NBSPlaybackSchedule(entries, instrumentReferences, instrumentIndices, tempo, pitch, clipMetadata);
         }
@@ -635,8 +634,7 @@ namespace RuniOS.NBS
             out NBSPlaybackCursor nextCursor
         )
         {
-            if (output == null)
-                throw new ArgumentNullException(nameof(output));
+            ArgumentNullException.ThrowIfNull(output);
 
             nextCursor = cursor;
             if (moments.Count == 0 || !double.IsFinite(context.currentPosition.fileTime) ||

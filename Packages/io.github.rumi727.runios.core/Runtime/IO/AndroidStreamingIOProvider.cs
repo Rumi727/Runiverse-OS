@@ -307,10 +307,8 @@ namespace RuniOS.IO
 
             public override int Read(byte[] buffer, int offset, int count)
             {
-                if (_disposed)
-                    throw new ObjectDisposedException(nameof(AndroidAssetStream));
-                if (buffer == null)
-                    throw new ArgumentNullException(nameof(buffer));
+                ObjectDisposedException.ThrowIf(_disposed, this);
+                ArgumentNullException.ThrowIfNull(buffer);
                 if (offset < 0)
                     throw new ArgumentOutOfRangeException(nameof(offset));
                 if (count < 0)

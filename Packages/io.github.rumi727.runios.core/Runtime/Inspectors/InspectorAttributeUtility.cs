@@ -37,8 +37,7 @@ namespace RuniOS.Inspectors
         /// <exception cref="ArgumentNullException">소스가 null 값일 때 발생합니다.</exception>
         public static IEnumerable<IInspectorAttribute> FilterInheritable(this IEnumerable<IInspectorAttribute> source)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            ArgumentNullException.ThrowIfNull(source);
             
             return source.Where(x => x.inheritToChildren && !x.applyToSelf);
         }

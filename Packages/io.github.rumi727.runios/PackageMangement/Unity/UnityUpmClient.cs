@@ -49,7 +49,7 @@ namespace RuniOS.PackageManagement.Unity
         /// </exception>
         public static async Task<T> RunAsync<T>(Func<Request<T>> requestFactory, CancellationToken cancellationToken = default)
         {
-            if (requestFactory is null) throw new ArgumentNullException(nameof(requestFactory));
+            ArgumentNullException.ThrowIfNull(requestFactory);
             await gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {

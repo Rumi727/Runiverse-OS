@@ -29,8 +29,7 @@ namespace RuniOS.NBS
         /// <returns>When loading completes, returns the instrument bank.<br/>로드가 완료되면 악기 bank를 반환합니다.</returns>
         public static async UniTask<NoteBlockInstrumentBank> Create(NBSPlaybackMap playbackMap, string sourceNamespace)
         {
-            if (playbackMap == null)
-                throw new ArgumentNullException(nameof(playbackMap));
+            ArgumentNullException.ThrowIfNull(playbackMap);
 
             NoteBlockInstrumentBank bank = new NoteBlockInstrumentBank();
             HashSet<NBSInstrumentReference> instruments = [];

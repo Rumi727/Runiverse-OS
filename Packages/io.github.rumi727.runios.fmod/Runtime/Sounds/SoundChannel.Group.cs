@@ -25,8 +25,7 @@ namespace RuniOS.Sounds
         /// </remarks>
         public void SetChannelGroup(SoundChannelGroup group)
         {
-            if (group == null)
-                throw new ArgumentNullException(nameof(group));
+            ArgumentNullException.ThrowIfNull(group);
 
             group.UseNative((channelGroup, native) => native.setChannelGroup(channelGroup).ThrowIfNotOkOfChannel(), native);
         }

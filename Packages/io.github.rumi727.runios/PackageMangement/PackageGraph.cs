@@ -52,7 +52,7 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public static PackageFlattenResult Flatten(IEnumerable<IPackage?> roots)
         {
-            if (roots is null) throw new ArgumentNullException(nameof(roots));
+            ArgumentNullException.ThrowIfNull(roots);
             var nodes = new Dictionary<IPackage, Node>(PackageReferenceComparer.instance);
             var invalid = new HashSet<IPackage>(PackageReferenceComparer.instance);
             var keys = new Dictionary<PackageIdentity, Node>();

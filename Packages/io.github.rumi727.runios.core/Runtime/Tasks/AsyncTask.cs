@@ -59,8 +59,7 @@ namespace RuniOS.Tasks
 
         public override void Dispose()
         {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(AsyncTask));
+            ObjectDisposedException.ThrowIf(isDisposed, this);
 
             cancelEvent.SafeInvoke();
             cancelEvent = null;

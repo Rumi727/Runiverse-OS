@@ -55,7 +55,7 @@ namespace RuniOS.PackageManagement
         public IEnumerable<IPackage> GetUnused(IEnumerable<IPackage> candidates)
         {
             if (!succeeded) throw new InvalidOperationException("Unused definitions require a successful closure.");
-            if (candidates is null) throw new ArgumentNullException(nameof(candidates));
+            ArgumentNullException.ThrowIfNull(candidates);
             foreach (IPackage package in candidates)
                 if (!_required.Contains(new PackageIdentity(package.id, package.exactIdentity))) yield return package;
         }

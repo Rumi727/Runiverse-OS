@@ -189,8 +189,7 @@ namespace RuniOS.Sounds.Streams
 
         void ThrowIfDisposed()
         {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(SoundFileStream));
+            ObjectDisposedException.ThrowIf(isDisposed, this);
         }
     }
 }

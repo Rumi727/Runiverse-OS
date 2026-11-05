@@ -127,8 +127,7 @@ namespace RuniOS.Sounds
         /// </exception>
         public void SetInputMixLevels(float[] levels)
         {
-            if (levels == null)
-                throw new ArgumentNullException(nameof(levels));
+            ArgumentNullException.ThrowIfNull(levels);
 
             native.setMixLevelsInput(levels, levels.Length).ThrowIfNotOkOfChannel();
         }

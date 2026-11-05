@@ -53,8 +53,7 @@ namespace RuniOS.NBS
         /// </exception>
         public NBSVisualEffectMap(IEnumerable<NBSSpecialEvent> events)
         {
-            if (events == null)
-                throw new ArgumentNullException(nameof(events));
+            ArgumentNullException.ThrowIfNull(events);
 
             NBSSpecialEvent[] visualEvents = events
                 .Where(IsVisualEffect)

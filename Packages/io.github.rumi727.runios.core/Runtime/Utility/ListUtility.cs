@@ -10,8 +10,7 @@ namespace RuniOS.Utility
     {
         public static void Move(this IList list, int oldIndex, int newIndex)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             object? temp = list[oldIndex];
             list.RemoveAt(oldIndex);
@@ -20,8 +19,7 @@ namespace RuniOS.Utility
 
         public static void Change(this IList list, int oldIndex, int newIndex)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
             
             (list[oldIndex], list[newIndex]) = (list[newIndex], list[oldIndex]);
         }
@@ -71,8 +69,7 @@ namespace RuniOS.Utility
         /// <returns></returns>
         public static BigDecimal CloseValue(this IEnumerable<BigDecimal> list, BigDecimal target)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             if (list.Any())
                 return list.Aggregate((x, y) => (x - target).Abs() < (y - target).Abs() ? x : y);
@@ -117,8 +114,7 @@ namespace RuniOS.Utility
         /// <returns></returns>
         public static BigDecimal CloseValue<T>(this IEnumerable<T> list, BigDecimal target, Func<T, BigDecimal> getNumberFunc)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             if (list.Any())
             {
@@ -192,8 +188,7 @@ namespace RuniOS.Utility
         /// <returns></returns>
         public static BigDecimal CloseValue<T>(this IEnumerable<T> list, BigDecimal target, Func<T, BigDecimal> getNumberFunc, Predicate<T> predicate)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             if (list.Any())
             {
@@ -250,8 +245,7 @@ namespace RuniOS.Utility
         /// <returns></returns>
         public static int CloseValueIndex(this IList<BigDecimal> list, BigDecimal target)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             if (list.Count > 0)
                 return list.IndexOf(list.CloseValue(target));
@@ -280,8 +274,7 @@ namespace RuniOS.Utility
         /// <returns></returns>
         public static int CloseValueIndexBinarySearch(this List<BigDecimal> list, BigDecimal target)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             if (list.Count > 0)
                 return list.BinarySearch(list.CloseValue(target));
@@ -375,8 +368,7 @@ namespace RuniOS.Utility
 
         public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
         {
-            if (source == null)
-                throw new ArgumentNullException(nameof(source));
+            ArgumentNullException.ThrowIfNull(source);
 
             using IEnumerator<TSource> sourceIterator = source.GetEnumerator();
             if (!sourceIterator.MoveNext())
@@ -482,8 +474,7 @@ namespace RuniOS.Utility
         
         public static Array Move(this Array list, int oldIndex, int newIndex)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             object? temp = list.GetValue(oldIndex);
             list.RemoveAt(oldIndex);
@@ -494,8 +485,7 @@ namespace RuniOS.Utility
         
         public static T[] Move<T>(this T[] list, int oldIndex, int newIndex)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             T temp = list[oldIndex];
             list.RemoveAt(oldIndex);

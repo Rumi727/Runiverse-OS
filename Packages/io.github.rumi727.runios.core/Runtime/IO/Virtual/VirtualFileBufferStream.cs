@@ -69,8 +69,7 @@ namespace RuniOS.IO.Virtual
             if (!CanRead)
                 throw new NotSupportedException();
 
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
+            ArgumentNullException.ThrowIfNull(buffer);
             if (offset < 0 || offset > buffer.Length)
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)
@@ -113,8 +112,7 @@ namespace RuniOS.IO.Virtual
             if (!CanWrite)
                 throw new NotSupportedException();
 
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
+            ArgumentNullException.ThrowIfNull(buffer);
             if (offset < 0 || offset > buffer.Length)
                 throw new ArgumentOutOfRangeException(nameof(offset));
             if (count < 0 || count > buffer.Length - offset)

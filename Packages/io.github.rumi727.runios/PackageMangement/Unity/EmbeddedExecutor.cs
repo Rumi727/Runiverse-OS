@@ -17,7 +17,7 @@ namespace RuniOS.PackageManagement.Unity
         /// <inheritdoc/>
         public async IAsyncEnumerable<InstallationPreview> PreviewAsync(IEnumerable<EmbeddedInstallation> installations, [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            ArgumentNullException.ThrowIfNull(installations);
             HashSet<string> names = await GetEmbeddedNamesAsync(cancellationToken).ConfigureAwait(false);
             foreach (EmbeddedInstallation installation in installations)
             {
@@ -37,7 +37,7 @@ namespace RuniOS.PackageManagement.Unity
         public async IAsyncEnumerable<InstallationResult> EnsureAsync(IEnumerable<EmbeddedInstallation> installations, bool force = false,
             [EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            ArgumentNullException.ThrowIfNull(installations);
             HashSet<string> names = await GetEmbeddedNamesAsync(cancellationToken).ConfigureAwait(false);
             foreach (EmbeddedInstallation installation in installations)
             {

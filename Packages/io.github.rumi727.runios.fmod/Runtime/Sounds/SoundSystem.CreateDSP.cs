@@ -53,8 +53,7 @@ namespace RuniOS.Sounds
             {
                 ThrowIfUnavailableUnsafe();
 
-                if (type == null)
-                    throw new ArgumentNullException(nameof(type));
+                ArgumentNullException.ThrowIfNull(type);
 
                 if (!typeof(DSP).IsAssignableFrom(type) || type.IsAbstract)
                     throw new ArgumentException($"The type must be a non-abstract {nameof(DSP)} type.", nameof(type));

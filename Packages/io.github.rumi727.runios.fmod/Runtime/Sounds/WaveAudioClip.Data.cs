@@ -31,8 +31,7 @@ namespace RuniOS.Sounds
 
         public void GetData(uint offset, uint length, GetDataAction action)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
+            ArgumentNullException.ThrowIfNull(action);
 
             if (isStream)
                 throw new InvalidOperationException("FMOD stream sound data cannot be locked.");
@@ -84,8 +83,7 @@ namespace RuniOS.Sounds
 
         public void GetRawData(uint offset, uint length, GetRawDataAction action)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
+            ArgumentNullException.ThrowIfNull(action);
 
             if (isStream)
                 throw new InvalidOperationException("FMOD stream sound data cannot be locked.");
@@ -137,8 +135,7 @@ namespace RuniOS.Sounds
 
         public uint ReadData(byte[] buffer)
         {
-            if (buffer == null)
-                throw new ArgumentNullException(nameof(buffer));
+            ArgumentNullException.ThrowIfNull(buffer);
 
             return UseNative(sound =>
             {

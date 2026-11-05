@@ -22,8 +22,7 @@ namespace RuniOS.Editor.Sounds
         // ReSharper disable once MemberCanBeMadeStatic.Global
         public WaveAudioClip? GetAudio(PhysicalPath path)
         {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(AudioPreview));
+            ObjectDisposedException.ThrowIf(isDisposed, this);
 
             previews.AddOrUpdate(this, resourceMarker);
             if (loadedClips.TryGetValue(path, out WaveAudioClip? clip))
@@ -37,8 +36,7 @@ namespace RuniOS.Editor.Sounds
 
         public void ReturnAudio(PhysicalPath path)
         {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(AudioPreview));
+            ObjectDisposedException.ThrowIf(isDisposed, this);
 
             requestedAudios.Remove(path);
             GarbageCleanup();

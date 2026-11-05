@@ -222,7 +222,7 @@ namespace RuniOS.PackageManagement
         }
         DispatchResult Dispatch(IEnumerable<IInstallation> installations, CancellationToken cancellationToken)
         {
-            if (installations is null) throw new ArgumentNullException(nameof(installations));
+            ArgumentNullException.ThrowIfNull(installations);
             var batches = new List<IInstallation>?[_executors.Length];
             var unmatched = new List<IInstallation>();
             foreach (IInstallation installation in installations)

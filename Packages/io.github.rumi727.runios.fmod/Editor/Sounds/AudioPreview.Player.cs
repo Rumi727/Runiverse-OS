@@ -38,8 +38,7 @@ namespace RuniOS.Editor.Sounds
 
         public Player GetOrCreatePlayer(PhysicalPath path)
         {
-            if (isDisposed)
-                throw new ObjectDisposedException(nameof(AudioPreview));
+            ObjectDisposedException.ThrowIf(isDisposed, this);
 
             if (!players.TryGetValue(path, out var player))
                 player = new Player(this, path);

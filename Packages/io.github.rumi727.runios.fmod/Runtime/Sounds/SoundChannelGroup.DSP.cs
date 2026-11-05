@@ -65,8 +65,7 @@ namespace RuniOS.Sounds
 
         void ValidateDSP(DSP dsp)
         {
-            if (dsp == null)
-                throw new ArgumentNullException(nameof(dsp));
+            ArgumentNullException.ThrowIfNull(dsp);
 
             if (dsp.system != system)
                 throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));

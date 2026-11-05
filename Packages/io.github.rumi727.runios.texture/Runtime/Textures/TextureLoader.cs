@@ -54,8 +54,7 @@ namespace RuniOS.Textures
         /// </exception>
         public static async UniTask<Texture2D> LoadAsync(Stream stream, TextureLoadSettings settings = default, CancellationToken cancellationToken = default)
         {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
             if (!stream.CanRead)
                 throw new ArgumentException("The image stream must be readable.", nameof(stream));
 

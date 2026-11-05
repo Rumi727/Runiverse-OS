@@ -31,8 +31,7 @@ namespace RuniOS.Formats
         /// </exception>
         public static CompositeFormatSegment[] Parse(string format)
         {
-            if (format == null)
-                throw new ArgumentNullException(nameof(format));
+            ArgumentNullException.ThrowIfNull(format);
 
             List<CompositeFormatSegment> segments = [];
             if (!TryParse(format, segments, out int failureOffset, out ParseFailure failure))

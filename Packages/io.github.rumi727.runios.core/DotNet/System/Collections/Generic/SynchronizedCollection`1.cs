@@ -17,16 +17,14 @@ namespace System.Collections.Generic
 
         public SynchronizedCollection(IEnumerable<T> list)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             internalList = new List<T>(list);
         }
 
         public SynchronizedCollection(params T[] list)
         {
-            if (list == null)
-                throw new ArgumentNullException(nameof(list));
+            ArgumentNullException.ThrowIfNull(list);
 
             internalList = new List<T>(list);
         }

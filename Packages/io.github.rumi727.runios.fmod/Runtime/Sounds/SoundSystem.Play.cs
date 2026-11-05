@@ -75,16 +75,14 @@ namespace RuniOS.Sounds
         {
             ValidatePlayableClip(clip);
 
-            if (group == null)
-                throw new ArgumentNullException(nameof(group));
+            ArgumentNullException.ThrowIfNull(group);
 
             return group.UseNative(channelGroup => PlaySoundUnsafe(clip, channelGroup, paused));
         }
 
         void ValidatePlayableClip(WaveAudioClip clip)
         {
-            if (clip == null)
-                throw new ArgumentNullException(nameof(clip));
+            ArgumentNullException.ThrowIfNull(clip);
 
             if (clip.system != this)
                 throw new ArgumentException("The FMOD wave audio clip belongs to a different sound system.", nameof(clip));

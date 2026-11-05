@@ -35,8 +35,7 @@ namespace RuniOS.Utility
         /// <returns>공백이 추가된 문자열입니다.</returns>
         public static string AddSpacesToSentence(this string text, bool preserveAcronyms = true)
         {
-            if (text == null)
-                throw new ArgumentNullException(nameof(text));
+            ArgumentNullException.ThrowIfNull(text);
 
             if (text.Length == 0)
                 return string.Empty;
@@ -87,8 +86,7 @@ namespace RuniOS.Utility
         /// <returns>분할된 문자열들을 열거하는 <see cref="IEnumerable{T}"/>를 반환합니다.</returns>
         public static IEnumerable<string> EnumerateQuotedSplit(this string text, char separator, bool trimEntries = false)
         {
-            if (text == null)
-                throw new ArgumentNullException(nameof(text));
+            ArgumentNullException.ThrowIfNull(text);
 
             StringBuilder currentPart = StringBuilderCache.Acquire();
             char? currentQuote = null;
@@ -160,8 +158,7 @@ namespace RuniOS.Utility
         /// <returns>한 줄씩 읽어오는 <see cref="IEnumerable{T}"/>를 반환합니다.</returns>
         public static IEnumerable<string> GetLines(this string text)
         {
-            if (text == null)
-                throw new ArgumentNullException(nameof(text));
+            ArgumentNullException.ThrowIfNull(text);
 
             if (text.Length == 0)
                 yield break;
