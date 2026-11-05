@@ -493,25 +493,25 @@ global::CollectionHandlerBase.registry.Unregister(typeof(global::CsvCollectionHa
 
 ## 9. 진단 설계
 
-구현된 진단 ID는 analyzer의 명명 규칙(`ROS####`)을 따르며, 다음 범위를 제공한다. 전체 규칙 목록은 `RuniOS.CodeAnalysis/AnalyzerReleases.Unshipped.md`에 있다.
+진단 ID는 공통 생성기와 concrete generator를 구분한다. ID와 메시지는 구현 시 analyzer의 기존 명명 규칙에 맞춰 최종 확정하되 다음 범위를 제공한다.
 
 | ID | 심각도 | 조건 |
 |---|---|---|
-| `ROS0002` | Error | `[GenerateTypeRegistry]` 대상이 property가 아님 |
-| `ROS0003` | Error | property가 `public static partial` get-only 계약을 만족하지 않음 |
-| `ROS0004` | Error | containing type 계층이 partial 또는 실질적 public이 아님 |
-| `ROS0005` | Error | property 타입이 구체적인 `TypeRegistry` 파생 타입이 아님 |
-| `ROS0006` | Error | 어떤 concrete generator도 registry type을 지원하지 않음 |
-| `ROS0007` | Error | 기본 initializer에 필요한 접근 가능한 매개변수 없는 생성자가 없음 |
-| `ROS0008` | Error | 생성할 backing field/property 구현과 기존 멤버가 충돌함 |
-| `ROS0009` | Error | `OnAssemblyLoaded` 또는 `OnAssemblyUnloading` API를 찾을 수 없음 |
-| `ROS0010` | Warning | manifest가 가리키는 owner/property를 복원하거나 검증할 수 없음 |
-| `ROS0011` | Error | 생성 hint name hash 충돌 |
-| `ROS0012` | Error | generic containing type의 registry에는 자동 lifecycle 등록을 생성할 수 없음 |
-| `ROS0013` | Error | `TAttribute`가 `TypeRegistrationAttribute` 계열이 아님 |
-| `ROS0014` | Error | 어트리뷰트 인자를 C# 식으로 재현할 수 없음 |
-| `ROS0015` | Error | 구현 타입 또는 attribute 생성자가 생성 위치에서 접근 불가능함 |
-| `ROS0016` | Warning | 후보가 추상 타입이어서 등록에서 제외됨 |
+| `RUTRSG001` | Error | `[GenerateTypeRegistry]` 대상이 property가 아님 |
+| `RUTRSG002` | Error | property가 `public static partial` get-only 계약을 만족하지 않음 |
+| `RUTRSG003` | Error | containing type 계층이 partial 또는 실질적 public이 아님 |
+| `RUTRSG004` | Error | property 타입이 구체적인 `TypeRegistry` 파생 타입이 아님 |
+| `RUTRSG005` | Error | 어떤 concrete generator도 registry type을 지원하지 않음 |
+| `RUTRSG006` | Error | 기본 initializer에 필요한 접근 가능한 매개변수 없는 생성자가 없음 |
+| `RUTRSG007` | Error | 생성할 backing field/property 구현과 기존 멤버가 충돌함 |
+| `RUTRSG008` | Error | `OnAssemblyLoaded` 또는 `OnAssemblyUnloading` API를 찾을 수 없음 |
+| `RUTRSG009` | Warning | manifest가 가리키는 owner/property를 복원하거나 검증할 수 없음 |
+| `RUTRSG010` | Error | 생성 hint name hash 충돌 |
+| `RUTRSG011` | Error | generic containing type의 registry에는 자동 lifecycle 등록을 생성할 수 없음 |
+| `RUATRSG001` | Error | `TAttribute`가 `TypeRegistrationAttribute` 계열이 아님 |
+| `RUATRSG002` | Error | 어트리뷰트 인자를 C# 식으로 재현할 수 없음 |
+| `RUATRSG003` | Error | 구현 타입 또는 attribute 생성자가 생성 위치에서 접근 불가능함 |
+| `RUATRSG004` | Warning | 후보가 추상 타입이어서 등록에서 제외됨 |
 
 오류가 난 레지스트리에는 불완전한 property 구현이나 registration 코드를 생성하지 않는다. 다른 유효한 레지스트리의 출력은 계속 생성한다. 진단 위치는 가능하면 사용자 property 또는 attribute 적용 구문을 가리킨다. 참조 manifest 문제처럼 현재 syntax 위치가 없으면 `Location.None`을 사용하고 assembly/type/property 이름을 메시지에 포함한다.
 
