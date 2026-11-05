@@ -126,11 +126,8 @@ namespace RuniOS.Utility
         }
 
         #region Approximately
-        public static bool Approximately<T>(this T a, T b) where T : IFloatingPointIeee754<T>
-        {
-            T relativeTolerance = T.CreateChecked(typeof(T) == typeof(double) ? 1E-14 : 1E-06);
-            return (b - a).Abs() < Max(relativeTolerance * Max(a.Abs(), b.Abs()), T.Epsilon * T.CreateChecked(8));
-        }
+        public static bool Approximately(this float a, float b) => (b - a).Abs() < Max(1E-06f * Max(a.Abs(), b.Abs()), float.Epsilon * 8f);
+        public static bool Approximately(this double a, double b) => (b - a).Abs() < Max(1E-14d * Max(a.Abs(), b.Abs()), double.Epsilon * 8f);
         #endregion
 
         #region Asin
