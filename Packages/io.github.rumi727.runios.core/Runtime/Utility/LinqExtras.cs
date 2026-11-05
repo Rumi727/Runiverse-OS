@@ -114,8 +114,8 @@ namespace RuniOS.Linq
 
         public static bool SequenceEqual(this IEnumerable first, IEnumerable second, IEqualityComparer? comparer)
         {
-            ExceptionUtility.ThrowIfArgumentNull(first, nameof(first));
-            ExceptionUtility.ThrowIfArgumentNull(second, nameof(second));
+            ArgumentNullException.ThrowIfNull(first);
+            ArgumentNullException.ThrowIfNull(second);
 
             if (first is ICollection firstCol && second is ICollection secondCol)
             {

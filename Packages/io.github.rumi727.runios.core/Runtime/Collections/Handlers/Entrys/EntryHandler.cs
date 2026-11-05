@@ -10,7 +10,7 @@ namespace RuniOS.Collections.Handlers.Entrys
 
         public static KeyValuePair<object?, object?> FindEntry(object? targetEntry)
         {
-            ExceptionUtility.ThrowIfArgumentNull(targetEntry);
+            ArgumentNullException.ThrowIfNull(targetEntry);
             
             Type? type = registry.Resolve(targetEntry.GetType());
             if (type != null)

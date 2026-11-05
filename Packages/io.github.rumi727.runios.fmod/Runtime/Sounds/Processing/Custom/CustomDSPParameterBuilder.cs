@@ -160,7 +160,7 @@ namespace RuniOS.Sounds.Processing.Custom
 
         static void ValidateText(string value, string parameterName, bool required)
         {
-            ExceptionUtility.ThrowIfArgumentNull(value, parameterName);
+            ArgumentNullException.ThrowIfNull(value, parameterName);
             if (required && string.IsNullOrWhiteSpace(value))
                 throw new ArgumentException("The parameter name must not be empty.", parameterName);
             if (Encoding.UTF8.GetByteCount(value) >= 16)
@@ -170,7 +170,7 @@ namespace RuniOS.Sounds.Processing.Custom
         static void ValidateMetadata(string label, string description)
         {
             ValidateText(label, nameof(label), required: false);
-            ExceptionUtility.ThrowIfArgumentNull(description, nameof(description));
+            ArgumentNullException.ThrowIfNull(description);
         }
 
         internal abstract class Definition

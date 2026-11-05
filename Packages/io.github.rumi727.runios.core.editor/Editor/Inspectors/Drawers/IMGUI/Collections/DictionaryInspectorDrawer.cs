@@ -49,7 +49,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
         {
             CheckInspectableDictionary();
             if (elementType == null)
-                ExceptionUtility.ThrowIfArgumentNull(elementType, nameof(elementType));
+                ArgumentNullException.ThrowIfNull(elementType);
 
             KeyValuePair<Type, Type>? elementTypePair = inspectableDictionary.inspectionElementType;
             if (elementTypePair == null)

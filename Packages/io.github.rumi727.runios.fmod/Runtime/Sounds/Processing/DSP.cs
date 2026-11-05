@@ -147,7 +147,7 @@ namespace RuniOS.Sounds.Processing
         [Obsolete("CustomDSP has not been tested and is quite complex!")]
         public Custom.DSPConnection AddInput(Custom.CustomDSP input)
         {
-            ExceptionUtility.ThrowIfArgumentNull(input, nameof(input));
+            ArgumentNullException.ThrowIfNull(input);
             if (input.system != system)
                 throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(input));
 

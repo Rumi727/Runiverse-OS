@@ -11,7 +11,7 @@ namespace RuniOS.Collections.Handlers.Entrys
 
         public override object CreateInstance(object? key, object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            ArgumentNullException.ThrowIfNull(key);
             return new DictionaryEntry(key, value);
         }
     }

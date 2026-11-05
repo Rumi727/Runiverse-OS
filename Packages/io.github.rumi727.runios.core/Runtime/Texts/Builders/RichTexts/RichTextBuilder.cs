@@ -48,7 +48,7 @@ namespace RuniOS.Texts.Builders.RichTexts
         /// </exception>
         public static string Build(Text text, ICollection<ITextChangeSource>? dependencies = null)
         {
-            ExceptionUtility.ThrowIfArgumentNull(text);
+            ArgumentNullException.ThrowIfNull(text);
 
             StringBuilder builder = StringBuilderCache.Acquire();
             try

@@ -78,7 +78,7 @@ namespace RuniOS.Sounds
             /// </remarks>
             public void Add(Processing.DSP dsp, DSPIndex index = DSPIndex.tail)
             {
-                ExceptionUtility.ThrowIfArgumentNull(dsp, nameof(dsp));
+                ArgumentNullException.ThrowIfNull(dsp);
                 if (dsp.system != channel.system)
                     throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));
 
@@ -104,7 +104,7 @@ namespace RuniOS.Sounds
             /// </param>
             public void Remove(Processing.DSP dsp)
             {
-                ExceptionUtility.ThrowIfArgumentNull(dsp, nameof(dsp));
+                ArgumentNullException.ThrowIfNull(dsp);
                 if (dsp.system != channel.system)
                     throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));
 
@@ -122,7 +122,7 @@ namespace RuniOS.Sounds
 
             public int IndexOf(Processing.DSP dsp)
             {
-                ExceptionUtility.ThrowIfArgumentNull(dsp, nameof(dsp));
+                ArgumentNullException.ThrowIfNull(dsp);
                 if (dsp.system != channel.system)
                     throw new ArgumentException("The FMOD DSP belongs to a different sound system.", nameof(dsp));
 

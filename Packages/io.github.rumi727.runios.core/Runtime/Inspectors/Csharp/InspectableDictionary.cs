@@ -206,7 +206,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = dictionaryHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(dictionaryHandler));
                 return handler[key];
             }
             set
@@ -225,7 +225,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = dictionaryHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(dictionaryHandler));
                 return handler.keys;
             }
         }
@@ -236,7 +236,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = dictionaryHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(dictionaryHandler));
                 return handler.values;
             }
         }
@@ -247,7 +247,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = dictionaryHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(dictionaryHandler));
                 return handler.count;
             }
         }
@@ -365,7 +365,7 @@ namespace RuniOS.Inspectors.Csharp
 
         public bool Contains(object key)
         {
-            ExceptionUtility.ThrowIfArgumentNull(dictionaryHandler, nameof(dictionaryHandler));
+            ArgumentNullException.ThrowIfNull(dictionaryHandler);
             var handlers = dictionaryHandlers;
             // ReSharper disable once LoopCanBeConvertedToQuery
             for (int i = 0; i < handlers.Count; i++)
@@ -400,7 +400,7 @@ namespace RuniOS.Inspectors.Csharp
         public IDictionaryEnumerator GetEnumerator()
         {
             var handler = dictionaryHandler;
-            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(dictionaryHandler));
+            ArgumentNullException.ThrowIfNull(handler, nameof(dictionaryHandler));
             return handler.GetEnumerator();
         }
 

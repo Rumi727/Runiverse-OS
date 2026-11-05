@@ -53,7 +53,7 @@ namespace RuniOS.Texts.Builders.RichTexts
         /// </exception>
         protected internal static RichTextRenderer FindRenderer(Text text)
         {
-            ExceptionUtility.ThrowIfArgumentNull(text);
+            ArgumentNullException.ThrowIfNull(text);
             Type textType = text.GetType();
 
             return cache.GetOrAdd(textType, x =>

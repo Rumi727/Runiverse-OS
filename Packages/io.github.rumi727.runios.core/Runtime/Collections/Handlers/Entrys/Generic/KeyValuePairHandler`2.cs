@@ -9,7 +9,7 @@ namespace RuniOS.Collections.Handlers.Entrys.Generic
 
         public override object CreateInstance(object? key, object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            ArgumentNullException.ThrowIfNull(key);
             return new KeyValuePair<TKey, TValue>((TKey)key, (TValue)value!);
         }
     }

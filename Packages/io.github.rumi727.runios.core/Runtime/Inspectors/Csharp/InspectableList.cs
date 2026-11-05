@@ -207,7 +207,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = listHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(listHandler));
 
                 if (index < 0 || index >= count)
                     throw new ArgumentOutOfRangeException(nameof(index));
@@ -233,7 +233,7 @@ namespace RuniOS.Inspectors.Csharp
             get
             {
                 var handler = listHandler;
-                ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+                ArgumentNullException.ThrowIfNull(handler, nameof(listHandler));
                 return handler.count;
             }
         }
@@ -560,7 +560,7 @@ namespace RuniOS.Inspectors.Csharp
         public bool Contains(object? value)
         {
             var handler = listHandler;
-            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            ArgumentNullException.ThrowIfNull(handler, nameof(listHandler));
             var handlers = listHandlers;
             // ReSharper disable once LoopCanBeConvertedToQuery
             for (int i = 0; i < handlers.Count; i++)
@@ -575,14 +575,14 @@ namespace RuniOS.Inspectors.Csharp
         public int IndexOf(object? value)
         {
             var handler = listHandler;
-            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            ArgumentNullException.ThrowIfNull(handler, nameof(listHandler));
             return handler.IndexOf(value);
         }
 
         public IEnumerator GetEnumerator()
         {
             var handler = listHandler;
-            ExceptionUtility.ThrowIfArgumentNull(handler, nameof(listHandler));
+            ArgumentNullException.ThrowIfNull(handler, nameof(listHandler));
             return handler.GetEnumerator();
         }
 

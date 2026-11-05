@@ -11,7 +11,7 @@ namespace RuniOS.Collections.Handlers.Entrys.Generic
 
         public override object CreateInstance(object? key, object? value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            ArgumentNullException.ThrowIfNull(key);
             return ((ISerializableKeyValuePair<TKey, TValue>)targetEntry).CreateInstance((TKey)key, (TValue)value!);
         }
     }

@@ -24,7 +24,7 @@ namespace RuniOS.Sounds.Streams
 
         public SoundFileStream(Stream stream, bool leaveOpen)
         {
-            ExceptionUtility.ThrowIfArgumentNull(stream, nameof(stream));
+            ArgumentNullException.ThrowIfNull(stream);
 
             if (!stream.CanRead)
                 throw new ArgumentException("The stream must be readable.", nameof(stream));

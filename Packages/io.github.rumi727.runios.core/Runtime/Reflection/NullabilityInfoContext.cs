@@ -63,7 +63,7 @@ namespace RuniOS.Reflection
         /// <returns><see cref="NullabilityInfo" /></returns>
         public NullabilityInfo Create(ParameterInfo parameterInfo)
         {
-            ExceptionUtility.ThrowIfArgumentNull(parameterInfo);
+            ArgumentNullException.ThrowIfNull(parameterInfo);
  
             IList<CustomAttributeData> attributes = parameterInfo.GetCustomAttributesData();
             NullableAttributeStateParser parser = parameterInfo.Member is MethodBase method && IsPrivateOrInternalMethodAndAnnotationDisabled(method)
@@ -188,7 +188,7 @@ namespace RuniOS.Reflection
         
         NullabilityInfo InternalCreate(PropertyInfo propertyInfo)
         {
-            ExceptionUtility.ThrowIfArgumentNull(propertyInfo);
+            ArgumentNullException.ThrowIfNull(propertyInfo);
  
             MethodInfo? getter = propertyInfo.GetGetMethod(true);
             MethodInfo? setter = propertyInfo.GetSetMethod(true);
@@ -243,7 +243,7 @@ namespace RuniOS.Reflection
         
         NullabilityInfo InternalCreate(EventInfo eventInfo)
         {
-            ExceptionUtility.ThrowIfArgumentNull(eventInfo);
+            ArgumentNullException.ThrowIfNull(eventInfo);
  
             return GetNullabilityInfo(eventInfo, eventInfo.EventHandlerType!, CreateParser(eventInfo.GetCustomAttributesData()));
         }
@@ -260,7 +260,7 @@ namespace RuniOS.Reflection
         
         NullabilityInfo InternalCreate(FieldInfo fieldInfo)
         {
-            ExceptionUtility.ThrowIfArgumentNull(fieldInfo);
+            ArgumentNullException.ThrowIfNull(fieldInfo);
  
             IList<CustomAttributeData> attributes = fieldInfo.GetCustomAttributesData();
             NullableAttributeStateParser parser = IsPrivateOrInternalFieldAndAnnotationDisabled(fieldInfo) ? NullableAttributeStateParser.Unknown : CreateParser(attributes);

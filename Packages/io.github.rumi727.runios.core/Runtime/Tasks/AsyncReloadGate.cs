@@ -45,7 +45,7 @@ namespace RuniOS.Tasks
             IProgress<float>? progress = null
         )
         {
-            ExceptionUtility.ThrowIfArgumentNull(reload, nameof(reload));
+            ArgumentNullException.ThrowIfNull(reload);
 
             pendingReload = reload;
             AddPendingProgress(progress);
@@ -78,7 +78,7 @@ namespace RuniOS.Tasks
         /// </exception>
         public UniTask Run(Func<UniTask> reload)
         {
-            ExceptionUtility.ThrowIfArgumentNull(reload, nameof(reload));
+            ArgumentNullException.ThrowIfNull(reload);
             return Run(_ => reload());
         }
 
