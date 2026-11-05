@@ -19,8 +19,7 @@ MonoBehaviour:
   descriptionKey: ""
   packageName: ""
   requiredAssemblyReferences: []
-  _dependencies:
-  - {fileID: 11400000, guid: aa7db2ff02624530b18a1ae9d078a743, type: 2}
+  _dependencies: []
   repositoryUrl: https://github.com/Rumi727/Runiverse-OS.git
   revision: ""
   packagePath: Packages/io.github.rumi727.nuget.lib.harmony.thin

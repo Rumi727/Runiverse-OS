@@ -19,10 +19,7 @@ MonoBehaviour:
   descriptionKey: ""
   packageName: ""
   requiredAssemblyReferences: []
-  _dependencies:
-  - {fileID: 11400000, guid: 37dd865c76654c0eb505a07ab66d6995, type: 2}
-  - {fileID: 11400000, guid: 38b9ccce426947048a24000c75ef2dbb, type: 2}
-  - {fileID: 11400000, guid: abbf33e95f8f4a0d9bf8540ff2ace40c, type: 2}
+  _dependencies: []
   repositoryUrl: https://github.com/Rumi727/Runiverse-OS.git
   revision: ""
   packagePath: Packages/io.github.rumi727.nuget.r3
