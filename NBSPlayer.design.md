@@ -1,5 +1,18 @@
 # NBSPlayer 사전 계산 맵 기반 재생 설계 명세
 
+> **구현 이름 변경 안내:** 이 문서는 구현 전에 작성한 설계 명세이며 당시 이름을 그대로 사용합니다. 현재 구현의 이름은 다음과 같습니다.
+>
+> | 이 문서의 이름 | 현재 구현 |
+> | --- | --- |
+> | `NBSPlayer` | `NoteBlockSource` |
+> | `NBSPlayerEditor` | `NoteBlockSourceEditor` |
+> | `NBSFile` | `NoteBlockClip` |
+> | `NBSInstrumentBank` | `NoteBlockInstrumentBank` |
+> | `NBSPlaybackSettings` | `NoteBlockPlaybackSettings` |
+> | `NBSPlaybackWorker` | `NoteBlockPlaybackWorker` |
+>
+> 구현에서 달라진 부분은 [패키지 README](Packages/io.github.rumi727.runios.nbs/README.md)가 우선합니다. 예를 들어 `lateTolerance`는 구현에 없고, NBS 헤더의 maximum loop count는 읽기만 하며 재생에 사용하지 않습니다.
+
 ## 문서 목적
 
 이 문서는 현재 `NBSPlayer`의 실시간 틱 계산, deadline 판정, late 생략, DSP 예약 커서 처리를 폐기하고, 정적인 NBS 악보를 사전 계산된 맵과 Player별 재생 스케줄로 재생하는 최종 설계를 정의한다.

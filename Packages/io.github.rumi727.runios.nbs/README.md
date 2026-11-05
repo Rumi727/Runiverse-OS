@@ -20,7 +20,7 @@ assets/
     sounds/custom/instrument.ogg
 ```
 
-`NBSAssetRegistry`는 NBS를 `runios:nbs` 레지스트리에 등록합니다. 커스텀 악기의 `soundFile`에서는 `sounds/` 접두사와 확장자를 제거합니다. 절대 경로, `..`, 다른 네임스페이스 지정은 거부됩니다. 실제 NBS와 악기 클립 수명은 `NBSPlayer`가 보유한 scope와 `NBSInstrumentBank`가 관리합니다.
+`NBSAssetRegistry`는 NBS를 `runios:nbs` 레지스트리에 등록합니다. 커스텀 악기의 `soundFile`에서는 `sounds/` 접두사와 확장자를 제거합니다. 절대 경로, `..`, 다른 네임스페이스 지정은 거부됩니다. 실제 NBS와 악기 클립 수명은 `NoteBlockSource`가 보유한 scope와 `NoteBlockInstrumentBank`가 관리합니다.
 
 ## 사전 계산 데이터
 
@@ -31,7 +31,7 @@ assets/
 - `NBSPlaybackMap`: clip 독립적인 instrument reference, pitch ratio, volume, pan, Sound Stopper
 - `NBSVisualEffectMap`: Editor preview용 지속 상태와 transient event
 
-`NBSPlaybackMap`에는 `WaveAudioClip`이나 scope가 없습니다. 각 Player는 현재 instrument metadata, tempo, pitch로 `NBSPlaybackSchedule`을 생성합니다. 스케줄은 note의 원본 시작 `S`, 끝 `E`, 원래 발생 시점, 실제 Voice 시작 anchor, playback interval, source 방향, interval index를 보유합니다. Worker hot path는 raw tick을 다시 시간으로 변환하지 않습니다.
+`NBSPlaybackMap`에는 `WaveAudioClip`이나 scope가 없습니다. 각 `NoteBlockSource`는 현재 instrument metadata, tempo, pitch로 `NBSPlaybackSchedule`을 생성합니다. 스케줄은 note의 원본 시작 `S`, 끝 `E`, 원래 발생 시점, 실제 Voice 시작 anchor, playback interval, source 방향, interval index를 보유합니다. Worker hot path는 raw tick을 다시 시간으로 변환하지 않습니다.
 
 ## TPS와 BPM
 
@@ -53,7 +53,7 @@ tempo와 pitch 부호는 독립입니다.
 - `pitch > 0`: clip PCM 정방향
 - `pitch < 0`: clip PCM 역방향
 
-note에 대해 원본 시작 시간을 `S`, clip 길이를 `L`, 정적 pitch ratio를 `Q`, Player 값을 `T`, `P`라고 하면 다음 값을 스케줄 생성 시 한 번 계산합니다.
+note에 대해 원본 시작 시간을 `S`, clip 길이를 `L`, 정적 pitch ratio를 `Q`, NoteBlockSource 값을 `T`, `P`라고 하면 다음 값을 스케줄 생성 시 한 번 계산합니다.
 
 ```text
 sourceRate      = Q × abs(P)
@@ -77,10 +77,10 @@ actualAnchor(^)  = originalAnchor - (P < 0 ? timelineDuration : 0)
 
 ## Worker와 DSP 예약
 
-모든 `NBSPlayer`는 하나의 공유 background Worker를 사용합니다.
+모든 `NoteBlockSource`는 하나의 공유 background Worker를 사용합니다.
 
-- `NBSPlaybackSettings.workerInterval`: 기본 `0.1`초
-- `NBSPlaybackSettings.schedulingLookahead`: 기본 `0.2`초, wall-clock 기준
+- `NoteBlockPlaybackSettings.workerInterval`: 기본 `0.1`초
+- `NoteBlockPlaybackSettings.schedulingLookahead`: 기본 `0.2`초, wall-clock 기준
 - 한 batch에서 master DSP clock과 실제 output sample rate를 한 번 읽음
 - 미래 occurrence는 paused channel 생성 후 `SetDelay`로 예약
 - 현재/past occurrence는 같은 경로에서 현재 DSP clock과 계산된 source offset 사용
@@ -105,7 +105,7 @@ actualAnchor(^)  = originalAnchor - (P < 0 ? timelineDuration : 0)
 
 ## 호출 스레드 비용 및 lock 주의
 
-공유 background Worker가 일반적인 schedule query를 담당하지만 `NBSPlayer`의 모든 API가 Worker로 전달되는 것은 아닙니다. 현재 구현은 다음 비용을 호출 경로에서 즉시 수행할 수 있습니다.
+공유 background Worker가 일반적인 schedule query를 담당하지만 `NoteBlockSource`의 모든 API가 Worker로 전달되는 것은 아닙니다. 현재 구현은 다음 비용을 호출 경로에서 즉시 수행할 수 있습니다.
 
 - 일부 property get/set이 `playingLock`, `voiceLock`, `voiceSettingsApplyLock`을 획득합니다. 일부 경로는 lock이 실제 상태 변경에 필요한 범위보다 넓은 작업을 감싸므로 Worker 또는 FMOD callback과 경합할 수 있습니다.
 - volume, pan, spatial/distance/rolloff property setter는 기존 active/pending Voice snapshot을 만든 뒤 각 Voice의 FMOD 채널에 즉시 적용합니다. Voice 수가 많으면 호출 시간이 함께 늘어납니다.
@@ -116,7 +116,7 @@ actualAnchor(^)  = originalAnchor - (P < 0 ? timelineDuration : 0)
 
 ## Loop
 
-공개 `time`은 현재 loop 구간의 file time이며 내부 occurrence는 loop iteration을 함께 사용합니다. file loop는 header의 start tick, score duration, maximum loop count를 사용합니다. manual loop는 `loopStart`와 `loopEnd`를 무한 반복합니다.
+공개 `time`은 현재 loop 구간의 file time이며 내부 occurrence는 loop iteration을 함께 사용합니다. file loop는 `loopEnabled`인 header의 start tick부터 곡 길이까지를 사용하며, header의 maximum loop count는 읽지만 재생에 사용하지 않습니다. manual loop는 `loopStart`와 `loopEnd`를 무한 반복합니다.
 
 loop 경계에서는 기존 tail을 자르지 않습니다. interval snapshot은 최대 note duration에 따라 이전 iteration도 검색하므로 경계를 넘어온 tail을 복원합니다. loop가 없으면 score duration 이후에도 transport는 계속 진행하고 기존 tail은 자연 종료합니다.
 
