@@ -20,6 +20,6 @@
 
 `Core Editor`는 직접 선택할 수 있으며, Sound, UI, Effects, FMOD, NBS의 종속 패키지로도 설치됩니다.
 
-종속 패키지로 UniTask, R3, LinkMerge, SoftMask for uGUI, Unity UI / TextMesh Pro, Newtonsoft Json, Burst, Unity Mathematics와 Unity 모듈 정의를 포함합니다.
+종속 패키지로 UniTask, R3, LinkMerge, SoftMask for uGUI, Unity UI / TextMesh Pro, Newtonsoft Json, Burst, Unity Mathematics와 Unity 모듈 정의, `LibraryImport` 소스 생성기를 담은 `Microsoft.NETCore.App.Ref` NuGet 패키지 정의를 포함합니다.
 
 FMOD for Unity는 프로젝트의 `Assets/Plugins/FMOD`에 별도로 제공해야 합니다.

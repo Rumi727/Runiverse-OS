@@ -1,6 +1,6 @@
 # Runiverse OS Installer
 
-`io.github.rumi727.runios.installer`는 패키지 종속성 계산과 설치 실행을 위한 공개 API, Runiverse OS 초기 설정용 Setup UI를 제공하는 Unity Editor 전용 패키지입니다.
+`io.github.rumi727.runios`는 패키지 종속성 계산과 설치 실행을 위한 공개 API, Runiverse OS 초기 설정용 Setup UI를 제공하는 Unity Editor 전용 패키지입니다.
 
 Unity 6000.7을 대상으로 하며, Runiverse OS 본체를 설치하기 전부터 사용할 수 있습니다.
 
@@ -34,7 +34,7 @@ API를 사용하는 Editor 어셈블리에서 필요한 어셈블리를 참조�
 - `LocalPackage`: 프로젝트 상대 경로나 절대 경로의 로컬 패키지.
 - `EmbeddedPackage`: 프로젝트에 이미 존재하는 embedded 패키지.
 
-`PackageAsset`은 `ScriptableObject` 기반의 `IPackage` 구현입니다. `PackageCatalog` 에셋은 정의 목록을 보관하며, 설치할 패키지 선택은 별도로 전달합니다. Git·Registry 정의 작성은 [작성 안내](Documentation/GitAndRegistry.md)를 참고하세요.
+`PackageAsset`은 `ScriptableObject` 기반의 `IPackage` 구현입니다. `PackageCatalog` 에셋은 정의 목록을 보관하며, 설치할 패키지 선택은 별도로 전달합니다.
 
 Setup에서 제공하는 정의는 [패키지 목록](Editor/Packages/README.md)을 참고하세요.
 
