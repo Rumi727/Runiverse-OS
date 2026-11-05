@@ -99,16 +99,16 @@ namespace RuniOS.IO.Locations.Windows
         static void OnAssemblyUnloading() => IKnownDirectoryProvider.Unregister(instance);
 #endif
 
-        static class Native
+        static partial class Native
         {
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern int CoInitializeEx(IntPtr reserved, uint coInit);
+            [LibraryImport("ole32.dll")]
+            public static partial int CoInitializeEx(IntPtr reserved, uint coInit);
 
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern void CoUninitialize();
+            [LibraryImport("ole32.dll")]
+            public static partial void CoUninitialize();
 
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            public static extern int SHGetKnownFolderPath(ref Guid id, uint flags, IntPtr token, out IntPtr path);
+            [LibraryImport("shell32.dll")]
+            public static partial int SHGetKnownFolderPath(ref Guid id, uint flags, IntPtr token, out IntPtr path);
         }
     }
 }

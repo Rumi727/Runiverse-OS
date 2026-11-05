@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace RuniOS.IO.Locations.Windows
 {
@@ -110,25 +111,25 @@ namespace RuniOS.IO.Locations.Windows
         static void OnAssemblyUnloading() => IFileManagerProvider.Unregister(instance);
 #endif
 
-        static class Native
+        static partial class Native
         {
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern int CoInitializeEx(IntPtr reserved, uint coInit);
+            [LibraryImport("ole32.dll")]
+            public static partial int CoInitializeEx(IntPtr reserved, uint coInit);
 
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern void CoUninitialize();
+            [LibraryImport("ole32.dll")]
+            public static partial void CoUninitialize();
 
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            public static extern IntPtr ILCreateFromPathW(string path);
+            [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
+            public static partial IntPtr ILCreateFromPathW(string path);
 
-            [DllImport("shell32.dll", ExactSpelling = true)]
-            public static extern IntPtr ILFindLastID(IntPtr id);
+            [LibraryImport("shell32.dll")]
+            public static partial IntPtr ILFindLastID(IntPtr id);
 
-            [DllImport("shell32.dll", ExactSpelling = true)]
-            public static extern void ILFree(IntPtr id);
+            [LibraryImport("shell32.dll")]
+            public static partial void ILFree(IntPtr id);
 
-            [DllImport("shell32.dll", ExactSpelling = true)]
-            public static extern int SHOpenFolderAndSelectItems(IntPtr folderId, uint count, IntPtr[] itemIds, uint flags);
+            [LibraryImport("shell32.dll")]
+            public static partial int SHOpenFolderAndSelectItems(IntPtr folderId, uint count, [MarshalUsing(CountElementName = nameof(count))] IntPtr[] itemIds, uint flags);
         }
     }
 }

@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text;
 
 namespace RuniOS.IO.Locations.Windows
@@ -27,20 +28,20 @@ namespace RuniOS.IO.Locations.Windows
 
             try
             {
-                StringBuilder volumeName = new(1024);
-                searchHandle = Native.FindFirstVolumeW(volumeName, (uint)volumeName.Capacity);
+                char[] volumeName = new char[1024];
+                searchHandle = Native.FindFirstVolumeW(volumeName, (uint)volumeName.Length);
                 if (searchHandle == invalidHandle)
                     return mounts;
 
                 do
                 {
-                    string currentVolumeName = volumeName.ToString();
+                    string currentVolumeName = ReadString(volumeName);
                     if (!string.IsNullOrEmpty(currentVolumeName))
                         AddVolumeMounts(currentVolumeName, mounts);
 
-                    volumeName.Clear();
+                    Array.Clear(volumeName);
                 }
-                while (Native.FindNextVolumeW(searchHandle, volumeName, (uint)volumeName.Capacity));
+                while (Native.FindNextVolumeW(searchHandle, volumeName, (uint)volumeName.Length));
             }
             catch (DllNotFoundException) { }
             catch (EntryPointNotFoundException) { }
@@ -64,7 +65,7 @@ namespace RuniOS.IO.Locations.Windows
 
         static void AddVolumeMounts(string volumeName, List<WindowsMount> mounts)
         {
-            StringBuilder fileSystemName = new(256);
+            char[] fileSystemName = new char[256];
             if
             (
                 !Native.GetVolumeInformationW
@@ -76,12 +77,13 @@ namespace RuniOS.IO.Locations.Windows
                     IntPtr.Zero,
                     out uint fileSystemFlags,
                     fileSystemName,
-                    (uint)fileSystemName.Capacity
+                    (uint)fileSystemName.Length
                 )
             )
                 return;
 
-            string? fileSystemType = fileSystemName.Length == 0 ? null : fileSystemName.ToString();
+            string fileSystemTypeText = ReadString(fileSystemName);
+            string? fileSystemType = fileSystemTypeText.Length == 0 ? null : fileSystemTypeText;
             bool isReadOnly = (fileSystemFlags & fileReadOnlyVolume) != 0;
 
             if (!TryGetVolumePaths(volumeName, out string[] mountPaths))
@@ -142,6 +144,13 @@ namespace RuniOS.IO.Locations.Windows
             return false;
         }
 
+        // 네이티브가 채운 버퍼에서 첫 null 문자 앞까지만 문자열로 읽습니다.
+        static string ReadString(ReadOnlySpan<char> buffer)
+        {
+            int end = buffer.IndexOf('\0');
+            return new string(end < 0 ? buffer : buffer[..end]);
+        }
+
         static bool TryParseMultiString(char[] buffer, int length, out string[] values)
         {
             List<string> result = [];
@@ -197,32 +206,32 @@ namespace RuniOS.IO.Locations.Windows
         static void OnAssemblyUnloading() => IMountProvider.Unregister(instance);
 #endif
 
-        static class Native
+        static partial class Native
         {
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
-            public static extern IntPtr FindFirstVolumeW(StringBuilder volumeName, uint bufferLength);
+            [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+            public static partial IntPtr FindFirstVolumeW([Out, MarshalUsing(CountElementName = nameof(bufferLength))] char[] volumeName, uint bufferLength);
 
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+            [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool FindNextVolumeW(IntPtr findVolume, StringBuilder volumeName, uint bufferLength);
+            public static partial bool FindNextVolumeW(IntPtr findVolume, [Out, MarshalUsing(CountElementName = nameof(bufferLength))] char[] volumeName, uint bufferLength);
 
-            [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true)]
+            [LibraryImport("kernel32.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool FindVolumeClose(IntPtr findVolume);
+            public static partial bool FindVolumeClose(IntPtr findVolume);
 
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+            [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool GetVolumePathNamesForVolumeNameW
+            public static partial bool GetVolumePathNamesForVolumeNameW
             (
                 string volumeName,
-                [Out, MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.U2, SizeParamIndex = 2)] char[]? volumePathNames,
+                [Out, MarshalUsing(CountElementName = nameof(bufferLength))] char[]? volumePathNames,
                 uint bufferLength,
                 out uint returnedLength
             );
 
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
+            [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
-            public static extern bool GetVolumeInformationW
+            public static partial bool GetVolumeInformationW
             (
                 string rootPathName,
                 IntPtr volumeNameBuffer,
@@ -230,12 +239,12 @@ namespace RuniOS.IO.Locations.Windows
                 IntPtr volumeSerialNumber,
                 IntPtr maximumComponentLength,
                 out uint fileSystemFlags,
-                StringBuilder fileSystemNameBuffer,
+                [Out, MarshalUsing(CountElementName = nameof(fileSystemNameSize))] char[] fileSystemNameBuffer,
                 uint fileSystemNameSize
             );
 
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
-            public static extern uint GetDriveTypeW(string rootPathName);
+            [LibraryImport("kernel32.dll", StringMarshalling = StringMarshalling.Utf16, SetLastError = true)]
+            public static partial uint GetDriveTypeW(string rootPathName);
         }
     }
 }

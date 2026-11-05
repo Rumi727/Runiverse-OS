@@ -52,7 +52,7 @@ namespace RuniOS.IO.Locations.Windows
         /// If an item cannot be recycled (for example, it exceeds the Recycle Bin size limit), Windows asks the user before deleting it permanently.<br/>
         /// 항목을 휴지통으로 보낼 수 없으면(예: 휴지통 크기 제한 초과) Windows가 영구 삭제하기 전에 사용자에게 묻습니다.
         /// </remarks>
-        public static UniTask MoveToTrash(IEnumerable<PhysicalPath> paths)
+        public static unsafe UniTask MoveToTrash(IEnumerable<PhysicalPath> paths)
         {
             // 경로 목록은 null 문자로 구분하고 null 문자 두 개로 끝나야 합니다. 마지막 null 문자 하나는 마샬러가 붙입니다.
             string from = string.Concat(paths.Select(static x => (string)x + '\0'));
@@ -75,15 +75,21 @@ namespace RuniOS.IO.Locations.Windows
                 bool aborted;
                 if (IntPtr.Size == 4)
                 {
-                    Native.FileOperation32 operation = new() { function = foDelete, from = from, flags = flags };
-                    result = Native.SHFileOperationW(ref operation);
-                    aborted = operation.anyOperationsAborted != 0;
+                    fixed (char* fromPointer = from)
+                    {
+                        Native.FileOperation32 operation = new() { function = foDelete, from = fromPointer, flags = flags };
+                        result = Native.SHFileOperationW(ref operation);
+                        aborted = operation.anyOperationsAborted != 0;
+                    }
                 }
                 else
                 {
-                    Native.FileOperation64 operation = new() { function = foDelete, from = from, flags = flags };
-                    result = Native.SHFileOperationW(ref operation);
-                    aborted = operation.anyOperationsAborted != 0;
+                    fixed (char* fromPointer = from)
+                    {
+                        Native.FileOperation64 operation = new() { function = foDelete, from = fromPointer, flags = flags };
+                        result = Native.SHFileOperationW(ref operation);
+                        aborted = operation.anyOperationsAborted != 0;
+                    }
                 }
 
                 if (aborted || result == errorCancelled)
@@ -113,7 +119,7 @@ namespace RuniOS.IO.Locations.Windows
         static void OnAssemblyUnloading() => ITrashProvider.Unregister(instance);
 #endif
 
-        static class Native
+        static unsafe partial class Native
         {
             // SHQUERYRBINFO
             [StructLayout(LayoutKind.Sequential)]
@@ -125,47 +131,47 @@ namespace RuniOS.IO.Locations.Windows
             }
 
             // SHFILEOPSTRUCTW (x86, 1바이트 단위 정렬)
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Pack = 1)]
+            [StructLayout(LayoutKind.Sequential, Pack = 1)]
             public struct FileOperation32
             {
                 public IntPtr window;
                 public uint function;
-                [MarshalAs(UnmanagedType.LPWStr)] public string from;
-                [MarshalAs(UnmanagedType.LPWStr)] public string? to;
+                public char* from;
+                public char* to;
                 public ushort flags;
                 public int anyOperationsAborted;
                 public IntPtr nameMappings;
-                [MarshalAs(UnmanagedType.LPWStr)] public string? progressTitle;
+                public char* progressTitle;
             }
 
             // SHFILEOPSTRUCTW (x64)
-            [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+            [StructLayout(LayoutKind.Sequential)]
             public struct FileOperation64
             {
                 public IntPtr window;
                 public uint function;
-                [MarshalAs(UnmanagedType.LPWStr)] public string from;
-                [MarshalAs(UnmanagedType.LPWStr)] public string? to;
+                public char* from;
+                public char* to;
                 public ushort flags;
                 public int anyOperationsAborted;
                 public IntPtr nameMappings;
-                [MarshalAs(UnmanagedType.LPWStr)] public string? progressTitle;
+                public char* progressTitle;
             }
 
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern int CoInitializeEx(IntPtr reserved, uint coInit);
+            [LibraryImport("ole32.dll")]
+            public static partial int CoInitializeEx(IntPtr reserved, uint coInit);
 
-            [DllImport("ole32.dll", ExactSpelling = true)]
-            public static extern void CoUninitialize();
+            [LibraryImport("ole32.dll")]
+            public static partial void CoUninitialize();
 
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            public static extern int SHQueryRecycleBinW(string rootPath, ref RecycleBinInfo info);
+            [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
+            public static partial int SHQueryRecycleBinW(string rootPath, ref RecycleBinInfo info);
 
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            public static extern int SHFileOperationW(ref FileOperation32 operation);
+            [LibraryImport("shell32.dll")]
+            public static partial int SHFileOperationW(ref FileOperation32 operation);
 
-            [DllImport("shell32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-            public static extern int SHFileOperationW(ref FileOperation64 operation);
+            [LibraryImport("shell32.dll")]
+            public static partial int SHFileOperationW(ref FileOperation64 operation);
         }
     }
 }
