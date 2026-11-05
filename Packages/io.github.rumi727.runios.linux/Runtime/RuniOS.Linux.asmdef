@@ -14,7 +14,7 @@
         "CloudRendering"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
         "Tmds.DBus.Protocol.dll"

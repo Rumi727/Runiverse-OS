@@ -181,19 +181,19 @@ namespace RuniOS.IO.Locations.Linux
 #endif
 
         // ReSharper disable InconsistentNaming
-        static class Native
+        static partial class Native
         {
-            [DllImport("libc")]
-            public static extern uint getuid();
+            [LibraryImport("libc")]
+            public static partial uint getuid();
 
-            [DllImport("libc", SetLastError = true)]
-            public static extern int access(string path, int mode);
+            [LibraryImport("libc", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial int access(string path, int mode);
 
-            [DllImport("libc", SetLastError = true)]
-            public static extern int mkdir(string path, uint mode);
+            [LibraryImport("libc", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial int mkdir(string path, uint mode);
 
-            [DllImport("libc", SetLastError = true)]
-            public static extern int rename(string oldPath, string newPath);
+            [LibraryImport("libc", SetLastError = true, StringMarshalling = StringMarshalling.Utf8)]
+            public static partial int rename(string oldPath, string newPath);
         }
     }
 }
