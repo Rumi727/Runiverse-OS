@@ -1277,7 +1277,7 @@ SOFTWARE.
 
 ## R3
 
-Files: `com.cysharp.r3` and `Packages/io.github.rumi727.runios.core/Plugins/R3/**`
+Files: `com.cysharp.r3` and `Packages/io.github.rumi727.nuget.r3/**`
 
 Source: https://github.com/Cysharp/R3  
 Copyright (c) 2024 Cysharp, Inc.
@@ -1308,7 +1308,7 @@ SOFTWARE.
 
 ## Harmony 2
 
-Files: `Packages/io.github.rumi727.runios.core/Plugins/Lib.Harmony.Thin/0Harmony.dll`
+Files: `Packages/io.github.rumi727.nuget.lib.harmony.thin/0Harmony.dll`
 
 Source: https://github.com/pardeike/Harmony  
 Copyright (c) 2017 Andreas Pardeike
@@ -1410,7 +1410,7 @@ Files:
 - `Packages/io.github.rumi727.runios.core/DotNet/System/**/*.cs`
 - `Packages/io.github.rumi727.runios.core/Plugins/System.Collections.Immutable/**`
 - `Packages/io.github.rumi727.runios.core/Plugins/System.Runtime.CompilerServices.Unsafe~/**`
-- `Packages/io.github.rumi727.runios.core/Plugins/R3/**`
+- `Packages/io.github.rumi727.nuget.r3/**`
 
 Sources:
 
@@ -1503,9 +1503,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ~~~~
 
+## Microsoft.NETCore.App.Ref (LibraryImport source generator)
+
+Files: `Packages/io.github.rumi727.nuget.microsoft.netcore.app.ref/**`
+
+Source: https://github.com/dotnet/runtime (NuGet package `Microsoft.NETCore.App.Ref` 10.0.13, `analyzers/dotnet/cs/Microsoft.Interop.LibraryImportGenerator.dll` and `Microsoft.Interop.SourceGeneration.dll`)
+
+The package also contains the upstream `THIRD-PARTY-NOTICES.TXT`.
+
+~~~~text
+The MIT License (MIT)
+
+Copyright (c) .NET Foundation and Contributors
+
+All rights reserved.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+~~~~
+
 ## ExtendedNumerics.BigDecimal
 
-Files: `Packages/io.github.rumi727.runios.core/Plugins/ExtendedNumerics.BigDecimal/**`
+Files: `Packages/io.github.rumi727.nuget.extendednumerics.bigdecimal/**`
 
 Copyright (c) 2024 Adam White
 
