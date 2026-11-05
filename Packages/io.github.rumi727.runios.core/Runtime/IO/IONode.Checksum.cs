@@ -33,7 +33,7 @@ namespace RuniOS.IO
                 while ((bytesRead = await stream.ReadAsync(buffer)) > 0)
                     incrementalHash.AppendData(buffer.AsSpan(0, bytesRead));
 
-                string result = BitConverter.ToString(incrementalHash.GetHashAndReset());
+                string result = Convert.ToHexString(incrementalHash.GetHashAndReset());
                 if (callerContext != null && SynchronizationContext.Current != callerContext)
                     await UniTask.SwitchToSynchronizationContext(callerContext);
 
