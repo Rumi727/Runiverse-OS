@@ -503,12 +503,6 @@ namespace RuniOS.Utility
             return newArray;
         }
 
-        public static Array Copy(this Array array)
-        {
-            return (Array)array.Clone();
-        }
-
-        public static T[] Copy<T>(this T[] array) => (T[])array.Clone();
         #endregion
         
         /// <summary>
