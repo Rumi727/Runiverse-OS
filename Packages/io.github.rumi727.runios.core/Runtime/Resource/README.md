@@ -279,7 +279,7 @@ if (sidecar.TryGetValue<MusicData>(key, out MusicData? data))
 `IAssetHandle` 자체는 사이드카를 요구하지 않습니다. 사이드카가 자신의 대상 동일성이나 로드 과정에 필요한 핸들만 `IAssetSidecarHandle`을 구현해 `AssetSidecar sidecar`를 제공합니다.\
 따라서 `InstanceAssetHandle<TAsset>`처럼 사이드카가 필요 없는 핸들은 빈 더미 객체를 가질 필요가 없습니다.
 
-사이드카를 **언제** 읽을지도 소비자 책임입니다. 일반 파일 핸들은 실제 에셋을 로드할 때 읽을 수 있고, `SpriteRegistry`처럼 사이드카 내용이 어떤 에셋 ID를 등록할지 결정하는 레지스트리는 자신의 `Reload()` 단계에서 미리 읽을 수도 있습니다.
+사이드카를 **언제** 읽을지도 소비자 책임입니다. 일반 파일 핸들은 실제 에셋을 로드할 때 읽을 수 있고, `SpriteAssetRegistry`처럼 사이드카 내용이 어떤 에셋 ID를 등록할지 결정하는 레지스트리는 자신의 `Reload()` 단계에서 미리 읽을 수도 있습니다.
 
 ## AssetRef
 
@@ -406,12 +406,12 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Example
 {
-    public partial sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
+    public sealed partial class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
         public override int priority => 100;
         public override Type providedAssetType => typeof(MyAsset);
-        public override WildcardPatterns assetFilter { get; } = "json";
+        public override IPatternMatcher assetMatcher { get; } = new ExtensionMatcher(".json");
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<MyAssetRegistry>();
@@ -419,7 +419,7 @@ namespace RuniOS.Resource.Example
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData)
+        protected override UniTask<MyAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData)
         {
             return UniTask.FromResult(new MyAssetHandle(node, fileMetaData));
         }

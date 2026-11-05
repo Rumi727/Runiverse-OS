@@ -279,7 +279,7 @@ if (sidecar.TryGetValue<MusicData>(key, out MusicData? data))
 `IAssetHandle` itself does not require a sidecar. Only handles that need a sidecar for target identity or loading implement `IAssetSidecarHandle` and expose `AssetSidecar sidecar`.\
 This means handles such as `InstanceAssetHandle<TAsset>` no longer need a dummy empty sidecar.
 
-The consumer also decides **when** to read a sidecar. An ordinary file handle may read it while loading the real asset, while a registry such as `SpriteRegistry` may read it during its own `Reload()` when sidecar contents determine which asset IDs should be registered.
+The consumer also decides **when** to read a sidecar. An ordinary file handle may read it while loading the real asset, while a registry such as `SpriteAssetRegistry` may read it during its own `Reload()` when sidecar contents determine which asset IDs should be registered.
 
 ## AssetRef
 
@@ -406,12 +406,12 @@ using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Resource.Example
 {
-    public partial sealed class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
+    public sealed partial class MyAssetRegistry : SimpleAssetRegistry<MyAssetHandle>
     {
         public override Identifier registryId => new Identifier("example", "my_assets");
         public override int priority => 100;
         public override Type providedAssetType => typeof(MyAsset);
-        public override WildcardPatterns assetFilter { get; } = "json";
+        public override IPatternMatcher assetMatcher { get; } = new ExtensionMatcher(".json");
 
         [OnCodeLoaded]
         static void OnCodeLoaded() => AssetRegistryManager.Register<MyAssetRegistry>();
@@ -419,7 +419,7 @@ namespace RuniOS.Resource.Example
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<MyAssetRegistry>();
 
-        protected override UniTask<MyAssetHandle> CreateHandle(IONode node, FileMetaData fileMetaData)
+        protected override UniTask<MyAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData)
         {
             return UniTask.FromResult(new MyAssetHandle(node, fileMetaData));
         }
