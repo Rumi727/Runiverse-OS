@@ -366,17 +366,17 @@ namespace RuniOS.Utility
         }
         #endregion
 
+        static readonly Regex digitRegex = new Regex(@"\d+", RegexOptions.Compiled);
+
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector) => sources.OrderByAlphaNumeric(selector, StringComparer.CurrentCulture);
 
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector, StringComparer comparer)
         {
-            var regex = new Regex(@"\d+", RegexOptions.Compiled);
-
             int maxDigits = sources
-                .SelectMany(x => regex.Matches(selector(x)).Select(digitChunk => (int?)digitChunk.Value.Length))
+                .SelectMany(x => digitRegex.Matches(selector(x)).Select(digitChunk => (int?)digitChunk.Value.Length))
                 .Max() ?? 0;
 
-            return sources.OrderBy(x => regex.Replace(selector(x), match => match.Value.PadLeft(maxDigits, '0')), comparer);
+            return sources.OrderBy(x => digitRegex.Replace(selector(x), match => match.Value.PadLeft(maxDigits, '0')), comparer);
         }
 
         public static void RenameKey<TKey, TValue>(this IDictionary<TKey, TValue> dic, TKey fromKey, TKey toKey)
@@ -505,19 +505,10 @@ namespace RuniOS.Utility
 
         public static Array Copy(this Array array)
         {
-            Array result = Array.CreateInstance(array.GetType().GetElementType() ?? throw new InvalidOperationException(), array.Length);
-            Array.Copy(array, result, array.Length);
-
-            return result;
+            return (Array)array.Clone();
         }
 
-        public static T[] Copy<T>(this T[] array)
-        {
-            T[] result = new T[array.Length];
-            Array.Copy(array, result, array.Length);
-
-            return result;
-        }
+        public static T[] Copy<T>(this T[] array) => (T[])array.Clone();
         #endregion
         
         /// <summary>
