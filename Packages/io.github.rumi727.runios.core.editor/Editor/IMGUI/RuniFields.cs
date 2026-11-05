@@ -40,7 +40,7 @@ namespace RuniOS.Editor.IMGUI
             return position;
         }
 
-        public static Rect DrawMultiRowsLabel(Rect position, bool drawOutside, params GUIContent[] contents)
+        public static Rect DrawMultiRowsLabel(Rect position, bool drawOutside, params ReadOnlySpan<GUIContent> contents)
         {
             float labelXSize = GetLabelXSize(contents);
             Rect labelPosition = position;

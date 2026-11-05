@@ -19,10 +19,10 @@ namespace RuniOS.Editor
         public static void BeginLabelWidth(string label, GUIStyle style) => BeginLabelWidth(new GUIContent(label), style);
         public static void BeginLabelWidth(GUIContent label, GUIStyle style) => BeginLabelWidth(GetXSize(label, style) + 2);
 
-        public static void BeginLabelWidth(params string[] label) => BeginLabelWidth(label, EditorStyles.label);
-        public static void BeginLabelWidth(params GUIContent[] label) => BeginLabelWidth(label, EditorStyles.label);
-        public static void BeginLabelWidth(string[] label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
-        public static void BeginLabelWidth(GUIContent[] label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
+        public static void BeginLabelWidth(params ReadOnlySpan<string> label) => BeginLabelWidth(label, EditorStyles.label);
+        public static void BeginLabelWidth(params ReadOnlySpan<GUIContent> label) => BeginLabelWidth(label, EditorStyles.label);
+        public static void BeginLabelWidth(ReadOnlySpan<string> label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
+        public static void BeginLabelWidth(ReadOnlySpan<GUIContent> label, GUIStyle style) => BeginLabelWidth(GetLabelXSize(label, style) + 2);
 
         static readonly Stack<float> labelWidthStack = new Stack<float>();
         public static void BeginLabelWidth(float width)
@@ -56,9 +56,9 @@ namespace RuniOS.Editor
         public static float GetLabelYSize(string label) => GetLabelYSize(new GUIContent(label));
         public static float GetLabelYSize(GUIContent label) => GetYSize(label, GUI.skin.label);
 
-        public static float GetLabelXSize(params string[] label) => GetLabelXSize(label, GUI.skin.label);
-        public static float GetLabelXSize(params GUIContent[] label) => GetLabelXSize(label, GUI.skin.label);
-        public static float GetLabelXSize(string[] label, GUIStyle style)
+        public static float GetLabelXSize(params ReadOnlySpan<string> label) => GetLabelXSize(label, GUI.skin.label);
+        public static float GetLabelXSize(params ReadOnlySpan<GUIContent> label) => GetLabelXSize(label, GUI.skin.label);
+        public static float GetLabelXSize(ReadOnlySpan<string> label, GUIStyle style)
         {
             float width = 0;
             for (int i = 0; i < label.Length; i++)
@@ -67,7 +67,7 @@ namespace RuniOS.Editor
             return width;
         }
 
-        public static float GetLabelXSize(GUIContent[] label, GUIStyle style)
+        public static float GetLabelXSize(ReadOnlySpan<GUIContent> label, GUIStyle style)
         {
             float width = 0;
             for (int i = 0; i < label.Length; i++)
