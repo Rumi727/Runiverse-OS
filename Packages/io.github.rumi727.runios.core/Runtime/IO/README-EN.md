@@ -66,7 +66,15 @@ WriteAllText
 WriteLines
 DeleteDirectory
 DeleteFile
+CopyFile
+CopyDirectory
+MoveFile
+MoveDirectory
+CreateSymbolicLink
 ```
+
+`CopyFile`, `CopyDirectory`, `MoveFile`, `MoveDirectory`, `WriteAll*`, and `WriteLines` have default implementations, so a provider only implements them when it needs to.\
+`CreateSymbolicLink` is available only on providers whose `supportsSymbolicLink` is `true`. `PhysicalIOProvider` supports it.
 
 ## RuniPath
 
@@ -132,7 +140,7 @@ string json = await langFile.file.ReadAllText();
 Directory operations live under `dir`, and file operations live under `file`.
 
 ```csharp
-await foreach (IOEntry entry in root.CreateChild("assets").dir.GetAllFiles("*.json"))
+await foreach (IOEntry entry in root.CreateChild("assets").dir.GetAllFiles(IPatternMatcher.jsonMatcher))
 {
     IONode file = root.Bind(entry);
     string text = await file.file.ReadAllText();
@@ -168,11 +176,18 @@ var provider = new PhysicalIOProvider((PhysicalPath)"./Packs/MyPack");
 IONode packInfo = provider.rootNode.CreateChild("pack.json");
 ```
 
-By default, `SandboxPolicy.Enabled` is applied.\
-It reduces boundary issues by blocking paths that escape the provider root and by blocking reparse-point access.
+`SandboxPolicy` selects how physical paths are validated. The default is `SandboxPolicy.BlockLinks`.
 
-Special cases can use `SandboxPolicy.Disabled`.\
-For example, `StreamingIOProvider` uses disabled sandbox validation when wrapping Unity-provided `StreamingAssets` paths.
+| Value | Behavior |
+| --- | --- |
+| `BlockLinks` | Blocks every path that passes through a symbolic link or reparse point. |
+| `AllowInternalLinks` | Allows symbolic links whose final target stays inside the provider root, and blocks links that escape it. |
+| `Unrestricted` | Performs no validation. |
+
+Paths that escape the provider root (for example with `..`) are always blocked unless the policy is `Unrestricted`. With `AllowInternalLinks`, reparse points that are not links (for example OneDrive placeholders) are allowed.
+
+Special cases can use `SandboxPolicy.Unrestricted`.\
+For example, `StreamingIOProvider` uses an unvalidated physical provider when wrapping Unity-provided `StreamingAssets` paths.
 
 ## StreamingIOProvider
 

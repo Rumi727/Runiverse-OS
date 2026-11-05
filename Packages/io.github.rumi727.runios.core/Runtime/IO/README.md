@@ -66,7 +66,15 @@ WriteAllText
 WriteLines
 DeleteDirectory
 DeleteFile
+CopyFile
+CopyDirectory
+MoveFile
+MoveDirectory
+CreateSymbolicLink
 ```
+
+`CopyFile`, `CopyDirectory`, `MoveFile`, `MoveDirectory`, `WriteAll*`, `WriteLines`는 기본 구현이 있어서 provider가 필요한 경우에만 직접 구현합니다.\
+`CreateSymbolicLink`는 `supportsSymbolicLink`가 `true`인 provider에서만 사용할 수 있습니다. `PhysicalIOProvider`가 이를 지원합니다.
 
 ## RuniPath
 
@@ -132,7 +140,7 @@ string json = await langFile.file.ReadAllText();
 디렉터리 작업은 `dir`, 파일 작업은 `file`에서 합니다.
 
 ```csharp
-await foreach (IOEntry entry in root.CreateChild("assets").dir.GetAllFiles("*.json"))
+await foreach (IOEntry entry in root.CreateChild("assets").dir.GetAllFiles(IPatternMatcher.jsonMatcher))
 {
     IONode file = root.Bind(entry);
     string text = await file.file.ReadAllText();
@@ -168,11 +176,18 @@ var provider = new PhysicalIOProvider((PhysicalPath)"./Packs/MyPack");
 IONode packInfo = provider.rootNode.CreateChild("pack.json");
 ```
 
-기본값으로 `SandboxPolicy.Enabled`가 적용됩니다.\
-provider 루트 밖으로 벗어나는 경로나 재분석 지점 접근을 막아, 물리 경로 사용 시 생길 수 있는 경계 문제를 줄입니다.
+`SandboxPolicy`로 물리 경로를 검증하는 방식을 고릅니다. 기본값은 `SandboxPolicy.BlockLinks`입니다.
 
-특수한 경우에는 `SandboxPolicy.Disabled`를 사용할 수 있습니다.\
-예를 들어 `StreamingIOProvider`는 Unity가 제공한 `StreamingAssets` 경로를 그대로 다루기 위해 비활성화된 물리 provider를 사용합니다.
+| 값 | 동작 |
+| --- | --- |
+| `BlockLinks` | 심볼릭 링크나 재분석 지점을 지나는 모든 경로를 차단합니다. |
+| `AllowInternalLinks` | 최종 대상이 provider 루트 안에 있는 심볼릭 링크는 허용하고, 루트 밖으로 벗어나는 링크는 차단합니다. |
+| `Unrestricted` | 검증하지 않습니다. |
+
+루트 밖으로 벗어나는 경로(`..` 등)는 `Unrestricted`가 아니면 항상 차단됩니다. `AllowInternalLinks`에서 링크가 아닌 재분석 지점(예: OneDrive 자리 표시자)은 허용됩니다.
+
+특수한 경우에는 `SandboxPolicy.Unrestricted`를 사용할 수 있습니다.\
+예를 들어 `StreamingIOProvider`는 Unity가 제공한 `StreamingAssets` 경로를 그대로 다루기 위해 검증하지 않는 물리 provider를 사용합니다.
 
 ## StreamingIOProvider
 
