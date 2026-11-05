@@ -198,7 +198,7 @@ namespace RuniOS.IO
 
 
         public string[] GetSegments() => value.Split(directorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
-        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan() => value.AsSpan().Split(directorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+        public ReadOnlySpanSingleSplitter<char> GetSegmentsSpan() => value.AsSpan().SplitSpans(directorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
 
 
 
@@ -334,7 +334,7 @@ namespace RuniOS.IO
             return string.Create(length, path, static (span, path) =>
             {
                 int dst = 0;
-                foreach (var item in path.AsSpan().Trim(directorySeparatorChar).Split(directorySeparatorChar, StringSplitOptions.None))
+                foreach (var item in path.AsSpan().Trim(directorySeparatorChar).SplitSpans(directorySeparatorChar))
                 {
                     if (item.IsEmpty)
                         continue;
@@ -361,7 +361,7 @@ namespace RuniOS.IO
                 return 0;
 
             int length = 0;
-            foreach (var item in path.Split(directorySeparatorChar, StringSplitOptions.None))
+            foreach (var item in path.SplitSpans(directorySeparatorChar))
             {
                 if (item.IsEmpty)
                     continue;

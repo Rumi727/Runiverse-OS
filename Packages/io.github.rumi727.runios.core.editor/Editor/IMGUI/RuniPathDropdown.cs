@@ -73,7 +73,7 @@ namespace RuniOS.Editor.IMGUI
                 }
                 
                 RuniPath splitAllPath = RuniPath.empty;
-                foreach (var span in path.value.AsSpan().Split(RuniPath.directorySeparatorChar, StringSplitOptions.None))
+                foreach (var span in path.value.AsSpan().SplitSpans(RuniPath.directorySeparatorChar))
                 {
                     RuniPath splitPath = (RuniPath)span;
                     splitAllPath /= splitPath;

@@ -182,7 +182,7 @@ namespace RuniOS.IO
             ReadOnlySpan<char> root = GetPathRootSpan();
             ReadOnlySpan<char> relativePath = value.AsSpan().Slice(root.Length);
 
-            return relativePath.Split(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
+            return relativePath.SplitSpans(Path.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
         }
 
 
