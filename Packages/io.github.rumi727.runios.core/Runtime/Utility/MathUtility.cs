@@ -12,12 +12,6 @@ namespace RuniOS.Utility
     public static class MathUtility
     {
         const int maxRoundingDigits = 15;
-        static readonly double[] roundPower10Double =
-        [
-            1E+0, 1E+1, 1E+2, 1E+3, 1E+4, 1E+5, 1E+6, 1E+7, 1E+8, 1E+9,
-            1E+10, 1E+11, 1E+12, 1E+13, 1E+14, 1E+15
-        ];
-
         static readonly BigDecimal[] roundPower10BigDecimal =
         [
             1E+0, 1E+1, 1E+2, 1E+3, 1E+4, 1E+5, 1E+6, 1E+7, 1E+8, 1E+9,
@@ -167,14 +161,7 @@ namespace RuniOS.Utility
         public static T Ceil<T>(this T value) where T : IFloatingPoint<T> => T.Ceiling(value);
         public static BigDecimal Ceil(this BigDecimal value) => BigDecimal.Ceiling(value);
 
-        public static T Ceil<T>(this T value, int digits) where T : IFloatingPoint<T>
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            T num = T.CreateChecked(roundPower10Double[digits]);
-            return (value * num).Ceil() / num;
-        }
+        public static T Ceil<T>(this T value, int digits) where T : IFloatingPoint<T> => T.Round(value, digits, MidpointRounding.ToPositiveInfinity);
         public static BigDecimal Ceil(this BigDecimal value, int digits)
         {
             if (digits < 0 || digits > maxRoundingDigits)
@@ -351,14 +338,7 @@ namespace RuniOS.Utility
         public static T Floor<T>(this T value) where T : IFloatingPoint<T> => T.Floor(value);
         public static BigDecimal Floor(this BigDecimal value) => BigDecimal.Floor(value);
 
-        public static T Floor<T>(this T value, int digits) where T : IFloatingPoint<T>
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            T num = T.CreateChecked(roundPower10Double[digits]);
-            return (value * num).Floor() / num;
-        }
+        public static T Floor<T>(this T value, int digits) where T : IFloatingPoint<T> => T.Round(value, digits, MidpointRounding.ToNegativeInfinity);
         public static BigDecimal Floor(this BigDecimal value, int digits)
         {
             if (digits < 0 || digits > maxRoundingDigits)
@@ -1448,6 +1428,7 @@ namespace RuniOS.Utility
 
         #region Truncate
         public static T Truncate<T>(this T value) where T : IFloatingPoint<T> => T.Truncate(value);
+        public static T Truncate<T>(this T value, int digits) where T : IFloatingPoint<T> => T.Round(value, digits, MidpointRounding.ToZero);
         public static BigDecimal Truncate(this BigDecimal value) => BigDecimal.Truncate(value);
         #endregion
 
