@@ -2,7 +2,7 @@
 // Source : https://source.dot.net/#System.Net.Primitives/src/runtime/src/libraries/Common/src/System/Text/StringBuilderCache.cs
 using System.Text;
 
-namespace RuniOS.Utility
+namespace RuniOS
 {
     /// <summary>
     /// Provides a cached reusable <see cref="StringBuilder"/> per thread.<br/>
