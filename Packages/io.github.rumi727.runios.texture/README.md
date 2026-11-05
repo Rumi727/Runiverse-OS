@@ -16,11 +16,11 @@ Language available: \[[**한국어 (대한민국)**](README.md) | [English (US)]
 
 ## 요구 사항
 
-- Unity `6000.3` 이상
+- Unity `6000.7` 이상
 - `com.unity.burst` `2.0.0`
 - `com.unity.mathematics` `1.4.0`
 - 프로젝트의 `RuniOS.IO` 및 `UniTask` 참조
-- 현재 포함된 FreeImage 네이티브 바이너리: Windows x86/x64, Linux
+- 현재 포함된 FreeImage 네이티브 바이너리: Windows x86/x64, Linux, Android (arm64-v8a, armeabi-v7a)
 
 ## 기본 사용
 
@@ -34,6 +34,8 @@ using UnityEngine;
 static UniTask<Texture2D> LoadTextureAsync(Stream stream, CancellationToken cancellationToken)
 {
     TextureLoadSettings settings = new(
+        FilterMode.Bilinear,
+        TextureWrapMode.Repeat,
         mipmapCount: 0,
         linear: false,
         makeNoLongerReadable: true);
@@ -77,18 +79,24 @@ public static UniTask<Texture2D> LoadAsync(
 
 | 설정 | 설명 |
 | --- | --- |
+| `filterMode` | 결과 텍스처의 `FilterMode`입니다. |
+| `anisoLevel` | 결과 텍스처의 이방성 필터링 수준입니다. 필터와 랩 모드만 받는 생성자는 `1`을 사용합니다. |
+| `wrapModeU`, `wrapModeV`, `wrapModeW` | 축별 `TextureWrapMode`입니다. `wrapMode` 하나만 받는 생성자는 세 축에 같은 값을 적용합니다. |
 | `mipmapCount` | `0` 이하는 전체 밉맵 자동 생성, `1`은 밉맵 없음, `2` 이상은 기본 레벨을 포함한 명시적 개수입니다. 기본값은 `0`입니다. |
 | `linear` | 결과 텍스처를 선형 데이터로 취급할지 여부입니다. |
 | `makeNoLongerReadable` | `Apply` 뒤 CPU 측 텍스처 데이터를 제거할지 여부입니다. |
+
+`settings`를 생략하면 `default`가 사용되어 `FilterMode.Point`, 이방성 `0`, `TextureWrapMode.Repeat`가 적용됩니다.\
+`FilterMode.Bilinear`와 이방성 `1`이 기본인 값이 필요하면 `TextureLoadSettings.defaultValue` 또는 매개변수 없는 생성자 `new TextureLoadSettings()`를 사용하세요.
 
 현재 public API는 출력 `TextureFormat`을 직접 선택하지 않습니다. 디코더가 입력의 채널·비트 깊이에 맞는 Unity 포맷을 자동으로 선택합니다.
 
 ## 밉맵 설정
 
 ```csharp
-new TextureLoadSettings(mipmapCount: 0); // 1x1까지 자동 생성
-new TextureLoadSettings(mipmapCount: 1); // 기본 레벨만
-new TextureLoadSettings(mipmapCount: 4); // 기본 레벨 포함 총 4개 레벨
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 0); // 1x1까지 자동 생성
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 1); // 기본 레벨만
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 4); // 기본 레벨 포함 총 4개 레벨
 ```
 
 `mipmapCount`가 `0` 이하이면 이미지 크기에 맞춰 1x1까지 생성합니다. `2` 이상 값은 기본 레벨을 포함합니다. 이미지 크기가 허용하는 최대 레벨보다 큰 값을 지정하면 `ArgumentOutOfRangeException`이 발생합니다.

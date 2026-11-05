@@ -16,11 +16,11 @@ This package is a runtime loader, not a Unity asset importer. Callers provide th
 
 ## Requirements
 
-- Unity `6000.3` or later
+- Unity `6000.7` or later
 - `com.unity.burst` `2.0.0`
 - `com.unity.mathematics` `1.4.0`
 - The project's `RuniOS.IO` and `UniTask` references
-- Bundled FreeImage native binaries: Windows x86/x64 and Linux
+- Bundled FreeImage native binaries: Windows x86/x64, Linux, and Android (arm64-v8a, armeabi-v7a)
 
 ## Basic usage
 
@@ -34,6 +34,8 @@ using UnityEngine;
 static UniTask<Texture2D> LoadTextureAsync(Stream stream, CancellationToken cancellationToken)
 {
     TextureLoadSettings settings = new(
+        FilterMode.Bilinear,
+        TextureWrapMode.Repeat,
         mipmapCount: 0,
         linear: false,
         makeNoLongerReadable: true);
@@ -77,18 +79,24 @@ public static UniTask<Texture2D> LoadAsync(
 
 | Setting | Description |
 | --- | --- |
+| `filterMode` | The `FilterMode` of the resulting texture. |
+| `anisoLevel` | The anisotropic filtering level of the resulting texture. The constructors that take only a filter and a wrap mode use `1`. |
+| `wrapModeU`, `wrapModeV`, `wrapModeW` | The `TextureWrapMode` for each axis. The constructors that take a single `wrapMode` apply it to all three axes. |
 | `mipmapCount` | Values less than or equal to `0` generate the full chain automatically, `1` disables mipmaps, and values of `2` or greater request an explicit count including the base level. The default is `0`. |
 | `linear` | Whether the resulting texture treats pixel values as linear data. |
 | `makeNoLongerReadable` | Whether CPU-side texture data is discarded after `Apply`. |
+
+When `settings` is omitted, `default` is used, which means `FilterMode.Point`, an aniso level of `0`, and `TextureWrapMode.Repeat`.\
+To get `FilterMode.Bilinear` and an aniso level of `1`, use `TextureLoadSettings.defaultValue` or the parameterless constructor `new TextureLoadSettings()`.
 
 The current public API does not expose direct `TextureFormat` selection. The decoder chooses a Unity format automatically from the input channel and bit-depth information.
 
 ## Mipmap settings
 
 ```csharp
-new TextureLoadSettings(mipmapCount: 0); // Automatic generation down to 1x1
-new TextureLoadSettings(mipmapCount: 1); // Base level only
-new TextureLoadSettings(mipmapCount: 4); // Four total levels, including base
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 0); // Automatic generation down to 1x1
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 1); // Base level only
+new TextureLoadSettings(FilterMode.Bilinear, TextureWrapMode.Repeat, mipmapCount: 4); // Four total levels, including base
 ```
 
 Values less than or equal to `0` generate levels down to 1x1. Values of `2` or greater include the base level in the requested count. Values beyond the maximum level allowed by the image dimensions throw `ArgumentOutOfRangeException`.
