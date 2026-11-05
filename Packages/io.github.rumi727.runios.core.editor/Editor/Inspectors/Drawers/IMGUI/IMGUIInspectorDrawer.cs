@@ -9,7 +9,6 @@ using RuniOS.Undos;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using NullabilityState = RuniOS.Reflection.NullabilityState;
 
 namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
 {
@@ -167,7 +166,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
         }
 
         /// <returns>변수가 null 값인지 여부를 반환합니다</returns>
-        protected static bool NullToggleField(Rect position, out Rect resultPosition, GUIContent? label, bool? hasValue, Action<bool>? writeAction, bool isInstanceCreatable, NullabilityState? nullabilityState, string nullText)
+        protected static bool NullToggleField(Rect position, out Rect resultPosition, GUIContent? label, bool? hasValue, Action<bool>? writeAction, bool isInstanceCreatable, NullState? nullabilityState, string nullText)
         {
             float toggleWidth = GetXSize(EditorStyles.toggle);
             Rect toggleRect = new Rect(position.x + (position.width - toggleWidth), position.y, toggleWidth, EditorGUIUtility.singleLineHeight);
@@ -176,7 +175,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
             {
                 if (hasValue != null)
                 {
-                    if (!hasValue.Value || nullabilityState == NullabilityState.Nullable)
+                    if (!hasValue.Value || nullabilityState == NullState.Nullable)
                     {
                         EditorGUI.BeginChangeCheck();
                         EditorGUI.BeginDisabledGroup(!hasValue.Value && !isInstanceCreatable);
@@ -208,7 +207,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                 {
                     BeginIndentLevel(0);
 
-                    if (nullabilityState == NullabilityState.Nullable)
+                    if (nullabilityState == NullState.Nullable)
                     {
                         EditorGUI.BeginChangeCheck();
                         EditorGUI.Toggle(toggleRect, false);

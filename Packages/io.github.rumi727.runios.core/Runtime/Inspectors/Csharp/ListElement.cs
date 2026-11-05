@@ -5,7 +5,6 @@ using RuniOS.Reflection;
 using System.Collections;
 using System.Collections.Immutable;
 using System.Reflection;
-using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -26,9 +25,9 @@ namespace RuniOS.Inspectors.Csharp
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
-                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.genericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.GetGenericTypeArgument(0));
                 if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo?.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null);
+                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo?.GetGenericTypeArgument(1));
             }
         }
 
@@ -52,7 +51,7 @@ namespace RuniOS.Inspectors.Csharp
         public Type variableType { get; }
         public Type currentElementType => value?.GetType() ?? variableType;
 
-        public NullabilityInfo? nullabilityInfo => inspectable.elementNullabilityInfo;
+        public Nullability? nullabilityInfo => inspectable.elementNullabilityInfo;
 
         public int index { get; set; }
 

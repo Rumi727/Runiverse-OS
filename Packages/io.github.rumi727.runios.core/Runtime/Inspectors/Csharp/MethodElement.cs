@@ -1,8 +1,6 @@
 ﻿#nullable enable
 using RuniOS.Reflection;
 using System.Reflection;
-using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
-using NullabilityInfoContext = RuniOS.Reflection.NullabilityInfoContext;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -14,11 +12,11 @@ namespace RuniOS.Inspectors.Csharp
         {
             this.method = method;
             if (method.ReturnParameter != null)
-                returnNullabilityInfo = new NullabilityInfoContext().Create(method.ReturnParameter);
+                returnNullabilityInfo = Nullability.Create(method.ReturnParameter);
         }
 
         public Type returnType => method.ReturnType;
-        public NullabilityInfo? returnNullabilityInfo { get; }
+        public Nullability? returnNullabilityInfo { get; }
         
         public MethodInfo method { get; }
 

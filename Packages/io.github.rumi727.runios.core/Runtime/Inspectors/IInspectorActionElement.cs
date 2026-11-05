@@ -6,7 +6,7 @@ namespace RuniOS.Inspectors
     public interface IInspectorActionElement : IInspectorElement
     {
         Type? returnType { get; }
-        NullabilityInfo? returnNullabilityInfo { get; }
+        Nullability? returnNullabilityInfo { get; }
 
         void Execute(object?[] parameters);
         

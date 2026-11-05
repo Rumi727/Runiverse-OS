@@ -12,16 +12,16 @@ namespace RuniOS.Inspectors.Csharp
 {
     public class InspectableList : IInspectableList
     {
-        public InspectableList(IEnumerable instance, NullabilityInfo? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
+        public InspectableList(IEnumerable instance, Nullability? elementNullabilityInfo = null) : this(instance.GetType(), Enumerable.Repeat(instance, 1), elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(inspectionType, [], elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, Nullability? elementNullabilityInfo = null) : this(inspectionType, [], elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, NullabilityInfo? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, [..instances], elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, Nullability? elementNullabilityInfo, params IEnumerable[] instances) : this(inspectionType, [..instances], elementNullabilityInfo) { }
 
-        public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
+        public InspectableList(Type inspectionType, IEnumerable<IEnumerable> instances, Nullability? elementNullabilityInfo = null) : this(null, inspectionType, instances, elementNullabilityInfo) { }
         
-        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, NullabilityInfo? elementNullabilityInfo = null) : this(parentElement, inspectionType, [], elementNullabilityInfo) { }
-        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, NullabilityInfo? elementNullabilityInfo = null)
+        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, Nullability? elementNullabilityInfo = null) : this(parentElement, inspectionType, [], elementNullabilityInfo) { }
+        public InspectableList(IInspectorVariableElement? parentElement, Type inspectionType, IEnumerable<IEnumerable> instances, Nullability? elementNullabilityInfo = null)
         {
             if (!typeof(IEnumerable).IsAssignableFrom(inspectionType))
                 throw new ArgumentException($"Provided type '{inspectionType.FullName}' is not a enumerable type.", nameof(inspectionType));
@@ -56,7 +56,7 @@ namespace RuniOS.Inspectors.Csharp
         /// </remarks>
         public Type? inspectionElementType { get; }
 
-        public NullabilityInfo? elementNullabilityInfo { get; }
+        public Nullability? elementNullabilityInfo { get; }
 
         public bool isReadOnly
         {

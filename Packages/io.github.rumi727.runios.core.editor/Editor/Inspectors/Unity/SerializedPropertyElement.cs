@@ -75,7 +75,7 @@ namespace RuniOS.Editor.Inspectors.Unity
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다. 직렬화된 프로퍼티의 경우 항상 null을 반환합니다.
         /// </summary>
-        public NullabilityInfo? nullabilityInfo => null;
+        public Nullability? nullabilityInfo => null;
         
         /// <summary>
         /// 변수가 공개되어있는지 여부를 나타내는 값을 가져옵니다. 직렬화된 프로퍼티의 경우 항상 true입니다.

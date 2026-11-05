@@ -19,7 +19,7 @@ namespace RuniOS.Inspectors
         /// <summary>
         /// 변수의 null 허용 여부 정보를 가져옵니다.
         /// </summary>
-        NullabilityInfo? nullabilityInfo { get; }
+        Nullability? nullabilityInfo { get; }
 
         /// <summary>
         /// 변수의 값을 가져오거나 설정합니다.

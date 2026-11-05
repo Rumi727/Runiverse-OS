@@ -68,7 +68,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 throw new NullReferenceException($"{nameof(elementType)} is null");
             
             CheckInspectableList();
-            if (inspectableList.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
+            if (inspectableList.elementNullabilityInfo?.writeState == NullState.Nullable)
                 return true;
             
             return elementType.CanGetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));
@@ -126,7 +126,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI.Collections
                 throw new NullReferenceException($"{nameof(elementType)} is null");
             
             CheckInspectableList();
-            if (inspectableList.elementNullabilityInfo?.writeState == NullabilityState.Nullable)
+            if (inspectableList.elementNullabilityInfo?.writeState == NullState.Nullable)
                 return elementType.GetDefaultValue(flags.HasFlagFast(InspectorFlags.NonPublic));
             else
                 return elementType.GetDefaultValueNotNull(flags.HasFlagFast(InspectorFlags.NonPublic));

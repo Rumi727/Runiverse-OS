@@ -12,7 +12,7 @@ namespace RuniOS.Inspectors
         /// </summary>
         Type? inspectionElementType { get; }
         
-        NullabilityInfo? elementNullabilityInfo { get; }
+        Nullability? elementNullabilityInfo { get; }
         
         /// <summary>
         /// 쓰기 가능 상태인 상속된 부모 요소가 있을 때만 크기를 바꿀 수 있는 리스트인지 여부를 나타냅니다.

@@ -12,7 +12,7 @@ namespace RuniOS.Inspectors
         /// </summary>
         KeyValuePair<Type, Type>? inspectionElementType { get; }
         
-        NullabilityInfo? elementNullabilityInfo { get; }
+        Nullability? elementNullabilityInfo { get; }
 
         void RenameKey(object fromKey, object toKey);
         

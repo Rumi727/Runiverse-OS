@@ -129,7 +129,7 @@ namespace RuniOS.Editor.Inspectors.Drawers.IMGUI
                         }
                     }) : null,
                     valueElement.variableType.HasDefaultConstructor(flags.HasFlagFast(InspectorFlags.NonPublic)),
-                    NullabilityState.Nullable,
+                    NullState.Nullable,
                     nullText ?? $"null ({underlyingType.GetTypeDisplayName()})"
                 )
             )

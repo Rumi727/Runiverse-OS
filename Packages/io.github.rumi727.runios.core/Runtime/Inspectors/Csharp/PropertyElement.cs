@@ -4,8 +4,6 @@ using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
-using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
-using NullabilityInfoContext = RuniOS.Reflection.NullabilityInfoContext;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -16,20 +14,20 @@ namespace RuniOS.Inspectors.Csharp
         public PropertyElement(InspectableObject inspectable, PropertyInfo property) : base(inspectable, property)
         {
             this.property = property;
-            nullabilityInfo = NullabilityInfoContext.Create(property);
+            nullabilityInfo = Nullability.Create(property);
 
             inspectableObjectElement = new InspectableObject(this, variableType);
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
-                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.GetGenericTypeArgument(0));
                 if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null);
+                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo?.GetGenericTypeArgument(1));
             }
         }
 
         public Type variableType => property.PropertyType;
-        public NullabilityInfo nullabilityInfo { get; }
+        public Nullability? nullabilityInfo { get; }
 
         public PropertyInfo property { get; }
 

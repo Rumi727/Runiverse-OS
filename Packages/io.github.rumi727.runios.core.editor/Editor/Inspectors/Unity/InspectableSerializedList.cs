@@ -47,7 +47,7 @@ namespace RuniOS.Editor.Inspectors.Unity
 
         public Action<IEnumerable<object?>>? onValueChanged { get; set; }
 
-        NullabilityInfo? IInspectableList.elementNullabilityInfo => null;
+        Nullability? IInspectableList.elementNullabilityInfo => null;
 
         bool IList.IsReadOnly => false;
         bool IList.IsFixedSize => false;

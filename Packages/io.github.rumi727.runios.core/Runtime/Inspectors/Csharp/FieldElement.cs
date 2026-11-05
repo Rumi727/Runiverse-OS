@@ -4,8 +4,6 @@ using RuniOS.Linq;
 using RuniOS.Reflection;
 using System.Collections;
 using System.Reflection;
-using NullabilityInfo = RuniOS.Reflection.NullabilityInfo;
-using NullabilityInfoContext = RuniOS.Reflection.NullabilityInfoContext;
 
 namespace RuniOS.Inspectors.Csharp
 {
@@ -36,15 +34,15 @@ namespace RuniOS.Inspectors.Csharp
         public FieldElement(InspectableObject inspectable, FieldInfo field) : base(inspectable, field)
         {
             this.field = field;
-            nullabilityInfo = NullabilityInfoContext.Create(field);
+            nullabilityInfo = Nullability.Create(field);
 
             inspectableObjectElement = new InspectableObject(this, variableType);
 
             if (typeof(IEnumerable).IsAssignableFrom(variableType))
             {
-                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo.elementType : nullabilityInfo.genericTypeArguments.FirstOrDefault());
+                inspectableListElement = new InspectableList(this, variableType, variableType.IsArray ? nullabilityInfo?.elementType : nullabilityInfo?.GetGenericTypeArgument(0));
                 if (CollectionHandlerBase.HandlerCheck<DictionaryHandlerBase>(variableType))
-                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo.genericTypeArguments.Length >= 2 ? nullabilityInfo.genericTypeArguments[1] : null);
+                    inspectableDictionaryElement = new InspectableDictionary(this, variableType, nullabilityInfo?.GetGenericTypeArgument(1));
             }
         }
 
@@ -56,7 +54,7 @@ namespace RuniOS.Inspectors.Csharp
         /// <summary>
         /// 필드의 null 허용 여부 정보를 가져옵니다.
         /// </summary>
-        public NullabilityInfo nullabilityInfo { get; }
+        public Nullability? nullabilityInfo { get; }
 
         /// <summary>
         /// 이 요소가 나타내는 <see cref="FieldInfo"/>를 가져옵니다.
