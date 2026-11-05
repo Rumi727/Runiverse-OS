@@ -287,7 +287,7 @@ namespace RuniOS.UIElements.IO
             PhysicalPath root = PhysicalPath.From(targetPath.GetPathRoot());
 
             if (!rootProviders.TryGetValue(root, out PhysicalIOProvider? provider))
-                rootProviders[root] = provider = new PhysicalIOProvider(root, SandboxPolicy.Disabled);
+                rootProviders[root] = provider = new PhysicalIOProvider(root, SandboxPolicy.Unrestricted);
 
             return provider.rootNode.CreateChild(targetPath.GetRelativePath(root));
         }

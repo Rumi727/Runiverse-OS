@@ -13,14 +13,14 @@ namespace RuniOS.IO
         {
 #if UNITY_EDITOR
             var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
-                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Disabled))
+                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Unrestricted))
                 .OfType<IIOProvider>();
 
-            instance = new GroupIOProvider([new PhysicalIOProvider((PhysicalPath)Application.streamingAssetsPath, SandboxPolicy.Disabled), .. packages]);
+            instance = new GroupIOProvider([new PhysicalIOProvider((PhysicalPath)Application.streamingAssetsPath, SandboxPolicy.Unrestricted), .. packages]);
 #elif UNITY_ANDROID
             instance = new AndroidStreamingIOProvider();
 #else
-            instance = new PhysicalIOProvider((PhysicalPath)Application.streamingAssetsPath, SandboxPolicy.Disabled);
+            instance = new PhysicalIOProvider((PhysicalPath)Application.streamingAssetsPath, SandboxPolicy.Unrestricted);
 #endif
         }
 

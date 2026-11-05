@@ -8,15 +8,21 @@ namespace RuniOS.IO
     public enum SandboxPolicy
     {
         /// <summary>
-        /// Enables sandbox validation before physical file-system access.<br/>
-        /// 실제 파일 시스템 접근 전에 샌드박스 검증을 수행합니다.
+        /// Blocks every path that passes through a symbolic link or reparse point.<br/>
+        /// 심볼릭 링크나 재분석 지점을 지나는 모든 경로를 차단합니다.
         /// </summary>
-        Enabled,
+        BlockLinks,
 
         /// <summary>
-        /// Disables sandbox validation before physical file-system access.<br/>
+        /// Allows symbolic links whose final target stays inside the provider root, and blocks the ones that escape it.<br/>
+        /// 최종 대상이 프로바이더 루트 안에 있는 심볼릭 링크는 허용하고, 밖으로 벗어나는 링크는 차단합니다.
+        /// </summary>
+        AllowInternalLinks,
+
+        /// <summary>
+        /// Performs no sandbox validation before physical file-system access.<br/>
         /// 실제 파일 시스템 접근 전 샌드박스 검증을 수행하지 않습니다.
         /// </summary>
-        Disabled
+        Unrestricted
     }
 }

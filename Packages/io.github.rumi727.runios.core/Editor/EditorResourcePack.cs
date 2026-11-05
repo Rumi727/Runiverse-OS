@@ -16,10 +16,10 @@ namespace RuniOS.Editor
         static void OnAssemblyLoaded()
         {
             var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
-                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Disabled))
+                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Unrestricted))
                 .OfType<IIOProvider>();
 
-            IIOProvider[] providers = [new PhysicalIOProvider((PhysicalPath)Directory.GetCurrentDirectory() / "Assets" / streamingAssetsFolderName, SandboxPolicy.Disabled), .. packages];
+            IIOProvider[] providers = [new PhysicalIOProvider((PhysicalPath)Directory.GetCurrentDirectory() / "Assets" / streamingAssetsFolderName, SandboxPolicy.Unrestricted), .. packages];
             GroupIOProvider provider = new GroupIOProvider(providers);
 
             pack = ResourcePack.Create("editor", provider, RequiredPackSort.BeforeVanilla);

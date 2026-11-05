@@ -30,7 +30,7 @@ namespace RuniOS.IO
         /// The sandbox policy applied before physical file-system access.<br/>
         /// 실제 파일 시스템 접근 전에 적용할 샌드박스 정책입니다.
         /// </param>
-        public PhysicalIOProvider(PhysicalPath targetPath, SandboxPolicy sandboxPolicy = SandboxPolicy.Enabled)
+        public PhysicalIOProvider(PhysicalPath targetPath, SandboxPolicy sandboxPolicy = SandboxPolicy.BlockLinks)
         {
             this.targetPath = targetPath;
             this.sandboxPolicy = sandboxPolicy;
@@ -322,7 +322,7 @@ namespace RuniOS.IO
         /// </exception>
         void ValidateSandboxPolicy(PhysicalPath fullPath)
         {
-            if (sandboxPolicy == SandboxPolicy.Disabled)
+            if (sandboxPolicy == SandboxPolicy.Unrestricted)
                 return;
 
             if (!fullPath.TryGetRelativePath(targetPath, out RuniPath relativePath))
@@ -337,8 +337,16 @@ namespace RuniOS.IO
                 if (!TryGetAttributes(currentPath, out FileAttributes attributes))
                     continue;
 
-                if ((attributes & FileAttributes.ReparsePoint) != 0)
+                if ((attributes & FileAttributes.ReparsePoint) == 0)
+                    continue;
+
+                if (sandboxPolicy == SandboxPolicy.BlockLinks)
                     throw CreateReparsePointException(fullPath);
+
+                // 링크가 아닌 재분석 지점(OneDrive 자리 표시자 등)은 ResolveLinkTarget이 null을 반환하므로 그대로 허용합니다.
+                FileSystemInfo? linkTarget = File.ResolveLinkTarget(currentPath, true);
+                if (linkTarget != null && !((PhysicalPath)linkTarget.FullName).TryGetRelativePath(targetPath, out _))
+                    throw CreateSandboxException((PhysicalPath)linkTarget.FullName, targetPath);
             }
         }
 
