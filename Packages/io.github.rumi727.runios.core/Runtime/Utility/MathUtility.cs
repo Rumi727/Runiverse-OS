@@ -227,152 +227,21 @@ namespace RuniOS.Utility
         #endregion
 
         #region Clamp
-        public static sbyte Clamp(this sbyte value, sbyte min) => value < min ? min : value;
-
-        public static sbyte Clamp(this sbyte value, sbyte min, sbyte max)
+        public static T Clamp<T, TMin>(this T value, TMin min) where T : INumber<T> where TMin : INumberBase<TMin>
         {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
+            T minValue = T.CreateSaturating(min);
+            return value < minValue ? minValue : value;
         }
 
-        public static byte Clamp(this byte value, byte min) => value < min ? min : value;
-
-        public static byte Clamp(this byte value, byte min, byte max)
+        public static T Clamp<T, TMin, TMax>(this T value, TMin min, TMax max) where T : INumber<T> where TMin : INumberBase<TMin> where TMax : INumberBase<TMax>
         {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
+            T minValue = T.CreateSaturating(min);
+            T maxValue = T.CreateSaturating(max);
 
-        public static short Clamp(this short value, short min) => value < min ? min : value;
-
-        public static short Clamp(this short value, short min, short max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static ushort Clamp(this ushort value, ushort min) => value < min ? min : value;
-
-        public static ushort Clamp(this ushort value, ushort min, ushort max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static int Clamp(this int value, int min) => value < min ? min : value;
-
-        public static int Clamp(this int value, int min, int max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static uint Clamp(this uint value, uint min) => value < min ? min : value;
-
-        public static uint Clamp(this uint value, uint min, uint max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static long Clamp(this long value, long min) => value < min ? min : value;
-
-        public static long Clamp(this long value, long min, long max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static ulong Clamp(this ulong value, ulong min) => value < min ? min : value;
-
-        public static ulong Clamp(this ulong value, ulong min, ulong max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static float Clamp(this float value, float min) => value < min ? min : value;
-
-        public static float Clamp(this float value, float min, float max)
-        {
-            if (float.IsNaN(value))
-                return 0;
-
-            if (value < min || float.IsNegativeInfinity(value))
-                return min;
-            else if (value > max || float.IsPositiveInfinity(value))
-                return max;
-            else
-                return value;
-        }
-
-        public static double Clamp(this double value, double min) => value < min ? min : value;
-
-        public static double Clamp(this double value, double min, double max)
-        {
-            if (double.IsNaN(value))
-                return 0;
-
-            if (value < min || double.IsNegativeInfinity(value))
-                return min;
-            else if (value > max || double.IsPositiveInfinity(value))
-                return max;
-            else
-                return value;
-        }
-
-        public static decimal Clamp(this decimal value, decimal min) => value < min ? min : value;
-
-        public static decimal Clamp(this decimal value, decimal min, decimal max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static BigInteger Clamp(this BigInteger value, BigInteger min) => value < min ? min : value;
-
-        public static BigInteger Clamp(this BigInteger value, BigInteger min, BigInteger max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
+            if (value < minValue)
+                return minValue;
+            else if (value > maxValue)
+                return maxValue;
             else
                 return value;
         }
@@ -380,30 +249,6 @@ namespace RuniOS.Utility
         public static BigDecimal Clamp(this BigDecimal value, BigDecimal min) => value < min ? min : value;
 
         public static BigDecimal Clamp(this BigDecimal value, BigDecimal min, BigDecimal max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static nint Clamp(this nint value, nint min) => value < min ? min : value;
-
-        public static nint Clamp(this nint value, nint min, nint max)
-        {
-            if (value < min)
-                return min;
-            else if (value > max)
-                return max;
-            else
-                return value;
-        }
-
-        public static nuint Clamp(this nuint value, nuint min) => value < min ? min : value;
-
-        public static nuint Clamp(this nuint value, nuint min, nuint max)
         {
             if (value < min)
                 return min;
