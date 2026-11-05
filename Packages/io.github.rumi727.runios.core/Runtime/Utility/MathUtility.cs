@@ -2626,365 +2626,37 @@ namespace RuniOS.Utility
         #endregion
 
         #region Next Power Of
-        public static sbyte NextPowerOf(this sbyte value, int power)
+        public static T NextPowerOf<T>(this T value, int power) where T : INumber<T>
         {
             bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = (sbyte)-value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = (sbyte)(tempValue * power);
-                if (negative)
-                    return (sbyte)-result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = (sbyte)tempValue;
-                if (negative)
-                    return (sbyte)-result;
-                else
-                    return result;
-            }
-        }
-
-        public static byte NextPowerOf(this byte value, int power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return (byte)tempValue;
-        }
-
-        public static short NextPowerOf(this short value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = (short)-value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = (short)(tempValue * power);
-                if (negative)
-                    return (short)-result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = (short)tempValue;
-                if (negative)
-                    return (short)-result;
-                else
-                    return result;
-            }
-        }
-
-        public static ushort NextPowerOf(this ushort value, int power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return (ushort)tempValue;
-        }
-
-        public static int NextPowerOf(this int value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
+            if (value == T.Zero)
+                return T.Zero;
+            else if (value < T.Zero)
             {
                 value = -value;
                 negative = true;
             }
 
-            power = power.Clamp(1);
+            T powerValue = T.CreateChecked(power.Clamp(1));
 
-            int tempValue = 1;
-            if (value < 1)
+            T tempValue = T.One;
+            T result;
+            if (value < T.One)
             {
                 while (tempValue > value)
-                    tempValue /= power;
+                    tempValue /= powerValue;
 
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
+                result = tempValue * powerValue;
             }
             else
             {
                 while (tempValue < value)
-                    tempValue *= power;
+                    tempValue *= powerValue;
 
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static uint NextPowerOf(this uint value, uint power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            uint tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return tempValue;
-        }
-
-        public static long NextPowerOf(this long value, long power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
+                result = tempValue;
             }
 
-
-            power = power.Clamp(1);
-
-            long tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static ulong NextPowerOf(this ulong value, ulong power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            ulong tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return tempValue;
-        }
-
-        public static float NextPowerOf(this float value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            float tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static double NextPowerOf(this double value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            double tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static decimal NextPowerOf(this decimal value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            decimal tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static BigInteger NextPowerOf(this BigInteger value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            BigInteger tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
+            return negative ? -result : result;
         }
 
         public static BigDecimal NextPowerOf(this BigDecimal value, int power)
@@ -3025,67 +2697,6 @@ namespace RuniOS.Utility
             }
         }
 
-        public static nint NextPowerOf(this nint value, nint power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            nint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue * power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static nuint NextPowerOf(this nuint value, nuint power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            nuint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                return tempValue * power;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue;
-            }
-        }
         #endregion
 
         public static int NextPowerOfTwo(this int value) => (int)BitOperations.RoundUpToPowerOf2((uint)value);
@@ -3093,365 +2704,37 @@ namespace RuniOS.Utility
         public static float PerlinNoise(this float x, float y) => Mathf.PerlinNoise(x, y);
 
         #region Pre Power Of
-        public static sbyte PrePowerOf(this sbyte value, int power)
+        public static T PrePowerOf<T>(this T value, int power) where T : INumber<T>
         {
             bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = (sbyte)-value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = (sbyte)tempValue;
-                if (negative)
-                    return (sbyte)-result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = (sbyte)(tempValue / power);
-                if (negative)
-                    return (sbyte)-result;
-                else
-                    return result;
-            }
-        }
-
-        public static byte PrePowerOf(this byte value, int power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return (byte)(tempValue / power);
-        }
-
-        public static short PrePowerOf(this short value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = (short)-value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = (short)tempValue;
-                if (negative)
-                    return (short)-result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = (short)(tempValue / power);
-                if (negative)
-                    return (short)-result;
-                else
-                    return result;
-            }
-        }
-
-        public static ushort PrePowerOf(this ushort value, int power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            int tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return (ushort)(tempValue / power);
-        }
-
-        public static int PrePowerOf(this int value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
+            if (value == T.Zero)
+                return T.Zero;
+            else if (value < T.Zero)
             {
                 value = -value;
                 negative = true;
             }
 
-            power = power.Clamp(1);
+            T powerValue = T.CreateChecked(power.Clamp(1));
 
-            int tempValue = 1;
-            if (value < 1)
+            T tempValue = T.One;
+            T result;
+            if (value < T.One)
             {
                 while (tempValue > value)
-                    tempValue /= power;
+                    tempValue /= powerValue;
 
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
+                result = tempValue;
             }
             else
             {
                 while (tempValue < value)
-                    tempValue *= power;
+                    tempValue *= powerValue;
 
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static uint PrePowerOf(this uint value, uint power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            uint tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return tempValue / power;
-        }
-
-        public static long PrePowerOf(this long value, long power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
+                result = tempValue / powerValue;
             }
 
-
-            power = power.Clamp(1);
-
-            long tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static ulong PrePowerOf(this ulong value, ulong power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            ulong tempValue = 1;
-            while (tempValue < value)
-                tempValue *= power;
-
-            return tempValue / power;
-        }
-
-        public static float PrePowerOf(this float value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            float tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static double PrePowerOf(this double value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            double tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static decimal PrePowerOf(this decimal value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            decimal tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static BigInteger PrePowerOf(this BigInteger value, int power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            BigInteger tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
+            return negative ? -result : result;
         }
 
         public static BigDecimal PrePowerOf(this BigDecimal value, int power)
@@ -3492,67 +2775,6 @@ namespace RuniOS.Utility
             }
         }
 
-        public static nint PrePowerOf(this nint value, nint power)
-        {
-            bool negative = false;
-            if (value == 0)
-                return 0;
-            else if (value < 0)
-            {
-                value = -value;
-                negative = true;
-            }
-
-            power = power.Clamp(1);
-
-            nint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                var result = tempValue;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                var result = tempValue / power;
-                if (negative)
-                    return -result;
-                else
-                    return result;
-            }
-        }
-
-        public static nuint PrePowerOf(this nuint value, nuint power)
-        {
-            if (value == 0)
-                return 0;
-
-            power = power.Clamp(1);
-
-            nuint tempValue = 1;
-            if (value < 1)
-            {
-                while (tempValue > value)
-                    tempValue /= power;
-
-                return tempValue;
-            }
-            else
-            {
-                while (tempValue < value)
-                    tempValue *= power;
-
-                return tempValue / power;
-            }
-        }
         #endregion
 
         #region Ping Pong
@@ -3631,41 +2853,19 @@ namespace RuniOS.Utility
         #endregion
 
         #region Repeat
-        public static sbyte Repeat(this sbyte t, sbyte length) => (sbyte)(t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static byte Repeat(this byte t, byte length) => (byte)(t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static short Repeat(this short t, short length) => (short)(t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static ushort Repeat(this ushort t, ushort length) => (ushort)(t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static int Repeat(this int t, int length) => (t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static uint Repeat(this uint t, uint length) => (t - ((uint)((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static long Repeat(this long t, long length) => (t - (((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static ulong Repeat(this ulong t, ulong length) => (t - ((ulong)((float)t / length).FloorToInt() * length)).Clamp(0, length);
-        public static float Repeat(this float t, float length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
-        public static double Repeat(this double t, double length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
-        public static decimal Repeat(this decimal t, decimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
-        public static BigInteger Repeat(this BigInteger t, BigInteger length) => (t - ((BigInteger)((BigDecimal)t / length).Floor() * length)).Clamp(0, length);
-        public static BigDecimal Repeat(this BigDecimal t, BigDecimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
-        public static nint Repeat(this nint t, nint length) => (t - ((nint)((float)t / length) * length)).Clamp(0, length);
-        public static nuint Repeat(this nuint t, nuint length) => (t - ((nuint)((float)t / length) * length)).Clamp(0, length);
+        public static T Repeat<T>(this T t, T length) where T : INumber<T>
+        {
+            T remainder = t % length;
+            return remainder < T.Zero ? remainder + length : remainder;
+        }
+        public static T Repeat<T>(this T t, T start, T end) where T : INumber<T> => (t - start).Repeat(start.Distance(end)) + start;
 
-        public static sbyte Repeat(this sbyte t, sbyte start, sbyte end) => (sbyte)((t - start).Repeat(start.Distance(end)) + start);
-        public static byte Repeat(this byte t, byte start, byte end) => (byte)((t - start).Repeat(start.Distance(end)) + end);
-        public static short Repeat(this short t, short start, short end) => (short)((t - start).Repeat(start.Distance(end)) + start);
-        public static ushort Repeat(this ushort t, ushort start, ushort end) => (ushort)((t - start).Repeat(start.Distance(end)) + start);
-        public static int Repeat(this int t, int start, int end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static uint Repeat(this uint t, uint start, uint end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static long Repeat(this long t, long start, long end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static ulong Repeat(this ulong t, ulong start, ulong end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static float Repeat(this float t, float start, float end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static double Repeat(this double t, double start, double end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static decimal Repeat(this decimal t, decimal start, decimal end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static BigInteger Repeat(this BigInteger t, BigInteger start, BigInteger end) => (t - start).Repeat(start.Distance(end)) + start;
+        public static BigDecimal Repeat(this BigDecimal t, BigDecimal length) => (t - ((t / length).Floor() * length)).Clamp(0, length);
         public static BigDecimal Repeat(this BigDecimal t, BigDecimal start, BigDecimal end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static nint Repeat(this nint t, nint start, nint end) => (t - start).Repeat(start.Distance(end)) + start;
-        public static nuint Repeat(this nuint t, nuint start, nuint end) => (t - start).Repeat(start.Distance(end)) + start;
         #endregion
 
         #region Repeat While
-        public static sbyte RepeatWhile(this sbyte t, sbyte start, sbyte length)
+        public static T RepeatWhile<T>(this T t, T start, T length) where T : INumber<T>
         {
             if (t >= start)
             {
@@ -3681,176 +2881,16 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static byte RepeatWhile(this byte t, byte start, byte length)
+        public static T RepeatWhile<T>(this T t, T length) where T : INumber<T>
         {
-            if (t >= start)
+            if (t >= T.Zero)
             {
                 while (t > length)
                     t -= length;
             }
             else
             {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static short RepeatWhile(this short t, short start, short length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ushort RepeatWhile(this ushort t, ushort start, ushort length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static int RepeatWhile(this int t, int start, int length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static uint RepeatWhile(this uint t, uint start, uint length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static long RepeatWhile(this long t, long start, long length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ulong RepeatWhile(this ulong t, ulong start, ulong length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static float RepeatWhile(this float t, float start, float length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static double RepeatWhile(this double t, double start, double length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static decimal RepeatWhile(this decimal t, decimal start, decimal length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static BigInteger RepeatWhile(this BigInteger t, BigInteger start, BigInteger length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
+                while (t < T.Zero)
                     t += length;
             }
 
@@ -3873,198 +2913,6 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static nint RepeatWhile(this nint t, nint start, nint length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static nuint RepeatWhile(this nuint t, nuint start, nuint length)
-        {
-            if (t >= start)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static sbyte RepeatWhile(this sbyte t, sbyte length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static byte RepeatWhile(this byte t, byte length)
-        {
-            while (t > length)
-                t -= length;
-
-            return t;
-        }
-
-        public static short RepeatWhile(this short t, short length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ushort RepeatWhile(this ushort t, ushort length)
-        {
-            while (t > length)
-                t -= length;
-
-            return t;
-        }
-
-        public static int RepeatWhile(this int t, int length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static uint RepeatWhile(this uint t, uint length)
-        {
-            while (t > length)
-                t -= length;
-
-            return t;
-        }
-
-        public static long RepeatWhile(this long t, long length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ulong RepeatWhile(this ulong t, ulong length)
-        {
-            while (t > length)
-                t -= length;
-
-            return t;
-        }
-
-        public static float RepeatWhile(this float t, float length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static double RepeatWhile(this double t, double length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static decimal RepeatWhile(this decimal t, decimal length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static BigInteger RepeatWhile(this BigInteger t, BigInteger length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
         public static BigDecimal RepeatWhile(this BigDecimal t, BigDecimal length)
         {
             if (t >= 0)
@@ -4081,41 +2929,10 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static nint RepeatWhile(this nint t, nint length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static nuint RepeatWhile(this nuint t, nuint length)
-        {
-            if (t >= 0)
-            {
-                while (t > length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
         #endregion
 
         #region Repeat While Other
-        public static sbyte RepeatWhileOther(this sbyte t, sbyte start, sbyte length)
+        public static T RepeatWhileOther<T>(this T t, T start, T length) where T : INumber<T>
         {
             if (t >= start)
             {
@@ -4131,176 +2948,16 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static byte RepeatWhileOther(this byte t, byte start, byte length)
+        public static T RepeatWhileOther<T>(this T t, T length) where T : INumber<T>
         {
-            if (t >= start)
+            if (t >= T.Zero)
             {
                 while (t >= length)
                     t -= length;
             }
             else
             {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static short RepeatWhileOther(this short t, short start, short length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ushort RepeatWhileOther(this ushort t, ushort start, ushort length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static int RepeatWhileOther(this int t, int start, int length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static uint RepeatWhileOther(this uint t, uint start, uint length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static long RepeatWhileOther(this long t, long start, long length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ulong RepeatWhileOther(this ulong t, ulong start, ulong length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static float RepeatWhileOther(this float t, float start, float length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static double RepeatWhileOther(this double t, double start, double length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static decimal RepeatWhileOther(this decimal t, decimal start, decimal length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static BigInteger RepeatWhileOther(this BigInteger t, BigInteger start, BigInteger length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
+                while (t < T.Zero)
                     t += length;
             }
 
@@ -4323,198 +2980,6 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static nint RepeatWhileOther(this nint t, nint start, nint length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static nuint RepeatWhileOther(this nuint t, nuint start, nuint length)
-        {
-            if (t >= start)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < start)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static sbyte RepeatWhileOther(this sbyte t, sbyte length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static byte RepeatWhileOther(this byte t, byte length)
-        {
-            while (t >= length)
-                t -= length;
-
-            return t;
-        }
-
-        public static short RepeatWhileOther(this short t, short length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ushort RepeatWhileOther(this ushort t, ushort length)
-        {
-            while (t >= length)
-                t -= length;
-
-            return t;
-        }
-
-        public static int RepeatWhileOther(this int t, int length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static uint RepeatWhileOther(this uint t, uint length)
-        {
-            while (t >= length)
-                t -= length;
-
-            return t;
-        }
-
-        public static long RepeatWhileOther(this long t, long length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static ulong RepeatWhileOther(this ulong t, ulong length)
-        {
-            while (t >= length)
-                t -= length;
-
-            return t;
-        }
-
-        public static float RepeatWhileOther(this float t, float length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static double RepeatWhileOther(this double t, double length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static decimal RepeatWhileOther(this decimal t, decimal length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static BigInteger RepeatWhileOther(this BigInteger t, BigInteger length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
         public static BigDecimal RepeatWhileOther(this BigDecimal t, BigDecimal length)
         {
             if (t >= 0)
@@ -4531,37 +2996,6 @@ namespace RuniOS.Utility
             return t;
         }
 
-        public static nint RepeatWhileOther(this nint t, nint length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
-
-        public static nuint RepeatWhileOther(this nuint t, nuint length)
-        {
-            if (t >= 0)
-            {
-                while (t >= length)
-                    t -= length;
-            }
-            else
-            {
-                while (t < 0)
-                    t += length;
-            }
-
-            return t;
-        }
         #endregion
 
         #region Round
@@ -4632,69 +3066,7 @@ namespace RuniOS.Utility
         #endregion 
 
         #region Sign
-        public static int Sign(this sbyte value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this short value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this int value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this long value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this float value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this double value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this decimal value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
-
-        public static int Sign(this BigInteger value)
-        {
-            if (value < BigInteger.Zero)
-                return -1;
-            else
-                return 1;
-        }
+        public static int Sign<T>(this T value) where T : INumber<T> => value < T.Zero ? -1 : 1;
 
         public static int Sign(this BigDecimal value)
         {
@@ -4704,95 +3076,10 @@ namespace RuniOS.Utility
                 return 1;
         }
 
-        public static int Sign(this nint value)
-        {
-            if (value < 0)
-                return -1;
-            else
-                return 1;
-        }
         #endregion
         
         #region Sign With Zero
-        public static int SignWithZero(this sbyte value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this short value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this int value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this long value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this float value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this double value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this decimal value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
-
-        public static int SignWithZero(this BigInteger value)
-        {
-            if (value < BigInteger.Zero)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
+        public static int SignWithZero<T>(this T value) where T : INumber<T> => T.Sign(value);
 
         public static int SignWithZero(this BigDecimal value)
         {
@@ -4804,15 +3091,6 @@ namespace RuniOS.Utility
             return 0;
         }
 
-        public static int SignWithZero(this nint value)
-        {
-            if (value < 0)
-                return -1;
-            else if (value > 0)
-                return 1;
-                
-            return 0;
-        }
         #endregion
 
         #region Sin
