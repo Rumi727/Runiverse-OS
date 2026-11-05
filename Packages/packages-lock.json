@@ -231,6 +231,12 @@
       "source": "embedded",
       "dependencies": {}
     },
+    "io.github.rumi727.nuget.microsoft.netcore.app.ref": {
+      "version": "file:io.github.rumi727.nuget.microsoft.netcore.app.ref",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {}
+    },
     "io.github.rumi727.nuget.r3": {
       "version": "file:io.github.rumi727.nuget.r3",
       "depth": 0,
@@ -262,6 +268,7 @@
         "com.realitystop.linkmerge": "1.0.0",
         "io.github.rumi727.nuget.extendednumerics.bigdecimal": "3003.2.0+161",
         "io.github.rumi727.nuget.lib.harmony.thin": "2.4.2",
+        "io.github.rumi727.nuget.microsoft.netcore.app.ref": "10.0.13",
         "io.github.rumi727.nuget.r3": "1.3.1"
       }
     },
