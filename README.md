@@ -37,10 +37,15 @@ FMOD, FreeImage, UnityAsyncImageLoader 등 포함된 외부 구성 요소와 제
 
 * 추후 System.Text.Json으로의 전환을 고려해야합니다.
   * 항상 퍼블릭 프로퍼티를 사용해야하며, 정적 멤버는 허용되지 않습니다.
-* 추후 유니티가 CoreCLR로 전환될 가능성도 고려해야합니다.
+* 이 프로젝트는 Unity가 CoreCLR(.NET 10) 기반으로 동작하는 환경을 전제로 하며, .NET Standard 2.1은 더 이상 지원하지 않습니다.
+  * `System.Numerics`의 제네릭 수학(`INumber<T>` 등), `System.Threading.Lock`, `params ReadOnlySpan<T>` 같은 최신 API를 사용하며, 이를 위한 폴리필은 두지 않습니다.
   * 현재 이 프로젝트가 사용중인 C# 언어 버전은 14 입니다. (global using 사랑해요 field 사랑해요)
   * 파일 스코프 네임스페이스 절대엄금
     * 미친 유니티가 올바른 MonoBehaviour나 ScriptableObject, Editor등으로 인식 못함 (= 직렬화가 안됨)
+* 네이티브 호출은 `DllImport` 대신 `LibraryImport`를 사용합니다.
+  * Unity는 .NET SDK의 소스 생성기를 자동으로 실행하지 않으므로, 생성기는 `Packages/io.github.rumi727.nuget.microsoft.netcore.app.ref`(NuGet `Microsoft.NETCore.App.Ref`)가 제공하고 `Runiverse OS Core`의 종속 패키지로 설치됩니다. 이 패키지는 asmdef가 없는 폴더에 있어 프로젝트의 모든 어셈블리에 적용됩니다.
+  * `LibraryImport`를 쓰는 어셈블리는 asmdef의 `allowUnsafeCode`를 켜야 합니다. 메서드를 선언하는 타입은 모두 `partial`이어야 하고, void가 아닌 `partial` 메서드에는 접근 한정자를 명시해야 합니다.
+  * `bool`에는 `[MarshalAs(UnmanagedType.Bool)]`를 붙이고, `StringBuilder`나 문자열 필드를 가진 구조체는 지원되지 않으므로 `char[]`/`char*`로 대신합니다. `MarshalUsing`은 `System.Runtime.InteropServices.Marshalling` 네임스페이스에 있습니다.
 * ~~유니티 에디터 자채를 패치하여 Roslyn 버전을 올려 C# 버전을 올릴 수 있지만, 이 프로젝트는 모두가 사용할 수 있게끔 의도하였기에 (실제로 쓰는 사람은 없겠지만...) 가능한 유니티 순정과의 호환성을 염두에 두고 제작 중입니다.~~
   * 점점 사용 가능 C# 버전 오르더니 이젠 공식 최신까지...ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ
 
@@ -251,7 +256,7 @@ Inspector
 이 원칙 덕분에 중앙 관리자가 구체 타입을 계속 알아가는 대신, 각 객체가 자기 바로 옆의 abstraction만 알도록 만들 수 있습니다.  
 에셋의 수명 정책은 Handle이, 컬렉션의 고유한 불변조건은 Collection Handler가, C# 멤버 접근 규칙은 Inspector Element가, 화면 표현은 Drawer가 맡습니다.
 
-메타데이터도 같은 방향을 따릅니다. `AssetImportData`는 모든 메타데이터의 의미를 중앙에서 정의하지 않고 식별자별 raw section을 보존하며, Wave Audio나 Rhythm처럼 실제로 그 데이터를 소비하는 시스템이 자신의 section을 해석합니다. 새로운 메타데이터를 추가하기 위해 기존 Sound 시스템이나 중앙 메타데이터 타입을 수정하지 않는 방향입니다.
+메타데이터도 같은 방향을 따릅니다. `AssetSidecar`는 모든 메타데이터의 의미를 중앙에서 정의하지 않고 식별자별 raw section을 보존하며, Wave Audio나 Rhythm처럼 실제로 그 데이터를 소비하는 시스템이 자신의 section을 해석합니다. 새로운 메타데이터를 추가하기 위해 기존 Sound 시스템이나 중앙 메타데이터 타입을 수정하지 않는 방향입니다.
 
 ### 특례가 아니라 예측 가능한 조합
 
