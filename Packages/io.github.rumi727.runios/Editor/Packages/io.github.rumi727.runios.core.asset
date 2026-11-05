@@ -27,6 +27,7 @@ MonoBehaviour:
   - {fileID: 11400000, guid: df490633780445fa89011da12049353c, type: 2}
   - {fileID: 11400000, guid: ebf060da9d2740ab8fd6eb17d235ec07, type: 2}
   - {fileID: 11400000, guid: c7ba1aac0a0743dc908198cdc19a3845, type: 2}
+  - {fileID: 11400000, guid: c8158950f28146b185bd5186786a1852, type: 2}
   repositoryUrl: "https://github.com/Rumi727/Runiverse-OS.git"
   revision: ""
   packagePath: "Packages/io.github.rumi727.runios.core"
