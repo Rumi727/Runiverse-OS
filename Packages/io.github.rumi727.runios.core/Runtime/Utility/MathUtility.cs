@@ -398,19 +398,64 @@ namespace RuniOS.Utility
         #endregion
 
         #region GCD
-        /// <summary>
-        /// 두 정수의 최대 공약수(GCD)를 계산합니다.
-        /// </summary>
-        /// <param name="a">첫 번째 정수입니다.</param>
-        /// <param name="b">두 번째 정수입니다.</param>
-        /// <returns>두 정수의 최대 공약수입니다.</returns>
-        /// <exception cref="ArgumentException">두 입력이 모두 0인 경우 발생합니다. GCD는 0,0에 대해 정의되지 않습니다.</exception>
-        public static ulong GCD(this ulong a, ulong b)
+        public static T GCD<T>(this T a, T b) where T : IBinaryInteger<T>
         {
-            if (a == 0 && b == 0)
+            if (T.IsZero(a) && T.IsZero(b))
                 throw new ArgumentException("GCD is not defined for both arguments being zero.");
-    
-            while (a != 0 && b != 0)
+
+            return GCDCore(a, b);
+        }
+
+        /// <summary>
+        /// 주어진 정수들의 모든 요소에 대한 최대 공약수(GCD)를 계산합니다.
+        /// </summary>
+        /// <param name="numbers">GCD를 계산할 정수들입니다. <br/> 2개 이상의 정수가 포함되어야 합니다.</param>
+        /// <returns>모든 요소에 대한 최대 공약수입니다.</returns>
+        /// <exception cref="ArgumentException">2개 미만의 요소를 포함하거나, 모든 요소가 0인 경우 발생합니다.</exception>
+        public static T GCD<T>(params ReadOnlySpan<T> numbers) where T : IBinaryInteger<T>
+        {
+            if (numbers.Length < 2)
+                throw new ArgumentException("Input must contain at least two numbers.");
+
+            T result = numbers[0];
+            for (int i = 1; i < numbers.Length; i++)
+                result = GCDCore(result, numbers[i]);
+
+            if (T.IsZero(result))
+                throw new ArgumentException("GCD is not defined for all arguments being zero.");
+
+            return result;
+        }
+
+        /// <inheritdoc cref="GCD{T}(ReadOnlySpan{T})"/>
+        public static T GCD<T>(IEnumerable<T> numbers) where T : IBinaryInteger<T>
+        {
+            ArgumentNullException.ThrowIfNull(numbers);
+
+            using IEnumerator<T> enumerator = numbers.GetEnumerator();
+            if (!enumerator.MoveNext())
+                throw new ArgumentException("Input must contain at least two numbers.");
+
+            T result = enumerator.Current;
+            int count = 1;
+            while (enumerator.MoveNext())
+            {
+                result = GCDCore(result, enumerator.Current);
+                count++;
+            }
+
+            if (count < 2)
+                throw new ArgumentException("Input must contain at least two numbers.");
+
+            if (T.IsZero(result))
+                throw new ArgumentException("GCD is not defined for all arguments being zero.");
+
+            return result;
+        }
+
+        static T GCDCore<T>(T a, T b) where T : IBinaryInteger<T>
+        {
+            while (!T.IsZero(a) && !T.IsZero(b))
             {
                 if (a > b)
                     a %= b;
@@ -420,28 +465,7 @@ namespace RuniOS.Utility
 
             return a | b;
         }
-        
-        /// <summary>
-        /// 주어진 정수 배열의 모든 요소에 대한 최대 공약수(GCD)를 계산합니다.
-        /// </summary>
-        /// <param name="numbers">GCD를 계산할 정수 배열입니다. <br/> 배열에는 2개 이상의 정수가 포함되어야 합니다.</param>
-        /// <returns>배열의 모든 요소에 대한 최대 공약수입니다.</returns>
-        /// <exception cref="ArgumentException">배열이 <see langword="null"/>이거나, 2개 미만의 요소를 포함하거나, 모든 요소가 0인 경우 발생합니다.</exception>
-        public static ulong GCD(params ulong[] numbers)
-        {
-            if (numbers == null || numbers.Length < 2)
-                throw new ArgumentException("Input array must not be null and contain at least two numbers.");
-    
-            if (numbers.All(static n => n == 0))
-                throw new ArgumentException("GCD is not defined for all arguments being zero.");
-
-            ulong result = numbers[0];
-            for (int i = 1; i < numbers.Length; i++)
-                result = GCD(result, numbers[i]);
-
-            return result;
-        }
-        #endregion
+                #endregion
 
         #region Get Number Of Decimals For Minimum Difference
         public static int GetNumberOfDecimalsForMinimumDifference(this float minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
@@ -686,37 +710,64 @@ namespace RuniOS.Utility
         #endregion
 
         #region Max Array
-        public static T Max<T>(T value, params T[] values) where T : INumber<T>
+        public static T Max<T>(T value, params ReadOnlySpan<T> values) where T : INumber<T>
         {
-            ArgumentNullException.ThrowIfNull(values);
-
             T result = value;
-            for (int i = 0; i < values.Length; i++)
+            foreach (T item in values)
             {
-                if (values[i] > result)
-                    result = values[i];
+                if (item > result)
+                    result = item;
             }
 
             return result;
         }
 
-        public static BigDecimal Max(BigDecimal value, params BigDecimal[] values)
+        public static T Max<T>(IEnumerable<T> values) where T : INumber<T>
         {
-            if (values == null)
-                throw new ArgumentNullException();
+            ArgumentNullException.ThrowIfNull(values);
 
-            int length = values.Length;
-            if (length == 0)
-                return 0;
+            using IEnumerator<T> enumerator = values.GetEnumerator();
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("Sequence contains no elements.");
 
-            BigDecimal num2 = value;
-            for (int i = 0; i < length; i++)
+            T result = enumerator.Current;
+            while (enumerator.MoveNext())
             {
-                if (values[i] > num2)
-                    num2 = values[i];
+                if (enumerator.Current > result)
+                    result = enumerator.Current;
             }
 
-            return num2;
+            return result;
+        }
+
+        public static BigDecimal Max(BigDecimal value, params ReadOnlySpan<BigDecimal> values)
+        {
+            BigDecimal result = value;
+            foreach (BigDecimal item in values)
+            {
+                if (item > result)
+                    result = item;
+            }
+
+            return result;
+        }
+
+        public static BigDecimal Max(IEnumerable<BigDecimal> values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+
+            using IEnumerator<BigDecimal> enumerator = values.GetEnumerator();
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("Sequence contains no elements.");
+
+            BigDecimal result = enumerator.Current;
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current > result)
+                    result = enumerator.Current;
+            }
+
+            return result;
         }
 
         #endregion
@@ -735,37 +786,64 @@ namespace RuniOS.Utility
         #endregion
 
         #region Min Array
-        public static T Min<T>(T value, params T[] values) where T : INumber<T>
+        public static T Min<T>(T value, params ReadOnlySpan<T> values) where T : INumber<T>
         {
-            ArgumentNullException.ThrowIfNull(values);
-
             T result = value;
-            for (int i = 0; i < values.Length; i++)
+            foreach (T item in values)
             {
-                if (values[i] < result)
-                    result = values[i];
+                if (item < result)
+                    result = item;
             }
 
             return result;
         }
 
-        public static BigDecimal Min(BigDecimal value, params BigDecimal[] values)
+        public static T Min<T>(IEnumerable<T> values) where T : INumber<T>
         {
-            if (values == null)
-                throw new ArgumentNullException();
+            ArgumentNullException.ThrowIfNull(values);
 
-            int length = values.Length;
-            if (length == 0)
-                return 0;
+            using IEnumerator<T> enumerator = values.GetEnumerator();
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("Sequence contains no elements.");
 
-            BigDecimal num2 = value;
-            for (int i = 0; i < length; i++)
+            T result = enumerator.Current;
+            while (enumerator.MoveNext())
             {
-                if (values[i] < num2)
-                    num2 = values[i];
+                if (enumerator.Current < result)
+                    result = enumerator.Current;
             }
 
-            return num2;
+            return result;
+        }
+
+        public static BigDecimal Min(BigDecimal value, params ReadOnlySpan<BigDecimal> values)
+        {
+            BigDecimal result = value;
+            foreach (BigDecimal item in values)
+            {
+                if (item < result)
+                    result = item;
+            }
+
+            return result;
+        }
+
+        public static BigDecimal Min(IEnumerable<BigDecimal> values)
+        {
+            ArgumentNullException.ThrowIfNull(values);
+
+            using IEnumerator<BigDecimal> enumerator = values.GetEnumerator();
+            if (!enumerator.MoveNext())
+                throw new InvalidOperationException("Sequence contains no elements.");
+
+            BigDecimal result = enumerator.Current;
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current < result)
+                    result = enumerator.Current;
+            }
+
+            return result;
         }
 
         #endregion
