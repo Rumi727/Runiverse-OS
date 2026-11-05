@@ -147,7 +147,25 @@ namespace RuniOS.Utility
             if (text == null)
                 return string.Empty;
 
-            return new string(text.Where(c => !char.IsWhiteSpace(c)).ToArray());
+            int whitespaceCount = 0;
+            foreach (char c in text)
+            {
+                if (char.IsWhiteSpace(c))
+                    whitespaceCount++;
+            }
+
+            if (whitespaceCount == 0)
+                return text;
+
+            return string.Create(text.Length - whitespaceCount, text, static (span, source) =>
+            {
+                int index = 0;
+                foreach (char c in source)
+                {
+                    if (!char.IsWhiteSpace(c))
+                        span[index++] = c;
+                }
+            });
         }
 
         /// <summary>
