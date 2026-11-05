@@ -12,22 +12,10 @@ namespace RuniOS.Utility
     public static class MathUtility
     {
         const int maxRoundingDigits = 15;
-        static readonly float[] roundPower10Float =
-        [
-            1E+0f, 1E+1f, 1E+2f, 1E+3f, 1E+4f, 1E+5f, 1E+6f, 1E+7f, 1E+8f, 1E+9f,
-            1E+10f, 1E+11f, 1E+12f, 1E+13f, 1E+14f, 1E+15f
-        ];
-
         static readonly double[] roundPower10Double =
         [
             1E+0, 1E+1, 1E+2, 1E+3, 1E+4, 1E+5, 1E+6, 1E+7, 1E+8, 1E+9,
             1E+10, 1E+11, 1E+12, 1E+13, 1E+14, 1E+15
-        ];
-
-        static readonly decimal[] roundPower10Decimal =
-        [
-            1E+0m, 1E+1m, 1E+2m, 1E+3m, 1E+4m, 1E+5m, 1E+6m, 1E+7m, 1E+8m, 1E+9m,
-            1E+10m, 1E+11m, 1E+12m, 1E+13m, 1E+14m, 1E+15m
         ];
 
         static readonly BigDecimal[] roundPower10BigDecimal =
@@ -135,21 +123,8 @@ namespace RuniOS.Utility
         #endregion
 
         #region Arithmetic Sequence Sum
-        public static sbyte ArithmeticSequenceSum(this sbyte start, sbyte end) => (sbyte)(((start.Distance(end) + 1) * (start + end)) / 2);
-        public static byte ArithmeticSequenceSum(this byte start, byte end) => (byte)(((start.Distance(end) + 1) * (start + end)) / 2);
-        public static short ArithmeticSequenceSum(this short start, short end) => (short)(((start.Distance(end) + 1) * (start + end)) / 2);
-        public static ushort ArithmeticSequenceSum(this ushort start, ushort end) => (ushort)(((start.Distance(end) + 1) * (start + end)) / 2);
-        public static int ArithmeticSequenceSum(this int start, int end) => ((start.Distance(end) + 1) * (start + end)) / 2;
-        public static uint ArithmeticSequenceSum(this uint start, uint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
-        public static long ArithmeticSequenceSum(this long start, long end) => ((start.Distance(end) + 1) * (start + end)) / 2;
-        public static ulong ArithmeticSequenceSum(this ulong start, ulong end) => ((start.Distance(end) + 1) * (start + end)) / 2;
-        public static float ArithmeticSequenceSum(this float start, float end) => (start.Distance(end) + 1) * (start + end) * 0.5f;
-        public static double ArithmeticSequenceSum(this double start, double end) => (start.Distance(end) + 1) * (start + end) * 0.5;
-        public static decimal ArithmeticSequenceSum(this decimal start, decimal end) => (start.Distance(end) + 1) * (start + end) * 0.5m;
-        public static BigInteger ArithmeticSequenceSum(this BigInteger start, BigInteger end) => ((start.Distance(end) + 1) * (start + end)) / 2;
+        public static T ArithmeticSequenceSum<T>(this T start, T end) where T : INumber<T> => ((start.Distance(end) + T.One) * (start + end)) / (T.One + T.One);
         public static BigDecimal ArithmeticSequenceSum(this BigDecimal start, BigDecimal end) => (start.Distance(end) + 1) * (start + end) * 0.5;
-        public static nint ArithmeticSequenceSum(this nint start, nint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
-        public static nuint ArithmeticSequenceSum(this nuint start, nuint end) => ((start.Distance(end) + 1) * (start + end)) / 2;
         #endregion
 
         public static float Angle(this Vector2 current, Vector2 target)
@@ -197,33 +172,15 @@ namespace RuniOS.Utility
         #endregion
 
         #region Ceil
-        public static float Ceil(this float value) => (float)Math.Ceiling(value);
-        public static double Ceil(this double value) => Math.Ceiling(value);
-        public static decimal Ceil(this decimal value) => Math.Ceiling(value);
+        public static T Ceil<T>(this T value) where T : IFloatingPoint<T> => T.Ceiling(value);
         public static BigDecimal Ceil(this BigDecimal value) => BigDecimal.Ceiling(value);
 
-        public static float Ceil(this float value, int digits)
+        public static T Ceil<T>(this T value, int digits) where T : IFloatingPoint<T>
         {
             if (digits < 0 || digits > maxRoundingDigits)
                 throw new ArgumentOutOfRangeException(nameof(digits));
 
-            float num = roundPower10Float[digits];
-            return (value * num).Ceil() / num;
-        }
-        public static double Ceil(this double value, int digits)
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            double num = roundPower10Double[digits];
-            return (value * num).Ceil() / num;
-        }
-        public static decimal Ceil(this decimal value, int digits)
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            decimal num = roundPower10Decimal[digits];
+            T num = T.CreateChecked(roundPower10Double[digits]);
             return (value * num).Ceil() / num;
         }
         public static BigDecimal Ceil(this BigDecimal value, int digits)
@@ -237,244 +194,36 @@ namespace RuniOS.Utility
         #endregion
         
         #region Ceil To SByte
-        public static sbyte CeilToSByte(this float value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Ceiling(value)
-            };
-        }
-        public static sbyte CeilToSByte(this double value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Ceiling(value)
-            };
-        }
-        public static sbyte CeilToSByte(this decimal value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Ceiling(value)
-            };
-        }
+        public static sbyte CeilToSByte<T>(this T value) where T : IFloatingPoint<T> => sbyte.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To Byte
-        public static byte CeilToByte(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Ceiling(value)
-            };
-        }
-        public static byte CeilToByte(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Ceiling(value)
-            };
-        }
-        public static byte CeilToByte(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Ceiling(value)
-            };
-        }
+        public static byte CeilToByte<T>(this T value) where T : IFloatingPoint<T> => byte.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To Short
-        public static short CeilToShort(this float value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Ceiling(value)
-            };
-        }
-        public static short CeilToShort(this double value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Ceiling(value)
-            };
-        }
-        public static short CeilToShort(this decimal value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Ceiling(value)
-            };
-        }
+        public static short CeilToShort<T>(this T value) where T : IFloatingPoint<T> => short.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To Ushort
-        public static ushort CeilToUShort(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Ceiling(value)
-            };
-        }
-        public static ushort CeilToUShort(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Ceiling(value)
-            };
-        }
-        public static ushort CeilToUShort(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Ceiling(value)
-            };
-        }
+        public static ushort CeilToUShort<T>(this T value) where T : IFloatingPoint<T> => ushort.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To Int
-        public static int CeilToInt(this float value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Ceiling(value)
-            };
-        }
-        public static int CeilToInt(this double value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Ceiling(value)
-            };
-        }
-        public static int CeilToInt(this decimal value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Ceiling(value)
-            };
-        }
+        public static int CeilToInt<T>(this T value) where T : IFloatingPoint<T> => int.CreateSaturating(T.Ceiling(value));
         public static BigInteger CeilToInt(this BigDecimal value) => (BigInteger)BigDecimal.Ceiling(value);
         #endregion
         
         #region Ceil To UInt
-        public static uint CeilToUInt(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Ceiling(value)
-            };
-        }
-        public static uint CeilToUInt(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Ceiling(value)
-            };
-        }
-        public static uint CeilToUInt(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Ceiling(value)
-            };
-        }
+        public static uint CeilToUInt<T>(this T value) where T : IFloatingPoint<T> => uint.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To Long
-        public static long CeilToLong(this float value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Ceiling(value)
-            };
-        }
-        public static long CeilToLong(this double value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Ceiling(value)
-            };
-        }
-        public static long CeilToLong(this decimal value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Ceiling(value)
-            };
-        }
+        public static long CeilToLong<T>(this T value) where T : IFloatingPoint<T> => long.CreateSaturating(T.Ceiling(value));
         #endregion
         
         #region Ceil To ULong
-        public static ulong CeilToULong(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Ceiling(value)
-            };
-        }
-        public static ulong CeilToULong(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Ceiling(value)
-            };
-        }
-        public static ulong CeilToULong(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Ceiling(value)
-            };
-        }
+        public static ulong CeilToULong<T>(this T value) where T : IFloatingPoint<T> => ulong.CreateSaturating(T.Ceiling(value));
         #endregion
 
         #region Clamp
@@ -979,53 +728,9 @@ namespace RuniOS.Utility
         #endregion
 
         #region Distance
-        public static sbyte Distance(this sbyte a, sbyte b) => (sbyte)(a - b).Abs();
-
-        public static byte Distance(this byte a, byte b) => (byte)(a - b).Abs();
-
-        public static short Distance(this short a, short b) => (short)(a - b).Abs();
-
-        public static ushort Distance(this ushort a, ushort b) => (ushort)(a - b).Abs();
-
-        public static int Distance(this int a, int b) => (a - b).Abs();
-
-        public static uint Distance(this uint a, uint b)
-        {
-            if (b > a)
-                return b - a;
-            else
-                return a - b;
-        }
-
-        public static long Distance(this long a, long b) => (a - b).Abs();
-
-        public static ulong Distance(this ulong a, ulong b)
-        {
-            if (b > a)
-                return b - a;
-            else
-                return a - b;
-        }
-
-        public static float Distance(this float a, float b) => (a - b).Abs();
-
-        public static double Distance(this double a, double b) => (a - b).Abs();
-
-        public static decimal Distance(this decimal a, decimal b) => (a - b).Abs();
-
-        public static BigInteger Distance(this BigInteger a, BigInteger b) => (a - b).Abs();
+        public static T Distance<T>(this T a, T b) where T : INumber<T> => a > b ? a - b : b - a;
 
         public static BigDecimal Distance(this BigDecimal a, BigDecimal b) => (a - b).Abs();
-
-        public static nint Distance(this nint a, nint b) => (a - b).Abs();
-
-        public static nuint Distance(this nuint a, nuint b)
-        {
-            if (b > a)
-                return b - a;
-            else
-                return a - b;
-        }
         #endregion
 
         #region Exp
@@ -1036,33 +741,15 @@ namespace RuniOS.Utility
         #endregion
 
         #region Floor
-        public static float Floor(this float value) => (float)Math.Floor(value);
-        public static double Floor(this double value) => Math.Floor(value);
-        public static decimal Floor(this decimal value) => Math.Floor(value);
+        public static T Floor<T>(this T value) where T : IFloatingPoint<T> => T.Floor(value);
         public static BigDecimal Floor(this BigDecimal value) => BigDecimal.Floor(value);
 
-        public static float Floor(this float value, int digits)
+        public static T Floor<T>(this T value, int digits) where T : IFloatingPoint<T>
         {
             if (digits < 0 || digits > maxRoundingDigits)
                 throw new ArgumentOutOfRangeException(nameof(digits));
 
-            float num = roundPower10Float[digits];
-            return (value * num).Floor() / num;
-        }
-        public static double Floor(this double value, int digits)
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            double num = roundPower10Double[digits];
-            return (value * num).Floor() / num;
-        }
-        public static decimal Floor(this decimal value, int digits)
-        {
-            if (digits < 0 || digits > maxRoundingDigits)
-                throw new ArgumentOutOfRangeException(nameof(digits));
-
-            decimal num = roundPower10Decimal[digits];
+            T num = T.CreateChecked(roundPower10Double[digits]);
             return (value * num).Floor() / num;
         }
         public static BigDecimal Floor(this BigDecimal value, int digits)
@@ -1076,244 +763,36 @@ namespace RuniOS.Utility
         #endregion
         
         #region Floor To SByte
-        public static sbyte FloorToSByte(this float value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Floor(value)
-            };
-        }
-        public static sbyte FloorToSByte(this double value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Floor(value)
-            };
-        }
-        public static sbyte FloorToSByte(this decimal value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Floor(value)
-            };
-        }
+        public static sbyte FloorToSByte<T>(this T value) where T : IFloatingPoint<T> => sbyte.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To Byte
-        public static byte FloorToByte(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Floor(value)
-            };
-        }
-        public static byte FloorToByte(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Floor(value)
-            };
-        }
-        public static byte FloorToByte(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Floor(value)
-            };
-        }
+        public static byte FloorToByte<T>(this T value) where T : IFloatingPoint<T> => byte.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To Short
-        public static short FloorToShort(this float value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Floor(value)
-            };
-        }
-        public static short FloorToShort(this double value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Floor(value)
-            };
-        }
-        public static short FloorToShort(this decimal value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Floor(value)
-            };
-        }
+        public static short FloorToShort<T>(this T value) where T : IFloatingPoint<T> => short.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To Ushort
-        public static ushort FloorToUShort(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Floor(value)
-            };
-        }
-        public static ushort FloorToUShort(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Floor(value)
-            };
-        }
-        public static ushort FloorToUShort(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Floor(value)
-            };
-        }
+        public static ushort FloorToUShort<T>(this T value) where T : IFloatingPoint<T> => ushort.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To Int
-        public static int FloorToInt(this float value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Floor(value)
-            };
-        }
-        public static int FloorToInt(this double value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Floor(value)
-            };
-        }
-        public static int FloorToInt(this decimal value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Floor(value)
-            };
-        }
+        public static int FloorToInt<T>(this T value) where T : IFloatingPoint<T> => int.CreateSaturating(T.Floor(value));
         public static BigInteger FloorToInt(this BigDecimal value) => (BigInteger)BigDecimal.Floor(value);
         #endregion
         
         #region Floor To UInt
-        public static uint FloorToUInt(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Floor(value)
-            };
-        }
-        public static uint FloorToUInt(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Floor(value)
-            };
-        }
-        public static uint FloorToUInt(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Floor(value)
-            };
-        }
+        public static uint FloorToUInt<T>(this T value) where T : IFloatingPoint<T> => uint.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To Long
-        public static long FloorToLong(this float value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Floor(value)
-            };
-        }
-        public static long FloorToLong(this double value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Floor(value)
-            };
-        }
-        public static long FloorToLong(this decimal value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Floor(value)
-            };
-        }
+        public static long FloorToLong<T>(this T value) where T : IFloatingPoint<T> => long.CreateSaturating(T.Floor(value));
         #endregion
         
         #region Floor To ULong
-        public static ulong FloorToULong(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Floor(value)
-            };
-        }
-        public static ulong FloorToULong(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Floor(value)
-            };
-        }
-        public static ulong FloorToULong(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Floor(value)
-            };
-        }
+        public static ulong FloorToULong<T>(this T value) where T : IFloatingPoint<T> => ulong.CreateSaturating(T.Floor(value));
         #endregion
 
         #region Gamma
@@ -5086,14 +4565,10 @@ namespace RuniOS.Utility
         #endregion
 
         #region Round
-        public static float Round(this float value) => (float)Math.Round(value);
-        public static double Round(this double value) => Math.Round(value);
-        public static decimal Round(this decimal value) => Math.Round(value);
+        public static T Round<T>(this T value) where T : IFloatingPoint<T> => T.Round(value);
         public static BigDecimal Round(this BigDecimal value) => BigDecimal.Round(value);
 
-        public static float Round(this float value, MidpointRounding midpointRounding) => (float)Math.Round(value, midpointRounding);
-        public static double Round(this double value, MidpointRounding midpointRounding) => Math.Round(value, midpointRounding);
-        public static decimal Round(this decimal value, MidpointRounding midpointRounding) => Math.Round(value, midpointRounding);
+        public static T Round<T>(this T value, MidpointRounding midpointRounding) where T : IFloatingPoint<T> => T.Round(value, midpointRounding);
         public static BigDecimal Round(this BigDecimal value, MidpointRounding midpointRounding) => midpointRounding switch
         {
             MidpointRounding.ToEven => BigDecimal.Round(value, RoundingStrategy.ToEven),
@@ -5104,9 +4579,7 @@ namespace RuniOS.Utility
             _ => throw new ArgumentOutOfRangeException(nameof(midpointRounding), midpointRounding, null)
         };
 
-        public static float Round(this float value, int digits) => (float)Math.Round(value, digits);
-        public static double Round(this double value, int digits) => Math.Round(value, digits);
-        public static decimal Round(this decimal value, int digits) => Math.Round(value, digits);
+        public static T Round<T>(this T value, int digits) where T : IFloatingPoint<T> => T.Round(value, digits);
         public static BigDecimal Round(this BigDecimal value, int digits)
         {
             if (digits < 0 || digits > maxRoundingDigits)
@@ -5116,250 +4589,40 @@ namespace RuniOS.Utility
             return BigDecimal.Round(value * num) / num;
         }
 
-        public static float Round(this float value, int digits, MidpointRounding midpointRounding) => (float)Math.Round(value, digits, midpointRounding);
-        public static double Round(this double value, int digits, MidpointRounding midpointRounding) => Math.Round(value, digits, midpointRounding);
-        public static decimal Round(this decimal value, int digits, MidpointRounding midpointRounding) => Math.Round(value, digits, midpointRounding);
+        public static T Round<T>(this T value, int digits, MidpointRounding midpointRounding) where T : IFloatingPoint<T> => T.Round(value, digits, midpointRounding);
         #endregion
         
         #region Round To SByte
-        public static sbyte RoundToSByte(this float value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Round(value)
-            };
-        }
-        public static sbyte RoundToSByte(this double value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Round(value)
-            };
-        }
-        public static sbyte RoundToSByte(this decimal value)
-        {
-            return value switch
-            {
-                <= sbyte.MinValue => sbyte.MinValue,
-                >= sbyte.MaxValue => sbyte.MaxValue,
-                _ => (sbyte)Math.Round(value)
-            };
-        }
+        public static sbyte RoundToSByte<T>(this T value) where T : IFloatingPoint<T> => sbyte.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To Byte
-        public static byte RoundToByte(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Round(value)
-            };
-        }
-        public static byte RoundToByte(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Round(value)
-            };
-        }
-        public static byte RoundToByte(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= byte.MaxValue => byte.MaxValue,
-                _ => (byte)Math.Round(value)
-            };
-        }
+        public static byte RoundToByte<T>(this T value) where T : IFloatingPoint<T> => byte.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To Short
-        public static short RoundToShort(this float value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Round(value)
-            };
-        }
-        public static short RoundToShort(this double value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Round(value)
-            };
-        }
-        public static short RoundToShort(this decimal value)
-        {
-            return value switch
-            {
-                <= short.MinValue => short.MinValue,
-                >= short.MaxValue => short.MaxValue,
-                _ => (short)Math.Round(value)
-            };
-        }
+        public static short RoundToShort<T>(this T value) where T : IFloatingPoint<T> => short.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To Ushort
-        public static ushort RoundToUShort(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Round(value)
-            };
-        }
-        public static ushort RoundToUShort(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Round(value)
-            };
-        }
-        public static ushort RoundToUShort(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ushort.MaxValue => ushort.MaxValue,
-                _ => (ushort)Math.Round(value)
-            };
-        }
+        public static ushort RoundToUShort<T>(this T value) where T : IFloatingPoint<T> => ushort.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To Int
-        public static int RoundToInt(this float value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Round(value)
-            };
-        }
-        public static int RoundToInt(this double value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Round(value)
-            };
-        }
-        public static int RoundToInt(this decimal value)
-        {
-            return value switch
-            {
-                <= int.MinValue => int.MinValue,
-                >= int.MaxValue => int.MaxValue,
-                _ => (int)Math.Round(value)
-            };
-        }
+        public static int RoundToInt<T>(this T value) where T : IFloatingPoint<T> => int.CreateSaturating(T.Round(value));
         public static BigInteger RoundToInt(this BigDecimal value) => BigDecimal.Round(value);
         #endregion
         
         #region Round To UInt
-        public static uint RoundToUInt(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Round(value)
-            };
-        }
-        public static uint RoundToUInt(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Round(value)
-            };
-        }
-        public static uint RoundToUInt(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= uint.MaxValue => uint.MaxValue,
-                _ => (uint)Math.Round(value)
-            };
-        }
+        public static uint RoundToUInt<T>(this T value) where T : IFloatingPoint<T> => uint.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To Long
-        public static long RoundToLong(this float value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Round(value)
-            };
-        }
-        public static long RoundToLong(this double value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Round(value)
-            };
-        }
-        public static long RoundToLong(this decimal value)
-        {
-            return value switch
-            {
-                <= long.MinValue => long.MinValue,
-                >= long.MaxValue => long.MaxValue,
-                _ => (long)Math.Round(value)
-            };
-        }
+        public static long RoundToLong<T>(this T value) where T : IFloatingPoint<T> => long.CreateSaturating(T.Round(value));
         #endregion
         
         #region Round To ULong
-        public static ulong RoundToULong(this float value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Round(value)
-            };
-        }
-        public static ulong RoundToULong(this double value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Round(value)
-            };
-        }
-        public static ulong RoundToULong(this decimal value)
-        {
-            return value switch
-            {
-                <= 0 => 0,
-                >= ulong.MaxValue => ulong.MaxValue,
-                _ => (ulong)Math.Round(value)
-            };
-        }
+        public static ulong RoundToULong<T>(this T value) where T : IFloatingPoint<T> => ulong.CreateSaturating(T.Round(value));
         #endregion
 
         #region  Round Based On Minimum Difference
@@ -5650,9 +4913,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Truncate
-        public static float Truncate(this float value) => (float)Math.Truncate(value);
-        public static double Truncate(this double value) => Math.Truncate(value);
-        public static decimal Truncate(this decimal value) => Math.Truncate(value);
+        public static T Truncate<T>(this T value) where T : IFloatingPoint<T> => T.Truncate(value);
         public static BigDecimal Truncate(this BigDecimal value) => BigDecimal.Truncate(value);
         #endregion
 
