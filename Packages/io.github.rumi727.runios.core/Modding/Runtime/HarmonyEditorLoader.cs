@@ -11,7 +11,7 @@ namespace RuniOS.Modding
     static partial class HarmonyEditorLoader
     {
         const string harmonyAssemblyName = "0Harmony";
-        const string harmonyPath = "Packages/io.github.rumi727.nuget.lib.harmony.thin/0Harmony.dll";
+        const string harmonyPath = "Packages/io.github.rumi727.nuget.lib.harmony/0Harmony.dll";
 
         [OnAssemblyLoaded]
         static void OnAssemblyLoaded() => AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;

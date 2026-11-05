@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 698a52835e9e49928bcc6a05be369bcd, type: 3}
-  m_Name: io.github.rumi727.nuget.lib.harmony.thin
+  m_Name: io.github.rumi727.nuget.lib.harmony
   m_EditorClassIdentifier: RuniOS.PackageManagement.Unity::RuniOS.PackageManagement.Unity.GitPackage
-  _id: io.github.rumi727.nuget.lib.harmony.thin
-  _displayName: "Lib.Harmony.Thin (NuGet)"
+  _id: io.github.rumi727.nuget.lib.harmony
+  _displayName: "Lib.Harmony (NuGet)"
   labelKey: ""
   oneLineDescriptionKey: ""
   descriptionKey: ""
@@ -22,4 +22,4 @@ MonoBehaviour:
   _dependencies: []
   repositoryUrl: https://github.com/Rumi727/Runiverse-OS.git
   revision: ""
-  packagePath: Packages/io.github.rumi727.nuget.lib.harmony.thin
+  packagePath: Packages/io.github.rumi727.nuget.lib.harmony

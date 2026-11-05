@@ -1308,7 +1308,7 @@ SOFTWARE.
 
 ## Harmony 2
 
-Files: `Packages/io.github.rumi727.nuget.lib.harmony.thin/0Harmony.dll`
+Files: `Packages/io.github.rumi727.nuget.lib.harmony/0Harmony.dll`
 
 Source: https://github.com/pardeike/Harmony  
 Copyright (c) 2017 Andreas Pardeike
