@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using RuniOS.Json.Converters;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using UnityEngine;
 
 namespace RuniOS
@@ -400,53 +401,44 @@ namespace RuniOS
                 return false;
             }
 
-            int sharp = 0;
-            if (hex[0] == '#')
-                sharp++;
+            ReadOnlySpan<char> digits = hex.AsSpan(hex[0] == '#' ? 1 : 0);
 
-            try
+            byte r, g, bl, al = 255;
+            bool success;
+            switch (digits.Length)
             {
-                // '#'를 고려한 후 파싱할 충분한 문자열이 있는지 확인
-                if (hex.Length >= 3 + sharp && hex.Length <= 8 + sharp) // 최대 길이: #RRGGBBAA
-                {
-                    if (hex.Length == 8 + sharp) // #RRGGBBAA
-                    {
-                        result = new Color32(Convert.ToByte(hex.Substring(0 + sharp, 2), 16), Convert.ToByte(hex.Substring(2 + sharp, 2), 16), Convert.ToByte(hex.Substring(4 + sharp, 2), 16), Convert.ToByte(hex.Substring(6 + sharp, 2), 16));
-                        return true;
-                    }
-                    else if (hex.Length == 6 + sharp) // #RRGGBB
-                    {
-                        result = new Color32(Convert.ToByte(hex.Substring(0 + sharp, 2), 16), Convert.ToByte(hex.Substring(2 + sharp, 2), 16), Convert.ToByte(hex.Substring(4 + sharp, 2), 16), 255);
-                        return true;
-                    }
-                    else if (hex.Length == 4 + sharp) // #RGBA
-                    {
-                        string i = hex[0 + sharp].ToString();
-                        string i1 = hex[1 + sharp].ToString();
-                        string i2 = hex[2 + sharp].ToString();
-                        string i3 = hex[3 + sharp].ToString();
-
-                        result = new Color32(Convert.ToByte(i + i, 16), Convert.ToByte(i1 + i1, 16), Convert.ToByte(i2 + i2, 16), Convert.ToByte(i3 + i3, 16));
-                        return true;
-                    }
-                    else if (hex.Length == 3 + sharp) // #RGB
-                    {
-                        string i = hex[0 + sharp].ToString();
-                        string i1 = hex[1 + sharp].ToString();
-                        string i2 = hex[2 + sharp].ToString();
-
-                        result = new Color32(Convert.ToByte(i + i, 16), Convert.ToByte(i1 + i1, 16), Convert.ToByte(i2 + i2, 16), 255);
-                        return true;
-                    }
-                }
-            }
-            catch
-            {
-                // 파싱 실패 시 false를 반환합니다.
+                case 8: // #RRGGBBAA
+                    success = TryParseHexByte(digits[..2], out r) & TryParseHexByte(digits[2..4], out g) & TryParseHexByte(digits[4..6], out bl) & TryParseHexByte(digits[6..], out al);
+                    break;
+                case 6: // #RRGGBB
+                    success = TryParseHexByte(digits[..2], out r) & TryParseHexByte(digits[2..4], out g) & TryParseHexByte(digits[4..], out bl);
+                    break;
+                case 4: // #RGBA
+                    success = TryParseHexNibble(digits[0], out r) & TryParseHexNibble(digits[1], out g) & TryParseHexNibble(digits[2], out bl) & TryParseHexNibble(digits[3], out al);
+                    break;
+                case 3: // #RGB
+                    success = TryParseHexNibble(digits[0], out r) & TryParseHexNibble(digits[1], out g) & TryParseHexNibble(digits[2], out bl);
+                    break;
+                default:
+                    success = false;
+                    r = g = bl = 0;
+                    break;
             }
 
-            result = default;
-            return false;
+            result = success ? new Color32(r, g, bl, al) : default;
+            return success;
+        }
+
+        static bool TryParseHexByte(ReadOnlySpan<char> digits, out byte value) => byte.TryParse(digits, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value);
+
+        // #RGB 형식의 한 자리 값은 같은 자리를 두 번 반복한 값(0xF -> 0xFF)입니다.
+        static bool TryParseHexNibble(char digit, out byte value)
+        {
+            if (!byte.TryParse(stackalloc char[] { digit }, NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture, out value))
+                return false;
+
+            value *= 17;
+            return true;
         }
 
         /// <summary>
