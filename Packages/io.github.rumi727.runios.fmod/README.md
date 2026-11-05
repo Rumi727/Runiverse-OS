@@ -247,6 +247,8 @@ IONode/Stream 비동기 읽기 또는 열기
 동기 생성이 끝났다는 뜻입니다. 시스템 해제가 먼저 완료되면 worker의 생성 단계에서
 `ObjectDisposedException`이 await 지점으로 전달될 수 있습니다.
 
+`Create*Async`는 `WaveAudioClip?`를 반환합니다. 시스템에서 생성 작업을 실행하지 못한 경우 `null`일 수 있으므로 호출자는 결과의 `null` 여부를 확인해야 합니다.
+
 `CreateSoundAsync`, `CreatePCMAsync`, `CreateStreamAsync`는 현재 스레드가 SoundSystem lock을
 소유한 상태라면 즉시 실패시켜 `Execute` 내부의 잘못된 비동기 호출을 막습니다.
 
@@ -263,7 +265,9 @@ using RuniOS.Sounds;
 
 async UniTask PlayOnce(SoundSystem system, IONode node)
 {
-    WaveAudioClip clip = await system.CreateSoundAsync(node);
+    WaveAudioClip? clip = await system.CreateSoundAsync(node);
+    if (clip == null)
+        return;
 
     try
     {
@@ -289,7 +293,7 @@ async UniTask PlayOnce(SoundSystem system, IONode node)
 raw PCM을 이미 메모리에 가지고 있다면 다음 경로를 사용합니다.
 
 ```csharp
-WaveAudioClip clip = await system.CreatePCMAsync(
+WaveAudioClip? clip = await system.CreatePCMAsync(
     pcm,
     channel: 2,
     frequency: 48_000,
