@@ -126,8 +126,11 @@ namespace RuniOS.Utility
         }
 
         #region Approximately
-        public static bool Approximately(this float a, float b) => (b - a).Abs() < Max(1E-06f * Max(a.Abs(), b.Abs()), float.Epsilon * 8f);
-        public static bool Approximately(this double a, double b) => (b - a).Abs() < Max(1E-14d * Max(a.Abs(), b.Abs()), double.Epsilon * 8f);
+        public static bool Approximately<T>(this T a, T b) where T : IFloatingPointIeee754<T>
+        {
+            T relativeTolerance = T.CreateChecked(typeof(T) == typeof(double) ? 1E-14 : 1E-06);
+            return (b - a).Abs() < Max(relativeTolerance * Max(a.Abs(), b.Abs()), T.Epsilon * T.CreateChecked(8));
+        }
         #endregion
 
         #region Asin
@@ -468,8 +471,7 @@ namespace RuniOS.Utility
                 #endregion
 
         #region Get Number Of Decimals For Minimum Difference
-        public static int GetNumberOfDecimalsForMinimumDifference(this float minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
-        public static int GetNumberOfDecimalsForMinimumDifference(this double minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
+        public static int GetNumberOfDecimalsForMinimumDifference<T>(this T minDifference) where T : IFloatingPoint<T>, ILogarithmicFunctions<T> => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
         public static int GetNumberOfDecimalsForMinimumDifference(this decimal minDifference) => (-minDifference.Abs().Log10().FloorToInt()).Clamp(0);
         #endregion
 
@@ -1379,8 +1381,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region  Round Based On Minimum Difference
-        public static float RoundBasedOnMinimumDifference(this float valueToRound, float minDifference) => minDifference == 0.0f ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
-        public static double RoundBasedOnMinimumDifference(this double valueToRound, double minDifference) => minDifference == 0.0 ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
+        public static T RoundBasedOnMinimumDifference<T>(this T valueToRound, T minDifference) where T : IFloatingPoint<T>, ILogarithmicFunctions<T> => T.IsZero(minDifference) ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
         public static decimal RoundBasedOnMinimumDifference(this decimal valueToRound, decimal minDifference) => minDifference == 0.0m ? valueToRound.DiscardLeastSignificantDecimal() : valueToRound.Round(minDifference.GetNumberOfDecimalsForMinimumDifference(), MidpointRounding.AwayFromZero);
         #endregion 
 
@@ -1542,21 +1543,19 @@ namespace RuniOS.Utility
         #endregion
 
         #region Discard Least Significant Decimal
-        public static float DiscardLeastSignificantDecimal(this float value) => ((double)value).DiscardLeastSignificantDecimal().ClampToFloat();
-
-        public static double DiscardLeastSignificantDecimal(this double value)
+        public static T DiscardLeastSignificantDecimal<T>(this T value) where T : IFloatingPoint<T>, ILogarithmicFunctions<T>
         {
-            int digits = (int)(5 - value.Abs().Log10()).Clamp(0);
+            int digits = (T.CreateChecked(5) - value.Abs().Log10()).Clamp(0).ClampToInt();
             try
             {
                 return value.Round(digits);
             }
             catch (ArgumentOutOfRangeException)
             {
-                return 0;
+                return T.Zero;
             }
         }
-        
+
         public static decimal DiscardLeastSignificantDecimal(this decimal value)
         {
             int digits = (int)(5 - value.Abs().Log10()).Clamp(0);
