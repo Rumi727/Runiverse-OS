@@ -5597,94 +5597,56 @@ namespace RuniOS.Utility
         #endregion
         
         #region Clamp To SByte
-        public static sbyte ClampToSByte<T>(this T value) where T : IBinaryInteger<T> => sbyte.CreateSaturating(value);
-        public static sbyte ClampToSByte(this float value) => value.FloorToSByte();
-        public static sbyte ClampToSByte(this double value) => value.FloorToSByte();
-        public static sbyte ClampToSByte(this decimal value) => value.FloorToSByte();
+        public static sbyte ClampToSByte<T>(this T value) where T : INumberBase<T> => sbyte.CreateSaturating(value);
         #endregion
         
         #region Clamp To Byte
-        public static byte ClampToByte<T>(this T value) where T : IBinaryInteger<T> => byte.CreateSaturating(value);
-        public static byte ClampToByte(this float value) => value.FloorToByte();
-        public static byte ClampToByte(this double value) => value.FloorToByte();
-        public static byte ClampToByte(this decimal value) => value.FloorToByte();
+        public static byte ClampToByte<T>(this T value) where T : INumberBase<T> => byte.CreateSaturating(value);
         #endregion
         
         #region Clamp To Short
-        public static short ClampToShort<T>(this T value) where T : IBinaryInteger<T> => short.CreateSaturating(value);
-        public static short ClampToShort(this float value) => value.FloorToShort();
-        public static short ClampToShort(this double value) => value.FloorToShort();
-        public static short ClampToShort(this decimal value) => value.FloorToShort();
+        public static short ClampToShort<T>(this T value) where T : INumberBase<T> => short.CreateSaturating(value);
         #endregion
         
         #region Clamp To UShort
-        public static ushort ClampToUShort<T>(this T value) where T : IBinaryInteger<T> => ushort.CreateSaturating(value);
-        public static ushort ClampToUShort(this float value) => value.FloorToUShort();
-        public static ushort ClampToUShort(this double value) => value.FloorToUShort();
-        public static ushort ClampToUShort(this decimal value) => value.FloorToUShort();
+        public static ushort ClampToUShort<T>(this T value) where T : INumberBase<T> => ushort.CreateSaturating(value);
         #endregion
 
         #region Clamp To Int
-        public static int ClampToInt<T>(this T value) where T : IBinaryInteger<T> => int.CreateSaturating(value);
-        public static int ClampToInt(this float value) => value.FloorToInt();
-        public static int ClampToInt(this double value) => value.FloorToInt();
-        public static int ClampToInt(this decimal value) => value.FloorToInt();
+        public static int ClampToInt<T>(this T value) where T : INumberBase<T> => int.CreateSaturating(value);
         #endregion
         
         #region Clamp To UInt
-        public static uint ClampToUInt<T>(this T value) where T : IBinaryInteger<T> => uint.CreateSaturating(value);
-        public static uint ClampToUInt(this float value) => value.FloorToUInt();
-        public static uint ClampToUInt(this double value) => value.FloorToUInt();
-        public static uint ClampToUInt(this decimal value) => value.FloorToUInt();
+        public static uint ClampToUInt<T>(this T value) where T : INumberBase<T> => uint.CreateSaturating(value);
         #endregion
         
         #region Clamp To Long
-        public static long ClampToLong<T>(this T value) where T : IBinaryInteger<T> => long.CreateSaturating(value);
-        public static long ClampToLong(this float value) => value.FloorToLong();
-        public static long ClampToLong(this double value) => value.FloorToLong();
-        public static long ClampToLong(this decimal value) => value.FloorToLong();
+        public static long ClampToLong<T>(this T value) where T : INumberBase<T> => long.CreateSaturating(value);
         #endregion
         
         #region Clamp To ULong
-        public static ulong ClampToULong<T>(this T value) where T : IBinaryInteger<T> => ulong.CreateSaturating(value);
-        public static ulong ClampToULong(this float value) => value.FloorToULong();
-        public static ulong ClampToULong(this double value) => value.FloorToULong();
-        public static ulong ClampToULong(this decimal value) => value.FloorToULong();
+        public static ulong ClampToULong<T>(this T value) where T : INumberBase<T> => ulong.CreateSaturating(value);
         #endregion
         
         #region Clamp To Float
-        public static float ClampToFloat<T>(this T value) where T : IBinaryInteger<T> => float.CreateSaturating(value);
-        public static float ClampToFloat(this float value) => value;
+        public static float ClampToFloat<T>(this T value) where T : INumberBase<T> => float.CreateSaturating(value);
         public static float ClampToFloat(this double value) => (float)value.Clamp(float.MinValue, float.MaxValue);
-        public static float ClampToFloat(this decimal value) => (float)value;
         #endregion
         
         #region Clamp To Double
-        public static double ClampToDouble<T>(this T value) where T : IBinaryInteger<T> => double.CreateSaturating(value);
-        public static double ClampToDouble(this float value) => value;
-        public static double ClampToDouble(this double value) => value;
-        public static double ClampToDouble(this decimal value) => (double)value;
+        public static double ClampToDouble<T>(this T value) where T : INumberBase<T> => double.CreateSaturating(value);
         #endregion
         
         #region Clamp To Decimal
-        public static decimal ClampToDecimal<T>(this T value) where T : IBinaryInteger<T> => decimal.CreateSaturating(value);
-        public static decimal ClampToDecimal(this float value) => (decimal)value.Clamp(decimal.MinValue.ClampToFloat(), decimal.MaxValue.ClampToFloat());
-        public static decimal ClampToDecimal(this double value) => (decimal)value.Clamp(decimal.MinValue.ClampToFloat(), decimal.MaxValue.ClampToFloat());
-        public static decimal ClampToDecimal(this decimal value) => value; 
+        public static decimal ClampToDecimal<T>(this T value) where T : INumberBase<T> => decimal.CreateSaturating(value);
         #endregion
         
         #region Clamp To NInt
-        public static nint ClampToNInt<T>(this T value) where T : IBinaryInteger<T> => nint.CreateSaturating(value);
-        public static nint ClampToNInt(this float value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
-        public static nint ClampToNInt(this double value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
-        public static nint ClampToNInt(this decimal value) => (nint)value.FloorToLong().Clamp(nintMinSize, nintMaxSize);
+        public static nint ClampToNInt<T>(this T value) where T : INumberBase<T> => nint.CreateSaturating(value);
         #endregion
         
         #region Clamp To NUInt
-        public static nuint ClampToNUInt<T>(this T value) where T : IBinaryInteger<T> => nuint.CreateSaturating(value);
-        public static nuint ClampToNUInt(this float value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
-        public static nuint ClampToNUInt(this double value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
-        public static nuint ClampToNUInt(this decimal value) => (nuint)value.FloorToULong().Clamp(0, nuintMaxSize);
+        public static nuint ClampToNUInt<T>(this T value) where T : INumberBase<T> => nuint.CreateSaturating(value);
         #endregion
 
         #region Truncate
