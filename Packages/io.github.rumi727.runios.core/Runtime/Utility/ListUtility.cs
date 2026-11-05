@@ -366,33 +366,6 @@ namespace RuniOS.Utility
         }
         #endregion
 
-        public static TSource MinBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> selector)
-        {
-            ArgumentNullException.ThrowIfNull(source);
-
-            using IEnumerator<TSource> sourceIterator = source.GetEnumerator();
-            if (!sourceIterator.MoveNext())
-                throw new InvalidOperationException("Empty sequence");
-
-            var comparer = Comparer<TKey>.Default;
-            TSource min = sourceIterator.Current;
-            TKey minKey = selector(min);
-
-            while (sourceIterator.MoveNext())
-            {
-                TSource current = sourceIterator.Current;
-                TKey currentKey = selector(current);
-
-                if (comparer.Compare(currentKey, minKey) >= 0)
-                    continue;
-
-                min = current;
-                minKey = currentKey;
-            }
-
-            return min;
-        }
-        
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector) => sources.OrderByAlphaNumeric(selector, StringComparer.CurrentCulture);
 
         public static IEnumerable<T> OrderByAlphaNumeric<T>(this IEnumerable<T> sources, Func<T, string> selector, StringComparer comparer)
