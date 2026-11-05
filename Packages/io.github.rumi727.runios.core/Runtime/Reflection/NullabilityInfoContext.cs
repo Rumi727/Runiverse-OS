@@ -487,11 +487,7 @@ namespace RuniOS.Reflection
             NetDebug.Assert(genericParameter.IsGenericParameter);
  
             if (reflectedType is not null
-#if NET
                 && !genericParameter.IsGenericMethodParameter
-#else
-                && !genericParameter.IsGenericMethodParameter()
-#endif
                 && TryUpdateGenericTypeParameterNullabilityFromReflectedType(nullability, genericParameter, reflectedType, reflectedType))
             {
                 return true;
@@ -523,11 +519,7 @@ namespace RuniOS.Reflection
         bool TryUpdateGenericTypeParameterNullabilityFromReflectedType(NullabilityInfo nullability, Type genericParameter, Type context, Type reflectedType)
         {
             NetDebug.Assert(genericParameter.IsGenericParameter &&
-#if NET
                 !genericParameter.IsGenericMethodParameter);
-#else
-                !genericParameter.IsGenericMethodParameter());
-#endif
  
             Type contextTypeDefinition = context.IsGenericType && !context.IsGenericTypeDefinition ? context.GetGenericTypeDefinition() : context;
             if (genericParameter.DeclaringType == contextTypeDefinition)

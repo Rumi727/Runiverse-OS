@@ -36,13 +36,8 @@ namespace RuniOS.Editor.UIElements.Serialization
                     modifiers |= EventModifiers.Command;
                 else if (part.Length == 1 && char.IsDigit(part[0]))
                     keyCode = KeyCode.Alpha0 + (part[0] - '0');
-#if NET
                 else if (Enum.TryParse(part, true, out KeyCode parsed))
                     keyCode = parsed;
-#else
-                else if (Enum.TryParse(part.ToString(), true, out KeyCode parsed))
-                    keyCode = parsed;
-#endif
                 else
                     Debug.LogError($"'{part.ToString()}' is not a valid key in shortcut '{value}'.");
             }

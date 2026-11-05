@@ -91,10 +91,6 @@ namespace RuniOS.Linq
         public static ReadOnlyQueue<T> AsReadOnly<T>(this Queue<T> list) => new ReadOnlyQueue<T>(list);
         public static ReadOnlyStack<T> AsReadOnly<T>(this Stack<T> list) => new ReadOnlyStack<T>(list);
 
-#if !NET
-        public static ReadOnlyDictionary<TKey, TValue> AsReadOnly<TKey, TValue>(this IDictionary<TKey, TValue> dictionary) => new ReadOnlyDictionary<TKey, TValue>(dictionary);
-#endif
-
         public static bool IsEmpty<T>(this IEnumerable<T> collection) => !collection.Any();
         
         public static bool TwoOrMore<T>(this IEnumerable<T> source)

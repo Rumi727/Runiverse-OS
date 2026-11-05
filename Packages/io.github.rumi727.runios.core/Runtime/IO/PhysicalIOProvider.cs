@@ -3,14 +3,8 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.Linq.Async;
 using RuniOS.Spans;
-#if !NET
-using System.ComponentModel;
-#endif
 using System.IO;
 using System.IO.Enumeration;
-#if !NET
-using System.Runtime.InteropServices;
-#endif
 using System.Threading;
 
 namespace RuniOS.IO
@@ -293,23 +287,10 @@ namespace RuniOS.IO
             string linkPath = ResolveFullPath(path);
             string relativeTarget = Path.GetRelativePath(Path.GetDirectoryName(linkPath)!, ResolveFullPath(target));
 
-#if NET
             if (isDirectory)
                 Directory.CreateSymbolicLink(linkPath, relativeTarget);
             else
                 File.CreateSymbolicLink(linkPath, relativeTarget);
-#else
-            // .NET Standard 프로파일에는 File·Directory.CreateSymbolicLink가 없어 운영체제 함수를 직접 부릅니다.
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                // 개발자 모드가 켜져 있으면 관리자 권한 없이도 만들 수 있도록 합니다.
-                uint flags = Native.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE | (isDirectory ? Native.SYMBOLIC_LINK_FLAG_DIRECTORY : 0);
-                if (!Native.CreateSymbolicLinkW(linkPath, relativeTarget, flags))
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-            }
-            else if (Native.symlink(relativeTarget, linkPath) != 0)
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-#endif
 
             return UniTask.CompletedTask;
         }
@@ -441,20 +422,5 @@ namespace RuniOS.IO
         );
 
         void IDisposable.Dispose() { }
-
-#if !NET
-        static class Native
-        {
-            public const uint SYMBOLIC_LINK_FLAG_DIRECTORY = 0x1;
-            public const uint SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE = 0x2;
-
-            [DllImport("kernel32.dll", CharSet = CharSet.Unicode, ExactSpelling = true, SetLastError = true)]
-            [return: MarshalAs(UnmanagedType.U1)]
-            public static extern bool CreateSymbolicLinkW(string symlinkFileName, string targetFileName, uint flags);
-
-            [DllImport("libc", SetLastError = true)]
-            public static extern int symlink(string target, string linkPath);
-        }
-#endif
     }
 }
