@@ -352,13 +352,6 @@ namespace RuniOS.IO
             }
         }
 
-            catch
-            {
-                attributes = default;
-                return false;
-            }
-        }
-
         /// <summary>
         /// Creates an exception for a path that escapes the provider root.<br/>
         /// 프로바이더 루트 밖으로 벗어난 경로에 대한 예외를 생성합니다.
