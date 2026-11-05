@@ -6,7 +6,7 @@ namespace RuniOS.Textures
     static partial class FreeImage
     {
         [StructLayout(LayoutKind.Sequential)]
-        public readonly struct Bitmap : IDisposable
+        public readonly partial struct Bitmap : IDisposable
         {
             public static Bitmap LoadFromMemory(Format format, Memory memory, LoadFlags flags) => FreeImage_LoadFromMemory(format, memory, flags);
 
@@ -41,33 +41,33 @@ namespace RuniOS.Textures
 
             public void Dispose() => FreeImage_Unload(handle);
 
-            [DllImport(dllName)] static extern ImageType FreeImage_GetImageType(Bitmap bitmap);
-            [DllImport(dllName)] static extern ColorType FreeImage_GetColorType(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial ImageType FreeImage_GetImageType(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial ColorType FreeImage_GetColorType(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern int FreeImage_GetTransparencyCount(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial int FreeImage_GetTransparencyCount(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern uint FreeImage_GetColorsUsed(Bitmap bitmap);
-            [DllImport(dllName)] static extern IntPtr FreeImage_GetPalette(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetColorsUsed(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial IntPtr FreeImage_GetPalette(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern bool FreeImage_IsTransparent(Bitmap bitmap);
+            [LibraryImport(dllName)] [return: MarshalAs(UnmanagedType.Bool)] private static partial bool FreeImage_IsTransparent(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern uint FreeImage_GetRedMask(Bitmap bitmap);
-            [DllImport(dllName)] static extern uint FreeImage_GetGreenMask(Bitmap bitmap);
-            [DllImport(dllName)] static extern uint FreeImage_GetBlueMask(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetRedMask(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetGreenMask(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetBlueMask(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern uint FreeImage_GetWidth(Bitmap bitmap);
-            [DllImport(dllName)] static extern uint FreeImage_GetHeight(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetWidth(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial uint FreeImage_GetHeight(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern int FreeImage_GetBPP(Bitmap bitmap);
-            [DllImport(dllName)] static extern IntPtr FreeImage_GetBits(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial int FreeImage_GetBPP(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial IntPtr FreeImage_GetBits(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern int FreeImage_GetPitch(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial int FreeImage_GetPitch(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern Bitmap FreeImage_ConvertTo24Bits(Bitmap bitmap);
-            [DllImport(dllName)] static extern Bitmap FreeImage_ConvertTo32Bits(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial Bitmap FreeImage_ConvertTo24Bits(Bitmap bitmap);
+            [LibraryImport(dllName)] private static partial Bitmap FreeImage_ConvertTo32Bits(Bitmap bitmap);
 
-            [DllImport(dllName)] static extern Bitmap FreeImage_LoadFromMemory(Format format, Memory memory, LoadFlags flags);
-            [DllImport(dllName)] static extern void FreeImage_Unload(IntPtr bitmap);
+            [LibraryImport(dllName)] private static partial Bitmap FreeImage_LoadFromMemory(Format format, Memory memory, LoadFlags flags);
+            [LibraryImport(dllName)] private static partial void FreeImage_Unload(IntPtr bitmap);
         }
     }
 }

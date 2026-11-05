@@ -6,7 +6,7 @@ namespace RuniOS.Textures
     static partial class FreeImage
     {
         [StructLayout(LayoutKind.Sequential)]
-        public struct Memory : IDisposable
+        public partial struct Memory : IDisposable
         {
             public static Memory Open(IntPtr data, uint sizeInBytes) => FreeImage_OpenMemory(data, sizeInBytes);
 
@@ -25,10 +25,10 @@ namespace RuniOS.Textures
                 handle = IntPtr.Zero;
             }
 
-            [DllImport(dllName)] static extern Format FreeImage_GetFileTypeFromMemory(Memory memory, int size);
+            [LibraryImport(dllName)] private static partial Format FreeImage_GetFileTypeFromMemory(Memory memory, int size);
 
-            [DllImport(dllName)] static extern Memory FreeImage_OpenMemory(IntPtr data, uint sizeInBytes);
-            [DllImport(dllName)] static extern void FreeImage_CloseMemory(IntPtr memory);
+            [LibraryImport(dllName)] private static partial Memory FreeImage_OpenMemory(IntPtr data, uint sizeInBytes);
+            [LibraryImport(dllName)] private static partial void FreeImage_CloseMemory(IntPtr memory);
         }
     }
 }
