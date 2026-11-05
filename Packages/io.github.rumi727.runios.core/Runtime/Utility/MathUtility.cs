@@ -1523,7 +1523,7 @@ namespace RuniOS.Utility
         }
         #endregion
 
-        public static bool IsPowerOfTwo(this int value) => Mathf.IsPowerOfTwo(value);
+        public static bool IsPowerOfTwo(this int value) => int.IsPow2(value);
 
         #region Lerp
         public static sbyte Lerp(this sbyte current, sbyte target, sbyte t) => t > 0 ? target : current;
@@ -3609,7 +3609,7 @@ namespace RuniOS.Utility
         }
         #endregion
 
-        public static int NextPowerOfTwo(this int value) => Mathf.NextPowerOfTwo(value);
+        public static int NextPowerOfTwo(this int value) => (int)BitOperations.RoundUpToPowerOf2((uint)value);
 
         public static float PerlinNoise(this float x, float y) => Mathf.PerlinNoise(x, y);
 
