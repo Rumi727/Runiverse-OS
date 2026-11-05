@@ -13,7 +13,8 @@ namespace RuniOS
 
         public void Add(TKey key, TValue value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             uniObjects.Add(key, value);
@@ -21,7 +22,8 @@ namespace RuniOS
         
         public void AddOrUpdate(TKey key, TValue value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             uniObjects[key] = value;
@@ -29,7 +31,8 @@ namespace RuniOS
 
         public bool TryAdd(TKey key, TValue value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             return uniObjects.TryAdd(key, value);
@@ -37,7 +40,8 @@ namespace RuniOS
         
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             return uniObjects.TryGetValue(key, out value);
@@ -45,7 +49,8 @@ namespace RuniOS
 
         public void Remove(TKey key)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             uniObjects.Remove(key);
@@ -53,7 +58,8 @@ namespace RuniOS
 
         public TValue GetOrCreateValue(TKey key)
         {
-            ExceptionUtility.ThrowIfArgumentNull(key, nameof(key));
+            if (key == null)
+                throw new ArgumentNullException(nameof(key));
             Clean();
             
             if (uniObjects.TryGetValue(key, out TValue? value))
