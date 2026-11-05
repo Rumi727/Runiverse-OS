@@ -334,7 +334,9 @@ namespace RuniOS.IO
             foreach (var segment in segments)
             {
                 currentPath = Path.Combine(currentPath, segment.ToString());
-                if (!TryGetAttributes(currentPath, out FileAttributes attributes))
+                // 존재하지 않는 경로는 FileInfo.Attributes가 -1을 반환합니다.
+                FileAttributes attributes = new FileInfo(currentPath).Attributes;
+                if (attributes == (FileAttributes)(-1))
                     continue;
 
                 if ((attributes & FileAttributes.ReparsePoint) == 0)
@@ -350,29 +352,6 @@ namespace RuniOS.IO
             }
         }
 
-        /// <summary>
-        /// Tries to read file-system attributes for the specified physical path.<br/>
-        /// 지정된 물리 경로의 파일 시스템 특성 읽기를 시도합니다.
-        /// </summary>
-        /// <param name="path">
-        /// The physical path to inspect.<br/>
-        /// 검사할 물리 경로입니다.
-        /// </param>
-        /// <param name="attributes">
-        /// When this method returns <see langword="true"/>, contains the attributes read from <paramref name="path"/>.<br/>
-        /// 이 메서드가 <see langword="true"/>를 반환하면 <paramref name="path"/>에서 읽은 특성을 포함합니다.
-        /// </param>
-        /// <returns>
-        /// <see langword="true"/> if attributes were read; <see langword="false"/> if the file or directory was not found.<br/>
-        /// 특성을 읽었으면 <see langword="true"/>를 반환하고, 파일 또는 디렉터리를 찾지 못했으면 <see langword="false"/>를 반환합니다.
-        /// </returns>
-        static bool TryGetAttributes(string path, out FileAttributes attributes)
-        {
-            try
-            {
-                attributes = File.GetAttributes(path);
-                return true;
-            }
             catch
             {
                 attributes = default;
