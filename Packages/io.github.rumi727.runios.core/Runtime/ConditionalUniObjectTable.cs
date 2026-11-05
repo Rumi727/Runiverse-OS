@@ -13,8 +13,7 @@ namespace RuniOS
 
         public void Add(TKey key, TValue value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             uniObjects.Add(key, value);
@@ -22,8 +21,7 @@ namespace RuniOS
         
         public void AddOrUpdate(TKey key, TValue value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             uniObjects[key] = value;
@@ -31,8 +29,7 @@ namespace RuniOS
 
         public bool TryAdd(TKey key, TValue value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             return uniObjects.TryAdd(key, value);
@@ -40,8 +37,7 @@ namespace RuniOS
         
         public bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             return uniObjects.TryGetValue(key, out value);
@@ -49,8 +45,7 @@ namespace RuniOS
 
         public void Remove(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             uniObjects.Remove(key);
@@ -58,8 +53,7 @@ namespace RuniOS
 
         public TValue GetOrCreateValue(TKey key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            ArgumentNullException.ThrowIfUnityNull(key);
             Clean();
             
             if (uniObjects.TryGetValue(key, out TValue? value))
