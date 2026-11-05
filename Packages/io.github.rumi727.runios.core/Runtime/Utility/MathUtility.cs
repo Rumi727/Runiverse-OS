@@ -1326,9 +1326,9 @@ namespace RuniOS.Utility
         {
             MidpointRounding.ToEven => BigDecimal.Round(value, RoundingStrategy.ToEven),
             MidpointRounding.AwayFromZero => BigDecimal.Round(value, RoundingStrategy.AwayFromZero),
-            /*MidpointRounding.ToZero => BigDecimal.Truncate(value),
+            MidpointRounding.ToZero => BigDecimal.Truncate(value),
             MidpointRounding.ToNegativeInfinity => BigDecimal.Floor(value),
-            MidpointRounding.ToPositiveInfinity => BigDecimal.Ceiling(value),*/
+            MidpointRounding.ToPositiveInfinity => BigDecimal.Ceiling(value),
             _ => throw new ArgumentOutOfRangeException(nameof(midpointRounding), midpointRounding, null)
         };
 
