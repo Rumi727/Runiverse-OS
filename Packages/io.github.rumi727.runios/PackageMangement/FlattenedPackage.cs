@@ -48,9 +48,11 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public FlattenedPackage(IPackage package, bool isRoot, IEnumerable<IPackage> requiredBy)
         {
-            this.package = package ?? throw new ArgumentNullException(nameof(package));
+            ArgumentNullException.ThrowIfNull(package);
+            this.package = package;
             this.isRoot = isRoot;
-            this.requiredBy = Array.AsReadOnly((requiredBy ?? throw new ArgumentNullException(nameof(requiredBy))).ToArray());
+            ArgumentNullException.ThrowIfNull(requiredBy);
+            this.requiredBy = Array.AsReadOnly(requiredBy.ToArray());
         }
     }
 }

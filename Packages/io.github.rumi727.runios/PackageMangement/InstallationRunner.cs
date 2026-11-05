@@ -55,7 +55,8 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public InstallationRunner(IEnumerable<IInstallationExecutor> executors)
         {
-            _executors = [.. executors ?? throw new ArgumentNullException(nameof(executors))];
+            ArgumentNullException.ThrowIfNull(executors);
+            _executors = [.. executors];
             foreach (IInstallationExecutor executor in _executors)
                 if (executor is null) throw new ArgumentException("An executor cannot be null.", nameof(executors));
         }

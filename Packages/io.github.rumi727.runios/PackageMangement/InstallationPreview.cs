@@ -57,7 +57,8 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public InstallationPreview(IInstallation installation, InstallationPreviewStatus status, IEnumerable<InstallationDiagnostic>? diagnostics = null, IInstallationExecutor? executor = null)
         {
-            this.installation = installation ?? throw new ArgumentNullException(nameof(installation));
+            ArgumentNullException.ThrowIfNull(installation);
+            this.installation = installation;
             this.status = status;
             this.executor = executor;
             this.diagnostics = Array.AsReadOnly(diagnostics?.ToArray() ?? Array.Empty<InstallationDiagnostic>());

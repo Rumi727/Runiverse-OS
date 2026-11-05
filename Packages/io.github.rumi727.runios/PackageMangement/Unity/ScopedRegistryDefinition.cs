@@ -55,7 +55,8 @@ namespace RuniOS.PackageManagement.Unity
             if (string.IsNullOrWhiteSpace(name)) throw new ArgumentException("A registry name is required.", nameof(name));
             if (!Uri.TryCreate(url, UriKind.Absolute, out Uri? uri) || uri is null || (uri.Scheme != "http" && uri.Scheme != "https"))
                 throw new ArgumentException("An absolute HTTP registry URL is required.", nameof(url));
-            string[] values = (scopes ?? throw new ArgumentNullException(nameof(scopes))).Distinct(StringComparer.Ordinal).ToArray();
+            ArgumentNullException.ThrowIfNull(scopes);
+            string[] values = scopes.Distinct(StringComparer.Ordinal).ToArray();
             if (values.Length == 0 || values.Any(string.IsNullOrWhiteSpace)) throw new ArgumentException("Non-empty registry scopes are required.", nameof(scopes));
             this.name = name;
             this.url = url.TrimEnd('/');

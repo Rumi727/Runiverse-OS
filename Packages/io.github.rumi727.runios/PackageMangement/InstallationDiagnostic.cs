@@ -37,8 +37,10 @@ namespace RuniOS.PackageManagement
         /// </exception>
         public InstallationDiagnostic(string code, string message)
         {
-            this.code = code ?? throw new ArgumentNullException(nameof(code));
-            this.message = message ?? throw new ArgumentNullException(nameof(message));
+            ArgumentNullException.ThrowIfNull(code);
+            this.code = code;
+            ArgumentNullException.ThrowIfNull(message);
+            this.message = message;
         }
     }
 }
