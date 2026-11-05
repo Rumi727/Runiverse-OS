@@ -250,7 +250,7 @@ namespace RuniOS.Sounds
         readonly List<PitchShiftDSP> pitchDSPList = [];
         const float pitchDSPFFTSize = 4096;
         volatile int pitchDSPCount;
-        readonly object pitchDSPListLock = new object();
+        readonly Lock pitchDSPListLock = new();
 
         double pitchDSPTimeOffset
         {

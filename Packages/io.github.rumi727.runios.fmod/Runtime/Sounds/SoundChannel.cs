@@ -99,7 +99,7 @@ namespace RuniOS.Sounds
             }
         }
         Action<SoundChannel>? _onStop;
-        readonly object onStopLock = new();
+        readonly Lock onStopLock = new();
 
         public static SoundChannel? GetManaged(IntPtr handle) => channelLists.GetValueOrDefault(handle);
 

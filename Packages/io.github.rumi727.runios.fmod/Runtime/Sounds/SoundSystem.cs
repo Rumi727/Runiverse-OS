@@ -18,7 +18,7 @@ namespace RuniOS.Sounds
 
         static readonly object resourceMarker = new();
 
-        static readonly object systemLifetimeLock = new();
+        static readonly Lock systemLifetimeLock = new();
 
         static SoundSystem()
         {
@@ -87,7 +87,7 @@ namespace RuniOS.Sounds
 
         FMOD.System native;
         readonly ReaderWriterLockSlim nativeLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
-        readonly object lifecycleLock = new();
+        readonly Lock lifecycleLock = new();
 
         bool nativeInitialized;
 

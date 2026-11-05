@@ -6,7 +6,7 @@ namespace RuniOS.NBS
 {
     static partial class NoteBlockPlaybackWorker
     {
-        static readonly object gate = new object();
+        static readonly Lock gate = new();
         static readonly HashSet<NoteBlockSource> players = [];
         static readonly AutoResetEvent wakeEvent = new AutoResetEvent(false);
 

@@ -54,7 +54,7 @@ namespace RuniOS.Sounds
             }
         }
         Action<SoundSystem>? _onReset;
-        readonly object resetEventLock = new();
+        readonly System.Threading.Lock resetEventLock = new();
         bool invokingResettingHandlers;
 
         /// <summary>

@@ -13,7 +13,7 @@ namespace RuniOS.NBS
     public sealed class NoteBlockInstrumentBank : IDisposable, INBSClipMetadataProvider
     {
         readonly Dictionary<NBSInstrumentReference, IAssetScope<WaveAudioClip>> scopes = [];
-        readonly object lifetimeLock = new object();
+        readonly System.Threading.Lock lifetimeLock = new();
         int activeUsers;
         bool disposeRequested;
         bool isDisposed;

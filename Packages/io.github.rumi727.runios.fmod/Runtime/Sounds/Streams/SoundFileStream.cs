@@ -14,7 +14,7 @@ namespace RuniOS.Sounds.Streams
         static readonly FILE_SEEK_CALLBACK seekCallback = Seek;
 
         readonly Stream stream;
-        readonly object streamLock = new();
+        readonly System.Threading.Lock streamLock = new();
         readonly long offset;
         readonly uint length;
         readonly bool leaveOpen;

@@ -39,13 +39,13 @@ namespace RuniOS.NBS
             long revision
         );
 
-        readonly object voiceLock = new object();
-        readonly object voiceSettingsApplyLock = new object();
+        readonly System.Threading.Lock voiceLock = new();
+        readonly System.Threading.Lock voiceSettingsApplyLock = new();
         readonly List<Voice> voices = [];
         readonly List<NBSPlaybackCommand> commandBuffer = [];
         readonly List<PendingSubmission> pendingSubmissionBuffer = [];
 
-        readonly object spatialSnapshotLock = new object();
+        readonly System.Threading.Lock spatialSnapshotLock = new();
         AudioSpatialState spatialSnapshot;
 
 #if UNITY_PHYSICS_EXIST

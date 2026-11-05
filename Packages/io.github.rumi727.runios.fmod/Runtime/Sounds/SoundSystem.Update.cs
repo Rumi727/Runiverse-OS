@@ -19,7 +19,7 @@ namespace RuniOS.Sounds
             }
         }
         Action? _onUpdate = null;
-        readonly object onUpdateLock = new object();
+        readonly Lock onUpdateLock = new();
 
         public void Update()
         {
