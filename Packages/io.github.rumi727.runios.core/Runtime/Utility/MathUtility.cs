@@ -439,117 +439,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Clamp01
-        public static sbyte Clamp01(this sbyte value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static byte Clamp01(this byte value)
-        {
-            if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static short Clamp01(this short value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static ushort Clamp01(this ushort value)
-        {
-            if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static int Clamp01(this int value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static uint Clamp01(this uint value)
-        {
-            if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static long Clamp01(this long value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static ulong Clamp01(this ulong value)
-        {
-            if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static float Clamp01(this float value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static double Clamp01(this double value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static decimal Clamp01(this decimal value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static BigInteger Clamp01(this BigInteger value)
-        {
-            if (value < 0)
-                return BigInteger.Zero;
-            else if (value > 1)
-                return BigInteger.One;
-            else
-                return value;
-        }
+        public static T Clamp01<T>(this T value) where T : INumber<T> => value < T.Zero ? T.Zero : value > T.One ? T.One : value;
 
         public static BigDecimal Clamp01(this BigDecimal value)
         {
@@ -557,26 +447,6 @@ namespace RuniOS.Utility
                 return BigDecimal.Zero;
             else if (value > 1)
                 return BigDecimal.One;
-            else
-                return value;
-        }
-
-        public static nint Clamp01(this nint value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
-            else
-                return value;
-        }
-
-        public static nuint Clamp01(this nuint value)
-        {
-            if (value < 0)
-                return 0;
-            else if (value > 1)
-                return 1;
             else
                 return value;
         }
@@ -609,92 +479,12 @@ namespace RuniOS.Utility
         #endregion
 
         #region Delta Angle
-        public static short DeltaAngle(this short value, short target)
+        public static T DeltaAngle<T>(this T value, T target) where T : INumber<T>
         {
-            short result = (short)(target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static ushort DeltaAngle(this ushort value, ushort target)
-        {
-            ushort result = (ushort)(target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static int DeltaAngle(this int value, int target)
-        {
-            int result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static uint DeltaAngle(this uint value, uint target)
-        {
-            uint result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static long DeltaAngle(this long value, long target)
-        {
-            long result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static ulong DeltaAngle(this ulong value, ulong target)
-        {
-            ulong result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static float DeltaAngle(this float value, float target)
-        {
-            float result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static double DeltaAngle(this double value, double target)
-        {
-            double result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static decimal DeltaAngle(this decimal value, decimal target)
-        {
-            decimal result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static BigInteger DeltaAngle(this BigInteger value, BigInteger target)
-        {
-            BigInteger result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
+            T fullTurn = T.CreateChecked(360);
+            T result = (target - value).Repeat(fullTurn);
+            if (result > T.CreateChecked(180))
+                result -= fullTurn;
 
             return result;
         }
@@ -708,23 +498,6 @@ namespace RuniOS.Utility
             return result;
         }
 
-        public static nint DeltaAngle(this nint value, nint target)
-        {
-            nint result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
-
-        public static nuint DeltaAngle(this nuint value, nuint target)
-        {
-            nuint result = (target - value).Repeat(360);
-            if (result > 180)
-                result -= 360;
-
-            return result;
-        }
         #endregion
 
         #region Distance
@@ -897,68 +670,12 @@ namespace RuniOS.Utility
         #endregion
 
         #region Inverse Lerp
-        public static sbyte InverseLerp(this sbyte a, sbyte b, sbyte t)
-        {
-            if (a != b)
-                return (sbyte)((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static byte InverseLerp(this byte a, byte b, byte t)
-        {
-            if (a != b)
-                return (byte)((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static short InverseLerp(this short a, short b, short t)
-        {
-            if (a != b)
-                return (short)((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static ushort InverseLerp(this ushort a, ushort b, ushort t)
-        {
-            if (a != b)
-                return (ushort)((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static int InverseLerp(this int a, int b, int t)
+        public static T InverseLerp<T>(this T a, T b, T t) where T : INumber<T>
         {
             if (a != b)
                 return ((t - a) / (b - a)).Clamp01();
 
-            return 0;
-        }
-
-        public static uint InverseLerp(this uint a, uint b, uint t)
-        {
-            if (a != b)
-                return ((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static long InverseLerp(this long a, long b, long t)
-        {
-            if (a != b)
-                return ((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static ulong InverseLerp(this ulong a, ulong b, ulong t)
-        {
-            if (a != b)
-                return ((t - a) / (b - a)).Clamp01();
-
-            return 0;
+            return T.Zero;
         }
 
         public static float InverseLerp(this float a, float b, float t)
@@ -977,22 +694,6 @@ namespace RuniOS.Utility
             return 0;
         }
 
-        public static decimal InverseLerp(this decimal a, decimal b, decimal t)
-        {
-            if (a != b)
-                return ((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
-        public static BigInteger InverseLerp(this BigInteger a, BigInteger b, BigInteger t)
-        {
-            if (a != b)
-                return ((t - a) / (b - a)).Clamp01();
-
-            return 0;
-        }
-
         public static BigDecimal InverseLerp(this BigDecimal a, BigDecimal b, BigDecimal t)
         {
             if (a != b)
@@ -1005,212 +706,20 @@ namespace RuniOS.Utility
         public static bool IsPowerOfTwo(this int value) => int.IsPow2(value);
 
         #region Lerp
-        public static sbyte Lerp(this sbyte current, sbyte target, sbyte t) => t > 0 ? target : current;
+        public static T Lerp<T>(this T current, T target, T t) where T : IBinaryInteger<T> => t > T.Zero ? target : current;
 
-        public static sbyte Lerp(this sbyte current, sbyte target, float t)
+        public static T Lerp<T, TFactor>(this T current, T target, TFactor t) where T : IBinaryInteger<T> where TFactor : IFloatingPoint<TFactor>
         {
             t = t.Clamp01();
-            return (sbyte)(current + ((target - current) * t));
+            TFactor start = TFactor.CreateTruncating(current);
+            return T.CreateTruncating(start + ((TFactor.CreateTruncating(target) - start) * t));
         }
 
-        public static sbyte Lerp(this sbyte current, sbyte target, double t)
+        public static T Lerp<T>(this T current, T target, BigDecimal t) where T : IBinaryInteger<T>
         {
             t = t.Clamp01();
-            return (sbyte)(current + ((target - current) * t));
-        }
-
-        public static sbyte Lerp(this sbyte current, sbyte target, decimal t)
-        {
-            t = t.Clamp01();
-            return (sbyte)(current + ((target - current) * t));
-        }
-
-        public static sbyte Lerp(this sbyte current, sbyte target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (sbyte)(current + ((target - current) * t));
-        }
-
-        public static byte Lerp(this byte current, byte target, byte t) => t > 0 ? target : current;
-
-        public static byte Lerp(this byte current, byte target, float t)
-        {
-            t = t.Clamp01();
-            return (byte)(current + ((target - current) * t));
-        }
-
-        public static byte Lerp(this byte current, byte target, double t)
-        {
-            t = t.Clamp01();
-            return (byte)(current + ((target - current) * t));
-        }
-
-        public static byte Lerp(this byte current, byte target, decimal t)
-        {
-            t = t.Clamp01();
-            return (byte)(current + ((target - current) * t));
-        }
-
-        public static byte Lerp(this byte current, byte target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (byte)(decimal)(current + ((target - current) * t));
-        }
-
-        public static short Lerp(this short current, short target, short t) => t > 0 ? target : current;
-
-        public static short Lerp(this short current, short target, float t)
-        {
-            t = t.Clamp01();
-            return (short)(current + ((target - current) * t));
-        }
-
-        public static short Lerp(this short current, short target, double t)
-        {
-            t = t.Clamp01();
-            return (short)(current + ((target - current) * t));
-        }
-
-        public static short Lerp(this short current, short target, decimal t)
-        {
-            t = t.Clamp01();
-            return (short)(current + ((target - current) * t));
-        }
-
-        public static short Lerp(this short current, short target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (short)(current + ((target - current) * t));
-        }
-
-        public static ushort Lerp(this ushort current, ushort target, ushort t) => t > 0 ? target : current;
-
-        public static ushort Lerp(this ushort current, ushort target, float t)
-        {
-            t = t.Clamp01();
-            return (ushort)(current + ((target - current) * t));
-        }
-
-        public static ushort Lerp(this ushort current, ushort target, double t)
-        {
-            t = t.Clamp01();
-            return (ushort)(current + ((target - current) * t));
-        }
-
-        public static ushort Lerp(this ushort current, ushort target, decimal t)
-        {
-            t = t.Clamp01();
-            return (ushort)(current + ((target - current) * t));
-        }
-
-        public static ushort Lerp(this ushort current, ushort target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (ushort)(decimal)(current + ((target - current) * t));
-        }
-
-        public static int Lerp(this int current, int target, int t) => t > 0 ? target : current;
-
-        public static int Lerp(this int current, int target, float t)
-        {
-            t = t.Clamp01();
-            return (int)(current + ((target - current) * t));
-        }
-
-        public static int Lerp(this int current, int target, double t)
-        {
-            t = t.Clamp01();
-            return (int)(current + ((target - current) * t));
-        }
-
-        public static int Lerp(this int current, int target, decimal t)
-        {
-            t = t.Clamp01();
-            return (int)(current + ((target - current) * t));
-        }
-
-        public static int Lerp(this int current, int target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (int)(current + ((target - current) * t));
-        }
-
-        public static uint Lerp(this uint current, uint target, uint t) => t > 0 ? target : current;
-
-        public static uint Lerp(this uint current, uint target, float t)
-        {
-            t = t.Clamp01();
-            return (uint)(current + ((target - current) * t));
-        }
-
-        public static uint Lerp(this uint current, uint target, double t)
-        {
-            t = t.Clamp01();
-            return (uint)(current + ((target - current) * t));
-        }
-
-        public static uint Lerp(this uint current, uint target, decimal t)
-        {
-            t = t.Clamp01();
-            return (uint)(current + ((target - current) * t));
-        }
-
-        public static uint Lerp(this uint current, uint target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (uint)(current + ((target - current) * t));
-        }
-
-        public static long Lerp(this long current, long target, long t) => t > 0 ? target : current;
-
-        public static long Lerp(this long current, long target, float t)
-        {
-            t = t.Clamp01();
-            return (long)(current + ((target - current) * t));
-        }
-
-        public static long Lerp(this long current, long target, double t)
-        {
-            t = t.Clamp01();
-            return (long)(current + ((target - current) * t));
-        }
-
-        public static long Lerp(this long current, long target, decimal t)
-        {
-            t = t.Clamp01();
-            return (long)(current + ((target - current) * t));
-        }
-
-        public static long Lerp(this long current, long target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (long)(decimal)(current + ((target - current) * t));
-        }
-
-        public static ulong Lerp(this ulong current, ulong target, ulong t) => t > 0 ? target : current;
-
-        public static ulong Lerp(this ulong current, ulong target, float t)
-        {
-            t = t.Clamp01();
-            return (ulong)(current + ((target - current) * t));
-        }
-
-        public static ulong Lerp(this ulong current, ulong target, double t)
-        {
-            t = t.Clamp01();
-            return (ulong)(current + ((target - current) * t));
-        }
-
-        public static ulong Lerp(this ulong current, ulong target, decimal t)
-        {
-            t = t.Clamp01();
-            return (ulong)(current + ((target - current) * t));
-        }
-
-        public static ulong Lerp(this ulong current, ulong target, BigDecimal t)
-        {
-            t = t.Clamp01();
-            return (ulong)(current + ((target - current) * t));
+            BigDecimal start = BigInteger.CreateTruncating(current);
+            return T.CreateTruncating((BigInteger)(start + ((BigInteger.CreateTruncating(target) - start) * t)));
         }
 
         public static float Lerp(this float current, float target, float t)
@@ -1231,48 +740,10 @@ namespace RuniOS.Utility
             return current + ((target - current) * t);
         }
 
-        public static BigInteger Lerp(this BigInteger current, BigInteger target, BigInteger t) => t > 0 ? target : current;
-
         public static BigDecimal Lerp(this BigDecimal current, BigDecimal target, BigDecimal t)
         {
             t = t.Clamp01();
             return current + ((target - current) * t);
-        }
-
-        public static nint Lerp(this nint current, nint target, float t)
-        {
-            t = t.Clamp01();
-            return (nint)(current + ((target - current) * t));
-        }
-
-        public static nint Lerp(this nint current, nint target, double t)
-        {
-            t = t.Clamp01();
-            return (nint)(current + ((target - current) * t));
-        }
-
-        public static nint Lerp(this nint current, nint target, decimal t)
-        {
-            t = t.Clamp01();
-            return (nint)(current + ((target - current) * t));
-        }
-
-        public static nuint Lerp(this nuint current, nuint target, float t)
-        {
-            t = t.Clamp01();
-            return (nuint)(current + ((target - current) * t));
-        }
-
-        public static nuint Lerp(this nuint current, nuint target, double t)
-        {
-            t = t.Clamp01();
-            return (nuint)(current + ((target - current) * t));
-        }
-
-        public static nuint Lerp(this nuint current, nuint target, decimal t)
-        {
-            t = t.Clamp01();
-            return (nuint)(current + ((target - current) * t));
         }
 
         public static Vector2 Lerp(this Vector2 current, Vector2 target, float t)
@@ -1368,68 +839,25 @@ namespace RuniOS.Utility
         #endregion
 
         #region Lerp Unclamped
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, sbyte t) => (sbyte)(current + ((target - current) * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, float t) => (sbyte)(current + ((target - current) * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, double t) => (sbyte)(current + ((target - current) * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, decimal t) => (sbyte)(current + ((target - current) * t));
-        public static sbyte LerpUnclamped(this sbyte current, sbyte target, BigDecimal t) => (sbyte)(current + ((target - current) * t));
+        public static T LerpUnclamped<T>(this T current, T target, T t) where T : IBinaryInteger<T> => current + ((target - current) * t);
 
-        public static byte LerpUnclamped(this byte current, byte target, byte t) => (byte)(current + ((target - current) * t));
-        public static byte LerpUnclamped(this byte current, byte target, float t) => (byte)(current + ((target - current) * t));
-        public static byte LerpUnclamped(this byte current, byte target, double t) => (byte)(current + ((target - current) * t));
-        public static byte LerpUnclamped(this byte current, byte target, decimal t) => (byte)(current + ((target - current) * t));
-        public static byte LerpUnclamped(this byte current, byte target, BigDecimal t) => (byte)(decimal)(current + ((target - current) * t));
+        public static T LerpUnclamped<T, TFactor>(this T current, T target, TFactor t) where T : IBinaryInteger<T> where TFactor : IFloatingPoint<TFactor>
+        {
+            TFactor start = TFactor.CreateTruncating(current);
+            return T.CreateTruncating(start + ((TFactor.CreateTruncating(target) - start) * t));
+        }
 
-        public static short LerpUnclamped(this short current, short target, short t) => (short)(current + ((target - current) * t));
-        public static short LerpUnclamped(this short current, short target, float t) => (short)(current + ((target - current) * t));
-        public static short LerpUnclamped(this short current, short target, double t) => (short)(current + ((target - current) * t));
-        public static short LerpUnclamped(this short current, short target, decimal t) => (short)(current + ((target - current) * t));
-        public static short LerpUnclamped(this short current, short target, BigDecimal t) => (short)(current + ((target - current) * t));
-
-        public static ushort LerpUnclamped(this ushort current, ushort target, ushort t) => (ushort)(current + ((target - current) * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, float t) => (ushort)(current + ((target - current) * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, double t) => (ushort)(current + ((target - current) * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, decimal t) => (ushort)(current + ((target - current) * t));
-        public static ushort LerpUnclamped(this ushort current, ushort target, BigDecimal t) => (ushort)(decimal)(current + ((target - current) * t));
-
-        public static int LerpUnclamped(this int current, int target, int t) => current + ((target - current) * t);
-        public static int LerpUnclamped(this int current, int target, float t) => (int)(current + ((target - current) * t));
-        public static int LerpUnclamped(this int current, int target, double t) => (int)(current + ((target - current) * t));
-        public static int LerpUnclamped(this int current, int target, decimal t) => (int)(current + ((target - current) * t));
-        public static int LerpUnclamped(this int current, int target, BigDecimal t) => (int)(current + ((target - current) * t));
-
-        public static uint LerpUnclamped(this uint current, uint target, uint t) => current + ((target - current) * t);
-        public static uint LerpUnclamped(this uint current, uint target, float t) => (uint)(current + ((target - current) * t));
-        public static uint LerpUnclamped(this uint current, uint target, double t) => (uint)(current + ((target - current) * t));
-        public static uint LerpUnclamped(this uint current, uint target, decimal t) => (uint)(current + ((target - current) * t));
-        public static uint LerpUnclamped(this uint current, uint target, BigDecimal t) => (uint)(current + ((target - current) * t));
-
-        public static long LerpUnclamped(this long current, long target, long t) => current + ((target - current) * t);
-        public static long LerpUnclamped(this long current, long target, float t) => (long)(current + ((target - current) * t));
-        public static long LerpUnclamped(this long current, long target, double t) => (long)(current + ((target - current) * t));
-        public static long LerpUnclamped(this long current, long target, decimal t) => (long)(current + ((target - current) * t));
-        public static long LerpUnclamped(this long current, long target, BigDecimal t) => (long)(decimal)(current + ((target - current) * t));
-
-        public static ulong LerpUnclamped(this ulong current, ulong target, ulong t) => current + ((target - current) * t);
-        public static ulong LerpUnclamped(this ulong current, ulong target, float t) => (ulong)(current + ((target - current) * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, double t) => (ulong)(current + ((target - current) * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, decimal t) => (ulong)(current + ((target - current) * t));
-        public static ulong LerpUnclamped(this ulong current, ulong target, BigDecimal t) => (ulong)(current + ((target - current) * t));
+        public static T LerpUnclamped<T>(this T current, T target, BigDecimal t) where T : IBinaryInteger<T>
+        {
+            BigDecimal start = BigInteger.CreateTruncating(current);
+            return T.CreateTruncating((BigInteger)(start + ((BigInteger.CreateTruncating(target) - start) * t)));
+        }
 
         public static float LerpUnclamped(this float current, float target, float t) => current + ((target - current) * t);
         public static double LerpUnclamped(this double current, double target, double t) => current + ((target - current) * t);
         public static decimal LerpUnclamped(this decimal current, decimal target, decimal t) => current + ((target - current) * t);
 
-        public static BigInteger LerpUnclamped(this BigInteger current, BigInteger target, BigInteger t) => current + ((target - current) * t);
         public static BigDecimal LerpUnclamped(this BigDecimal current, BigDecimal target, BigDecimal t) => current + ((target - current) * t);
-
-        public static nint LerpUnclamped(this nint current, nint target, float t) => (nint)(current + ((target - current) * t));
-        public static nint LerpUnclamped(this nint current, nint target, double t) => (nint)(current + ((target - current) * t));
-        public static nint LerpUnclamped(this nint current, nint target, decimal t) => (nint)(current + ((target - current) * t));
-
-        public static nuint LerpUnclamped(this nuint current, nuint target, float t) => (nuint)(current + ((target - current) * t));
-        public static nuint LerpUnclamped(this nuint current, nuint target, double t) => (nuint)(current + ((target - current) * t));
-        public static nuint LerpUnclamped(this nuint current, nuint target, decimal t) => (nuint)(current + ((target - current) * t));
 
         public static Vector2 LerpUnclamped(this Vector2 current, Vector2 target, float t) => new Vector2(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t));
         public static Vector3 LerpUnclamped(this Vector3 current, Vector3 target, float t) => new Vector3(current.x + ((target.x - current.x) * t), current.y + ((target.y - current.y) * t), current.z + ((target.z - current.z) * t));
@@ -1461,101 +889,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Max
-        public static sbyte Max(sbyte a, sbyte b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static byte Max(byte a, byte b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static short Max(short a, short b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static ushort Max(ushort a, ushort b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static int Max(int a, int b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static uint Max(uint a, uint b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static long Max(long a, long b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static ulong Max(ulong a, ulong b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static float Max(float a, float b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static double Max(double a, double b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static decimal Max(decimal a, decimal b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static BigInteger Max(BigInteger a, BigInteger b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
+        public static T Max<T>(T a, T b) where T : INumber<T> => T.Max(a, b);
 
         public static BigDecimal Max(BigDecimal a, BigDecimal b)
         {
@@ -1565,250 +899,21 @@ namespace RuniOS.Utility
                 return b;
         }
 
-        public static nint Max(nint a, nint b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
-
-        public static nuint Max(nuint a, nuint b)
-        {
-            if (a > b)
-                return a;
-            else
-                return b;
-        }
         #endregion
 
         #region Max Array
-        public static sbyte Max(sbyte value, params sbyte[] values)
+        public static T Max<T>(T value, params T[] values) where T : INumber<T>
         {
-            if (values == null)
-                throw new ArgumentNullException();
+            ArgumentNullException.ThrowIfNull(values);
 
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            sbyte num2 = value;
-            for (int i = 0; i < length; i++)
+            T result = value;
+            for (int i = 0; i < values.Length; i++)
             {
-                if (values[i] > num2)
-                    num2 = values[i];
+                if (values[i] > result)
+                    result = values[i];
             }
 
-            return num2;
-        }
-
-        public static byte Max(byte value, params byte[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            byte num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static short Max(short value, params short[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            short num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static ushort Max(ushort value, params ushort[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            ushort num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static int Max(int value, params int[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            int num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static uint Max(uint value, params uint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            uint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static long Max(long value, params long[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            long num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static ulong Max(ulong value, params ulong[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            ulong num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static float Max(float value, params float[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            float num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static double Max(double value, params double[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            double num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static decimal Max(decimal value, params decimal[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            decimal num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static BigInteger Max(BigInteger value, params BigInteger[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            BigInteger num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
+            return result;
         }
 
         public static BigDecimal Max(BigDecimal value, params BigDecimal[] values)
@@ -1830,141 +935,10 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nint Max(nint value, params nint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            nint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static nuint Max(nuint value, params nuint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            nuint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] > num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
         #endregion
 
         #region Min
-        public static sbyte Min(sbyte a, sbyte b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static byte Min(byte a, byte b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static short Min(short a, short b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static ushort Min(ushort a, ushort b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static int Min(int a, int b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static uint Min(uint a, uint b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static long Min(long a, long b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static ulong Min(ulong a, ulong b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static float Min(float a, float b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static double Min(double a, double b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static decimal Min(decimal a, decimal b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static BigInteger Min(BigInteger a, BigInteger b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
+        public static T Min<T>(T a, T b) where T : INumber<T> => T.Min(a, b);
 
         public static BigDecimal Min(BigDecimal a, BigDecimal b)
         {
@@ -1974,250 +948,21 @@ namespace RuniOS.Utility
                 return b;
         }
 
-        public static nint Min(nint a, nint b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
-
-        public static nuint Min(nuint a, nuint b)
-        {
-            if (a < b)
-                return a;
-            else
-                return b;
-        }
         #endregion
 
         #region Min Array
-        public static sbyte Min(sbyte value, params sbyte[] values)
+        public static T Min<T>(T value, params T[] values) where T : INumber<T>
         {
-            if (values == null)
-                throw new ArgumentNullException();
+            ArgumentNullException.ThrowIfNull(values);
 
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            sbyte num2 = value;
-            for (int i = 0; i < length; i++)
+            T result = value;
+            for (int i = 0; i < values.Length; i++)
             {
-                if (values[i] < num2)
-                    num2 = values[i];
+                if (values[i] < result)
+                    result = values[i];
             }
 
-            return num2;
-        }
-
-        public static byte Min(byte value, params byte[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            byte num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static short Min(short value, params short[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            short num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static ushort Min(ushort value, params ushort[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            ushort num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static int Min(int value, params int[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            int num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static uint Min(uint value, params uint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            uint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static long Min(long value, params long[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            long num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static ulong Min(ulong value, params ulong[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            ulong num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static float Min(float value, params float[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            float num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static double Min(double value, params double[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            double num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static decimal Min(decimal value, params decimal[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            decimal num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static BigInteger Min(BigInteger value, params BigInteger[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            BigInteger num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
+            return result;
         }
 
         public static BigDecimal Min(BigDecimal value, params BigDecimal[] values)
@@ -2239,160 +984,15 @@ namespace RuniOS.Utility
             return num2;
         }
 
-        public static nint Min(nint value, params nint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            nint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
-
-        public static nuint Min(nuint value, params nuint[] values)
-        {
-            if (values == null)
-                throw new ArgumentNullException();
-
-            int length = values.Length;
-            if (length == 0)
-                return 0;
-
-            nuint num2 = value;
-            for (int i = 0; i < length; i++)
-            {
-                if (values[i] < num2)
-                    num2 = values[i];
-            }
-
-            return num2;
-        }
         #endregion
 
         #region Move Towards
-        public static sbyte MoveTowards(this sbyte current, sbyte target, sbyte maxDelta)
+        public static T MoveTowards<T>(this T current, T target, T maxDelta) where T : INumber<T>
         {
-            if ((target - current).Abs() <= maxDelta)
+            if (current.Distance(target) <= maxDelta)
                 return target;
 
-            return (sbyte)(current + ((target - current).Sign() * maxDelta));
-        }
-
-        public static byte MoveTowards(this byte current, byte target, byte maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return (byte)(current + ((target - current).Sign() * maxDelta));
-        }
-
-        public static short MoveTowards(this short current, short target, short maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return (short)(current + ((target - current).Sign() * maxDelta));
-        }
-
-        public static ushort MoveTowards(this ushort current, ushort target, ushort maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return (ushort)(current + ((target - current).Sign() * maxDelta));
-        }
-
-        public static int MoveTowards(this int current, int target, int maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static uint MoveTowards(this uint current, uint target, uint maxDelta)
-        {
-            if (target >= current)
-            {
-                if ((target - current) <= maxDelta)
-                    return target;
-
-                return current + maxDelta;
-            }
-            else
-            {
-                if ((current - target) <= maxDelta)
-                    return target;
-
-                return current - maxDelta;
-            }
-        }
-
-        public static long MoveTowards(this long current, long target, long maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static ulong MoveTowards(this ulong current, ulong target, ulong maxDelta)
-        {
-            if (target >= current)
-            {
-                if ((target - current) <= maxDelta)
-                    return target;
-
-                return current + maxDelta;
-            }
-            else
-            {
-                if ((current - target) <= maxDelta)
-                    return target;
-
-                return current - maxDelta;
-            }
-        }
-
-        public static float MoveTowards(this float current, float target, float maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static double MoveTowards(this double current, double target, double maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static decimal MoveTowards(this decimal current, decimal target, decimal maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static BigInteger MoveTowards(this BigInteger current, BigInteger target, BigInteger maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
+            return target > current ? current + maxDelta : current - maxDelta;
         }
 
         public static BigDecimal MoveTowards(this BigDecimal current, BigDecimal target, BigDecimal maxDelta)
@@ -2401,32 +1001,6 @@ namespace RuniOS.Utility
                 return target;
 
             return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static nint MoveTowards(this nint current, nint target, nint maxDelta)
-        {
-            if ((target - current).Abs() <= maxDelta)
-                return target;
-
-            return current + ((target - current).Sign() * maxDelta);
-        }
-
-        public static nuint MoveTowards(this nuint current, nuint target, nuint maxDelta)
-        {
-            if (target >= current)
-            {
-                if ((target - current) <= maxDelta)
-                    return target;
-
-                return current + maxDelta;
-            }
-            else
-            {
-                if ((current - target) <= maxDelta)
-                    return target;
-
-                return current - maxDelta;
-            }
         }
 
         public static Vector2 MoveTowards(this Vector2 current, Vector2 target, float maxDistanceDelta)
@@ -2494,99 +1068,9 @@ namespace RuniOS.Utility
         #endregion
 
         #region Move Towards Angle
-        public static short MoveTowardsAngle(this short current, short target, short maxDelta)
+        public static T MoveTowardsAngle<T>(this T current, T target, T maxDelta) where T : INumber<T>
         {
-            short temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = (short)(current + temp);
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static ushort MoveTowardsAngle(this ushort current, ushort target, ushort maxDelta)
-        {
-            ushort temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = (ushort)(current + temp);
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static int MoveTowardsAngle(this int current, int target, int maxDelta)
-        {
-            int temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static uint MoveTowardsAngle(this uint current, uint target, uint maxDelta)
-        {
-            uint temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static long MoveTowardsAngle(this long current, long target, long maxDelta)
-        {
-            long temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static ulong MoveTowardsAngle(this ulong current, ulong target, ulong maxDelta)
-        {
-            ulong temp = current.DeltaAngle(target);
-            if (0 - maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static float MoveTowardsAngle(this float current, float target, float maxDelta)
-        {
-            float temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static double MoveTowardsAngle(this double current, double target, double maxDelta)
-        {
-            double temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static decimal MoveTowardsAngle(this decimal current, decimal target, decimal maxDelta)
-        {
-            decimal temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static BigInteger MoveTowardsAngle(this BigInteger current, BigInteger target, BigInteger maxDelta)
-        {
-            BigInteger temp = current.DeltaAngle(target);
+            T temp = current.DeltaAngle(target);
             if (-maxDelta < temp && temp < maxDelta)
                 return target;
 
@@ -2604,25 +1088,6 @@ namespace RuniOS.Utility
             return MoveTowards(current, target, maxDelta);
         }
 
-        public static nint MoveTowardsAngle(this nint current, nint target, nint maxDelta)
-        {
-            nint temp = current.DeltaAngle(target);
-            if (-maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
-
-        public static nuint MoveTowardsAngle(this nuint current, nuint target, nuint maxDelta)
-        {
-            nuint temp = current.DeltaAngle(target);
-            if (0 - maxDelta < temp && temp < maxDelta)
-                return target;
-
-            target = current + temp;
-            return MoveTowards(current, target, maxDelta);
-        }
         #endregion
 
         #region Next Power Of
@@ -2778,21 +1243,14 @@ namespace RuniOS.Utility
         #endregion
 
         #region Ping Pong
-        public static sbyte PingPong(this sbyte value, sbyte length) => (sbyte)(length - (value.Repeat((sbyte)(length * 2)) - length).Abs());
-        public static byte PingPong(this byte value, byte length) => (byte)(length - (value.Repeat((byte)(length * 2)) - length));
-        public static short PingPong(this short value, short length) => (short)(length - (value.Repeat((short)(length * 2)) - length).Abs());
-        public static ushort PingPong(this ushort value, ushort length) => (ushort)(length - (value.Repeat((ushort)(length * 2)) - length));
-        public static int PingPong(this int value, int length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static uint PingPong(this uint value, uint length) => length - (value.Repeat(length * 2) - length);
-        public static long PingPong(this long value, long length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static ulong PingPong(this ulong value, ulong length) => length - (value.Repeat(length * 2) - length);
-        public static float PingPong(this float value, float length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static double PingPong(this double value, double length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static decimal PingPong(this decimal value, decimal length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static BigInteger PingPong(this BigInteger value, BigInteger length) => length - (value.Repeat(length * 2) - length).Abs();
+        public static T PingPong<T>(this T value, T length) where T : INumber<T>
+        {
+            T doubleLength = length + length;
+            T remainder = value.Repeat(doubleLength);
+            return remainder <= length ? remainder : doubleLength - remainder;
+        }
+
         public static BigDecimal PingPong(this BigDecimal value, BigDecimal length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static nint PingPong(this nint value, nint length) => length - (value.Repeat(length * 2) - length).Abs();
-        public static nuint PingPong(this nuint value, nuint length) => length - (value.Repeat(length * 2) - length);
         #endregion
 
         #region Pow
