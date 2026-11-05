@@ -112,14 +112,12 @@ namespace RuniOS.Utility
         #endregion Abs
 
         #region Acos
-        public static float Acos(this float value) => (float)Math.Acos(value);
-        public static double Acos(this double value) => Math.Acos(value);
+        public static T Acos<T>(this T value) where T : ITrigonometricFunctions<T> => T.Acos(value);
         public static decimal Acos(this decimal value) => DecimalMath.Acos(value);
         #endregion
 
         #region Acosh
-        public static float Acosh(this float value) => (float)Math.Acosh(value);
-        public static double Acosh(this double value) => Math.Acosh(value);
+        public static T Acosh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Acosh(value);
         #endregion
 
         #region Arithmetic Sequence Sum
@@ -139,36 +137,30 @@ namespace RuniOS.Utility
         #endregion
 
         #region Asin
-        public static float Asin(this float value) => (float)Math.Asin(value);
-        public static double Asin(this double value) => Math.Asin(value);
+        public static T Asin<T>(this T value) where T : ITrigonometricFunctions<T> => T.Asin(value);
         public static decimal Asin(this decimal value) => DecimalMath.Asin(value);
         #endregion
 
         #region Asinh
-        public static float Asinh(this float value) => (float)Math.Asinh(value);
-        public static double Asinh(this double value) => Math.Asinh(value);
+        public static T Asinh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Asinh(value);
         #endregion
 
         #region Atan
-        public static float Atan(this float value) => (float)Math.Atan(value);
-        public static double Atan(this double value) => Math.Atan(value);
+        public static T Atan<T>(this T value) where T : ITrigonometricFunctions<T> => T.Atan(value);
         public static decimal Atan(this decimal value) => DecimalMath.ATan(value);
         #endregion
 
         #region Atan2
-        public static float Atan2(this float y, float x) => (float)Math.Atan2(y, x);
-        public static double Atan2(this double y, double x) => Math.Atan2(y, x);
+        public static T Atan2<T>(this T y, T x) where T : IFloatingPointIeee754<T> => T.Atan2(y, x);
         public static decimal Atan2(this decimal y, decimal x) => DecimalMath.Atan2(y, x);
         #endregion
 
         #region Atanh
-        public static float Atanh(this float value) => (float)Math.Atanh(value);
-        public static double Atanh(this double value) => Math.Atanh(value);
+        public static T Atanh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Atanh(value);
         #endregion
 
         #region Cbrt
-        public static float Cbrt(this float value) => (float)Math.Cbrt(value);
-        public static double Cbrt(this double value) => Math.Cbrt(value);
+        public static T Cbrt<T>(this T value) where T : IRootFunctions<T> => T.Cbrt(value);
         #endregion
 
         #region Ceil
@@ -312,14 +304,12 @@ namespace RuniOS.Utility
         public static Color CorrelatedColorTemperatureToRGB(this float value) => Mathf.CorrelatedColorTemperatureToRGB(value);
 
         #region Cos
-        public static float Cos(this float value) => (float)Math.Cos(value);
-        public static double Cos(this double value) => Math.Cos(value);
+        public static T Cos<T>(this T value) where T : ITrigonometricFunctions<T> => T.Cos(value);
         public static decimal Cos(this decimal value) => DecimalMath.Cos(value);
         #endregion
 
         #region Cosh
-        public static float Cosh(this float value) => (float)Math.Cosh(value);
-        public static double Cosh(this double value) => Math.Cosh(value);
+        public static T Cosh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Cosh(value);
         public static decimal Cosh(this decimal value) => DecimalMath.Cosh(value);
         #endregion
 
@@ -352,8 +342,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Exp
-        public static float Exp(this float value) => (float)Math.Exp(value);
-        public static double Exp(this double value) => Math.Exp(value);
+        public static T Exp<T>(this T value) where T : IExponentialFunctions<T> => T.Exp(value);
         public static decimal Exp(this decimal value) => DecimalMath.Exp(value);
         public static BigDecimal Exp(this BigInteger value) => BigDecimal.Exp(value);
         #endregion
@@ -414,45 +403,18 @@ namespace RuniOS.Utility
         #endregion
 
         #region Gamma
-        public static float Gamma(this float value, float absMax, float gamma)
+        public static T Gamma<T>(this T value, T absMax, T gamma) where T : INumber<T>, IPowerFunctions<T>
         {
-            bool flag = value < 0;
-            float temp = value.Abs();
+            bool flag = value < T.Zero;
+            T temp = value.Abs();
 
             if (temp > absMax)
-            {
-                if (flag)
-                    return -temp;
-                else
-                    return temp;
-            }
+                return flag ? -temp : temp;
 
-            float result = (temp / absMax.Pow(gamma)) * absMax;
-            if (flag)
-                return -result;
-            else
-                return result;
+            T result = (temp / absMax.Pow(gamma)) * absMax;
+            return flag ? -result : result;
         }
 
-        public static double Gamma(this double value, double absMax, double gamma)
-        {
-            bool flag = value < 0;
-            double temp = value.Abs();
-
-            if (temp > absMax)
-            {
-                if (flag)
-                    return -temp;
-                else
-                    return temp;
-            }
-
-            double result = (temp / absMax.Pow(gamma)) * absMax;
-            if (flag)
-                return -result;
-            else
-                return result;
-        }
         #endregion
 
         #region GCD
@@ -510,8 +472,7 @@ namespace RuniOS.Utility
         public static float GammaToLinearSpace(this float value) => Mathf.GammaToLinearSpace(value);
 
         #region IEEE Remainder
-        public static float IEEERemainder(this float x, float y) => (float)Math.IEEERemainder(x, y);
-        public static double IEEERemainder(this double x, double y) => Math.IEEERemainder(x, y);
+        public static T IEEERemainder<T>(this T x, T y) where T : IFloatingPointIeee754<T> => T.Ieee754Remainder(x, y);
         #endregion
 
         #region Inverse Lerp
@@ -722,14 +683,12 @@ namespace RuniOS.Utility
         public static float LinearToGammaSpace(this float value) => Mathf.LinearToGammaSpace(value);
 
         #region Log
-        public static float Log(this float value) => (float)Math.Log(value);
-        public static double Log(this double value) => Math.Log(value);
+        public static T Log<T>(this T value) where T : ILogarithmicFunctions<T> => T.Log(value);
         public static decimal Log(this decimal value) => DecimalMath.Log(value);
         #endregion
 
         #region Log 10
-        public static float Log10(this float value) => (float)Math.Log10(value);
-        public static double Log10(this double value) => Math.Log10(value);
+        public static T Log10<T>(this T value) where T : ILogarithmicFunctions<T> => T.Log10(value);
         public static decimal Log10(this decimal value) => DecimalMath.Log10(value);
         #endregion
 
@@ -1099,6 +1058,7 @@ namespace RuniOS.Utility
         #endregion
 
         #region Pow
+        public static T Pow<T>(this T x, T y) where T : IPowerFunctions<T> => T.Pow(x, y);
         public static long Pow(this int baseValue, int exponent) => ((long)baseValue).Pow(exponent);
         public static ulong Pow(this uint baseValue, uint exponent) => ((ulong)baseValue).Pow(exponent);
         public static long Pow(this long baseValue, long exponent)
@@ -1147,8 +1107,6 @@ namespace RuniOS.Utility
             return result;
         }
         
-        public static float Pow(this float x, float y) => (float)Math.Pow(x, y);
-        public static double Pow(this double x, double y) => Math.Pow(x, y);
         public static decimal Pow(this decimal x, int y) => DecimalMath.PowerN(x, y);
         public static decimal Pow(this decimal x, decimal y) => DecimalMath.Power(x, y);
         public static BigInteger Pow(this BigInteger x, int y) => BigInteger.Pow(x, y);
@@ -1397,14 +1355,12 @@ namespace RuniOS.Utility
         #endregion
 
         #region Sin
-        public static float Sin(this float value) => (float)Math.Sin(value);
-        public static double Sin(this double value) => Math.Sin(value);
+        public static T Sin<T>(this T value) where T : ITrigonometricFunctions<T> => T.Sin(value);
         public static decimal Sin(this decimal value) => DecimalMath.Sin(value);
         #endregion
 
         #region Sinh
-        public static float Sinh(this float value) => (float)Math.Sinh(value);
-        public static double Sinh(this double value) => Math.Sinh(value);
+        public static T Sinh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Sinh(value);
         public static decimal Sinh(this decimal value) => DecimalMath.Sinh(value);
         #endregion
 
@@ -1423,20 +1379,17 @@ namespace RuniOS.Utility
         public static float SmoothStep(this float from, float to, float t) => Mathf.SmoothStep(from, to, t);
 
         #region Sqrt
-        public static float Sqrt(this float value) => (float)Math.Sqrt(value);
-        public static double Sqrt(this double value) => Math.Sqrt(value);
+        public static T Sqrt<T>(this T value) where T : IRootFunctions<T> => T.Sqrt(value);
         public static decimal Sqrt(this decimal value) => DecimalMath.Sqrt(value);
         #endregion
 
         #region Tan
-        public static float Tan(this float value) => (float)Math.Tan(value);
-        public static double Tan(this double value) => Math.Tan(value);
+        public static T Tan<T>(this T value) where T : ITrigonometricFunctions<T> => T.Tan(value);
         public static decimal Tan(this decimal value) => DecimalMath.Tan(value);
         #endregion
 
         #region Tanh
-        public static float Tanh(this float value) => (float)Math.Tanh(value);
-        public static double Tanh(this double value) => Math.Tanh(value);
+        public static T Tanh<T>(this T value) where T : IHyperbolicFunctions<T> => T.Tanh(value);
         public static decimal Tanh(this decimal value) => DecimalMath.Tanh(value);
         #endregion
         
