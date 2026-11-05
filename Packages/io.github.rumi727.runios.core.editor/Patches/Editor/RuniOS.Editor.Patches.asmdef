@@ -10,7 +10,7 @@
         "Editor"
     ],
     "excludePlatforms": [],
-    "allowUnsafeCode": false,
+    "allowUnsafeCode": true,
     "overrideReferences": true,
     "precompiledReferences": [
         "RuniOS.Editor.APIBridge.UnityEditor.CoreModule.dll",

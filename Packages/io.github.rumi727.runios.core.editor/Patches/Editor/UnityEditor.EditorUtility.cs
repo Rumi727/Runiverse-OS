@@ -19,7 +19,7 @@ namespace RuniOS.Editor.Patches
             /// 패널은 GTK의 <c>GtkFileChooserNative</c>를 사용하며, 포탈을 사용할 수 없으면 GTK 파일 선택기로 대체됩니다.
             /// </summary>
             [HarmonyPatch(typeof(EditorUtility))]
-            public static class EditorUtilityPatch
+            public static partial class EditorUtilityPatch
             {
                 [HarmonyPrefix]
                 [HarmonyPatch(nameof(EditorUtility.OpenFilePanel))]
@@ -235,27 +235,27 @@ namespace RuniOS.Editor.Patches
                 const string gobject = "libgobject-2.0.so.0";
                 const string gtk = "libgtk-3.so.0";
 
-                [DllImport(libc)] static extern int setenv(string name, string value, int overwrite);
+                [LibraryImport(libc, StringMarshalling = StringMarshalling.Utf8)] private static partial int setenv(string name, string value, int overwrite);
 
-                [DllImport(glib)] static extern void g_free(IntPtr pointer);
-                [DllImport(glib)] static extern void g_list_free(IntPtr list);
-                [DllImport(gobject)] static extern void g_object_unref(IntPtr instance);
+                [LibraryImport(glib)] private static partial void g_free(IntPtr pointer);
+                [LibraryImport(glib)] private static partial void g_list_free(IntPtr list);
+                [LibraryImport(gobject)] private static partial void g_object_unref(IntPtr instance);
 
-                [DllImport(gtk)] static extern IntPtr gtk_window_list_toplevels();
-                [DllImport(gtk)] static extern bool gtk_window_is_active(IntPtr window);
+                [LibraryImport(gtk)] private static partial IntPtr gtk_window_list_toplevels();
+                [LibraryImport(gtk)] [return: MarshalAs(UnmanagedType.Bool)] private static partial bool gtk_window_is_active(IntPtr window);
 
-                [DllImport(gtk)] static extern IntPtr gtk_file_chooser_native_new([MarshalAs(UnmanagedType.LPUTF8Str)] string? title, IntPtr parent, int action, IntPtr acceptLabel, IntPtr cancelLabel);
-                [DllImport(gtk)] static extern int gtk_native_dialog_run(IntPtr dialog);
+                [LibraryImport(gtk)] private static partial IntPtr gtk_file_chooser_native_new([MarshalAs(UnmanagedType.LPUTF8Str)] string? title, IntPtr parent, int action, IntPtr acceptLabel, IntPtr cancelLabel);
+                [LibraryImport(gtk)] private static partial int gtk_native_dialog_run(IntPtr dialog);
 
-                [DllImport(gtk)] static extern bool gtk_file_chooser_set_current_folder(IntPtr chooser, [MarshalAs(UnmanagedType.LPUTF8Str)] string fileName);
-                [DllImport(gtk)] static extern void gtk_file_chooser_set_current_name(IntPtr chooser, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
-                [DllImport(gtk)] static extern void gtk_file_chooser_set_do_overwrite_confirmation(IntPtr chooser, bool doOverwriteConfirmation);
-                [DllImport(gtk)] static extern void gtk_file_chooser_add_filter(IntPtr chooser, IntPtr filter);
-                [DllImport(gtk)] static extern IntPtr gtk_file_chooser_get_filename(IntPtr chooser);
+                [LibraryImport(gtk)] [return: MarshalAs(UnmanagedType.Bool)] private static partial bool gtk_file_chooser_set_current_folder(IntPtr chooser, [MarshalAs(UnmanagedType.LPUTF8Str)] string fileName);
+                [LibraryImport(gtk)] private static partial void gtk_file_chooser_set_current_name(IntPtr chooser, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+                [LibraryImport(gtk)] private static partial void gtk_file_chooser_set_do_overwrite_confirmation(IntPtr chooser, [MarshalAs(UnmanagedType.Bool)] bool doOverwriteConfirmation);
+                [LibraryImport(gtk)] private static partial void gtk_file_chooser_add_filter(IntPtr chooser, IntPtr filter);
+                [LibraryImport(gtk)] private static partial IntPtr gtk_file_chooser_get_filename(IntPtr chooser);
 
-                [DllImport(gtk)] static extern IntPtr gtk_file_filter_new();
-                [DllImport(gtk)] static extern void gtk_file_filter_set_name(IntPtr filter, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
-                [DllImport(gtk)] static extern void gtk_file_filter_add_pattern(IntPtr filter, [MarshalAs(UnmanagedType.LPUTF8Str)] string pattern);
+                [LibraryImport(gtk)] private static partial IntPtr gtk_file_filter_new();
+                [LibraryImport(gtk)] private static partial void gtk_file_filter_set_name(IntPtr filter, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+                [LibraryImport(gtk)] private static partial void gtk_file_filter_add_pattern(IntPtr filter, [MarshalAs(UnmanagedType.LPUTF8Str)] string pattern);
             }
         }
     }
