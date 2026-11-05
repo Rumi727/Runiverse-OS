@@ -154,7 +154,7 @@ namespace RuniOS.IO.Virtual
         public virtual async UniTask WriteAllBytes(byte[] bytes, CancellationToken cancellationToken = default)
         {
             await using Stream stream = await Create(cancellationToken);
-            await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+            await stream.WriteAsync(bytes, cancellationToken);
         }
 
         /// <summary>

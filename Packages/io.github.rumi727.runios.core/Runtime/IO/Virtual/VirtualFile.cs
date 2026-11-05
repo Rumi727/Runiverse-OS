@@ -82,8 +82,8 @@ namespace RuniOS.IO.Virtual
                 byte[] buffer = new byte[content.chunkSize];
                 int readLength;
 
-                while ((readLength = await nodeStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken)) != 0)
-                    await stream.WriteAsync(buffer, 0, readLength, cancellationToken);
+                while ((readLength = await nodeStream.ReadAsync(buffer, cancellationToken)) != 0)
+                    await stream.WriteAsync(buffer.AsMemory(0, readLength), cancellationToken);
 
                 stream.Seek(0, SeekOrigin.Begin);
                 shortcutNode = null;

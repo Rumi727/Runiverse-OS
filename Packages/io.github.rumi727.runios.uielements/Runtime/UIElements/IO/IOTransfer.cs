@@ -272,10 +272,10 @@ namespace RuniOS.UIElements.IO
 
                     byte[] buffer = new byte[81920];
                     int read;
-                    while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+                    while ((read = source.Read(buffer)) > 0)
                     {
                         cancellation.Token.ThrowIfCancellationRequested();
-                        destination.Write(buffer, 0, read);
+                        destination.Write(buffer.AsSpan(0, read));
                     }
                 }
 

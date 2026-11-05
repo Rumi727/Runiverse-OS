@@ -30,8 +30,8 @@ namespace RuniOS.IO
             try
             {
                 int bytesRead;
-                while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                    incrementalHash.AppendData(buffer, 0, bytesRead);
+                while ((bytesRead = await stream.ReadAsync(buffer)) > 0)
+                    incrementalHash.AppendData(buffer.AsSpan(0, bytesRead));
 
                 string result = BitConverter.ToString(incrementalHash.GetHashAndReset());
                 if (callerContext != null && SynchronizationContext.Current != callerContext)

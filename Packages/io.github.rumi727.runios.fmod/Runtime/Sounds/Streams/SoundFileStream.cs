@@ -149,16 +149,7 @@ namespace RuniOS.Sounds.Streams
 
                 try
                 {
-                    int totalBytesRead = 0;
-
-                    while (totalBytesRead < requested)
-                    {
-                        int read = stream.Read(bytes, totalBytesRead, requested - totalBytesRead);
-                        if (read == 0)
-                            break;
-
-                        totalBytesRead += read;
-                    }
+                    int totalBytesRead = stream.ReadAtLeast(bytes.AsSpan(0, requested), requested, throwOnEndOfStream: false);
 
                     if (totalBytesRead > 0)
                         Marshal.Copy(bytes, 0, buffer, totalBytesRead);

@@ -382,7 +382,7 @@ namespace RuniOS.IO
         async UniTask WriteAllBytes(RuniPath path, byte[] bytes, CancellationToken cancellationToken = default)
         {
             await using Stream stream = await CreateFile(path, cancellationToken);
-            await stream.WriteAsync(bytes, 0, bytes.Length, cancellationToken);
+            await stream.WriteAsync(bytes, cancellationToken);
         }
 
         /// <summary>
