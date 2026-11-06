@@ -10,7 +10,7 @@ namespace RuniOS.IO
     /// Provides the streaming assets of player platforms that expose them as a physical directory.<br/>
     /// StreamingAssets를 물리 디렉터리로 노출하는 플레이어 플랫폼에서 StreamingAssets를 제공합니다.
     /// </summary>
-    public sealed class PlayerStreamingAssetsService : IStreamingAssetsService
+    public sealed partial class PlayerStreamingAssetsService : IStreamingAssetsService
     {
         PlayerStreamingAssetsService() { }
 

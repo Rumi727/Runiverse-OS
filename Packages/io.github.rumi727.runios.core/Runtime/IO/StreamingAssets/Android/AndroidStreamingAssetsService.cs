@@ -9,7 +9,7 @@ namespace RuniOS.IO
     /// Provides the streaming assets packed in the Android application through <see cref="AndroidStreamingIOProvider"/>.<br/>
     /// Android 애플리케이션에 포함된 StreamingAssets를 <see cref="AndroidStreamingIOProvider"/>로 제공합니다.
     /// </summary>
-    public sealed class AndroidStreamingAssetsService : IStreamingAssetsService
+    public sealed partial class AndroidStreamingAssetsService : IStreamingAssetsService
     {
         AndroidStreamingAssetsService() { }
 
