@@ -53,6 +53,8 @@ namespace RuniOS.UIElements.IO
                 foreach (IOBrowserTab tab in tabs)
                     tab.readOnly = value;
 
+                breadcrumbBar.readOnly = value;
+
                 foreach (IOBrowserPlaceGroup group in navigationGroups)
                     group.readOnly = value;
             }

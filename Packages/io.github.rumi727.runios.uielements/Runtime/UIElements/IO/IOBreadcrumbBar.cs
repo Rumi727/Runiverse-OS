@@ -32,6 +32,25 @@ namespace RuniOS.UIElements.IO
         public ScrollView scrollView { get; }
 
         /// <summary>
+        /// 경로 버튼과 하위 폴더 메뉴 항목에 IO 항목을 놓지 못하게 할지 정합니다. 보통 <see cref="IOBrowser.readOnly"/>가 정합니다.
+        /// 이후에 <see cref="SetCrumbs"/>로 만드는 경로 버튼에도 적용됩니다.
+        /// </summary>
+        public bool readOnly
+        {
+            get;
+            set
+            {
+                field = value;
+                folderMenu.readOnly = value;
+                foreach (VisualElement child in scrollView.Children())
+                {
+                    if (child is Crumb crumb)
+                        crumb.readOnly = value;
+                }
+            }
+        }
+
+        /// <summary>
         /// 누르면 <see cref="editRequested"/>가 발생하는 버튼입니다.
         /// </summary>
         public Button editButton { get; }
@@ -97,7 +116,7 @@ namespace RuniOS.UIElements.IO
                 if (previous is { } parent)
                     AddArrow(parent);
 
-                scrollView.Add(new Crumb(name, node, x => nodeSelected?.Invoke(x)));
+                scrollView.Add(new Crumb(name, node, x => nodeSelected?.Invoke(x)) { readOnly = readOnly });
                 previous = node;
             }
 
@@ -193,12 +212,13 @@ namespace RuniOS.UIElements.IO
         {
             VisualElement? highlighted;
 
+            public bool readOnly { get; set; }
+
             bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
             {
-                // 팝업은 오버레이로 옮겨지지만 이 메뉴 자체는 경로 표시줄에 붙어 있으므로, 조상에서 브라우저를 찾을 수 있습니다.
                 RuniMenuItem? item = GetItem(position);
                 directory = item?.userData is IONode node ? node : default;
-                return item != null && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
+                return item != null && !readOnly;
             }
 
             void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => SetHighlight(canDrop ? GetItem(position) : null);
@@ -231,6 +251,8 @@ namespace RuniOS.UIElements.IO
         {
             readonly IONode _node;
 
+            public bool readOnly { get; set; }
+
             public Crumb(string text, IONode node, Action<IONode> selected) : base(() => selected(node))
             {
                 _node = node;
@@ -240,11 +262,11 @@ namespace RuniOS.UIElements.IO
                 AddToClassList(crumbUssClassName);
             }
 
-            // 홈 화면(장치 목록)이나 읽기 전용인 브라우저에는 놓을 수 없습니다.
+            // 홈 화면(장치 목록)이나 읽기 전용이면 놓을 수 없습니다.
             bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
             {
                 directory = _node;
-                return _node != IONode.empty && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
+                return _node != IONode.empty && !readOnly;
             }
 
             void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => EnableInClassList(crumbDropTargetUssClassName, canDrop);
