@@ -12,7 +12,7 @@ namespace RuniOS.Resource
             _loadedResourcePacks = new Dictionary<PackIdentifier, ResourcePack>();
             loadedResourcePacks = _loadedResourcePacks.AsReadOnly();
 
-            defaultPack = Create("vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
+            defaultPack = Create("runios:vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
         }
 
         /// <summary>

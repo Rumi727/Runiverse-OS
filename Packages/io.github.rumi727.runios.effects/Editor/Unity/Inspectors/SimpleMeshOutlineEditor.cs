@@ -21,13 +21,13 @@ namespace RuniOS.Editor.Effects.Unity.Inspectors
             
             Space();
             
-            DrawPropertyLayout("_gap", TrTempContent("inspector.simple_mesh_outline.appearance.gap"));
-            DrawPropertyLayout("_usePixelGap", TrTempContent("inspector.simple_mesh_outline.appearance.use_pixel_gap", "inspector.simple_mesh_outline.appearance.use_pixel_gap.tooltip"));
+            DrawPropertyLayout("_gap", TrTempContent("runios:inspector.simple_mesh_outline.appearance.gap"));
+            DrawPropertyLayout("_usePixelGap", TrTempContent("runios:inspector.simple_mesh_outline.appearance.use_pixel_gap", "runios:inspector.simple_mesh_outline.appearance.use_pixel_gap.tooltip"));
             
             Space();
             
-            GUILayout.Label(GetTextOrKey("inspector.simple_mesh_outline.settings.header"), EditorStyles.boldLabel);
-            DrawPropertyLayout("_outlineVisibility", TrTempContent("inspector.simple_mesh_outline.settings.outline_visibility", "inspector.simple_mesh_outline.settings.outline_visibility.tooltip"));
+            GUILayout.Label(GetTextOrKey("runios:inspector.simple_mesh_outline.settings.header"), EditorStyles.boldLabel);
+            DrawPropertyLayout("_outlineVisibility", TrTempContent("runios:inspector.simple_mesh_outline.settings.outline_visibility", "runios:inspector.simple_mesh_outline.settings.outline_visibility.tooltip"));
         }
     }
 }

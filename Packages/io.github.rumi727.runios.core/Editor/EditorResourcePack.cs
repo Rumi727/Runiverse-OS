@@ -22,7 +22,7 @@ namespace RuniOS.Editor
             IIOProvider[] providers = [new PhysicalIOProvider((PhysicalPath)Directory.GetCurrentDirectory() / "Assets" / streamingAssetsFolderName, SandboxPolicy.Unrestricted), .. packages];
             GroupIOProvider provider = new GroupIOProvider(providers);
 
-            pack = ResourcePack.Create("editor", provider, RequiredPackSort.BeforeVanilla);
+            pack = ResourcePack.Create("runios:editor", provider, RequiredPackSort.BeforeVanilla);
         }
 
         [OnAssemblyUnloading]
