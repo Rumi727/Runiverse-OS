@@ -3,6 +3,7 @@
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using UnityEditor.PackageManager;
 using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Modding
@@ -16,7 +17,8 @@ namespace RuniOS.Modding
     static partial class HarmonyEditorLoader
     {
         const string harmonyAssemblyName = "0Harmony";
-        const string harmonyPath = "Packages/io.github.rumi727.nuget.lib.harmony/0Harmony.dll";
+        const string harmonyPackagePath = "Packages/io.github.rumi727.nuget.lib.harmony";
+        const string harmonyFileName = "0Harmony.dll";
 
         [OnAssemblyLoaded]
         static void OnAssemblyLoaded() => AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
@@ -29,7 +31,8 @@ namespace RuniOS.Modding
             if (new AssemblyName(args.Name).Name != harmonyAssemblyName)
                 return null;
 
-            return AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(harmonyPath));
+            string packagePath = PackageInfo.FindForAssetPath(harmonyPackagePath).resolvedPath;
+            return AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.Combine(packagePath, harmonyFileName));
         }
     }
 }
