@@ -2,4 +2,3 @@
 -nullable:enable
 -warnaserror:nullable
 -nowarn:UAL0010,UAL0013
--r:"Packages/io.github.rumi727.nuget.lib.harmony/0Harmony.dll"
