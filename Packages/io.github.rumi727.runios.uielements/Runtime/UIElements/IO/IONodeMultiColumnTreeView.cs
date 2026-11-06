@@ -456,6 +456,23 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         protected virtual void BuildContextMenu(RuniMenu menu)
         {
+            // 더블 클릭이나 Enter 키와 같이 선택된 항목을 엽니다. 폴더는 이동하고 파일은 opened를 거쳐 열립니다.
+            RuniMenuItem open = new(string.Empty, () =>
+            {
+                foreach (IOEntry entry in selectedEntries)
+                    opened?.Invoke(entry);
+            });
+
+            menu.opened += () =>
+            {
+                open.text = GetText("runios-editor:io_node_tree_view.open");
+                open.SetEnabled(selectedEntries.Length > 0);
+            };
+
+            menu.Add(open);
+
+            menu.Add(new Separator());
+
             AddNewItemMenu(menu, () => this);
 
             menu.Add(new Separator());

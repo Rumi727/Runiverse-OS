@@ -240,6 +240,7 @@
   "io_node_tree_view.new_text_file_name": "새 텍스트 파일",
   "io_node_tree_view.new_markdown_file_name": "새 마크다운 파일",
   "io_node_tree_view.new_json_file_name": "새 JSON 파일",
+  "io_node_tree_view.open": "열기",
   "io_node_tree_view.cut": "잘라내기",
   "io_node_tree_view.copy": "복사",
   "io_node_tree_view.paste": "붙여넣기",

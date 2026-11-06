@@ -241,6 +241,7 @@
   "io_node_tree_view.new_text_file_name": "New Text File",
   "io_node_tree_view.new_markdown_file_name": "New Markdown File",
   "io_node_tree_view.new_json_file_name": "New JSON File",
+  "io_node_tree_view.open": "Open",
   "io_node_tree_view.cut": "Cut",
   "io_node_tree_view.copy": "Copy",
   "io_node_tree_view.paste": "Paste",
