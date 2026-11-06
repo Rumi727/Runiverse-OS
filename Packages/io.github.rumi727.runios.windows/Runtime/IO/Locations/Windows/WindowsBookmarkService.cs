@@ -5,6 +5,7 @@ using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Runtime.InteropServices.Marshalling;
 
 // ReSharper disable CommentTypo
 namespace RuniOS.IO.Locations.Windows
@@ -54,12 +55,12 @@ namespace RuniOS.IO.Locations.Windows
 
         IUniTaskAsyncEnumerable<Bookmark> IBookmarkService.EnumerateBookmarks() => EnumerateBookmarks().ToUniTaskAsyncEnumerable();
 
-        static unsafe List<Bookmark> ReadQuickAccess()
+        static List<Bookmark> ReadQuickAccess()
         {
             List<Bookmark> result = new();
 
-            void* folder = null;
-            void* enumerator = null;
+            IShellItem? folder = null;
+            IEnumShellItems? enumerator = null;
             bool shouldUninitializeCom = false;
 
             try
@@ -70,33 +71,18 @@ namespace RuniOS.IO.Locations.Windows
                 else if (initializeResult != rpcEChangedMode)
                     return result;
 
-                Guid shellItemId = iidShellItem;
-                if (Native.SHCreateItemFromParsingName(quickAccessPath, IntPtr.Zero, ref shellItemId, out IntPtr folderPointer) < 0)
+                if (Native.SHCreateItemFromParsingName(quickAccessPath, IntPtr.Zero, in iidShellItem, out folder) < 0 || folder == null)
                     return result;
 
-                folder = (void*)folderPointer;
-
-                // IShellItem::BindToHandler
-                Guid enumItemsHandler = bhidEnumItems;
-                Guid enumShellItemsId = iidEnumShellItems;
-                void* rawEnumerator;
-                if (((delegate* unmanaged[Stdcall]<void*, void*, Guid*, Guid*, void**, int>)GetMethod(folder, 3))(folder, null, &enumItemsHandler, &enumShellItemsId, &rawEnumerator) < 0)
+                if (folder.BindToHandler(IntPtr.Zero, in bhidEnumItems, in iidEnumShellItems, out enumerator) < 0 || enumerator == null)
                     return result;
 
-                enumerator = rawEnumerator;
-
-                while (true)
+                while (enumerator.Next(1, out IShellItem? item, out uint fetched) == 0 && fetched != 0 && item != null)
                 {
-                    // IEnumShellItems::Next
-                    void* item;
-                    uint fetched;
-                    if (((delegate* unmanaged[Stdcall]<void*, uint, void**, uint*, int>)GetMethod(enumerator, 3))(enumerator, 1, &item, &fetched) != 0 || fetched == 0)
-                        break;
-
                     try
                     {
-                        if (TryGetDisplayName(item, sigdnFileSysPath, out string path) && Directory.Exists(path)
-                            && TryGetDisplayName(item, sigdnNormalDisplay, out string name))
+                        if (item.GetDisplayName(sigdnFileSysPath, out string? path) >= 0 && !string.IsNullOrEmpty(path) && Directory.Exists(path)
+                            && item.GetDisplayName(sigdnNormalDisplay, out string? name) >= 0 && !string.IsNullOrEmpty(name))
                             result.Add(new Bookmark(name, (PhysicalPath)path));
                     }
                     catch (ArgumentException) { }
@@ -112,12 +98,10 @@ namespace RuniOS.IO.Locations.Windows
             catch (EntryPointNotFoundException) { }
             finally
             {
-                if (enumerator != null)
-                    Release(enumerator);
+                Release(enumerator);
+                Release(folder);
 
-                if (folder != null)
-                    Release(folder);
-
+                // 래퍼가 해제되기 전에 COM이 먼저 종료되지 않도록 명시적으로 해제합니다.
                 if (shouldUninitializeCom)
                     Native.CoUninitialize();
             }
@@ -125,30 +109,7 @@ namespace RuniOS.IO.Locations.Windows
             return result;
         }
 
-        static unsafe void* GetMethod(void* instance, int index) => (*(void***)instance)[index];
-
-        // IUnknown::Release
-        static unsafe void Release(void* instance) => ((delegate* unmanaged[Stdcall]<void*, uint>)GetMethod(instance, 2))(instance);
-
-        // IShellItem::GetDisplayName
-        static unsafe bool TryGetDisplayName(void* item, uint sigdn, out string name)
-        {
-            name = string.Empty;
-
-            char* buffer;
-            if (((delegate* unmanaged[Stdcall]<void*, uint, char**, int>)GetMethod(item, 5))(item, sigdn, &buffer) < 0 || buffer == null)
-                return false;
-
-            try
-            {
-                name = new string(buffer);
-                return name.Length > 0;
-            }
-            finally
-            {
-                Marshal.FreeCoTaskMem((IntPtr)buffer);
-            }
-        }
+        static void Release(object? comObject) => (comObject as ComObject)?.FinalRelease();
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
@@ -167,7 +128,30 @@ namespace RuniOS.IO.Locations.Windows
             public static partial void CoUninitialize();
 
             [LibraryImport("shell32.dll", StringMarshalling = StringMarshalling.Utf16)]
-            public static partial int SHCreateItemFromParsingName(string path, IntPtr bindContext, ref Guid iid, out IntPtr item);
+            public static partial int SHCreateItemFromParsingName(string path, IntPtr bindContext, in Guid iid, [MarshalAs(UnmanagedType.Interface)] out IShellItem? item);
         }
+    }
+
+    // 메서드 순서는 vtable 순서이므로 바꾸면 안 됩니다. 사용하지 않는 뒤쪽 메서드는 생략합니다.
+    [GeneratedComInterface]
+    [Guid("43826D1E-E718-42EE-BC55-A1E261C37BFE")]
+    internal partial interface IShellItem
+    {
+        [PreserveSig]
+        int BindToHandler(IntPtr bindContext, in Guid handlerId, in Guid interfaceId, [MarshalAs(UnmanagedType.Interface)] out IEnumShellItems? enumerator);
+
+        [PreserveSig]
+        int GetParent([MarshalAs(UnmanagedType.Interface)] out IShellItem? parent);
+
+        [PreserveSig]
+        int GetDisplayName(uint sigdn, [MarshalAs(UnmanagedType.LPWStr)] out string? name);
+    }
+
+    [GeneratedComInterface]
+    [Guid("70629033-E363-4A28-A567-0DB78006E6D7")]
+    internal partial interface IEnumShellItems
+    {
+        [PreserveSig]
+        int Next(uint count, [MarshalAs(UnmanagedType.Interface)] out IShellItem? item, out uint fetched);
     }
 }
