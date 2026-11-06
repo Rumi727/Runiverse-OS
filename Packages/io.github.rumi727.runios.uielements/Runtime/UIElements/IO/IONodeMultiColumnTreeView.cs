@@ -59,6 +59,22 @@ namespace RuniOS.UIElements.IO
             }
         }
 
+        /// <summary>
+        /// 경로가 일치하는 파일만 표시합니다. 폴더에는 적용되지 않으며, <see langword="null"/>이면 모든 파일을 표시합니다. 바꾸면 목록을 다시 불러옵니다.
+        /// </summary>
+        public IPatternMatcher? filter
+        {
+            get;
+            set
+            {
+                if (field == value)
+                    return;
+
+                field = value;
+                Refresh().Forget();
+            }
+        }
+
         [UxmlAttribute]
         public SelectionType selectionType
         {
@@ -1157,7 +1173,13 @@ namespace RuniOS.UIElements.IO
         IUniTaskAsyncEnumerable<IOEntry> EnumerateEntries(RuniPath path)
         {
             IUniTaskAsyncEnumerable<IOEntry> entries = provider.EnumerateEntries(path, false);
-            return showHiddenFiles ? entries : entries.Where(static x => !IsHidden(x));
+            if (!showHiddenFiles)
+                entries = entries.Where(static x => !IsHidden(x));
+
+            if (filter is { } matcher)
+                entries = entries.Where(x => x.isDirectory || matcher.IsMatch(x.path));
+
+            return entries;
         }
 
         static bool IsHidden(IOEntry entry) => entry.metaData.attributes?.HasFlag(FileAttributes.Hidden) == true;

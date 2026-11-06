@@ -60,6 +60,21 @@ namespace RuniOS.UIElements.IO
             }
         }
 
+        /// <summary>
+        /// 내용 영역에 표시할 파일을 거릅니다. 폴더에는 적용되지 않으며, <see langword="null"/>이면 모든 파일을 표시합니다.
+        /// 모든 탭에 적용되고, 새로 여는 탭에도 적용됩니다.
+        /// </summary>
+        public IPatternMatcher? filter
+        {
+            get;
+            set
+            {
+                field = value;
+                foreach (IOBrowserTab tab in tabs)
+                    tab.filter = value;
+            }
+        }
+
         public IOBrowserTab activeTab => (IOBrowserTab)contentPane.activeTab;
         public IEnumerable<IOBrowserTab> tabs => contentPane.Children().Cast<IOBrowserTab>();
 
@@ -296,6 +311,7 @@ namespace RuniOS.UIElements.IO
         {
             IOBrowserTab tab = CreateTab();
             tab.readOnly = readOnly;
+            tab.filter = filter;
             tab.name = "tab";
             tab.AddToClassList(tabUssClassName);
             tab.nodeChanged += OnTabNodeChanged;

@@ -33,6 +33,12 @@ namespace RuniOS.UIElements.IO
             set => treeView.readOnly = value;
         }
 
+        public override IPatternMatcher? filter
+        {
+            get => treeView.filter;
+            set => treeView.filter = value;
+        }
+
         public DeviceLocationView deviceLocationView { get; }
         public IONodeMultiColumnTreeView treeView { get; }
 

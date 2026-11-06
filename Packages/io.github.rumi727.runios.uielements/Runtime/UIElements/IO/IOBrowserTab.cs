@@ -123,6 +123,11 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         public abstract bool readOnly { get; set; }
 
+        /// <summary>
+        /// 이 탭의 내용 뷰에 표시할 파일을 거릅니다. 폴더에는 적용되지 않으며, <see langword="null"/>이면 모든 파일을 표시합니다. 보통 <see cref="IOBrowser.filter"/>가 정합니다.
+        /// </summary>
+        public abstract IPatternMatcher? filter { get; set; }
+
         // 홈 화면(장치 목록)이나 읽기 전용인 탭에는 놓을 수 없습니다.
         bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
         {

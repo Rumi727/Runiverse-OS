@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.IO;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -26,6 +27,12 @@ namespace RuniOS.UIElements.IO
         {
             get => treeView.readOnly;
             set => treeView.readOnly = value;
+        }
+
+        public override IPatternMatcher? filter
+        {
+            get => treeView.filter;
+            set => treeView.filter = value;
         }
 
         public IONodeBrowserTab()
