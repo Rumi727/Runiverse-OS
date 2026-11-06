@@ -9,6 +9,10 @@ using System.Runtime.InteropServices;
 // ReSharper disable CommentTypo
 namespace RuniOS.IO.Locations.Windows
 {
+    /// <summary>
+    /// Provides the Windows known folders retrieved through the shell known folder API.<br/>
+    /// 셸 알려진 폴더 API로 가져오는 Windows 알려진 폴더를 제공합니다.
+    /// </summary>
     public sealed partial class WindowsKnownDirectoryProvider : IKnownDirectoryProvider
     {
         const uint kfFlagDontVerify = 0x00004000;
@@ -36,11 +40,27 @@ namespace RuniOS.IO.Locations.Windows
 
         WindowsKnownDirectoryProvider() { }
 
+        /// <summary>
+        /// Gets the Windows known directory provider instance.<br/>
+        /// Windows 알려진 디렉터리 프로바이더 인스턴스를 가져옵니다.
+        /// </summary>
         public static WindowsKnownDirectoryProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Windows known directory provider.<br/>
+        /// Windows 알려진 디렉터리 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/windows");
         Identifier IProvider.id => id;
 
+        /// <summary>
+        /// Enumerates the known folders whose paths can be retrieved from the shell.<br/>
+        /// 셸에서 경로를 가져올 수 있는 알려진 폴더를 열거합니다.
+        /// </summary>
+        /// <returns>
+        /// A sequence containing one directory for each known folder with a valid path.<br/>
+        /// 유효한 경로를 가진 알려진 폴더마다 하나의 디렉터리를 포함하는 시퀀스를 반환합니다.
+        /// </returns>
         public static IEnumerable<KnownDirectory> EnumerateDirectories()
         {
             foreach ((KnownDirectoryType type, Guid id) in knownFolders)

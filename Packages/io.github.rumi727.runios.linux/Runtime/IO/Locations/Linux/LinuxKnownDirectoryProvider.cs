@@ -9,15 +9,35 @@ using System.Text;
 // ReSharper disable StringLiteralTypo
 namespace RuniOS.IO.Locations.Linux
 {
+    /// <summary>
+    /// Provides the home directory and the user directories defined in <c>user-dirs.dirs</c>.<br/>
+    /// 홈 디렉터리와 <c>user-dirs.dirs</c>에 정의된 사용자 디렉터리를 제공합니다.
+    /// </summary>
     public sealed partial class LinuxKnownDirectoryProvider : IKnownDirectoryProvider
     {
         LinuxKnownDirectoryProvider() { }
 
+        /// <summary>
+        /// Gets the Linux known directory provider instance.<br/>
+        /// Linux 알려진 디렉터리 프로바이더 인스턴스를 가져옵니다.
+        /// </summary>
         public static LinuxKnownDirectoryProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Linux known directory provider.<br/>
+        /// Linux 알려진 디렉터리 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/linux");
         Identifier IProvider.id => id;
 
+        /// <summary>
+        /// Enumerates the home directory and the user directories defined in <c>user-dirs.dirs</c>.<br/>
+        /// 홈 디렉터리와 <c>user-dirs.dirs</c>에 정의된 사용자 디렉터리를 열거합니다.
+        /// </summary>
+        /// <returns>
+        /// A sequence that starts with the home directory, or an empty sequence when the home directory cannot be determined.<br/>
+        /// 홈 디렉터리로 시작하는 시퀀스를 반환하며, 홈 디렉터리를 확인할 수 없으면 빈 시퀀스를 반환합니다.
+        /// </returns>
         public static IEnumerable<KnownDirectory> EnumerateDirectories()
         {
             string? home = GetHomeDirectory();

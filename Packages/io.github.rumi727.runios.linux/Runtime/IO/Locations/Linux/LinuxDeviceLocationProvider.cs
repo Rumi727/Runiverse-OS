@@ -27,6 +27,10 @@ namespace RuniOS.IO.Locations.Linux
         /// </summary>
         public static LinuxDeviceLocationProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Linux device location provider.<br/>
+        /// Linux 장치 위치 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "device-location/linux");
         Identifier IProvider.id => id;
 

@@ -27,6 +27,10 @@ namespace RuniOS.IO.Locations.Linux
         /// </summary>
         public static LinuxTrashProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Linux trash provider.<br/>
+        /// Linux 휴지통 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "trash/linux");
         Identifier IProvider.id => id;
 

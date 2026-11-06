@@ -21,6 +21,10 @@ namespace RuniOS.IO.Locations.Windows
         /// </summary>
         public static WindowsNetworkLocationProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Windows network location provider.<br/>
+        /// Windows 네트워크 위치 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "network-location/windows");
         Identifier IProvider.id => id;
 

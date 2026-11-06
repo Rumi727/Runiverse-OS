@@ -10,6 +10,10 @@ using System.Runtime.InteropServices.Marshalling;
 // ReSharper disable UnusedMethodReturnValue.Local
 namespace RuniOS.IO.Locations.Windows
 {
+    /// <summary>
+    /// Enumerates the volume mounts of the system by using the Windows volume APIs.<br/>
+    /// Windows 볼륨 API를 사용해 시스템의 볼륨 마운트를 열거합니다.
+    /// </summary>
     public sealed partial class WindowsMountProvider : IMountProvider
     {
         const int errorMoreData = 234;
@@ -21,11 +25,27 @@ namespace RuniOS.IO.Locations.Windows
 
         WindowsMountProvider() { }
 
+        /// <summary>
+        /// Gets the Windows mount provider instance.<br/>
+        /// Windows 마운트 프로바이더 인스턴스를 가져옵니다.
+        /// </summary>
         public static WindowsMountProvider instance { get; } = new();
 
+        /// <summary>
+        /// The identifier of the Windows mount provider.<br/>
+        /// Windows 마운트 프로바이더의 식별자입니다.
+        /// </summary>
         public static readonly Identifier id = new Identifier("runios", "mount/windows");
         Identifier IProvider.id => id;
 
+        /// <summary>
+        /// Enumerates the volume mounts of the system.<br/>
+        /// 시스템의 볼륨 마운트를 열거합니다.
+        /// </summary>
+        /// <returns>
+        /// A collection containing the volume mounts, or an empty collection when the volume APIs are unavailable or no volume is found.<br/>
+        /// 볼륨 마운트를 포함하는 컬렉션을 반환하며, 볼륨 API를 사용할 수 없거나 볼륨을 찾지 못하면 빈 컬렉션을 반환합니다.
+        /// </returns>
         public static IEnumerable<WindowsMount> EnumerateMounts()
         {
             List<WindowsMount> mounts = [];
