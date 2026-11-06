@@ -275,6 +275,7 @@
   "io_node_tree_view.copy_physical_path": "物理パスをコピー",
   "io_node_tree_view.show_in_file_manager": "ファイルマネージャーで表示",
   "io_browser.places": "場所",
+  "io_browser.bookmarks": "ブックマーク",
   "io_browser.remote": "リモート",
   "io_browser.devices": "デバイス",
   "io_browser.computer": "コンピューター",

@@ -275,6 +275,7 @@
   "io_node_tree_view.copy_physical_path": "Copy Physical Path",
   "io_node_tree_view.show_in_file_manager": "Show in File Manager",
   "io_browser.places": "Places",
+  "io_browser.bookmarks": "Bookmarks",
   "io_browser.remote": "Remote",
   "io_browser.devices": "Devices",
   "io_browser.computer": "Computer",

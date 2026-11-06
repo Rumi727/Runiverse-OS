@@ -147,6 +147,16 @@ namespace RuniOS.UIElements.IO
 
             groups.Add(places);
 
+            if (ServiceRegistry.TryGet(out IBookmarkService? bookmarkService))
+            {
+                IOBrowserPlaceGroup bookmarks = new(GetText("runios-editor:io_browser.bookmarks")) { name = "bookmarks" };
+                await foreach (Bookmark bookmark in bookmarkService.EnumerateBookmarks())
+                    bookmarks.Add(MakeBookmarkPlace(bookmark));
+
+                if (bookmarks.childCount > 0)
+                    groups.Add(bookmarks);
+            }
+
             if (ServiceRegistry.TryGet(out INetworkLocationService? networkLocationService))
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
@@ -192,6 +202,14 @@ namespace RuniOS.UIElements.IO
             IOBrowserPlace place = MakePlace(text, knownDirectoryIcons.GetValueOrDefault(directory.type, folderIcon), () => Open(directory.path));
             place.name = directory.type;
             place.dropDirectory = GetNodeFromPhysicalRoot(directory.path);
+
+            return place;
+        }
+
+        IOBrowserPlace MakeBookmarkPlace(Bookmark bookmark)
+        {
+            IOBrowserPlace place = MakePlace(bookmark.name, folderIcon, () => Open(bookmark.path));
+            place.dropDirectory = GetNodeFromPhysicalRoot(bookmark.path);
 
             return place;
         }

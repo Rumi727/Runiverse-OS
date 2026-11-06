@@ -274,6 +274,7 @@
   "io_node_tree_view.copy_physical_path": "물리 경로 복사",
   "io_node_tree_view.show_in_file_manager": "파일 관리자에서 보기",
   "io_browser.places": "위치",
+  "io_browser.bookmarks": "즐겨찾기",
   "io_browser.remote": "원격",
   "io_browser.devices": "장치",
   "io_browser.computer": "컴퓨터",
