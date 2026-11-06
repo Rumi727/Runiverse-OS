@@ -106,6 +106,9 @@
       <Compile Update="Generators\SourceWriter.AppendLineEditorBrowsable.cs">
         <DependentUpon>SourceWriter.cs</DependentUpon>
       </Compile>
+      <Compile Update="Generators\SourceWriter.AppendLineModuleInitializer.cs">
+        <DependentUpon>SourceWriter.cs</DependentUpon>
+      </Compile>
     </ItemGroup>
 
     <Target Name="CopyAnalyzerToUnityPackage" AfterTargets="Build">
