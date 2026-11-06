@@ -36,7 +36,7 @@ namespace RuniOS.UIElements.IO
 
         public async UniTask Refresh()
         {
-            if (ProviderRegistry.Get<IDeviceLocationProvider>() is not { } provider)
+            if (!ProviderRegistry.TryGet(out IDeviceLocationProvider? provider))
             {
                 Clear();
                 return;

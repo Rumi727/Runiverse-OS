@@ -443,7 +443,7 @@ namespace RuniOS.UIElements.IO
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
             RuniMenuItem openInFileManager = new(string.Empty, () =>
             {
-                if (ProviderRegistry.Get<IFileManagerProvider>() is { } fileManager && node.provider is PhysicalIOProvider physicalProvider)
+                if (ProviderRegistry.TryGet(out IFileManagerProvider? fileManager) && node.provider is PhysicalIOProvider physicalProvider)
                     fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
             });
 

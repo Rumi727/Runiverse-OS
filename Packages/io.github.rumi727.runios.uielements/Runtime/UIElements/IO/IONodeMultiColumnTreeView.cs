@@ -544,7 +544,7 @@ namespace RuniOS.UIElements.IO
             // 선택된 항목이 있으면 그 항목들을 보여 주고, 없으면 빈 곳에서 연 메뉴이므로 폴더 메뉴처럼 현재 폴더를 엽니다.
             RuniMenuItem showInFileManager = new(string.Empty, () =>
             {
-                if (ProviderRegistry.Get<IFileManagerProvider>() is not { } fileManager || provider is not PhysicalIOProvider physicalProvider)
+                if (!ProviderRegistry.TryGet(out IFileManagerProvider? fileManager) || provider is not PhysicalIOProvider physicalProvider)
                     return;
 
                 IOEntry[] entries = selectedEntries;
@@ -807,7 +807,7 @@ namespace RuniOS.UIElements.IO
 
             ITrashProvider? trash = null;
             PhysicalPath[] trashPaths = Array.Empty<PhysicalPath>();
-            if (!permanently && ProviderRegistry.Get<ITrashProvider>() is { } trashProvider && provider is PhysicalIOProvider physicalProvider)
+            if (!permanently && ProviderRegistry.TryGet(out ITrashProvider? trashProvider) && provider is PhysicalIOProvider physicalProvider)
             {
                 trashPaths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
 
