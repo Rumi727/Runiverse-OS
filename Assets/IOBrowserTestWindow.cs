@@ -196,7 +196,7 @@ public sealed class IOBrowserTestWindow : EditorWindow
             this.cases = cases;
             style.flexGrow = 1;
 
-            VisualElement header = new() { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap } };
+            VisualElement header = new() { style = { flexDirection = FlexDirection.Row, flexWrap = Wrap.Wrap, flexShrink = 0 } };
             Add(header);
 
             caseField = new DropdownField(cases.Select(x => x.name).ToList(), index) { style = { width = 300 } };
