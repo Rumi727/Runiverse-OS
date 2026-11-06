@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO.Locations.Linux.DBus;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using Tmds.DBus.Protocol;
 
@@ -11,22 +11,22 @@ namespace RuniOS.IO.Locations.Linux
     /// Shows paths in the file manager through the freedesktop FileManager1 D-Bus interface.<br/>
     /// freedesktop FileManager1 D-Bus 인터페이스로 파일 관리자에서 경로를 보여 줍니다.
     /// </summary>
-    public sealed partial class LinuxFileManagerProvider : IFileManagerProvider
+    public sealed partial class LinuxFileManagerService : IFileManagerService
     {
         const string fileManager1ServiceName = "org.freedesktop.FileManager1";
         const string fileManager1Path = "/org/freedesktop/FileManager1";
 
-        LinuxFileManagerProvider() { }
+        LinuxFileManagerService() { }
 
         /// <summary>
-        /// Gets the Linux file manager provider instance.<br/>
-        /// Linux 파일 관리자 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux file manager service instance.<br/>
+        /// Linux 파일 관리자 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxFileManagerProvider instance { get; } = new();
+        public static LinuxFileManagerService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Linux file manager provider.<br/>
-        /// Linux 파일 관리자 프로바이더의 식별자입니다.
+        /// The identifier of the Linux file manager service.<br/>
+        /// Linux 파일 관리자 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "file-manager/linux");
         Identifier IService.id => id;
@@ -59,17 +59,17 @@ namespace RuniOS.IO.Locations.Linux
             return new FileManager1(connection, fileManager1ServiceName, new ObjectPath(fileManager1Path));
         }
 
-        UniTask IFileManagerProvider.ShowFolder(PhysicalPath path) => ShowFolder(path);
-        UniTask IFileManagerProvider.ShowItems(IEnumerable<PhysicalPath> paths) => ShowItems(paths);
+        UniTask IFileManagerService.ShowFolder(PhysicalPath path) => ShowFolder(path);
+        UniTask IFileManagerService.ShowItems(IEnumerable<PhysicalPath> paths) => ShowItems(paths);
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
         static void OnAssemblyUnloading()
         {
-            ProviderRegistry.Unregister(instance);
+            ServiceRegistry.Unregister(instance);
 
             // 공유 연결의 소켓 수신 대기가 언로드되는 ALC를 붙잡지 않도록 연결을 끊습니다.
             DBusConnection.Session.Dispose();

@@ -1,6 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.Globalization;
 using System.IO;
@@ -13,23 +13,23 @@ namespace RuniOS.IO.Locations.Linux
     /// Moves paths to the trash according to the freedesktop Trash specification.<br/>
     /// freedesktop 휴지통 규격에 따라 경로를 휴지통으로 보냅니다.
     /// </summary>
-    public sealed partial class LinuxTrashProvider : ITrashProvider
+    public sealed partial class LinuxTrashService : ITrashService
     {
         const uint directoryMode = 0x1C0; // 0700
         const int writeAndExecuteAccess = 0x2 | 0x1; // W_OK | X_OK
         const int crossDeviceError = 18; // EXDEV
 
-        LinuxTrashProvider() { }
+        LinuxTrashService() { }
 
         /// <summary>
-        /// Gets the Linux trash provider instance.<br/>
-        /// Linux 휴지통 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux trash service instance.<br/>
+        /// Linux 휴지통 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxTrashProvider instance { get; } = new();
+        public static LinuxTrashService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Linux trash provider.<br/>
-        /// Linux 휴지통 프로바이더의 식별자입니다.
+        /// The identifier of the Linux trash service.<br/>
+        /// Linux 휴지통 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "trash/linux");
         Identifier IService.id => id;
@@ -42,7 +42,7 @@ namespace RuniOS.IO.Locations.Linux
         /// </summary>
         public static UniTask<bool> CanMoveToTrash(PhysicalPath path)
         {
-            if (GetTrashDirectory(path, LinuxMountProvider.EnumerateMounts().ToList(), out _) is not { } trash)
+            if (GetTrashDirectory(path, LinuxMountService.EnumerateMounts().ToList(), out _) is not { } trash)
                 return UniTask.FromResult(false);
 
             // 휴지통이 아직 없으면 조회만으로 디렉터리를 만들지 않도록, 만들 수 있는지만 확인합니다.
@@ -63,7 +63,7 @@ namespace RuniOS.IO.Locations.Linux
         /// </exception>
         public static UniTask MoveToTrash(IEnumerable<PhysicalPath> paths)
         {
-            List<LinuxMount> mounts = LinuxMountProvider.EnumerateMounts().ToList();
+            List<LinuxMount> mounts = LinuxMountService.EnumerateMounts().ToList();
             foreach (PhysicalPath path in paths)
             {
                 if (GetTrashDirectory(path, mounts, out string? topDirectory) is not { } trash)
@@ -178,15 +178,15 @@ namespace RuniOS.IO.Locations.Linux
 
         static bool IsSymbolicLink(string path) => new FileInfo(path).LinkTarget != null;
 
-        UniTask<bool> ITrashProvider.CanMoveToTrash(PhysicalPath path) => CanMoveToTrash(path);
-        UniTask ITrashProvider.MoveToTrash(IEnumerable<PhysicalPath> paths) => MoveToTrash(paths);
+        UniTask<bool> ITrashService.CanMoveToTrash(PhysicalPath path) => CanMoveToTrash(path);
+        UniTask ITrashService.MoveToTrash(IEnumerable<PhysicalPath> paths) => MoveToTrash(paths);
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
 
         // ReSharper disable InconsistentNaming

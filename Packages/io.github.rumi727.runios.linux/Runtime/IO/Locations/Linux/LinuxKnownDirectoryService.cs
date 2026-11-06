@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Text;
@@ -13,19 +13,19 @@ namespace RuniOS.IO.Locations.Linux
     /// Provides the home directory and the user directories defined in <c>user-dirs.dirs</c>.<br/>
     /// 홈 디렉터리와 <c>user-dirs.dirs</c>에 정의된 사용자 디렉터리를 제공합니다.
     /// </summary>
-    public sealed partial class LinuxKnownDirectoryProvider : IKnownDirectoryProvider
+    public sealed partial class LinuxKnownDirectoryService : IKnownDirectoryService
     {
-        LinuxKnownDirectoryProvider() { }
+        LinuxKnownDirectoryService() { }
 
         /// <summary>
-        /// Gets the Linux known directory provider instance.<br/>
-        /// Linux 알려진 디렉터리 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux known directory service instance.<br/>
+        /// Linux 알려진 디렉터리 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxKnownDirectoryProvider instance { get; } = new();
+        public static LinuxKnownDirectoryService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Linux known directory provider.<br/>
-        /// Linux 알려진 디렉터리 프로바이더의 식별자입니다.
+        /// The identifier of the Linux known directory service.<br/>
+        /// Linux 알려진 디렉터리 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/linux");
         Identifier IService.id => id;
@@ -51,7 +51,7 @@ namespace RuniOS.IO.Locations.Linux
                 yield return new KnownDirectory(type, path);
         }
 
-        IUniTaskAsyncEnumerable<KnownDirectory> IKnownDirectoryProvider.EnumerateDirectories() => EnumerateDirectories().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<KnownDirectory> IKnownDirectoryService.EnumerateDirectories() => EnumerateDirectories().ToUniTaskAsyncEnumerable();
 
         static Dictionary<KnownDirectoryType, PhysicalPath> ReadUserDirectories(string home)
         {
@@ -236,10 +236,10 @@ namespace RuniOS.IO.Locations.Linux
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
     }
 }

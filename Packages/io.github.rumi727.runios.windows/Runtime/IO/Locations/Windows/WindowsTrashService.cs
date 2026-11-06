@@ -1,6 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -11,7 +11,7 @@ namespace RuniOS.IO.Locations.Windows
     /// Moves paths to the Windows Recycle Bin.<br/>
     /// Windows 휴지통으로 경로를 보냅니다.
     /// </summary>
-    public sealed partial class WindowsTrashProvider : ITrashProvider
+    public sealed partial class WindowsTrashService : ITrashService
     {
         const uint coInitApartmentThreaded = 0x2;
         const int rpcEChangedMode = unchecked((int)0x80010106);
@@ -26,17 +26,17 @@ namespace RuniOS.IO.Locations.Windows
 
         const int errorCancelled = 0x4C7;
 
-        WindowsTrashProvider() { }
+        WindowsTrashService() { }
 
         /// <summary>
-        /// Gets the Windows trash provider instance.<br/>
-        /// Windows 휴지통 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Windows trash service instance.<br/>
+        /// Windows 휴지통 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static WindowsTrashProvider instance { get; } = new();
+        public static WindowsTrashService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Windows trash provider.<br/>
-        /// Windows 휴지통 프로바이더의 식별자입니다.
+        /// The identifier of the Windows trash service.<br/>
+        /// Windows 휴지통 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "trash/windows");
         Identifier IService.id => id;
@@ -117,15 +117,15 @@ namespace RuniOS.IO.Locations.Windows
             return UniTask.CompletedTask;
         }
 
-        UniTask<bool> ITrashProvider.CanMoveToTrash(PhysicalPath path) => CanMoveToTrash(path);
-        UniTask ITrashProvider.MoveToTrash(IEnumerable<PhysicalPath> paths) => MoveToTrash(paths);
+        UniTask<bool> ITrashService.CanMoveToTrash(PhysicalPath path) => CanMoveToTrash(path);
+        UniTask ITrashService.MoveToTrash(IEnumerable<PhysicalPath> paths) => MoveToTrash(paths);
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
 
         static unsafe partial class Native

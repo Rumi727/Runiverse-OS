@@ -1,6 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Providers;
+using RuniOS.Services;
 using System.IO;
 
 namespace RuniOS.IO.Locations
@@ -9,7 +9,7 @@ namespace RuniOS.IO.Locations
     /// Moves physical paths to the system trash.<br/>
     /// 실제 경로를 시스템 휴지통으로 보냅니다.
     /// </summary>
-    public interface ITrashProvider : IService
+    public interface ITrashService : IService
     {
         /// <summary>
         /// Determines whether the specified path can be moved to the system trash.<br/>

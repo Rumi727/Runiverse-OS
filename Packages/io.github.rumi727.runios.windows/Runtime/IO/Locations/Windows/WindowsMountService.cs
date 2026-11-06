@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -14,7 +14,7 @@ namespace RuniOS.IO.Locations.Windows
     /// Enumerates the volume mounts of the system by using the Windows volume APIs.<br/>
     /// Windows 볼륨 API를 사용해 시스템의 볼륨 마운트를 열거합니다.
     /// </summary>
-    public sealed partial class WindowsMountProvider : IMountProvider
+    public sealed partial class WindowsMountService : IMountService
     {
         const int errorMoreData = 234;
         const uint fileReadOnlyVolume = 0x00080000;
@@ -23,17 +23,17 @@ namespace RuniOS.IO.Locations.Windows
 
         static readonly IntPtr invalidHandle = new(-1);
 
-        WindowsMountProvider() { }
+        WindowsMountService() { }
 
         /// <summary>
-        /// Gets the Windows mount provider instance.<br/>
-        /// Windows 마운트 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Windows mount service instance.<br/>
+        /// Windows 마운트 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static WindowsMountProvider instance { get; } = new();
+        public static WindowsMountService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Windows mount provider.<br/>
-        /// Windows 마운트 프로바이더의 식별자입니다.
+        /// The identifier of the Windows mount service.<br/>
+        /// Windows 마운트 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "mount/windows");
         Identifier IService.id => id;
@@ -86,7 +86,7 @@ namespace RuniOS.IO.Locations.Windows
             return mounts;
         }
 
-        IUniTaskAsyncEnumerable<Mount> IMountProvider.EnumerateMounts() => EnumerateMounts().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<Mount> IMountService.EnumerateMounts() => EnumerateMounts().ToUniTaskAsyncEnumerable();
 
         static void AddVolumeMounts(string volumeName, List<WindowsMount> mounts)
         {
@@ -225,10 +225,10 @@ namespace RuniOS.IO.Locations.Windows
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
 
         static partial class Native

@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 
@@ -11,19 +11,19 @@ namespace RuniOS.IO.Locations.Linux
     /// Enumerates the mounts listed in <c>/proc/self/mountinfo</c>.<br/>
     /// <c>/proc/self/mountinfo</c>에 나열된 마운트를 열거합니다.
     /// </summary>
-    public sealed partial class LinuxMountProvider : IMountProvider
+    public sealed partial class LinuxMountService : IMountService
     {
-        LinuxMountProvider() { }
+        LinuxMountService() { }
 
         /// <summary>
-        /// Gets the Linux mount provider instance.<br/>
-        /// Linux 마운트 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux mount service instance.<br/>
+        /// Linux 마운트 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxMountProvider instance { get; } = new LinuxMountProvider();
+        public static LinuxMountService instance { get; } = new LinuxMountService();
 
         /// <summary>
-        /// The identifier of the Linux mount provider.<br/>
-        /// Linux 마운트 프로바이더의 식별자입니다.
+        /// The identifier of the Linux mount service.<br/>
+        /// Linux 마운트 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "mount/linux");
         Identifier IService.id => id;
@@ -51,14 +51,14 @@ namespace RuniOS.IO.Locations.Linux
                 yield return LinuxMountParser.Parse(line);
         }
 
-        IUniTaskAsyncEnumerable<Mount> IMountProvider.EnumerateMounts() => EnumerateMounts().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<Mount> IMountService.EnumerateMounts() => EnumerateMounts().ToUniTaskAsyncEnumerable();
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
     }
 }

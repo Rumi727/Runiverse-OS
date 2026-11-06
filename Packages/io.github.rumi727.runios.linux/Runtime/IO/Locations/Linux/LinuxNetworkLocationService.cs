@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 
@@ -11,19 +11,19 @@ namespace RuniOS.IO.Locations.Linux
     /// Enumerates network filesystems mounted in the current process's mount namespace.<br/>
     /// 현재 프로세스의 마운트 네임스페이스에 마운트된 네트워크 파일 시스템을 열거합니다.
     /// </summary>
-    public sealed partial class LinuxNetworkLocationProvider : INetworkLocationProvider
+    public sealed partial class LinuxNetworkLocationService : INetworkLocationService
     {
-        LinuxNetworkLocationProvider() { }
+        LinuxNetworkLocationService() { }
 
         /// <summary>
-        /// Gets the Linux network location provider instance.<br/>
-        /// Linux 네트워크 위치 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux network location service instance.<br/>
+        /// Linux 네트워크 위치 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxNetworkLocationProvider instance { get; } = new();
+        public static LinuxNetworkLocationService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Linux network location provider.<br/>
-        /// Linux 네트워크 위치 프로바이더의 식별자입니다.
+        /// The identifier of the Linux network location service.<br/>
+        /// Linux 네트워크 위치 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "network-location/linux");
         Identifier IService.id => id;
@@ -48,18 +48,18 @@ namespace RuniOS.IO.Locations.Linux
         /// May be thrown if a mount information entry is malformed during enumeration.<br/>
         /// 열거 중 마운트 정보 항목의 형식이 잘못된 경우 발생할 수 있습니다.
         /// </exception>
-        public static IEnumerable<LinuxNetworkLocation> EnumerateLocations() => LinuxMountProvider.EnumerateMounts()
+        public static IEnumerable<LinuxNetworkLocation> EnumerateLocations() => LinuxMountService.EnumerateMounts()
             .Where(LinuxMountUtility.IsNetworkFileSystem)
             .Select(mount => new LinuxNetworkLocation(mount));
 
-        IUniTaskAsyncEnumerable<NetworkLocation> INetworkLocationProvider.EnumerateLocations() => EnumerateLocations().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<NetworkLocation> INetworkLocationService.EnumerateLocations() => EnumerateLocations().ToUniTaskAsyncEnumerable();
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
     }
 }

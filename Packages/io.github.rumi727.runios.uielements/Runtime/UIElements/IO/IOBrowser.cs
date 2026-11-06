@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using RuniOS.IO.Locations;
-using RuniOS.Providers;
+using RuniOS.Services;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -443,7 +443,7 @@ namespace RuniOS.UIElements.IO
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
             RuniMenuItem openInFileManager = new(string.Empty, () =>
             {
-                if (ProviderRegistry.TryGet(out IFileManagerProvider? fileManager) && node.provider is PhysicalIOProvider physicalProvider)
+                if (ServiceRegistry.TryGet(out IFileManagerService? fileManager) && node.provider is PhysicalIOProvider physicalProvider)
                     fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
             });
 
@@ -452,7 +452,7 @@ namespace RuniOS.UIElements.IO
                 openInFileManager.text = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
 
                 // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
-                openInFileManager.SetEnabled(ProviderRegistry.Get<IFileManagerProvider>() != null && node.provider is PhysicalIOProvider);
+                openInFileManager.SetEnabled(ServiceRegistry.Get<IFileManagerService>() != null && node.provider is PhysicalIOProvider);
             };
 
             menu.Add(openInFileManager);

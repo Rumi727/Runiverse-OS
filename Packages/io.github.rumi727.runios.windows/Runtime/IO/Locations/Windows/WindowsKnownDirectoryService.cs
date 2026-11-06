@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -13,7 +13,7 @@ namespace RuniOS.IO.Locations.Windows
     /// Provides the Windows known folders retrieved through the shell known folder API.<br/>
     /// 셸 알려진 폴더 API로 가져오는 Windows 알려진 폴더를 제공합니다.
     /// </summary>
-    public sealed partial class WindowsKnownDirectoryProvider : IKnownDirectoryProvider
+    public sealed partial class WindowsKnownDirectoryService : IKnownDirectoryService
     {
         const uint kfFlagDontVerify = 0x00004000;
         const uint coInitMultithreaded = 0;
@@ -38,17 +38,17 @@ namespace RuniOS.IO.Locations.Windows
             (KnownDirectoryType.searches, new Guid("7D1D3A04-DEBB-4115-95CF-2F29DA2920DA"))
         ];
 
-        WindowsKnownDirectoryProvider() { }
+        WindowsKnownDirectoryService() { }
 
         /// <summary>
-        /// Gets the Windows known directory provider instance.<br/>
-        /// Windows 알려진 디렉터리 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Windows known directory service instance.<br/>
+        /// Windows 알려진 디렉터리 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static WindowsKnownDirectoryProvider instance { get; } = new();
+        public static WindowsKnownDirectoryService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Windows known directory provider.<br/>
-        /// Windows 알려진 디렉터리 프로바이더의 식별자입니다.
+        /// The identifier of the Windows known directory service.<br/>
+        /// Windows 알려진 디렉터리 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/windows");
         Identifier IService.id => id;
@@ -81,7 +81,7 @@ namespace RuniOS.IO.Locations.Windows
             }
         }
 
-        IUniTaskAsyncEnumerable<KnownDirectory> IKnownDirectoryProvider.EnumerateDirectories() => EnumerateDirectories().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<KnownDirectory> IKnownDirectoryService.EnumerateDirectories() => EnumerateDirectories().ToUniTaskAsyncEnumerable();
 
         static bool TryGetKnownFolderPath(Guid id, out string path)
         {
@@ -118,10 +118,10 @@ namespace RuniOS.IO.Locations.Windows
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
 
         static partial class Native

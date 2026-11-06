@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO.Locations.Linux.DBus;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 using System.Text;
@@ -14,22 +14,22 @@ namespace RuniOS.IO.Locations.Linux
     /// Enumerates UDisks2 block devices that have a matching current Linux mount.<br/>
     /// 현재 Linux 마운트와 대응하는 UDisks2 블록 장치를 열거합니다.
     /// </summary>
-    public sealed partial class LinuxDeviceLocationProvider : IDeviceLocationProvider
+    public sealed partial class LinuxDeviceLocationService : IDeviceLocationService
     {
         const string uDisks2ServiceName = "org.freedesktop.UDisks2";
         const string uDisks2ObjectManagerPath = "/org/freedesktop/UDisks2";
 
-        LinuxDeviceLocationProvider() { }
+        LinuxDeviceLocationService() { }
 
         /// <summary>
-        /// Gets the Linux device location provider instance.<br/>
-        /// Linux 장치 위치 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Linux device location service instance.<br/>
+        /// Linux 장치 위치 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static LinuxDeviceLocationProvider instance { get; } = new();
+        public static LinuxDeviceLocationService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Linux device location provider.<br/>
-        /// Linux 장치 위치 프로바이더의 식별자입니다.
+        /// The identifier of the Linux device location service.<br/>
+        /// Linux 장치 위치 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "device-location/linux");
         Identifier IService.id => id;
@@ -51,7 +51,7 @@ namespace RuniOS.IO.Locations.Linux
             Dictionary<ObjectPath, Dictionary<string, Dictionary<string, VariantValue>>> objects = await objectManager.GetManagedObjectsAsync();
 
             Dictionary<PhysicalPath, LinuxMount> mountsByPoint = new();
-            foreach (LinuxMount mount in LinuxMountProvider.EnumerateMounts())
+            foreach (LinuxMount mount in LinuxMountService.EnumerateMounts())
                 mountsByPoint[mount.mountPoint] = mount;
 
             Dictionary<ObjectPath, INullableDriveProperties> drivePropertiesCache = new();
@@ -182,16 +182,16 @@ namespace RuniOS.IO.Locations.Linux
             }
         }
 
-        IUniTaskAsyncEnumerable<DeviceLocation> IDeviceLocationProvider.EnumerateLocations() => EnumerateLocations();
+        IUniTaskAsyncEnumerable<DeviceLocation> IDeviceLocationService.EnumerateLocations() => EnumerateLocations();
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
         static void OnAssemblyUnloading()
         {
-            ProviderRegistry.Unregister(instance);
+            ServiceRegistry.Unregister(instance);
 
             // 공유 연결의 소켓 수신 대기가 언로드되는 ALC를 붙잡지 않도록 연결을 끊습니다.
             DBusConnection.System.Dispose();

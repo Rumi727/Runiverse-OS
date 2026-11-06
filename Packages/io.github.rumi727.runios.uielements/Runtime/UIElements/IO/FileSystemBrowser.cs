@@ -3,7 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.IO.Locations;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using UnityEngine.UIElements;
 
@@ -123,9 +123,9 @@ namespace RuniOS.UIElements.IO
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
             places.Add(MakeCurrentDirectoryPlace());
 
-            if (ProviderRegistry.TryGet(out IKnownDirectoryProvider? knownDirectoryProvider))
+            if (ServiceRegistry.TryGet(out IKnownDirectoryService? knownDirectoryService))
             {
-                List<KnownDirectory> directories = await knownDirectoryProvider.EnumerateDirectories().ToListAsync();
+                List<KnownDirectory> directories = await knownDirectoryService.EnumerateDirectories().ToListAsync();
                 foreach (KnownDirectoryType type in placeDirectoryTypes)
                 {
                     foreach (KnownDirectory directory in directories)
@@ -147,20 +147,20 @@ namespace RuniOS.UIElements.IO
 
             groups.Add(places);
 
-            if (ProviderRegistry.TryGet(out INetworkLocationProvider? networkLocationProvider))
+            if (ServiceRegistry.TryGet(out INetworkLocationService? networkLocationService))
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
-                await foreach (NetworkLocation location in networkLocationProvider.EnumerateLocations())
+                await foreach (NetworkLocation location in networkLocationService.EnumerateLocations())
                     remote.Add(MakeLocationPlace(location, networkIcon));
 
                 if (remote.childCount > 0)
                     groups.Add(remote);
             }
 
-            if (ProviderRegistry.TryGet(out IDeviceLocationProvider? deviceLocationProvider))
+            if (ServiceRegistry.TryGet(out IDeviceLocationService? deviceLocationService))
             {
                 IOBrowserPlaceGroup devices = new(GetText("runios-editor:io_browser.devices")) { name = "devices" };
-                await foreach (DeviceLocation location in deviceLocationProvider.EnumerateLocations())
+                await foreach (DeviceLocation location in deviceLocationService.EnumerateLocations())
                     devices.Add(MakeDevicePlace(location));
 
                 if (devices.childCount > 0)

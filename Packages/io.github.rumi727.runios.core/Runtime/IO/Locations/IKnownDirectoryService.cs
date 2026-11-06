@@ -1,6 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Providers;
+using RuniOS.Services;
 
 namespace RuniOS.IO.Locations
 {
@@ -8,7 +8,7 @@ namespace RuniOS.IO.Locations
     /// Provides the well-known directories of the system, such as the home directory.<br/>
     /// 홈 디렉터리처럼 시스템에서 잘 알려진 디렉터리를 제공합니다.
     /// </summary>
-    public interface IKnownDirectoryProvider : IService
+    public interface IKnownDirectoryService : IService
     {
         /// <summary>
         /// Asynchronously enumerates the known directories.<br/>

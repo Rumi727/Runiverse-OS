@@ -2,7 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO.Locations;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using UnityEngine.UIElements;
 
@@ -36,7 +36,7 @@ namespace RuniOS.UIElements.IO
 
         public async UniTask Refresh()
         {
-            if (!ProviderRegistry.TryGet(out IDeviceLocationProvider? provider))
+            if (!ServiceRegistry.TryGet(out IDeviceLocationService? provider))
             {
                 Clear();
                 return;

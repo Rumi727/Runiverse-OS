@@ -1,7 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
-using RuniOS.Providers;
+using RuniOS.Services;
 using RuniOS.Resource;
 using System.IO;
 
@@ -11,19 +11,19 @@ namespace RuniOS.IO.Locations.Windows
     /// Enumerates Windows mapped network drives.<br/>
     /// Windows에 매핑된 네트워크 드라이브를 열거합니다.
     /// </summary>
-    public sealed class WindowsNetworkLocationProvider : INetworkLocationProvider
+    public sealed class WindowsNetworkLocationService : INetworkLocationService
     {
-        WindowsNetworkLocationProvider() { }
+        WindowsNetworkLocationService() { }
 
         /// <summary>
-        /// Gets the Windows network location provider instance.<br/>
-        /// Windows 네트워크 위치 프로바이더 인스턴스를 가져옵니다.
+        /// Gets the Windows network location service instance.<br/>
+        /// Windows 네트워크 위치 서비스 인스턴스를 가져옵니다.
         /// </summary>
-        public static WindowsNetworkLocationProvider instance { get; } = new();
+        public static WindowsNetworkLocationService instance { get; } = new();
 
         /// <summary>
-        /// The identifier of the Windows network location provider.<br/>
-        /// Windows 네트워크 위치 프로바이더의 식별자입니다.
+        /// The identifier of the Windows network location service.<br/>
+        /// Windows 네트워크 위치 서비스의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "network-location/windows");
         Identifier IService.id => id;
@@ -53,14 +53,14 @@ namespace RuniOS.IO.Locations.Windows
             }
         }
 
-        IUniTaskAsyncEnumerable<NetworkLocation> INetworkLocationProvider.EnumerateLocations() => EnumerateLocations().ToUniTaskAsyncEnumerable();
+        IUniTaskAsyncEnumerable<NetworkLocation> INetworkLocationService.EnumerateLocations() => EnumerateLocations().ToUniTaskAsyncEnumerable();
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
+        static void OnAssemblyLoaded() => ServiceRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
+        static void OnAssemblyUnloading() => ServiceRegistry.Unregister(instance);
 #endif
     }
 }

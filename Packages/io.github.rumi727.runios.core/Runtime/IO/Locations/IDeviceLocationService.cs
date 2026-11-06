@@ -1,6 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Providers;
+using RuniOS.Services;
 
 namespace RuniOS.IO.Locations
 {
@@ -8,7 +8,7 @@ namespace RuniOS.IO.Locations
     /// Provides the device locations of the system.<br/>
     /// 시스템의 장치 위치를 제공합니다.
     /// </summary>
-    public interface IDeviceLocationProvider : IService
+    public interface IDeviceLocationService : IService
     {
         /// <summary>
         /// Asynchronously enumerates the device locations.<br/>
