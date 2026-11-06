@@ -20,7 +20,7 @@ Physical files, StreamingAssets, Android assets, virtual files, archives, remote
 필요한 것은 "이것은 I/O provider이고, `RuniPath`로 접근할 수 있다"는 사실뿐입니다.
 
 ```csharp
-IIOProvider provider = StreamingIOProvider.instance;
+IIOProvider provider = ServiceRegistry.Get<IStreamingAssetsService>()!.provider;
 
 IONode file = provider.rootNode.CreateChild("assets/runios/lang/ko_kr.json");
 string json = await file.file.ReadAllText();
@@ -187,33 +187,37 @@ IONode packInfo = provider.rootNode.CreateChild("pack.json");
 루트 밖으로 벗어나는 경로(`..` 등)는 `Unrestricted`가 아니면 항상 차단됩니다. `AllowInternalLinks`에서 링크가 아닌 재분석 지점(예: OneDrive 자리 표시자)은 허용됩니다.
 
 특수한 경우에는 `SandboxPolicy.Unrestricted`를 사용할 수 있습니다.\
-예를 들어 `StreamingIOProvider`는 Unity가 제공한 `StreamingAssets` 경로를 그대로 다루기 위해 검증하지 않는 물리 provider를 사용합니다.
+예를 들어 `PlayerStreamingAssetsService`와 `EditorStreamingAssetsService`는 Unity가 제공한 `StreamingAssets` 경로를 그대로 다루기 위해 검증하지 않는 물리 provider를 사용합니다.
 
-## StreamingIOProvider
+## IStreamingAssetsService
 
-`StreamingIOProvider.instance`는 현재 플랫폼에 맞는 StreamingAssets provider입니다.
+`IStreamingAssetsService`는 애플리케이션의 StreamingAssets를 `IIOProvider`로 제공하는 서비스 계약입니다.\
+플랫폼마다 구현이 따로 있고, 어셈블리의 플랫폼 제한으로 구분되기 때문에 실행 환경마다 하나만 등록됩니다.
 
 ```text
-Unity Editor
--> GroupIOProvider
-   -> Application.streamingAssetsPath
-   -> registered package StreamingAssets folders
+Unity Editor        (RuniOS.Core.Editor)
+-> EditorStreamingAssetsService
+   -> GroupIOProvider
+      -> Application.streamingAssetsPath
+      -> registered package StreamingAssets folders
 
-Android
--> AndroidStreamingIOProvider
+Android             (RuniOS.StreamingAssets.Android)
+-> AndroidStreamingAssetsService
+   -> AndroidStreamingIOProvider
 
-Other platforms
--> PhysicalIOProvider(Application.streamingAssetsPath)
+Other platforms     (RuniOS.StreamingAssets.Player)
+-> PlayerStreamingAssetsService
+   -> PhysicalIOProvider(Application.streamingAssetsPath)
 ```
 
 그래서 StreamingAssets를 읽는 쪽은 플랫폼 분기를 하지 않아도 됩니다.
 
 ```csharp
-IIOProvider provider = StreamingIOProvider.instance;
+IIOProvider provider = ServiceRegistry.Get<IStreamingAssetsService>()!.provider;
 byte[] bytes = await provider.rootNode.CreateChild("data/bootstrap.json").file.ReadAllBytes();
 ```
 
-Editor에서는 프로젝트 StreamingAssets와 패키지 StreamingAssets가 `GroupIOProvider`로 묶입니다.\
+Editor에서는 프로젝트 StreamingAssets와 패키지 StreamingAssets가 `GroupIOProvider`로 묶이며, 프로젝트가 패키지보다 우선합니다.\
 Android에서는 `AssetManager`를 통해 APK 내부 asset을 열고 열거합니다.
 
 ## GroupIOProvider
@@ -341,7 +345,7 @@ provider가 `IPrecalculatedIOChecksum`을 구현하면 미리 계산된 체크�
 OS 파일 시스템 메타데이터가 필요함
 ```
 
-`StreamingIOProvider`가 맞는 경우:
+`IStreamingAssetsService`가 맞는 경우:
 
 ```text
 Unity StreamingAssets를 플랫폼 분기 없이 읽고 싶음
@@ -370,5 +374,5 @@ I/O 시스템은 저장 위치와 사용 코드를 분리합니다.\
 `RuniPath`는 플랫폼 독립 논리 경로이고, `PhysicalPath`는 실제 파일 시스템 경로입니다.\
 `IONode`는 provider 안의 경로를 노드 구조로 다루게 해 줍니다.
 
-`PhysicalIOProvider`, `StreamingIOProvider`, `GroupIOProvider`, `VirtualIOProvider`는 서로 다른 저장소를 같은 API로 맞춥니다.\
+`PhysicalIOProvider`, `IStreamingAssetsService`, `GroupIOProvider`, `VirtualIOProvider`는 서로 다른 저장소를 같은 API로 맞춥니다.\
 덕분에 리소스 팩과 에셋 레지스트리는 파일이 어디에서 오는지 몰라도 같은 방식으로 읽고 열거할 수 있습니다.

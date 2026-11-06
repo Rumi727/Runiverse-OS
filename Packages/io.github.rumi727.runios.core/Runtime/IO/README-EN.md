@@ -20,7 +20,7 @@ From the perspective of a resource pack or asset registry, it does not matter wh
 The code only needs to know: "this is an I/O provider, and it can be accessed with `RuniPath`."
 
 ```csharp
-IIOProvider provider = StreamingIOProvider.instance;
+IIOProvider provider = ServiceRegistry.Get<IStreamingAssetsService>()!.provider;
 
 IONode file = provider.rootNode.CreateChild("assets/runios/lang/ko_kr.json");
 string json = await file.file.ReadAllText();
@@ -187,33 +187,37 @@ IONode packInfo = provider.rootNode.CreateChild("pack.json");
 Paths that escape the provider root (for example with `..`) are always blocked unless the policy is `Unrestricted`. With `AllowInternalLinks`, reparse points that are not links (for example OneDrive placeholders) are allowed.
 
 Special cases can use `SandboxPolicy.Unrestricted`.\
-For example, `StreamingIOProvider` uses an unvalidated physical provider when wrapping Unity-provided `StreamingAssets` paths.
+For example, `PlayerStreamingAssetsService` and `EditorStreamingAssetsService` use unvalidated physical providers when wrapping Unity-provided `StreamingAssets` paths.
 
-## StreamingIOProvider
+## IStreamingAssetsService
 
-`StreamingIOProvider.instance` is the StreamingAssets provider for the current platform.
+`IStreamingAssetsService` is the service contract that provides the application's StreamingAssets as an `IIOProvider`.\
+Each platform has its own implementation, separated by the platform restrictions of its assembly, so only one is registered in any execution environment.
 
 ```text
-Unity Editor
--> GroupIOProvider
-   -> Application.streamingAssetsPath
-   -> registered package StreamingAssets folders
+Unity Editor        (RuniOS.Core.Editor)
+-> EditorStreamingAssetsService
+   -> GroupIOProvider
+      -> Application.streamingAssetsPath
+      -> registered package StreamingAssets folders
 
-Android
--> AndroidStreamingIOProvider
+Android             (RuniOS.StreamingAssets.Android)
+-> AndroidStreamingAssetsService
+   -> AndroidStreamingIOProvider
 
-Other platforms
--> PhysicalIOProvider(Application.streamingAssetsPath)
+Other platforms     (RuniOS.StreamingAssets.Player)
+-> PlayerStreamingAssetsService
+   -> PhysicalIOProvider(Application.streamingAssetsPath)
 ```
 
 So code reading StreamingAssets does not need platform branches.
 
 ```csharp
-IIOProvider provider = StreamingIOProvider.instance;
+IIOProvider provider = ServiceRegistry.Get<IStreamingAssetsService>()!.provider;
 byte[] bytes = await provider.rootNode.CreateChild("data/bootstrap.json").file.ReadAllBytes();
 ```
 
-In the Editor, project StreamingAssets and package StreamingAssets are merged with `GroupIOProvider`.\
+In the Editor, project StreamingAssets and package StreamingAssets are merged with `GroupIOProvider`, and the project takes priority over packages.\
 On Android, assets inside the APK are opened and enumerated through `AssetManager`.
 
 ## GroupIOProvider
@@ -341,7 +345,7 @@ A real local folder should be read or written
 OS file-system metadata is useful
 ```
 
-Use `StreamingIOProvider` when:
+Use `IStreamingAssetsService` when:
 
 ```text
 Unity StreamingAssets should be read without platform-specific branches
@@ -370,5 +374,5 @@ Callers mainly work with `IIOProvider`, `RuniPath`, and `IONode`.
 `RuniPath` is a platform-independent logical path, while `PhysicalPath` is a real file-system path.\
 `IONode` makes provider paths behave like navigable nodes instead of loose string combinations.
 
-`PhysicalIOProvider`, `StreamingIOProvider`, `GroupIOProvider`, and `VirtualIOProvider` adapt different storage models to the same API.\
+`PhysicalIOProvider`, `IStreamingAssetsService`, `GroupIOProvider`, and `VirtualIOProvider` adapt different storage models to the same API.\
 This lets resource packs and asset registries read and enumerate files the same way, regardless of where those files actually come from.
