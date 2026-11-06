@@ -281,6 +281,7 @@
   "io_browser.devices": "デバイス",
   "io_browser.computer": "コンピューター",
   "io_browser.current_directory": "現在のフォルダー",
+  "io_browser.request_root_access": "場所へのアクセスをリクエスト…",
   "io_browser.show_hidden_files": "隠しファイルを表示",
   "io_browser.open_in_file_manager": "ファイルマネージャーで開く",
   "io_browser.new_tab": "新しいタブ",

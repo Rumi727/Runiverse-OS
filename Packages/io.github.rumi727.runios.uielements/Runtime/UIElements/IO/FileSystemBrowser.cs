@@ -123,6 +123,13 @@ namespace RuniOS.UIElements.IO
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
             places.Add(MakeCurrentDirectoryPlace());
 
+            if (ServiceRegistry.TryGet(out IRootAccessService? rootAccessService))
+            {
+                IOBrowserPlace requestRootAccess = MakePlace(GetText("runios-editor:io_browser.request_root_access"), folderIcon, () => OpenRequestedRoot(rootAccessService).Forget());
+                requestRootAccess.name = "request-root-access";
+                places.Add(requestRootAccess);
+            }
+
             if (ServiceRegistry.TryGet(out IKnownDirectoryService? knownDirectoryService))
             {
                 List<KnownDirectory> directories = await knownDirectoryService.EnumerateDirectories().ToListAsync();
@@ -291,6 +298,16 @@ namespace RuniOS.UIElements.IO
                 return IONode.empty;
 
             return GetNodeFromPhysicalRoot(PhysicalPath.From(path));
+        }
+
+        // 파일 브라우저는 이 프로그램이 사용할 수 있는 모든 루트를 보여 주는 것이 목적이므로, 서비스가 돌려준 루트는 샌드박스되지 않은 전체 접근 루트로 간주합니다.
+        // 사용자가 요청을 거부하거나 취소하면 아무 일도 하지 않습니다.
+        async UniTaskVoid OpenRequestedRoot(IRootAccessService rootAccessService)
+        {
+            if (await rootAccessService.RequestRoot() is not { } provider)
+                return;
+
+            node = GetNodeFromPhysicalRoot(provider.rootNode);
         }
 
         public void OpenLocation(FileLocation location) => node = GetNodeFromPhysicalRoot(location.ioProvider.rootNode);

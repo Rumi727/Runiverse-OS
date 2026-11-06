@@ -281,6 +281,7 @@
   "io_browser.devices": "Devices",
   "io_browser.computer": "Computer",
   "io_browser.current_directory": "Current Folder",
+  "io_browser.request_root_access": "Request Location Access…",
   "io_browser.show_hidden_files": "Show Hidden Files",
   "io_browser.open_in_file_manager": "Open in File Manager",
   "io_browser.new_tab": "New Tab",
