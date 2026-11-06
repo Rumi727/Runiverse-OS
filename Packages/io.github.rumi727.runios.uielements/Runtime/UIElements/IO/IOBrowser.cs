@@ -59,9 +59,15 @@ namespace RuniOS.UIElements.IO
         public IEnumerable<IOBrowserTab> tabs => contentPane.Children().Cast<IOBrowserTab>();
 
         /// <summary>
-        /// 내용 영역에서 파일을 열면 발생합니다. 파일을 여는 동작은 구독자가 정합니다.
+        /// 내용 영역에서 파일을 열면 발생합니다.
         /// </summary>
         public event Action<IONode>? fileOpened;
+
+        /// <summary>
+        /// 내용 영역에서 파일을 열 때 <see cref="fileOpened"/>를 발생시키는 것과 함께 파일을 실제로 열지 정합니다.
+        /// 실제 경로가 있는 파일만 <see cref="IFileOpenService"/>로 열리고, 끄면 이벤트만 발생합니다.
+        /// </summary>
+        public bool openFiles { get; set; } = true;
 
         public Toolbar header { get; }
 
@@ -242,6 +248,14 @@ namespace RuniOS.UIElements.IO
 
         public virtual void Up() => node = node.GetParent();
 
+        void OnTabFileOpened(IONode fileNode)
+        {
+            fileOpened?.Invoke(fileNode);
+
+            if (openFiles && ServiceRegistry.TryGet(out IFileOpenService? fileOpen) && fileNode.provider is PhysicalIOProvider physicalProvider)
+                fileOpen.OpenFile(physicalProvider.targetPath.Combine(fileNode.path)).Forget();
+        }
+
         /// <summary>
         /// 활성 탭의 내용을 다시 읽어 옵니다.
         /// </summary>
@@ -257,7 +271,7 @@ namespace RuniOS.UIElements.IO
             tab.name = "tab";
             tab.AddToClassList(tabUssClassName);
             tab.nodeChanged += OnTabNodeChanged;
-            tab.fileOpened += x => fileOpened?.Invoke(x);
+            tab.fileOpened += OnTabFileOpened;
 
             // 닫기 버튼도 CloseTab으로 닫히도록, 직접 닫은 뒤 TabView의 기본 닫기 동작은 취소합니다.
             tab.closing += () =>
