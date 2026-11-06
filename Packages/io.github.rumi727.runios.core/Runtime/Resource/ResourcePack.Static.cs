@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
+using RuniOS.Services;
 using RuniOS.Tasks;
 
 namespace RuniOS.Resource
@@ -11,8 +12,6 @@ namespace RuniOS.Resource
         {
             _loadedResourcePacks = new Dictionary<PackIdentifier, ResourcePack>();
             loadedResourcePacks = _loadedResourcePacks.AsReadOnly();
-
-            defaultPack = Create("runios:vanilla", StreamingIOProvider.instance, RequiredPackSort.BeforeVanilla);
         }
 
         /// <summary>
@@ -31,9 +30,20 @@ namespace RuniOS.Resource
         public static readonly ResourcePack emptyPack = new ResourcePack();
 
         /// <summary>
-        /// 시스템의 기본 리소스 팩을 가져옵니다.
+        /// 시스템의 기본 리소스 팩을 가져옵니다.<br/>
+        /// 사용 가능한 <see cref="IStreamingAssetsService"/>가 없으면 <see langword="null"/>입니다.
         /// </summary>
-        public static readonly ResourcePack defaultPack;
+        public static ResourcePack? defaultPack => _defaultPack ??= CreateDefaultPack();
+        static ResourcePack? _defaultPack;
+
+        static ResourcePack? CreateDefaultPack()
+        {
+            IIOProvider[] providers = [..ServiceRegistry.GetAll<IStreamingAssetsService>().Where(x => x.isAvailable).Select(x => x.provider)];
+            if (providers.Length <= 0)
+                return null;
+
+            return Create("runios:vanilla", providers.Length == 1 ? providers[0] : new GroupIOProvider(providers, leaveOpen: true), RequiredPackSort.BeforeVanilla);
+        }
 
         static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks;
         public static IReadOnlyDictionary<PackIdentifier, ResourcePack> loadedResourcePacks { get; }
@@ -85,7 +95,8 @@ namespace RuniOS.Resource
 
         static UniTask ReloadAllCore()
         {
-            EnablePack(defaultPack.identifier, _enabledPackIdentifiers.Count);
+            if (defaultPack is { } vanillaPack)
+                EnablePack(vanillaPack.identifier, _enabledPackIdentifiers.Count);
 
             return UniTask.WhenAll(loadedResourcePacks.Values.Select(pack =>
             {
