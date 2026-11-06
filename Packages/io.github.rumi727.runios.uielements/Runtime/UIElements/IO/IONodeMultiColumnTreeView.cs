@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.IO.Locations;
+using RuniOS.Providers;
 using RuniOS.Resource;
 using System.IO;
 using UnityEngine;
@@ -543,7 +544,7 @@ namespace RuniOS.UIElements.IO
             // 선택된 항목이 있으면 그 항목들을 보여 주고, 없으면 빈 곳에서 연 메뉴이므로 폴더 메뉴처럼 현재 폴더를 엽니다.
             RuniMenuItem showInFileManager = new(string.Empty, () =>
             {
-                if (IFileManagerProvider.instance is not { } fileManager || provider is not PhysicalIOProvider physicalProvider)
+                if (ProviderRegistry.Get<IFileManagerProvider>() is not { } fileManager || provider is not PhysicalIOProvider physicalProvider)
                     return;
 
                 IOEntry[] entries = selectedEntries;
@@ -560,7 +561,7 @@ namespace RuniOS.UIElements.IO
                     : GetText("runios-editor:io_browser.open_in_file_manager");
 
                 // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-                showInFileManager.SetEnabled(IFileManagerProvider.instance != null && provider is PhysicalIOProvider);
+                showInFileManager.SetEnabled(ProviderRegistry.Get<IFileManagerProvider>() != null && provider is PhysicalIOProvider);
             };
 
             menu.Add(showInFileManager);
@@ -806,7 +807,7 @@ namespace RuniOS.UIElements.IO
 
             ITrashProvider? trash = null;
             PhysicalPath[] trashPaths = Array.Empty<PhysicalPath>();
-            if (!permanently && ITrashProvider.instance is { } trashProvider && provider is PhysicalIOProvider physicalProvider)
+            if (!permanently && ProviderRegistry.Get<ITrashProvider>() is { } trashProvider && provider is PhysicalIOProvider physicalProvider)
             {
                 trashPaths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
 

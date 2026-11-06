@@ -1,6 +1,8 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 
 namespace RuniOS.IO.Locations.Windows
@@ -18,6 +20,9 @@ namespace RuniOS.IO.Locations.Windows
         /// Windows 장치 위치 프로바이더 인스턴스를 가져옵니다.
         /// </summary>
         public static WindowsDeviceLocationProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "device-location/windows");
+        Identifier IProvider.id => id;
 
         /// <summary>
         /// Enumerates logical drives other than network drives whose roots match current Windows mount points.<br/>
@@ -58,10 +63,10 @@ namespace RuniOS.IO.Locations.Windows
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => IDeviceLocationProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => IDeviceLocationProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
     }
 }

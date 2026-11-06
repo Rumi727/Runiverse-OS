@@ -1,12 +1,11 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Providers;
 
 namespace RuniOS.IO.Locations
 {
-    public interface IKnownDirectoryProvider
+    public interface IKnownDirectoryProvider : IProvider
     {
-        public static IKnownDirectoryProvider? instance { get; private set; } = null;
-
         IUniTaskAsyncEnumerable<KnownDirectory> EnumerateDirectories();
 
         async UniTask<KnownDirectory?> TryGetDirectory(KnownDirectoryType type)
@@ -20,22 +19,6 @@ namespace RuniOS.IO.Locations
             }
 
             return null;
-        }
-
-        public static void Register(IKnownDirectoryProvider provider)
-        {
-            if (instance != null)
-                throw new InvalidOperationException("The IKnownDirectoryProvider instance must be globally unique!");
-
-            instance = provider;
-        }
-
-        public static void Unregister(IKnownDirectoryProvider provider)
-        {
-            if (instance != provider)
-                throw new InvalidOperationException("This is an unregistered IKnownDirectoryProvider instance!");
-
-            instance = null;
         }
     }
 }

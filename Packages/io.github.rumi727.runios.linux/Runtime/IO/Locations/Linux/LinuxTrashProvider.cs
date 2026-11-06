@@ -1,5 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -24,6 +26,9 @@ namespace RuniOS.IO.Locations.Linux
         /// Linux 휴지통 프로바이더 인스턴스를 가져옵니다.
         /// </summary>
         public static LinuxTrashProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "trash/linux");
+        Identifier IProvider.id => id;
 
         static string homeTrash => Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Trash");
 
@@ -174,10 +179,10 @@ namespace RuniOS.IO.Locations.Linux
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ITrashProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ITrashProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
 
         // ReSharper disable InconsistentNaming

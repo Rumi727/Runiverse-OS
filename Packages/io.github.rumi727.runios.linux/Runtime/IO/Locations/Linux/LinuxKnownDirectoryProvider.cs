@@ -1,6 +1,8 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 using System.Text;
 
@@ -12,6 +14,9 @@ namespace RuniOS.IO.Locations.Linux
         LinuxKnownDirectoryProvider() { }
 
         public static LinuxKnownDirectoryProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "known-directory/linux");
+        Identifier IProvider.id => id;
 
         public static IEnumerable<KnownDirectory> EnumerateDirectories()
         {
@@ -211,10 +216,10 @@ namespace RuniOS.IO.Locations.Linux
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => IKnownDirectoryProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => IKnownDirectoryProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
     }
 }

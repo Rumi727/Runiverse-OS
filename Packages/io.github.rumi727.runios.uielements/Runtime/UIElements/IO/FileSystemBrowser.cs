@@ -3,6 +3,7 @@ using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
 using RuniOS.IO.Locations;
+using RuniOS.Providers;
 using RuniOS.Resource;
 using UnityEngine.UIElements;
 
@@ -122,7 +123,7 @@ namespace RuniOS.UIElements.IO
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
             places.Add(MakeCurrentDirectoryPlace());
 
-            if (IKnownDirectoryProvider.instance is { } knownDirectoryProvider)
+            if (ProviderRegistry.Get<IKnownDirectoryProvider>() is { } knownDirectoryProvider)
             {
                 List<KnownDirectory> directories = await knownDirectoryProvider.EnumerateDirectories().ToListAsync();
                 foreach (KnownDirectoryType type in placeDirectoryTypes)
@@ -146,7 +147,7 @@ namespace RuniOS.UIElements.IO
 
             groups.Add(places);
 
-            if (INetworkLocationProvider.instance is { } networkLocationProvider)
+            if (ProviderRegistry.Get<INetworkLocationProvider>() is { } networkLocationProvider)
             {
                 IOBrowserPlaceGroup remote = new(GetText("runios-editor:io_browser.remote")) { name = "remote" };
                 await foreach (NetworkLocation location in networkLocationProvider.EnumerateLocations())
@@ -156,7 +157,7 @@ namespace RuniOS.UIElements.IO
                     groups.Add(remote);
             }
 
-            if (IDeviceLocationProvider.instance is { } deviceLocationProvider)
+            if (ProviderRegistry.Get<IDeviceLocationProvider>() is { } deviceLocationProvider)
             {
                 IOBrowserPlaceGroup devices = new(GetText("runios-editor:io_browser.devices")) { name = "devices" };
                 await foreach (DeviceLocation location in deviceLocationProvider.EnumerateLocations())

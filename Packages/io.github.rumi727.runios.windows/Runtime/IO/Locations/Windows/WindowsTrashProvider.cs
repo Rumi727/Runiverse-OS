@@ -1,5 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -31,6 +33,9 @@ namespace RuniOS.IO.Locations.Windows
         /// Windows 휴지통 프로바이더 인스턴스를 가져옵니다.
         /// </summary>
         public static WindowsTrashProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "trash/windows");
+        Identifier IProvider.id => id;
 
         /// <summary>
         /// Determines whether the drive containing the specified path has a Recycle Bin.<br/>
@@ -113,10 +118,10 @@ namespace RuniOS.IO.Locations.Windows
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => ITrashProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => ITrashProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
 
         static unsafe partial class Native

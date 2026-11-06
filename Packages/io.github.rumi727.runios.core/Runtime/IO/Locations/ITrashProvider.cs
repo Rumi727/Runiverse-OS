@@ -1,5 +1,6 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
+using RuniOS.Providers;
 using System.IO;
 
 namespace RuniOS.IO.Locations
@@ -8,10 +9,8 @@ namespace RuniOS.IO.Locations
     /// Moves physical paths to the system trash.<br/>
     /// 실제 경로를 시스템 휴지통으로 보냅니다.
     /// </summary>
-    public interface ITrashProvider
+    public interface ITrashProvider : IProvider
     {
-        public static ITrashProvider? instance { get; private set; } = null;
-
         /// <summary>
         /// Determines whether the specified path can be moved to the system trash.<br/>
         /// 지정한 경로를 시스템 휴지통으로 보낼 수 있는지 확인합니다.
@@ -35,21 +34,5 @@ namespace RuniOS.IO.Locations
         /// 항목을 휴지통으로 보낼 수 없을 때 발생합니다.
         /// </exception>
         UniTask MoveToTrash(IEnumerable<PhysicalPath> paths);
-
-        public static void Register(ITrashProvider provider)
-        {
-            if (instance != null)
-                throw new InvalidOperationException("The ITrashProvider instance must be globally unique!");
-
-            instance = provider;
-        }
-
-        public static void Unregister(ITrashProvider provider)
-        {
-            if (instance != provider)
-                throw new InvalidOperationException("This is an unregistered ITrashProvider instance!");
-
-            instance = null;
-        }
     }
 }

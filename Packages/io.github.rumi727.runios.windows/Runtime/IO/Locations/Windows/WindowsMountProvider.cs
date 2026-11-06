@@ -1,6 +1,8 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.Marshalling;
@@ -20,6 +22,9 @@ namespace RuniOS.IO.Locations.Windows
         WindowsMountProvider() { }
 
         public static WindowsMountProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "mount/windows");
+        Identifier IProvider.id => id;
 
         public static IEnumerable<WindowsMount> EnumerateMounts()
         {
@@ -200,10 +205,10 @@ namespace RuniOS.IO.Locations.Windows
 
 #if UNITY_EDITOR_WIN || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => IMountProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => IMountProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
 
         static partial class Native

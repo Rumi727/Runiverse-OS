@@ -1,6 +1,8 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 
 namespace RuniOS.IO.Locations.Linux
@@ -18,6 +20,9 @@ namespace RuniOS.IO.Locations.Linux
         /// Linux 네트워크 위치 프로바이더 인스턴스를 가져옵니다.
         /// </summary>
         public static LinuxNetworkLocationProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "network-location/linux");
+        Identifier IProvider.id => id;
 
         /// <summary>
         /// Enumerates current Linux mounts classified as network filesystems.<br/>
@@ -47,10 +52,10 @@ namespace RuniOS.IO.Locations.Linux
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => INetworkLocationProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
-        static void OnAssemblyUnloading() => INetworkLocationProvider.Unregister(instance);
+        static void OnAssemblyUnloading() => ProviderRegistry.Unregister(instance);
 #endif
     }
 }

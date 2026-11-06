@@ -2,6 +2,8 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO.Locations.Linux.DBus;
+using RuniOS.Providers;
+using RuniOS.Resource;
 using System.IO;
 using System.Text;
 using Tmds.DBus.Protocol;
@@ -24,6 +26,9 @@ namespace RuniOS.IO.Locations.Linux
         /// Linux 장치 위치 프로바이더 인스턴스를 가져옵니다.
         /// </summary>
         public static LinuxDeviceLocationProvider instance { get; } = new();
+
+        public static readonly Identifier id = new Identifier("runios", "device-location/linux");
+        Identifier IProvider.id => id;
 
         /// <summary>
         /// Asynchronously enumerates mounted UDisks2 block devices.<br/>
@@ -177,12 +182,12 @@ namespace RuniOS.IO.Locations.Linux
 
 #if UNITY_EDITOR_LINUX || !UNITY_EDITOR
         [Unity.Scripting.LifecycleManagement.OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => IDeviceLocationProvider.Register(instance);
+        static void OnAssemblyLoaded() => ProviderRegistry.Register(instance);
 
         [Unity.Scripting.LifecycleManagement.OnAssemblyUnloading]
         static void OnAssemblyUnloading()
         {
-            IDeviceLocationProvider.Unregister(instance);
+            ProviderRegistry.Unregister(instance);
 
             // 공유 연결의 소켓 수신 대기가 언로드되는 ALC를 붙잡지 않도록 연결을 끊습니다.
             DBusConnection.System.Dispose();
