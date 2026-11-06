@@ -33,4 +33,6 @@
 * Resource 시스템을 더 추상화하여 AssetRef가 더 이상 리소스 레지스트리만을 참조로 하는게 아닌 다양한 에셋 출처를 사용할 수 있게 승격하기
 * ~~OS 기능을 사용하기 위한 provider 종류들(IDeviceLocationProvider, IFileManagerProvider 등)을 일괄 관리하는 매니저 설계 만들기~~
   * ~~provider 등록/해제와 함께, D-Bus 서비스(udisks2, FileManager1 등)가 없는 환경에서의 가용성/실패 처리도 한 곳에서 다룰 것~~
-* FMOD로 고정된 사운드 시스템을 Provider를 사용하여 사운드 엔진을 자유자재로 교채할 수 있게 재설계 할 것
+  * 서비스 시스템으로 만들어짐.
+* FMOD로 고정된 사운드 시스템을 서비스를 사용하여 사운드 엔진을 자유자재로 교채할 수 있게 재설계 할 것
+  * 될진 모르겠긴 함
