@@ -69,6 +69,7 @@
 ## C# Style
 
 - Put `#nullable enable` at the very top of C# files.
+- A class that declares a Unity lifecycle API method (for example one marked with `[OnAssemblyLoaded]` or `[OnAssemblyUnloading]` from `Unity.Scripting.LifecycleManagement`) must be declared `partial`. Do this even when the whole class lives in one file; follow the existing services such as `LinuxFileOpenService` (`sealed partial class`).
 
 ## USS Theme Separation
 
