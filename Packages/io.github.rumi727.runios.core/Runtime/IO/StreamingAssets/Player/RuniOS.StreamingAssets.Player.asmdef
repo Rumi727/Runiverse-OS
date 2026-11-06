@@ -7,7 +7,7 @@
         "GUID:5c01796d064528144a599661eaab93a6"
     ],
     "includePlatforms": [],
-    "excludePlatforms": ["Android", "Editor"],
+    "excludePlatforms": ["Android", "Editor", "WebGL"],
     "allowUnsafeCode": false,
     "overrideReferences": false,
     "precompiledReferences": [],
