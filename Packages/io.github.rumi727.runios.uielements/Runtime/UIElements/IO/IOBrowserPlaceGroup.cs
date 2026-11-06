@@ -17,6 +17,23 @@ namespace RuniOS.UIElements.IO
             set => header.text = value;
         }
 
+        /// <summary>
+        /// 이 그룹에 직접 들어 있는 <see cref="IOBrowserPlace"/>들의 <see cref="IOBrowserPlace.readOnly"/>를 정합니다.
+        /// </summary>
+        public bool readOnly
+        {
+            get;
+            set
+            {
+                field = value;
+                foreach (VisualElement child in content.Children())
+                {
+                    if (child is IOBrowserPlace place)
+                        place.readOnly = value;
+                }
+            }
+        }
+
         public Label header { get; }
 
         public VisualElement content { get; }

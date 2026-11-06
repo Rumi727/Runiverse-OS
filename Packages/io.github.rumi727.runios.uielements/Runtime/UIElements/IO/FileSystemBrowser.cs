@@ -117,7 +117,7 @@ namespace RuniOS.UIElements.IO
 
         public async UniTask RefreshNavigation()
         {
-            List<VisualElement> groups = [];
+            List<IOBrowserPlaceGroup> groups = [];
 
             IOBrowserPlaceGroup places = new(GetText("runios-editor:io_browser.places")) { name = "places" };
             places.Add(MakePlace(GetText("runios-editor:io_browser.computer"), computerIcon, () => node = IONode.empty));
@@ -185,9 +185,7 @@ namespace RuniOS.UIElements.IO
             }
 
             // 열거가 끝난 뒤 한 번에 교체하므로, 겹쳐 호출되어도 항목이 중복되지 않습니다.
-            navigationPane.Clear();
-            foreach (VisualElement group in groups)
-                navigationPane.Add(group);
+            SetNavigationGroups(groups);
         }
 
         // 프로세스의 작업 폴더이며, 에디터에서는 프로젝트 폴더, 빌드에서는 실행한 위치입니다.

@@ -52,6 +52,9 @@ namespace RuniOS.UIElements.IO
                 field = value;
                 foreach (IOBrowserTab tab in tabs)
                     tab.readOnly = value;
+
+                foreach (IOBrowserPlaceGroup group in navigationGroups)
+                    group.readOnly = value;
             }
         }
 
@@ -91,6 +94,12 @@ namespace RuniOS.UIElements.IO
         public TwoPaneSplitView splitView { get; }
 
         public ScrollView navigationPane { get; }
+
+        /// <summary>
+        /// <see cref="SetNavigationGroups"/>로 지정한 네비게이션 영역의 장소 그룹입니다.
+        /// </summary>
+        public IReadOnlyList<IOBrowserPlaceGroup> navigationGroups => _navigationGroups;
+        readonly List<IOBrowserPlaceGroup> _navigationGroups = [];
 
         public IOBrowserTabView contentPane { get; }
 
@@ -254,6 +263,23 @@ namespace RuniOS.UIElements.IO
 
             if (openFiles && ServiceRegistry.TryGet(out IFileOpenService? fileOpen) && fileNode.provider is PhysicalIOProvider physicalProvider)
                 fileOpen.OpenFile(physicalProvider.targetPath.Combine(fileNode.path)).Forget();
+        }
+
+        /// <summary>
+        /// 네비게이션 영역의 장소 그룹을 지정한 그룹들로 교체합니다. 그룹에는 <see cref="readOnly"/>가 적용됩니다.
+        /// </summary>
+        public void SetNavigationGroups(IEnumerable<IOBrowserPlaceGroup> groups)
+        {
+            navigationPane.Clear();
+            _navigationGroups.Clear();
+
+            foreach (IOBrowserPlaceGroup group in groups)
+            {
+                group.readOnly = readOnly;
+
+                navigationPane.Add(group);
+                _navigationGroups.Add(group);
+            }
         }
 
         /// <summary>

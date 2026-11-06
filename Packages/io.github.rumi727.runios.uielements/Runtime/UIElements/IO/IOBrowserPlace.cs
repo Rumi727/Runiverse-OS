@@ -35,6 +35,11 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         public IONode? dropDirectory { get; set; }
 
+        /// <summary>
+        /// 이 장소에 IO 항목을 놓지 못하게 할지 정합니다. 보통 <see cref="IOBrowser.readOnly"/>가 정합니다.
+        /// </summary>
+        public bool readOnly { get; set; }
+
         public IOBrowserPlace() : this(string.Empty, null) { }
 
         public IOBrowserPlace(string text, Action? clicked)
@@ -64,11 +69,10 @@ namespace RuniOS.UIElements.IO
             this.AddManipulator(clickable);
         }
 
-        // 읽기 전용인 브라우저 안에 있으면 놓을 수 없습니다.
         bool IIODropTarget.TryGetDropDirectory(Vector2 position, out IONode directory)
         {
             directory = dropDirectory ?? default;
-            return dropDirectory != null && GetFirstAncestorOfType<IOBrowser>() is not { readOnly: true };
+            return dropDirectory != null && !readOnly;
         }
 
         void IIODropTarget.OnDragOver(IODragData data, Vector2 position, bool canDrop) => EnableInClassList(dropTargetUssClassName, canDrop);
