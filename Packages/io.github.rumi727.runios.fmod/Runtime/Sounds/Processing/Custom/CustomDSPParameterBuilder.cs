@@ -158,6 +158,7 @@ namespace RuniOS.Sounds.Processing.Custom
                 throw new ArgumentOutOfRangeException(nameof(defaultValue), "The default value must be within the declared range.");
         }
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         static void ValidateText(string value, string parameterName, bool required)
         {
             ArgumentNullException.ThrowIfNull(value, parameterName);
