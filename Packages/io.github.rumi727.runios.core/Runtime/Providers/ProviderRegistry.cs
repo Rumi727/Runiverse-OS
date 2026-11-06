@@ -1,6 +1,7 @@
 #nullable enable
 using RuniOS.Resource;
 using System.Collections.ObjectModel;
+using System.Diagnostics.CodeAnalysis;
 
 namespace RuniOS.Providers
 {
@@ -190,6 +191,50 @@ namespace RuniOS.Providers
                 return defaultProvider;
 
             return GetAll(type).FirstOrDefault(x => x.isAvailable);
+        }
+
+        /// <summary>
+        /// Tries to get the provider for the contract type <typeparamref name="T"/>.<br/>
+        /// 계약 타입 <typeparamref name="T"/>의 프로바이더를 가져오려고 시도합니다.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The contract type that the provider must be an instance of.<br/>
+        /// 프로바이더가 인스턴스여야 하는 계약 타입입니다.
+        /// </typeparam>
+        /// <param name="provider">
+        /// The provider that <see cref="Get{T}()"/> returns when this method returns <see langword="true"/>; otherwise, <see langword="null"/>.<br/>
+        /// 이 메서드가 <see langword="true"/>를 반환하면 <see cref="Get{T}()"/>가 반환하는 프로바이더이며, 그렇지 않으면 <see langword="null"/>입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if an available provider was found; otherwise, <see langword="false"/>.<br/>
+        /// 사용 가능한 프로바이더를 찾았으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+        /// </returns>
+        public static bool TryGet<T>([NotNullWhen(true)] out T? provider) where T : IProvider
+        {
+            provider = Get<T>();
+            return provider != null;
+        }
+
+        /// <summary>
+        /// Tries to get the provider for the specified contract type.<br/>
+        /// 지정된 계약 타입의 프로바이더를 가져오려고 시도합니다.
+        /// </summary>
+        /// <param name="type">
+        /// The contract type that the provider must be an instance of.<br/>
+        /// 프로바이더가 인스턴스여야 하는 계약 타입입니다.
+        /// </param>
+        /// <param name="provider">
+        /// The provider that <see cref="Get(Type)"/> returns when this method returns <see langword="true"/>; otherwise, <see langword="null"/>.<br/>
+        /// 이 메서드가 <see langword="true"/>를 반환하면 <see cref="Get(Type)"/>이 반환하는 프로바이더이며, 그렇지 않으면 <see langword="null"/>입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if an available provider was found; otherwise, <see langword="false"/>.<br/>
+        /// 사용 가능한 프로바이더를 찾았으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
+        /// </returns>
+        public static bool TryGet(Type type, [NotNullWhen(true)] out IProvider? provider)
+        {
+            provider = Get(type);
+            return provider != null;
         }
 
         /// <summary>
