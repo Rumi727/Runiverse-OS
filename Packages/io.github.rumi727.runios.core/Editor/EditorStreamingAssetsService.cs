@@ -14,7 +14,7 @@ namespace RuniOS.Editor
     /// The project streaming assets take priority over the package streaming assets, so the end user always has the final say over the resources.<br/>
     /// 프로젝트 StreamingAssets가 패키지 StreamingAssets보다 우선하므로, 리소스에 대한 최종 결정권은 항상 최종 사용자에게 있습니다.
     /// </remarks>
-    public sealed class EditorStreamingAssetsService : IStreamingAssetsService
+    public sealed partial class EditorStreamingAssetsService : IStreamingAssetsService
     {
         EditorStreamingAssetsService() { }
 
