@@ -51,7 +51,7 @@ namespace RuniOS.IO.Locations.Windows
         /// Windows 알려진 디렉터리 프로바이더의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/windows");
-        Identifier IProvider.id => id;
+        Identifier IService.id => id;
 
         /// <summary>
         /// Enumerates the known folders whose paths can be retrieved from the shell.<br/>

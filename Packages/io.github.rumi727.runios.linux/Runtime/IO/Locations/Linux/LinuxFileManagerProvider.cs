@@ -29,7 +29,7 @@ namespace RuniOS.IO.Locations.Linux
         /// Linux 파일 관리자 프로바이더의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "file-manager/linux");
-        Identifier IProvider.id => id;
+        Identifier IService.id => id;
 
         /// <summary>
         /// Asynchronously opens the specified folder in the file manager.<br/>

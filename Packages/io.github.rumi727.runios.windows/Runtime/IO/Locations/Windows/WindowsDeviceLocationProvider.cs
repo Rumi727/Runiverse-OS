@@ -26,7 +26,7 @@ namespace RuniOS.IO.Locations.Windows
         /// Windows 장치 위치 프로바이더의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "device-location/windows");
-        Identifier IProvider.id => id;
+        Identifier IService.id => id;
 
         /// <summary>
         /// Enumerates logical drives other than network drives whose roots match current Windows mount points.<br/>

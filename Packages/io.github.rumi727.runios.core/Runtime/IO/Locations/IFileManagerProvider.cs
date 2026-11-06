@@ -8,7 +8,7 @@ namespace RuniOS.IO.Locations
     /// Shows physical paths in the system file manager.<br/>
     /// 실제 경로를 시스템 파일 관리자에서 보여 줍니다.
     /// </summary>
-    public interface IFileManagerProvider : IProvider
+    public interface IFileManagerProvider : IService
     {
         /// <summary>
         /// Opens the specified folder in the system file manager.<br/>

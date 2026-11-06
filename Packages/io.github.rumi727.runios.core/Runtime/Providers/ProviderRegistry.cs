@@ -15,9 +15,9 @@ namespace RuniOS.Providers
     /// </remarks>
     public static class ProviderRegistry
     {
-        static readonly HashSet<IProvider> providers = [];
-        static readonly Dictionary<Identifier, IProvider> registriesById = [];
-        static readonly Dictionary<Type, IProvider[]> providersByContract = [];
+        static readonly HashSet<IService> providers = [];
+        static readonly Dictionary<Identifier, IService> registriesById = [];
+        static readonly Dictionary<Type, IService[]> providersByContract = [];
         static readonly Dictionary<Type, Identifier> defaultIds = [];
         static Type[]? providerTypes;
 
@@ -30,10 +30,10 @@ namespace RuniOS.Providers
         /// 등록할 프로바이더입니다.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when another registered provider already uses the same <see cref="IProvider.id"/>.<br/>
-        /// 등록된 다른 프로바이더가 같은 <see cref="IProvider.id"/>를 사용하면 발생합니다.
+        /// Thrown when another registered provider already uses the same <see cref="IService.id"/>.<br/>
+        /// 등록된 다른 프로바이더가 같은 <see cref="IService.id"/>를 사용하면 발생합니다.
         /// </exception>
-        public static void Register(IProvider provider)
+        public static void Register(IService provider)
         {
             if (!registriesById.TryAdd(provider.id, provider))
                 throw new InvalidOperationException($"Registry ID conflict: {provider.id}");
@@ -52,10 +52,10 @@ namespace RuniOS.Providers
         /// 등록을 해제할 등록된 프로바이더 인스턴스입니다.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when no provider is registered with the <see cref="IProvider.id"/> of <paramref name="provider"/>, or when the registered instance is not <paramref name="provider"/>.<br/>
-        /// <paramref name="provider"/>의 <see cref="IProvider.id"/>로 등록된 프로바이더가 없거나, 등록된 인스턴스가 <paramref name="provider"/>가 아니면 발생합니다.
+        /// Thrown when no provider is registered with the <see cref="IService.id"/> of <paramref name="provider"/>, or when the registered instance is not <paramref name="provider"/>.<br/>
+        /// <paramref name="provider"/>의 <see cref="IService.id"/>로 등록된 프로바이더가 없거나, 등록된 인스턴스가 <paramref name="provider"/>가 아니면 발생합니다.
         /// </exception>
-        public static void Unregister(IProvider provider)
+        public static void Unregister(IService provider)
         {
             if (Get(provider.id) is not { } otherProvider)
                 throw new InvalidOperationException($"Unregistered registry: {provider.id}");
@@ -77,8 +77,8 @@ namespace RuniOS.Providers
         /// 기본 프로바이더를 설정할 계약 타입입니다.
         /// </param>
         /// <param name="providerId">
-        /// The <see cref="IProvider.id"/> of the default provider, or <see langword="null"/> to clear the default.<br/>
-        /// 기본 프로바이더의 <see cref="IProvider.id"/>이며, 기본값을 해제하려면 <see langword="null"/>입니다.
+        /// The <see cref="IService.id"/> of the default provider, or <see langword="null"/> to clear the default.<br/>
+        /// 기본 프로바이더의 <see cref="IService.id"/>이며, 기본값을 해제하려면 <see langword="null"/>입니다.
         /// </param>
         /// <remarks>
         /// The default is only a preference and is not validated at the time of the call. It takes effect while a provider with the identifier is registered, available, and an instance of <paramref name="type"/>.<br/>
@@ -101,10 +101,10 @@ namespace RuniOS.Providers
         /// 기본 프로바이더를 설정할 계약 타입입니다.
         /// </typeparam>
         /// <param name="providerId">
-        /// The <see cref="IProvider.id"/> of the default provider, or <see langword="null"/> to clear the default.<br/>
-        /// 기본 프로바이더의 <see cref="IProvider.id"/>이며, 기본값을 해제하려면 <see langword="null"/>입니다.
+        /// The <see cref="IService.id"/> of the default provider, or <see langword="null"/> to clear the default.<br/>
+        /// 기본 프로바이더의 <see cref="IService.id"/>이며, 기본값을 해제하려면 <see langword="null"/>입니다.
         /// </param>
-        public static void SetDefault<T>(Identifier? providerId) where T : IProvider => SetDefault(typeof(T), providerId);
+        public static void SetDefault<T>(Identifier? providerId) where T : IService => SetDefault(typeof(T), providerId);
 
         /// <summary>
         /// Gets the identifier of the default provider set for the specified contract type.<br/>
@@ -136,7 +136,7 @@ namespace RuniOS.Providers
         /// The identifier passed to <see cref="SetDefault{T}(Identifier?)"/>, or <see langword="null"/> when no default is set.<br/>
         /// <see cref="SetDefault{T}(Identifier?)"/>에 전달한 식별자를 반환하며, 설정된 기본값이 없으면 <see langword="null"/>을 반환합니다.
         /// </returns>
-        public static Identifier? GetDefault<T>() where T : IProvider => GetDefault(typeof(T));
+        public static Identifier? GetDefault<T>() where T : IService => GetDefault(typeof(T));
 
         /// <summary>
         /// Gets the provider registered with the specified identifier.<br/>
@@ -150,7 +150,7 @@ namespace RuniOS.Providers
         /// The matching provider, or <see langword="null"/> when no provider is registered with the identifier.<br/>
         /// 일치하는 프로바이더를 반환하며, 해당 식별자로 등록된 프로바이더가 없으면 <see langword="null"/>을 반환합니다.
         /// </returns>
-        public static IProvider? Get(Identifier identifier) => registriesById.GetValueOrDefault(identifier);
+        public static IService? Get(Identifier identifier) => registriesById.GetValueOrDefault(identifier);
 
         /// <summary>
         /// Gets the provider for the contract type <typeparamref name="T"/>.<br/>
@@ -164,7 +164,7 @@ namespace RuniOS.Providers
         /// The default provider if it is registered and available; otherwise, one of the available registered providers, or <see langword="null"/> when none is available.<br/>
         /// 기본 프로바이더가 등록되어 있고 사용 가능하면 그것을 반환하고, 그렇지 않으면 사용 가능한 등록된 프로바이더 중 하나를 반환하며, 사용 가능한 프로바이더가 없으면 <see langword="null"/>을 반환합니다.
         /// </returns>
-        public static T? Get<T>() where T : IProvider => (T?)Get(typeof(T));
+        public static T? Get<T>() where T : IService => (T?)Get(typeof(T));
 
         /// <summary>
         /// Gets the provider for the specified contract type.<br/>
@@ -179,13 +179,13 @@ namespace RuniOS.Providers
         /// 기본 프로바이더가 등록되어 있고 사용 가능하며 <paramref name="type"/>의 인스턴스이면 그것을 반환하고, 그렇지 않으면 인스턴스인 사용 가능한 등록된 프로바이더 중 하나를 반환하며, 없으면 <see langword="null"/>을 반환합니다.
         /// </returns>
         /// <remarks>
-        /// <see cref="IProvider.isAvailable"/> is evaluated on every call. A default that is currently unavailable is skipped but remains set, so it applies again once it becomes available.<br/>
-        /// <see cref="IProvider.isAvailable"/>은 호출할 때마다 평가됩니다. 현재 사용할 수 없는 기본값은 건너뛰지만 설정은 유지되므로, 다시 사용 가능해지면 다시 적용됩니다.
+        /// <see cref="IService.isAvailable"/> is evaluated on every call. A default that is currently unavailable is skipped but remains set, so it applies again once it becomes available.<br/>
+        /// <see cref="IService.isAvailable"/>은 호출할 때마다 평가됩니다. 현재 사용할 수 없는 기본값은 건너뛰지만 설정은 유지되므로, 다시 사용 가능해지면 다시 적용됩니다.
         /// <br/><br/>
         /// Which provider is returned when no default applies is unspecified.<br/>
         /// 적용되는 기본값이 없을 때 어떤 프로바이더가 반환되는지는 지정되지 않습니다.
         /// </remarks>
-        public static IProvider? Get(Type type)
+        public static IService? Get(Type type)
         {
             if (defaultIds.TryGetValue(type, out Identifier id) && Get(id) is { isAvailable: true } defaultProvider && type.IsInstanceOfType(defaultProvider))
                 return defaultProvider;
@@ -209,7 +209,7 @@ namespace RuniOS.Providers
         /// <see langword="true"/> if an available provider was found; otherwise, <see langword="false"/>.<br/>
         /// 사용 가능한 프로바이더를 찾았으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
         /// </returns>
-        public static bool TryGet<T>([NotNullWhen(true)] out T? provider) where T : IProvider
+        public static bool TryGet<T>([NotNullWhen(true)] out T? provider) where T : IService
         {
             provider = Get<T>();
             return provider != null;
@@ -231,7 +231,7 @@ namespace RuniOS.Providers
         /// <see langword="true"/> if an available provider was found; otherwise, <see langword="false"/>.<br/>
         /// 사용 가능한 프로바이더를 찾았으면 <see langword="true"/>, 그렇지 않으면 <see langword="false"/>입니다.
         /// </returns>
-        public static bool TryGet(Type type, [NotNullWhen(true)] out IProvider? provider)
+        public static bool TryGet(Type type, [NotNullWhen(true)] out IService? provider)
         {
             provider = Get(type);
             return provider != null;
@@ -245,7 +245,7 @@ namespace RuniOS.Providers
         /// A read-only set containing all registered providers.<br/>
         /// 등록된 모든 프로바이더를 포함하는 읽기 전용 집합을 반환합니다.
         /// </returns>
-        public static ReadOnlySet<IProvider> GetAll() => providers.AsReadOnly();
+        public static ReadOnlySet<IService> GetAll() => providers.AsReadOnly();
 
         /// <summary>
         /// Gets all registered providers that are instances of the contract type <typeparamref name="T"/>.<br/>
@@ -259,7 +259,7 @@ namespace RuniOS.Providers
         /// The matching providers, or an empty sequence when none is registered.<br/>
         /// 일치하는 프로바이더를 반환하며, 등록된 프로바이더가 없으면 빈 시퀀스를 반환합니다.
         /// </returns>
-        public static IEnumerable<T> GetAll<T>() where T : IProvider => GetAll(typeof(T)).Cast<T>();
+        public static IEnumerable<T> GetAll<T>() where T : IService => GetAll(typeof(T)).Cast<T>();
 
         /// <summary>
         /// Gets all registered providers that are instances of the specified contract type.<br/>
@@ -277,9 +277,9 @@ namespace RuniOS.Providers
         /// The result for each contract type is indexed on its first request and discarded whenever a provider is registered or unregistered.<br/>
         /// 계약 타입별 결과는 처음 요청할 때 인덱싱되며, 프로바이더를 등록하거나 등록 해제할 때마다 폐기됩니다.
         /// </remarks>
-        public static IReadOnlyList<IProvider> GetAll(Type type)
+        public static IReadOnlyList<IService> GetAll(Type type)
         {
-            if (!providersByContract.TryGetValue(type, out IProvider[]? array))
+            if (!providersByContract.TryGetValue(type, out IService[]? array))
                 providersByContract[type] = array = [..providers.Where(type.IsInstanceOfType)];
 
             return array;
@@ -290,12 +290,12 @@ namespace RuniOS.Providers
         /// 등록된 프로바이더의 계약 타입을 가져옵니다.
         /// </summary>
         /// <returns>
-        /// The interfaces that extend <see cref="IProvider"/> and are implemented by at least one registered provider, or an empty list when none is registered.<br/>
-        /// <see cref="IProvider"/>를 상속하고 등록된 프로바이더가 하나 이상 구현한 인터페이스를 반환하며, 등록된 프로바이더가 없으면 빈 목록을 반환합니다.
+        /// The interfaces that extend <see cref="IService"/> and are implemented by at least one registered provider, or an empty list when none is registered.<br/>
+        /// <see cref="IService"/>를 상속하고 등록된 프로바이더가 하나 이상 구현한 인터페이스를 반환하며, 등록된 프로바이더가 없으면 빈 목록을 반환합니다.
         /// </returns>
         /// <remarks>
-        /// <see cref="IProvider"/> itself is not included, and every interface in an inheritance chain that extends <see cref="IProvider"/> is included.<br/>
-        /// <see cref="IProvider"/> 자체는 포함되지 않으며, <see cref="IProvider"/>를 상속하는 상속 체인의 모든 인터페이스가 포함됩니다.
+        /// <see cref="IService"/> itself is not included, and every interface in an inheritance chain that extends <see cref="IService"/> is included.<br/>
+        /// <see cref="IService"/> 자체는 포함되지 않으며, <see cref="IService"/>를 상속하는 상속 체인의 모든 인터페이스가 포함됩니다.
         /// <br/><br/>
         /// The result is indexed on its first request and discarded whenever a provider is registered or unregistered.<br/>
         /// 결과는 처음 요청할 때 인덱싱되며, 프로바이더를 등록하거나 등록 해제할 때마다 폐기됩니다.
@@ -303,7 +303,7 @@ namespace RuniOS.Providers
         public static IReadOnlyList<Type> GetProviderTypes() => providerTypes ??=
         [
             ..providers.SelectMany(x => x.GetType().GetInterfaces())
-                .Where(x => x != typeof(IProvider) && typeof(IProvider).IsAssignableFrom(x))
+                .Where(x => x != typeof(IService) && typeof(IService).IsAssignableFrom(x))
                 .Distinct()
         ];
     }

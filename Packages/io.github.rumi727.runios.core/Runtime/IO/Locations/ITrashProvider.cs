@@ -9,7 +9,7 @@ namespace RuniOS.IO.Locations
     /// Moves physical paths to the system trash.<br/>
     /// 실제 경로를 시스템 휴지통으로 보냅니다.
     /// </summary>
-    public interface ITrashProvider : IProvider
+    public interface ITrashProvider : IService
     {
         /// <summary>
         /// Determines whether the specified path can be moved to the system trash.<br/>

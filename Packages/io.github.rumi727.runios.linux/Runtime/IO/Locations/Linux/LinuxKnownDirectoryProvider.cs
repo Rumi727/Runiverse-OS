@@ -28,7 +28,7 @@ namespace RuniOS.IO.Locations.Linux
         /// Linux 알려진 디렉터리 프로바이더의 식별자입니다.
         /// </summary>
         public static readonly Identifier id = new Identifier("runios", "known-directory/linux");
-        Identifier IProvider.id => id;
+        Identifier IService.id => id;
 
         /// <summary>
         /// Enumerates the home directory and the user directories defined in <c>user-dirs.dirs</c>.<br/>

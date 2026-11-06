@@ -8,7 +8,7 @@ namespace RuniOS.IO.Locations
     /// Provides the mounts of the system.<br/>
     /// 시스템의 마운트를 제공합니다.
     /// </summary>
-    public interface IMountProvider : IProvider
+    public interface IMountProvider : IService
     {
         /// <summary>
         /// Asynchronously enumerates the mounts.<br/>

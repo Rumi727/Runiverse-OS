@@ -8,7 +8,7 @@ namespace RuniOS.IO.Locations
     /// Provides the network locations of the system.<br/>
     /// 시스템의 네트워크 위치를 제공합니다.
     /// </summary>
-    public interface INetworkLocationProvider : IProvider
+    public interface INetworkLocationProvider : IService
     {
         /// <summary>
         /// Asynchronously enumerates the network locations.<br/>

@@ -12,16 +12,16 @@ namespace RuniOS.Providers
     /// <br/><br/>
     /// 계약은 이 인터페이스를 상속한 인터페이스이며, <see cref="ProviderRegistry"/>는 호출자가 요청한 계약 타입으로 프로바이더를 확인합니다.
     /// </remarks>
-    public interface IProvider
+    public interface IService
     {
         /// <summary>
         /// Gets the identifier of this provider.<br/>
         /// 이 프로바이더의 식별자를 가져옵니다.
         /// </summary>
         /// <remarks>
-        /// The identifier must be unique among all registered providers, regardless of their contract types. <see cref="ProviderRegistry.Register(IProvider)"/> throws when another registered provider uses the same identifier.
+        /// The identifier must be unique among all registered providers, regardless of their contract types. <see cref="ProviderRegistry.Register(IService)"/> throws when another registered provider uses the same identifier.
         /// <br/><br/>
-        /// 식별자는 계약 타입과 관계없이 등록된 모든 프로바이더 사이에서 고유해야 합니다. 등록된 다른 프로바이더가 같은 식별자를 사용하면 <see cref="ProviderRegistry.Register(IProvider)"/>가 예외를 던집니다.
+        /// 식별자는 계약 타입과 관계없이 등록된 모든 프로바이더 사이에서 고유해야 합니다. 등록된 다른 프로바이더가 같은 식별자를 사용하면 <see cref="ProviderRegistry.Register(IService)"/>가 예외를 던집니다.
         /// </remarks>
         Identifier id { get; }
 
