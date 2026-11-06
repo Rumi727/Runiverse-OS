@@ -15,7 +15,7 @@ namespace RuniOS.Editor
             HashSet<string> addedPaths = new(StringComparer.Ordinal);
             foreach (PackageInfo packageInfo in PackageInfo.GetAllRegisteredPackages())
             {
-                string sourceRoot = Path.Combine(packageInfo.resolvedPath, StreamingIOProvider.streamingAssetsFolderName);
+                string sourceRoot = Path.Combine(packageInfo.resolvedPath, IStreamingAssetsService.streamingAssetsFolderName);
                 if (!Directory.Exists(sourceRoot))
                     continue;
 
