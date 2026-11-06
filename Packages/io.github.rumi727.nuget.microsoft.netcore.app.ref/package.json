@@ -2,5 +2,5 @@
   "name": "io.github.rumi727.nuget.microsoft.netcore.app.ref",
   "version": "10.0.13",
   "displayName": "Microsoft.NETCore.App.Ref (NuGet)",
-  "description": "Only the LibraryImport source generator analyzers (analyzers/dotnet/cs) from the Microsoft.NETCore.App.Ref NuGet package."
+  "description": "The source generator analyzers (analyzers/dotnet/cs) with their localized resource assemblies from the Microsoft.NETCore.App.Ref NuGet package."
 }
