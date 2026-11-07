@@ -84,6 +84,33 @@ namespace RuniOS.UIElements.IO
         public event Action<IONode>? fileOpened;
 
         /// <summary>
+        /// 어느 탭이든 다른 위치로 이동하기 직전에 발생합니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 이동하지 않습니다.
+        /// </summary>
+        public event Func<IOBrowserTab, IONode, bool>? nodeChanging;
+
+        /// <summary>
+        /// 어느 탭이든 이동하거나 새로고침해서 위치가 다시 정해지면 발생합니다.
+        /// </summary>
+        public event Action<IOBrowserTab>? nodeChanged;
+
+        /// <summary>
+        /// 탭을 닫기 직전에 발생합니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 닫지 않습니다.
+        /// 탭이 하나만 남아 닫히지 않는 경우에는 발생하지 않습니다.
+        /// </summary>
+        public event Func<IOBrowserTab, bool>? tabClosing;
+
+        /// <summary>
+        /// 활성 탭이 바뀌어 <see cref="activeTabChanged"/>를 발생시키기 전에 이전 탭과 새 탭을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 이전 탭으로 되돌립니다.
+        /// 탭 뷰는 탭을 바꾼 뒤에야 알리므로, 이 이벤트가 발생할 때 화면의 탭은 이미 새 탭입니다. 이전 탭은 처음 탭을 추가할 때 <see langword="null"/>입니다.
+        /// </summary>
+        public event Func<IOBrowserTab?, IOBrowserTab, bool>? activeTabChanging;
+
+        /// <summary>
+        /// 활성 탭이 바뀐 뒤에 이전 탭과 새 탭을 알립니다. 이전 탭은 처음 탭을 추가할 때 <see langword="null"/>이고, 탭을 닫는 중이면 닫히는 탭입니다.
+        /// </summary>
+        public event Action<IOBrowserTab?, IOBrowserTab>? activeTabChanged;
+
+        /// <summary>
         /// 내용 영역에서 파일을 열 때 <see cref="fileOpened"/>를 발생시키는 것과 함께 파일을 실제로 열지 정합니다.
         /// 실제 경로가 있는 파일만 <see cref="IFileOpenService"/>로 열리고, 끄면 이벤트만 발생합니다.
         /// </summary>
@@ -247,13 +274,7 @@ namespace RuniOS.UIElements.IO
 
                 contentPane = new IOBrowserTabView { name = "content-pane", reorderable = true };
                 contentPane.AddToClassList(contentPaneUssClassName);
-                contentPane.activeTabChanged += (_, _) =>
-                {
-                    UpdateHeader();
-
-                    // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
-                    Focus();
-                };
+                contentPane.activeTabChanged += (_, current) => OnContentPaneActiveTabChanged((IOBrowserTab)current);
                 splitView.Add(contentPane);
             }
             hierarchy.Add(splitView);
@@ -314,6 +335,7 @@ namespace RuniOS.UIElements.IO
             tab.filter = filter;
             tab.name = "tab";
             tab.AddToClassList(tabUssClassName);
+            tab.nodeChanging += OnTabNodeChanging;
             tab.nodeChanged += OnTabNodeChanged;
             tab.fileOpened += OnTabFileOpened;
 
@@ -325,12 +347,13 @@ namespace RuniOS.UIElements.IO
             };
 
             contentPane.Add(tab);
-            contentPane.activeTab = tab;
-
             UpdateTabHeaderDisplay();
 
             // 생성이 모두 끝난 뒤에 위치를 정해, 탭의 내용 갱신(OnNodeChanged)이 생성자에서 호출되지 않게 합니다.
+            // activeTabChanging 구독자가 새 탭의 위치를 볼 수 있도록 활성화하기 전에 정합니다.
             tab.ResetNode(node);
+
+            contentPane.activeTab = tab;
 
             // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
             Focus();
@@ -345,11 +368,18 @@ namespace RuniOS.UIElements.IO
             if (contentPane.childCount <= 1)
                 return;
 
+            if (tabClosing?.GetInvocationList().OfType<Func<IOBrowserTab, bool>>().All(x => x.Invoke(tab)) == false)
+                return;
+
             // TabView는 활성 탭이 제거되면 첫 탭을 활성화하므로, 제거하기 전에 옆 탭을 활성화합니다.
+            // activeTabChanging이 거부해 닫을 탭이 그대로 활성 탭이면 닫지 않습니다.
             if (tab == contentPane.activeTab)
             {
                 int index = contentPane.selectedTabIndex;
                 contentPane.selectedTabIndex = index + 1 < contentPane.childCount ? index + 1 : index - 1;
+
+                if (tab == contentPane.activeTab)
+                    return;
             }
 
             tab.RemoveFromHierarchy();
@@ -362,12 +392,41 @@ namespace RuniOS.UIElements.IO
         // 탭이 하나뿐이면 탭 헤더를 숨깁니다.
         void UpdateTabHeaderDisplay() => contentPane.contentViewport.style.display = contentPane.childCount > 1 ? DisplayStyle.Flex : DisplayStyle.None;
 
+        // activeTabChanging이 거부하면 되돌아갈, 마지막으로 받아들인 활성 탭입니다.
+        // 되돌리면서 다시 들어온 알림은 이 탭으로 돌아오는 것이므로 묻지 않습니다.
+        IOBrowserTab? acceptedActiveTab;
+
+        void OnContentPaneActiveTabChanged(IOBrowserTab current)
+        {
+            IOBrowserTab? previous = acceptedActiveTab;
+            if (current == previous)
+                return;
+
+            if (activeTabChanging?.GetInvocationList().OfType<Func<IOBrowserTab?, IOBrowserTab, bool>>().All(x => x.Invoke(previous, current)) == false && previous != null)
+            {
+                contentPane.activeTab = previous;
+                return;
+            }
+
+            acceptedActiveTab = current;
+
+            UpdateHeader();
+            activeTabChanged?.Invoke(previous, current);
+
+            // 이전 탭이 숨겨지면 그 안의 포커스가 해제되므로, 브라우저로 포커스를 되돌립니다.
+            Focus();
+        }
+
+        bool OnTabNodeChanging(IOBrowserTab tab, IONode node) => nodeChanging?.GetInvocationList().OfType<Func<IOBrowserTab, IONode, bool>>().All(x => x.Invoke(tab, node)) ?? true;
+
         void OnTabNodeChanged(IOBrowserTab tab)
         {
             tab.RefreshLabel();
 
             if (tab == contentPane.activeTab)
                 UpdateHeader();
+
+            nodeChanged?.Invoke(tab);
         }
 
         void UpdateHeader()

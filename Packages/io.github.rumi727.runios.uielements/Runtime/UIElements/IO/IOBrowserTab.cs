@@ -22,6 +22,9 @@ namespace RuniOS.UIElements.IO
                 // 같은 위치를 다시 열면 새로고침만 하고 기록하지 않습니다.
                 if (_node != value)
                 {
+                    if (!CanChangeNode(value))
+                        return;
+
                     backHistory.Push(_node);
                     forwardHistory.Clear();
                 }
@@ -36,6 +39,12 @@ namespace RuniOS.UIElements.IO
 
         public bool canGoBack => backHistory.Count > 0;
         public bool canGoForward => forwardHistory.Count > 0;
+
+        /// <summary>
+        /// 다른 위치로 이동하기 직전에 발생합니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 이동하지 않습니다.
+        /// 새로고침과 <see cref="ResetNode"/>에서는 발생하지 않습니다.
+        /// </summary>
+        public event Func<IOBrowserTab, IONode, bool>? nodeChanging;
 
         /// <summary>
         /// 이동하거나 새로고침해서 위치가 다시 정해지면 발생합니다.
@@ -57,18 +66,20 @@ namespace RuniOS.UIElements.IO
 
         public void Back()
         {
-            if (!backHistory.TryPop(out IONode previous))
+            if (!backHistory.TryPeek(out IONode previous) || !CanChangeNode(previous))
                 return;
 
+            backHistory.Pop();
             forwardHistory.Push(_node);
             SetNode(previous);
         }
 
         public void Forward()
         {
-            if (!forwardHistory.TryPop(out IONode next))
+            if (!forwardHistory.TryPeek(out IONode next) || !CanChangeNode(next))
                 return;
 
+            forwardHistory.Pop();
             backHistory.Push(_node);
             SetNode(next);
         }
@@ -83,6 +94,8 @@ namespace RuniOS.UIElements.IO
 
             SetNode(value);
         }
+
+        bool CanChangeNode(IONode value) => nodeChanging?.GetInvocationList().OfType<Func<IOBrowserTab, IONode, bool>>().All(x => x.Invoke(this, value)) ?? true;
 
         void SetNode(IONode value)
         {
