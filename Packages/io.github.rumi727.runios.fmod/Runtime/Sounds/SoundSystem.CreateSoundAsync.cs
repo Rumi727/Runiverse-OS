@@ -21,8 +21,8 @@ namespace RuniOS.Sounds
         {
             ThrowIfSystemLockHeld();
 
-            if (node.provider is PhysicalIOProvider physicalProvider)
-                return await CreateSoundAsync(physicalProvider.targetPath / node.path, keepCompressed);
+            if (node.provider is IPhysicalBackedIOProvider physicalProvider)
+                return await CreateSoundAsync(physicalProvider.GetPhysicalPath(node.path), keepCompressed);
             else
             {
                 byte[] data = await node.file.ReadAllBytes();

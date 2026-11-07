@@ -16,7 +16,7 @@ namespace RuniOS.IO
     /// 실제 로컬 파일 시스템 디렉터리를 <see cref="IWritableIOProvider"/> API로 제공합니다.<br/>
     /// 모든 프로바이더 기준 <see cref="RuniPath"/> 값은 <see cref="targetPath"/> 아래에서 해석됩니다.
     /// </summary>
-    public class PhysicalIOProvider : IWritableIOProvider
+    public class PhysicalIOProvider : IWritableIOProvider, IPhysicalBackedIOProvider
     {
         /// <summary>
         /// Initializes a new <see cref="PhysicalIOProvider"/> with the specified physical root and sandbox policy.<br/>
@@ -62,6 +62,13 @@ namespace RuniOS.IO
 
         /*/// <inheritdoc/>
         public IWritableIOProvider Recreate(RuniPath path) => path.IsEmpty() ? this : new PhysicalIOProvider(targetPath.Combine(path));*/
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The path is combined with <see cref="targetPath"/> without applying <see cref="sandboxPolicy"/>.<br/>
+        /// 경로를 <see cref="sandboxPolicy"/>를 적용하지 않고 <see cref="targetPath"/>와 결합합니다.
+        /// </remarks>
+        public PhysicalPath GetPhysicalPath(RuniPath path) => targetPath.Combine(path);
 
         /// <inheritdoc/>
         public bool IsSameTarget(IIOProvider other) => other is PhysicalIOProvider otherPhysical && targetPath == otherPhysical.targetPath && sandboxPolicy == otherPhysical.sandboxPolicy;

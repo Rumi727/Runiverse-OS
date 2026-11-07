@@ -278,8 +278,8 @@ namespace RuniOS.UIElements.IO
         {
             fileOpened?.Invoke(fileNode);
 
-            if (openFiles && ServiceRegistry.TryGet(out IFileOpenService? fileOpen) && fileNode.provider is PhysicalIOProvider physicalProvider)
-                fileOpen.OpenFile(physicalProvider.targetPath.Combine(fileNode.path)).Forget();
+            if (openFiles && ServiceRegistry.TryGet(out IFileOpenService? fileOpen) && fileNode.provider is IPhysicalBackedIOProvider physicalProvider)
+                fileOpen.OpenFile(physicalProvider.GetPhysicalPath(fileNode.path)).Forget();
         }
 
         /// <summary>
@@ -501,8 +501,8 @@ namespace RuniOS.UIElements.IO
             const string openInFileManagerKey = "runios-editor:io_browser.open_in_file_manager";
             RuniMenuItem openInFileManager = new(string.Empty, () =>
             {
-                if (ServiceRegistry.TryGet(out IFileManagerService? fileManager) && node.provider is PhysicalIOProvider physicalProvider)
-                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
+                if (ServiceRegistry.TryGet(out IFileManagerService? fileManager) && node.provider is IPhysicalBackedIOProvider physicalProvider)
+                    fileManager.ShowFolder(physicalProvider.GetPhysicalPath(node.path)).Forget();
             });
 
             menu.opened += () =>
@@ -510,7 +510,7 @@ namespace RuniOS.UIElements.IO
                 openInFileManager.text = LocalizationUtility.GetText(openInFileManagerKey) ?? openInFileManagerKey;
 
                 // 실제 경로가 있는 노드이고 이 플랫폼에 파일 관리자 연동이 있을 때만 열 수 있습니다.
-                openInFileManager.SetEnabled(ServiceRegistry.Get<IFileManagerService>() != null && node.provider is PhysicalIOProvider);
+                openInFileManager.SetEnabled(ServiceRegistry.Get<IFileManagerService>() != null && node.provider is IPhysicalBackedIOProvider);
             };
 
             menu.Add(openInFileManager);

@@ -49,8 +49,8 @@ namespace RuniOS.Sounds
         {
             ThrowIfSystemLockHeld();
 
-            if (node.provider is PhysicalIOProvider physicalProvider)
-                return await CreateStreamAsync(physicalProvider.targetPath / node.path);
+            if (node.provider is IPhysicalBackedIOProvider physicalProvider)
+                return await CreateStreamAsync(physicalProvider.GetPhysicalPath(node.path));
             else
             {
                 Stream stream = await node.file.OpenRead();

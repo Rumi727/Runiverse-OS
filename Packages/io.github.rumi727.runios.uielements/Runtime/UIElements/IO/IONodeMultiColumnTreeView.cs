@@ -557,19 +557,19 @@ namespace RuniOS.UIElements.IO
             // 논리 경로 대신 프로바이더의 실제 경로로 복사합니다. 실제 경로가 있는 프로바이더에서만 쓸 수 있습니다.
             RuniMenuItem copyPhysicalPath = new(string.Empty, () =>
             {
-                if (provider is not PhysicalIOProvider physicalProvider)
+                if (provider is not IPhysicalBackedIOProvider physicalProvider)
                     return;
 
                 IOEntry[] entries = selectedEntries;
                 GUIUtility.systemCopyBuffer = entries.Length > 0
-                    ? string.Join('\n', entries.Select(x => physicalProvider.targetPath.Combine(x.path).ToString()))
-                    : physicalProvider.targetPath.Combine(node.path).ToString();
+                    ? string.Join('\n', entries.Select(x => physicalProvider.GetPhysicalPath(x.path).ToString()))
+                    : physicalProvider.GetPhysicalPath(node.path).ToString();
             });
 
             menu.opened += () =>
             {
                 copyPhysicalPath.text = GetText("runios-editor:io_node_tree_view.copy_physical_path");
-                copyPhysicalPath.SetEnabled(provider is PhysicalIOProvider);
+                copyPhysicalPath.SetEnabled(provider is IPhysicalBackedIOProvider);
             };
 
             menu.Add(copyPhysicalPath);
@@ -577,14 +577,14 @@ namespace RuniOS.UIElements.IO
             // 선택된 항목이 있으면 그 항목들을 보여 주고, 없으면 빈 곳에서 연 메뉴이므로 폴더 메뉴처럼 현재 폴더를 엽니다.
             RuniMenuItem showInFileManager = new(string.Empty, () =>
             {
-                if (!ServiceRegistry.TryGet(out IFileManagerService? fileManager) || provider is not PhysicalIOProvider physicalProvider)
+                if (!ServiceRegistry.TryGet(out IFileManagerService? fileManager) || provider is not IPhysicalBackedIOProvider physicalProvider)
                     return;
 
                 IOEntry[] entries = selectedEntries;
                 if (entries.Length > 0)
-                    fileManager.ShowItems(entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray()).Forget();
+                    fileManager.ShowItems(entries.Select(x => physicalProvider.GetPhysicalPath(x.path)).ToArray()).Forget();
                 else
-                    fileManager.ShowFolder(physicalProvider.targetPath.Combine(node.path)).Forget();
+                    fileManager.ShowFolder(physicalProvider.GetPhysicalPath(node.path)).Forget();
             });
 
             menu.opened += () =>
@@ -594,7 +594,7 @@ namespace RuniOS.UIElements.IO
                     : GetText("runios-editor:io_browser.open_in_file_manager");
 
                 // 실제 경로가 있는 항목이고 이 플랫폼에 파일 관리자 연동이 있을 때만 보여 줄 수 있습니다.
-                showInFileManager.SetEnabled(ServiceRegistry.Get<IFileManagerService>() != null && provider is PhysicalIOProvider);
+                showInFileManager.SetEnabled(ServiceRegistry.Get<IFileManagerService>() != null && provider is IPhysicalBackedIOProvider);
             };
 
             menu.Add(showInFileManager);
@@ -840,9 +840,9 @@ namespace RuniOS.UIElements.IO
 
             ITrashService? trash = null;
             PhysicalPath[] trashPaths = Array.Empty<PhysicalPath>();
-            if (!permanently && ServiceRegistry.TryGet(out ITrashService? trashService) && provider is PhysicalIOProvider physicalProvider)
+            if (!permanently && ServiceRegistry.TryGet(out ITrashService? trashService) && provider is IPhysicalBackedIOProvider physicalProvider)
             {
-                trashPaths = entries.Select(x => physicalProvider.targetPath.Combine(x.path)).ToArray();
+                trashPaths = entries.Select(x => physicalProvider.GetPhysicalPath(x.path)).ToArray();
 
                 bool[] canMoveToTrash = await UniTask.WhenAll(trashPaths.Select(trashService.CanMoveToTrash));
                 if (canMoveToTrash.All(static x => x))
