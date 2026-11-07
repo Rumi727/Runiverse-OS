@@ -1,0 +1,23 @@
+.runios-pack-inspector__title {
+    -unity-font-style: bold;
+    font-size: 13px;
+    text-overflow: ellipsis;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+}
+
+.runios-pack-inspector__body {
+    margin-left: 10px;
+    margin-right: 10px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.runios-pack-inspector__footer {
+    margin-top: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 5px;
+}

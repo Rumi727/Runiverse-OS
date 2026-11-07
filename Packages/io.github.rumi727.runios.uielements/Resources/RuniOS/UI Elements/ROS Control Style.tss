@@ -12,6 +12,7 @@
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Menu%20Style.uss?fileID=7433441132597879392&guid=2c5cbefb3c234caf8715a30ce39e6885&type=3#Menu Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Menu%20Item%20Style.uss?fileID=7433441132597879392&guid=05a792e5b6bb466b997128218a8a4e27&type=3#Menu Item Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Dialog%20Style.uss?fileID=7433441132597879392&guid=9ccc65b344134451bccaca4cb70677b4&type=3#Dialog Style");
+@import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Pack%20Inspector%20Style.uss?fileID=7433441132597879392&guid=cbcbf53f092b40e8b591d989b7b7265e&type=3#Pack Inspector Style");
 
 
 

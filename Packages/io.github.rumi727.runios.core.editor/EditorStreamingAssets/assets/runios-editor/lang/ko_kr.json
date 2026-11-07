@@ -305,5 +305,6 @@
   "undo.collection.add": "{0}의 {1}에 요소 추가",
   "undo.collection.remove": "{0}의 {1}에서 요소 삭제",
   "undo.collection.move": "{0}의 {1}에서 요소 이동",
-  "undo.discard": "{0}의 변경사항 버리기"
+  "undo.discard": "{0}의 변경사항 버리기",
+  "pack_inspector.previewing": "{1}개 중 {0}개 미리보는 중"
 }

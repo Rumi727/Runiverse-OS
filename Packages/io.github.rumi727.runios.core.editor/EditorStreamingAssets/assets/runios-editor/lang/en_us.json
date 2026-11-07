@@ -306,5 +306,6 @@
   "undo.collection.add": "Add element to {0} of {1}",
   "undo.collection.remove": "Remove element from {0} of {1}",
   "undo.collection.move": "Move element from {0} of {1}",
-  "undo.discard": "Discard changes to {0}"
+  "undo.discard": "Discard changes to {0}",
+  "pack_inspector.previewing": "Previewing {0} of {1} Objects"
 }

@@ -1,0 +1,29 @@
+.runios-pack-inspector {
+    flex-grow: 1;
+}
+
+.runios-pack-inspector__title {
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.runios-pack-inspector__split-view {
+    flex-grow: 1;
+}
+
+.runios-pack-inspector__footer {
+    flex-direction: row;
+    justify-content: flex-end;
+}
+
+.runios-pack-inspector__preview {
+    flex-grow: 1;
+}
+
+.runios-pack-inspector__preview-header {
+    flex-shrink: 0;
+}
+
+.runios-pack-inspector__preview-content {
+    flex-grow: 1;
+}

@@ -306,5 +306,6 @@
   "undo.collection.add": "{0}の{1}に要素を追加する",
   "undo.collection.remove": "{0}の{1}から要素を削除する",
   "undo.collection.move": "{0}の{1}で要素を移動する",
-  "undo.discard": "{0}の変更を破棄する"
+  "undo.discard": "{0}の変更を破棄する",
+  "pack_inspector.previewing": "{1} 個中 {0} 個をプレビュー中"
 }
