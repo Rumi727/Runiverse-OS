@@ -129,6 +129,28 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         public event Action<ImmutableArray<IOEntry>>? selectionChanged;
 
+        /// <summary>
+        /// 이 목록에서 시작한 이동(이름 바꾸기, 잘라내 붙여넣기, 끌어서 옮기기) 직전에 옮길 항목을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 옮기지 않습니다.
+        /// 이 목록 밖에서 일어난 변경은 알리지 않으므로, 모든 변경을 감지하는 데 쓸 수는 없습니다.
+        /// </summary>
+        public event Func<ImmutableArray<IONode>, bool>? moving;
+
+        /// <summary>
+        /// 이 목록에서 시작한 이동으로 실제로 옮겨진 항목을 원본과 대상 쌍으로 알립니다. 폴더를 합쳤다면 폴더 대신 그 안에서 옮긴 항목이 들어 있습니다.
+        /// </summary>
+        public event Action<ImmutableArray<(IONode source, IONode destination)>>? moved;
+
+        /// <summary>
+        /// 이 목록에서 시작한 삭제나 덮어쓰기 직전에 사라질 항목을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 지우거나 덮어쓰지 않습니다.
+        /// 삭제는 확인 대화 상자에서 확인한 뒤에, 덮어쓰기는 파일마다 묻습니다. 이 목록 밖에서 일어난 변경은 알리지 않습니다.
+        /// </summary>
+        public event Func<ImmutableArray<IONode>, bool>? deleting;
+
+        /// <summary>
+        /// 이 목록에서 시작한 삭제나 덮어쓰기로 실제로 사라지거나 대체된 항목을 알립니다.
+        /// </summary>
+        public event Action<ImmutableArray<IONode>>? deleted;
+
         protected MultiColumnTreeView treeView { get; }
         protected LazyTreeLoader<IOEntry> loader { get; }
 
@@ -885,6 +907,10 @@ namespace RuniOS.UIElements.IO
             RuniPath destinationPath = entry.path.GetParentPath() / name;
             IOWriteNode entryNode = writeNode.Bind(entry);
 
+            IONode sourceNode = node.Bind(entry);
+            if (!CanMove([sourceNode]))
+                return;
+
             // 대상이 이미 있는지는 덮어쓰지 않는 이동이 판단하므로 미리 확인하지 않습니다.
             try
             {
@@ -898,6 +924,8 @@ namespace RuniOS.UIElements.IO
                 Debug.LogException(e);
                 return;
             }
+
+            moved?.Invoke([(sourceNode, sourceNode.CreateInRoot(destinationPath))]);
 
             // 이동하는 동안 트리가 다시 로드되었으면 이미 바뀐 이름으로 표시되어 있습니다.
             if (!treeView.viewController.Exists(id))
@@ -969,6 +997,10 @@ namespace RuniOS.UIElements.IO
             if (await dialog.ShowAsync(this) != confirm)
                 return;
 
+            ImmutableArray<IONode> nodes = [..entries.Select(directoryNode.Bind)];
+            if (!CanDelete(nodes))
+                return;
+
             if (trash != null)
             {
                 try
@@ -1000,18 +1032,23 @@ namespace RuniOS.UIElements.IO
                 }
             }
 
-            // 지우는 동안 다른 폴더로 이동했으면 그 목록에서 뺄 것이 없습니다.
-            if (node != directoryNode)
-                return;
-
-            // 일부만 지워졌을 수 있으므로 실제로 없어진 항목만 뺍니다.
+            // 일부만 지워졌을 수 있으므로 실제로 없어진 항목만 알리고 뺍니다. 지우는 동안 다른 폴더로 이동했으면 그 목록에서 뺄 것이 없습니다.
+            ImmutableArray<IONode>.Builder deletedNodes = ImmutableArray.CreateBuilder<IONode>(ids.Length);
             for (int i = 0; i < ids.Length; i++)
             {
-                if (await directory.provider.GetEntry(entries[i].path) == null && treeView.viewController.Exists(ids[i]))
+                if (await directory.provider.GetEntry(entries[i].path) != null)
+                    continue;
+
+                deletedNodes.Add(nodes[i]);
+                if (node == directoryNode && treeView.viewController.Exists(ids[i]))
                     loader.RemoveItem(ids[i]);
             }
 
-            treeView.RefreshItems();
+            if (node == directoryNode)
+                treeView.RefreshItems();
+
+            if (deletedNodes.Count > 0)
+                deleted?.Invoke(deletedNodes.ToImmutable());
         }
 
         /// <summary>
@@ -1054,7 +1091,7 @@ namespace RuniOS.UIElements.IO
                 if (!(cut ? IOTransfer.CanMove(group.Key, entries, directory) : IOTransfer.CanCopy(group.Key, entries, directory)))
                     continue;
 
-                await IOTransfer.Run(group.Key, entries, directory, cut ? IODropOperation.Move : IODropOperation.Copy, this);
+                await Transfer(group.Key, entries, directory, cut ? IODropOperation.Move : IODropOperation.Copy, this);
             }
 
             // 비우면 잘라낸 항목을 보여 주던 목록이 스스로 새로 고치므로, 이 목록도 따로 새로 고치지 않습니다.
@@ -1063,6 +1100,27 @@ namespace RuniOS.UIElements.IO
             else
                 await Refresh();
         }
+
+        // 이 목록에서 시작한 전송(붙여넣기, 이 목록에서 끌어 놓기)이며, 옮기거나 덮어써서 사라지는 항목을 이벤트로 묻고 알립니다.
+        internal async UniTask Transfer(IIOProvider sourceProvider, IReadOnlyList<IOEntry> entries, IOWriteNode directory, IODropOperation operation, VisualElement dialogTarget)
+        {
+            if (operation == IODropOperation.Move && !CanMove([..entries.Select(x => new IONode(sourceProvider, x.path))]))
+                return;
+
+            ImmutableArray<IOTransferResult> results = await IOTransfer.Run(sourceProvider, entries, directory, operation, dialogTarget, x => CanDelete([x]));
+
+            // 덮어써 사라진 대상을 옮겨 온 항목보다 먼저 알려, 같은 경로가 새 항목으로 바뀐 것으로 받게 합니다.
+            ImmutableArray<IONode> overwritten = [..results.Where(static x => x.overwritten).Select(static x => x.destination)];
+            if (overwritten.Length > 0)
+                deleted?.Invoke(overwritten);
+
+            if (operation == IODropOperation.Move && results.Length > 0)
+                moved?.Invoke([..results.Select(static x => (x.source, x.destination))]);
+        }
+
+        bool CanMove(ImmutableArray<IONode> nodes) => moving?.GetInvocationList().OfType<Func<ImmutableArray<IONode>, bool>>().All(x => x.Invoke(nodes)) ?? true;
+
+        bool CanDelete(ImmutableArray<IONode> nodes) => deleting?.GetInvocationList().OfType<Func<ImmutableArray<IONode>, bool>>().All(x => x.Invoke(nodes)) ?? true;
 
         void OnClipboardChanged()
         {

@@ -310,7 +310,7 @@ namespace RuniOS.UIElements.IO
             if (location.directory.AsWriteNode() is not { } directory)
                 return;
 
-            await IOTransfer.Run(data.provider, data.entries, directory, operation, location.element);
+            await data.source.Transfer(data.provider, data.entries, directory, operation, location.element);
 
             // 새로 고침은 펼침·선택·스크롤을 유지하므로, 바뀐 내용만 반영됩니다.
             // 사이드바처럼 목록이 아닌 곳에 놓아도 놓은 폴더가 원본 목록에 펼쳐져 있을 수 있으므로, 원본은 항상 새로 고칩니다.

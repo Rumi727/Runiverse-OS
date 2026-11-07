@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using Cysharp.Threading.Tasks.Linq;
 using RuniOS.IO;
+using System.Collections.Immutable;
 using System.IO;
 using System.Threading;
 using UnityEngine.UIElements;
@@ -38,6 +39,10 @@ namespace RuniOS.UIElements.IO
         readonly bool background;
         readonly IODropOperation operation;
         readonly VisualElement dialogTarget;
+        readonly Func<IONode, bool>? overwriting;
+
+        // 처리를 마친 항목이며, Run이 끝나면 돌려줍니다.
+        readonly List<IOTransferResult> results = [];
 
         // "모두 적용"을 고른 처리 방법이며, 파일과 폴더를 따로 기억합니다.
         Resolution? fileResolution;
@@ -52,12 +57,13 @@ namespace RuniOS.UIElements.IO
         int processedCount;
         string currentName = string.Empty;
 
-        IOTransfer(IIOProvider sourceProvider, IWritableIOProvider destinationProvider, IODropOperation operation, VisualElement dialogTarget)
+        IOTransfer(IIOProvider sourceProvider, IWritableIOProvider destinationProvider, IODropOperation operation, VisualElement dialogTarget, Func<IONode, bool>? overwriting)
         {
             this.sourceProvider = sourceProvider;
             this.destinationProvider = destinationProvider;
             this.operation = operation;
             this.dialogTarget = dialogTarget;
+            this.overwriting = overwriting;
 
             sameProvider = ReferenceEquals(sourceProvider, destinationProvider);
             background = sourceProvider.isThreadSafe && destinationProvider.isThreadSafe;
@@ -109,8 +115,13 @@ namespace RuniOS.UIElements.IO
         /// <param name="dialogTarget">이름이 겹칠 때와 진행 중에 띄우는 대화 상자를 표시할 패널을 정하는 요소입니다.</param>
         /// <param name="entries"></param>
         /// <param name="directory"></param>
-        public static UniTask Run(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IOWriteNode directory, IODropOperation operation, VisualElement dialogTarget) =>
-            new IOTransfer(sourceProvider, directory.provider, operation, dialogTarget).TransferWithProgress(entries, directory.path);
+        /// <param name="overwriting">
+        /// 파일을 덮어쓰기 직전에 메인 스레드에서 덮어쓸 대상을 받아 호출합니다. <see langword="false"/>를 반환하면 그 항목을 건너뜁니다.
+        /// 폴더 합치기는 폴더 자체를 덮어쓰지 않으므로 호출하지 않고, 합치는 동안 덮어쓰는 파일마다 호출합니다.
+        /// </param>
+        /// <returns>처리를 마친 항목입니다. 건너뛰거나 실패한 항목은 들어 있지 않으며, 합친 폴더는 폴더 대신 그 안에서 처리한 항목이 들어 있습니다.</returns>
+        public static UniTask<ImmutableArray<IOTransferResult>> Run(IIOProvider sourceProvider, IEnumerable<IOEntry> entries, IOWriteNode directory, IODropOperation operation, VisualElement dialogTarget, Func<IONode, bool>? overwriting = null) =>
+            new IOTransfer(sourceProvider, directory.provider, operation, dialogTarget, overwriting).TransferWithProgress(entries, directory.path);
 
         static bool PathEquals(RuniPath x, RuniPath y) => string.Equals(x.value, y.value, StringComparison.Ordinal);
 
@@ -118,7 +129,7 @@ namespace RuniOS.UIElements.IO
             PathEquals(path, ancestorPath)
             || path.value.StartsWith(ancestorPath.value + RuniPath.directorySeparatorChar, StringComparison.Ordinal);
 
-        async UniTask TransferWithProgress(IEnumerable<IOEntry> entries, RuniPath directoryPath)
+        async UniTask<ImmutableArray<IOTransferResult>> TransferWithProgress(IEnumerable<IOEntry> entries, RuniPath directoryPath)
         {
             ShowProgressAfterDelay().Forget();
             try
@@ -136,6 +147,8 @@ namespace RuniOS.UIElements.IO
                 progressTimer?.Cancel();
                 progress.Close();
             }
+
+            return [..results];
         }
 
         // 진행 대화 상자를 닫는 것도 취소로 보므로, 전송이 끝나 닫을 때는 이미 끝난 전송을 취소할 뿐입니다.
@@ -200,7 +213,9 @@ namespace RuniOS.UIElements.IO
                     await Merge(entry, destinationPath);
                     break;
                 case Resolution.Overwrite:
-                    await TransferItem(entry, destinationPath, true);
+                    if (await CanOverwrite(destinationPath))
+                        await TransferItem(entry, destinationPath, true);
+
                     break;
                 case Resolution.Rename:
                     await TransferItem(entry, renamedPath, false);
@@ -224,6 +239,23 @@ namespace RuniOS.UIElements.IO
                 await CopyFile(entry.path, destinationPath, overwrite);
             else
                 await CopyDirectory(entry.path, destinationPath);
+
+            results.Add(new IOTransferResult(new IONode(sourceProvider, entry.path), new IONode(destinationProvider, destinationPath), overwrite));
+        }
+
+        // overwriting 구독자는 대화 상자를 띄울 수 있으므로 메인 스레드에서 호출합니다.
+        async UniTask<bool> CanOverwrite(RuniPath destinationPath)
+        {
+            if (overwriting == null)
+                return true;
+
+            await UniTask.SwitchToMainThread();
+            bool canOverwrite = overwriting(new IONode(destinationProvider, destinationPath));
+
+            if (background)
+                await UniTask.SwitchToThreadPool();
+
+            return canOverwrite;
         }
 
         // 이미 있는 폴더 안으로 자식을 하나씩 옮기거나 복사합니다.

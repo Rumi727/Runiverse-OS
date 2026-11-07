@@ -42,6 +42,30 @@ namespace RuniOS.UIElements.IO
         /// <seealso cref="IONodeMultiColumnTreeView.selectionChanged"/>
         public event Action<IONodeBrowserTab, ImmutableArray<IOEntry>>? selectionChanged;
 
+        /// <summary>
+        /// 어느 탭에서든 그 탭에서 시작한 이동 직전에 탭과 옮길 항목을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 옮기지 않습니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.moving"/>
+        public event Func<IONodeBrowserTab, ImmutableArray<IONode>, bool>? moving;
+
+        /// <summary>
+        /// 어느 탭에서든 그 탭에서 시작한 이동으로 옮겨진 항목을 탭과 함께 알립니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.moved"/>
+        public event Action<IONodeBrowserTab, ImmutableArray<(IONode source, IONode destination)>>? moved;
+
+        /// <summary>
+        /// 어느 탭에서든 그 탭에서 시작한 삭제나 덮어쓰기 직전에 탭과 사라질 항목을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 지우거나 덮어쓰지 않습니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.deleting"/>
+        public event Func<IONodeBrowserTab, ImmutableArray<IONode>, bool>? deleting;
+
+        /// <summary>
+        /// 어느 탭에서든 그 탭에서 시작한 삭제나 덮어쓰기로 사라지거나 대체된 항목을 탭과 함께 알립니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.deleted"/>
+        public event Action<IONodeBrowserTab, ImmutableArray<IONode>>? deleted;
+
         public IONodeBrowser() : this(IONode.empty) { }
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
@@ -59,6 +83,10 @@ namespace RuniOS.UIElements.IO
             IONodeMultiColumnTreeView tabTreeView = tab.treeView;
             tabTreeView.selectionChanging += x => selectionChanging?.GetInvocationList().OfType<Func<IONodeBrowserTab, ImmutableArray<IOEntry>, bool>>().All(y => y.Invoke(tab, x)) ?? true;
             tabTreeView.selectionChanged += x => selectionChanged?.Invoke(tab, x);
+            tabTreeView.moving += x => moving?.GetInvocationList().OfType<Func<IONodeBrowserTab, ImmutableArray<IONode>, bool>>().All(y => y.Invoke(tab, x)) ?? true;
+            tabTreeView.moved += x => moved?.Invoke(tab, x);
+            tabTreeView.deleting += x => deleting?.GetInvocationList().OfType<Func<IONodeBrowserTab, ImmutableArray<IONode>, bool>>().All(y => y.Invoke(tab, x)) ?? true;
+            tabTreeView.deleted += x => deleted?.Invoke(tab, x);
 
             return tab;
         }
