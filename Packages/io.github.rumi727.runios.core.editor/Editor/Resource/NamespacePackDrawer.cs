@@ -1,24 +1,14 @@
 ﻿#nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using RuniOS.Resource;
 using System.Collections.Immutable;
-using System.IO;
 using UnityEditorInternal;
 
 namespace RuniOS.Editor.Resource
 {
-    public sealed class NamespacePackDrawer : PackDrawer
+    public sealed class NamespacePackDrawer(ImmutableArray<IONode> targets) : PackDrawer(targets)
     {
-        public NamespacePackDrawer(ImmutableArray<PathPair> targets) : base(targets)
-        {
-            relativeExistsPaths = targets
-                .Select<PathPair, string>(x => x.rootPath / x.relativePath)
-                .Where(Directory.Exists)
-                .ToArray();
-
-            UpdateNamespaceList();
-        }
-
         public override string targetTypeName => targetTitle;
         public override string targetTitle => GetTextOrKey("runios-editor:gui.namespace");
 
@@ -26,12 +16,39 @@ namespace RuniOS.Editor.Resource
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => x == ResourcePack.assetsFolderName);
 
-        readonly string[] relativeExistsPaths = [];
+        // 마지막으로 읽어 온 네임스페이스 목록이며, 되돌리기는 다시 읽지 않고 이 목록으로 돌아갑니다.
+        List<string> loadedNameSpaces = [];
 
         List<string> nameSpaces = [];
         int orgCount;
 
         ReorderableList? reorderableList;
+
+        protected internal override UniTask OnEnable() => Load();
+
+        // 모든 대상의 하위 폴더 이름을 겹치지 않게 모읍니다.
+        async UniTask Load()
+        {
+            List<string> names = [];
+            foreach (IONode target in targets)
+            {
+                if (!await target.dir.Exists())
+                    continue;
+
+                await foreach (IOEntry entry in target.dir.GetDirectories())
+                {
+                    string name = entry.path.GetFileName();
+                    if (!names.Contains(name))
+                        names.Add(name);
+                }
+            }
+
+            loadedNameSpaces = names;
+            nameSpaces = [..names];
+            orgCount = names.Count;
+
+            Repaint();
+        }
 
         protected internal override void OnGUI(bool isDebug = false)
         {
@@ -145,26 +162,33 @@ namespace RuniOS.Editor.Resource
             reorderableList.DoLayoutList();
         }
 
-        public override void SaveChanges()
+        // 프로젝트 StreamingAssets가 아니라 편집 중인 각 assets 폴더에 만들고, 쓸 수 없는 위치는 건너뜁니다.
+        public override async UniTask SaveChanges()
         {
-            for (int i = orgCount; i < nameSpaces.Count; i++)
-                AssetDatabase.CreateFolder((PackInspectorSystem.packRootPath / ResourcePack.assetsFolderName).value, nameSpaces[i]);
-            
-            UpdateNamespaceList();
-            base.SaveChanges();
+            ImmutableArray<string> createdNameSpaces = [..nameSpaces.Skip(orgCount)];
+            foreach (IONode target in targets)
+            {
+                if (target.AsWriteNode() is not { } directory)
+                    continue;
+
+                foreach (string nameSpace in createdNameSpaces)
+                    await directory.CreateChild(nameSpace).dir.Create();
+            }
+
+            AssetDatabase.Refresh();
+            await Load();
+
+            await base.SaveChanges();
         }
 
-        public override void DiscardChanges()
+        // 실행 취소 기록을 지금 Unity 실행 취소 그룹에 넣어야 하므로, 다시 읽지 않고 마지막으로 읽어 온 목록으로 돌아갑니다.
+        public override UniTask DiscardChanges()
         {
             bool oldDirty = isDirty;
             const bool newDirty = false;
-            
+
             List<string> oldList = nameSpaces;
-            List<string> newList = relativeExistsPaths
-                .SelectMany(Directory.GetDirectories)
-                .Select(x => ((RuniPath)x).GetFileName())
-                .Distinct()
-                .ToList();
+            List<string> newList = [..loadedNameSpaces];
 
             int oldOrgCount = orgCount;
             int newOrgCount = newList.Count;
@@ -184,18 +208,7 @@ namespace RuniOS.Editor.Resource
             nameSpaces = newList;
             orgCount = newOrgCount;
 
-            base.DiscardChanges();
-        }
-
-        void UpdateNamespaceList()
-        {
-            nameSpaces = relativeExistsPaths
-                .SelectMany(Directory.GetDirectories)
-                .Select(x => ((RuniPath)x).GetFileName())
-                .Distinct()
-                .ToList();
-
-            orgCount = nameSpaces.Count;
+            return base.DiscardChanges();
         }
     }
 }

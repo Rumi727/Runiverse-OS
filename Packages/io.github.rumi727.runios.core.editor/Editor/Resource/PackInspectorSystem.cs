@@ -1,10 +1,9 @@
 ﻿#nullable enable
+using Cysharp.Threading.Tasks;
 using System.Collections.Immutable;
-using RuniOS.Editor.APIBridge.UnityEditor;
 using RuniOS.IO;
 using RuniOS.Linq;
 using RuniOS.Reflection;
-using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor.Resource
 {
@@ -38,8 +37,9 @@ namespace RuniOS.Editor.Resource
                         {
                             try
                             {
-                                PackDrawer drawer = (PackDrawer)Activator.CreateInstance(x, ImmutableArray<PackDrawer.PathPair>.Empty)!;
-                                drawer.OnEnable();
+                                PackDrawer drawer = (PackDrawer)Activator.CreateInstance(x, ImmutableArray<IONode>.Empty)!;
+                                // 대상이 없는 원형이라 준비가 끝나기를 기다릴 필요가 없습니다.
+                                drawer.OnEnable().Forget();
 
                                 return drawer;
                             }
@@ -57,73 +57,14 @@ namespace RuniOS.Editor.Resource
             private set;
         } = default;
 
-        public static bool isFolderViewMode { get; private set; }
-        public static RuniPath activeFolderPath { get; private set; }
-
-        [OnAssemblyLoaded]
-        static void OnAssemblyLoaded()
+        public static PackDrawer? CreateDrawer(IEnumerable<IONode> nodes)
         {
-            Selection.selectionChanged += CheckFolder;
-            EditorApplication.update += CheckFolder;
-        }
-
-        [OnAssemblyUnloading]
-        static void OnAssemblyUnloading()
-        {
-            Selection.selectionChanged -= CheckFolder;
-            EditorApplication.update -= CheckFolder;
-        }
-
-        public static PackDrawer? CreateDrawer(Object[] objects)
-        {
-            IEnumerable<PackDrawer.PathPair> paths = objects
-                .Select(x =>
-                {
-                    bool success = TryGetRelativePathFrom(x, out PhysicalPath rootPath, out RuniPath path);
-                    return (success, rootPath, path);
-                })
-                .Where(x => x.success)
-                .Select(x => new PackDrawer.PathPair(x.rootPath, x.path));
+            ImmutableArray<IONode> nodeArray = [..nodes];
 
             // ReSharper disable once UseCollectionExpression
-            return drawers.Where(x => x.IsMatch(paths.Select(x => x.relativePath)))
-                .Select(x => (PackDrawer)Activator.CreateInstance(x.GetType(), paths.ToImmutableArray())!)
+            return drawers.Where(x => x.IsMatch(nodeArray.Select(x => x.path)))
+                .Select(x => (PackDrawer)Activator.CreateInstance(x.GetType(), nodeArray)!)
                 .FirstOrDefault();
-        }
-
-        public static bool TryGetRelativePathFrom(Object obj, out PhysicalPath rootPath, out RuniPath path)
-        {
-            rootPath = (PhysicalPath)Application.streamingAssetsPath;
-            path = RuniPath.From(AssetDatabase.GetAssetPath(obj));
-
-            if (path.TryGetRelativePath(packRootPath, out path))
-                return true;
-
-            return false;
-        }
-
-        static RuniPath lastCheckPath = RuniPath.empty;
-        static void CheckFolder()
-        {
-            if (Selection.objects.Length > 0)
-            {
-                isFolderViewMode = false;
-                return;
-            }
-
-            RuniPath currentPath = (RuniPath)ProjectWindowUtilBridge.GetActiveFolderPath();
-            if (lastCheckPath != currentPath)
-            {
-                lastCheckPath = currentPath;
-                InspectorWindowBridge.RepaintAllInspectors();
-
-                isFolderViewMode = true;
-
-                if (currentPath.TryGetRelativePath(packRootPath, out RuniPath relative))
-                    activeFolderPath = relative;
-                else
-                    activeFolderPath = RuniPath.empty;
-            }
         }
     }
 }

@@ -1,10 +1,10 @@
 #nullable enable
+using Cysharp.Threading.Tasks;
 using RuniOS.Editor.Sounds;
 using RuniOS.IO;
 using RuniOS.Sounds;
 using System.Collections.Immutable;
 using System.Globalization;
-using System.IO;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
@@ -13,27 +13,21 @@ namespace RuniOS.Editor.Resource.Sounds
         public static GUIStyle shadowLabelStyle => _shadowLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _shadowLabelStyle;
 
-        public WaveAudioClipPackDrawer(ImmutableArray<PathPair> targets) : base(targets)
-        {
-            if (target == null)
-                return;
+        public WaveAudioClipPackDrawer(ImmutableArray<IONode> targets) : base(targets) { }
 
-            PhysicalPath soundPath = target.Value.rootPath / target.Value.relativePath;
-            if (!File.Exists(soundPath))
-                return;
-
-            targetSoundPath = soundPath;
-        }
-
-        public PhysicalPath? targetSoundPath { get; }
-        public override WaveAudioClip? targetClip => targetSoundPath != null ? preview.GetAudio(targetSoundPath.Value) : null;
+        // 대상이 없거나 불러오지 못하면 AudioPreview가 null을 돌려줍니다.
+        public override WaveAudioClip? targetClip => target is { } node ? preview.GetAudio(node) : null;
 
         readonly AudioPreview preview = new AudioPreview();
-        readonly Dictionary<PhysicalPath, Texture2D> loadedTextures = [];
+        readonly Dictionary<IONode, Texture2D> loadedTextures = [];
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
 
-        protected override void OnEnable() => AudioPreview.onLoadedAudio += OnLoadedAudio;
+        protected override UniTask OnEnable()
+        {
+            AudioPreview.onLoadedAudio += OnLoadedAudio;
+            return UniTask.CompletedTask;
+        }
 
         protected override void OnDisable()
         {
@@ -44,7 +38,7 @@ namespace RuniOS.Editor.Resource.Sounds
             AudioPreview.onLoadedAudio -= OnLoadedAudio;
         }
 
-        void OnLoadedAudio(PhysicalPath path) => Repaint();
+        void OnLoadedAudio(IONode node) => Repaint();
 
         protected override void DrawInfoLayout()
         {
@@ -58,14 +52,13 @@ namespace RuniOS.Editor.Resource.Sounds
 
         protected override bool HasPreviewGUI() => true;
 
-        protected override void OnPreviewGUI(Rect r, PhysicalPath rootPath, RuniPath relativePath, GUIStyle background)
+        protected override void OnPreviewGUI(Rect r, IONode node, GUIStyle background)
         {
-            PhysicalPath soundPath = rootPath / relativePath;
-            WaveAudioClip? clip = preview.GetAudio(soundPath);
+            WaveAudioClip? clip = preview.GetAudio(node);
             if (clip == null)
                 return;
 
-            Texture2D? texture = loadedTextures.GetValueOrDefault(soundPath);
+            Texture2D? texture = loadedTextures.GetValueOrDefault(node);
             if (Event.current.type == EventType.Repaint)
             {
                 background.Draw(r, GUIContent.none, false, false, false, false);
@@ -79,13 +72,13 @@ namespace RuniOS.Editor.Resource.Sounds
                         Object.DestroyImmediate(texture);
 
                     texture = AudioPreview.WaveformTextureGenerate(clip, width, height, Color.darkOrange);
-                    loadedTextures[soundPath] = texture;
+                    loadedTextures[node] = texture;
                 }
             }
 
             GUI.DrawTexture(r, texture, ScaleMode.StretchToFill, true);
 
-            AudioPreview.Player player = preview.GetOrCreatePlayer(soundPath);
+            AudioPreview.Player player = preview.GetOrCreatePlayer(node);
             if (player.isPlaying)
             {
                 Rect cursorRect = r;
@@ -115,14 +108,13 @@ namespace RuniOS.Editor.Resource.Sounds
             EndAlignment(shadowLabelStyle);
         }
 
-        protected override void OnInteractivePreviewGUI(Rect r, PhysicalPath rootPath, RuniPath relativePath, GUIStyle background)
+        protected override void OnInteractivePreviewGUI(Rect r, IONode node, GUIStyle background)
         {
-            OnPreviewGUI(r, rootPath, relativePath, background);
+            OnPreviewGUI(r, node, background);
 
             if (r.Contains(Event.current.mousePosition) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
             {
-                PhysicalPath soundPath = rootPath / relativePath;
-                AudioPreview.Player targetPlayer = preview.GetOrCreatePlayer(soundPath);
+                AudioPreview.Player targetPlayer = preview.GetOrCreatePlayer(node);
 
                 foreach (var player in preview.players)
                 {
@@ -137,14 +129,14 @@ namespace RuniOS.Editor.Resource.Sounds
         protected override void OnPreviewSettings()
         {
             bool isPlaying = preview.players.Any(x => x.Value.isPlaying);
-            EditorGUI.BeginDisabledGroup(!isPlaying && targetSoundPath == null);
+            EditorGUI.BeginDisabledGroup(!isPlaying && target == null);
 
             EditorGUI.BeginChangeCheck();
             isPlaying = GUILayout.Toggle(isPlaying, EditorGUIUtility.IconContent("Play"), EditorStyles.toolbarButton);
             if (EditorGUI.EndChangeCheck())
             {
                 if (isPlaying)
-                    preview.GetOrCreatePlayer(targetSoundPath!.Value).Play();
+                    preview.GetOrCreatePlayer(target!.Value).Play();
                 else
                 {
                     foreach (var player in preview.players)

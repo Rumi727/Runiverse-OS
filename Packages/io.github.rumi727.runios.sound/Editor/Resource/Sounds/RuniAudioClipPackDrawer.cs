@@ -1,11 +1,12 @@
 #nullable enable
+using RuniOS.IO;
 using RuniOS.Resource;
 using RuniOS.Sounds;
 using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
-    public abstract class RuniAudioClipPackDrawer<T>(ImmutableArray<PackDrawer.PathPair> targets) : PackDrawer(targets) where T : RuniAudioClip
+    public abstract class RuniAudioClipPackDrawer<T>(ImmutableArray<IONode> targets) : PackDrawer(targets) where T : RuniAudioClip
     {
         public override string targetTypeName => typeof(T).GetTypeDisplayName();
 
