@@ -5,6 +5,7 @@ using RuniOS.IO;
 using RuniOS.IO.Locations;
 using RuniOS.Services;
 using RuniOS.Resource;
+using System.Collections.Immutable;
 using System.IO;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -100,10 +101,11 @@ namespace RuniOS.UIElements.IO
         public bool canWrite => !readOnly && provider is IWritableIOProvider;
 
         /// <summary>
-        /// 선택된 항목을 가져옵니다.
+        /// 선택된 항목을 가져옵니다. 가져올 때마다 새로 만들므로, 여러 번 쓸 때는 한 번 가져와 두고 씁니다.
         /// </summary>
         // DefaultMultiColumnTreeViewController.GetItemForIndex가 정렬을 반영하지 않아 selectedItems가 화면과 어긋나므로, 선택된 id로 항목을 찾습니다.
-        public IOEntry[] selectedEntries => selectedIds.Select(treeView.GetItemDataForId<IOEntry>).ToArray();
+        // 트리를 다시 채우거나 항목을 지워도 컬렉션 뷰가 알리지 않아 캐시를 맞출 시점이 없으므로, 가져올 때마다 만듭니다.
+        public ImmutableArray<IOEntry> selectedEntries => [..selectedIds.Select(treeView.GetItemDataForId<IOEntry>)];
 
         // 컬렉션 뷰는 트리를 다시 채우거나 항목을 제거해도 선택 id 목록에서 사라진 id를 지우지 않으므로(인덱스만 다시 만듭니다),
         // 트리에 실제로 있는 항목의 id만 씁니다. 없는 id로 항목을 찾으면 경로가 빈 기본값, 즉 루트가 나옵니다.
@@ -113,6 +115,19 @@ namespace RuniOS.UIElements.IO
         /// 항목을 더블 클릭하거나 Enter 키로 고르면 발생합니다.
         /// </summary>
         public event Action<IOEntry>? opened;
+
+        /// <summary>
+        /// 선택이 바뀌어 <see cref="selectionChanged"/>를 발생시키기 전에 새 선택을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 이전 선택으로 되돌립니다.
+        /// 컬렉션 뷰는 선택을 바꾼 뒤에야 알리므로, 이 이벤트가 발생할 때 화면의 선택은 이미 새 선택입니다.
+        /// <see cref="selectionChanged"/>가 발생하지 않는 경우에는 발생하지 않습니다.
+        /// </summary>
+        public event Func<ImmutableArray<IOEntry>, bool>? selectionChanging;
+
+        /// <summary>
+        /// 선택이 바뀐 뒤에 새 선택을 알립니다. <see cref="Refresh"/>가 이전 선택을 되살리는 동안과
+        /// <see cref="SetSelectionWithoutNotify(IEnumerable{RuniPath})"/>, 그리고 <see cref="SetSelection(IEnumerable{RuniPath})"/>이 아직 불러오지 않은 항목을 나중에 선택할 때는 발생하지 않습니다.
+        /// </summary>
+        public event Action<ImmutableArray<IOEntry>>? selectionChanged;
 
         protected MultiColumnTreeView treeView { get; }
         protected LazyTreeLoader<IOEntry> loader { get; }
@@ -180,6 +195,8 @@ namespace RuniOS.UIElements.IO
             treeView = new MultiColumnTreeView([nameColumn, sizeColumn, creationTimeColumn, lastAccessTime, lastWriteTimeColumn]) { sortingMode = ColumnSortingMode.Default, selectionType = SelectionType.Multiple };
             treeView.sortColumnDescriptions.Add(new SortColumnDescription(nameColumn.name, SortDirection.Ascending));
 
+            treeView.selectionChanged += _ => OnTreeViewSelectionChanged();
+
             loader = new LazyTreeLoader<IOEntry>(treeView, x => x.isDirectory, x => EnumerateEntries(x.path)) { preloadDepth = 1 };
             treeView.SetViewController(new LazyMultiColumnTreeViewController<IOEntry>(treeView, loader));
             loader.childrenLoaded += RestoreChildren;
@@ -194,8 +211,8 @@ namespace RuniOS.UIElements.IO
             // 오른쪽 버튼에서는 빈 곳에서 연 메뉴가 이전 선택을 대상으로 하지 않게 됩니다.
             RegisterCallback<PointerDownEvent>(e =>
             {
-                if (e.button is ((int)MouseButton.LeftMouse or (int)MouseButton.RightMouse) && IsEmptyArea(e.target))
-                    treeView.ClearSelection();
+                if (e.button is (int)MouseButton.LeftMouse or (int)MouseButton.RightMouse && IsEmptyArea(e.target))
+                    ClearSelection();
             });
 
             // 목록 아래 빈 영역이 어느 요소에 속하는지는 컬렉션 뷰의 내부 배치에 달려 있으므로,
@@ -268,6 +285,95 @@ namespace RuniOS.UIElements.IO
             this.AddManipulator(new LocalizationManipulator(OnLanguageChanged));
 
             this.node = node;
+        }
+
+        /// <summary>
+        /// 경로가 일치하는 항목을 선택합니다. 아직 불러오지 않은 항목은 조상 폴더를 펼쳐 불러오는 대로 선택하며,
+        /// 이렇게 나중에 선택되는 항목은 <see cref="selectionChanged"/>를 발생시키지 않습니다.
+        /// </summary>
+        public void SetSelection(IEnumerable<RuniPath> paths) => SetSelection(paths, true);
+
+        /// <summary>
+        /// <see cref="SetSelection(IEnumerable{RuniPath})"/>와 같지만 <see cref="selectionChanged"/>를 발생시키지 않습니다.
+        /// </summary>
+        public void SetSelectionWithoutNotify(IEnumerable<RuniPath> paths) => SetSelection(paths, false);
+
+        void SetSelection(IEnumerable<RuniPath> paths, bool notify)
+        {
+            // 이전에 예약한, 아직 선택되지 않은 항목은 이 선택으로 대체됩니다.
+            restoringSelectedPaths.Clear();
+
+            List<int> ids = [];
+            foreach (RuniPath path in paths)
+            {
+                int id = FindId(path);
+                if (id >= 0)
+                {
+                    ids.Add(id);
+                    continue;
+                }
+
+                // 불러오지 않은 항목은 조상 폴더를 펼치면 로더가 불러오고, RestoreChildren이 선택합니다.
+                restoringSelectedPaths.Add(path);
+
+                for (RuniPath parent = path.GetParentPath(); !parent.IsEmpty() && parent != node.path; parent = parent.GetParentPath())
+                    restoringExpandedPaths.Add(parent);
+            }
+
+            if (notify)
+                treeView.SetSelectionById(ids);
+            else
+            {
+                treeView.SetSelectionByIdWithoutNotify(ids);
+                acceptedSelectedIds = [..selectedIds];
+            }
+
+            if (restoringExpandedPaths.Count == 0)
+                return;
+
+            foreach (int id in treeView.viewController.GetAllItemIds().ToArray())
+            {
+                if (restoringExpandedPaths.Remove(treeView.GetItemDataForId<IOEntry>(id).path))
+                    treeView.ExpandItem(id, refresh: false);
+            }
+        }
+
+        /// <summary>
+        /// 선택을 모두 해제합니다. <see cref="SetSelection(IEnumerable{RuniPath})"/>으로 예약해 둔, 아직 불러오지 않은 항목의 선택도 취소합니다.
+        /// </summary>
+        public void ClearSelection() => SetSelection([], true);
+
+        // selectionChanging이 거부하면 되돌아갈, 마지막으로 받아들인 선택입니다. 트리를 다시 채우면 id가 바뀌므로 되살리는 동안의 선택도 받아들입니다.
+        ImmutableArray<int> acceptedSelectedIds = [];
+
+        void OnTreeViewSelectionChanged()
+        {
+            if (suppressSelectionChanged > 0)
+            {
+                acceptedSelectedIds = [..selectedIds];
+                return;
+            }
+
+            ImmutableArray<IOEntry> entries = selectedEntries;
+            if (selectionChanging?.GetInvocationList().OfType<Func<ImmutableArray<IOEntry>, bool>>().All(x => x.Invoke(entries)) == false)
+            {
+                treeView.SetSelectionByIdWithoutNotify(acceptedSelectedIds.Where(treeView.viewController.Exists));
+                return;
+            }
+
+            acceptedSelectedIds = [..selectedIds];
+            selectionChanged?.Invoke(entries);
+        }
+
+        int FindId(RuniPath path)
+        {
+            foreach (int id in treeView.viewController.GetAllItemIds())
+            {
+                if (treeView.GetItemDataForId<IOEntry>(id).path == path)
+                    return id;
+            }
+
+            return -1;
         }
 
         void OnLanguageChanged()
@@ -545,7 +651,7 @@ namespace RuniOS.UIElements.IO
             // 선택된 항목이 있으면 그 항목들의 경로를 줄바꿈으로 이어 복사하고, 없으면 빈 곳에서 연 메뉴이므로 현재 폴더의 경로를 복사합니다.
             RuniMenuItem copyPath = new(string.Empty, () =>
             {
-                IOEntry[] entries = selectedEntries;
+                ImmutableArray<IOEntry> entries = selectedEntries;
                 GUIUtility.systemCopyBuffer = entries.Length > 0
                     ? string.Join('\n', entries.Select(x => x.path.ToString()))
                     : node.path.ToString();
@@ -560,7 +666,7 @@ namespace RuniOS.UIElements.IO
                 if (provider is not IPhysicalBackedIOProvider physicalProvider)
                     return;
 
-                IOEntry[] entries = selectedEntries;
+                ImmutableArray<IOEntry> entries = selectedEntries;
                 GUIUtility.systemCopyBuffer = entries.Length > 0
                     ? string.Join('\n', entries.Select(x => physicalProvider.GetPhysicalPath(x.path).ToString()))
                     : physicalProvider.GetPhysicalPath(node.path).ToString();
@@ -580,7 +686,7 @@ namespace RuniOS.UIElements.IO
                 if (!ServiceRegistry.TryGet(out IFileManagerService? fileManager) || provider is not IPhysicalBackedIOProvider physicalProvider)
                     return;
 
-                IOEntry[] entries = selectedEntries;
+                ImmutableArray<IOEntry> entries = selectedEntries;
                 if (entries.Length > 0)
                     fileManager.ShowItems(entries.Select(x => physicalProvider.GetPhysicalPath(x.path)).ToArray()).Forget();
                 else
@@ -928,8 +1034,7 @@ namespace RuniOS.UIElements.IO
         /// </summary>
         public async UniTask Paste()
         {
-            IOEntry[] selected = selectedEntries;
-            IONode target = selected is [{ isDirectory: true } selectedDirectory] ? node.Bind(selectedDirectory) : node;
+            IONode target = selectedEntries is [{ isDirectory: true } selectedDirectory] ? node.Bind(selectedDirectory) : node;
             if (!canWrite || target.AsWriteNode() is not { } directory)
                 return;
 
@@ -1097,6 +1202,10 @@ namespace RuniOS.UIElements.IO
             return -1;
         }
 
+        // 0보다 크면 selectionChanging과 selectionChanged를 발생시키지 않습니다(OnTreeViewSelectionChanged).
+        // 새로 고침이 선택을 되살리는 동안의 변화는 사용자가 선택을 바꾼 것이 아니기 때문이며, Refresh와 RestoreChildren에서만 올립니다.
+        int suppressSelectionChanged;
+
         /// <summary>
         /// 현재 위치의 목록을 다시 불러옵니다. 마지막으로 불러온 위치와 같으면 펼침·선택·스크롤 상태를 되살립니다.
         /// </summary>
@@ -1107,6 +1216,9 @@ namespace RuniOS.UIElements.IO
 
             bool restore = loadedNode == node;
             loadedNode = node;
+
+            // 다시 채우면 id가 바뀌므로 이전 id로는 되돌아갈 수 없습니다. 되살리는 선택은 되살리는 동안 다시 받아들입니다.
+            acceptedSelectedIds = [];
 
             ScrollView scrollView = treeView.Q<ScrollView>();
             Vector2 scrollOffset = scrollView.scrollOffset;
@@ -1121,9 +1233,19 @@ namespace RuniOS.UIElements.IO
 
                 foreach (IOEntry entry in selectedEntries)
                     restoringSelectedPaths.Add(entry.path);
+
+                suppressSelectionChanged++;
             }
 
-            await loader.Reset(EnumerateEntries(node.path));
+            try
+            {
+                await loader.Reset(EnumerateEntries(node.path));
+            }
+            finally
+            {
+                if (restore)
+                    suppressSelectionChanged--;
+            }
 
             if (!restore)
                 return;
@@ -1166,7 +1288,17 @@ namespace RuniOS.UIElements.IO
                     treeView.ExpandItem(id, refresh: false);
 
                 if (restoringSelectedPaths.Remove(path))
-                    treeView.AddToSelectionById(id);
+                {
+                    suppressSelectionChanged++;
+                    try
+                    {
+                        treeView.AddToSelectionById(id);
+                    }
+                    finally
+                    {
+                        suppressSelectionChanged--;
+                    }
+                }
             }
         }
 

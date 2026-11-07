@@ -1,5 +1,6 @@
 #nullable enable
 using RuniOS.IO;
+using System.Collections.Immutable;
 using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.IO
@@ -29,6 +30,18 @@ namespace RuniOS.UIElements.IO
             }
         } = SelectionType.Multiple;
 
+        /// <summary>
+        /// 어느 탭에서든 선택이 바뀌기 직전에 그 탭과 새 선택을 묻습니다. 구독자가 하나라도 <see langword="false"/>를 반환하면 그 탭의 선택을 되돌립니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.selectionChanging"/>
+        public event Func<IONodeBrowserTab, ImmutableArray<IOEntry>, bool>? selectionChanging;
+
+        /// <summary>
+        /// 어느 탭에서든 선택이 바뀐 뒤에 그 탭과 새 선택을 알립니다.
+        /// </summary>
+        /// <seealso cref="IONodeMultiColumnTreeView.selectionChanged"/>
+        public event Action<IONodeBrowserTab, ImmutableArray<IOEntry>>? selectionChanged;
+
         public IONodeBrowser() : this(IONode.empty) { }
 
         public IONodeBrowser(IIOProvider provider) : this(provider.rootNode) { }
@@ -39,7 +52,16 @@ namespace RuniOS.UIElements.IO
             AddTab(node);
         }
 
-        protected override IOBrowserTab CreateTab() => new IONodeBrowserTab { selectionType = selectionType };
+        protected override IOBrowserTab CreateTab()
+        {
+            IONodeBrowserTab tab = new IONodeBrowserTab { selectionType = selectionType };
+
+            IONodeMultiColumnTreeView tabTreeView = tab.treeView;
+            tabTreeView.selectionChanging += x => selectionChanging?.GetInvocationList().OfType<Func<IONodeBrowserTab, ImmutableArray<IOEntry>, bool>>().All(y => y.Invoke(tab, x)) ?? true;
+            tabTreeView.selectionChanged += x => selectionChanged?.Invoke(tab, x);
+
+            return tab;
+        }
 
         protected override void ToggleShowHiddenFiles() => treeView.showHiddenFiles = !treeView.showHiddenFiles;
 
