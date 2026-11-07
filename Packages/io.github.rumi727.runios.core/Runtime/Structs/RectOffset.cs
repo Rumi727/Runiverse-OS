@@ -38,7 +38,55 @@ namespace RuniOS
             }
         }
 
+        /// <summary>
+        /// Gets the sum of <see cref="left"/> and <see cref="right"/>.<br/>
+        /// <see cref="left"/>와 <see cref="right"/>의 합을 가져옵니다.
+        /// </summary>
+        [JsonIgnore] public readonly float horizontal => left + right;
+
+        /// <summary>
+        /// Gets the sum of <see cref="top"/> and <see cref="bottom"/>.<br/>
+        /// <see cref="top"/>과 <see cref="bottom"/>의 합을 가져옵니다.
+        /// </summary>
+        [JsonIgnore] public readonly float vertical => top + bottom;
+
         [JsonIgnore] public static RectOffset zero => new RectOffset(Vector2.zero, Vector2.zero);
+
+        /// <summary>
+        /// Returns <paramref name="rect"/> grown outward by this offset.<br/>
+        /// 이 오프셋만큼 바깥으로 넓힌 <paramref name="rect"/>를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// Like <see cref="RectTransform"/>, y grows upward, so <see cref="bottom"/> is applied to <see cref="Rect.y"/>. This differs from <see cref="UnityEngine.RectOffset.Add"/>, which applies <see cref="UnityEngine.RectOffset.top"/> to it.<br/>
+        /// <see cref="RectTransform"/>처럼 y가 위로 커지므로 <see cref="bottom"/>을 <see cref="Rect.y"/>에 적용합니다. <see cref="UnityEngine.RectOffset.top"/>을 적용하는 <see cref="UnityEngine.RectOffset.Add"/>와 다릅니다.
+        /// </remarks>
+        /// <param name="rect">
+        /// The rectangle to grow.<br/>
+        /// 넓힐 사각형입니다.
+        /// </param>
+        /// <returns>
+        /// The grown rectangle.<br/>
+        /// 넓힌 사각형을 반환합니다.
+        /// </returns>
+        public readonly Rect Add(Rect rect) => new Rect(rect.x - left, rect.y - bottom, rect.width + horizontal, rect.height + vertical);
+
+        /// <summary>
+        /// Returns <paramref name="rect"/> shrunk inward by this offset.<br/>
+        /// 이 오프셋만큼 안쪽으로 줄인 <paramref name="rect"/>를 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// Like <see cref="RectTransform"/>, y grows upward, so <see cref="bottom"/> is applied to <see cref="Rect.y"/>. This differs from <see cref="UnityEngine.RectOffset.Remove"/>, which applies <see cref="UnityEngine.RectOffset.top"/> to it.<br/>
+        /// <see cref="RectTransform"/>처럼 y가 위로 커지므로 <see cref="bottom"/>을 <see cref="Rect.y"/>에 적용합니다. <see cref="UnityEngine.RectOffset.top"/>을 적용하는 <see cref="UnityEngine.RectOffset.Remove"/>와 다릅니다.
+        /// </remarks>
+        /// <param name="rect">
+        /// The rectangle to shrink.<br/>
+        /// 줄일 사각형입니다.
+        /// </param>
+        /// <returns>
+        /// The shrunk rectangle.<br/>
+        /// 줄인 사각형을 반환합니다.
+        /// </returns>
+        public readonly Rect Remove(Rect rect) => new Rect(rect.x + left, rect.y + bottom, rect.width - horizontal, rect.height - vertical);
 
 
 
