@@ -9,25 +9,6 @@ namespace RuniOS.UIElements.IO
     {
         public new const string ussClassName = "runios-io-node-browser";
 
-        [UxmlAttribute]
-        SerializableNullable<PhysicalPath> targetPath
-        {
-            get
-            {
-                if (node.provider is PhysicalIOProvider provider)
-                    return provider.targetPath;
-
-                return null;
-            }
-            set
-            {
-                if (value == null || targetPath == value)
-                    return;
-
-                activeTab.ResetNode(new PhysicalIOProvider(value.Value).rootNode);
-            }
-        }
-
         /// <summary>
         /// 활성 탭의 트리 뷰입니다.
         /// </summary>
