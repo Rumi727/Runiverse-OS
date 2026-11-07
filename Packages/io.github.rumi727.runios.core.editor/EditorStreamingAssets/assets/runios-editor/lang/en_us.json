@@ -307,5 +307,13 @@
   "undo.collection.remove": "Remove element from {0} of {1}",
   "undo.collection.move": "Move element from {0} of {1}",
   "undo.discard": "Discard changes to {0}",
+  "resource_pack_browser.title": "Resource Pack Browser",
+  "resource_pack_inspector.title": "Resource Pack Inspector",
+  "resource_pack_inspector.debug": "Debug",
+  "resource_pack_inspector.unsaved_changes.message": "There are unapplied changes to the resource pack settings.",
+  "resource_pack_inspector.unsaved_changes.save": "Save",
+  "resource_pack_inspector.unsaved_changes.cancel": "Cancel",
+  "resource_pack_inspector.unsaved_changes.discard": "Discard Changes",
+  "resource_pack_inspector.targets_missing.message": "The edited target no longer exists, so the changes cannot be saved.",
   "pack_inspector.previewing": "Previewing {0} of {1} Objects"
 }

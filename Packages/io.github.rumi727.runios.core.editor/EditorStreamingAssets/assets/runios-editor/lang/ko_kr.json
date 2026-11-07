@@ -306,5 +306,13 @@
   "undo.collection.remove": "{0}의 {1}에서 요소 삭제",
   "undo.collection.move": "{0}의 {1}에서 요소 이동",
   "undo.discard": "{0}의 변경사항 버리기",
+  "resource_pack_browser.title": "리소스팩 브라우저",
+  "resource_pack_inspector.title": "리소스팩 인스펙터",
+  "resource_pack_inspector.debug": "디버그",
+  "resource_pack_inspector.unsaved_changes.message": "적용하지 않은 리소스팩 설정 변경 사항이 있습니다.",
+  "resource_pack_inspector.unsaved_changes.save": "저장",
+  "resource_pack_inspector.unsaved_changes.cancel": "취소",
+  "resource_pack_inspector.unsaved_changes.discard": "변경 사항 버리기",
+  "resource_pack_inspector.targets_missing.message": "편집 중인 대상이 사라져 변경 사항을 저장할 수 없습니다.",
   "pack_inspector.previewing": "{1}개 중 {0}개 미리보는 중"
 }

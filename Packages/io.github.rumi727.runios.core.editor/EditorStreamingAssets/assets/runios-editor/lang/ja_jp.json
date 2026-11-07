@@ -307,5 +307,13 @@
   "undo.collection.remove": "{0}の{1}から要素を削除する",
   "undo.collection.move": "{0}の{1}で要素を移動する",
   "undo.discard": "{0}の変更を破棄する",
+  "resource_pack_browser.title": "リソースパックブラウザー",
+  "resource_pack_inspector.title": "リソースパックインスペクター",
+  "resource_pack_inspector.debug": "デバッグ",
+  "resource_pack_inspector.unsaved_changes.message": "適用されていないリソースパック設定の変更があります。",
+  "resource_pack_inspector.unsaved_changes.save": "保存",
+  "resource_pack_inspector.unsaved_changes.cancel": "キャンセル",
+  "resource_pack_inspector.unsaved_changes.discard": "変更を破棄",
+  "resource_pack_inspector.targets_missing.message": "編集中の対象が存在しないため、変更を保存できません。",
   "pack_inspector.previewing": "{1} 個中 {0} 個をプレビュー中"
 }
