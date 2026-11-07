@@ -11,34 +11,34 @@ namespace RuniOS.Editor.Sounds
         static readonly object resourceMarker = new();
 
         static readonly ConditionalWeakTable<AudioPreview, object> previews = [];
-        static readonly Dictionary<PhysicalPath, WaveAudioClip> loadedClips = [];
+        static readonly Dictionary<IONode, WaveAudioClip> loadedClips = [];
 
-        readonly HashSet<PhysicalPath> requestedAudios = [];
+        readonly HashSet<IONode> requestedAudios = [];
 
-        public static event Action<PhysicalPath>? onLoadedAudio;
+        public static event Action<IONode>? onLoadedAudio;
 
         public bool isDisposed { get; private set; }
 
         // ReSharper disable once MemberCanBeMadeStatic.Global
-        public WaveAudioClip? GetAudio(PhysicalPath path)
+        public WaveAudioClip? GetAudio(IONode node)
         {
             ObjectDisposedException.ThrowIf(isDisposed, this);
 
             previews.AddOrUpdate(this, resourceMarker);
-            if (loadedClips.TryGetValue(path, out WaveAudioClip? clip))
+            if (loadedClips.TryGetValue(node, out WaveAudioClip? clip))
                 return clip;
 
-            if (requestedAudios.Add(path))
-                LoadAudio(path).Forget();
+            if (requestedAudios.Add(node))
+                LoadAudio(node).Forget();
 
             return null;
         }
 
-        public void ReturnAudio(PhysicalPath path)
+        public void ReturnAudio(IONode node)
         {
             ObjectDisposedException.ThrowIf(isDisposed, this);
 
-            requestedAudios.Remove(path);
+            requestedAudios.Remove(node);
             GarbageCleanup();
         }
 
@@ -65,12 +65,12 @@ namespace RuniOS.Editor.Sounds
             EditorThreadDispatcher.ExecuteForget(GarbageCleanup);
         }
 
-        static async UniTaskVoid LoadAudio(PhysicalPath path)
+        static async UniTaskVoid LoadAudio(IONode node)
         {
             WaveAudioClip? clip = null;
             try
             {
-                clip = await SoundSystem.main.CreateSoundAsync(path);
+                clip = await SoundSystem.main.CreateSoundAsync(node);
             }
             catch (Exception e)
             {
@@ -80,15 +80,15 @@ namespace RuniOS.Editor.Sounds
             if (clip == null)
                 return;
 
-            loadedClips.TryAdd(path, clip);
-            onLoadedAudio?.Invoke(path);
+            loadedClips.TryAdd(node, clip);
+            onLoadedAudio?.Invoke(node);
 
             GarbageCleanup();
         }
 
         static void GarbageCleanup()
         {
-            List<PhysicalPath> removeList = [];
+            List<IONode> removeList = [];
 
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
             foreach (var loadedClip in loadedClips)

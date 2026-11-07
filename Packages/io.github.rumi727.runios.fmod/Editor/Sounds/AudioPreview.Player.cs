@@ -9,8 +9,8 @@ namespace RuniOS.Editor.Sounds
     {
         static readonly ConditionalWeakTable<Player, object> globalPlayers = new ConditionalWeakTable<Player, object>();
 
-        public IReadOnlyDictionary<PhysicalPath, Player> players => _players;
-        readonly Dictionary<PhysicalPath, Player> _players = [];
+        public IReadOnlyDictionary<IONode, Player> players => _players;
+        readonly Dictionary<IONode, Player> _players = [];
 
         public static float globalVolume
         {
@@ -36,27 +36,27 @@ namespace RuniOS.Editor.Sounds
 
         public static bool autoPlay { get; set; }
 
-        public Player GetOrCreatePlayer(PhysicalPath path)
+        public Player GetOrCreatePlayer(IONode node)
         {
             ObjectDisposedException.ThrowIf(isDisposed, this);
 
-            if (!players.TryGetValue(path, out var player))
-                player = new Player(this, path);
+            if (!players.TryGetValue(node, out var player))
+                player = new Player(this, node);
 
             return player;
         }
 
         public sealed class Player : IPlayControl, IStoppable, ISeekable
         {
-            internal Player(AudioPreview preview, PhysicalPath path)
+            internal Player(AudioPreview preview, IONode node)
             {
                 this.preview = preview;
-                this.path = path;
+                this.node = node;
 
-                WaveAudioClip? clip = preview.GetAudio(path);
-                preview._players.Add(path, this);
+                WaveAudioClip? clip = preview.GetAudio(node);
+                preview._players.Add(node, this);
 
-                globalPlayers.Add(this, path);
+                globalPlayers.Add(this, node);
 
                 if (!autoPlay)
                     return;
@@ -67,9 +67,9 @@ namespace RuniOS.Editor.Sounds
                 {
                     onLoadedAudio += OnLoadedAudio;
 
-                    void OnLoadedAudio(PhysicalPath path)
+                    void OnLoadedAudio(IONode node)
                     {
-                        if (this.path != path || isPlaying)
+                        if (this.node != node || isPlaying)
                             return;
 
                         Play();
@@ -79,7 +79,7 @@ namespace RuniOS.Editor.Sounds
             }
 
             readonly AudioPreview preview;
-            readonly PhysicalPath path;
+            readonly IONode node;
 
             SoundChannel? channel;
 
@@ -90,7 +90,7 @@ namespace RuniOS.Editor.Sounds
                     if (preview.isDisposed)
                         return null;
 
-                    return preview.GetAudio(path);
+                    return preview.GetAudio(node);
                 }
             }
 
