@@ -16,7 +16,7 @@ namespace RuniOS.IO
         /// Initializes a new <see cref="GroupIOProvider"/> instance from the specified providers.<br/>
         /// 지정된 프로바이더들로 새 <see cref="GroupIOProvider"/> 인스턴스를 초기화합니다.
         /// </summary>
-        public GroupIOProvider(params IIOProvider[] providers) : this(providers, false) { }
+        public GroupIOProvider(params IEnumerable<IIOProvider> providers) : this(providers, false) { }
 
         /// <summary>
         /// Initializes a new <see cref="GroupIOProvider"/> instance from the specified providers.<br/>
