@@ -1,7 +1,5 @@
 #nullable enable
-using RuniOS.IO;
 using RuniOS.Resource;
-using System.IO;
 using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Editor
@@ -10,20 +8,8 @@ namespace RuniOS.Editor
     {
         public static ResourcePack? pack { get; private set; }
 
-        public const string streamingAssetsFolderName = "EditorStreamingAssets";
-
         [OnAssemblyLoaded]
-        static void OnAssemblyLoaded()
-        {
-            var packages = UnityEditor.PackageManager.PackageInfo.GetAllRegisteredPackages()
-                .Select(x => new PhysicalIOProvider((PhysicalPath)x.resolvedPath / streamingAssetsFolderName, SandboxPolicy.Unrestricted))
-                .OfType<IIOProvider>();
-
-            IIOProvider[] providers = [new PhysicalIOProvider((PhysicalPath)Directory.GetCurrentDirectory() / "Assets" / streamingAssetsFolderName, SandboxPolicy.Unrestricted), .. packages];
-            GroupIOProvider provider = new GroupIOProvider(providers);
-
-            pack = ResourcePack.Create("runios:editor", provider, RequiredPackSort.BeforeVanilla);
-        }
+        static void OnAssemblyLoaded() => pack = ResourcePack.Create("runios:editor", EditorStreamingAssetsService.editorProvider, RequiredPackSort.BeforeVanilla);
 
         [OnAssemblyUnloading]
         static void OnAssemblyUnloading() => pack?.Dispose();
