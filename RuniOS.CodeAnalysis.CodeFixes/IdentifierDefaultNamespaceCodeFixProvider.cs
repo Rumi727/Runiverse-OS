@@ -8,7 +8,7 @@ using System.Composition;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace RuniOS.CodeAnalysis.Analyzers;
+namespace RuniOS.CodeAnalysis.CodeFixes;
 
 /// <summary>
 /// Adds the explicit <c>runios:</c> namespace to identifier string literals that resolve to the default namespace.<br/>

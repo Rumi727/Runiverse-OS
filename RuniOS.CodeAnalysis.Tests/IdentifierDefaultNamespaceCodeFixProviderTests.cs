@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 using RuniOS.CodeAnalysis.Analyzers;
+using RuniOS.CodeAnalysis.CodeFixes;
 using System.Collections.Immutable;
 
 namespace RuniOS.CodeAnalysis.Tests;
@@ -130,7 +131,7 @@ public sealed class IdentifierDefaultNamespaceCodeFixProviderTests
                 new FixedDiagnosticProvider(diagnostics),
                 CancellationToken.None
             );
-            action = provider.GetFixAllProvider()!.GetFixAsync(context).GetAwaiter().GetResult()!;
+            action = provider.GetFixAllProvider().GetFixAsync(context).GetAwaiter().GetResult()!;
         }
 
         Solution solution = action.GetOperationsAsync(CancellationToken.None).GetAwaiter().GetResult()

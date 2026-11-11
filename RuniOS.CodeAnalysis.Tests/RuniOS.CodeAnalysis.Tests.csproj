@@ -20,6 +20,7 @@
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <ProjectReference Include="../RuniOS.CodeAnalysis/RuniOS.CodeAnalysis.csproj" />
+        <ProjectReference Include="../RuniOS.CodeAnalysis.CodeFixes/RuniOS.CodeAnalysis.CodeFixes.csproj" />
     </ItemGroup>
 
 </Project>
