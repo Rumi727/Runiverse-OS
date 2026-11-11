@@ -45,7 +45,7 @@ public sealed class MilestoneMethodAnalyzerTests
     }
 
     [Fact]
-    public void EveryMilestoneDiagnosticIsLocatedOnTheAttribute()
+    public async Task EveryMilestoneDiagnosticIsLocatedOnTheAttribute()
     {
         CSharpCompilation compilation = CreateCompilation
         ("""
@@ -55,8 +55,8 @@ public sealed class MilestoneMethodAnalyzerTests
         }
         """);
         DiagnosticAnalyzer analyzer = new MilestoneMethodAnalyzer();
-        ImmutableArray<Diagnostic> diagnostics = compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
-            .GetAnalyzerDiagnosticsAsync().GetAwaiter().GetResult();
+        ImmutableArray<Diagnostic> diagnostics = await compilation.WithAnalyzers(ImmutableArray.Create(analyzer))
+            .GetAnalyzerDiagnosticsAsync();
         SyntaxTree syntaxTree = compilation.SyntaxTrees.Single();
         TextSpan attributeSpan = syntaxTree.GetRoot().DescendantNodes().OfType<AttributeSyntax>().Single(static attribute => attribute.Name.ToString() == "OnResourcesReady").GetLocation().SourceSpan;
 
@@ -86,7 +86,7 @@ public sealed class MilestoneMethodAnalyzerTests
     }
 
     [Fact]
-    public void ContainingTypeDiagnosticIsReportedAsSemanticDocumentDiagnostic()
+    public async Task ContainingTypeDiagnosticIsReportedAsSemanticDocumentDiagnostic()
     {
         CSharpCompilation compilation = CreateCompilation
         ("""
@@ -100,10 +100,10 @@ public sealed class MilestoneMethodAnalyzerTests
         SyntaxTree syntaxTree = compilation.SyntaxTrees.Single();
         SemanticModel semanticModel = compilation.GetSemanticModel(syntaxTree);
 
-        AnalysisResult result = withAnalyzers.GetAnalysisResultAsync(semanticModel, null, default).GetAwaiter().GetResult();
+        AnalysisResult result = await withAnalyzers.GetAnalysisResultAsync(semanticModel, null, default);
 
         Assert.True(result.SemanticDiagnostics.TryGetValue(syntaxTree, out var diagnosticsByAnalyzer));
-        Assert.True(diagnosticsByAnalyzer!.TryGetValue(analyzer, out ImmutableArray<Diagnostic> semanticDiagnostics));
+        Assert.True(diagnosticsByAnalyzer.TryGetValue(analyzer, out ImmutableArray<Diagnostic> semanticDiagnostics));
         Assert.Contains(semanticDiagnostics, static diagnostic => diagnostic.Id == "ROS0032");
         Assert.False
         (
