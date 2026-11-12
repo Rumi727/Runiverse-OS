@@ -10,14 +10,6 @@
     -unity-text-align: middle-right;
 }
 
-.runios-io-browser .unity-multi-column-view__header-container {
-    flex-shrink: 0;
-}
-
-.runios-io-browser .unity-multi-column-view__cell {
-    justify-content: flex-start;
-}
-
 .runios-io-browser .runios-io-browser__path-field,
 .runios-io-browser .runios-io-browser__breadcrumb-bar {
     flex-shrink: 1;
