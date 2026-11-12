@@ -108,6 +108,11 @@ namespace RuniOS.Editor.Sounds
                     Debug.LogException(e);
                 }
             }
+            else
+            {
+                // 불러오는 동안 선택이 바뀌면 새 미리보기가 같은 노드를 다시 불러오므로, 늦게 끝난 쪽은 버리기 전에 해제합니다.
+                clip.Dispose();
+            }
 
             onLoadedAudio?.Invoke(node);
 
