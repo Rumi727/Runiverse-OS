@@ -59,6 +59,8 @@ namespace RuniOS.Sounds
          * - 채널을 바깥 루프에 두어 쓰기를 연속으로 만듭니다. 채널마다 같은 원본 구간을 다시 읽지만 구간이 작아 캐시에서 읽힙니다.
          * - 스테레오는 읽기 간격이 상수 2가 되도록 따로 처리합니다. 간격이 상수여야 연속으로 읽은 뒤 셔플로 나누는 벡터 코드가 나오며,
          *   런타임 간격(channelCount)으로는 벡터화되지 않습니다. 대부분의 클립이 스테레오이므로 이 경로 하나만 둡니다.
+         *   이 경로는 인덱스를 곱하지 않고 포인터를 전진시킵니다. 32비트 곱(i * 2)은 넘칠 수 있어 Burst가 연속 접근임을 증명하지 못하고
+         *   레인마다 따로 읽는 코드를 만들지만, 64비트 포인터 증가는 그런 문제가 없습니다.
          */
         const int planarChunkSize = 16384;
 
@@ -77,10 +79,11 @@ namespace RuniOS.Sounds
 
                 if (channelCount == 2)
                 {
-                    for (int i = start; i < end; i++)
+                    byte* frame = source + ((long)start * 2);
+                    for (int i = start; i < end; i++, frame += 2)
                     {
-                        output[i] = Convert(source[i * 2]);
-                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                        output[i] = Convert(frame[0]);
+                        output[sampleCount + i] = Convert(frame[1]);
                     }
 
                     return;
@@ -112,10 +115,11 @@ namespace RuniOS.Sounds
 
                 if (channelCount == 2)
                 {
-                    for (int i = start; i < end; i++)
+                    short* frame = source + ((long)start * 2);
+                    for (int i = start; i < end; i++, frame += 2)
                     {
-                        output[i] = source[i * 2];
-                        output[sampleCount + i] = source[(i * 2) + 1];
+                        output[i] = frame[0];
+                        output[sampleCount + i] = frame[1];
                     }
 
                     return;
@@ -145,10 +149,11 @@ namespace RuniOS.Sounds
 
                 if (channelCount == 2)
                 {
-                    for (int i = start; i < end; i++)
+                    byte* frame = source + ((long)start * 2 * 3);
+                    for (int i = start; i < end; i++, frame += 2 * 3)
                     {
-                        output[i] = Convert(source + (i * 2 * 3));
-                        output[sampleCount + i] = Convert(source + (((i * 2) + 1) * 3));
+                        output[i] = Convert(frame);
+                        output[sampleCount + i] = Convert(frame + 3);
                     }
 
                     return;
@@ -181,10 +186,11 @@ namespace RuniOS.Sounds
 
                 if (channelCount == 2)
                 {
-                    for (int i = start; i < end; i++)
+                    int* frame = source + ((long)start * 2);
+                    for (int i = start; i < end; i++, frame += 2)
                     {
-                        output[i] = Convert(source[i * 2]);
-                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                        output[i] = Convert(frame[0]);
+                        output[sampleCount + i] = Convert(frame[1]);
                     }
 
                     return;
@@ -216,10 +222,11 @@ namespace RuniOS.Sounds
 
                 if (channelCount == 2)
                 {
-                    for (int i = start; i < end; i++)
+                    float* frame = source + ((long)start * 2);
+                    for (int i = start; i < end; i++, frame += 2)
                     {
-                        output[i] = Convert(source[i * 2]);
-                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                        output[i] = Convert(frame[0]);
+                        output[sampleCount + i] = Convert(frame[1]);
                     }
 
                     return;
