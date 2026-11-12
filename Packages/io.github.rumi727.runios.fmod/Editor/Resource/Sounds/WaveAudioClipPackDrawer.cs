@@ -5,7 +5,6 @@ using RuniOS.IO;
 using RuniOS.Sounds;
 using System.Collections.Immutable;
 using System.Globalization;
-using Unity.Collections;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
@@ -70,7 +69,7 @@ namespace RuniOS.Editor.Resource.Sounds
                 int width = Max(1, (int)r.width);
                 int height = Max(1, (int)r.height);
 
-                if ((texture == null || texture.width != width || texture.height != height || !texture.IsCreated()) && preview.TryGetPlanarSamples(node, out NativeArray<float> samples))
+                if ((texture == null || texture.width != width || texture.height != height || !texture.IsCreated()) && preview.TryGetWaveform(node, out Waveform? waveform))
                 {
                     if (texture == null || texture.width != width || texture.height != height)
                     {
@@ -83,7 +82,7 @@ namespace RuniOS.Editor.Resource.Sounds
 
                     // 어셈블리 로드 중 호출되는 OnEnable에서는 네이티브 오브젝트를 만들 수 없으므로 처음 그릴 때 만듭니다.
                     waveformRenderer ??= new WaveformRenderer();
-                    waveformRenderer.Render(samples, clip.channel, texture, Color.darkOrange);
+                    waveformRenderer.Render(waveform, 0, waveform.sampleCount - 1, texture, Color.darkOrange);
                 }
             }
 

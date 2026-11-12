@@ -2,6 +2,7 @@
 using Cysharp.Threading.Tasks;
 using RuniOS.IO;
 using RuniOS.Sounds;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Unity.Collections;
 
@@ -13,7 +14,7 @@ namespace RuniOS.Editor.Sounds
 
         static readonly ConditionalWeakTable<AudioPreview, object> previews = [];
         static readonly Dictionary<IONode, WaveAudioClip> loadedClips = [];
-        static readonly Dictionary<IONode, NativeArray<float>> loadedPlanarSamples = [];
+        static readonly Dictionary<IONode, Waveform> loadedWaveforms = [];
 
         readonly HashSet<IONode> requestedAudios = [];
 
@@ -37,17 +38,17 @@ namespace RuniOS.Editor.Sounds
         }
 
         /// <summary>
-        /// Gets the planar samples of the audio loaded by <see cref="GetAudio"/>.<br/>
-        /// <see cref="GetAudio"/>로 불러온 오디오의 planar 샘플을 가져옵니다.
+        /// Gets the waveform of the audio loaded by <see cref="GetAudio"/>.<br/>
+        /// <see cref="GetAudio"/>로 불러온 오디오의 파형을 가져옵니다.
         /// </summary>
         /// <remarks>
-        /// The samples are owned by <see cref="AudioPreview"/> and are disposed together with the audio.<br/>
-        /// 샘플은 <see cref="AudioPreview"/>가 소유하며 오디오와 함께 해제됩니다.
+        /// The waveform is owned by <see cref="AudioPreview"/> and is disposed together with the audio.<br/>
+        /// 파형은 <see cref="AudioPreview"/>가 소유하며 오디오와 함께 해제됩니다.
         /// </remarks>
-        public bool TryGetPlanarSamples(IONode node, out NativeArray<float> samples)
+        public bool TryGetWaveform(IONode node, [NotNullWhen(true)] out Waveform? waveform)
         {
             ObjectDisposedException.ThrowIf(isDisposed, this);
-            return loadedPlanarSamples.TryGetValue(node, out samples);
+            return loadedWaveforms.TryGetValue(node, out waveform);
         }
 
         public void ReturnAudio(IONode node)
@@ -100,7 +101,7 @@ namespace RuniOS.Editor.Sounds
             {
                 try
                 {
-                    loadedPlanarSamples.Add(node, clip.CreatePlanarSamples(Allocator.Persistent));
+                    loadedWaveforms.Add(node, new Waveform(clip.CreatePlanarSamples(Allocator.Persistent), clip.channel));
                 }
                 catch (Exception e)
                 {
@@ -124,8 +125,8 @@ namespace RuniOS.Editor.Sounds
                     continue;
 
                 loadedClip.Value.Dispose();
-                if (loadedPlanarSamples.Remove(loadedClip.Key, out NativeArray<float> samples))
-                    samples.Dispose();
+                if (loadedWaveforms.Remove(loadedClip.Key, out Waveform? waveform))
+                    waveform.Dispose();
 
                 removeList.Add(loadedClip.Key);
             }

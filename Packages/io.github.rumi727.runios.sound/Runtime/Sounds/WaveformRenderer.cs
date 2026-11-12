@@ -1,13 +1,12 @@
 #nullable enable
-using Unity.Collections;
 using Unity.Mathematics;
 using Unity.Scripting.LifecycleManagement;
 
 namespace RuniOS.Sounds
 {
     /// <summary>
-    /// Renders waveforms of planar samples into render textures on the GPU.<br/>
-    /// planar 샘플의 파형을 GPU로 렌더 텍스처에 렌더링합니다.
+    /// Renders waveforms into render textures on the GPU.<br/>
+    /// 파형을 GPU로 렌더 텍스처에 렌더링합니다.
     /// </summary>
     /// <remarks>
     /// Must be created, used, and disposed on the main thread.<br/>
@@ -43,16 +42,17 @@ namespace RuniOS.Sounds
         Texture2D? minMaxTexture;
 
         /// <summary>
-        /// Renders the waveform of <paramref name="planarSamples"/> into <paramref name="target"/>, one column per pixel and one lane per channel.<br/>
-        /// <paramref name="planarSamples"/>의 파형을 픽셀당 한 열, 채널당 한 레인으로 <paramref name="target"/>에 렌더링합니다.
+        /// Renders the range from <paramref name="startSample"/> to <paramref name="endSample"/> of <paramref name="waveform"/> into <paramref name="target"/>, one column per pixel and one lane per channel.<br/>
+        /// <paramref name="waveform"/>의 <paramref name="startSample"/>부터 <paramref name="endSample"/>까지의 구간을 픽셀당 한 열, 채널당 한 레인으로 <paramref name="target"/>에 렌더링합니다.
         /// </summary>
-        /// <param name="planarSamples">
-        /// Samples laid out per channel as <c>[channel * sampleCount + sample]</c>.<br/>
-        /// <c>[channel * sampleCount + sample]</c>로 채널별 배치된 샘플입니다.
-        /// </param>
-        public void Render(NativeArray<float> planarSamples, int channelCount, RenderTexture target, Color color)
+        /// <remarks>
+        /// The range follows the contract of <see cref="Waveform.ScheduleMinMax"/>.<br/>
+        /// 구간은 <see cref="Waveform.ScheduleMinMax"/>의 계약을 따릅니다.
+        /// </remarks>
+        public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color)
         {
             int width = target.width;
+            int channelCount = waveform.channelCount;
             if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != channelCount)
             {
                 if (minMaxTexture != null)
@@ -66,7 +66,7 @@ namespace RuniOS.Sounds
                 };
             }
 
-            Waveform.ScheduleMinMax(planarSamples, channelCount, width, minMaxTexture.GetPixelData<float2>(0)).Complete();
+            waveform.ScheduleMinMax(startSample, endSample, width, minMaxTexture.GetPixelData<float2>(0)).Complete();
             minMaxTexture.Apply(false);
 
             material.SetColor(colorID, color);
