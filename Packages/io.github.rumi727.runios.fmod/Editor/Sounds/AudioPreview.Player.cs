@@ -96,13 +96,29 @@ namespace RuniOS.Editor.Sounds
 
             public bool isPlaying => channel != null;
 
+            // FMOD는 재생 위치를 DSP 버퍼 단위(예: 1024샘플, 48kHz에서 약 21ms)로만 갱신하므로,
+            // 그 사이에는 위치가 바뀐 것을 처음 본 시각부터 흐른 실제 시간을 더해 미리보기가 계단식으로 움직이지 않게 합니다.
+            double lastChannelTime = double.NaN;
+            double lastChannelTimeChangedAt;
+
             public double time
             {
                 get
                 {
                     try
                     {
-                        return channel?.time ?? 0;
+                        if (channel == null)
+                            return 0;
+
+                        double channelTime = channel.time;
+                        double now = EditorApplication.timeSinceStartup;
+                        if (channelTime != lastChannelTime)
+                        {
+                            lastChannelTime = channelTime;
+                            lastChannelTimeChangedAt = now;
+                        }
+
+                        return Math.Min(channelTime + (now - lastChannelTimeChangedAt), length);
                     }
                     catch (ObjectDisposedException)
                     {
@@ -111,6 +127,9 @@ namespace RuniOS.Editor.Sounds
                 }
                 set
                 {
+                    // 탐색한 위치가 마지막으로 본 위치와 같아도 이전 기준 시각이 이어지지 않도록 기준을 버립니다.
+                    lastChannelTime = double.NaN;
+
                     try
                     {
                         if (channel != null)
@@ -157,6 +176,8 @@ namespace RuniOS.Editor.Sounds
                 {
                     if (!SoundSystem.main.Execute(system => system.PlaySound(clip, true), out channel) || channel == null)
                         return;
+
+                    lastChannelTime = double.NaN;
 
                     channel.volume = volume;
                     channel.loop = loop;
