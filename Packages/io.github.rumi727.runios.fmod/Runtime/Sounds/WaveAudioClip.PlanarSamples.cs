@@ -27,14 +27,14 @@ namespace RuniOS.Sounds
                 {
                     fixed (byte* pointer = source)
                     {
-                        const int batchCount = 4096;
+                        int chunkCount = (sampleCount + planarChunkSize - 1) / planarChunkSize;
                         JobHandle handle = pcmFormat!.Value switch
                         {
-                            PCMFormat.PCM8 => new PCM8PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(sampleCount, batchCount),
-                            PCMFormat.PCM16 => new PCM16PlanarJob { source = (short*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(sampleCount, batchCount),
-                            PCMFormat.PCM24 => new PCM24PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(sampleCount, batchCount),
-                            PCMFormat.PCM32 => new PCM32PlanarJob { source = (int*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(sampleCount, batchCount),
-                            PCMFormat.Float => new FloatPlanarJob { source = (float*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(sampleCount, batchCount),
+                            PCMFormat.PCM8 => new PCM8PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
+                            PCMFormat.PCM16 => new PCM16PlanarJob { source = (short*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
+                            PCMFormat.PCM24 => new PCM24PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
+                            PCMFormat.PCM32 => new PCM32PlanarJob { source = (int*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
+                            PCMFormat.Float => new FloatPlanarJob { source = (float*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             _ => throw new InvalidOperationException($"FMOD returned unsupported sample format {pcmFormat}.")
                         };
 
@@ -52,6 +52,16 @@ namespace RuniOS.Sounds
             return output;
         }
 
+        /*
+         * 인터리브(L R L R ...)를 planar(L L ... R R ...)로 바꾸는 것은 전치이므로 읽기와 쓰기 중 한쪽은 반드시 간격이 생깁니다.
+         * 모든 포맷의 잡은 다음 구조를 공유합니다.
+         * - Execute 하나가 샘플 구간 하나를 맡습니다. 샘플 루프가 잡 디스패처가 아닌 잡 코드 안에 있어야 Burst가 그 루프를 벡터화할 수 있습니다.
+         * - 채널을 바깥 루프에 두어 쓰기를 연속으로 만듭니다. 채널마다 같은 원본 구간을 다시 읽지만 구간이 작아 캐시에서 읽힙니다.
+         * - 스테레오는 읽기 간격이 상수 2가 되도록 따로 처리합니다. 간격이 상수여야 연속으로 읽은 뒤 셔플로 나누는 벡터 코드가 나오며,
+         *   런타임 간격(channelCount)으로는 벡터화되지 않습니다. 대부분의 클립이 스테레오이므로 이 경로 하나만 둡니다.
+         */
+        const int planarChunkSize = 16384;
+
         [BurstCompile]
         unsafe struct PCM8PlanarJob : IJobParallelFor
         {
@@ -60,12 +70,31 @@ namespace RuniOS.Sounds
             public int sampleCount;
             public int channelCount;
 
-            public void Execute(int sample)
+            public void Execute(int chunk)
             {
-                byte* frame = source + (sample * channelCount);
+                int start = chunk * planarChunkSize;
+                int end = Math.Min(start + planarChunkSize, sampleCount);
+
+                if (channelCount == 2)
+                {
+                    for (int i = start; i < end; i++)
+                    {
+                        output[i] = Convert(source[i * 2]);
+                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                    }
+
+                    return;
+                }
+
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = (short)(unchecked((sbyte)frame[channel]) << 8);
+                {
+                    int offset = channel * sampleCount;
+                    for (int i = start; i < end; i++)
+                        output[offset + i] = Convert(source[(i * channelCount) + channel]);
+                }
             }
+
+            static short Convert(byte value) => (short)(unchecked((sbyte)value) << 8);
         }
 
         [BurstCompile]
@@ -76,11 +105,28 @@ namespace RuniOS.Sounds
             public int sampleCount;
             public int channelCount;
 
-            public void Execute(int sample)
+            public void Execute(int chunk)
             {
-                short* frame = source + (sample * channelCount);
+                int start = chunk * planarChunkSize;
+                int end = Math.Min(start + planarChunkSize, sampleCount);
+
+                if (channelCount == 2)
+                {
+                    for (int i = start; i < end; i++)
+                    {
+                        output[i] = source[i * 2];
+                        output[sampleCount + i] = source[(i * 2) + 1];
+                    }
+
+                    return;
+                }
+
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = frame[channel];
+                {
+                    int offset = channel * sampleCount;
+                    for (int i = start; i < end; i++)
+                        output[offset + i] = source[(i * channelCount) + channel];
+                }
             }
         }
 
@@ -92,16 +138,32 @@ namespace RuniOS.Sounds
             public int sampleCount;
             public int channelCount;
 
-            public void Execute(int sample)
+            public void Execute(int chunk)
             {
-                byte* frame = source + (sample * channelCount * 3);
+                int start = chunk * planarChunkSize;
+                int end = Math.Min(start + planarChunkSize, sampleCount);
+
+                if (channelCount == 2)
+                {
+                    for (int i = start; i < end; i++)
+                    {
+                        output[i] = Convert(source + (i * 2 * 3));
+                        output[sampleCount + i] = Convert(source + (((i * 2) + 1) * 3));
+                    }
+
+                    return;
+                }
+
                 for (int channel = 0; channel < channelCount; channel++)
                 {
-                    // 리틀 엔디언 24비트 샘플의 상위 2바이트만 사용합니다.
-                    byte* bytes = frame + (channel * 3);
-                    output[(channel * sampleCount) + sample] = (short)(bytes[1] | (bytes[2] << 8));
+                    int offset = channel * sampleCount;
+                    for (int i = start; i < end; i++)
+                        output[offset + i] = Convert(source + (((i * channelCount) + channel) * 3));
                 }
             }
+
+            // 리틀 엔디언 24비트 샘플의 상위 2바이트만 사용합니다.
+            static short Convert(byte* bytes) => (short)(bytes[1] | (bytes[2] << 8));
         }
 
         [BurstCompile]
@@ -112,12 +174,31 @@ namespace RuniOS.Sounds
             public int sampleCount;
             public int channelCount;
 
-            public void Execute(int sample)
+            public void Execute(int chunk)
             {
-                int* frame = source + (sample * channelCount);
+                int start = chunk * planarChunkSize;
+                int end = Math.Min(start + planarChunkSize, sampleCount);
+
+                if (channelCount == 2)
+                {
+                    for (int i = start; i < end; i++)
+                    {
+                        output[i] = Convert(source[i * 2]);
+                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                    }
+
+                    return;
+                }
+
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = (short)(frame[channel] >> 16);
+                {
+                    int offset = channel * sampleCount;
+                    for (int i = start; i < end; i++)
+                        output[offset + i] = Convert(source[(i * channelCount) + channel]);
+                }
             }
+
+            static short Convert(int value) => (short)(value >> 16);
         }
 
         [BurstCompile]
@@ -128,15 +209,35 @@ namespace RuniOS.Sounds
             public int sampleCount;
             public int channelCount;
 
-            public void Execute(int sample)
+            public void Execute(int chunk)
             {
-                float* frame = source + (sample * channelCount);
+                int start = chunk * planarChunkSize;
+                int end = Math.Min(start + planarChunkSize, sampleCount);
+
+                if (channelCount == 2)
+                {
+                    for (int i = start; i < end; i++)
+                    {
+                        output[i] = Convert(source[i * 2]);
+                        output[sampleCount + i] = Convert(source[(i * 2) + 1]);
+                    }
+
+                    return;
+                }
+
                 for (int channel = 0; channel < channelCount; channel++)
                 {
-                    // float 샘플은 ±1을 넘을 수 있으므로 short로 변환하기 전에 범위를 제한합니다.
-                    float value = frame[channel] * 32768f;
-                    output[(channel * sampleCount) + sample] = (short)(value >= short.MaxValue ? short.MaxValue : value <= short.MinValue ? short.MinValue : value);
+                    int offset = channel * sampleCount;
+                    for (int i = start; i < end; i++)
+                        output[offset + i] = Convert(source[(i * channelCount) + channel]);
                 }
+            }
+
+            // float 샘플은 ±1을 넘을 수 있으므로 short로 변환하기 전에 범위를 제한합니다.
+            static short Convert(float value)
+            {
+                value *= 32768f;
+                return (short)(value >= short.MaxValue ? short.MaxValue : value <= short.MinValue ? short.MinValue : value);
             }
         }
     }
