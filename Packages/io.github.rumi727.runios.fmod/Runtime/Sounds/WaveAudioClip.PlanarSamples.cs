@@ -39,8 +39,10 @@ namespace RuniOS.Sounds
                         _ => throw new InvalidOperationException($"FMOD returned unsupported sample format {pcmFormat}.")
                     };
 
+                    // ReSharper disable AccessToDisposedClosure
                     if (source.Length < (long)output.Length * bytesPerSample)
                         throw new InvalidOperationException($"FMOD returned {source.Length} bytes, but {(long)output.Length * bytesPerSample} bytes are required.");
+                    // ReSharper restore AccessToDisposedClosure
 
                     fixed (byte* pointer = source)
                     {
