@@ -1,4 +1,5 @@
 #nullable enable
+using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Scripting.LifecycleManagement;
 
@@ -16,6 +17,9 @@ namespace RuniOS.Sounds
     {
         static readonly int colorID = Shader.PropertyToID("_Color");
         static readonly int targetHeightID = Shader.PropertyToID("_TargetHeight");
+        static readonly int thicknessID = Shader.PropertyToID("_Thickness");
+        static readonly int antialiasingID = Shader.PropertyToID("_Antialiasing");
+        static readonly int boundaryTexID = Shader.PropertyToID("_BoundaryTex");
 
         // Blit은 호출 시점의 프로퍼티로 즉시 그리므로 모든 렌더러가 하나의 머티리얼을 공유합니다.
         static Material material
@@ -40,6 +44,10 @@ namespace RuniOS.Sounds
         }
 
         Texture2D? minMaxTexture;
+
+        // 열 경계마다의 파형 값입니다. 셰이더가 열 안의 파형을 꺾은선으로 복원하는 데 씁니다.
+        Texture2D? boundaryTexture;
+
         bool isDisposed;
 
         /// <summary>
@@ -50,9 +58,17 @@ namespace RuniOS.Sounds
         /// The range follows the contract of <see cref="Waveform.ScheduleMinMax"/>.<br/>
         /// 구간은 <see cref="Waveform.ScheduleMinMax"/>의 계약을 따릅니다.
         /// </remarks>
+        /// <param name="thickness">
+        /// Line thickness in pixels, measured perpendicular to the line regardless of its slope.<br/>
+        /// 기울기와 상관없이 선에 수직인 방향으로 잰 선 굵기(픽셀)입니다.
+        /// </param>
+        /// <param name="antialiasing">
+        /// Width in pixels over which the line's edges fade out. <c>0</c> draws hard edges.<br/>
+        /// 선 가장자리가 흐려지는 폭(픽셀)입니다. <c>0</c>이면 가장자리를 딱 끊어 그립니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">This renderer has been disposed.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="waveform"/> or <paramref name="target"/> is <see langword="null"/>.</exception>
-        public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color)
+        public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color, float thickness = 1, float antialiasing = 1)
         {
             // 해제 후 호출되면 다시 만든 텍스처를 해제할 곳이 없어 누수되므로 거부합니다.
             ObjectDisposedException.ThrowIf(isDisposed, this);
@@ -76,11 +92,43 @@ namespace RuniOS.Sounds
                 };
             }
 
-            waveform.ScheduleMinMax(startSample, endSample, width, minMaxTexture.GetPixelData<float2>(0)).Complete();
+            if (boundaryTexture == null || boundaryTexture.width != width + 1 || boundaryTexture.height != channelCount)
+            {
+                if (boundaryTexture != null)
+                    Object.DestroyImmediate(boundaryTexture);
+
+                boundaryTexture = new Texture2D(width + 1, channelCount, TextureFormat.RFloat, false, true)
+                {
+                    filterMode = FilterMode.Point,
+                    wrapMode = TextureWrapMode.Clamp,
+                    hideFlags = HideFlags.HideAndDontSave
+                };
+            }
+
+            // 두 잡은 원본을 읽기만 하므로 서로 기다리지 않고 함께 돌립니다.
+            JobHandle minMaxHandle = waveform.ScheduleMinMax(startSample, endSample, width, minMaxTexture.GetPixelData<float2>(0));
+            JobHandle boundaryHandle;
+            try
+            {
+                boundaryHandle = waveform.ScheduleResample(startSample, endSample, width + 1, boundaryTexture.GetPixelData<float>(0));
+            }
+            catch
+            {
+                // 이미 스케줄된 잡이 텍스처 메모리에 쓰는 중이므로, 텍스처가 다시 만들어지거나 해제되기 전에 끝냅니다.
+                minMaxHandle.Complete();
+                throw;
+            }
+
+            JobHandle.CombineDependencies(minMaxHandle, boundaryHandle).Complete();
+
             minMaxTexture.Apply(false);
+            boundaryTexture.Apply(false);
 
             material.SetColor(colorID, color);
             material.SetFloat(targetHeightID, target.height);
+            material.SetFloat(thicknessID, thickness);
+            material.SetFloat(antialiasingID, antialiasing);
+            material.SetTexture(boundaryTexID, boundaryTexture);
 
             // Blit은 활성 렌더 타겟을 바꾸고, IMGUI는 sRGB 쓰기를 끈 채 그리므로 호출자의 상태를 되돌립니다.
             RenderTexture previous = RenderTexture.active;
@@ -99,6 +147,11 @@ namespace RuniOS.Sounds
                 Object.DestroyImmediate(minMaxTexture);
 
             minMaxTexture = null;
+
+            if (boundaryTexture != null)
+                Object.DestroyImmediate(boundaryTexture);
+
+            boundaryTexture = null;
             isDisposed = true;
         }
     }
