@@ -8,12 +8,10 @@ using System.Globalization;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
-    public sealed class WaveAudioClipPackDrawer : RuniAudioClipPackDrawer<WaveAudioClip>
+    public sealed class WaveAudioClipPackDrawer(ImmutableArray<IONode> targets) : RuniAudioClipPackDrawer<WaveAudioClip>(targets)
     {
         public static GUIStyle shadowLabelStyle => _shadowLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _shadowLabelStyle;
-
-        public WaveAudioClipPackDrawer(ImmutableArray<IONode> targets) : base(targets) { }
 
         // 대상이 없거나 불러오지 못하면 AudioPreview가 null을 돌려줍니다.
         public override WaveAudioClip? targetClip => target is { } node ? preview.GetAudio(node) : null;
