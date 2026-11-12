@@ -23,6 +23,16 @@ namespace RuniOS.Editor.Resource.Sounds
         readonly Dictionary<IONode, (double start, double size)> views = [];
         WaveformRenderer? waveformRenderer;
 
+        static FollowMode followMode;
+
+        // 재생 중 확대된 보기가 커서를 따라가는 방식입니다.
+        enum FollowMode
+        {
+            None,
+            Page,
+            Center
+        }
+
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
 
         protected override UniTask OnEnable()
@@ -64,8 +74,29 @@ namespace RuniOS.Editor.Resource.Sounds
 
             RenderTexture? texture = loadedTextures.GetValueOrDefault(node);
             (double start, double size) view = views.GetValueOrDefault(node, (0d, 1d));
+            AudioPreview.Player player = preview.GetOrCreatePlayer(node);
             if (Event.current.type == EventType.Repaint)
             {
+                if (player.isPlaying && view.size < 1 && followMode != FollowMode.None)
+                {
+                    double time = player.time / player.length;
+
+                    // 페이지 넘김은 커서가 보이는 구간을 벗어날 때만 커서 위치에서 다음 페이지를 시작합니다.
+                    double start = followMode switch
+                    {
+                        FollowMode.Page when time < view.start || time > view.start + view.size => time,
+                        FollowMode.Center => time - (view.size * 0.5),
+                        _ => view.start
+                    };
+
+                    start = start.Clamp(0, 1 - view.size);
+                    if (start != view.start)
+                    {
+                        SetView(node, start, view.size);
+                        view.start = start;
+                    }
+                }
+
                 background.Draw(r, GUIContent.none, false, false, false, false);
 
                 int width = Max(1, (int)r.width);
@@ -92,7 +123,6 @@ namespace RuniOS.Editor.Resource.Sounds
             if (texture != null)
                 GUI.DrawTexture(r, texture, ScaleMode.StretchToFill, true);
 
-            AudioPreview.Player player = preview.GetOrCreatePlayer(node);
             if (player.isPlaying)
             {
                 // 커서는 보이는 구간 안에 있을 때만 그립니다.
@@ -145,6 +175,9 @@ namespace RuniOS.Editor.Resource.Sounds
             }
 
             OnPreviewGUI(waveformRect, node, background);
+
+            // 재생 위치를 따라가면 OnPreviewGUI가 구간을 옮기므로 다시 읽습니다.
+            view = views.GetValueOrDefault(node, (0d, 1d));
 
             if (isZoomed)
             {
@@ -236,6 +269,18 @@ namespace RuniOS.Editor.Resource.Sounds
             bool globalLoop = GUILayout.Toggle(AudioPreview.globalLoop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton);
             if (EditorGUI.EndChangeCheck())
                 AudioPreview.globalLoop = globalLoop;
+
+            GUIContent followContent = new GUIContent(EditorGUIUtility.IconContent(followMode == FollowMode.None ? "Unlinked" : "Linked").image, GetTextOrKey("runios-editor:gui.follow"));
+            if (EditorGUILayout.DropdownButton(followContent, FocusType.Passive, EditorStyles.toolbarDropDown))
+            {
+                GenericMenu menu = new GenericMenu();
+                AddFollowModeItem(FollowMode.None, "runios-editor:gui.follow.none");
+                AddFollowModeItem(FollowMode.Page, "runios-editor:gui.follow.page");
+                AddFollowModeItem(FollowMode.Center, "runios-editor:gui.follow.center");
+                menu.ShowAsContext();
+
+                void AddFollowModeItem(FollowMode mode, string key) => menu.AddItem(new GUIContent(GetTextOrKey(key)), followMode == mode, () => followMode = mode);
+            }
 
             Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
             AudioPreview.globalVolume = GUI.HorizontalSlider(sliderRect, AudioPreview.globalVolume, 0, 1);
