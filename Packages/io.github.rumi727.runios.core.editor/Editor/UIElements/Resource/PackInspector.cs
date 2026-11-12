@@ -174,6 +174,10 @@ namespace RuniOS.Editor.UIElements.Resource
             }
             Add(splitView);
 
+            // TwoPaneSplitView는 패널을 준비하기 전의 접기는 미뤄 두었다가 적용하지만 펴기는 무시하므로, 준비가 끝난 뒤 현재 드로어에 맞게 다시 정합니다.
+            // 이 콜백은 TwoPaneSplitView가 생성자에서 등록한 준비 콜백보다 뒤에 실행됩니다.
+            splitView.RegisterCallback<GeometryChangedEvent>(OnSplitViewSetUp);
+
             this.AddManipulator(new LocalizationManipulator(OnLanguageChanged));
 
             Rebuild();
@@ -201,7 +205,7 @@ namespace RuniOS.Editor.UIElements.Resource
             if (drawer == null)
             {
                 footer.style.display = DisplayStyle.None;
-                splitView.CollapseChild(1);
+                UpdatePreviewPane();
 
                 return;
             }
@@ -238,11 +242,24 @@ namespace RuniOS.Editor.UIElements.Resource
 
                 previewContent.AddToClassList(previewContentUssClassName);
                 preview.Add(previewContent);
-
-                splitView.UnCollapse();
             }
+
+            UpdatePreviewPane();
+        }
+
+        // 보여줄 미리보기가 있을 때만 미리보기 패널을 폅니다.
+        void UpdatePreviewPane()
+        {
+            if (previewContent != null)
+                splitView.UnCollapse();
             else
                 splitView.CollapseChild(1);
+        }
+
+        void OnSplitViewSetUp(GeometryChangedEvent evt)
+        {
+            splitView.UnregisterCallback<GeometryChangedEvent>(OnSplitViewSetUp);
+            UpdatePreviewPane();
         }
 
         void UpdateFooter()
