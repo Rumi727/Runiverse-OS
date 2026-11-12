@@ -62,12 +62,36 @@ namespace RuniOS.Sounds
                 float min = math.min(startValue, endValue);
                 float max = math.max(startValue, endValue);
 
-                int last = math.min((int)end, sampleCount - 1);
-                for (int i = (int)start + 1; i <= last; i++)
+                int first = (int)start + 1;
+                int count = math.min((int)end, sampleCount - 1) - first + 1;
+                if (count > 0)
                 {
-                    float value = samples[offset + i];
-                    min = math.min(min, value);
-                    max = math.max(max, value);
+                    NativeArray<float> range = samples.GetSubArray(offset + first, count);
+
+                    // 스칼라 min/max 누적은 Burst가 리덕션으로 인식하지 못해 자동 벡터화되지 않으므로 float4로 직접 누적합니다.
+                    int vectorCount = count >> 2;
+                    if (vectorCount > 0)
+                    {
+                        NativeArray<float4> vectors = range.GetSubArray(0, vectorCount << 2).Reinterpret<float4>(sizeof(float));
+                        float4 min4 = min;
+                        float4 max4 = max;
+                        for (int i = 0; i < vectorCount; i++)
+                        {
+                            float4 value = vectors[i];
+                            min4 = math.min(min4, value);
+                            max4 = math.max(max4, value);
+                        }
+
+                        min = math.cmin(min4);
+                        max = math.cmax(max4);
+                    }
+
+                    for (int i = vectorCount << 2; i < count; i++)
+                    {
+                        float value = range[i];
+                        min = math.min(min, value);
+                        max = math.max(max, value);
+                    }
                 }
 
                 result[index] = new float2(min, max);
