@@ -40,6 +40,7 @@ namespace RuniOS.Sounds
         }
 
         Texture2D? minMaxTexture;
+        bool isDisposed;
 
         /// <summary>
         /// Renders the range from <paramref name="startSample"/> to <paramref name="endSample"/> of <paramref name="waveform"/> into <paramref name="target"/>, one column per pixel and one lane per channel.<br/>
@@ -49,8 +50,17 @@ namespace RuniOS.Sounds
         /// The range follows the contract of <see cref="Waveform.ScheduleMinMax"/>.<br/>
         /// 구간은 <see cref="Waveform.ScheduleMinMax"/>의 계약을 따릅니다.
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">This renderer has been disposed.</exception>
+        /// <exception cref="ArgumentNullException"><paramref name="waveform"/> or <paramref name="target"/> is <see langword="null"/>.</exception>
         public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color)
         {
+            // 해제 후 호출되면 다시 만든 텍스처를 해제할 곳이 없어 누수되므로 거부합니다.
+            ObjectDisposedException.ThrowIf(isDisposed, this);
+            ArgumentNullException.ThrowIfNull(waveform);
+
+            if (target == null)
+                throw new ArgumentNullException(nameof(target));
+
             int width = target.width;
             int channelCount = waveform.channelCount;
             if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != channelCount)
@@ -87,6 +97,9 @@ namespace RuniOS.Sounds
         {
             if (minMaxTexture != null)
                 Object.DestroyImmediate(minMaxTexture);
+
+            minMaxTexture = null;
+            isDisposed = true;
         }
     }
 }
