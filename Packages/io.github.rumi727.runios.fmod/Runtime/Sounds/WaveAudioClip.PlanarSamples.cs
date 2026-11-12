@@ -25,6 +25,23 @@ namespace RuniOS.Sounds
             {
                 GetRawData(0, (uint)output.Length, (source, channelCount) =>
                 {
+                    // 잡은 원본을 포인터로 읽으므로, FMOD가 돌려준 데이터가 출력 전체를 채울 만큼인지 스케줄 전에 확인합니다.
+                    if (channelCount != channel)
+                        throw new InvalidOperationException($"FMOD returned {channelCount} channels, but the clip has {channel} channels.");
+
+                    int bytesPerSample = pcmFormat!.Value switch
+                    {
+                        PCMFormat.PCM8 => 1,
+                        PCMFormat.PCM16 => 2,
+                        PCMFormat.PCM24 => 3,
+                        PCMFormat.PCM32 => 4,
+                        PCMFormat.Float => 4,
+                        _ => throw new InvalidOperationException($"FMOD returned unsupported sample format {pcmFormat}.")
+                    };
+
+                    if (source.Length < (long)output.Length * bytesPerSample)
+                        throw new InvalidOperationException($"FMOD returned {source.Length} bytes, but {(long)output.Length * bytesPerSample} bytes are required.");
+
                     fixed (byte* pointer = source)
                     {
                         int chunkCount = ((sampleCount + planarChunkSize) - 1) / planarChunkSize;
