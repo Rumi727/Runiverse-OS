@@ -141,7 +141,8 @@ namespace RuniOS.Editor.UIElements.Resource
             title.AddToClassList(titleUssClassName);
             Add(title);
 
-            splitView = new TwoPaneSplitView(1, 200, TwoPaneSplitViewOrientation.Vertical) { name = "split-view" };
+            // 뷰 데이터 키가 있어야 미리보기 높이가 저장됩니다.
+            splitView = new TwoPaneSplitView(1, 200, TwoPaneSplitViewOrientation.Vertical) { name = "split-view", viewDataKey = "split-view" };
             splitView.AddToClassList(splitViewUssClassName);
             {
                 scrollView = new ScrollView { name = "scroll-view" };
