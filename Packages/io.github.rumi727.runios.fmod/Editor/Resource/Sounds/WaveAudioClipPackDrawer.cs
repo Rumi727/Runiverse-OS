@@ -20,7 +20,8 @@ namespace RuniOS.Editor.Resource.Sounds
         readonly Dictionary<IONode, RenderTexture> loadedTextures = [];
 
         // 전체 길이를 1로 본 보이는 구간의 시작과 길이입니다. 없으면 전체를 봅니다.
-        readonly Dictionary<IONode, (double start, double size)> views = [];
+        // 선택이 바뀌면 드로어를 새로 만들므로, 다시 선택해도 유지되도록 정적으로 둡니다.
+        static readonly Dictionary<IONode, (double start, double size)> views = [];
         WaveformRenderer? waveformRenderer;
 
         static FollowMode followMode;
