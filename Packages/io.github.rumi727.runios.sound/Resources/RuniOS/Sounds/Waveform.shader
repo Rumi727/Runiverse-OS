@@ -65,6 +65,10 @@ Shader "Hidden/RuniOS/Waveform"
 
                 float nearest = 1e9;
 
+                // 픽셀이 속한 열을 칠할 때, 그 열의 세로 범위 안쪽으로 들어온 거리(바깥은 음수)입니다.
+                int pixelColumn = (int)floor(pixel.x);
+                float fillDepth = -1e9;
+
                 [loop]
                 for (int column = firstColumn; column <= lastColumn; column++)
                 {
@@ -99,10 +103,22 @@ Shader "Hidden/RuniOS/Waveform"
                     nearest = min(nearest, SegmentDistance(pixel, p0, p1));
                     nearest = min(nearest, SegmentDistance(pixel, p1, p2));
                     nearest = min(nearest, SegmentDistance(pixel, p2, p3));
+
+                    /*
+                     * 극값이 경계 값 범위 밖에 있으면 열 안에 가로 위치를 모르는 극값이 있다는 뜻입니다.
+                     * 꺾은선은 지어낸 가로 위치를 지나가므로, 안티에일리어싱하면 면 안에 그 위치가 무늬로 드러납니다.
+                     * 그런 열은 세로 범위를 열 폭(한 픽셀) 전체에 칠하고, 위아래 끝만 세로 거리로 안티에일리어싱합니다.
+                     */
+                    if (column == pixelColumn && (minMax.x < min(left, right) || minMax.y > max(left, right)))
+                    {
+                        float low = center + (minMax.x * halfLane);
+                        float high = center + (minMax.y * halfLane);
+                        fillDepth = min(pixel.y - low, high - pixel.y);
+                    }
                 }
 
                 // 선 가장자리 밖으로 벗어난 거리(안쪽은 음수)를 안티에일리어싱 폭에 걸쳐 알파로 바꿉니다.
-                float outside = nearest - (_Thickness / 2);
+                float outside = min(nearest, -fillDepth) - (_Thickness / 2);
                 float alpha = _Antialiasing > 0 ? saturate(0.5 - (outside / _Antialiasing)) : outside <= 0;
 
                 return float4(_Color.rgb, _Color.a * alpha);
