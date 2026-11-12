@@ -95,7 +95,7 @@ namespace RuniOS.Editor.Resource.Sounds
                     };
 
                     start = start.Clamp(0, 1 - view.size);
-                    if (start != view.start)
+                    if (!start.Approximately(view.start))
                     {
                         SetView(node, start, view.size);
                         view.start = start;
@@ -121,7 +121,7 @@ namespace RuniOS.Editor.Resource.Sounds
                     // 어셈블리 로드 중 호출되는 OnEnable에서는 네이티브 오브젝트를 만들 수 없으므로 처음 그릴 때 만듭니다.
                     waveformRenderer ??= new WaveformRenderer();
                     double lastSample = waveform.sampleCount - 1;
-                    waveformRenderer.Render(waveform, view.start * lastSample, Min((view.start + view.size) * lastSample, lastSample), texture, Color.darkOrange);
+                    waveformRenderer.Render(waveform, view.start * lastSample, Min((view.start + view.size) * lastSample, lastSample), texture, Color.darkOrange, 2);
                 }
             }
 
@@ -202,7 +202,7 @@ namespace RuniOS.Editor.Resource.Sounds
                 {
                     double mouse = waveformRect.x.InverseLerp(waveformRect.xMax, evt.mousePosition.x);
                     double anchor = view.start + (mouse * view.size);
-                    double size = (view.size * 1.1.Pow((double)evt.delta.y)).Clamp(1d / (clip.samples - 1), 1);
+                    double size = (view.size * 1.1.Pow(evt.delta.y)).Clamp(1d / (clip.samples - 1), 1);
 
                     SetView(node, anchor - (mouse * size), size);
                     evt.Use();
@@ -213,7 +213,7 @@ namespace RuniOS.Editor.Resource.Sounds
                     evt.Use();
                     break;
                 case EventType.MouseDrag when GUIUtility.hotControl == panControlID:
-                    SetView(node, view.start - (evt.delta.x / waveformRect.width * view.size), view.size);
+                    SetView(node, view.start - ((evt.delta.x / waveformRect.width) * view.size), view.size);
                     evt.Use();
                     break;
                 case EventType.MouseUp when GUIUtility.hotControl == panControlID:
