@@ -18,6 +18,9 @@ namespace RuniOS.Editor.Resource.Sounds
 
         readonly AudioPreview preview = new AudioPreview();
         readonly Dictionary<IONode, RenderTexture> loadedTextures = [];
+
+        // 전체 길이를 1로 본 보이는 구간의 시작과 길이입니다. 없으면 전체를 봅니다.
+        readonly Dictionary<IONode, (double start, double size)> views = [];
         WaveformRenderer? waveformRenderer;
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
@@ -60,6 +63,7 @@ namespace RuniOS.Editor.Resource.Sounds
                 return;
 
             RenderTexture? texture = loadedTextures.GetValueOrDefault(node);
+            (double start, double size) view = views.GetValueOrDefault(node, (0d, 1d));
             if (Event.current.type == EventType.Repaint)
             {
                 background.Draw(r, GUIContent.none, false, false, false, false);
@@ -80,7 +84,8 @@ namespace RuniOS.Editor.Resource.Sounds
 
                     // 어셈블리 로드 중 호출되는 OnEnable에서는 네이티브 오브젝트를 만들 수 없으므로 처음 그릴 때 만듭니다.
                     waveformRenderer ??= new WaveformRenderer();
-                    waveformRenderer.Render(waveform, 0, waveform.sampleCount - 1, texture, Color.darkOrange);
+                    double lastSample = waveform.sampleCount - 1;
+                    waveformRenderer.Render(waveform, view.start * lastSample, Min((view.start + view.size) * lastSample, lastSample), texture, Color.darkOrange);
                 }
             }
 
@@ -90,11 +95,16 @@ namespace RuniOS.Editor.Resource.Sounds
             AudioPreview.Player player = preview.GetOrCreatePlayer(node);
             if (player.isPlaying)
             {
-                Rect cursorRect = r;
-                cursorRect.x = (r.x - 1).Lerp(r.width - 1, (player.time / player.length).ClampToFloat());
-                cursorRect.width = 2;
+                // 커서는 보이는 구간 안에 있을 때만 그립니다.
+                double position = ((player.time / player.length) - view.start) / view.size;
+                if (position is >= 0 and <= 1)
+                {
+                    Rect cursorRect = r;
+                    cursorRect.x = (r.x - 1).Lerp(r.width - 1, position.ClampToFloat());
+                    cursorRect.width = 2;
 
-                EditorGUI.DrawRect(cursorRect, Color.white);
+                    EditorGUI.DrawRect(cursorRect, Color.white);
+                }
 
                 BeginRichText(shadowLabelStyle);
                 BeginAlignment(TextAnchor.UpperCenter, shadowLabelStyle);
@@ -119,20 +129,82 @@ namespace RuniOS.Editor.Resource.Sounds
 
         protected override void OnInteractivePreviewGUI(Rect r, IONode node, GUIStyle background)
         {
-            OnPreviewGUI(r, node, background);
+            // 스크롤바는 확대했을 때만 그려져 이후 컨트롤 ID를 바꾸므로, 이동에 쓰는 ID를 가장 먼저 받습니다.
+            int panControlID = GUIUtility.GetControlID(FocusType.Passive);
+            Event evt = Event.current;
 
-            if (r.Contains(Event.current.mousePosition) && (Event.current.type == EventType.MouseDown || Event.current.type == EventType.MouseDrag))
+            (double start, double size) view = views.GetValueOrDefault(node, (0d, 1d));
+            bool isZoomed = view.size < 1;
+
+            Rect waveformRect = r;
+            Rect scrollbarRect = r;
+            if (isZoomed)
+            {
+                scrollbarRect.yMin = r.yMax - GUI.skin.horizontalScrollbar.fixedHeight;
+                waveformRect.yMax = scrollbarRect.yMin;
+            }
+
+            OnPreviewGUI(waveformRect, node, background);
+
+            if (isZoomed)
+            {
+                EditorGUI.BeginChangeCheck();
+                float scroll = GUI.HorizontalScrollbar(scrollbarRect, (float)view.start, (float)view.size, 0, 1);
+                if (EditorGUI.EndChangeCheck())
+                    SetView(node, scroll, view.size);
+            }
+
+            switch (evt.GetTypeForControl(panControlID))
+            {
+                // 마우스 아래의 위치를 고정한 채 확대하고 축소합니다. 보이는 구간은 최소 한 샘플입니다.
+                case EventType.ScrollWheel when preview.GetAudio(node) is { samples: > 1 } clip && waveformRect.Contains(evt.mousePosition):
+                {
+                    double mouse = waveformRect.x.InverseLerp(waveformRect.xMax, evt.mousePosition.x);
+                    double anchor = view.start + (mouse * view.size);
+                    double size = (view.size * 1.1.Pow((double)evt.delta.y)).Clamp(1d / (clip.samples - 1), 1);
+
+                    SetView(node, anchor - (mouse * size), size);
+                    evt.Use();
+                    break;
+                }
+                case EventType.MouseDown when evt.button == 2 && isZoomed && waveformRect.Contains(evt.mousePosition):
+                    GUIUtility.hotControl = panControlID;
+                    evt.Use();
+                    break;
+                case EventType.MouseDrag when GUIUtility.hotControl == panControlID:
+                    SetView(node, view.start - (evt.delta.x / waveformRect.width * view.size), view.size);
+                    evt.Use();
+                    break;
+                case EventType.MouseUp when GUIUtility.hotControl == panControlID:
+                    GUIUtility.hotControl = 0;
+                    evt.Use();
+                    break;
+            }
+
+            // 가운데 버튼은 이동에 쓰므로 탐색하지 않습니다.
+            if (evt.button != 2 && waveformRect.Contains(evt.mousePosition) && (evt.type == EventType.MouseDown || evt.type == EventType.MouseDrag))
             {
                 AudioPreview.Player targetPlayer = preview.GetOrCreatePlayer(node);
 
                 foreach (var player in preview.players)
                 {
                     if (targetPlayer == player.Value)
-                        player.Value.time = (r.x - 1).InverseLerp(r.width - 1, Event.current.mousePosition.x) * player.Value.length;
+                        player.Value.time = (view.start + ((waveformRect.x - 1).InverseLerp(waveformRect.width - 1, evt.mousePosition.x) * view.size)) * player.Value.length;
                     else
                         player.Value.Stop();
                 }
             }
+        }
+
+        // 텍스처를 해제해 다음 Repaint에서 새 구간으로 다시 그리게 합니다.
+        void SetView(IONode node, double start, double size)
+        {
+            views[node] = (start.Clamp(0, 1 - size), size);
+
+            if (loadedTextures.TryGetValue(node, out RenderTexture? texture))
+                texture.Release();
+
+            Repaint();
         }
 
         protected override void OnPreviewSettings()
