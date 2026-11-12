@@ -12,8 +12,8 @@ namespace RuniOS.Sounds
     /// 16비트 planar 샘플과 그로부터 만든 min/max 피라미드를 보관하고, 임의의 샘플 구간을 파형 열로 축약합니다.
     /// </summary>
     /// <remarks>
-    /// Must be created on the main thread. Jobs scheduled by <see cref="ScheduleMinMax"/> must complete before <see cref="Dispose"/>.<br/>
-    /// 메인 스레드에서 생성해야 합니다. <see cref="ScheduleMinMax"/>로 스케줄한 잡은 <see cref="Dispose"/> 전에 완료되어야 합니다.
+    /// Must be created, used, and disposed on the main thread. <see cref="Dispose"/> waits for jobs scheduled by <see cref="ScheduleMinMax"/> before releasing memory.<br/>
+    /// 메인 스레드에서 생성, 사용, 해제해야 합니다. <see cref="Dispose"/>는 메모리를 해제하기 전에 <see cref="ScheduleMinMax"/>로 스케줄한 잡을 기다립니다.
     /// </remarks>
     public sealed class Waveform : IDisposable
     {
@@ -27,6 +27,10 @@ namespace RuniOS.Sounds
         // 레벨마다 levels 안의 (offset, count)입니다.
         NativeArray<int2> levelInfos;
 
+        // Dispose가 해제 전에 기다릴, 이 파형의 배열을 사용하는 잡들입니다.
+        JobHandle pendingJobs;
+        bool isDisposed;
+
         public int channelCount { get; }
         public int sampleCount { get; }
 
@@ -39,12 +43,39 @@ namespace RuniOS.Sounds
         /// <c>[channel * sampleCount + sample]</c>로 채널별 배치된 샘플입니다.
         /// </param>
         /// <param name="channelCount"></param>
+        /// <remarks>
+        /// Ownership is taken even when the constructor throws, so <paramref name="planarSamples"/> is disposed in that case.<br/>
+        /// 생성자가 예외를 던져도 소유권은 넘어오므로, 그 경우 <paramref name="planarSamples"/>는 해제됩니다.
+        /// </remarks>
+        /// <exception cref="ArgumentException"><paramref name="planarSamples"/> is not created, or its length is not a multiple of <paramref name="channelCount"/>.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="channelCount"/> is less than or equal to 0.</exception>
         public Waveform(NativeArray<short> planarSamples, int channelCount)
         {
             samples = planarSamples;
-            this.channelCount = channelCount;
-            sampleCount = planarSamples.Length / channelCount;
+            try
+            {
+                if (!planarSamples.IsCreated)
+                    throw new ArgumentException("The planar samples are not created.", nameof(planarSamples));
 
+                ArgumentOutOfRangeException.ThrowIfNegativeOrZero(channelCount);
+
+                if (planarSamples.Length % channelCount != 0)
+                    throw new ArgumentException($"The planar sample length {planarSamples.Length} is not a multiple of the channel count {channelCount}.", nameof(planarSamples));
+
+                this.channelCount = channelCount;
+                sampleCount = planarSamples.Length / channelCount;
+
+                BuildLevels();
+            }
+            catch
+            {
+                Dispose();
+                throw;
+            }
+        }
+
+        void BuildLevels()
+        {
             List<int2> infos = [];
             int count = sampleCount;
             int length = 0;
@@ -66,36 +97,36 @@ namespace RuniOS.Sounds
             for (int level = 0; level < infos.Count; level++)
                 views[level] = levels.GetSubArray(infos[level].x, infos[level].y * channelCount * 2);
 
-            JobHandle handle = default;
+            // 스케줄 도중 실패해도 Dispose가 이미 스케줄된 잡을 기다리도록 체인을 pendingJobs에 둡니다.
             for (int level = 0; level < infos.Count; level++)
             {
                 int levelCount = infos[level].y;
                 int chunksPerChannel = ((levelCount + buildChunkSize) - 1) / buildChunkSize;
                 if (level == 0)
                 {
-                    handle = new BuildFromSamplesJob
+                    pendingJobs = new BuildFromSamplesJob
                     {
                         source = samples,
                         output = views[level],
                         sourceCount = sampleCount,
                         count = levelCount,
                         chunksPerChannel = chunksPerChannel
-                    }.Schedule(chunksPerChannel * channelCount, 16, handle);
+                    }.Schedule(chunksPerChannel * channelCount, 16, pendingJobs);
                 }
                 else
                 {
-                    handle = new BuildFromLevelJob
+                    pendingJobs = new BuildFromLevelJob
                     {
                         source = views[level - 1],
                         output = views[level],
                         sourceCount = infos[level - 1].y,
                         count = levelCount,
                         chunksPerChannel = chunksPerChannel
-                    }.Schedule(chunksPerChannel * channelCount, 16, handle);
+                    }.Schedule(chunksPerChannel * channelCount, 16, pendingJobs);
                 }
             }
 
-            handle.Complete();
+            pendingJobs.Complete();
         }
 
         /// <summary>
@@ -114,9 +145,24 @@ namespace RuniOS.Sounds
         /// <param name="startSample"></param>
         /// <param name="endSample"></param>
         /// <param name="dependency"></param>
+        /// <exception cref="ObjectDisposedException">This waveform has been disposed.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> is negative, or the range does not satisfy the contract.</exception>
+        /// <exception cref="ArgumentException"><paramref name="result"/> has fewer than <c>channelCount * width</c> elements.</exception>
         public JobHandle ScheduleMinMax(double startSample, double endSample, int width, NativeArray<float2> result, JobHandle dependency = default)
         {
-            return new MinMaxJob
+            ObjectDisposedException.ThrowIf(isDisposed, this);
+            ArgumentOutOfRangeException.ThrowIfNegative(width);
+
+            // 샘플이 없으면 잡이 원본을 읽지 않고 모든 열을 빈 열로 채우므로 구간을 검사하지 않습니다.
+            // 부정 비교로 쓴 것은 NaN도 거부하기 위해서입니다.
+            if (sampleCount > 0 && !(startSample >= 0 && startSample <= endSample && endSample <= sampleCount - 1))
+                throw new ArgumentOutOfRangeException(nameof(startSample), $"The range [{startSample}, {endSample}] must satisfy 0 <= startSample <= endSample <= {sampleCount - 1}.");
+
+            int columnCount = checked(channelCount * width);
+            if (!result.IsCreated || result.Length < columnCount)
+                throw new ArgumentException($"The result array must have at least {columnCount} elements (channelCount * width).", nameof(result));
+
+            JobHandle handle = new MinMaxJob
             {
                 samples = samples,
                 levels = levels,
@@ -126,14 +172,27 @@ namespace RuniOS.Sounds
                 width = width,
                 startSample = startSample,
                 scale = (endSample - startSample) / width
-            }.Schedule(channelCount * width, 16, dependency);
+            }.Schedule(columnCount, 16, dependency);
+
+            pendingJobs = JobHandle.CombineDependencies(pendingJobs, handle);
+            return handle;
         }
 
         public void Dispose()
         {
-            samples.Dispose();
-            levels.Dispose();
-            levelInfos.Dispose();
+            // 잡이 읽는 중인 배열을 해제하지 않도록 먼저 기다립니다. 생성 도중 실패했을 때는 만들어진 배열만 해제합니다.
+            pendingJobs.Complete();
+
+            if (samples.IsCreated)
+                samples.Dispose();
+
+            if (levels.IsCreated)
+                levels.Dispose();
+
+            if (levelInfos.IsCreated)
+                levelInfos.Dispose();
+
+            isDisposed = true;
         }
 
         /*
