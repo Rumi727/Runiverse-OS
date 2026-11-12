@@ -13,6 +13,10 @@ namespace RuniOS.Editor.Resource.Sounds
         public static GUIStyle shadowLabelStyle => _shadowLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _shadowLabelStyle;
 
+        // 대상이 하나일 때도 다중 선택 격자의 칸처럼 어두운 배경에 파형을 그립니다.
+        static GUIStyle waveformBackgroundStyle => _waveformBackgroundStyle ??= "PreBackgroundSolid";
+        static GUIStyle? _waveformBackgroundStyle;
+
         // 대상이 없거나 불러오지 못하면 AudioPreview가 null을 돌려줍니다.
         public override WaveAudioClip? targetClip => target is { } node ? preview.GetAudio(node) : null;
 
@@ -98,7 +102,7 @@ namespace RuniOS.Editor.Resource.Sounds
                     }
                 }
 
-                background.Draw(r, GUIContent.none, false, false, false, false);
+                DrawWaveformBackground(r);
 
                 int width = Max(1, (int)r.width);
                 int height = Max(1, (int)r.height);
@@ -182,6 +186,9 @@ namespace RuniOS.Editor.Resource.Sounds
 
             if (isZoomed)
             {
+                if (evt.type == EventType.Repaint)
+                    DrawWaveformBackground(scrollbarRect);
+
                 EditorGUI.BeginChangeCheck();
                 float scroll = GUI.HorizontalScrollbar(scrollbarRect, (float)view.start, (float)view.size, 0, 1);
                 if (EditorGUI.EndChangeCheck())
@@ -228,6 +235,14 @@ namespace RuniOS.Editor.Resource.Sounds
                         player.Value.Stop();
                 }
             }
+        }
+
+        // 이 스타일은 사각형 밖으로 넘쳐 그려지므로, 격자 칸처럼 주어진 영역으로 잘라 그립니다.
+        static void DrawWaveformBackground(Rect rect)
+        {
+            GUI.BeginClip(rect);
+            waveformBackgroundStyle.Draw(new Rect(Vector2.zero, rect.size), GUIContent.none, false, false, false, false);
+            GUI.EndClip();
         }
 
         // 텍스처를 해제해 다음 Repaint에서 새 구간으로 다시 그리게 합니다.
