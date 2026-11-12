@@ -9,17 +9,17 @@ namespace RuniOS.Sounds
     public sealed partial class WaveAudioClip
     {
         /// <summary>
-        /// Converts the whole PCM data to normalized floats laid out per channel (<c>[channel * samples + sample]</c>).<br/>
-        /// 전체 PCM 데이터를 채널별로 배치한(<c>[channel * samples + sample]</c>) 정규화된 float로 변환합니다.
+        /// Converts the whole PCM data to 16-bit samples laid out per channel (<c>[channel * samples + sample]</c>).<br/>
+        /// 전체 PCM 데이터를 채널별로 배치한(<c>[channel * samples + sample]</c>) 16비트 샘플로 변환합니다.
         /// </summary>
         /// <remarks>
-        /// Schedules Burst jobs and waits for them, so it must be called from the main thread. The caller owns the returned array.<br/>
-        /// Burst 잡을 스케줄하고 완료까지 기다리므로 메인 스레드에서 호출해야 합니다. 반환된 배열은 호출자가 소유합니다.
+        /// Formats other than 16-bit PCM are quantized to 16 bits. Schedules Burst jobs and waits for them, so it must be called from the main thread. The caller owns the returned array.<br/>
+        /// 16비트 PCM이 아닌 포맷은 16비트로 양자화됩니다. Burst 잡을 스케줄하고 완료까지 기다리므로 메인 스레드에서 호출해야 합니다. 반환된 배열은 호출자가 소유합니다.
         /// </remarks>
-        public unsafe NativeArray<float> CreatePlanarSamples(Allocator allocator)
+        public unsafe NativeArray<short> CreatePlanarSamples(Allocator allocator)
         {
             int sampleCount = checked((int)samples);
-            NativeArray<float> output = new NativeArray<float>(checked(sampleCount * channel), allocator, NativeArrayOptions.UninitializedMemory);
+            NativeArray<short> output = new NativeArray<short>(checked(sampleCount * channel), allocator, NativeArrayOptions.UninitializedMemory);
 
             try
             {
@@ -56,7 +56,7 @@ namespace RuniOS.Sounds
         unsafe struct PCM8PlanarJob : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction] public byte* source;
-            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<float> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sampleCount;
             public int channelCount;
 
@@ -64,7 +64,7 @@ namespace RuniOS.Sounds
             {
                 byte* frame = source + (sample * channelCount);
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = unchecked((sbyte)frame[channel]) / 128f;
+                    output[(channel * sampleCount) + sample] = (short)(unchecked((sbyte)frame[channel]) << 8);
             }
         }
 
@@ -72,7 +72,7 @@ namespace RuniOS.Sounds
         unsafe struct PCM16PlanarJob : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction] public short* source;
-            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<float> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sampleCount;
             public int channelCount;
 
@@ -80,7 +80,7 @@ namespace RuniOS.Sounds
             {
                 short* frame = source + (sample * channelCount);
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = frame[channel] / 32768f;
+                    output[(channel * sampleCount) + sample] = frame[channel];
             }
         }
 
@@ -88,7 +88,7 @@ namespace RuniOS.Sounds
         unsafe struct PCM24PlanarJob : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction] public byte* source;
-            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<float> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sampleCount;
             public int channelCount;
 
@@ -97,11 +97,9 @@ namespace RuniOS.Sounds
                 byte* frame = source + (sample * channelCount * 3);
                 for (int channel = 0; channel < channelCount; channel++)
                 {
+                    // 리틀 엔디언 24비트 샘플의 상위 2바이트만 사용합니다.
                     byte* bytes = frame + (channel * 3);
-
-                    // 상위 바이트를 int의 최상위에 두고 산술 시프트해 부호를 확장합니다.
-                    int value = ((bytes[0] << 8) | (bytes[1] << 16) | (bytes[2] << 24)) >> 8;
-                    output[(channel * sampleCount) + sample] = value / 8388608f;
+                    output[(channel * sampleCount) + sample] = (short)(bytes[1] | (bytes[2] << 8));
                 }
             }
         }
@@ -110,7 +108,7 @@ namespace RuniOS.Sounds
         unsafe struct PCM32PlanarJob : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction] public int* source;
-            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<float> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sampleCount;
             public int channelCount;
 
@@ -118,7 +116,7 @@ namespace RuniOS.Sounds
             {
                 int* frame = source + (sample * channelCount);
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = frame[channel] / 2147483648f;
+                    output[(channel * sampleCount) + sample] = (short)(frame[channel] >> 16);
             }
         }
 
@@ -126,7 +124,7 @@ namespace RuniOS.Sounds
         unsafe struct FloatPlanarJob : IJobParallelFor
         {
             [NativeDisableUnsafePtrRestriction] public float* source;
-            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<float> output;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sampleCount;
             public int channelCount;
 
@@ -134,7 +132,11 @@ namespace RuniOS.Sounds
             {
                 float* frame = source + (sample * channelCount);
                 for (int channel = 0; channel < channelCount; channel++)
-                    output[(channel * sampleCount) + sample] = frame[channel];
+                {
+                    // float 샘플은 ±1을 넘을 수 있으므로 short로 변환하기 전에 범위를 제한합니다.
+                    float value = frame[channel] * 32768f;
+                    output[(channel * sampleCount) + sample] = (short)(value >= short.MaxValue ? short.MaxValue : value <= short.MinValue ? short.MinValue : value);
+                }
             }
         }
     }
