@@ -12,8 +12,8 @@ namespace RuniOS.Sounds
     /// 16비트 planar 샘플과 그로부터 만든 min/max 피라미드를 보관하고, 임의의 샘플 구간을 파형 열로 축약합니다.
     /// </summary>
     /// <remarks>
-    /// Must be created, used, and disposed on the main thread. <see cref="Dispose"/> waits for jobs scheduled by <see cref="ScheduleMinMax"/> before releasing memory.<br/>
-    /// 메인 스레드에서 생성, 사용, 해제해야 합니다. <see cref="Dispose"/>는 메모리를 해제하기 전에 <see cref="ScheduleMinMax"/>로 스케줄한 잡을 기다립니다.
+    /// Must be created, used, and disposed on the main thread. <see cref="Dispose"/> waits for jobs scheduled by <see cref="ScheduleMinMax"/> and <see cref="ScheduleResample"/> before releasing memory.<br/>
+    /// 메인 스레드에서 생성, 사용, 해제해야 합니다. <see cref="Dispose"/>는 메모리를 해제하기 전에 <see cref="ScheduleMinMax"/>와 <see cref="ScheduleResample"/>로 스케줄한 잡을 기다립니다.
     /// </remarks>
     public sealed class Waveform : IDisposable
     {
@@ -178,6 +178,57 @@ namespace RuniOS.Sounds
             return handle;
         }
 
+        /// <summary>
+        /// Schedules a job that samples the waveform at <paramref name="count"/> evenly spaced positions from <paramref name="startSample"/> to <paramref name="endSample"/>, both inclusive.<br/>
+        /// <paramref name="startSample"/>부터 <paramref name="endSample"/>까지 양 끝을 포함해 균등한 간격의 <paramref name="count"/>개 위치에서 파형을 샘플링하는 잡을 스케줄합니다.
+        /// </summary>
+        /// <remarks>
+        /// Values between samples are linearly interpolated, the same way <see cref="ScheduleMinMax"/> treats column edges, so sampling <c>width + 1</c> positions over the same range gives the value at each column edge.
+        /// When <paramref name="count"/> is 1, the only position is <paramref name="startSample"/>.
+        /// The range must satisfy <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>. Values are normalized to -1..1.<br/>
+        /// 샘플 사이의 값은 <see cref="ScheduleMinMax"/>가 열 경계를 다루는 것과 같은 방식으로 선형 보간하므로, 같은 구간을 <c>width + 1</c>개 위치로 샘플링하면 각 열 경계의 값이 됩니다.
+        /// <paramref name="count"/>가 1이면 위치는 <paramref name="startSample"/> 하나입니다.
+        /// 구간은 <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>을 만족해야 합니다. 값은 -1..1로 정규화됩니다.
+        /// </remarks>
+        /// <param name="count"></param>
+        /// <param name="result">
+        /// Receives the value at <c>[channel * count + i]</c>. Receives 0 when there are no samples.<br/>
+        /// <c>[channel * count + i]</c>에 값을 받습니다. 샘플이 없으면 0을 받습니다.
+        /// </param>
+        /// <param name="startSample"></param>
+        /// <param name="endSample"></param>
+        /// <param name="dependency"></param>
+        /// <exception cref="ObjectDisposedException">This waveform has been disposed.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="count"/> is negative, or the range does not satisfy the contract.</exception>
+        /// <exception cref="ArgumentException"><paramref name="result"/> has fewer than <c>channelCount * count</c> elements.</exception>
+        public JobHandle ScheduleResample(double startSample, double endSample, int count, NativeArray<float> result, JobHandle dependency = default)
+        {
+            ObjectDisposedException.ThrowIf(isDisposed, this);
+            ArgumentOutOfRangeException.ThrowIfNegative(count);
+
+            // 샘플이 없으면 잡이 원본을 읽지 않고 0을 채우므로 구간을 검사하지 않습니다.
+            // 부정 비교로 쓴 것은 NaN도 거부하기 위해서입니다.
+            if (sampleCount > 0 && !(startSample >= 0 && startSample <= endSample && endSample <= sampleCount - 1))
+                throw new ArgumentOutOfRangeException(nameof(startSample), $"The range [{startSample}, {endSample}] must satisfy 0 <= startSample <= endSample <= {sampleCount - 1}.");
+
+            int pointCount = checked(channelCount * count);
+            if (!result.IsCreated || result.Length < pointCount)
+                throw new ArgumentException($"The result array must have at least {pointCount} elements (channelCount * count).", nameof(result));
+
+            JobHandle handle = new ResampleJob
+            {
+                samples = samples,
+                result = result,
+                sampleCount = sampleCount,
+                count = count,
+                startSample = startSample,
+                scale = count > 1 ? (endSample - startSample) / (count - 1) : 0
+            }.Schedule(pointCount, 64, dependency);
+
+            pendingJobs = JobHandle.CombineDependencies(pendingJobs, handle);
+            return handle;
+        }
+
         public void Dispose()
         {
             // 잡이 읽는 중인 배열을 해제하지 않도록 먼저 기다립니다. 생성 도중 실패했을 때는 만들어진 배열만 해제합니다.
@@ -332,8 +383,8 @@ namespace RuniOS.Sounds
                 double start = startSample + (x * scale);
                 double end = startSample + ((x + 1) * scale);
 
-                float startValue = Sample(offset, start);
-                float endValue = Sample(offset, end);
+                float startValue = Sample(samples, sampleCount, offset, start);
+                float endValue = Sample(samples, sampleCount, offset, end);
 
                 float min = math.min(startValue, endValue);
                 float max = math.max(startValue, endValue);
@@ -395,16 +446,42 @@ namespace RuniOS.Sounds
                     max = math.max(max, levels[baseIndex + (i * 2) + 1]);
                 }
             }
+        }
 
-            float Sample(int offset, double position)
+        [BurstCompile(FloatMode = FloatMode.Fast)]
+        struct ResampleJob : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<short> samples;
+            [WriteOnly] public NativeArray<float> result;
+            public int sampleCount;
+            public int count;
+            public double startSample;
+            public double scale;
+
+            public void Execute(int index)
             {
-                int previous = (int)position;
-                if (previous >= sampleCount - 1)
-                    return samples[(offset + sampleCount) - 1] / 32768f;
+                if (sampleCount == 0)
+                {
+                    result[index] = 0;
+                    return;
+                }
 
-                float t = (float)(position - previous);
-                return math.lerp(samples[offset + previous] / 32768f, samples[offset + previous + 1] / 32768f, t);
+                int channel = index / count;
+                int i = index - (channel * count);
+
+                result[index] = Sample(samples, sampleCount, channel * sampleCount, startSample + (i * scale));
             }
+        }
+
+        // MinMaxJob의 열 경계와 ResampleJob이 같은 값을 내도록 두 잡이 이 보간을 함께 씁니다.
+        static float Sample(NativeArray<short> samples, int sampleCount, int offset, double position)
+        {
+            int previous = (int)position;
+            if (previous >= sampleCount - 1)
+                return samples[(offset + sampleCount) - 1] / 32768f;
+
+            float t = (float)(position - previous);
+            return math.lerp(samples[offset + previous] / 32768f, samples[offset + previous + 1] / 32768f, t);
         }
     }
 }
