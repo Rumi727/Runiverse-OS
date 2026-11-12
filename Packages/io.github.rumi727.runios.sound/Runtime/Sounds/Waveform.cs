@@ -69,6 +69,7 @@ namespace RuniOS.Sounds
             for (int level = 0; level < infos.Count; level++)
             {
                 int levelCount = infos[level].y;
+                int chunksPerChannel = (levelCount + buildChunkSize - 1) / buildChunkSize;
                 if (level == 0)
                 {
                     handle = new BuildFromSamplesJob
@@ -76,8 +77,9 @@ namespace RuniOS.Sounds
                         source = samples,
                         output = views[level],
                         sourceCount = sampleCount,
-                        count = levelCount
-                    }.Schedule(levelCount * channelCount, 64, handle);
+                        count = levelCount,
+                        chunksPerChannel = chunksPerChannel
+                    }.Schedule(chunksPerChannel * channelCount, 16, handle);
                 }
                 else
                 {
@@ -86,8 +88,9 @@ namespace RuniOS.Sounds
                         source = views[level - 1],
                         output = views[level],
                         sourceCount = infos[level - 1].y,
-                        count = levelCount
-                    }.Schedule(levelCount * channelCount, 64, handle);
+                        count = levelCount,
+                        chunksPerChannel = chunksPerChannel
+                    }.Schedule(chunksPerChannel * channelCount, 16, handle);
                 }
             }
 
@@ -128,6 +131,14 @@ namespace RuniOS.Sounds
             levelInfos.Dispose();
         }
 
+        /*
+         * 피라미드 생성 잡은 Execute 하나가 한 채널 안의 원소 buildChunkSize개를 맡습니다.
+         * 원소 하나(16개 비교)마다 Execute를 부르면 채널을 구하는 나눗셈, 런타임 길이 루프의 진입 비용, 벡터 수평 축약이 실제 비교보다 비싸므로
+         * 나눗셈과 진입 비용을 묶음당 한 번으로 줄입니다. 꽉 찬 블록은 반복 횟수가 상수인 루프로 처리해 Burst가 펼쳐서 벡터화하게 하고,
+         * 채널 끝의 남은 샘플만 다루는 마지막 블록만 일반 루프로 처리합니다.
+         */
+        const int buildChunkSize = 64;
+
         [BurstCompile]
         struct BuildFromSamplesJob : IJobParallelFor
         {
@@ -135,25 +146,45 @@ namespace RuniOS.Sounds
             [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sourceCount;
             public int count;
+            public int chunksPerChannel;
 
-            public void Execute(int index)
+            public void Execute(int chunk)
             {
-                int channel = index / count;
-                int first = (index - (channel * count)) * branch;
-                int last = math.min(first + branch, sourceCount);
-                int offset = channel * sourceCount;
+                int channel = chunk / chunksPerChannel;
+                int first = (chunk - (channel * chunksPerChannel)) * buildChunkSize;
+                int last = math.min(first + buildChunkSize, count);
+                int sourceOffset = channel * sourceCount;
+                int outputOffset = channel * count;
 
-                int min = int.MaxValue;
-                int max = int.MinValue;
                 for (int i = first; i < last; i++)
                 {
-                    int value = source[offset + i];
-                    min = math.min(min, value);
-                    max = math.max(max, value);
-                }
+                    int begin = i * branch;
+                    int offset = sourceOffset + begin;
 
-                output[index * 2] = (short)min;
-                output[(index * 2) + 1] = (short)max;
+                    int min = int.MaxValue;
+                    int max = int.MinValue;
+                    if (begin + branch <= sourceCount)
+                    {
+                        for (int j = 0; j < branch; j++)
+                        {
+                            int value = source[offset + j];
+                            min = math.min(min, value);
+                            max = math.max(max, value);
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j < sourceCount - begin; j++)
+                        {
+                            int value = source[offset + j];
+                            min = math.min(min, value);
+                            max = math.max(max, value);
+                        }
+                    }
+
+                    output[(outputOffset + i) * 2] = (short)min;
+                    output[((outputOffset + i) * 2) + 1] = (short)max;
+                }
             }
         }
 
@@ -165,24 +196,43 @@ namespace RuniOS.Sounds
             [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
             public int sourceCount;
             public int count;
+            public int chunksPerChannel;
 
-            public void Execute(int index)
+            public void Execute(int chunk)
             {
-                int channel = index / count;
-                int first = (index - (channel * count)) * branch;
-                int last = math.min(first + branch, sourceCount);
-                int offset = channel * sourceCount;
+                int channel = chunk / chunksPerChannel;
+                int first = (chunk - (channel * chunksPerChannel)) * buildChunkSize;
+                int last = math.min(first + buildChunkSize, count);
+                int sourceOffset = channel * sourceCount;
+                int outputOffset = channel * count;
 
-                int min = int.MaxValue;
-                int max = int.MinValue;
                 for (int i = first; i < last; i++)
                 {
-                    min = math.min(min, source[(offset + i) * 2]);
-                    max = math.max(max, source[((offset + i) * 2) + 1]);
-                }
+                    int begin = i * branch;
+                    int offset = (sourceOffset + begin) * 2;
 
-                output[index * 2] = (short)min;
-                output[(index * 2) + 1] = (short)max;
+                    int min = int.MaxValue;
+                    int max = int.MinValue;
+                    if (begin + branch <= sourceCount)
+                    {
+                        for (int j = 0; j < branch; j++)
+                        {
+                            min = math.min(min, source[offset + (j * 2)]);
+                            max = math.max(max, source[offset + (j * 2) + 1]);
+                        }
+                    }
+                    else
+                    {
+                        for (int j = 0; j < sourceCount - begin; j++)
+                        {
+                            min = math.min(min, source[offset + (j * 2)]);
+                            max = math.max(max, source[offset + (j * 2) + 1]);
+                        }
+                    }
+
+                    output[(outputOffset + i) * 2] = (short)min;
+                    output[((outputOffset + i) * 2) + 1] = (short)max;
+                }
             }
         }
 
