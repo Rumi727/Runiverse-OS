@@ -118,6 +118,11 @@ namespace RuniOS.Utility
                 Object.DestroyImmediate(_missingTexture);
 
             _missingTexture = null!;
+
+            if (_coloredMaterial != null)
+                Object.DestroyImmediate(_coloredMaterial);
+
+            _coloredMaterial = null;
         }
     }
 }
