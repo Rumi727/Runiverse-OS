@@ -121,7 +121,7 @@ namespace RuniOS.Editor.Resource.Sounds
                     // 어셈블리 로드 중 호출되는 OnEnable에서는 네이티브 오브젝트를 만들 수 없으므로 처음 그릴 때 만듭니다.
                     waveformRenderer ??= new WaveformRenderer();
                     double lastSample = waveform.sampleCount - 1;
-                    waveformRenderer.Render(waveform, view.start * lastSample, Min((view.start + view.size) * lastSample, lastSample), texture, Color.darkOrange, 2);
+                    waveformRenderer.Render(waveform, view.start * lastSample, Min((view.start + view.size) * lastSample, lastSample), texture, Color.darkOrange, 1.5f);
                 }
             }
 
