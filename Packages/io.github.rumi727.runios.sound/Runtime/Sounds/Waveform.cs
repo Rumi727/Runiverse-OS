@@ -38,6 +38,7 @@ namespace RuniOS.Sounds
         /// Samples laid out per channel as <c>[channel * sampleCount + sample]</c>.<br/>
         /// <c>[channel * sampleCount + sample]</c>로 채널별 배치된 샘플입니다.
         /// </param>
+        /// <param name="channelCount"></param>
         public Waveform(NativeArray<short> planarSamples, int channelCount)
         {
             samples = planarSamples;
@@ -49,7 +50,7 @@ namespace RuniOS.Sounds
             int length = 0;
             while (count >= branch)
             {
-                count = (count + branch - 1) / branch;
+                count = ((count + branch) - 1) / branch;
                 infos.Add(new int2(length, count));
                 length = checked(length + (count * channelCount * 2));
             }
@@ -69,7 +70,7 @@ namespace RuniOS.Sounds
             for (int level = 0; level < infos.Count; level++)
             {
                 int levelCount = infos[level].y;
-                int chunksPerChannel = (levelCount + buildChunkSize - 1) / buildChunkSize;
+                int chunksPerChannel = ((levelCount + buildChunkSize) - 1) / buildChunkSize;
                 if (level == 0)
                 {
                     handle = new BuildFromSamplesJob
@@ -105,10 +106,14 @@ namespace RuniOS.Sounds
         /// The range must satisfy <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>. Values are normalized to -1..1.<br/>
         /// 구간은 <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>을 만족해야 합니다. 값은 -1..1로 정규화됩니다.
         /// </remarks>
+        /// <param name="width"></param>
         /// <param name="result">
         /// Receives <c>(min, max)</c> at <c>[channel * width + x]</c>. Columns with no samples receive a minimum greater than the maximum.<br/>
         /// <c>[channel * width + x]</c>에 <c>(min, max)</c>를 받습니다. 샘플이 없는 열은 최솟값이 최댓값보다 큽니다.
         /// </param>
+        /// <param name="startSample"></param>
+        /// <param name="endSample"></param>
+        /// <param name="dependency"></param>
         public JobHandle ScheduleMinMax(double startSample, double endSample, int width, NativeArray<float2> result, JobHandle dependency = default)
         {
             return new MinMaxJob
@@ -182,8 +187,10 @@ namespace RuniOS.Sounds
                         }
                     }
 
+                    // ReSharper disable IntVariableOverflowInUncheckedContext
                     output[(outputOffset + i) * 2] = (short)min;
                     output[((outputOffset + i) * 2) + 1] = (short)max;
+                    // ReSharper restore IntVariableOverflowInUncheckedContext
                 }
             }
         }
@@ -230,8 +237,10 @@ namespace RuniOS.Sounds
                         }
                     }
 
+                    // ReSharper disable IntVariableOverflowInUncheckedContext
                     output[(outputOffset + i) * 2] = (short)min;
                     output[((outputOffset + i) * 2) + 1] = (short)max;
+                    // ReSharper restore IntVariableOverflowInUncheckedContext
                 }
             }
         }
@@ -332,7 +341,7 @@ namespace RuniOS.Sounds
             {
                 int previous = (int)position;
                 if (previous >= sampleCount - 1)
-                    return samples[offset + sampleCount - 1] / 32768f;
+                    return samples[(offset + sampleCount) - 1] / 32768f;
 
                 float t = (float)(position - previous);
                 return math.lerp(samples[offset + previous] / 32768f, samples[offset + previous + 1] / 32768f, t);

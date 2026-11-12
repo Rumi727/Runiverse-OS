@@ -27,15 +27,17 @@ namespace RuniOS.Sounds
                 {
                     fixed (byte* pointer = source)
                     {
-                        int chunkCount = (sampleCount + planarChunkSize - 1) / planarChunkSize;
+                        int chunkCount = ((sampleCount + planarChunkSize) - 1) / planarChunkSize;
                         JobHandle handle = pcmFormat!.Value switch
                         {
+                            // ReSharper disable AccessToDisposedClosure
                             PCMFormat.PCM8 => new PCM8PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             PCMFormat.PCM16 => new PCM16PlanarJob { source = (short*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             PCMFormat.PCM24 => new PCM24PlanarJob { source = pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             PCMFormat.PCM32 => new PCM32PlanarJob { source = (int*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             PCMFormat.Float => new FloatPlanarJob { source = (float*)pointer, output = output, sampleCount = sampleCount, channelCount = channelCount }.Schedule(chunkCount, 1),
                             _ => throw new InvalidOperationException($"FMOD returned unsupported sample format {pcmFormat}.")
+                            // ReSharper restore AccessToDisposedClosure
                         };
 
                         // FMOD lock이 풀리기 전에 원본 포인터 사용을 끝내야 합니다.
