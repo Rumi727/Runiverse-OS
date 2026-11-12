@@ -5,6 +5,7 @@ using RuniOS.IO;
 using RuniOS.Sounds;
 using System.Collections.Immutable;
 using System.Globalization;
+using Unity.Collections;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
@@ -19,7 +20,8 @@ namespace RuniOS.Editor.Resource.Sounds
         public override WaveAudioClip? targetClip => target is { } node ? preview.GetAudio(node) : null;
 
         readonly AudioPreview preview = new AudioPreview();
-        readonly Dictionary<IONode, Texture2D> loadedTextures = [];
+        readonly Dictionary<IONode, RenderTexture> loadedTextures = [];
+        WaveformRenderer? waveformRenderer;
 
         public override bool IsMatch(IEnumerable<RuniPath> relativePaths) => relativePaths.Any() && relativePaths.All(x => IsMatch(x, "sounds", IPatternMatcher.musicMatcher));
 
@@ -31,8 +33,10 @@ namespace RuniOS.Editor.Resource.Sounds
 
         protected override void OnDisable()
         {
-            foreach (Texture2D texture in loadedTextures.Values)
+            foreach (RenderTexture texture in loadedTextures.Values)
                 Object.DestroyImmediate(texture);
+
+            waveformRenderer?.Dispose();
 
             preview.Dispose();
             AudioPreview.onLoadedAudio -= OnLoadedAudio;
@@ -58,7 +62,7 @@ namespace RuniOS.Editor.Resource.Sounds
             if (clip == null)
                 return;
 
-            Texture2D? texture = loadedTextures.GetValueOrDefault(node);
+            RenderTexture? texture = loadedTextures.GetValueOrDefault(node);
             if (Event.current.type == EventType.Repaint)
             {
                 background.Draw(r, GUIContent.none, false, false, false, false);
@@ -66,17 +70,25 @@ namespace RuniOS.Editor.Resource.Sounds
                 int width = Max(1, (int)r.width);
                 int height = Max(1, (int)r.height);
 
-                if (texture == null || texture.width != width || texture.height != height)
+                if ((texture == null || texture.width != width || texture.height != height || !texture.IsCreated()) && preview.TryGetPlanarSamples(node, out NativeArray<float> samples))
                 {
-                    if (texture != null)
-                        Object.DestroyImmediate(texture);
+                    if (texture == null || texture.width != width || texture.height != height)
+                    {
+                        if (texture != null)
+                            Object.DestroyImmediate(texture);
 
-                    texture = AudioPreview.WaveformTextureGenerate(clip, width, height, Color.darkOrange);
-                    loadedTextures[node] = texture;
+                        texture = new RenderTexture(width, height, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.sRGB) { hideFlags = HideFlags.HideAndDontSave };
+                        loadedTextures[node] = texture;
+                    }
+
+                    // 어셈블리 로드 중 호출되는 OnEnable에서는 네이티브 오브젝트를 만들 수 없으므로 처음 그릴 때 만듭니다.
+                    waveformRenderer ??= new WaveformRenderer();
+                    waveformRenderer.Render(samples, clip.channel, texture, Color.darkOrange);
                 }
             }
 
-            GUI.DrawTexture(r, texture, ScaleMode.StretchToFill, true);
+            if (texture != null)
+                GUI.DrawTexture(r, texture, ScaleMode.StretchToFill, true);
 
             AudioPreview.Player player = preview.GetOrCreatePlayer(node);
             if (player.isPlaying)
