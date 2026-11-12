@@ -1,43 +1,202 @@
 #nullable enable
 using Unity.Burst;
 using Unity.Collections;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Jobs;
 using Unity.Mathematics;
 
 namespace RuniOS.Sounds
 {
-    public static class Waveform
+    /// <summary>
+    /// Holds 16-bit planar samples and a min/max pyramid built from them, and reduces any sample range to waveform columns.<br/>
+    /// 16비트 planar 샘플과 그로부터 만든 min/max 피라미드를 보관하고, 임의의 샘플 구간을 파형 열로 축약합니다.
+    /// </summary>
+    /// <remarks>
+    /// Must be created on the main thread. Jobs scheduled by <see cref="ScheduleMinMax"/> must complete before <see cref="Dispose"/>.<br/>
+    /// 메인 스레드에서 생성해야 합니다. <see cref="ScheduleMinMax"/>로 스케줄한 잡은 <see cref="Dispose"/> 전에 완료되어야 합니다.
+    /// </remarks>
+    public sealed class Waveform : IDisposable
     {
+        const int branch = 16;
+
+        NativeArray<short> samples;
+
+        // 레벨 l의 원소 하나는 원본 샘플 16^(l+1)개의 (min, max) 짝이며, [offset + 2 * (channel * count + i)]에 저장됩니다.
+        NativeArray<short> levels;
+
+        // 레벨마다 levels 안의 (offset, count)입니다.
+        NativeArray<int2> levelInfos;
+
+        public int channelCount { get; }
+        public int sampleCount { get; }
+
         /// <summary>
-        /// Schedules a job that computes the minimum and maximum of each column of the waveform.<br/>
-        /// 파형의 각 열의 최솟값과 최댓값을 계산하는 잡을 스케줄합니다.
+        /// Takes ownership of <paramref name="planarSamples"/> and builds the min/max pyramid.<br/>
+        /// <paramref name="planarSamples"/>의 소유권을 가져오고 min/max 피라미드를 만듭니다.
         /// </summary>
         /// <param name="planarSamples">
         /// Samples laid out per channel as <c>[channel * sampleCount + sample]</c>.<br/>
         /// <c>[channel * sampleCount + sample]</c>로 채널별 배치된 샘플입니다.
         /// </param>
+        public Waveform(NativeArray<short> planarSamples, int channelCount)
+        {
+            samples = planarSamples;
+            this.channelCount = channelCount;
+            sampleCount = planarSamples.Length / channelCount;
+
+            List<int2> infos = [];
+            int count = sampleCount;
+            int length = 0;
+            while (count >= branch)
+            {
+                count = (count + branch - 1) / branch;
+                infos.Add(new int2(length, count));
+                length = checked(length + (count * channelCount * 2));
+            }
+
+            levelInfos = new NativeArray<int2>(infos.Count, Allocator.Persistent);
+            for (int i = 0; i < infos.Count; i++)
+                levelInfos[i] = infos[i];
+
+            levels = new NativeArray<short>(length, Allocator.Persistent, NativeArrayOptions.UninitializedMemory);
+
+            // 잡이 levels에 쓰는 동안에는 서브 배열을 만들 수 없으므로 레벨별 구간을 먼저 만들어 둡니다.
+            NativeArray<short>[] views = new NativeArray<short>[infos.Count];
+            for (int level = 0; level < infos.Count; level++)
+                views[level] = levels.GetSubArray(infos[level].x, infos[level].y * channelCount * 2);
+
+            JobHandle handle = default;
+            for (int level = 0; level < infos.Count; level++)
+            {
+                int levelCount = infos[level].y;
+                if (level == 0)
+                {
+                    handle = new BuildFromSamplesJob
+                    {
+                        source = samples,
+                        output = views[level],
+                        sourceCount = sampleCount,
+                        count = levelCount
+                    }.Schedule(levelCount * channelCount, 64, handle);
+                }
+                else
+                {
+                    handle = new BuildFromLevelJob
+                    {
+                        source = views[level - 1],
+                        output = views[level],
+                        sourceCount = infos[level - 1].y,
+                        count = levelCount
+                    }.Schedule(levelCount * channelCount, 64, handle);
+                }
+            }
+
+            handle.Complete();
+        }
+
+        /// <summary>
+        /// Schedules a job that computes the minimum and maximum of each column when the range from <paramref name="startSample"/> to <paramref name="endSample"/> is spread over <paramref name="width"/> columns.<br/>
+        /// <paramref name="startSample"/>부터 <paramref name="endSample"/>까지의 구간을 <paramref name="width"/>개의 열로 펼쳤을 때 각 열의 최솟값과 최댓값을 계산하는 잡을 스케줄합니다.
+        /// </summary>
+        /// <remarks>
+        /// The range must satisfy <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>. Values are normalized to -1..1.<br/>
+        /// 구간은 <c>0 &lt;= startSample &lt;= endSample &lt;= sampleCount - 1</c>을 만족해야 합니다. 값은 -1..1로 정규화됩니다.
+        /// </remarks>
         /// <param name="result">
         /// Receives <c>(min, max)</c> at <c>[channel * width + x]</c>. Columns with no samples receive a minimum greater than the maximum.<br/>
         /// <c>[channel * width + x]</c>에 <c>(min, max)</c>를 받습니다. 샘플이 없는 열은 최솟값이 최댓값보다 큽니다.
         /// </param>
-        public static JobHandle ScheduleMinMax(NativeArray<float> planarSamples, int channelCount, int width, NativeArray<float2> result, JobHandle dependency = default)
+        public JobHandle ScheduleMinMax(double startSample, double endSample, int width, NativeArray<float2> result, JobHandle dependency = default)
         {
             return new MinMaxJob
             {
-                samples = planarSamples,
+                samples = samples,
+                levels = levels,
+                levelInfos = levelInfos,
                 result = result,
-                sampleCount = planarSamples.Length / channelCount,
-                width = width
+                sampleCount = sampleCount,
+                width = width,
+                startSample = startSample,
+                scale = (endSample - startSample) / width
             }.Schedule(channelCount * width, 16, dependency);
+        }
+
+        public void Dispose()
+        {
+            samples.Dispose();
+            levels.Dispose();
+            levelInfos.Dispose();
+        }
+
+        [BurstCompile]
+        struct BuildFromSamplesJob : IJobParallelFor
+        {
+            [ReadOnly] public NativeArray<short> source;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
+            public int sourceCount;
+            public int count;
+
+            public void Execute(int index)
+            {
+                int channel = index / count;
+                int first = (index - (channel * count)) * branch;
+                int last = math.min(first + branch, sourceCount);
+                int offset = channel * sourceCount;
+
+                int min = int.MaxValue;
+                int max = int.MinValue;
+                for (int i = first; i < last; i++)
+                {
+                    int value = source[offset + i];
+                    min = math.min(min, value);
+                    max = math.max(max, value);
+                }
+
+                output[index * 2] = (short)min;
+                output[(index * 2) + 1] = (short)max;
+            }
+        }
+
+        [BurstCompile]
+        struct BuildFromLevelJob : IJobParallelFor
+        {
+            // 같은 levels 배열에서 이전 레벨 구간을 읽고 다음 레벨 구간에 씁니다. 두 구간은 겹치지 않습니다.
+            [ReadOnly, NativeDisableContainerSafetyRestriction] public NativeArray<short> source;
+            [NativeDisableParallelForRestriction, WriteOnly] public NativeArray<short> output;
+            public int sourceCount;
+            public int count;
+
+            public void Execute(int index)
+            {
+                int channel = index / count;
+                int first = (index - (channel * count)) * branch;
+                int last = math.min(first + branch, sourceCount);
+                int offset = channel * sourceCount;
+
+                int min = int.MaxValue;
+                int max = int.MinValue;
+                for (int i = first; i < last; i++)
+                {
+                    min = math.min(min, source[(offset + i) * 2]);
+                    max = math.max(max, source[((offset + i) * 2) + 1]);
+                }
+
+                output[index * 2] = (short)min;
+                output[(index * 2) + 1] = (short)max;
+            }
         }
 
         [BurstCompile(FloatMode = FloatMode.Fast)]
         struct MinMaxJob : IJobParallelFor
         {
-            [ReadOnly] public NativeArray<float> samples;
+            [ReadOnly] public NativeArray<short> samples;
+            [ReadOnly] public NativeArray<short> levels;
+            [ReadOnly] public NativeArray<int2> levelInfos;
             [WriteOnly] public NativeArray<float2> result;
             public int sampleCount;
             public int width;
+            public double startSample;
+            public double scale;
 
             public void Execute(int index)
             {
@@ -52,9 +211,8 @@ namespace RuniOS.Sounds
                 int offset = channel * sampleCount;
 
                 // 샘플 사이를 직선으로 이은 파형에서 열 x가 덮는 [start, end] 구간의 최솟값과 최댓값을 구합니다.
-                double scale = (double)(sampleCount - 1) / width;
-                double start = x * scale;
-                double end = (x + 1) * scale;
+                double start = startSample + (x * scale);
+                double end = startSample + ((x + 1) * scale);
 
                 float startValue = Sample(offset, start);
                 float endValue = Sample(offset, end);
@@ -63,48 +221,71 @@ namespace RuniOS.Sounds
                 float max = math.max(startValue, endValue);
 
                 int first = (int)start + 1;
-                int count = math.min((int)end, sampleCount - 1) - first + 1;
-                if (count > 0)
+                int last = math.min((int)end, sampleCount - 1);
+                if (first <= last)
                 {
-                    NativeArray<float> range = samples.GetSubArray(offset + first, count);
-
-                    // 스칼라 min/max 누적은 Burst가 리덕션으로 인식하지 못해 자동 벡터화되지 않으므로 float4로 직접 누적합니다.
-                    int vectorCount = count >> 2;
-                    if (vectorCount > 0)
-                    {
-                        NativeArray<float4> vectors = range.GetSubArray(0, vectorCount << 2).Reinterpret<float4>(sizeof(float));
-                        float4 min4 = min;
-                        float4 max4 = max;
-                        for (int i = 0; i < vectorCount; i++)
-                        {
-                            float4 value = vectors[i];
-                            min4 = math.min(min4, value);
-                            max4 = math.max(max4, value);
-                        }
-
-                        min = math.cmin(min4);
-                        max = math.cmax(max4);
-                    }
-
-                    for (int i = vectorCount << 2; i < count; i++)
-                    {
-                        float value = range[i];
-                        min = math.min(min, value);
-                        max = math.max(max, value);
-                    }
+                    Reduce(channel, first, last + 1, out int innerMin, out int innerMax);
+                    min = math.min(min, innerMin / 32768f);
+                    max = math.max(max, innerMax / 32768f);
                 }
 
                 result[index] = new float2(min, max);
+            }
+
+            // 원본 샘플 [lo, hi)를 레벨마다 정렬되지 않은 양 끝만 소비하고 나머지는 상위 레벨로 올려 보내며 축약합니다.
+            void Reduce(int channel, int lo, int hi, out int min, out int max)
+            {
+                min = int.MaxValue;
+                max = int.MinValue;
+
+                int level = -1;
+                int count = sampleCount;
+                int baseIndex = channel * sampleCount;
+
+                while (level != levelInfos.Length - 1 && hi - lo > branch * 2)
+                {
+                    for (; lo % branch != 0; lo++)
+                        Take(level, baseIndex, lo, ref min, ref max);
+
+                    for (; hi % branch != 0 && hi != count; hi--)
+                        Take(level, baseIndex, hi - 1, ref min, ref max);
+
+                    int2 next = levelInfos[level + 1];
+                    lo /= branch;
+                    hi = hi == count ? next.y : hi / branch;
+
+                    level++;
+                    count = next.y;
+                    baseIndex = next.x + (channel * count * 2);
+                }
+
+                for (int i = lo; i < hi; i++)
+                    Take(level, baseIndex, i, ref min, ref max);
+            }
+
+            void Take(int level, int baseIndex, int i, ref int min, ref int max)
+            {
+                if (level < 0)
+                {
+                    int value = samples[baseIndex + i];
+                    min = math.min(min, value);
+                    max = math.max(max, value);
+                }
+                else
+                {
+                    min = math.min(min, levels[baseIndex + (i * 2)]);
+                    max = math.max(max, levels[baseIndex + (i * 2) + 1]);
+                }
             }
 
             float Sample(int offset, double position)
             {
                 int previous = (int)position;
                 if (previous >= sampleCount - 1)
-                    return samples[offset + sampleCount - 1];
+                    return samples[offset + sampleCount - 1] / 32768f;
 
                 float t = (float)(position - previous);
-                return math.lerp(samples[offset + previous], samples[offset + previous + 1], t);
+                return math.lerp(samples[offset + previous] / 32768f, samples[offset + previous + 1] / 32768f, t);
             }
         }
     }
