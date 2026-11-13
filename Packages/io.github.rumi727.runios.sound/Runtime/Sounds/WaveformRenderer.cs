@@ -86,6 +86,7 @@ namespace RuniOS.Sounds
         /// The range follows the contract of <see cref="Waveform.ScheduleMinMax"/>.<br/>
         /// 구간은 <see cref="Waveform.ScheduleMinMax"/>의 계약을 따릅니다.
         /// </remarks>
+        /// <param name="color"></param>
         /// <param name="thickness">
         /// Line thickness in pixels, measured perpendicular to the line regardless of its slope.<br/>
         /// 기울기와 상관없이 선에 수직인 방향으로 잰 선 굵기(픽셀)입니다.
@@ -98,6 +99,10 @@ namespace RuniOS.Sounds
         /// How to draw the waveform when one pixel covers two or more samples.<br/>
         /// 픽셀 하나가 샘플 2개 이상을 덮을 때 파형을 그리는 방식입니다.
         /// </param>
+        /// <param name="waveform"></param>
+        /// <param name="startSample"></param>
+        /// <param name="endSample"></param>
+        /// <param name="target"></param>
         /// <exception cref="ObjectDisposedException">This renderer has been disposed.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="waveform"/> or <paramref name="target"/> is <see langword="null"/>.</exception>
         public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color, float thickness = 1, float antialiasing = 1, WaveformRenderMode mode = WaveformRenderMode.Density)
