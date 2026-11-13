@@ -23,6 +23,7 @@ namespace RuniOS.Sounds
         static readonly int samplesPerPixelID = Shader.PropertyToID("_SamplesPerPixel");
         static readonly int subColumnsID = Shader.PropertyToID("_SubColumns");
         static readonly int modeID = Shader.PropertyToID("_Mode");
+        static readonly int zoomedOutBlendEndID = Shader.PropertyToID("_ZoomedOutBlendEnd");
 
         // 축소 상태에서 픽셀 하나를 나누는 하위 열의 최대 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
         const int maxSubColumns = 16;
@@ -48,6 +49,16 @@ namespace RuniOS.Sounds
 
             _material = null;
         }
+
+        /// <summary>
+        /// Samples per pixel at which the waveform is fully drawn by the zoomed-out mode. From 1 sample per pixel up to this value, the line blends into the zoomed-out mode.<br/>
+        /// 파형을 축소 상태 방식으로만 그리기 시작하는 픽셀당 샘플 수입니다. 픽셀당 샘플 1개부터 이 값까지 선이 축소 상태 방식으로 섞여 넘어갑니다.
+        /// </summary>
+        /// <remarks>
+        /// A value of 1 or less switches at 1 sample per pixel without blending.<br/>
+        /// 1 이하이면 섞지 않고 픽셀당 샘플 1개에서 바로 바뀝니다.
+        /// </remarks>
+        public float zoomedOutBlendEnd { get; set; } = 2;
 
         Texture2D? minMaxTexture;
 
@@ -152,6 +163,7 @@ namespace RuniOS.Sounds
             material.SetFloat(samplesPerPixelID, (float)samplesPerPixel);
             material.SetFloat(subColumnsID, subColumns);
             material.SetFloat(modeID, (float)mode);
+            material.SetFloat(zoomedOutBlendEndID, zoomedOutBlendEnd);
             material.SetTexture(boundaryTexID, boundaryTexture);
 
             // Blit은 활성 렌더 타겟을 바꾸고, IMGUI는 sRGB 쓰기를 끈 채 그리므로 호출자의 상태를 되돌립니다.

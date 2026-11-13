@@ -11,6 +11,7 @@ Shader "Hidden/RuniOS/Waveform"
         _SamplesPerPixel ("Samples Per Pixel", Float) = 1
         _SubColumns ("Sub Columns", Float) = 1
         _Mode ("Mode", Float) = 0
+        _ZoomedOutBlendEnd ("Zoomed Out Blend End", Float) = 2
     }
     SubShader
     {
@@ -44,6 +45,9 @@ Shader "Hidden/RuniOS/Waveform"
 
             // WaveformRenderMode입니다. 0: 밀도, 1: 피크
             float _Mode;
+
+            // 축소 상태 방식으로만 그리기 시작하는 픽셀당 샘플 수입니다. 픽셀당 샘플 1개부터 여기까지 선과 섞습니다.
+            float _ZoomedOutBlendEnd;
 
             float2 FetchMinMax(int channel, int column, int subColumn, int width)
             {
@@ -254,10 +258,11 @@ Shader "Hidden/RuniOS/Waveform"
                 float2 pixel = float2(i.uv.x * width, y + 0.5);
 
                 /*
-                 * 픽셀당 샘플 1개 이하는 선으로, 2개 이상은 축소 상태 방식(밀도 또는 피크)으로 그리고, 그 사이는 줌할 때 모양이 튀지 않도록 섞습니다.
+                 * 픽셀당 샘플 1개 이하는 선으로, _ZoomedOutBlendEnd개 이상은 축소 상태 방식(밀도 또는 피크)으로 그리고, 그 사이는 줌할 때 모양이 튀지 않도록 섞습니다.
                  * 픽셀당 샘플이 1개면 그 픽셀의 소리는 그 샘플뿐이라 밀도가 100%이므로, 밀도 방식은 이 지점에서 선과 자연스럽게 이어집니다.
                  */
-                float zoomedOutWeight = saturate(_SamplesPerPixel - 1);
+                // 끝 지점이 1 이하면 0으로 나누지 않도록 폭을 아주 작게 두어 1에서 바로 바뀌게 합니다.
+                float zoomedOutWeight = saturate((_SamplesPerPixel - 1) / max(_ZoomedOutBlendEnd - 1, 1e-6));
 
                 float alpha = 0;
                 if (zoomedOutWeight < 1)
