@@ -112,7 +112,7 @@ namespace RuniOS.Editor.Sounds
 
                         double channelTime = channel.time;
                         double now = EditorApplication.timeSinceStartup;
-                        if (channelTime != lastChannelTime)
+                        if (!channelTime.Approximately(lastChannelTime))
                         {
                             lastChannelTime = channelTime;
                             lastChannelTimeChangedAt = now;
