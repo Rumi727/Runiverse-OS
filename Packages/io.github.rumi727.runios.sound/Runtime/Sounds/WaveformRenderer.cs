@@ -27,8 +27,8 @@ namespace RuniOS.Sounds
         static readonly int zoomedOutBlendEndID = Shader.PropertyToID("_ZoomedOutBlendEnd");
         static readonly int densityGammaID = Shader.PropertyToID("_DensityGamma");
 
-        // 밀도 방식에서 픽셀 하나를 나누는 하위 열의 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
-        const int densitySubColumns = 16;
+        // 밀도 방식에서 픽셀 하나를 나누는 하위 열의 최대 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
+        const int maxSubColumns = 16;
 
         // Blit은 호출 시점의 프로퍼티로 즉시 그리므로 모든 렌더러가 하나의 머티리얼을 공유합니다.
         static Material material
@@ -121,11 +121,12 @@ namespace RuniOS.Sounds
 
             /*
              * 축소 상태에서는 픽셀 하나를 하위 열로 나눠 min/max를 구하고, 셰이더가 하위 열들이 픽셀을 덮는 비율을 평균 내어 소리의 밀도를 보여줍니다.
-             * 하위 열 양 끝은 원본에서 보간하므로 샘플이 없는 하위 열도 그 구간을 지나는 선분의 min/max가 정확합니다. 그래서 배율과 상관없이 같은 개수로 나눠 비스듬한 선도 가로로 안티에일리어싱합니다.
+             * 하위 열 개수는 픽셀당 샘플 수를 넘지 않게 합니다. 더 잘게 나누면 비스듬한 선의 가로 경계가 부드러워지지만,
+             * 픽셀당 샘플이 적은 배율은 선 방식의 비중이 커서 거의 보이지 않는 데 비해 열 수만큼 비용이 늘기 때문입니다.
              * 폭 * 하위 열 수는 텍스처 최대 폭을 넘을 수 있으므로, 텍스처는 픽셀 폭으로 두고 하위 열은 줄을 늘려 이어 붙입니다.
              */
-            // 피크 방식은 픽셀마다 min/max 하나만 쓰고, 픽셀당 샘플 1개 이하는 선으로만 그리므로 나누지 않습니다.
-            int subColumns = mode == WaveformRenderMode.Density && samplesPerPixel > 1 ? densitySubColumns : 1;
+            // 피크 방식은 픽셀마다 min/max 하나만 쓰므로 나누지 않습니다.
+            int subColumns = mode == WaveformRenderMode.Density ? (int)Math.Clamp(Math.Floor(samplesPerPixel), 1, maxSubColumns) : 1;
             int rowCount = channelCount * subColumns;
 
             if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != rowCount)
