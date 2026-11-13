@@ -8,6 +8,8 @@ Shader "Hidden/RuniOS/Waveform"
         _TargetHeight ("Target Height", Float) = 1
         _Thickness ("Thickness", Float) = 1
         _Antialiasing ("Antialiasing", Float) = 1
+        _SamplesPerPixel ("Samples Per Pixel", Float) = 1
+        _SubColumns ("Sub Columns", Float) = 1
     }
     SubShader
     {
@@ -20,7 +22,7 @@ Shader "Hidden/RuniOS/Waveform"
             #pragma fragment frag
             #include "UnityCG.cginc"
 
-            // x: 열 하나당 텍셀 하나, y: 채널 하나당 텍셀 하나, 텍셀 값은 (min, max)
+            // 텍셀 값은 하위 열 하나의 (min, max)입니다. [(채널 * 열 개수 + 열) * 하위 열 개수 + 하위 열]의 선형 순서로 폭이 열 개수인 텍스처에 줄을 바꿔 가며 놓입니다.
             sampler2D _MainTex;
             float4 _MainTex_TexelSize;
 
@@ -33,6 +35,35 @@ Shader "Hidden/RuniOS/Waveform"
             float _Thickness;
             float _Antialiasing;
 
+            // 열 하나가 덮는 원본 샘플 수입니다. 화면 전체에서 같으므로 두 그리기 방식을 섞는 비율을 정하는 데 씁니다.
+            float _SamplesPerPixel;
+
+            // 픽셀 하나를 나눈 하위 열의 개수입니다. 픽셀당 샘플이 2개 미만인 확대 상태에서는 1입니다.
+            float _SubColumns;
+
+            float2 FetchMinMax(int channel, int column, int subColumn, int width)
+            {
+                int index = (((channel * width) + column) * (int)_SubColumns) + subColumn;
+                int row = index / width;
+                return tex2Dlod(_MainTex, float4(((index - (row * width)) + 0.5) * _MainTex_TexelSize.x, (row + 0.5) * _MainTex_TexelSize.y, 0, 0)).rg;
+            }
+
+            // 하위 열들은 열 구간을 빈틈없이 나누므로, 그 min/max를 합치면 열 전체의 min/max가 됩니다.
+            float2 FetchColumnMinMax(int channel, int column, int width)
+            {
+                float2 minMax = FetchMinMax(channel, column, 0, width);
+                int subColumns = (int)_SubColumns;
+
+                [loop]
+                for (int subColumn = 1; subColumn < subColumns; subColumn++)
+                {
+                    float2 sub = FetchMinMax(channel, column, subColumn, width);
+                    minMax = float2(min(minMax.x, sub.x), max(minMax.y, sub.y));
+                }
+
+                return minMax;
+            }
+
             float SegmentDistance(float2 p, float2 a, float2 b)
             {
                 float2 ab = b - a;
@@ -40,24 +71,15 @@ Shader "Hidden/RuniOS/Waveform"
                 return length(p - a - (ab * t));
             }
 
-            float4 frag(v2f_img i) : SV_Target
+            // 선 가장자리 밖으로 벗어난 거리(안쪽은 음수)를 안티에일리어싱 폭에 걸쳐 알파로 바꿉니다.
+            float Coverage(float outside)
             {
-                int width = (int)_MainTex_TexelSize.z;
-                int channelCount = (int)_MainTex_TexelSize.w;
-                int laneHeight = (int)_TargetHeight / channelCount;
-                int y = (int)floor(i.uv.y * _TargetHeight);
+                return _Antialiasing > 0 ? saturate(0.5 - (outside / _Antialiasing)) : outside <= 0;
+            }
 
-                int lane = laneHeight > 0 ? y / laneHeight : channelCount;
-                if (lane >= channelCount)
-                    return 0;
-
-                int channel = channelCount - lane - 1;
-                float v = (channel + 0.5) * _MainTex_TexelSize.y;
-
-                float halfLane = laneHeight / 2.0;
-                float center = (lane * laneHeight) + halfLane;
-                float2 pixel = float2(i.uv.x * width, y + 0.5);
-
+            // 열 안의 파형을 꺾은선으로 복원해 굵기를 가진 선으로 그립니다. 샘플 간격이 픽셀보다 넓은 확대 상태를 위한 방식입니다.
+            float LineAlpha(float2 pixel, int width, int channel, float v, float center, float halfLane)
+            {
                 // 픽셀에서 굵기와 안티에일리어싱 폭의 절반 안에 들어오는 열만 선에 닿을 수 있습니다.
                 float reach = (_Thickness + _Antialiasing) / 2;
                 int firstColumn = max((int)floor(pixel.x - reach), 0);
@@ -72,7 +94,7 @@ Shader "Hidden/RuniOS/Waveform"
                 [loop]
                 for (int column = firstColumn; column <= lastColumn; column++)
                 {
-                    float2 minMax = tex2Dlod(_MainTex, float4((column + 0.5) * _MainTex_TexelSize.x, v, 0, 0)).rg;
+                    float2 minMax = FetchColumnMinMax(channel, column, width);
                     if (minMax.x > minMax.y)
                         continue;
 
@@ -117,9 +139,73 @@ Shader "Hidden/RuniOS/Waveform"
                     }
                 }
 
-                // 선 가장자리 밖으로 벗어난 거리(안쪽은 음수)를 안티에일리어싱 폭에 걸쳐 알파로 바꿉니다.
-                float outside = min(nearest, -fillDepth) - (_Thickness / 2);
-                float alpha = _Antialiasing > 0 ? saturate(0.5 - (outside / _Antialiasing)) : outside <= 0;
+                return Coverage(min(nearest, -fillDepth) - (_Thickness / 2));
+            }
+
+            // 하위 열 하나의 세로 범위가 픽셀을 덮는 정도입니다. 거의 평평한 범위도 보이도록 높이가 굵기보다 작으면 가운데를 기준으로 굵기만큼 벌립니다.
+            float SpanCoverage(float2 minMax, float pixelY, float center, float halfLane)
+            {
+                if (minMax.x > minMax.y)
+                    return 0;
+
+                float low = center + (minMax.x * halfLane);
+                float high = center + (minMax.y * halfLane);
+                float middle = (low + high) / 2;
+                float halfHeight = max((high - low) / 2, _Thickness / 2);
+
+                return Coverage(abs(pixelY - middle) - halfHeight);
+            }
+
+            /*
+             * 열 하나에 샘플이 많아 파형이 선이 아닌 면이 되는 축소 상태를 위한 방식입니다.
+             * 픽셀을 나눈 하위 열들이 픽셀을 덮는 정도를 평균 내므로, 순간 피크 하나만 있는 높이는 흐리게, 소리가 몰린 높이는 진하게 보입니다.
+             * 하위 열이 픽셀 안의 가로 변화를 그대로 담으므로 열 사이를 보간하지 않아도 가로 경계가 부드럽게 나옵니다.
+             */
+            float DensityAlpha(float2 pixel, int width, int channel, float center, float halfLane)
+            {
+                int column = (int)floor(pixel.x);
+                int subColumns = (int)_SubColumns;
+
+                float sum = 0;
+
+                [loop]
+                for (int subColumn = 0; subColumn < subColumns; subColumn++)
+                    sum += SpanCoverage(FetchMinMax(channel, column, subColumn, width), pixel.y, center, halfLane);
+
+                return sum / subColumns;
+            }
+
+            float4 frag(v2f_img i) : SV_Target
+            {
+                // 경계 값 텍스처는 하위 열과 상관없이 (열 개수 + 1) × 채널 수입니다.
+                int width = (int)_BoundaryTex_TexelSize.z - 1;
+                int channelCount = (int)_BoundaryTex_TexelSize.w;
+                int laneHeight = (int)_TargetHeight / channelCount;
+                int y = (int)floor(i.uv.y * _TargetHeight);
+
+                int lane = laneHeight > 0 ? y / laneHeight : channelCount;
+                if (lane >= channelCount)
+                    return 0;
+
+                int channel = channelCount - lane - 1;
+                float v = (channel + 0.5) * _BoundaryTex_TexelSize.y;
+
+                float halfLane = laneHeight / 2.0;
+                float center = (lane * laneHeight) + halfLane;
+                float2 pixel = float2(i.uv.x * width, y + 0.5);
+
+                /*
+                 * 픽셀당 샘플 1개 이하는 선으로, 2개 이상은 밀도로 그리고, 그 사이는 줌할 때 모양이 튀지 않도록 섞습니다.
+                 * 픽셀당 샘플이 1개면 그 픽셀의 소리는 그 샘플뿐이라 밀도가 100%이므로, 밀도 방식은 이 지점에서 선과 자연스럽게 이어집니다.
+                 */
+                float zoomedOutWeight = saturate(_SamplesPerPixel - 1);
+
+                float alpha = 0;
+                if (zoomedOutWeight < 1)
+                    alpha = LineAlpha(pixel, width, channel, v, center, halfLane);
+
+                if (zoomedOutWeight > 0)
+                    alpha = lerp(alpha, DensityAlpha(pixel, width, channel, center, halfLane), zoomedOutWeight);
 
                 return float4(_Color.rgb, _Color.a * alpha);
             }

@@ -20,6 +20,11 @@ namespace RuniOS.Sounds
         static readonly int thicknessID = Shader.PropertyToID("_Thickness");
         static readonly int antialiasingID = Shader.PropertyToID("_Antialiasing");
         static readonly int boundaryTexID = Shader.PropertyToID("_BoundaryTex");
+        static readonly int samplesPerPixelID = Shader.PropertyToID("_SamplesPerPixel");
+        static readonly int subColumnsID = Shader.PropertyToID("_SubColumns");
+
+        // 축소 상태에서 픽셀 하나를 나누는 하위 열의 최대 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
+        const int maxSubColumns = 16;
 
         // Blit은 호출 시점의 프로퍼티로 즉시 그리므로 모든 렌더러가 하나의 머티리얼을 공유합니다.
         static Material material
@@ -79,12 +84,22 @@ namespace RuniOS.Sounds
 
             int width = target.width;
             int channelCount = waveform.channelCount;
-            if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != channelCount)
+            double samplesPerPixel = (endSample - startSample) / width;
+
+            /*
+             * 축소 상태에서는 픽셀 하나를 하위 열로 나눠 min/max를 구하고, 셰이더가 하위 열들이 픽셀을 덮는 비율을 평균 내어 소리의 밀도를 보여줍니다.
+             * 하위 열마다 샘플이 하나 이상 들어가도록 픽셀당 샘플 수를 넘지 않게 합니다.
+             * 폭 * 하위 열 수는 텍스처 최대 폭을 넘을 수 있으므로, 텍스처는 픽셀 폭으로 두고 하위 열은 줄을 늘려 이어 붙입니다.
+             */
+            int subColumns = (int)Math.Clamp(Math.Floor(samplesPerPixel), 1, maxSubColumns);
+            int rowCount = channelCount * subColumns;
+
+            if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != rowCount)
             {
                 if (minMaxTexture != null)
                     Object.DestroyImmediate(minMaxTexture);
 
-                minMaxTexture = new Texture2D(width, channelCount, TextureFormat.RGFloat, false, true)
+                minMaxTexture = new Texture2D(width, rowCount, TextureFormat.RGFloat, false, true)
                 {
                     filterMode = FilterMode.Point,
                     wrapMode = TextureWrapMode.Clamp,
@@ -106,7 +121,7 @@ namespace RuniOS.Sounds
             }
 
             // 두 잡은 원본을 읽기만 하므로 서로 기다리지 않고 함께 돌립니다.
-            JobHandle minMaxHandle = waveform.ScheduleMinMax(startSample, endSample, width, minMaxTexture.GetPixelData<float2>(0));
+            JobHandle minMaxHandle = waveform.ScheduleMinMax(startSample, endSample, width * subColumns, minMaxTexture.GetPixelData<float2>(0));
             JobHandle boundaryHandle;
             try
             {
@@ -128,6 +143,8 @@ namespace RuniOS.Sounds
             material.SetFloat(targetHeightID, target.height);
             material.SetFloat(thicknessID, thickness);
             material.SetFloat(antialiasingID, antialiasing);
+            material.SetFloat(samplesPerPixelID, (float)samplesPerPixel);
+            material.SetFloat(subColumnsID, subColumns);
             material.SetTexture(boundaryTexID, boundaryTexture);
 
             // Blit은 활성 렌더 타겟을 바꾸고, IMGUI는 sRGB 쓰기를 끈 채 그리므로 호출자의 상태를 되돌립니다.
