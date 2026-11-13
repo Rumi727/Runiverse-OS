@@ -40,7 +40,7 @@ Shader "Hidden/RuniOS/Waveform"
             // 열 하나가 덮는 원본 샘플 수입니다. 화면 전체에서 같으므로 두 그리기 방식을 섞는 비율을 정하는 데 씁니다.
             float _SamplesPerPixel;
 
-            // 픽셀 하나를 나눈 하위 열의 개수입니다. 픽셀당 샘플이 2개 미만인 확대 상태에서는 1입니다.
+            // 픽셀 하나를 나눈 하위 열의 개수입니다. 피크 방식이거나 픽셀당 샘플이 1개 이하면 1입니다.
             float _SubColumns;
 
             // WaveformRenderMode입니다. 0: 밀도, 1: 피크
