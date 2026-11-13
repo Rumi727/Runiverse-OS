@@ -42,17 +42,24 @@ namespace RuniOS.Sounds
 
     public static class PCMFormatExtension
     {
-        public static PCMFormat? ToPCMFormat(this SOUND_FORMAT format)
+        public static PCMFormat? ToPCMFormat(this SOUND_FORMAT format) => format switch
         {
-            return format switch
-            {
-                SOUND_FORMAT.PCM8 => PCMFormat.PCM8,
-                SOUND_FORMAT.PCM16 => PCMFormat.PCM16,
-                SOUND_FORMAT.PCM24 => PCMFormat.PCM24,
-                SOUND_FORMAT.PCM32 => PCMFormat.PCM32,
-                SOUND_FORMAT.PCMFLOAT => PCMFormat.Float,
-                _ => null
-            };
-        }
+            SOUND_FORMAT.PCM8 => PCMFormat.PCM8,
+            SOUND_FORMAT.PCM16 => PCMFormat.PCM16,
+            SOUND_FORMAT.PCM24 => PCMFormat.PCM24,
+            SOUND_FORMAT.PCM32 => PCMFormat.PCM32,
+            SOUND_FORMAT.PCMFLOAT => PCMFormat.Float,
+            _ => null
+        };
+
+        public static int GetBytePerSamples(this PCMFormat format) => format switch
+        {
+            PCMFormat.PCM8 => 1,
+            PCMFormat.PCM16 => 2,
+            PCMFormat.PCM24 => 3,
+            PCMFormat.PCM32 => 4,
+            PCMFormat.Float => 4,
+            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
+        };
     }
 }
