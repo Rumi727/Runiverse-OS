@@ -24,6 +24,7 @@ namespace RuniOS.Sounds
         static readonly int subColumnsID = Shader.PropertyToID("_SubColumns");
         static readonly int modeID = Shader.PropertyToID("_Mode");
         static readonly int zoomedOutBlendEndID = Shader.PropertyToID("_ZoomedOutBlendEnd");
+        static readonly int densityGammaID = Shader.PropertyToID("_DensityGamma");
 
         // 밀도 방식에서 픽셀 하나를 나누는 하위 열의 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
         const int densitySubColumns = 16;
@@ -58,7 +59,17 @@ namespace RuniOS.Sounds
         /// A value of 1 or less switches at 1 sample per pixel without blending.<br/>
         /// 1 이하이면 섞지 않고 픽셀당 샘플 1개에서 바로 바뀝니다.
         /// </remarks>
-        public float zoomedOutBlendEnd { get; set; } = 2;
+        public float zoomedOutBlendEnd { get; set; } = 256;
+
+        /// <summary>
+        /// Gamma applied to the density in <see cref="WaveformRenderMode.Density"/>. The alpha is <c>density^(1 / densityGamma)</c>, so values above 1 make sparse sound more visible.<br/>
+        /// <see cref="WaveformRenderMode.Density"/>에서 밀도에 적용하는 감마입니다. 알파는 <c>밀도^(1 / densityGamma)</c>이므로, 1보다 크면 드문 소리가 더 잘 보입니다.
+        /// </summary>
+        /// <remarks>
+        /// Density 0 and 1 stay alpha 0 and 1, so the blend with the line at 1 sample per pixel is unaffected.<br/>
+        /// 밀도 0과 1은 그대로 알파 0과 1이므로, 픽셀당 샘플 1개에서 선과 이어지는 부분에는 영향이 없습니다.
+        /// </remarks>
+        public float densityGamma { get; set; } = 2.2f;
 
         Texture2D? minMaxTexture;
 
@@ -164,6 +175,7 @@ namespace RuniOS.Sounds
             material.SetFloat(subColumnsID, subColumns);
             material.SetFloat(modeID, (float)mode);
             material.SetFloat(zoomedOutBlendEndID, zoomedOutBlendEnd);
+            material.SetFloat(densityGammaID, densityGamma);
             material.SetTexture(boundaryTexID, boundaryTexture);
 
             // Blit은 활성 렌더 타겟을 바꾸고, IMGUI는 sRGB 쓰기를 끈 채 그리므로 호출자의 상태를 되돌립니다.

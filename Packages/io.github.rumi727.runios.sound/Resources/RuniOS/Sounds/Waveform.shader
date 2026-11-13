@@ -11,7 +11,8 @@ Shader "Hidden/RuniOS/Waveform"
         _SamplesPerPixel ("Samples Per Pixel", Float) = 1
         _SubColumns ("Sub Columns", Float) = 1
         _Mode ("Mode", Float) = 0
-        _ZoomedOutBlendEnd ("Zoomed Out Blend End", Float) = 2
+        _ZoomedOutBlendEnd ("Zoomed Out Blend End", Float) = 256
+        _DensityGamma ("Density Gamma", Float) = 2.2
     }
     SubShader
     {
@@ -48,6 +49,9 @@ Shader "Hidden/RuniOS/Waveform"
 
             // 축소 상태 방식으로만 그리기 시작하는 픽셀당 샘플 수입니다. 픽셀당 샘플 1개부터 여기까지 선과 섞습니다.
             float _ZoomedOutBlendEnd;
+
+            // 밀도에 적용하는 감마입니다. 알파는 밀도^(1 / 감마)입니다.
+            float _DensityGamma;
 
             float2 FetchMinMax(int channel, int column, int subColumn, int width)
             {
@@ -180,7 +184,8 @@ Shader "Hidden/RuniOS/Waveform"
                 for (int subColumn = 0; subColumn < subColumns; subColumn++)
                     sum += SpanCoverage(FetchMinMax(channel, column, subColumn, width), pixel.y, center, halfLane);
 
-                return sum / subColumns;
+                // 밀도 0과 1은 그대로 두고 그 사이만 휘므로, 1보다 큰 감마는 드문 소리를 더 잘 보이게 합니다.
+                return pow(sum / subColumns, 1 / max(_DensityGamma, 1e-6));
             }
 
             // 열 중앙에 둔 (최소, 최대) 꼭짓점의 픽셀 y와, 샘플이 있는 열인지(z)를 돌려줍니다.
