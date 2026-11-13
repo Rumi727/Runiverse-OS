@@ -24,15 +24,7 @@ namespace RuniOS.Sounds
 
         public int length => source.Length / bytesPerSample;
 
-        readonly int bytesPerSample = format switch
-        {
-            PCMFormat.PCM8 => 1,
-            PCMFormat.PCM16 => 2,
-            PCMFormat.PCM24 => 3,
-            PCMFormat.PCM32 => 4,
-            PCMFormat.Float => 4,
-            _ => throw new ArgumentOutOfRangeException(nameof(format), format, null)
-        };
+        readonly int bytesPerSample = format.GetBytePerSamples();
 
         static double ReadSample(ReadOnlySpan<byte> source, int offset, PCMFormat format)
         {
