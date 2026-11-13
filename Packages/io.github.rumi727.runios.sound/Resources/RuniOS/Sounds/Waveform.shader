@@ -10,6 +10,7 @@ Shader "Hidden/RuniOS/Waveform"
         _Antialiasing ("Antialiasing", Float) = 1
         _SamplesPerPixel ("Samples Per Pixel", Float) = 1
         _SubColumns ("Sub Columns", Float) = 1
+        _Mode ("Mode", Float) = 0
     }
     SubShader
     {
@@ -40,6 +41,9 @@ Shader "Hidden/RuniOS/Waveform"
 
             // 픽셀 하나를 나눈 하위 열의 개수입니다. 픽셀당 샘플이 2개 미만인 확대 상태에서는 1입니다.
             float _SubColumns;
+
+            // WaveformRenderMode입니다. 0: 밀도, 1: 피크
+            float _Mode;
 
             float2 FetchMinMax(int channel, int column, int subColumn, int width)
             {
@@ -175,6 +179,61 @@ Shader "Hidden/RuniOS/Waveform"
                 return sum / subColumns;
             }
 
+            // 열 중앙에 둔 (최소, 최대) 꼭짓점의 픽셀 y와, 샘플이 있는 열인지(z)를 돌려줍니다.
+            float3 EnvelopeAt(int channel, int column, int width, float center, float halfLane)
+            {
+                float2 minMax = FetchColumnMinMax(channel, column, width);
+                if (minMax.x > minMax.y)
+                    return 0;
+
+                float low = center + (minMax.x * halfLane);
+                float high = center + (minMax.y * halfLane);
+
+                // 거의 평평한 열도 보이도록 높이가 굵기보다 작으면 가운데를 기준으로 굵기만큼 벌립니다.
+                float middle = (low + high) / 2;
+                float halfHeight = max((high - low) / 2, _Thickness / 2);
+                return float3(middle - halfHeight, middle + halfHeight, 1);
+            }
+
+            /*
+             * 열마다 중앙에 (최소, 최대) 꼭짓점을 두고 이웃 열의 꼭짓점끼리 이은 위아래 외곽선 사이를 채웁니다.
+             * 한 열짜리 피크가 옆 열로 번지지 않고 꼭짓점에서 뾰족하게 끝납니다.
+             * 픽셀 중심은 자기 열의 중앙에 있으므로 안쪽인지는 자기 열의 꼭짓점으로 판정하고, 가장자리는 가까운 외곽선 선분까지의 거리로 안티에일리어싱합니다.
+             */
+            float PeakAlpha(float2 pixel, int width, int channel, float center, float halfLane)
+            {
+                int pixelColumn = (int)floor(pixel.x);
+                float3 own = EnvelopeAt(channel, pixelColumn, width, center, halfLane);
+                if (own.z == 0)
+                    return 0;
+
+                float lowDistance = abs(pixel.y - own.x);
+                float highDistance = abs(pixel.y - own.y);
+
+                // 이웃 꼭짓점은 한 픽셀 간격이므로 안티에일리어싱 폭의 절반 안에 드는 선분만 봅니다.
+                int reach = max((int)ceil(_Antialiasing / 2), 1);
+                int firstColumn = max(pixelColumn - reach, 0);
+                int lastColumn = min(pixelColumn + reach, width - 1);
+
+                float3 previous = EnvelopeAt(channel, firstColumn, width, center, halfLane);
+
+                [loop]
+                for (int column = firstColumn + 1; column <= lastColumn; column++)
+                {
+                    float3 current = EnvelopeAt(channel, column, width, center, halfLane);
+                    if (previous.z > 0 && current.z > 0)
+                    {
+                        lowDistance = min(lowDistance, SegmentDistance(pixel, float2(column - 0.5, previous.x), float2(column + 0.5, current.x)));
+                        highDistance = min(highDistance, SegmentDistance(pixel, float2(column - 0.5, previous.y), float2(column + 0.5, current.y)));
+                    }
+
+                    previous = current;
+                }
+
+                float outside = pixel.y > own.y ? highDistance : pixel.y < own.x ? lowDistance : -min(lowDistance, highDistance);
+                return Coverage(outside);
+            }
+
             float4 frag(v2f_img i) : SV_Target
             {
                 // 경계 값 텍스처는 하위 열과 상관없이 (열 개수 + 1) × 채널 수입니다.
@@ -195,7 +254,7 @@ Shader "Hidden/RuniOS/Waveform"
                 float2 pixel = float2(i.uv.x * width, y + 0.5);
 
                 /*
-                 * 픽셀당 샘플 1개 이하는 선으로, 2개 이상은 밀도로 그리고, 그 사이는 줌할 때 모양이 튀지 않도록 섞습니다.
+                 * 픽셀당 샘플 1개 이하는 선으로, 2개 이상은 축소 상태 방식(밀도 또는 피크)으로 그리고, 그 사이는 줌할 때 모양이 튀지 않도록 섞습니다.
                  * 픽셀당 샘플이 1개면 그 픽셀의 소리는 그 샘플뿐이라 밀도가 100%이므로, 밀도 방식은 이 지점에서 선과 자연스럽게 이어집니다.
                  */
                 float zoomedOutWeight = saturate(_SamplesPerPixel - 1);
@@ -205,7 +264,10 @@ Shader "Hidden/RuniOS/Waveform"
                     alpha = LineAlpha(pixel, width, channel, v, center, halfLane);
 
                 if (zoomedOutWeight > 0)
-                    alpha = lerp(alpha, DensityAlpha(pixel, width, channel, center, halfLane), zoomedOutWeight);
+                {
+                    float zoomedOut = _Mode > 0.5 ? PeakAlpha(pixel, width, channel, center, halfLane) : DensityAlpha(pixel, width, channel, center, halfLane);
+                    alpha = lerp(alpha, zoomedOut, zoomedOutWeight);
+                }
 
                 return float4(_Color.rgb, _Color.a * alpha);
             }

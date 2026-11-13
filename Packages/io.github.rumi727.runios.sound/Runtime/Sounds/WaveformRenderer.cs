@@ -22,6 +22,7 @@ namespace RuniOS.Sounds
         static readonly int boundaryTexID = Shader.PropertyToID("_BoundaryTex");
         static readonly int samplesPerPixelID = Shader.PropertyToID("_SamplesPerPixel");
         static readonly int subColumnsID = Shader.PropertyToID("_SubColumns");
+        static readonly int modeID = Shader.PropertyToID("_Mode");
 
         // 축소 상태에서 픽셀 하나를 나누는 하위 열의 최대 개수입니다. 셰이더가 픽셀마다 이만큼 텍셀을 읽습니다.
         const int maxSubColumns = 16;
@@ -71,9 +72,13 @@ namespace RuniOS.Sounds
         /// Width in pixels over which the line's edges fade out. <c>0</c> draws hard edges.<br/>
         /// 선 가장자리가 흐려지는 폭(픽셀)입니다. <c>0</c>이면 가장자리를 딱 끊어 그립니다.
         /// </param>
+        /// <param name="mode">
+        /// How to draw the waveform when one pixel covers two or more samples.<br/>
+        /// 픽셀 하나가 샘플 2개 이상을 덮을 때 파형을 그리는 방식입니다.
+        /// </param>
         /// <exception cref="ObjectDisposedException">This renderer has been disposed.</exception>
         /// <exception cref="ArgumentNullException"><paramref name="waveform"/> or <paramref name="target"/> is <see langword="null"/>.</exception>
-        public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color, float thickness = 1, float antialiasing = 1)
+        public void Render(Waveform waveform, double startSample, double endSample, RenderTexture target, Color color, float thickness = 1, float antialiasing = 1, WaveformRenderMode mode = WaveformRenderMode.Density)
         {
             // 해제 후 호출되면 다시 만든 텍스처를 해제할 곳이 없어 누수되므로 거부합니다.
             ObjectDisposedException.ThrowIf(isDisposed, this);
@@ -91,7 +96,8 @@ namespace RuniOS.Sounds
              * 하위 열마다 샘플이 하나 이상 들어가도록 픽셀당 샘플 수를 넘지 않게 합니다.
              * 폭 * 하위 열 수는 텍스처 최대 폭을 넘을 수 있으므로, 텍스처는 픽셀 폭으로 두고 하위 열은 줄을 늘려 이어 붙입니다.
              */
-            int subColumns = (int)Math.Clamp(Math.Floor(samplesPerPixel), 1, maxSubColumns);
+            // 피크 방식은 픽셀마다 min/max 하나만 쓰므로 나누지 않습니다.
+            int subColumns = mode == WaveformRenderMode.Density ? (int)Math.Clamp(Math.Floor(samplesPerPixel), 1, maxSubColumns) : 1;
             int rowCount = channelCount * subColumns;
 
             if (minMaxTexture == null || minMaxTexture.width != width || minMaxTexture.height != rowCount)
@@ -145,6 +151,7 @@ namespace RuniOS.Sounds
             material.SetFloat(antialiasingID, antialiasing);
             material.SetFloat(samplesPerPixelID, (float)samplesPerPixel);
             material.SetFloat(subColumnsID, subColumns);
+            material.SetFloat(modeID, (float)mode);
             material.SetTexture(boundaryTexID, boundaryTexture);
 
             // Blit은 활성 렌더 타겟을 바꾸고, IMGUI는 sRGB 쓰기를 끈 채 그리므로 호출자의 상태를 되돌립니다.
