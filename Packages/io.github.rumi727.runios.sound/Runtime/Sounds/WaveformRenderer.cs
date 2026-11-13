@@ -1,4 +1,5 @@
 #nullable enable
+using Unity.Collections;
 using Unity.Jobs;
 using Unity.Mathematics;
 using Unity.Scripting.LifecycleManagement;
@@ -154,7 +155,11 @@ namespace RuniOS.Sounds
             }
 
             // 두 잡은 원본을 읽기만 하므로 서로 기다리지 않고 함께 돌립니다.
-            JobHandle minMaxHandle = waveform.ScheduleMinMax(startSample, endSample, width * subColumns, minMaxTexture.GetPixelData<float2>(0));
+            // 밀도 방식의 하위 열은 경계가 하위 열 하나보다 덜 어긋나도 보이지 않으므로, 경계를 다듬지 않는 근사 축약으로 비용을 줄입니다.
+            NativeArray<float2> minMaxData = minMaxTexture.GetPixelData<float2>(0);
+            JobHandle minMaxHandle = subColumns > 1
+                ? waveform.ScheduleApproximateMinMax(startSample, endSample, width * subColumns, minMaxData)
+                : waveform.ScheduleMinMax(startSample, endSample, width, minMaxData);
             JobHandle boundaryHandle;
             try
             {

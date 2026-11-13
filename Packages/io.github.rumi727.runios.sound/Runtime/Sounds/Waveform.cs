@@ -10,8 +10,8 @@ namespace RuniOS.Sounds
     /// 16비트 planar 샘플과 그로부터 만든 min/max 피라미드를 보관하고, 임의의 샘플 구간을 파형 열로 축약합니다.
     /// </summary>
     /// <remarks>
-    /// Must be created, used, and disposed on the main thread. <see cref="Dispose"/> waits for jobs scheduled by <see cref="ScheduleMinMax"/> and <see cref="ScheduleResample"/> before releasing memory.<br/>
-    /// 메인 스레드에서 생성, 사용, 해제해야 합니다. <see cref="Dispose"/>는 메모리를 해제하기 전에 <see cref="ScheduleMinMax"/>와 <see cref="ScheduleResample"/>로 스케줄한 잡을 기다립니다.
+    /// Must be created, used, and disposed on the main thread. <see cref="Dispose"/> waits for jobs scheduled by the Schedule methods before releasing memory.<br/>
+    /// 메인 스레드에서 생성, 사용, 해제해야 합니다. <see cref="Dispose"/>는 메모리를 해제하기 전에 Schedule 메서드들로 스케줄한 잡을 기다립니다.
     /// </remarks>
     public sealed partial class Waveform : IDisposable
     {
@@ -170,6 +170,69 @@ namespace RuniOS.Sounds
                 width = width,
                 startSample = startSample,
                 scale = (endSample - startSample) / width
+            }.Schedule(columnCount, 16, dependency);
+
+            pendingJobs = JobHandle.CombineDependencies(pendingJobs, handle);
+            return handle;
+        }
+
+        /// <summary>
+        /// Schedules a job that computes an approximate minimum and maximum of each column, cheaper than <see cref="ScheduleMinMax"/> when columns are long.<br/>
+        /// 열이 길 때 <see cref="ScheduleMinMax"/>보다 싸게, 각 열의 최솟값과 최댓값을 근사로 계산하는 잡을 스케줄합니다.
+        /// </summary>
+        /// <remarks>
+        /// When a column covers 16 samples or more, each column takes the minimum and maximum of the samples in the pyramid nodes that overlap it, at the coarsest level whose node is no longer than a column.
+        /// So the range of each column is widened outward by less than one column on each side, and the interpolated values at the column edges are not included.
+        /// Otherwise the result is the same as <see cref="ScheduleMinMax"/>. The arguments, the result layout, and the exceptions follow <see cref="ScheduleMinMax"/>.<br/>
+        /// 열 하나가 샘플 16개 이상을 덮으면, 노드가 열보다 길지 않은 가장 거친 레벨에서 열과 겹치는 피라미드 노드들에 든 샘플의 최솟값과 최댓값을 구합니다.
+        /// 따라서 각 열의 구간은 양쪽으로 열 하나보다 짧은 만큼 넓어지고, 열 경계의 보간 값은 포함되지 않습니다.
+        /// 그렇지 않으면 <see cref="ScheduleMinMax"/>와 같은 결과입니다. 인자, 결과 배치, 예외는 <see cref="ScheduleMinMax"/>를 따릅니다.
+        /// </remarks>
+        /// <param name="startSample"></param>
+        /// <param name="endSample"></param>
+        /// <param name="width"></param>
+        /// <param name="result"></param>
+        /// <param name="dependency"></param>
+        /// <exception cref="ObjectDisposedException">This waveform has been disposed.</exception>
+        /// <exception cref="ArgumentOutOfRangeException"><paramref name="width"/> is negative, or the range does not satisfy the contract.</exception>
+        /// <exception cref="ArgumentException"><paramref name="result"/> has fewer than <c>channelCount * width</c> elements.</exception>
+        public JobHandle ScheduleApproximateMinMax(double startSample, double endSample, int width, NativeArray<float2> result, JobHandle dependency = default)
+        {
+            ObjectDisposedException.ThrowIf(isDisposed, this);
+            ArgumentOutOfRangeException.ThrowIfNegative(width);
+
+            // 부정 비교로 쓴 것은 NaN도 거부하기 위해서입니다.
+            if (sampleCount > 0 && !(startSample >= 0 && startSample <= endSample && endSample <= sampleCount - 1))
+                throw new ArgumentOutOfRangeException(nameof(startSample), $"The range [{startSample}, {endSample}] must satisfy 0 <= startSample <= endSample <= {sampleCount - 1}.");
+
+            int columnCount = checked(channelCount * width);
+            if (!result.IsCreated || result.Length < columnCount)
+                throw new ArgumentException($"The result array must have at least {columnCount} elements (channelCount * width).", nameof(result));
+
+            // 열이 가장 작은 노드(16샘플)보다 짧으면 노드에 맞출 수 없으므로 정확한 축약을 씁니다. 이때 읽을 샘플이 적어 정확한 축약도 쌉니다.
+            double scale = (endSample - startSample) / width;
+            if (sampleCount == 0 || levelInfos.Length == 0 || !(scale >= branch))
+                return ScheduleMinMax(startSample, endSample, width, result, dependency);
+
+            // 노드가 열보다 길지 않은 가장 거친 레벨을 고릅니다.
+            int level = 0;
+            int nodeSize = branch;
+            while (level + 1 < levelInfos.Length && (long)nodeSize * branch <= scale)
+            {
+                level++;
+                nodeSize *= branch;
+            }
+
+            JobHandle handle = new ApproximateMinMaxJob
+            {
+                levels = levels,
+                result = result,
+                width = width,
+                startSample = startSample,
+                scale = scale,
+                levelOffset = levelInfos[level].x,
+                levelCount = levelInfos[level].y,
+                nodeSize = nodeSize
             }.Schedule(columnCount, 16, dependency);
 
             pendingJobs = JobHandle.CombineDependencies(pendingJobs, handle);
