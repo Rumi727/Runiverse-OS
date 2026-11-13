@@ -27,15 +27,7 @@ namespace RuniOS.Sounds
                     if (channelCount != channel)
                         throw new InvalidOperationException($"FMOD returned {channelCount} channels, but the clip has {channel} channels.");
 
-                    int bytesPerSample = pcmFormat!.Value switch
-                    {
-                        PCMFormat.PCM8 => 1,
-                        PCMFormat.PCM16 => 2,
-                        PCMFormat.PCM24 => 3,
-                        PCMFormat.PCM32 => 4,
-                        PCMFormat.Float => 4,
-                        _ => throw new InvalidOperationException($"FMOD returned unsupported sample format {pcmFormat}.")
-                    };
+                    int bytesPerSample = bits / 8;
 
                     // ReSharper disable AccessToDisposedClosure
                     if (source.Length < (long)output.Length * bytesPerSample)
