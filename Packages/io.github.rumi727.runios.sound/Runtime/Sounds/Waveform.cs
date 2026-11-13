@@ -160,6 +160,11 @@ namespace RuniOS.Sounds
             if (!result.IsCreated || result.Length < columnCount)
                 throw new ArgumentException($"The result array must have at least {columnCount} elements (channelCount * width).", nameof(result));
 
+            // 열이 짧을 때만 묶습니다. MinMaxJob이 원본을 순서대로 훑는 기준과 같습니다.
+            double scale = (endSample - startSample) / width;
+            int columnsPerChunk = scale <= branch * 2 ? minMaxChunkSize : 1;
+            int chunksPerChannel = ((width + columnsPerChunk) - 1) / columnsPerChunk;
+
             JobHandle handle = new MinMaxJob
             {
                 samples = samples,
@@ -168,9 +173,11 @@ namespace RuniOS.Sounds
                 result = result,
                 sampleCount = sampleCount,
                 width = width,
+                columnsPerChunk = columnsPerChunk,
+                chunksPerChannel = chunksPerChannel,
                 startSample = startSample,
-                scale = (endSample - startSample) / width
-            }.Schedule(columnCount, 16, dependency);
+                scale = scale
+            }.Schedule(chunksPerChannel * channelCount, columnsPerChunk == 1 ? 16 : 1, dependency);
 
             pendingJobs = JobHandle.CombineDependencies(pendingJobs, handle);
             return handle;
