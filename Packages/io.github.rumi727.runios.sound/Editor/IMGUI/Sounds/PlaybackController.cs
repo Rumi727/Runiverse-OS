@@ -160,6 +160,22 @@ namespace RuniOS.Editor.IMGUI.Sounds
         /// </remarks>
         public Action<Rect, ISeekable, double>? timelineOverlay { private get; set; }
 
+        /// <summary>
+        /// Gets or sets the height of the lane below the timeline track that <see cref="timelineLane"/> draws in. <c>0</c> disables the lane.<br/>
+        /// <see cref="timelineLane"/>가 그리는 타임라인 트랙 아래 레인의 높이를 가져오거나 설정합니다. <c>0</c>이면 레인을 사용하지 않습니다.
+        /// </summary>
+        public float timelineLaneHeight { get; set; }
+
+        /// <summary>
+        /// Sets the callback used to draw the lane below the timeline track.<br/>
+        /// 타임라인 트랙 아래 레인을 그리는 데 사용할 콜백을 설정합니다.
+        /// </summary>
+        /// <remarks>
+        /// The callback receives a position that is horizontally aligned with the track and <see cref="timelineLaneHeight"/> high, the unique seekable target, and its length when such a target exists.<br/>
+        /// 콜백은 고유한 탐색 가능 대상이 존재할 때 트랙과 가로로 정렬되고 높이가 <see cref="timelineLaneHeight"/>인 위치, 해당 대상 및 길이를 전달받습니다.
+        /// </remarks>
+        public Action<Rect, ISeekable, double>? timelineLane { private get; set; }
+
         public GUIStyle buttonStyle
         {
             get => _buttonStyle ??= GUI.skin.button;
@@ -395,6 +411,9 @@ namespace RuniOS.Editor.IMGUI.Sounds
                 position.y += position.height;
                 position.y += EditorGUIUtility.standardVerticalSpacing;
 
+                if (timelineLaneHeight > 0)
+                    position.y += timelineLaneHeight + EditorGUIUtility.standardVerticalSpacing;
+
                 EditorGUI.BeginDisabledGroup(!anyPlaying);
 
                 BeginLabelWidth(75);
@@ -466,11 +485,20 @@ namespace RuniOS.Editor.IMGUI.Sounds
             if (loopHandlesEnabled)
                 DrawLoopHandles(loopRangeControlID, position, timelineTrackPosition, loopablePlayer!, length);
 
-            if (!features.HasFlag(PlaybackControllerFeatures.timeUnit))
-                return;
-
             position.y += position.height;
             position.y += EditorGUIUtility.standardVerticalSpacing;
+
+            if (timelineLaneHeight > 0)
+            {
+                Rect lanePosition = new Rect(timelineTrackPosition.x, position.y, timelineTrackPosition.width, timelineLaneHeight);
+                if (timeControllable != null)
+                    timelineLane?.Invoke(lanePosition, timeControllable, length);
+
+                position.y += timelineLaneHeight + EditorGUIUtility.standardVerticalSpacing;
+            }
+
+            if (!features.HasFlag(PlaybackControllerFeatures.timeUnit))
+                return;
 
             for (int i = 0; i < timeUnits.Count; i++)
             {
@@ -660,7 +688,13 @@ namespace RuniOS.Editor.IMGUI.Sounds
         public float GetHeight()
         {
             float height = GetYSize(buttonStyle);
-            if (!features.HasFlag(PlaybackControllerFeatures.timeline) || !features.HasFlag(PlaybackControllerFeatures.timeUnit))
+            if (!features.HasFlag(PlaybackControllerFeatures.timeline))
+                return height;
+
+            if (timelineLaneHeight > 0)
+                height += EditorGUIUtility.standardVerticalSpacing + timelineLaneHeight;
+
+            if (!features.HasFlag(PlaybackControllerFeatures.timeUnit))
                 return height;
 
             height += EditorGUIUtility.standardVerticalSpacing;
