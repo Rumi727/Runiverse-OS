@@ -19,10 +19,12 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
     {
         const float visualEffectCardHeight = 44;
         const float tempoChangeMarkerWidth = 2;
+        const float soundStopperMarkerWidth = 2;
         const double savePopupHoldDuration = 1;
         const double savePopupFadeDuration = 0.25;
         static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
         static readonly Color tempoChangeMarkerColor = new Color(1, 0.65f, 0.15f, 0.9f);
+        static readonly Color soundStopperMarkerColor = new Color(1, 0.25f, 0.25f, 0.9f);
 
         readonly Dictionary<EntityId, SavePopupTracker> savePopupTrackers = [];
         double savePopupStartedAt = double.NegativeInfinity;
@@ -34,7 +36,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             controller.timeUnits.Add(new NBSTickTimeUnit());
             controller.timeUnits.Add(new NBSIndexTimeUnit());
 
-            controller.timelineOverlay = DrawTempoChangeMarkers;
+            controller.timelineOverlay = DrawTimelineMarkers;
         }
 
         protected override bool repaintInEditor
@@ -443,6 +445,38 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             loopStartTick = useFileLoop ? file.header.loopStartTick : file.tempoMap.TimeToTick(loopStartTime);
             loopEndTick = useFileLoop ? file.tickLength : file.tempoMap.TimeToTick(loopEndTime);
             return double.IsFinite(loopStartTick) && double.IsFinite(loopEndTick) && loopEndTick > loopStartTick;
+        }
+
+        static void DrawTimelineMarkers(Rect trackPosition, ISeekable seekable, double length)
+        {
+            DrawTempoChangeMarkers(trackPosition, seekable, length);
+            DrawSoundStopperMarkers(trackPosition, seekable, length);
+        }
+
+        static void DrawSoundStopperMarkers(Rect trackPosition, ISeekable seekable, double length)
+        {
+            if (seekable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0 || length <= 0)
+                return;
+
+            foreach (NBSMappedSpecialEvent mappedEvent in file.noteMap.specialEvents)
+            {
+                NBSSpecialEvent specialEvent = mappedEvent.specialEvent;
+                if (specialEvent.kind != NBSSpecialEventKind.soundStop || !double.IsFinite(mappedEvent.time) || mappedEvent.time < 0 || mappedEvent.time > length)
+                    continue;
+
+                float x = trackPosition.xMin.Lerp(trackPosition.xMax, (mappedEvent.time / length).ClampToFloat());
+                Rect markerPosition = new Rect
+                (
+                    x - (soundStopperMarkerWidth * 0.5f),
+                    trackPosition.y + 2,
+                    soundStopperMarkerWidth,
+                    trackPosition.height - 8
+                );
+                EditorGUI.DrawRect(markerPosition, soundStopperMarkerColor);
+
+                string endLayer = specialEvent.endLayer == int.MaxValue ? "∞" : specialEvent.endLayer.ToString();
+                GUI.Label(markerPosition, TempContent(string.Empty, $"Sound Stopper (Layer {specialEvent.startLayer} - {endLayer})"), GUIStyle.none);
+            }
         }
 
         static void DrawTempoChangeMarkers(Rect trackPosition, ISeekable seekable, double length)
