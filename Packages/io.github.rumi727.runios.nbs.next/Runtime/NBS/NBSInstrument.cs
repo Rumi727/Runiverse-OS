@@ -94,8 +94,11 @@ namespace RuniOS.NBS
             return true;
         }
 
-        static bool ContainsChangeColorPrefixOnce(string name)
+        static bool ContainsChangeColorPrefixOnce(string? name)
         {
+            if (name == null)
+                return false;
+
             int index = name.IndexOf(changeColorPrefix, StringComparison.OrdinalIgnoreCase);
             return index >= 0 && name.IndexOf(changeColorPrefix, index + 1, StringComparison.OrdinalIgnoreCase) < 0;
         }
