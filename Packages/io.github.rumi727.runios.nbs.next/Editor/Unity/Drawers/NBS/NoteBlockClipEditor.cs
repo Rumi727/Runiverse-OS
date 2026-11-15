@@ -1,6 +1,5 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
-using RuniOS.Editor.IMGUI.Sounds;
 using RuniOS.Editor.NBS;
 using RuniOS.NBS;
 using RuniOS.Resource;
@@ -8,107 +7,143 @@ using RuniOS.Resource;
 namespace RuniOS.Editor.Unity.Drawers.NBS
 {
     /// <summary>
-    /// Draws a summary of a <see cref="NoteBlockClip"/> and a preview player instead of its raw note lists.<br/>
-    /// <see cref="NoteBlockClip"/>의 원시 노트 리스트 대신 요약과 미리듣기 플레이어를 그립니다.
+    /// Previews a <see cref="NoteBlockClip"/> in the preview area, like an audio clip: the song header as an overlay, a summary below it, and simple playback.<br/>
+    /// 오디오 클립처럼 <see cref="NoteBlockClip"/>을 미리보기 영역에 표시합니다. 곡 헤더는 오버레이로, 요약은 그 아래에 표시하고 간단히 재생합니다.
     /// </summary>
+    /// <remarks>
+    /// The inspector body is empty, because <see cref="NoteBlockClipImporterEditor"/> does not show the imported object and the preview area shows the clip instead.<br/>
+    /// <see cref="NoteBlockClipImporterEditor"/>가 가져온 오브젝트를 표시하지 않고 미리보기 영역이 클립을 대신 보여주므로 인스펙터 본문은 비어 있습니다.
+    /// </remarks>
     [CustomEditor(typeof(NoteBlockClip))]
     public sealed class NoteBlockClipEditor : UnityEditor.Editor
     {
-        readonly PlaybackController controller = new PlaybackController(new GenericTimeUnit()) { features = PlaybackControllerFeatures.all & ~PlaybackControllerFeatures.loopRange };
+        static GUIStyle overlayLabelStyle => _overlayLabelStyle ??= "PreOverlayLabel";
+        static GUIStyle? _overlayLabelStyle;
+
         NBSPreviewTransport? preview;
         bool isCreatingPreview;
 
         void OnDisable() => DisposePreview();
 
         /// <inheritdoc/>
-        public override bool RequiresConstantRepaint() => preview?.isPlaying == true;
+        public override void OnInspectorGUI() { }
 
         /// <inheritdoc/>
-        public override void OnInspectorGUI()
-        {
-            // Unity draws imported objects disabled. This inspector edits nothing, so it is enabled to keep the preview controls usable.
-            bool wasEnabled = GUI.enabled;
-            GUI.enabled = true;
+        public override bool HasPreviewGUI() => true;
 
-            try
-            {
-                DrawInspector();
-            }
-            finally
-            {
-                GUI.enabled = wasEnabled;
-            }
-        }
-
-        void DrawInspector()
+        /// <inheritdoc/>
+        public override void OnPreviewSettings()
         {
             if (target is not NoteBlockClip clip)
                 return;
 
+            // Without a loop the transport keeps running past the end, so the preview stops there.
+            if (preview is { isPlaying: true, loop: false } && preview.time >= preview.length)
+                preview.Stop();
+
+            using (new EditorGUI.DisabledScope(isCreatingPreview))
+            {
+                bool isPlaying = preview?.isPlaying == true;
+                if (GUILayout.Toggle(isPlaying, EditorGUIUtility.IconContent("Play"), EditorStyles.toolbarButton) != isPlaying)
+                {
+                    if (preview == null)
+                        LoadAndPlay(clip).Forget();
+                    else if (isPlaying)
+                        preview.Stop();
+                    else
+                        preview.Play();
+                }
+            }
+
+            // The loop follows the file until the preview is loaded.
+            using (new EditorGUI.DisabledScope(preview == null))
+            {
+                bool loop = preview?.loop ?? clip.header.loop;
+                if (GUILayout.Toggle(loop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton) != loop)
+                    preview!.loop = !loop;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override void OnPreviewGUI(Rect r, GUIStyle background)
+        {
+            if (target is not NoteBlockClip clip)
+                return;
+
+            if (Event.current.type == EventType.Repaint)
+                background.Draw(r, false, false, false, false);
+
+            Rect labelRect = r;
+            labelRect.xMin += 3;
+
+            BeginAlignment(TextAnchor.UpperLeft, overlayLabelStyle);
+            EditorGUI.DropShadowLabel(labelRect, GetHeaderText(clip));
+            EndAlignment(overlayLabelStyle);
+
+            if (preview is not { isPlaying: true } || !(preview.length > 0))
+                return;
+
+            double time = preview.time;
+            double position = time / preview.length;
+            if (Event.current.type == EventType.Repaint && position is >= 0 and <= 1)
+                EditorGUI.DrawRect(new Rect(Mathf.Lerp(r.x - 1, r.xMax - 1, (float)position), r.y, 2, r.height), Color.white);
+
+            labelRect.xMax -= 3;
+
+            BeginRichText(overlayLabelStyle);
+            BeginAlignment(TextAnchor.UpperRight, overlayLabelStyle);
+            EditorGUI.DropShadowLabel(labelRect, RichNumberMSpace(TimeUtility.ToTimeString(time)));
+            EndAlignment(overlayLabelStyle);
+            EndRichText(overlayLabelStyle);
+
+            // This editor is reached only through the importer's preview, so like an audio clip the preview requests its own repaint while playing.
+            Repaint();
+        }
+
+        /// <inheritdoc/>
+        public override void OnInteractivePreviewGUI(Rect r, GUIStyle background)
+        {
+            OnPreviewGUI(r, background);
+
+            Event evt = Event.current;
+            if (preview is { isPlaying: true } && evt.button == 0 && evt.type is EventType.MouseDown or EventType.MouseDrag && r.Contains(evt.mousePosition))
+            {
+                preview.time = Mathf.InverseLerp(r.x, r.xMax, evt.mousePosition.x) * preview.length;
+                evt.Use();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string GetInfoString()
+        {
+            if (target is not NoteBlockClip clip)
+                return string.Empty;
+
             NBSHeader header = clip.header;
             NBSMap map = clip.map;
 
-            GUILayout.Label(header.name.Length > 0 ? header.name : clip.name, EditorStyles.boldLabel);
-            DrawLabel("Author", header.author);
-            DrawLabel("Original Author", header.originalAuthor);
-            if (header.description.Length > 0)
-                EditorGUILayout.HelpBox(header.description, MessageType.None);
-
-            Space();
-
-            DrawLabel("Format Version", header.version.ToString());
-            DrawLabel("Length", $"{TimeUtility.ToTimeString(map.length)} · {map.tickLength} ticks");
-            DrawLabel("Tempo", $"{header.ticksPerSecond:0.##} TPS · {header.ticksPerSecond * 15:0.##} BPM");
-            DrawLabel("Tempo Changes", (map.tempo.changes.Length - 1).ToString());
-            DrawLabel("Notes", $"{map.notes.Count} in {map.columns.Length} columns");
-            DrawLabel("Layers", map.layers.Length.ToString());
-            DrawLabel("Sound Stoppers", map.stoppers.Length.ToString());
-            DrawLabel("Loop", header.loop ? $"from tick {header.loopStartTick} · max {(header.maxLoopCount == 0 ? "∞" : header.maxLoopCount.ToString())}" : "off");
-
-            if (!map.instruments.IsEmpty)
-            {
-                Space();
-                GUILayout.Label("Custom Instruments", EditorStyles.boldLabel);
-                for (int i = 0; i < map.instruments.Length; i++)
-                {
-                    NBSInstrument instrument = map.instruments[i];
-                    NBSInstrumentFunction function = instrument.function;
-                    DrawLabel(instrument.name, function == NBSInstrumentFunction.none ? instrument.soundFile : function.ToString());
-                }
-            }
-
-            Space();
-            GUILayout.Label("Preview", EditorStyles.boldLabel);
-            DrawPreview(clip);
+            string loop = header.loop ? $"loop from tick {header.loopStartTick} · max {(header.maxLoopCount == 0 ? "∞" : header.maxLoopCount.ToString())}" : "no loop";
+            return $"Format {header.version} · {TimeUtility.ToTimeString(map.length)} · {map.tickLength} ticks · {header.ticksPerSecond:0.##} TPS · {header.ticksPerSecond * 15:0.##} BPM · "
+                + $"{map.tempo.changes.Length - 1} tempo changes · {map.notes.Count} notes in {map.columns.Length} columns · {map.layers.Length} layers · "
+                + $"{map.stoppers.Length} sound stoppers · {map.instruments.Length} custom instruments · {loop}";
         }
 
-        void DrawPreview(NoteBlockClip clip)
+        static string GetHeaderText(NoteBlockClip clip)
         {
-            if (preview == null)
-            {
-                using (new EditorGUI.DisabledScope(isCreatingPreview))
-                {
-                    if (GUILayout.Button(isCreatingPreview ? "Loading instruments..." : "Load Preview"))
-                        CreatePreview(clip).Forget();
-                }
+            NBSHeader header = clip.header;
 
-                return;
-            }
+            string text = header.name.Length > 0 ? header.name : clip.name;
+            if (header.author.Length > 0)
+                text += $"\nAuthor: {header.author}";
+            if (header.originalAuthor.Length > 0)
+                text += $"\nOriginal Author: {header.originalAuthor}";
+            if (header.description.Length > 0)
+                text += $"\n\n{header.description}";
 
-            controller.target = preview;
-            controller.DrawLayout();
-
-            EditorGUI.BeginChangeCheck();
-            float tempo = EditorGUILayout.Slider("Tempo", preview.tempo, -3, 3);
-            float pitch = EditorGUILayout.Slider("Pitch", preview.pitch, -3, 3);
-            if (EditorGUI.EndChangeCheck())
-            {
-                preview.tempo = tempo;
-                preview.pitch = pitch;
-            }
+            return text;
         }
 
-        async UniTaskVoid CreatePreview(NoteBlockClip clip)
+        async UniTaskVoid LoadAndPlay(NoteBlockClip clip)
         {
             isCreatingPreview = true;
             try
@@ -122,6 +157,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
                 DisposePreview();
                 preview = created;
+                preview.Play();
             }
             finally
             {
@@ -136,7 +172,5 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             preview?.Dispose();
             preview = null;
         }
-
-        static void DrawLabel(string label, string value) => EditorGUILayout.LabelField(label, value);
     }
 }
