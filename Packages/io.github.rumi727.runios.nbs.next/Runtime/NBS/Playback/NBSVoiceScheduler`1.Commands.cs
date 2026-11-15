@@ -260,13 +260,36 @@ namespace RuniOS.NBS
             NBSPlaybackWorker.Signal();
         }
 
+        /*
+         * A sound that has not started keeps its timeline distance to the start, so only the wall time follows the new tempo.
+         * Its placement is computed again, because the sound position at the start and the stop point depend on the rate:
+         * a sound entered at a loop wrap starts mid-sound, and a sound shortened by a stopper starts at its cut point when reversed.
+         */
         void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, NBSLoopRange? loop, in ClockSnapshot snapshot, double previousTempo, double tempo)
         {
+            double length = timeline.GetLength(voice.mapIndex, rate, loop, out bool stopped);
+            if (!(length > 0))
+            {
+                StopVoice(voice);
+                return;
+            }
+
+            NBSNotePlacement placement = timeline.GetPlacement(voice.mapIndex, length, rate);
+            double sourceTime = placement.GetSourceTime(voice.startPosition);
+            double remainingSource = placement.startsAtAttack ? (length * placement.sourceScale) - sourceTime : sourceTime;
+            if (!(remainingSource > 0))
+            {
+                StopVoice(voice);
+                return;
+            }
+
             double distance = ((double)voice.startClock - snapshot.clock) / snapshot.sampleRate * previousTempo;
             voice.startClock = ToClock(snapshot.clock + ((distance / tempo) * snapshot.sampleRate));
+            voice.endClock = stopped && placement.startsAtAttack
+                ? ToClock(voice.startClock + ((Math.Abs(placement.exit - voice.startPosition) / tempo) * snapshot.sampleRate))
+                : 0;
 
-            double length = timeline.GetLength(voice.mapIndex, rate, loop, out bool stopped);
-            voice.endClock = stopped && rate.pitch > 0 ? ToClock(voice.startClock + ((length / tempo) * snapshot.sampleRate)) : 0;
+            voice.channel.timeSample = (uint)Math.Clamp(Math.Round(sourceTime * voice.clip.frequency), 0, voice.clip.samples - 1d);
             voice.channel.SetDelay(voice.startClock, voice.endClock);
         }
 

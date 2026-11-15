@@ -7,10 +7,13 @@ namespace RuniOS.NBS
     public sealed partial class NBSVoiceScheduler<TTransport>
     {
         /// <summary>Records one sound handed to FMOD: what it plays and the clocks it was scheduled with.</summary>
-        sealed class Voice(SoundChannel channel, int mapIndex, WaveAudioClip clip, double ratio, ulong startClock, ulong endClock)
+        sealed class Voice(SoundChannel channel, int mapIndex, double startPosition, WaveAudioClip clip, double ratio, ulong startClock, ulong endClock)
         {
             public readonly SoundChannel channel = channel;
             public readonly int mapIndex = mapIndex;
+
+            /// <summary>The song time, in the coordinates of the note, where the sound starts.</summary>
+            public readonly double startPosition = startPosition;
             public readonly WaveAudioClip clip = clip;
             public readonly double ratio = ratio;
             public ulong startClock = startClock;
@@ -80,7 +83,7 @@ namespace RuniOS.NBS
             if (!system.Execute(static (soundSystem, sound) => soundSystem.PlaySound(sound, true), clip, out SoundChannel? channel) || channel == null)
                 return;
 
-            Voice voice = new Voice(channel, plan.mapIndex, clip, ratio, startClock, endClock);
+            Voice voice = new Voice(channel, plan.mapIndex, plan.position, clip, ratio, startClock, endClock);
             try
             {
                 channel.frequency = (float)(clip.frequency * ratio * absolutePitch * Math.Sign(rate.pitch));

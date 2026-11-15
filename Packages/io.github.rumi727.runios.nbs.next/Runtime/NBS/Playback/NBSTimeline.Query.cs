@@ -168,7 +168,7 @@ namespace RuniOS.NBS
 
                 double distance = offset + (forward ? entry - segmentStart : segmentStart - entry);
                 if (window.Contains(distance))
-                    output.Add(new NBSPlannedVoice(i, distance, placement.GetSourceTime(entry), placement, length, stopped));
+                    output.Add(new NBSPlannedVoice(i, distance, entry, placement.GetSourceTime(entry), placement, length, stopped));
             }
         }
 
@@ -189,7 +189,7 @@ namespace RuniOS.NBS
                     continue;
 
                 if (placement.low < point && point < placement.high)
-                    output.Add(new NBSPlannedVoice(i, distance, placement.GetSourceTime(point), placement, length, stopped));
+                    output.Add(new NBSPlannedVoice(i, distance, point, placement.GetSourceTime(point), placement, length, stopped));
             }
         }
 
