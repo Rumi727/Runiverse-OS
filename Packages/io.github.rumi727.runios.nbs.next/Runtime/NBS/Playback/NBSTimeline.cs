@@ -58,7 +58,8 @@ namespace RuniOS.NBS
                     continue;
 
                 // play_sound of Note Block Studio: 0.5 · 2^((key + instrument key + fine pitch / 100 − 78) / 12)
-                double ratio = 0.5 * Math.Pow(2, (note.key + bank.GetKey(note.instrument) + (mix.pitch / 100d) - 78) / 12d);
+                int instrumentKey = map.TryGetCustomInstrumentIndex(note.instrument, out int customIndex) ? map.instruments[customIndex].key : NBSInstrumentBank.vanillaKey;
+                double ratio = 0.5 * Math.Pow(2, (note.key + instrumentKey + (mix.pitch / 100d) - 78) / 12d);
                 if (!double.IsFinite(ratio) || ratio <= 0)
                     continue;
 

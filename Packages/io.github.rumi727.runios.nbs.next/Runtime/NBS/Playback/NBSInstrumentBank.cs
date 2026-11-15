@@ -13,9 +13,12 @@ namespace RuniOS.NBS
     /// 곡이 재생하는 악기의 사운드 리소스를 소유합니다.
     /// </summary>
     /// <remarks>
+    /// The bank maps sounds by instrument index when it loads. After editing a clip, call <c>Reload</c> of the owner when a sound file changes,
+    /// when custom instruments are reordered, or when a layer that was muted at load is unmuted.<br/>
     /// Built-in instruments resolve to <c>runios:block.note_block.*</c> in <see cref="WaveAudioAssetRegistry"/>.<br/>
     /// Custom instruments resolve to their <see cref="NBSInstrument.soundFile"/> in the song namespace, without a leading <c>sounds/</c> and without the extension. Missing sounds stay silent.
     /// <br/><br/>
+    /// bank는 로드할 때 악기 인덱스별로 사운드를 연결합니다. 클립을 편집한 뒤 사운드 파일이 바뀌거나, 커스텀 악기 순서가 바뀌거나, 로드할 때 무음이던 레이어의 무음을 해제하면 소유자의 <c>Reload</c>를 호출해야 합니다.<br/>
     /// 기본 악기는 <see cref="WaveAudioAssetRegistry"/>의 <c>runios:block.note_block.*</c>로 확인합니다.<br/>
     /// 커스텀 악기는 곡 네임스페이스에서 앞의 <c>sounds/</c>와 확장자를 뺀 <see cref="NBSInstrument.soundFile"/>로 확인합니다. 없는 사운드는 무음입니다.
     /// </remarks>
@@ -51,14 +54,9 @@ namespace RuniOS.NBS
         /// </summary>
         public const int vanillaKey = 45;
 
-        NBSInstrumentBank(IAssetScope<WaveAudioClip>?[] scopes, byte[] keys)
-        {
-            this.scopes = scopes;
-            this.keys = keys;
-        }
+        NBSInstrumentBank(IAssetScope<WaveAudioClip>?[] scopes) => this.scopes = scopes;
 
         readonly IAssetScope<WaveAudioClip>?[] scopes;
-        readonly byte[] keys;
 
         /// <summary>
         /// Loads the instruments that the audible notes of a map use.<br/>
@@ -94,7 +92,6 @@ namespace RuniOS.NBS
 
             int count = NBSInstrument.vanillaCount + map.instruments.Length;
             IAssetScope<WaveAudioClip>?[] scopes = new IAssetScope<WaveAudioClip>?[count];
-            byte[] keys = new byte[count];
             bool[] used = new bool[count];
 
             ReadOnlySpan<NBSMapNote> notes = map.notes.AsSpan();
@@ -105,12 +102,11 @@ namespace RuniOS.NBS
                     used[instrument] = true;
             }
 
-            NBSInstrumentBank bank = new NBSInstrumentBank(scopes, keys);
+            NBSInstrumentBank bank = new NBSInstrumentBank(scopes);
             try
             {
                 for (int instrument = 0; instrument < count; instrument++)
                 {
-                    keys[instrument] = instrument < NBSInstrument.vanillaCount ? (byte)vanillaKey : map.instruments[instrument - NBSInstrument.vanillaCount].key;
                     if (!used[instrument] || !TryGetResourceKey(map, instrument, nameSpace, out ResourceKey key))
                         continue;
 
@@ -140,20 +136,6 @@ namespace RuniOS.NBS
         /// 로드된 사운드를 반환하며, 악기가 무음이면 <see langword="null"/>을 반환합니다.
         /// </returns>
         public WaveAudioClip? GetClip(int instrument) => (uint)instrument < (uint)scopes.Length ? scopes[instrument]?.asset : null;
-
-        /// <summary>
-        /// Gets the key at which an instrument plays at its original pitch.<br/>
-        /// 악기가 원래 피치로 재생되는 건반을 가져옵니다.
-        /// </summary>
-        /// <param name="instrument">
-        /// The instrument index of a note.<br/>
-        /// 노트의 악기 인덱스입니다.
-        /// </param>
-        /// <returns>
-        /// The instrument key, or <see cref="vanillaKey"/> for an unknown index.<br/>
-        /// 악기 건반을 반환하며, 알 수 없는 인덱스이면 <see cref="vanillaKey"/>를 반환합니다.
-        /// </returns>
-        public int GetKey(int instrument) => (uint)instrument < (uint)keys.Length ? keys[instrument] : vanillaKey;
 
         /// <summary>
         /// Gets the resource key that an instrument sound is loaded from.<br/>
