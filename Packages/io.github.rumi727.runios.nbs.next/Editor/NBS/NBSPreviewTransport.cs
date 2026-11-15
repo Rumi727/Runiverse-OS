@@ -143,6 +143,9 @@ namespace RuniOS.Editor.NBS
         }
 
         /// <inheritdoc/>
+        public NBSLoopRange? loopRange => NBSLoopRange.Create(_loop, loopStart, loopEnd);
+
+        /// <inheritdoc/>
         public float tempo
         {
             get => _tempo;
@@ -254,7 +257,7 @@ namespace RuniOS.Editor.NBS
                 return _isPlaying && !_isPaused ? anchor.GetTime(clock, _tempo, SoundSystem.main.outputSampleRate) : anchor.time;
         }
 
-        double Fold(double linear) => NBSLoopRange.Create(_loop, loopStart, loopEnd) is { } range ? range.Fold(linear, _tempo) : linear;
+        double Fold(double linear) => loopRange is { } range ? range.Fold(linear, _tempo) : linear;
 
         // The clock starts again after a reset, so the position is kept across it and anchored on the new clock.
         void OnSoundSystemResetting(SoundSystem system)

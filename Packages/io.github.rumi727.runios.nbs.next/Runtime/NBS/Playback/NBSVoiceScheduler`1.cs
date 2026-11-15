@@ -160,6 +160,6 @@ namespace RuniOS.NBS
 
         NBSPlaybackRate ReadRate() => new NBSPlaybackRate(transport.tempo, transport.pitch, _reversePitchAlignment);
 
-        NBSLoopRange? ReadLoop() => NBSLoopRange.Create(transport.loop, transport.loopStart, transport.loopEnd);
+        NBSLoopRange? ReadLoop() => transport.loopRange;
     }
 }

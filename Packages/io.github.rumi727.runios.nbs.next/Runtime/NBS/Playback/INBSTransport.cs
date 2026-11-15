@@ -18,5 +18,11 @@ namespace RuniOS.NBS
         /// 타임라인의 기준점을 가져옵니다. 일시 정지나 정지 중에는 <see cref="NBSClockAnchor.time"/>이 유지되는 위치입니다.
         /// </summary>
         NBSClockAnchor clockAnchor { get; }
+
+        /// <summary>
+        /// Gets the song time range that playback repeats, or <see langword="null"/> while it does not loop.<br/>
+        /// 재생이 반복하는 곡 시간 범위를 가져오며, 반복하지 않으면 <see langword="null"/>입니다.
+        /// </summary>
+        NBSLoopRange? loopRange { get; }
     }
 }
