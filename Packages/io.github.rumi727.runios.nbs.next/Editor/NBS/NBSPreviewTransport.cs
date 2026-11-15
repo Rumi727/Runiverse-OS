@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics;
 using System.Threading;
 using Cysharp.Threading.Tasks;
 using RuniOS.NBS;
@@ -12,11 +11,12 @@ namespace RuniOS.Editor.NBS
     /// 미리보기를 위해 씬 오브젝트 없이 에디터에서 <see cref="NoteBlockClip"/>을 재생합니다.
     /// </summary>
     /// <remarks>
-    /// This is a minimal transport for the inspector: it keeps its own timeline and drives an <see cref="NBSVoiceScheduler{TTransport}"/>.
-    /// The loop follows the NBS header.<br/>
-    /// 인스펙터용 최소 트랜스포트입니다. 자기 타임라인을 가지며 <see cref="NBSVoiceScheduler{TTransport}"/>를 조작합니다. 반복은 NBS 헤더를 따릅니다.
+    /// This is a minimal transport for the inspector: it keeps its own timeline on the DSP clock and drives an <see cref="NBSVoiceScheduler{TTransport}"/>.
+    /// The loop follows the NBS header, and <see cref="time"/> advances in mix blocks.<br/>
+    /// 인스펙터용 최소 트랜스포트입니다. DSP 클록 위에 자기 타임라인을 가지며 <see cref="NBSVoiceScheduler{TTransport}"/>를 조작합니다.
+    /// 반복은 NBS 헤더를 따르며, <see cref="time"/>은 믹스 블록 단위로 진행합니다.
     /// </remarks>
-    public sealed class NBSPreviewTransport : IPlayControl, IPausable, IStoppable, ISeekable, ILoopControl, ITempoControl, IPitchControl, IDisposable
+    public sealed class NBSPreviewTransport : INBSTransport, IPlayControl, IPausable, IStoppable, ISeekable, ILoopControl, ITempoControl, IPitchControl, IDisposable
     {
         NBSPreviewTransport(NoteBlockClip clip) => this.clip = clip;
 
@@ -25,8 +25,8 @@ namespace RuniOS.Editor.NBS
         NBSInstrumentBank? bank;
         NBSVoiceScheduler<NBSPreviewTransport>? scheduler;
 
-        double anchorTime;
-        long anchorTimestamp;
+        NBSClockAnchor anchor;
+        double resetTime;
         bool _isPlaying;
         bool _isPaused;
         float _tempo = 1;
@@ -54,7 +54,19 @@ namespace RuniOS.Editor.NBS
             NBSPreviewTransport transport = new NBSPreviewTransport(clip) { _loop = clip.header.loop };
             transport.bank = await NBSInstrumentBank.LoadAsync(clip.map, instrumentNamespace);
             transport.scheduler = new NBSVoiceScheduler<NBSPreviewTransport>(clip, transport.bank, transport);
+            SoundSystem.main.onResetting += transport.OnSoundSystemResetting;
+            SoundSystem.main.onReset += transport.OnSoundSystemReset;
             return transport;
+        }
+
+        /// <inheritdoc/>
+        public NBSClockAnchor clockAnchor
+        {
+            get
+            {
+                lock (gate)
+                    return anchor;
+            }
         }
 
         /// <inheritdoc/>
@@ -85,11 +97,8 @@ namespace RuniOS.Editor.NBS
         {
             get
             {
-                lock (gate)
-                {
-                    double linear = _isPlaying && !_isPaused ? anchorTime + (Stopwatch.GetElapsedTime(anchorTimestamp).TotalSeconds * _tempo) : anchorTime;
-                    return NBSLoopRange.Create(_loop, loopStart, loopEnd) is { } range ? range.Fold(linear, _tempo) : linear;
-                }
+                SoundSystem.main.Execute(static system => system.GetMasterDSPClock(), out ulong clock);
+                return Fold(GetTime(clock));
             }
             set
             {
@@ -107,7 +116,7 @@ namespace RuniOS.Editor.NBS
             get => _loop;
             set
             {
-                Anchor(time);
+                MoveAnchor(fold: true);
                 _loop = value;
                 scheduler?.OnLoopChanged();
             }
@@ -139,7 +148,7 @@ namespace RuniOS.Editor.NBS
             get => _tempo;
             set
             {
-                Anchor(time);
+                MoveAnchor();
                 _tempo = value;
                 scheduler?.OnRateChanged();
             }
@@ -175,7 +184,7 @@ namespace RuniOS.Editor.NBS
             {
                 _isPlaying = false;
                 _isPaused = false;
-                anchorTime = 0;
+                anchor = anchor with { time = 0 };
             }
 
             scheduler?.Stop();
@@ -184,7 +193,7 @@ namespace RuniOS.Editor.NBS
         /// <inheritdoc/>
         public void Pause()
         {
-            Anchor(time);
+            MoveAnchor();
             lock (gate)
                 _isPaused = true;
 
@@ -194,7 +203,8 @@ namespace RuniOS.Editor.NBS
         /// <inheritdoc/>
         public void UnPause()
         {
-            Anchor(time);
+            // Moved while still paused, so the held position is kept at the new clock.
+            MoveAnchor();
             lock (gate)
                 _isPaused = false;
 
@@ -207,19 +217,53 @@ namespace RuniOS.Editor.NBS
         /// </summary>
         public void Dispose()
         {
+            SoundSystem.main.onResetting -= OnSoundSystemResetting;
+            SoundSystem.main.onReset -= OnSoundSystemReset;
             scheduler?.Dispose();
             bank?.Dispose();
             scheduler = null;
             bank = null;
         }
 
-        void Anchor(double value)
+        /// <summary>Anchors the timeline at the next mix clock. Without a readable clock it holds until the sound system resets.</summary>
+        void Anchor(double linearTime)
         {
+            ulong clock = NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong nextMixClock) ? nextMixClock : ulong.MaxValue;
+            lock (gate)
+                anchor = new NBSClockAnchor(clock, linearTime);
+        }
+
+        /// <summary>Moves the anchor to the next mix clock without moving the timeline, optionally wrapping the position into the loop range.</summary>
+        void MoveAnchor(bool fold = false)
+        {
+            bool hasClock = NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock);
             lock (gate)
             {
-                anchorTime = value;
-                anchorTimestamp = Stopwatch.GetTimestamp();
+                double linear = hasClock && _isPlaying && !_isPaused ? anchor.GetTime(clock, _tempo, SoundSystem.main.outputSampleRate) : anchor.time;
+                anchor = new NBSClockAnchor(hasClock ? clock : ulong.MaxValue, fold ? Fold(linear) : linear);
             }
+        }
+
+        /// <summary>Gets the linear position at a DSP clock; it only advances while playing.</summary>
+        double GetTime(ulong clock)
+        {
+            lock (gate)
+                return _isPlaying && !_isPaused ? anchor.GetTime(clock, _tempo, SoundSystem.main.outputSampleRate) : anchor.time;
+        }
+
+        double Fold(double linear) => NBSLoopRange.Create(_loop, loopStart, loopEnd) is { } range ? range.Fold(linear, _tempo) : linear;
+
+        // The clock starts again after a reset, so the position is kept across it and anchored on the new clock.
+        void OnSoundSystemResetting(SoundSystem system)
+        {
+            SoundSystem.main.Execute(static soundSystem => soundSystem.GetMasterDSPClock(), out ulong clock);
+            resetTime = GetTime(clock);
+        }
+
+        void OnSoundSystemReset(SoundSystem system)
+        {
+            Anchor(resetTime);
+            scheduler?.Resync();
         }
     }
 }
