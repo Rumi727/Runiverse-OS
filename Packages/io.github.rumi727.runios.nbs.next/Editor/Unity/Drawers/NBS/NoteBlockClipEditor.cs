@@ -20,8 +20,18 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         static GUIStyle overlayLabelStyle => _overlayLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _overlayLabelStyle;
 
+        // Shared by every clip preview, like the audio preview.
+        static bool autoPlay;
+        static float volume = 0.5f;
+
         NBSPreviewTransport? preview;
         bool isCreatingPreview;
+
+        void OnEnable()
+        {
+            if (autoPlay && target is NoteBlockClip clip)
+                LoadAndPlay(clip).Forget();
+        }
 
         void OnDisable() => DisposePreview();
 
@@ -55,6 +65,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 }
             }
 
+            autoPlay = GUILayout.Toggle(autoPlay, EditorGUIUtility.IconContent("preAudioAutoPlayOff"), EditorStyles.toolbarButton);
+
             // The loop follows the file until the preview is loaded.
             using (new EditorGUI.DisabledScope(preview == null))
             {
@@ -62,6 +74,14 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 if (GUILayout.Toggle(loop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton) != loop)
                     preview!.loop = !loop;
             }
+
+            Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
+            EditorGUI.BeginChangeCheck();
+            volume = GUI.HorizontalSlider(sliderRect, volume, 0, 1);
+            if (EditorGUI.EndChangeCheck() && preview != null)
+                preview.volume = volume;
+
+            GUI.Box(sliderRect, TempContent("", $"{GetTextOrKey("runios-editor:gui.volume")}: {(volume * 100).Floor()}"), GUIStyle.none);
         }
 
         /// <inheritdoc/>
@@ -157,6 +177,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
                 DisposePreview();
                 preview = created;
+                preview.volume = volume;
                 preview.Play();
             }
             finally
