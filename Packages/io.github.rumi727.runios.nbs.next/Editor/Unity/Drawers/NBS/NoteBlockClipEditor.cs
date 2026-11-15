@@ -26,6 +26,22 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         public override void OnInspectorGUI()
         {
+            // Unity draws imported objects disabled. This inspector edits nothing, so it is enabled to keep the preview controls usable.
+            bool wasEnabled = GUI.enabled;
+            GUI.enabled = true;
+
+            try
+            {
+                DrawInspector();
+            }
+            finally
+            {
+                GUI.enabled = wasEnabled;
+            }
+        }
+
+        void DrawInspector()
+        {
             if (target is not NoteBlockClip clip)
                 return;
 
