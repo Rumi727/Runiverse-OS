@@ -79,7 +79,7 @@ namespace RuniOS.Editor.IMGUI.NBS
 
         static void DrawFileLoop(Rect position, NoteBlockSource source, NoteBlockClip clip, double length)
         {
-            if (!source.useFileLoopSettings || !clip.header.loop)
+            if (!source.loop || !source.useFileLoopSettings || !clip.header.loop)
                 return;
 
             float start = TimeToX(position, Math.Clamp(source.loopStart, 0, length), length);
