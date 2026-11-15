@@ -212,6 +212,10 @@ namespace RuniOS.Sounds
 
             boundaryTexture = null;
             isDisposed = true;
+
+            GC.SuppressFinalize(this);
         }
+
+        ~WaveformRenderer() => Debug.LogWarning("WaveformRenderer was not disposed! The texture has not been released!");
     }
 }
