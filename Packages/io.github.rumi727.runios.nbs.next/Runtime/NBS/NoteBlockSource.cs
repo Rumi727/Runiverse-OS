@@ -349,7 +349,7 @@ namespace RuniOS.NBS
             try
             {
                 // Freezes the wrapped position first, so the new range does not move the current position.
-                MoveAnchorUnsafe(fold: true);
+                MoveAnchorUnsafe();
                 SyncInterpolatedTime(time);
                 change();
                 scheduler?.OnLoopChanged();

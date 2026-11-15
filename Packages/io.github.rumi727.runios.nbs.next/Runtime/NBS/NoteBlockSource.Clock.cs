@@ -39,12 +39,15 @@ namespace RuniOS.NBS
         /// <summary>Anchors the timeline at the next mix clock. The caller holds the write lock of <see cref="RuniAudioSource.playingLock"/>.</summary>
         void AnchorUnsafe(double linearTime) => SetAnchorUnsafe(NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock) ? clock : ulong.MaxValue, linearTime);
 
-        /// <summary>Moves the anchor to the next mix clock without moving the timeline, optionally wrapping the position into the current loop range.</summary>
-        void MoveAnchorUnsafe(bool fold = false)
+        /// <summary>
+        /// Moves the anchor to the next mix clock without moving the timeline. The position is wrapped into the current loop range first,
+        /// because a later change of the tempo sign wraps only at the other boundary.
+        /// </summary>
+        void MoveAnchorUnsafe()
         {
             bool hasClock = NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock);
             double linear = hasClock && anchorAdvances ? _clockAnchor.GetTime(clock, base.tempo, SoundSystem.main.outputSampleRate) : _clockAnchor.time;
-            SetAnchorUnsafe(hasClock ? clock : ulong.MaxValue, fold ? FoldTime(linear) : linear);
+            SetAnchorUnsafe(hasClock ? clock : ulong.MaxValue, FoldTime(linear));
         }
 
         void SetAnchorUnsafe(ulong clock, double linearTime)

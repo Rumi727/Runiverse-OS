@@ -66,7 +66,7 @@ namespace RuniOS.NBS
                 scheduler = newScope != null && newBank != null ? CreateScheduler(newScope.asset, newBank) : null;
 
                 // The loop range can change with the clip, so the current position is wrapped again before the new scheduler reads it.
-                MoveAnchorUnsafe(fold: true);
+                MoveAnchorUnsafe();
                 SyncInterpolatedTime(time);
             }
             finally

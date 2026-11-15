@@ -116,7 +116,7 @@ namespace RuniOS.Editor.NBS
             get => _loop;
             set
             {
-                MoveAnchor(fold: true);
+                MoveAnchor();
                 _loop = value;
                 scheduler?.OnLoopChanged();
             }
@@ -233,14 +233,17 @@ namespace RuniOS.Editor.NBS
                 anchor = new NBSClockAnchor(clock, linearTime);
         }
 
-        /// <summary>Moves the anchor to the next mix clock without moving the timeline, optionally wrapping the position into the loop range.</summary>
-        void MoveAnchor(bool fold = false)
+        /// <summary>
+        /// Moves the anchor to the next mix clock without moving the timeline. The position is wrapped into the loop range first,
+        /// because a later change of the tempo sign wraps only at the other boundary.
+        /// </summary>
+        void MoveAnchor()
         {
             bool hasClock = NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock);
             lock (gate)
             {
                 double linear = hasClock && _isPlaying && !_isPaused ? anchor.GetTime(clock, _tempo, SoundSystem.main.outputSampleRate) : anchor.time;
-                anchor = new NBSClockAnchor(hasClock ? clock : ulong.MaxValue, fold ? Fold(linear) : linear);
+                anchor = new NBSClockAnchor(hasClock ? clock : ulong.MaxValue, Fold(linear));
             }
         }
 
