@@ -6,7 +6,7 @@ namespace RuniOS.NBS
     /// Represents an immutable parsed NBS file and its precomputed timing data.<br/>
     /// 파싱된 불변 NBS 파일과 미리 계산된 타이밍 데이터를 나타냅니다.
     /// </summary>
-    public sealed class NoteBlockClip : RuniAudioClip
+    public sealed class NoteBlockClip : IAudioClip
     {
         internal NoteBlockClip
         (
@@ -65,6 +65,6 @@ namespace RuniOS.NBS
         public int tickLength { get; }
 
         /// <summary>Gets the song duration after all tempo changes are applied.<br/>모든 템포 변경을 적용한 곡 길이를 가져옵니다.</summary>
-        public override double length => tempoMap.TickToTime(tickLength);
+        public double length => tempoMap.TickToTime(tickLength);
     }
 }

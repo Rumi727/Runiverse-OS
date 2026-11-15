@@ -4,7 +4,7 @@ using System.Threading;
 
 namespace RuniOS.Sounds
 {
-    public sealed partial class WaveAudioClip : RuniAudioClip, IDisposable, ISoundSystemResource
+    public sealed partial class WaveAudioClip : IAudioClip, IDisposable, ISoundSystemResource
     {
         public static class Unsafe
         {
@@ -57,7 +57,7 @@ namespace RuniOS.Sounds
 
         public string name { get; }
 
-        public override double length { get; }
+        public double length { get; }
 
         public uint samples { get; }
 

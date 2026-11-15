@@ -6,7 +6,7 @@ using System.Collections.Immutable;
 
 namespace RuniOS.Editor.Resource.Sounds
 {
-    public abstract class RuniAudioClipPackDrawer<T>(ImmutableArray<IONode> targets) : PackDrawer(targets) where T : RuniAudioClip
+    public abstract class RuniAudioClipPackDrawer<T>(ImmutableArray<IONode> targets) : PackDrawer(targets) where T : class, IAudioClip
     {
         public override string targetTypeName => typeof(T).GetTypeDisplayName();
 
