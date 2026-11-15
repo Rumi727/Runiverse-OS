@@ -1,5 +1,4 @@
 #nullable enable
-using System.Diagnostics;
 using RuniOS.Sounds;
 
 namespace RuniOS.NBS
@@ -25,31 +24,31 @@ namespace RuniOS.NBS
             public Action<SoundChannel>? stopHandler;
         }
 
-        /// <summary>The DSP clock read once per operation, aligned with the transport position read right after it.</summary>
-        readonly record struct ClockSnapshot(ulong clock, int sampleRate, double position, double positionClock)
+        /// <summary>The first unmixed DSP clock of one operation and the timeline position there. Nothing is scheduled before <see cref="clock"/>.</summary>
+        readonly record struct ClockSnapshot(ulong clock, int sampleRate, double position)
         {
-            public double ToClock(double distance, double absoluteTempo) => positionClock + ((distance / absoluteTempo) * sampleRate);
+            public double ToClock(double distance, double absoluteTempo) => clock + ((distance / absoluteTempo) * sampleRate);
 
-            public double ToDistance(double clockValue, double absoluteTempo) => ((clockValue - positionClock) / sampleRate) * absoluteTempo;
+            public double ToDistance(double clockValue, double absoluteTempo) => ((clockValue - clock) / sampleRate) * absoluteTempo;
         }
 
-        bool TryTakeClockSnapshot(out ClockSnapshot snapshot)
+        /// <summary>Reads the first unmixed clock and the transport position there, both on the DSP clock, so no wall clock is involved.</summary>
+        bool TryTakeClockSnapshot(in NBSPlaybackRate rate, NBSLoopRange? loop, out ClockSnapshot snapshot)
         {
-            long clockBefore = Stopwatch.GetTimestamp();
-            bool success = system.Execute(static soundSystem => (clock: soundSystem.GetMasterDSPClock(), sampleRate: soundSystem.outputSampleRate), out (ulong clock, int sampleRate) result);
-            long clockAfter = Stopwatch.GetTimestamp();
-            (ulong clock, int sampleRate) = result;
+            snapshot = default;
+            int sampleRate = system.outputSampleRate;
+            if (sampleRate <= 0 || !NBSClockAnchor.TryGetNextMixClock(system, out ulong clock))
+                return false;
 
-            long positionBefore = Stopwatch.GetTimestamp();
-            double position = transport.time;
-            long positionAfter = Stopwatch.GetTimestamp();
+            // An anchor after the next mix clock belongs to a clock that was reset or could not be read, and the transport moves it again.
+            NBSClockAnchor anchor = transport.clockAnchor;
+            if (anchor.dspClock > clock)
+                return false;
 
-            double clockTimestamp = (clockBefore + clockAfter) * 0.5;
-            double positionTimestamp = (positionBefore + positionAfter) * 0.5;
-            double positionClock = clock + (((positionTimestamp - clockTimestamp) / Stopwatch.Frequency) * sampleRate);
-
-            snapshot = new ClockSnapshot(clock, sampleRate, position, positionClock);
-            return success && sampleRate > 0 && double.IsFinite(position);
+            double linear = transport.isPlaying && !transport.isPaused ? anchor.GetTime(clock, rate.tempo, sampleRate) : anchor.time;
+            double position = loop is { } range ? range.Fold(linear, rate.tempo) : linear;
+            snapshot = new ClockSnapshot(clock, sampleRate, position);
+            return double.IsFinite(position);
         }
 
         static ulong ToClock(double value) => value <= 0 ? 0 : value >= ulong.MaxValue ? ulong.MaxValue : (ulong)Math.Round(value);

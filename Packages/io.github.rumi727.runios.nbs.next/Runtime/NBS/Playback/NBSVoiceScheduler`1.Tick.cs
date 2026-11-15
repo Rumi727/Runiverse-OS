@@ -15,7 +15,7 @@ namespace RuniOS.NBS
 
             NBSPlaybackRate rate = ReadRate();
             NBSLoopRange? loop = ReadLoop();
-            if (!rate.canPlace || !TryTakeClockSnapshot(out ClockSnapshot snapshot))
+            if (!rate.canPlace || !TryTakeClockSnapshot(rate, loop, out ClockSnapshot snapshot))
                 return;
 
             lock (gate)

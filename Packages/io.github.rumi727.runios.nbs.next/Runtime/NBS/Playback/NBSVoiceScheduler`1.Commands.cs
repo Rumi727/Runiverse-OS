@@ -15,7 +15,7 @@ namespace RuniOS.NBS
         {
             NBSPlaybackRate rate = ReadRate();
             NBSLoopRange? loop = ReadLoop();
-            TryTakeClockSnapshot(out ClockSnapshot snapshot);
+            TryTakeClockSnapshot(rate, loop, out ClockSnapshot snapshot);
 
             lock (gate)
             {
@@ -52,8 +52,12 @@ namespace RuniOS.NBS
         {
             NBSPlaybackRate rate = ReadRate();
             NBSLoopRange? loop = ReadLoop();
-            if (!TryTakeClockSnapshot(out ClockSnapshot snapshot))
+            if (!TryTakeClockSnapshot(rate, loop, out ClockSnapshot snapshot))
                 return;
+
+            // The transport moved its anchor to where the tempo changed, so the sounds after it are retimed from there.
+            // Without a tempo change, the scale below is 1 and the reference does not matter.
+            ulong changeClock = Math.Min(transport.clockAnchor.dspClock, snapshot.clock);
 
             lock (gate)
             {
@@ -102,9 +106,9 @@ namespace RuniOS.NBS
 
                         SetFrequency(voice, rate.pitch);
                         if (voice.startClock > snapshot.clock)
-                            RetimePendingVoice(voice, rate, loop, snapshot, previousTempo, tempo);
+                            RetimePendingVoice(voice, rate, loop, changeClock, snapshot.sampleRate, previousTempo, tempo);
                         else if (!paused)
-                            RetimeStopPoint(voice, snapshot, previousTempo, tempo);
+                            RetimeStopPoint(voice, changeClock, snapshot.sampleRate, previousTempo, tempo);
                     }
                     catch (ObjectDisposedException)
                     {
@@ -115,10 +119,10 @@ namespace RuniOS.NBS
                 if (tempo == 0)
                     hasCursor = false;
                 else if (keepsSchedule && hasCursor)
-                    cursorClock = snapshot.ToClock(snapshot.ToDistance(cursorClock, previousTempo), tempo);
+                    cursorClock = changeClock + ((cursorClock - changeClock) * previousTempo / tempo);
                 else
                 {
-                    cursorClock = snapshot.positionClock;
+                    cursorClock = snapshot.clock;
                     hasCursor = true;
                 }
             }
@@ -132,7 +136,7 @@ namespace RuniOS.NBS
         /// </summary>
         public void Pause()
         {
-            if (!TryTakeClockSnapshot(out ClockSnapshot snapshot))
+            if (!TryTakeClockSnapshot(ReadRate(), ReadLoop(), out ClockSnapshot snapshot))
                 return;
 
             lock (gate)
@@ -181,7 +185,7 @@ namespace RuniOS.NBS
         /// </summary>
         public void UnPause()
         {
-            if (!TryTakeClockSnapshot(out ClockSnapshot snapshot))
+            if (!TryTakeClockSnapshot(ReadRate(), ReadLoop(), out ClockSnapshot snapshot))
                 return;
 
             lock (gate)
@@ -213,7 +217,8 @@ namespace RuniOS.NBS
                     }
                 }
 
-                cursorClock = snapshot.positionClock;
+                // Scheduling resumes from where the transport anchored the resume.
+                cursorClock = Math.Min(transport.clockAnchor.dspClock, snapshot.clock);
                 hasCursor = tempo > 0;
             }
 
@@ -243,7 +248,7 @@ namespace RuniOS.NBS
         /// </summary>
         public void OnLoopChanged()
         {
-            if (!TryTakeClockSnapshot(out ClockSnapshot snapshot))
+            if (!TryTakeClockSnapshot(ReadRate(), ReadLoop(), out ClockSnapshot snapshot))
                 return;
 
             lock (gate)
@@ -252,8 +257,10 @@ namespace RuniOS.NBS
                     return;
 
                 generation++;
-                CancelPendingVoicesUnsafe(snapshot.clock);
-                cursorClock = snapshot.positionClock;
+                // The new range applies from where the transport anchored the change.
+                ulong changeClock = Math.Min(transport.clockAnchor.dspClock, snapshot.clock);
+                CancelPendingVoicesUnsafe(changeClock);
+                cursorClock = changeClock;
                 hasCursor = hasCursor && committedRate.tempo != 0;
             }
 
@@ -265,7 +272,7 @@ namespace RuniOS.NBS
          * Its placement is computed again, because the sound position at the start and the stop point depend on the rate:
          * a sound entered at a loop wrap starts mid-sound, and a sound shortened by a stopper starts at its cut point when reversed.
          */
-        void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, NBSLoopRange? loop, in ClockSnapshot snapshot, double previousTempo, double tempo)
+        void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, NBSLoopRange? loop, ulong changeClock, int sampleRate, double previousTempo, double tempo)
         {
             double length = timeline.GetLength(voice.mapIndex, rate, loop, out bool stopped);
             if (!(length > 0))
@@ -283,22 +290,22 @@ namespace RuniOS.NBS
                 return;
             }
 
-            double distance = ((double)voice.startClock - snapshot.clock) / snapshot.sampleRate * previousTempo;
-            voice.startClock = ToClock(snapshot.clock + ((distance / tempo) * snapshot.sampleRate));
+            double distance = ((double)voice.startClock - changeClock) / sampleRate * previousTempo;
+            voice.startClock = ToClock(changeClock + ((distance / tempo) * sampleRate));
             voice.endClock = stopped && placement.startsAtAttack
-                ? ToClock(voice.startClock + ((Math.Abs(placement.exit - voice.startPosition) / tempo) * snapshot.sampleRate))
+                ? ToClock(voice.startClock + ((Math.Abs(placement.exit - voice.startPosition) / tempo) * sampleRate))
                 : 0;
 
             voice.channel.timeSample = (uint)Math.Clamp(Math.Round(sourceTime * voice.clip.frequency), 0, voice.clip.samples - 1d);
             voice.channel.SetDelay(voice.startClock, voice.endClock);
         }
 
-        void RetimeStopPoint(Voice voice, in ClockSnapshot snapshot, double previousTempo, double tempo)
+        void RetimeStopPoint(Voice voice, ulong changeClock, int sampleRate, double previousTempo, double tempo)
         {
-            // The stop point is a fixed timeline position, so its remaining distance is kept while the wall time follows the tempo.
+            // The stop point is a fixed timeline position, so its remaining distance is kept while the clock time follows the tempo.
             double distance = double.IsFinite(voice.heldEndDistance)
                 ? voice.heldEndDistance
-                : voice.endClock != 0 && previousTempo > 0 ? ((double)voice.endClock - snapshot.clock) / snapshot.sampleRate * previousTempo : double.NaN;
+                : voice.endClock != 0 && previousTempo > 0 ? ((double)voice.endClock - changeClock) / sampleRate * previousTempo : double.NaN;
 
             if (!double.IsFinite(distance))
                 return;
@@ -311,7 +318,7 @@ namespace RuniOS.NBS
             else
             {
                 voice.heldEndDistance = double.NaN;
-                voice.endClock = ToClock(snapshot.clock + ((distance / tempo) * snapshot.sampleRate));
+                voice.endClock = ToClock(changeClock + ((distance / tempo) * sampleRate));
             }
 
             voice.channel.SetDelay(voice.startClock, voice.endClock);

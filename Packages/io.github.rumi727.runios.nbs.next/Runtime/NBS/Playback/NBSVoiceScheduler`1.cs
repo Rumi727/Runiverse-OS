@@ -18,6 +18,10 @@ namespace RuniOS.NBS
     /// that start within <see cref="NBSPlaybackSettings.schedulingLookahead"/>. Only those sounds and the ones still ringing have channels.
     /// </para>
     /// <para>
+    /// Start clocks come from <see cref="INBSTransport.clockAnchor"/> by plain arithmetic on the DSP clock, so sounds keep exact sample spacing
+    /// however the worker passes fall.
+    /// </para>
+    /// <para>
     /// The transport owner must call the matching command right after a discontinuity: <see cref="Resync"/> after a seek or play,
     /// <see cref="OnRateChanged"/> after a tempo or pitch change, <see cref="Pause"/>, <see cref="UnPause"/>, <see cref="Stop"/>, and <see cref="OnLoopChanged"/>.
     /// </para>
@@ -31,6 +35,9 @@ namespace RuniOS.NBS
     /// <see cref="NBSPlaybackSettings.schedulingLookahead"/> 안에 시작하는 소리를 예약합니다. 채널은 그 소리와 아직 울리는 소리에만 있습니다.
     /// </para>
     /// <para>
+    /// 시작 클록은 <see cref="INBSTransport.clockAnchor"/>에서 DSP 클록 위의 단순 계산으로 얻으므로, 워커 순회 시점과 관계없이 소리 사이 간격이 샘플 단위로 정확합니다.
+    /// </para>
+    /// <para>
     /// 트랜스포트 주인은 불연속 직후 알맞은 명령을 호출해야 합니다. seek이나 재생 후에는 <see cref="Resync"/>, tempo나 pitch 변경 후에는 <see cref="OnRateChanged"/>,
     /// 그 밖에 <see cref="Pause"/>, <see cref="UnPause"/>, <see cref="Stop"/>, <see cref="OnLoopChanged"/>입니다.
     /// </para>
@@ -40,7 +47,7 @@ namespace RuniOS.NBS
     /// </para>
     /// </remarks>
     public sealed partial class NBSVoiceScheduler<TTransport> : IDisposable, NBSPlaybackWorker.IClient
-        where TTransport : class, ISeekable, ITempoControl, IPitchControl, ILoopControl, IPausable
+        where TTransport : class, INBSTransport, ISeekable, ITempoControl, IPitchControl, ILoopControl, IPausable
     {
         /// <summary>
         /// Initializes a scheduler and registers it with <see cref="NBSPlaybackWorker"/>.<br/>
