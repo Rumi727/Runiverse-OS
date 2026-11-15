@@ -66,14 +66,17 @@ NoteBlockSource (시간 축, 직렬화)
        -> FMOD SoundChannel
 ```
 
-- **시간 축은 `NoteBlockSource` 하나만 가집니다.**
+- **시간 축은 `NoteBlockSource` 하나만 가지며, DSP 클록 위에 정의됩니다.**
+  - 타임라인은 `clockAnchor`(`NBSClockAnchor`: DSP 클록과 그때의 위치)에서 tempo만큼 진행합니다. 소리의 시작 클록은 여기서 단순 계산으로 나오므로 소리 사이 간격이 샘플 단위로 정확하고, 드리프트나 장치 멈춤도 오디오를 따라갑니다.
+  - seek, 재생, tempo·반복 변경, 일시 정지와 재개는 아직 믹스하지 않은 다음 블록에서 적용되므로 최대 한 블록(기본 약 21ms) 늦게 시작합니다.
+  - `time`은 `WaveAudioSource`처럼 믹서가 진행할 때마다 이 타임라인을 따라가는 표시용 값이라 약 한 블록 늦을 수 있습니다.
   - 반복 중에는 `time`이 진행 방향을 기준으로 반복 범위 안으로 되돌아갑니다.
   - 반복 여부는 항상 `loop`가 정합니다. `useFileLoopSettings`이고 헤더 반복이 켜져 있으면 범위만 NBS 헤더의 반복(시작 tick부터 곡 끝까지)으로 바뀝니다. 그 밖에는 `loopStart`·`loopEnd`를 곡 범위로 제한해 사용합니다.
 - **`NBSVoiceScheduler`는 `SoundChannel`과 같은 위치의 엔진 계층입니다.**
   - 공유 `NBSPlaybackWorker`가 `workerInterval`(기본 0.1초)마다 트랜스포트의 현재 위치를 읽습니다.
   - 그때부터 `schedulingLookahead`(기본 0.2초) 안에 시작하는 소리만 DSP 클록에 예약합니다.
-  - Mono 없이 쓰려면 `ISeekable`, `ITempoControl`, `IPitchControl`, `ILoopControl`, `IPausable`을 구현한 트랜스포트를 넘깁니다.
-  - seek, 재생, tempo·pitch·반복 변경 같은 불연속은 트랜스포트 주인이 `Resync`, `OnRateChanged`, `OnLoopChanged`, `Pause`, `UnPause`, `Stop`으로 알립니다.
+  - Mono 없이 쓰려면 `INBSTransport`, `ISeekable`, `ITempoControl`, `IPitchControl`, `ILoopControl`, `IPausable`을 구현한 트랜스포트를 넘깁니다.
+  - seek, 재생, tempo·pitch·반복 변경 같은 불연속은 트랜스포트 주인이 `Resync`, `OnRateChanged`, `OnLoopChanged`, `Pause`, `UnPause`, `Stop`으로 알립니다. 그 전에 `NBSClockAnchor.TryGetNextMixClock`으로 기준점을 옮겨 둡니다.
 - **배치:** 소리 길이 `L`, 피치 배율 `Q`인 노트는 `D = (|tempo| / |pitch|) · L / Q` 타임라인 초를 차지합니다. tempo나 pitch가 바뀌어도 다시 계산할 것이 없습니다.
 - **tempo와 pitch의 부호:** tempo 부호는 타임라인 방향, pitch 부호는 소리 방향입니다.
   - tempo < 0 재생은 pitch 부호가 반대인 tempo > 0 렌더링을 시간축으로 뒤집은 것입니다.
