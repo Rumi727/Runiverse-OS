@@ -73,8 +73,8 @@ namespace RuniOS.NBS
         readonly AsyncReloadGate reloadGate = new();
 
         /// <summary>
-        /// Gets or sets whether the loop range of the NBS header replaces <see cref="loopStart"/> and <see cref="loopEnd"/> when the header loop is on. <see cref="loop"/> still decides whether playback loops.<br/>
-        /// 헤더 반복이 켜져 있을 때 NBS 헤더의 반복 범위로 <see cref="loopStart"/>와 <see cref="loopEnd"/>를 대신할지 가져오거나 설정합니다. 반복 여부는 여전히 <see cref="loop"/>가 정합니다.
+        /// Gets or sets whether <see cref="loopRange"/> uses the loop range of the NBS header instead of <see cref="loopStart"/> and <see cref="loopEnd"/> when the header loop is on. <see cref="loop"/> still decides whether playback loops.<br/>
+        /// 헤더 반복이 켜져 있을 때 <see cref="loopRange"/>가 <see cref="loopStart"/>와 <see cref="loopEnd"/> 대신 NBS 헤더의 반복 범위를 사용할지 가져오거나 설정합니다. 반복 여부는 여전히 <see cref="loop"/>가 정합니다.
         /// </summary>
         public bool useFileLoopSettings
         {
@@ -126,7 +126,7 @@ namespace RuniOS.NBS
             get
             {
                 double linear = base.time;
-                return GetLoopRange() is { } range ? range.Fold(linear, base.tempo) : linear;
+                return loopRange is { } range ? range.Fold(linear, base.tempo) : linear;
             }
             set
             {
@@ -286,48 +286,17 @@ namespace RuniOS.NBS
             }
         }
 
-        /// <summary>
-        /// Gets or sets the loop start in seconds.<br/>
-        /// 반복 시작을 초 단위로 가져오거나 설정합니다.
-        /// </summary>
-        /// <remarks>
-        /// <see cref="RuniAudioSource.loop"/> always decides whether playback loops; this only chooses the range.
-        /// While a clip is loaded, the getter returns the loop start of the NBS header when <see cref="useFileLoopSettings"/> is set and the header loop is on,
-        /// and otherwise the stored value clamped to the song.<br/>
-        /// 반복 여부는 항상 <see cref="RuniAudioSource.loop"/>가 정하고, 이 값은 범위만 고릅니다.
-        /// 클립이 로드되어 있으면 getter는 <see cref="useFileLoopSettings"/>가 켜져 있고 헤더 반복이 켜져 있을 때 NBS 헤더의 반복 시작을, 그렇지 않으면 곡 범위로 제한한 저장 값을 반환합니다.
-        /// </remarks>
+        /// <inheritdoc/>
         public override double loopStart
         {
-            get
-            {
-                NoteBlockClip? current = loadedClip;
-                if (current == null)
-                    return base.loopStart;
-
-                return UsesFileLoop(current) ? current.map.tempo.TickToTime(current.header.loopStartTick) : Math.Clamp(base.loopStart, 0, current.length);
-            }
+            get => base.loopStart;
             set => ChangeLoop(() => base.loopStart = value);
         }
 
-        /// <summary>
-        /// Gets or sets the loop end in seconds.<br/>
-        /// 반복 끝을 초 단위로 가져오거나 설정합니다.
-        /// </summary>
-        /// <remarks>
-        /// While a clip is loaded, the getter returns the song length when the loop of the NBS header is used, and otherwise the stored value clamped between <see cref="loopStart"/> and the song length.<br/>
-        /// 클립이 로드되어 있으면 getter는 NBS 헤더의 반복을 사용할 때 곡 길이를, 그렇지 않으면 <see cref="loopStart"/>와 곡 길이 사이로 제한한 저장 값을 반환합니다.
-        /// </remarks>
+        /// <inheritdoc/>
         public override double loopEnd
         {
-            get
-            {
-                NoteBlockClip? current = loadedClip;
-                if (current == null)
-                    return base.loopEnd;
-
-                return UsesFileLoop(current) ? current.length : Math.Clamp(base.loopEnd, Math.Min(loopStart, current.length), current.length);
-            }
+            get => base.loopEnd;
             set => ChangeLoop(() => base.loopEnd = value);
         }
 
@@ -338,9 +307,31 @@ namespace RuniOS.NBS
             set => ChangeLoop(() => base.loop = value);
         }
 
-        bool UsesFileLoop(NoteBlockClip current) => _useFileLoopSettings && current.header.loop;
+        /// <summary>
+        /// Gets the song time range that playback repeats, or <see langword="null"/> while it does not loop.<br/>
+        /// 재생이 반복하는 곡 시간 범위를 가져오며, 반복하지 않으면 <see langword="null"/>입니다.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="RuniAudioSource.loop"/> always decides whether playback loops. While a clip is loaded, the range is the loop of the NBS header
+        /// when <see cref="useFileLoopSettings"/> is set and the header loop is on, and otherwise <see cref="loopStart"/> and <see cref="loopEnd"/> clamped to the song.<br/>
+        /// 반복 여부는 항상 <see cref="RuniAudioSource.loop"/>가 정합니다. 클립이 로드되어 있으면 범위는 <see cref="useFileLoopSettings"/>가 켜져 있고 헤더 반복이 켜져 있을 때 NBS 헤더의 반복이고,
+        /// 그렇지 않으면 곡 범위로 제한한 <see cref="loopStart"/>와 <see cref="loopEnd"/>입니다.
+        /// </remarks>
+        public NBSLoopRange? loopRange
+        {
+            get
+            {
+                NoteBlockClip? current = loadedClip;
+                if (current == null)
+                    return NBSLoopRange.Create(loop, loopStart, loopEnd);
 
-        NBSLoopRange? GetLoopRange() => NBSLoopRange.Create(loop, loopStart, loopEnd);
+                if (_useFileLoopSettings && current.header.loop)
+                    return NBSLoopRange.Create(loop, current.map.tempo.TickToTime(current.header.loopStartTick), current.length);
+
+                double start = Math.Clamp(loopStart, 0, current.length);
+                return NBSLoopRange.Create(loop, start, Math.Clamp(loopEnd, start, current.length));
+            }
+        }
 
         void ChangeLoop(Action change)
         {

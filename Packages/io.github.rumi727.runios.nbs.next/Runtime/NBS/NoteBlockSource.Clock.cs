@@ -57,7 +57,7 @@ namespace RuniOS.NBS
             anchorAdvances = isPlaying && !isPaused;
         }
 
-        double FoldTime(double linear) => GetLoopRange() is { } range ? range.Fold(linear, base.tempo) : linear;
+        double FoldTime(double linear) => loopRange is { } range ? range.Fold(linear, base.tempo) : linear;
 
         /// <summary>Moves the interpolated time to the timeline whenever the mixer advances, as <see cref="WaveAudioSource"/> follows its channel.</summary>
         void SyncTimeToMixer()

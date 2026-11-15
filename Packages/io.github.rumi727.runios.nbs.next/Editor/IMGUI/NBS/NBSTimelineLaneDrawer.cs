@@ -82,8 +82,8 @@ namespace RuniOS.Editor.IMGUI.NBS
             if (!source.loop || !source.useFileLoopSettings || !clip.header.loop)
                 return;
 
-            float start = TimeToX(position, Math.Clamp(source.loopStart, 0, length), length);
-            float end = TimeToX(position, Math.Clamp(source.loopEnd, 0, length), length);
+            float start = TimeToX(position, Math.Clamp(clip.map.tempo.TickToTime(clip.header.loopStartTick), 0, length), length);
+            float end = TimeToX(position, length, length);
             EditorGUI.DrawRect(new Rect(start, position.y, Math.Max(1, end - start), position.height), loopColor);
             EditorGUI.DrawRect(new Rect(start, position.y, 2, position.height), loopFlagColor);
             EditorGUI.DrawRect(new Rect(start, position.y, 6, 3), loopFlagColor);
