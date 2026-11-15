@@ -19,7 +19,7 @@ namespace RuniOS.NBS
     /// </remarks>
     [ExecuteAlways]
     [AddComponentMenu("Audio/Note Block Source")]
-    public sealed partial class NoteBlockSource : RuniAudioSource, IReloadable
+    public sealed partial class NoteBlockSource : RuniAudioSource, INBSTransport, IReloadable
     {
         /// <summary>
         /// Gets or sets the clip reference. Setting it reloads the clip.<br/>
@@ -135,6 +135,7 @@ namespace RuniOS.NBS
                 try
                 {
                     base.time = value;
+                    AnchorUnsafe(value);
 
                     // RuniAudioSource.Play and Stop assign the time, so this also restarts the sounds for them.
                     scheduler?.Resync();
@@ -176,6 +177,8 @@ namespace RuniOS.NBS
 
                 try
                 {
+                    // The new tempo applies from the next mix clock, where the timeline keeps its position.
+                    MoveAnchorUnsafe();
                     base.tempo = value;
                     scheduler?.OnRateChanged();
                 }
@@ -346,6 +349,7 @@ namespace RuniOS.NBS
             try
             {
                 // Freezes the wrapped position first, so the new range does not move the current position.
+                MoveAnchorUnsafe(fold: true);
                 SyncInterpolatedTime(time);
                 change();
                 scheduler?.OnLoopChanged();

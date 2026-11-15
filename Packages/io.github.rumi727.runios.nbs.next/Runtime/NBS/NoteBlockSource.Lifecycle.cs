@@ -66,6 +66,7 @@ namespace RuniOS.NBS
                 scheduler = newScope != null && newBank != null ? CreateScheduler(newScope.asset, newBank) : null;
 
                 // The loop range can change with the clip, so the current position is wrapped again before the new scheduler reads it.
+                MoveAnchorUnsafe(fold: true);
                 SyncInterpolatedTime(time);
             }
             finally
@@ -104,6 +105,8 @@ namespace RuniOS.NBS
             base.OnEnable();
             lastPosition = transform.position;
 
+            SoundSystem.main.onUpdate += SyncTimeToMixer;
+            SoundSystem.main.onReset += OnSoundSystemReset;
             ResourceManager.AttachReloadable(this);
             Reload().Forget();
         }
@@ -112,6 +115,8 @@ namespace RuniOS.NBS
         protected override void OnDisable()
         {
             base.OnDisable();
+            SoundSystem.main.onUpdate -= SyncTimeToMixer;
+            SoundSystem.main.onReset -= OnSoundSystemReset;
             ResourceManager.DetachReloadable(this);
 
             NBSVoiceScheduler<NoteBlockSource>? oldScheduler;
@@ -145,10 +150,20 @@ namespace RuniOS.NBS
         protected override void OnStop() => scheduler?.Stop();
 
         /// <inheritdoc/>
-        protected override void OnPause() => scheduler?.Pause();
+        protected override void OnPause()
+        {
+            // The timeline stops at the next mix clock, and the interpolated time shows that position.
+            MoveAnchorUnsafe();
+            SyncInterpolatedTime(_clockAnchor.time);
+            scheduler?.Pause();
+        }
 
         /// <inheritdoc/>
-        protected override void OnUnPause() => scheduler?.UnPause();
+        protected override void OnUnPause()
+        {
+            MoveAnchorUnsafe();
+            scheduler?.UnPause();
+        }
 
         void Update()
         {
