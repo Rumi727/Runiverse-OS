@@ -154,7 +154,7 @@ namespace RuniOS.NBS
         {
             ReadOnlySpan<int> span = savePopupTicks.AsSpan();
             tick = 0;
-            if (fromTick == toTick || span.IsEmpty)
+            if (fromTick.Approximately(toTick) || span.IsEmpty)
                 return false;
 
             if (fromTick < toTick)

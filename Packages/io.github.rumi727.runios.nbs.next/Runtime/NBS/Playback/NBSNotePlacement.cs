@@ -43,7 +43,7 @@ namespace RuniOS.NBS
         /// Gets whether the sound starts from its beginning at the entry point and plays forwards.<br/>
         /// 소리가 진입점에서 처음부터 시작해 정방향으로 재생되는지 여부를 가져옵니다.
         /// </summary>
-        public bool startsAtAttack => entry == attack;
+        public bool startsAtAttack => entry.Approximately(attack);
 
         /// <summary>
         /// Gets the position in the sound, in seconds from its beginning, that is heard at a song time.<br/>
