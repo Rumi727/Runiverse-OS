@@ -18,10 +18,6 @@ namespace RuniOS.UIElements.Grids
         /// Gets or sets the axis position at the left edge of the item area.<br/>
         /// 아이템 영역 왼쪽 끝의 축 위치를 가져오거나 설정합니다.
         /// </summary>
-        /// <remarks>
-        /// When <see cref="limit"/> is set, the value is kept so that the view stays inside it.<br/>
-        /// <see cref="limit"/>가 설정되어 있으면 보이는 범위가 그 안에 머물도록 값을 조정합니다.
-        /// </remarks>
         public double offset
         {
             get => _offset;
@@ -53,16 +49,19 @@ namespace RuniOS.UIElements.Grids
         public double maximumPixelsPerUnit { get; set; } = 1e6;
 
         /// <summary>
-        /// Gets or sets the range the view may show, or <see langword="null"/> for no limit.<br/>
-        /// 보여 줄 수 있는 범위를 가져오거나 설정합니다. <see langword="null"/>이면 제한하지 않습니다.
+        /// Gets or sets the range that the horizontal scroll bar of <see cref="GridView"/> spans, or <see langword="null"/> to hide the scroll bar.<br/>
+        /// It does not limit the view: panning, the wheel, and the scroll bar buttons can move past it without end.
+        /// <br/><br/>
+        /// <see cref="GridView"/>의 가로 스크롤바가 나타내는 범위를 가져오거나 설정하며, 스크롤바를 숨기려면 <see langword="null"/>입니다.<br/>
+        /// 보이는 범위를 제한하지 않으므로, 끌기 이동, 휠, 스크롤바 버튼으로 이 범위를 넘어 끝없이 이동할 수 있습니다.
         /// </summary>
-        public GridRange? limit
+        public GridRange? scrollRange
         {
             get;
             set
             {
                 field = value;
-                SetView(offset, pixelsPerUnit);
+                changed?.Invoke();
             }
         }
 
@@ -100,8 +99,8 @@ namespace RuniOS.UIElements.Grids
         public Func<double, double>? snap { get; set; }
 
         /// <summary>
-        /// Occurs when <see cref="offset"/>, <see cref="pixelsPerUnit"/>, <see cref="width"/>, or anything drawn from the axis changes.<br/>
-        /// <see cref="offset"/>, <see cref="pixelsPerUnit"/>, <see cref="width"/> 또는 축에서 그려지는 무언가가 바뀌면 발생합니다.
+        /// Occurs when <see cref="offset"/>, <see cref="pixelsPerUnit"/>, <see cref="width"/>, <see cref="scrollRange"/>, or anything drawn from the axis changes.<br/>
+        /// <see cref="offset"/>, <see cref="pixelsPerUnit"/>, <see cref="width"/>, <see cref="scrollRange"/> 또는 축에서 그려지는 무언가가 바뀌면 발생합니다.
         /// </summary>
         public event Action? changed;
 
@@ -178,13 +177,6 @@ namespace RuniOS.UIElements.Grids
         public void SetView(double offset, double pixelsPerUnit)
         {
             pixelsPerUnit = Math.Clamp(pixelsPerUnit, minimumPixelsPerUnit, maximumPixelsPerUnit);
-
-            if (limit is { } range)
-            {
-                double visibleLength = width / pixelsPerUnit;
-                offset = visibleLength >= range.length ? range.start : Math.Clamp(offset, range.start, range.end - visibleLength);
-            }
-
             if (_offset.Approximately(offset) && _pixelsPerUnit.Approximately(pixelsPerUnit))
                 return;
 
