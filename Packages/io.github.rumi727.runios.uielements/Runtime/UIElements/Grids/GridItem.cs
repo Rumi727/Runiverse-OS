@@ -25,7 +25,7 @@ namespace RuniOS.UIElements.Grids
             get;
             set
             {
-                if (field == value)
+                if (field.Approximately(value))
                     return;
 
                 field = value;

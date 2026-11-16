@@ -520,7 +520,7 @@ namespace RuniOS.UIElements.Grids
                 ApplyAddedAndRemovedItems(gridView);
 
             GridAxis axis = gridView.axis;
-            bool zoomChanged = axis.pixelsPerUnit != arrangedPixelsPerUnit;
+            bool zoomChanged = !axis.pixelsPerUnit.Approximately(arrangedPixelsPerUnit);
             if (dirty)
                 SortByStart(CollectionsMarshal.AsSpan(sorted));
 

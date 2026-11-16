@@ -88,7 +88,7 @@ namespace RuniOS.UIElements.Grids
             return HasSubdivision(step, pixelsPerUnit) ? step / subdivision : step;
         }
 
-        bool HasSubdivision(double step, double pixelsPerUnit) => subdivision > 1 && step / subdivision * pixelsPerUnit >= minimumSubdivisionSpacing;
+        bool HasSubdivision(double step, double pixelsPerUnit) => subdivision > 1 && (step / subdivision) * pixelsPerUnit >= minimumSubdivisionSpacing;
 
         /// <inheritdoc/>
         public override void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines)

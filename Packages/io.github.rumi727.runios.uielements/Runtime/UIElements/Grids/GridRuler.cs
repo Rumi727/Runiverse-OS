@@ -104,7 +104,7 @@ namespace RuniOS.UIElements.Grids
             {
                 GridLine line = lines[i];
                 if (!string.IsNullOrEmpty(line.label))
-                    context.DrawText(line.label, new Vector2(MathF.Round(axis.ToPixel(line.position)) + 3, 0), fontSize, textColor, null);
+                    context.DrawText(line.label, new Vector2(MathF.Round(axis.ToPixel(line.position)) + 3, 0), fontSize, textColor);
             }
         }
     }

@@ -75,7 +75,7 @@ namespace RuniOS.UIElements.Grids
             get;
             set
             {
-                if (field == value)
+                if (field.Approximately(value))
                     return;
 
                 field = value;
@@ -185,7 +185,7 @@ namespace RuniOS.UIElements.Grids
                 offset = visibleLength >= range.length ? range.start : Math.Clamp(offset, range.start, range.end - visibleLength);
             }
 
-            if (_offset == offset && _pixelsPerUnit == pixelsPerUnit)
+            if (_offset.Approximately(offset) && _pixelsPerUnit.Approximately(pixelsPerUnit))
                 return;
 
             _offset = offset;
