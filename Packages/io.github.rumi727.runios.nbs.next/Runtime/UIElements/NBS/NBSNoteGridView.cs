@@ -53,7 +53,7 @@ namespace RuniOS.UIElements.NBS
         public const float cellSize = 32;
 
         // Above this many visible notes, the notes are drawn as rectangles instead of blocks.
-        const int maximumBlockCount = 512;
+        const int maximumBlockCount = 1024;
 
         // Below this many pixels per tick, which is the width of a block, the notes are drawn as rectangles instead of blocks.
         const double minimumBlockPixelsPerTick = 4;
