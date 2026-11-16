@@ -71,6 +71,12 @@
 - Put `#nullable enable` at the very top of C# files.
 - A class that declares a Unity lifecycle API method (for example one marked with `[OnAssemblyLoaded]` or `[OnAssemblyUnloading]` from `Unity.Scripting.LifecycleManagement`) must be declared `partial`. Do this even when the whole class lives in one file; follow the existing services such as `LinuxFileOpenService` (`sealed partial class`).
 
+## No Python-Style Code and Heap Allocation
+
+- Do not write Python-style C#: code that reaches for a convenient temporary collection instead of the straightforward algorithm. Examples are a `new List<T>()` or `new HashSet<T>()` inside a method only to collect, deduplicate, or reorder values, or removing duplicates by converting a list to a set and back. Write the direct, conventional loop, binary search, in-place operation, or existing collection API instead.
+- Avoid unnecessary heap allocations: temporary collections, closures and lambdas that capture state, boxing, `string` building, LINQ, and `params` arrays. This is not a total ban. Allocate when it is really needed, and say why in a comment.
+- Tell hot paths from the others. Code that runs every frame or on every pointer, layout, repaint, or mesh-generation event is a hot path. Allocating there is almost forbidden; if a collection is really needed, cache it in a field and clear it for reuse. Loading, building, rebuilding on a changed input, and other work that runs rarely may allocate when it keeps the code simple.
+
 ## USS Theme Separation
 
 - Each control's styles are split into a base USS imported by the control theme (`ROS Control Style.tss`) and theme USS files imported by a specific theme (for example `Editor/... Style.uss` imported by `ROS Editor Theme.tss`).
