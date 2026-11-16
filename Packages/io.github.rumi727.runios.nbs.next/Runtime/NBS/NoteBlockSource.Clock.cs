@@ -34,8 +34,6 @@ namespace RuniOS.NBS
         /// <summary>Whether the timeline advances from <see cref="_clockAnchor"/>, which is decided when it is anchored.</summary>
         bool anchorAdvances;
 
-        ulong lastMixClock;
-
         /// <summary>Anchors the timeline at the next mix clock. The caller holds the write lock of <see cref="RuniAudioSource.playingLock"/>.</summary>
         void AnchorUnsafe(double linearTime) => SetAnchorUnsafe(NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock) ? clock : ulong.MaxValue, linearTime);
 
@@ -58,6 +56,8 @@ namespace RuniOS.NBS
         }
 
         double FoldTime(double linear) => loopRange is { } range ? range.Fold(linear, base.tempo) : linear;
+
+        ulong lastMixClock;
 
         /// <summary>Moves the interpolated time to the timeline whenever the mixer advances, as <see cref="WaveAudioSource"/> follows its channel.</summary>
         void SyncTimeToMixer()

@@ -19,12 +19,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         const float visualEffectCardHeight = 28;
         const double savePopupHoldDuration = 1;
         const double savePopupFadeDuration = 0.25;
-        static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
-        static readonly Color savePopupColor = new Color(0.4f, 0.4f, 0.4f, 0.95f);
 
         double savePopupStartedAt = double.NegativeInfinity;
-        double previousTick = double.NaN;
-        NBSClockAnchor previousAnchor;
         bool isRainbowShown;
 
         /// <summary>
@@ -212,6 +208,10 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
         void DrawInformation<TValue>(string key, Func<NoteBlockSource, TValue> readFunc) => EditorGUILayout.LabelField(TrTempContent(key), new GUIContent(GetCommonValueString(readFunc)));
 
+        static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
+        double previousTick = double.NaN;
+        NBSClockAnchor previousAnchor;
+
         bool DrawVisualEffectsLayout()
         {
             isRainbowShown = false;
@@ -322,6 +322,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 ? string.Join(" · ", status)
                 : GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.inactive");
         }
+
+        static readonly Color savePopupColor = new Color(0.4f, 0.4f, 0.4f, 0.95f);
 
         /// <summary>
         /// Draws the song saved popup floating over the center of the visual effect card, fading out after it is held.<br/>

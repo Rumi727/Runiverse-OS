@@ -7,15 +7,6 @@ namespace RuniOS.NBS
 {
     public sealed partial class NoteBlockSource
     {
-        Vector3 lastPosition;
-
-#if UNITY_PHYSICS_EXIST
-        Rigidbody? rigidbody;
-#endif
-#if UNITY_PHYSICS2D_EXIST
-        Rigidbody2D? rigidbody2D;
-#endif
-
         /// <summary>
         /// Loads <see cref="clip"/> and its instruments again when the reference points to a different target.<br/>
         /// 참조가 다른 대상을 가리키면 <see cref="clip"/>과 그 악기를 다시 로드합니다.
@@ -105,6 +96,15 @@ namespace RuniOS.NBS
             AssetRefMode.registry => target.resourceKey.assetId.nameSpace,
             _ => _directInstrumentNamespace
         };
+
+        Vector3 lastPosition;
+
+#if UNITY_PHYSICS_EXIST
+        Rigidbody? rigidbody;
+#endif
+#if UNITY_PHYSICS2D_EXIST
+        Rigidbody2D? rigidbody2D;
+#endif
 
         /// <inheritdoc/>
         protected override void OnEnable()

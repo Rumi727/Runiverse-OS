@@ -96,8 +96,6 @@ namespace RuniOS.NBS
         readonly Stream stream;
         readonly bool leaveOpen;
 
-        static readonly UTF8Encoding strictUtf8 = new UTF8Encoding(false, true);
-
         /// <summary>
         /// Gets the next section that the reader expects.<br/>
         /// 리더가 다음으로 기대하는 섹션을 가져옵니다.
@@ -462,6 +460,8 @@ namespace RuniOS.NBS
             ReadExactly(lengthBytes[1..]);
             return ReadStringContent(BinaryPrimitives.ReadInt32LittleEndian(lengthBytes));
         }
+
+        static readonly UTF8Encoding strictUtf8 = new UTF8Encoding(false, true);
 
         string ReadStringContent(int length)
         {
