@@ -12,8 +12,8 @@ namespace RuniOS.UIElements.Grids
     /// 팝업 안의 입력은 그리드에 전달되지 않습니다.
     /// </summary>
     /// <remarks>
-    /// While <see cref="GridView.readOnly"/> is <see langword="true"/>, the popup is disabled.<br/>
-    /// <see cref="GridView.readOnly"/>가 <see langword="true"/>인 동안에는 팝업이 비활성화됩니다.
+    /// While <see cref="GridView.readOnly"/> is <see langword="true"/>, the popup is disabled unless <see cref="enabledWhenReadOnly"/> is <see langword="true"/>.<br/>
+    /// <see cref="GridView.readOnly"/>가 <see langword="true"/>인 동안에는 <see cref="enabledWhenReadOnly"/>가 <see langword="true"/>가 아니면 팝업이 비활성화됩니다.
     /// </remarks>
     public class GridPopup : VisualElement
     {
@@ -40,6 +40,21 @@ namespace RuniOS.UIElements.Grids
         /// 팝업이 표시된 그리드를 가져옵니다. 숨겨져 있으면 <see langword="null"/>입니다.
         /// </summary>
         public GridView? view { get; private set; }
+
+        /// <summary>
+        /// Gets or sets whether the popup stays enabled while <see cref="GridView.readOnly"/> is <see langword="true"/>, for a popup that only shows information. The default is <see langword="false"/>.<br/>
+        /// <see cref="GridView.readOnly"/>가 <see langword="true"/>인 동안에도 팝업을 활성 상태로 둘지 여부를 가져오거나 설정하며, 정보만 보여 주는 팝업에 씁니다. 기본값은 <see langword="false"/>입니다.
+        /// </summary>
+        public bool enabledWhenReadOnly
+        {
+            get;
+            set
+            {
+                field = value;
+                if (view != null)
+                    SetEnabled(value || !view.readOnly);
+            }
+        }
 
         /// <summary>
         /// Gets the items the popup is attached to.<br/>
@@ -76,7 +91,7 @@ namespace RuniOS.UIElements.Grids
                 this.view = view;
             }
 
-            SetEnabled(!view.readOnly);
+            SetEnabled(enabledWhenReadOnly || !view.readOnly);
             UpdatePosition();
         }
 

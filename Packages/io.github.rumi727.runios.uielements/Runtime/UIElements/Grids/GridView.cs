@@ -266,7 +266,7 @@ namespace RuniOS.UIElements.Grids
                 EnableInClassList(readOnlyUssClassName, value);
 
                 foreach (GridPopup popup in popupLayer.Children().OfType<GridPopup>())
-                    popup.SetEnabled(!value);
+                    popup.SetEnabled(popup.enabledWhenReadOnly || !value);
             }
         }
 
