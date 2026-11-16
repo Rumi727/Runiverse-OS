@@ -16,6 +16,7 @@
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/Dialog%20Style.uss?fileID=7433441132597879392&guid=a2a84f0e29514b70874485b8bc64f854&type=3#Dialog Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/Pack%20Inspector%20Style.uss?fileID=7433441132597879392&guid=14e6cdafd81348b286517c6ba34c8f26&type=3#Pack Inspector Style");
 @import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/Grid%20View%20Style.uss?fileID=7433441132597879392&guid=5247dc566da94747985386fe4d48e7c3&type=3#Grid View Style");
+@import url("project://database/Packages/io.github.rumi727.runios.uielements/Resources/RuniOS/UI%20Elements/Editor/NBS%20Note%20Grid%20View%20Style.uss?fileID=7433441132597879392&guid=5453dc969aec4378a27405c0bc43f18c&type=3#NBS Note Grid View Style");
 
 
 

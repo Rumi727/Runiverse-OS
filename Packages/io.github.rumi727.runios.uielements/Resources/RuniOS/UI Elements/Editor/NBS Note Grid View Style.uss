@@ -1,0 +1,72 @@
+.runios-nbs-note-grid-view__layer-header {
+    padding-left: 4px;
+    padding-right: 4px;
+}
+
+.runios-nbs-note-grid-view__layer-header--locked {
+    opacity: 0.5;
+}
+
+.runios-nbs-note-grid-view__layer-header--solo {
+    background-color: rgba(255, 200, 0, 0.15);
+}
+
+.runios-nbs-note-grid-view__layer-number {
+    min-width: 24px;
+    margin-right: 4px;
+    -unity-text-align: middle-right;
+    color: var(--unity-colors-label-text);
+    opacity: 0.6;
+}
+
+.runios-nbs-note-grid-view__layer-name {
+    text-overflow: ellipsis;
+    color: var(--unity-colors-label-text);
+}
+
+.runios-nbs-note-grid-view__notes--muted {
+    opacity: 0.4;
+}
+
+.runios-nbs-note-grid-view__playhead {
+    width: 2px;
+    background-color: rgb(255, 255, 255);
+}
+
+.runios-nbs-note-block__tint--down {
+    background-color: rgb(255, 0, 0);
+}
+
+.runios-nbs-note-block__tint--up {
+    background-color: rgb(0, 0, 255);
+}
+
+.runios-nbs-note-block__key {
+    padding-top: 1px;
+    font-size: 10px;
+    color: rgb(255, 255, 0);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.runios-nbs-note-block__value {
+    padding-top: 6px;
+    font-size: 10px;
+    color: rgb(255, 255, 255);
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.runios-nbs-preview-toolbar__time {
+    margin-right: 4px;
+    color: var(--unity-colors-label-text);
+}
+
+.runios-nbs-preview-toolbar__icon {
+    width: 16px;
+    height: 16px;
+}
+
+.runios-nbs-preview-toolbar__volume {
+    width: 75px;
+    margin-left: 4px;
+    margin-right: 4px;
+}
