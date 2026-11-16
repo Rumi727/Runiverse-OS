@@ -11,17 +11,27 @@ namespace RuniOS.UIElements.Grids
     /// <remarks>
     /// <list type="bullet">
     /// <item><description>Wheel: zooms horizontally around the pointer. When <see cref="zoomModifier"/> is set, <see cref="zoomModifier"/> + wheel zooms and the wheel alone scrolls the tracks vertically.</description></item>
+    /// <item><description><see cref="verticalZoomModifier"/> + wheel: zooms the tracks vertically around the pointer with <see cref="GridView.ZoomVertical"/>. It is off by default.</description></item>
     /// <item><description><see cref="horizontalModifier"/> + wheel, or a horizontal wheel: pans horizontally.</description></item>
     /// <item><description><see cref="verticalModifier"/> + wheel: scrolls the tracks vertically.</description></item>
     /// <item><description>Middle drag, or <see cref="dragModifier"/> + left drag: pans in both directions.</description></item>
     /// </list>
+    /// <para>
+    /// A wheel modifier matches only when all of its keys are held, and <see cref="EventModifiers.None"/> turns it off.<br/>
+    /// When several match, the one with the most keys wins, so <c>Control | Shift</c> wins over <c>Control</c> while both are held. The order of matches with as many keys is not specified.
+    /// </para>
     /// <br/><br/>
     /// <list type="bullet">
     /// <item><description>휠: 포인터를 기준으로 가로 확대·축소합니다. <see cref="zoomModifier"/>가 설정되어 있으면 <see cref="zoomModifier"/> + 휠이 확대·축소하고, 휠만 쓰면 트랙을 세로로 스크롤합니다.</description></item>
+    /// <item><description><see cref="verticalZoomModifier"/> + 휠: <see cref="GridView.ZoomVertical"/>로 포인터를 기준으로 트랙을 세로 확대·축소합니다. 기본값은 꺼져 있습니다.</description></item>
     /// <item><description><see cref="horizontalModifier"/> + 휠, 또는 가로 휠: 가로로 이동합니다.</description></item>
     /// <item><description><see cref="verticalModifier"/> + 휠: 트랙을 세로로 스크롤합니다.</description></item>
     /// <item><description>가운데 끌기, 또는 <see cref="dragModifier"/> + 왼쪽 끌기: 양방향으로 이동합니다.</description></item>
     /// </list>
+    /// <para>
+    /// 휠 보조 키는 그 키가 모두 눌려 있을 때만 일치하며, <see cref="EventModifiers.None"/>이면 꺼집니다.<br/>
+    /// 여러 개가 일치하면 키가 가장 많은 것이 우선하므로, 둘 다 눌려 있으면 <c>Control | Shift</c>가 <c>Control</c>보다 우선합니다. 키 개수가 같은 것끼리의 순서는 정해져 있지 않습니다.
+    /// </para>
     /// </remarks>
     /// <param name="view">
     /// The grid to zoom and pan.<br/>
@@ -68,6 +78,12 @@ namespace RuniOS.UIElements.Grids
         public EventModifiers zoomModifier { get; set; } = EventModifiers.None;
 
         /// <summary>
+        /// Gets or sets the modifier keys that make the wheel zoom the tracks vertically. The default, <see cref="EventModifiers.None"/>, turns vertical zooming off.<br/>
+        /// 휠로 트랙을 세로 확대·축소하게 하는 보조 키를 가져오거나 설정합니다. 기본값인 <see cref="EventModifiers.None"/>이면 세로 확대·축소를 끕니다.
+        /// </summary>
+        public EventModifiers verticalZoomModifier { get; set; } = EventModifiers.None;
+
+        /// <summary>
         /// Gets or sets the modifier key that makes a left drag pan.<br/>
         /// 왼쪽 끌기로 이동하게 하는 보조 키를 가져오거나 설정합니다.
         /// </summary>
@@ -102,16 +118,41 @@ namespace RuniOS.UIElements.Grids
             pointerId = -1;
         }
 
+        const int noAction = 0;
+        const int zoomAction = 1;
+        const int verticalZoomAction = 2;
+        const int verticalAction = 3;
+        const int horizontalAction = 4;
+
         void OnWheel(WheelEvent evt)
         {
             Vector3 delta = evt.delta;
             float ticks = delta.y / WheelEvent.scrollDeltaPerTick;
 
-            if (zoomModifier != EventModifiers.None && (evt.modifiers & zoomModifier) != 0)
+            // This runs on every wheel tick, so the best match is tracked in locals instead of a collection.
+            EventModifiers modifiers = evt.modifiers;
+            int action = noAction;
+            int keyCount = 0;
+            if (Matches(modifiers, zoomModifier, ref keyCount))
+                action = zoomAction;
+            if (Matches(modifiers, verticalZoomModifier, ref keyCount))
+                action = verticalZoomAction;
+            if (Matches(modifiers, verticalModifier, ref keyCount))
+                action = verticalAction;
+            if (Matches(modifiers, horizontalModifier, ref keyCount))
+                action = horizontalAction;
+
+            if (action == zoomAction)
                 view.axis.Zoom(Math.Pow(zoomFactor, -ticks), view.GetAxisPixel(evt.mousePosition));
-            else if (verticalModifier != EventModifiers.None && (evt.modifiers & verticalModifier) != 0)
+            else if (action == verticalZoomAction)
+            {
+                // Shift can turn the wheel into a horizontal wheel on some platforms, so both directions count, as they do for panning.
+                float verticalZoomTicks = ticks + (delta.x / WheelEvent.scrollDeltaPerTick);
+                view.ZoomVertical(Math.Pow(zoomFactor, -verticalZoomTicks), view.scrollView.contentViewport.WorldToLocal(evt.mousePosition).y);
+            }
+            else if (action == verticalAction)
                 view.scrollView.scrollOffset += new Vector2(0, ticks * scrollDistance);
-            else if (horizontalModifier != EventModifiers.None && (evt.modifiers & horizontalModifier) != 0)
+            else if (action == horizontalAction)
                 view.axis.Pan(-(ticks + (delta.x / WheelEvent.scrollDeltaPerTick)) * scrollDistance);
             else if (delta.x != 0)
                 view.axis.Pan(-(delta.x / WheelEvent.scrollDeltaPerTick) * scrollDistance);
@@ -121,6 +162,20 @@ namespace RuniOS.UIElements.Grids
                 view.axis.Zoom(Math.Pow(zoomFactor, -ticks), view.GetAxisPixel(evt.mousePosition));
 
             evt.StopPropagation();
+        }
+
+        // Whether every key of candidate is held and it has more keys than the best match so far, which it then becomes.
+        static bool Matches(EventModifiers modifiers, EventModifiers candidate, ref int bestKeyCount)
+        {
+            if (candidate == EventModifiers.None || (modifiers & candidate) != candidate)
+                return false;
+
+            int count = System.Numerics.BitOperations.PopCount((uint)candidate);
+            if (count <= bestKeyCount)
+                return false;
+
+            bestKeyCount = count;
+            return true;
         }
 
         Vector2 lastPosition;
