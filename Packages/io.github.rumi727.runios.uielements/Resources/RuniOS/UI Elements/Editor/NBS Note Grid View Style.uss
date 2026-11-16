@@ -1,4 +1,4 @@
-.runios-nbs-note-grid-view {
+.runios-nbs-note-grid-view__stopper-guide {
     --runios-nbs-stopper-guide-color: var(--unity-colors-label-text);
 }
 
