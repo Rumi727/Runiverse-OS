@@ -28,6 +28,10 @@
     flex-grow: 1;
 }
 
+.runios-grid-view__horizontal-scroller {
+    flex-shrink: 0;
+}
+
 .runios-grid-view__overlay {
     position: absolute;
     top: 0;
