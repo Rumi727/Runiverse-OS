@@ -113,6 +113,9 @@ namespace RuniOS.UIElements.NBS
             // The popup only shows information, so it stays enabled in the read-only grid.
             grid.selectionPopup.enabledWhenReadOnly = true;
 
+            // Pointer input passes through the popup to the grid behind it. The popup content ignores picking too; see NBSNoteInfoPopup.
+            grid.selectionPopup.pickingMode = PickingMode.Ignore;
+
             for (int i = 0; i < textures.Length; i++)
             {
                 int index = i;

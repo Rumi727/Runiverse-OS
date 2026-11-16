@@ -60,7 +60,8 @@ namespace RuniOS.UIElements.NBS
             if (count == 0)
                 return null;
 
-            VisualElement content = new();
+            // PickingMode.Ignore does not apply to descendants, so every element of the popup sets it to let pointer input through to the grid.
+            VisualElement content = new() { pickingMode = PickingMode.Ignore };
             content.AddToClassList(ussClassName);
 
             if (count == 1)
@@ -144,14 +145,14 @@ namespace RuniOS.UIElements.NBS
 
         static void AddRow(VisualElement content, string key, string value)
         {
-            VisualElement row = new();
+            VisualElement row = new() { pickingMode = PickingMode.Ignore };
             row.AddToClassList(rowUssClassName);
 
-            Label name = new(GetText(key));
+            Label name = new(GetText(key)) { pickingMode = PickingMode.Ignore };
             name.AddToClassList(nameUssClassName);
             row.Add(name);
 
-            Label valueLabel = new(value);
+            Label valueLabel = new(value) { pickingMode = PickingMode.Ignore };
             valueLabel.AddToClassList(valueUssClassName);
             row.Add(valueLabel);
 
