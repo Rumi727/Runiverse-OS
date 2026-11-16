@@ -5,6 +5,8 @@ using RuniOS.Editor.IMGUI.NBS;
 using RuniOS.Editor.Unity.Drawers.Sounds;
 using RuniOS.NBS;
 using RuniOS.Sounds;
+using RuniOS.UIElements.NBS;
+using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Unity.Drawers.NBS
 {
@@ -204,6 +206,31 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             DrawInformation("runios-editor:inspector.nbs_player.information.tps", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).ticksPerSecond.ToString("0.##") : null);
             DrawInformation("runios-editor:inspector.nbs_player.information.bpm", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).beatsPerMinute.ToString("0.##") : null);
             DrawInformation("runios-editor:inspector.nbs_player.information.custom_instruments", x => x.loadedClip != null ? x.loadedClip.map.instruments.Length : 0);
+        }
+
+        /// <inheritdoc/>
+        public override bool HasPreviewGUI() => true;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The playhead follows the source itself, and the view shows <see cref="NoteBlockSource.loadedClip"/>, which changes when the clip is replaced or reloaded.<br/>
+        /// 플레이헤드는 소스 자체를 따라가며, 뷰는 클립이 바뀌거나 다시 로드될 때 달라지는 <see cref="NoteBlockSource.loadedClip"/>을 표시합니다.
+        /// </remarks>
+        public override VisualElement CreatePreview(VisualElement inspectorPreviewWindow)
+        {
+            NoteBlockSource? source = target;
+            NBSNoteGridView grid = new() { clip = source != null ? source.loadedClip : null, player = source };
+            inspectorPreviewWindow.Add(grid);
+
+            // The clip is loaded asynchronously and may be replaced, so the view follows it by polling.
+            grid.schedule.Execute(() =>
+            {
+                NoteBlockClip? loadedClip = source != null ? source.loadedClip : null;
+                if (grid.clip != loadedClip)
+                    grid.clip = loadedClip;
+            }).Every(100);
+
+            return grid;
         }
 
         void DrawInformation<TValue>(string key, Func<NoteBlockSource, TValue> readFunc) => EditorGUILayout.LabelField(TrTempContent(key), new GUIContent(GetCommonValueString(readFunc)));
