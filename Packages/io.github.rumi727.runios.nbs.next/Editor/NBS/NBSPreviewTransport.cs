@@ -45,14 +45,6 @@ namespace RuniOS.Editor.NBS
         readonly Lock gate = new();
         NBSVoiceScheduler<NBSPreviewTransport>? scheduler;
 
-        NBSClockAnchor anchor;
-        double resetTime;
-        bool _isPlaying;
-        bool _isPaused;
-        float _tempo = 1;
-        float _pitch = 1;
-        bool _loop;
-
         /// <inheritdoc/>
         public NBSClockAnchor clockAnchor
         {
@@ -62,9 +54,11 @@ namespace RuniOS.Editor.NBS
                     return anchor;
             }
         }
+        NBSClockAnchor anchor;
 
         /// <inheritdoc/>
         public bool isPlaying => Volatile.Read(ref _isPlaying);
+        bool _isPlaying;
 
         /// <inheritdoc/>
         public bool isPaused
@@ -78,6 +72,7 @@ namespace RuniOS.Editor.NBS
                     UnPause();
             }
         }
+        bool _isPaused;
 
         /// <inheritdoc/>
         public float volume
@@ -115,6 +110,7 @@ namespace RuniOS.Editor.NBS
                 scheduler?.OnLoopChanged();
             }
         }
+        bool _loop;
 
         /// <summary>
         /// Gets the loop start of the NBS header in seconds. Setting it has no effect.<br/>
@@ -150,6 +146,7 @@ namespace RuniOS.Editor.NBS
                 scheduler?.OnRateChanged();
             }
         }
+        float _tempo = 1;
 
         /// <inheritdoc/>
         public float pitch
@@ -161,6 +158,7 @@ namespace RuniOS.Editor.NBS
                 scheduler?.OnRateChanged();
             }
         }
+        float _pitch = 1;
 
         /// <inheritdoc/>
         public void Play(double startTime = 0)
@@ -250,6 +248,8 @@ namespace RuniOS.Editor.NBS
         }
 
         double Fold(double linear) => loopRange is { } range ? range.Fold(linear, _tempo) : linear;
+
+        double resetTime;
 
         // The clock starts again after a reset, so the position is kept across it and anchored on the new clock.
         void OnSoundSystemResetting(SoundSystem system)
