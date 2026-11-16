@@ -1,5 +1,4 @@
 #nullable enable
-using Cysharp.Threading.Tasks;
 using RuniOS.Editor.NBS;
 using RuniOS.Editor.Unity.Inspectors;
 using RuniOS.NBS;
@@ -21,21 +20,25 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         static GUIStyle overlayLabelStyle => _overlayLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _overlayLabelStyle;
 
-        // Shared by every clip preview, like the audio preview.
-        static bool autoPlay;
-        static float volume = 0.5f;
-
-        NBSPreviewTransport? preview;
-        bool isCreatingPreview;
+        NBSPreview preview = null!;
+        NBSPreview.Player? player;
 
         protected override void OnEnable()
         {
             base.OnEnable();
-            if (autoPlay && target != null)
-                LoadAndPlay(target).Forget();
+
+            preview = new NBSPreview(Identifier.defaultNamespace);
+            preview.onBankLoadCompleted += OnBankLoadCompleted;
+
+            if (NBSPreview.autoPlay && target != null)
+                GetOrCreatePlayer(target).Play();
         }
 
-        protected override void OnDisable() => DisposePreview();
+        protected override void OnDisable()
+        {
+            preview.Dispose();
+            player = null;
+        }
 
         /// <inheritdoc/>
         public override void OnInspectorGUI() { }
@@ -50,40 +53,38 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 return;
 
             // Without a loop the transport keeps running past the end, so the preview stops there.
-            if (preview is { isPlaying: true, loop: false } && preview.time >= preview.length)
-                preview.Stop();
+            if (player is { isPlaying: true, loop: false } && player.time >= player.length)
+                player.Stop();
 
-            using (new EditorGUI.DisabledScope(isCreatingPreview))
+            using (new EditorGUI.DisabledScope(player?.isLoading == true))
             {
-                bool isPlaying = preview?.isPlaying == true;
+                bool isPlaying = player?.isPlaying == true;
                 if (GUILayout.Toggle(isPlaying, EditorGUIUtility.IconContent("Play"), EditorStyles.toolbarButton) != isPlaying)
                 {
-                    if (preview == null)
-                        LoadAndPlay(target).Forget();
-                    else if (isPlaying)
-                        preview.Stop();
+                    if (isPlaying)
+                        player!.Stop();
                     else
-                        preview.Play();
+                        GetOrCreatePlayer(target).Play();
                 }
             }
 
-            autoPlay = GUILayout.Toggle(autoPlay, EditorGUIUtility.IconContent("preAudioAutoPlayOff"), EditorStyles.toolbarButton);
+            NBSPreview.autoPlay = GUILayout.Toggle(NBSPreview.autoPlay, EditorGUIUtility.IconContent("preAudioAutoPlayOff"), EditorStyles.toolbarButton);
 
-            // The loop follows the file until the preview is loaded.
-            using (new EditorGUI.DisabledScope(preview == null))
+            // The loop follows the file until the instruments are loaded.
+            using (new EditorGUI.DisabledScope(player is not { isLoaded: true }))
             {
-                bool loop = preview?.loop ?? target.header.loop;
+                bool loop = player?.loop ?? target.header.loop;
                 if (GUILayout.Toggle(loop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton) != loop)
-                    preview!.loop = !loop;
+                    player!.loop = !loop;
             }
 
             Rect sliderRect = EditorGUILayout.GetControlRect(GUILayout.Width(75));
             EditorGUI.BeginChangeCheck();
-            volume = GUI.HorizontalSlider(sliderRect, volume, 0, 1);
-            if (EditorGUI.EndChangeCheck() && preview != null)
-                preview.volume = volume;
+            float volume = GUI.HorizontalSlider(sliderRect, NBSPreview.globalVolume, 0, 1);
+            if (EditorGUI.EndChangeCheck())
+                NBSPreview.globalVolume = volume;
 
-            GUI.Box(sliderRect, TempContent("", $"{GetTextOrKey("runios-editor:gui.volume")}: {(volume * 100).Floor()}"), GUIStyle.none);
+            GUI.Box(sliderRect, TempContent("", $"{GetTextOrKey("runios-editor:gui.volume")}: {(NBSPreview.globalVolume * 100).Floor()}"), GUIStyle.none);
         }
 
         /// <inheritdoc/>
@@ -102,11 +103,11 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             EditorGUI.DropShadowLabel(labelRect, GetHeaderText(target));
             EndAlignment(overlayLabelStyle);
 
-            if (preview is not { isPlaying: true } || !(preview.length > 0))
+            if (player is not { isPlaying: true } || !(player.length > 0))
                 return;
 
-            double time = preview.time;
-            double position = time / preview.length;
+            double time = player.time;
+            double position = time / player.length;
             if (Event.current.type == EventType.Repaint && position is >= 0 and <= 1)
                 EditorGUI.DrawRect(new Rect(Mathf.Lerp(r.x - 1, r.xMax - 1, (float)position), r.y, 2, r.height), Color.white);
 
@@ -128,9 +129,9 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             OnPreviewGUI(r, background);
 
             Event evt = Event.current;
-            if (preview is { isPlaying: true } && evt.button == 0 && evt.type is EventType.MouseDown or EventType.MouseDrag && r.Contains(evt.mousePosition))
+            if (player is { isPlaying: true } && evt.button == 0 && evt.type is EventType.MouseDown or EventType.MouseDrag && r.Contains(evt.mousePosition))
             {
-                preview.time = Mathf.InverseLerp(r.x, r.xMax, evt.mousePosition.x) * preview.length;
+                player.time = Mathf.InverseLerp(r.x, r.xMax, evt.mousePosition.x) * player.length;
                 evt.Use();
             }
         }
@@ -165,35 +166,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             return text;
         }
 
-        async UniTaskVoid LoadAndPlay(NoteBlockClip clip)
-        {
-            isCreatingPreview = true;
-            try
-            {
-                NBSPreviewTransport created = await NBSPreviewTransport.CreateAsync(clip, Identifier.defaultNamespace);
-                if (this == null || target != clip)
-                {
-                    created.Dispose();
-                    return;
-                }
+        NBSPreview.Player GetOrCreatePlayer(NoteBlockClip clip) => player ??= preview.GetOrCreatePlayer(clip);
 
-                DisposePreview();
-                preview = created;
-                preview.volume = volume;
-                preview.Play();
-            }
-            finally
-            {
-                isCreatingPreview = false;
-                if (this != null)
-                    Repaint();
-            }
-        }
-
-        void DisposePreview()
-        {
-            preview?.Dispose();
-            preview = null;
-        }
+        void OnBankLoadCompleted(NoteBlockClip clip) => Repaint();
     }
 }
