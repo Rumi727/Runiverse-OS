@@ -32,8 +32,8 @@ namespace RuniOS.UIElements.NBS
         double shownBeatsPerMinute;
 
         /// <summary>
-        /// Gets or sets how the view scrolls to keep the playhead in view while playing. It is shared by every view.<br/>
-        /// 재생 중 플레이헤드를 화면에 두기 위해 뷰가 스크롤하는 방식을 가져오거나 설정합니다. 모든 뷰가 공유합니다.
+        /// Gets or sets how the view scrolls to keep the playhead in view while playing. It is shared by every view, and defaults to <see cref="NBSFollowMode.pageByPage"/>.<br/>
+        /// 재생 중 플레이헤드를 화면에 두기 위해 뷰가 스크롤하는 방식을 가져오거나 설정합니다. 모든 뷰가 공유하며, 기본값은 <see cref="NBSFollowMode.pageByPage"/>입니다.
         /// </summary>
         public static NBSFollowMode followMode { get; set; }
 
