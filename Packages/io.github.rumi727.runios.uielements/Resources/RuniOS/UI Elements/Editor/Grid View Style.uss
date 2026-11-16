@@ -1,0 +1,78 @@
+.runios-grid-view__corner {
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    border-right-color: var(--unity-colors-default-border);
+}
+
+.runios-grid-ruler {
+    height: 18px;
+    font-size: 10px;
+    color: var(--unity-colors-label-text);
+    border-bottom-width: 1px;
+    border-bottom-color: var(--unity-colors-default-border);
+    --runios-grid-ruler-line-color: rgba(128, 128, 128, 0.8);
+}
+
+.runios-grid-track {
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(128, 128, 128, 0.25);
+}
+
+.runios-grid-track__header {
+    background-color: rgba(128, 128, 128, 0.08);
+    border-right-width: 1px;
+    border-right-color: var(--unity-colors-default-border);
+}
+
+.runios-grid-layer {
+    --runios-grid-line-color-0: rgba(128, 128, 128, 0.55);
+    --runios-grid-line-color-1: rgba(128, 128, 128, 0.3);
+    --runios-grid-line-color-2: rgba(128, 128, 128, 0.12);
+    --runios-grid-item-color: rgba(90, 150, 255, 0.85);
+    --runios-grid-selected-item-color: rgb(255, 255, 255);
+}
+
+.runios-grid-item--selected {
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: rgb(255, 255, 255);
+    border-right-color: rgb(255, 255, 255);
+    border-bottom-color: rgb(255, 255, 255);
+    border-left-color: rgb(255, 255, 255);
+}
+
+.runios-grid-view__marquee {
+    background-color: rgba(64, 128, 255, 0.2);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: rgba(64, 128, 255, 0.8);
+    border-right-color: rgba(64, 128, 255, 0.8);
+    border-bottom-color: rgba(64, 128, 255, 0.8);
+    border-left-color: rgba(64, 128, 255, 0.8);
+}
+
+.runios-grid-popup {
+    margin-top: 4px;
+    padding-top: 4px;
+    padding-right: 4px;
+    padding-bottom: 4px;
+    padding-left: 4px;
+    background-color: var(--unity-colors-window-background);
+    border-top-width: 1px;
+    border-right-width: 1px;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    border-top-color: var(--unity-colors-default-border);
+    border-right-color: var(--unity-colors-default-border);
+    border-bottom-color: var(--unity-colors-default-border);
+    border-left-color: var(--unity-colors-default-border);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
+}

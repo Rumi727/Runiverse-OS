@@ -1,0 +1,91 @@
+.runios-grid-view {
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.runios-grid-view__viewport {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.runios-grid-view__top {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.runios-grid-view__corner {
+    flex-shrink: 0;
+}
+
+.runios-grid-view__rulers {
+    flex-grow: 1;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.runios-grid-view__scroll-view {
+    flex-grow: 1;
+}
+
+.runios-grid-view__overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.runios-grid-view__marquee {
+    position: absolute;
+    left: 0;
+    top: 0;
+    display: none;
+}
+
+.runios-grid-view__marquee--active {
+    display: flex;
+}
+
+.runios-grid-view__popup-layer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.runios-grid-ruler {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.runios-grid-track {
+    flex-direction: row;
+    flex-shrink: 0;
+}
+
+.runios-grid-track__header {
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.runios-grid-track__layer {
+    flex-grow: 1;
+}
+
+.runios-grid-layer {
+    overflow: hidden;
+}
+
+.runios-grid-item {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.runios-grid-popup {
+    position: absolute;
+    left: 0;
+    top: 0;
+}
