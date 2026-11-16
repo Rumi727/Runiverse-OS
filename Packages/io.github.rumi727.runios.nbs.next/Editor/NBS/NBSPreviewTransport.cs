@@ -1,6 +1,5 @@
 #nullable enable
 using System.Threading;
-using Cysharp.Threading.Tasks;
 using RuniOS.NBS;
 using RuniOS.Sounds;
 
@@ -15,14 +14,35 @@ namespace RuniOS.Editor.NBS
     /// The loop follows the NBS header, and <see cref="time"/> advances in mix blocks.<br/>
     /// 인스펙터용 최소 트랜스포트입니다. DSP 클록 위에 자기 타임라인을 가지며 <see cref="NBSVoiceScheduler{TTransport}"/>를 조작합니다.
     /// 반복은 NBS 헤더를 따르며, <see cref="time"/>은 믹스 블록 단위로 진행합니다.
+    /// <br/><br/>
+    /// The transport does not own the instruments; release them after disposing the transport.<br/>
+    /// 트랜스포트는 악기를 소유하지 않으므로 트랜스포트를 해제한 뒤에 악기를 해제해야 합니다.
     /// </remarks>
     public sealed class NBSPreviewTransport : INBSTransport, IPlayControl, IPausable, IStoppable, ISeekable, ILoopControl, ITempoControl, IPitchControl, IDisposable
     {
-        NBSPreviewTransport(NoteBlockClip clip) => this.clip = clip;
+        /// <summary>
+        /// Initializes a stopped transport that plays a clip with loaded instruments.<br/>
+        /// 로드된 악기로 클립을 재생하는, 정지된 트랜스포트를 초기화합니다.
+        /// </summary>
+        /// <param name="clip">
+        /// The clip to preview.<br/>
+        /// 미리 들을 클립입니다.
+        /// </param>
+        /// <param name="bank">
+        /// The instruments of <paramref name="clip"/>.<br/>
+        /// <paramref name="clip"/>의 악기입니다.
+        /// </param>
+        public NBSPreviewTransport(NoteBlockClip clip, NBSInstrumentBank bank)
+        {
+            this.clip = clip;
+            _loop = clip.header.loop;
+            scheduler = new NBSVoiceScheduler<NBSPreviewTransport>(clip, bank, this);
+            SoundSystem.main.onResetting += OnSoundSystemResetting;
+            SoundSystem.main.onReset += OnSoundSystemReset;
+        }
 
         readonly NoteBlockClip clip;
         readonly Lock gate = new();
-        NBSInstrumentBank? bank;
         NBSVoiceScheduler<NBSPreviewTransport>? scheduler;
 
         NBSClockAnchor anchor;
@@ -32,32 +52,6 @@ namespace RuniOS.Editor.NBS
         float _tempo = 1;
         float _pitch = 1;
         bool _loop;
-
-        /// <summary>
-        /// Creates a preview and loads the instruments of a clip.<br/>
-        /// 미리보기를 만들고 클립의 악기를 로드합니다.
-        /// </summary>
-        /// <param name="clip">
-        /// The clip to preview.<br/>
-        /// 미리 들을 클립입니다.
-        /// </param>
-        /// <param name="instrumentNamespace">
-        /// The resource namespace of custom instrument sounds.<br/>
-        /// 커스텀 악기 사운드의 리소스 네임스페이스입니다.
-        /// </param>
-        /// <returns>
-        /// When the asynchronous operation completes, returns the preview.<br/>
-        /// 비동기 작업이 완료되면 미리보기를 반환합니다.
-        /// </returns>
-        public static async UniTask<NBSPreviewTransport> CreateAsync(NoteBlockClip clip, string instrumentNamespace)
-        {
-            NBSPreviewTransport transport = new NBSPreviewTransport(clip) { _loop = clip.header.loop };
-            transport.bank = await NBSInstrumentBank.LoadAsync(clip.map, instrumentNamespace);
-            transport.scheduler = new NBSVoiceScheduler<NBSPreviewTransport>(clip, transport.bank, transport);
-            SoundSystem.main.onResetting += transport.OnSoundSystemResetting;
-            SoundSystem.main.onReset += transport.OnSoundSystemReset;
-            return transport;
-        }
 
         /// <inheritdoc/>
         public NBSClockAnchor clockAnchor
@@ -215,17 +209,15 @@ namespace RuniOS.Editor.NBS
         }
 
         /// <summary>
-        /// Stops the preview and releases its instruments.<br/>
-        /// 미리보기를 멈추고 악기를 해제합니다.
+        /// Stops the sounds of the preview. The instruments are not released.<br/>
+        /// 미리보기의 소리를 멈춥니다. 악기는 해제하지 않습니다.
         /// </summary>
         public void Dispose()
         {
             SoundSystem.main.onResetting -= OnSoundSystemResetting;
             SoundSystem.main.onReset -= OnSoundSystemReset;
             scheduler?.Dispose();
-            bank?.Dispose();
             scheduler = null;
-            bank = null;
         }
 
         /// <summary>Anchors the timeline at the next mix clock. Without a readable clock it holds until the sound system resets.</summary>
