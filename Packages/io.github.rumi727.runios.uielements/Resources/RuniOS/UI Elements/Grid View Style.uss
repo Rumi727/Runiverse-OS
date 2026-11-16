@@ -28,7 +28,7 @@
     flex-grow: 1;
 }
 
-.runios-grid-view__horizontal-scroller {
+.runios-grid-view__horizontal-range-slider {
     flex-shrink: 0;
 }
 

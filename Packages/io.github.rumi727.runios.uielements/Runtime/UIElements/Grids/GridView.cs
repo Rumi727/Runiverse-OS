@@ -5,10 +5,10 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements.Grids
 {
     /// <summary>
-    /// An interactive grid that runs horizontally, made of rulers at the top, a header column on the left, tracks that scroll vertically, an overlay, popups, and a horizontal scroll bar.<br/>
+    /// An interactive grid that runs horizontally, made of rulers at the top, a header column on the left, tracks that scroll vertically, an overlay, popups, and a horizontal range slider.<br/>
     /// The horizontal unit is not fixed; <see cref="axis"/> maps any <see cref="double"/> position to pixels.
     /// <br/><br/>
-    /// 가로로 진행하는 상호작용 그리드입니다. 위쪽 눈금자, 왼쪽 헤더 열, 세로로 스크롤되는 트랙, 오버레이, 팝업, 가로 스크롤바로 이루어집니다.<br/>
+    /// 가로로 진행하는 상호작용 그리드입니다. 위쪽 눈금자, 왼쪽 헤더 열, 세로로 스크롤되는 트랙, 오버레이, 팝업, 가로 범위 슬라이더로 이루어집니다.<br/>
     /// 가로 단위는 정해져 있지 않으며, <see cref="axis"/>가 임의의 <see cref="double"/> 위치를 픽셀로 바꿉니다.
     /// </summary>
     /// <remarks>
@@ -136,8 +136,8 @@ namespace RuniOS.UIElements.Grids
             viewport.Add(marquee);
 
             // Outside the viewport, so presses on it do not reach the manipulators and the overlay does not cover it.
-            horizontalScroller = CreateHorizontalScroller();
-            hierarchy.Add(horizontalScroller);
+            horizontalRangeSlider = CreateHorizontalRangeSlider();
+            hierarchy.Add(horizontalRangeSlider);
 
             popupLayer = new VisualElement { name = "popup-layer", pickingMode = PickingMode.Ignore };
             popupLayer.AddToClassList(popupLayerUssClassName);
@@ -146,7 +146,7 @@ namespace RuniOS.UIElements.Grids
             selectionPopup = new GridPopup();
 
             axis.changed += ScheduleRefresh;
-            axis.changed += UpdateHorizontalScroller;
+            axis.changed += UpdateHorizontalRangeSlider;
             selection.changed += OnSelectionChanged;
             viewport.RegisterCallback<GeometryChangedEvent>(_ => UpdateLayout());
             viewport.RegisterCallback<PointerMoveEvent>(evt => pointer = CreatePointerArgs(evt.position, -1, 0, evt.modifiers, evt.actionKey), TrickleDown.TrickleDown);
@@ -495,7 +495,7 @@ namespace RuniOS.UIElements.Grids
         void UpdateLayout()
         {
             overlay.style.left = headerWidth;
-            horizontalScroller.style.marginLeft = headerWidth;
+            horizontalRangeSlider.style.marginLeft = headerWidth;
 
             float width = viewport.layout.width;
             if (!float.IsNaN(width))

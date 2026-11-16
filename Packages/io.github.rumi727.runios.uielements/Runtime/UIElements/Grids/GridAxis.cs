@@ -49,11 +49,11 @@ namespace RuniOS.UIElements.Grids
         public double maximumPixelsPerUnit { get; set; } = 1e6;
 
         /// <summary>
-        /// Gets or sets the range that the horizontal scroll bar of <see cref="GridView"/> spans, or <see langword="null"/> to hide the scroll bar.<br/>
-        /// It does not limit the view: panning, the wheel, and the scroll bar buttons can move past it without end.
+        /// Gets or sets the range that <see cref="GridView.horizontalRangeSlider"/> spans, or <see langword="null"/> to hide the slider.<br/>
+        /// It does not limit the view: panning and the wheel can move past it without end.
         /// <br/><br/>
-        /// <see cref="GridView"/>의 가로 스크롤바가 나타내는 범위를 가져오거나 설정하며, 스크롤바를 숨기려면 <see langword="null"/>입니다.<br/>
-        /// 보이는 범위를 제한하지 않으므로, 끌기 이동, 휠, 스크롤바 버튼으로 이 범위를 넘어 끝없이 이동할 수 있습니다.
+        /// <see cref="GridView.horizontalRangeSlider"/>가 나타내는 범위를 가져오거나 설정하며, 슬라이더를 숨기려면 <see langword="null"/>입니다.<br/>
+        /// 보이는 범위를 제한하지 않으므로, 끌기 이동과 휠로 이 범위를 넘어 끝없이 이동할 수 있습니다.
         /// </summary>
         public GridRange? scrollRange
         {
