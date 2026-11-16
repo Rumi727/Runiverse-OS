@@ -55,10 +55,11 @@ namespace RuniOS.UIElements.Grids
         {
             double position = axis.ToPosition(GetAxisPixel(panelPosition));
 
+            // This runs on every pointer move, so the children are walked by index instead of through the LINQ properties.
             GridRuler? ruler = null;
-            foreach (GridRuler candidate in rulers)
+            for (int i = 0; i < rulerContainer.childCount; i++)
             {
-                if (candidate.worldBound.Contains(panelPosition))
+                if (rulerContainer[i] is GridRuler candidate && candidate.worldBound.Contains(panelPosition))
                 {
                     ruler = candidate;
                     break;
@@ -71,9 +72,10 @@ namespace RuniOS.UIElements.Grids
             double verticalPosition = 0;
             if (ruler == null && scrollView.contentViewport.worldBound.Contains(panelPosition))
             {
-                foreach (GridTrack candidate in tracks)
+                VisualElement content = scrollView.contentContainer;
+                for (int i = 0; i < content.childCount; i++)
                 {
-                    if (!candidate.worldBound.Contains(panelPosition))
+                    if (content[i] is not GridTrack candidate || !candidate.worldBound.Contains(panelPosition))
                         continue;
 
                     track = candidate;

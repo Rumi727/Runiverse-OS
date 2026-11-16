@@ -270,8 +270,11 @@ namespace RuniOS.UIElements.Grids
                 field = value;
                 EnableInClassList(readOnlyUssClassName, value);
 
-                foreach (GridPopup popup in popupLayer.Children().OfType<GridPopup>())
-                    popup.SetEnabled(popup.enabledWhenReadOnly || !value);
+                for (int i = 0; i < popupLayer.childCount; i++)
+                {
+                    if (popupLayer[i] is GridPopup popup)
+                        popup.SetEnabled(popup.enabledWhenReadOnly || !value);
+                }
             }
         }
 
@@ -423,8 +426,11 @@ namespace RuniOS.UIElements.Grids
                     selectionPopup.Close();
             }
 
-            foreach (GridPopup popup in popupLayer.Children().OfType<GridPopup>())
-                popup.UpdatePosition();
+            for (int i = 0; i < popupLayer.childCount; i++)
+            {
+                if (popupLayer[i] is GridPopup popup)
+                    popup.UpdatePosition();
+            }
         }
 
         void OnSelectionChanged()

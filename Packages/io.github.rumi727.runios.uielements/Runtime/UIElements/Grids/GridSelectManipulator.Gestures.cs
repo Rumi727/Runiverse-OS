@@ -96,8 +96,13 @@ namespace RuniOS.UIElements.Grids
 
             marqueeItems.Clear();
             marqueeItems.AddRange(marqueeBase);
-            foreach (GridTrack track in view.tracks)
+            // This runs on every pointer move, so the tracks are walked by index instead of through GridView.tracks.
+            VisualElement content = view.scrollView.contentContainer;
+            for (int i = 0; i < content.childCount; i++)
             {
+                if (content[i] is not GridTrack track)
+                    continue;
+
                 GridLayer layer = track.layer;
                 layer.Overlap(FromPoints(layer.WorldToLocal(pressPanelPosition), layer.WorldToLocal(panelPosition)), marqueeItems);
             }
