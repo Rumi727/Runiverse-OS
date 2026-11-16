@@ -45,6 +45,7 @@ namespace RuniOS.UIElements.NBS
         public const string accentUssClassName = ussClassName + "__accent";
         public const string savePopupUssClassName = ussClassName + "__save-popup";
         public const string stopperGuideUssClassName = ussClassName + "__stopper-guide";
+        public const string lockedLayerShadeUssClassName = ussClassName + "__locked-layer-shade";
 
         /// <summary>
         /// The pixel size of one block at the default zoom, and the height of every layer at vertical scale <c>1</c>. Blocks and layers are <c>cellSize * grid.verticalScale</c> pixels high.<br/>
@@ -218,6 +219,9 @@ namespace RuniOS.UIElements.NBS
             notesLayer.items.AddRange(items);
 
             GridTrack track = grid.AddTrack(notesLayer);
+            if (NBSLockedLayerShade.IsNeeded(newMap, layerCount))
+                track.hierarchy.Insert(track.hierarchy.IndexOf(notesLayer), new NBSLockedLayerShade(newMap, layerCount, grid.headerWidth));
+
             if (newMap.stoppers.Length > 0)
             {
                 stopperGuide = new NBSStopperGuide(grid.axis, newMap, layerCount, grid.headerWidth);

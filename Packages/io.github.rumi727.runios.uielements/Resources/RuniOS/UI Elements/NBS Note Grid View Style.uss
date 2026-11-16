@@ -52,6 +52,13 @@
     top: 0;
 }
 
+.runios-nbs-note-grid-view__locked-layer-shade {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
 .runios-nbs-note-grid-view__stopper-guide {
     position: absolute;
     top: 0;
