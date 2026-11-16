@@ -8,8 +8,8 @@ namespace RuniOS.NBS
     public sealed partial class NoteBlockSource
     {
         /// <summary>
-        /// Loads <see cref="clip"/> and its instruments again when the reference points to a different target.<br/>
-        /// 참조가 다른 대상을 가리키면 <see cref="clip"/>과 그 악기를 다시 로드합니다.
+        /// Loads <see cref="clip"/> and its instruments again when the reference or an instrument sound points to a different target.<br/>
+        /// 참조나 악기 사운드가 다른 대상을 가리키면 <see cref="clip"/>과 그 악기를 다시 로드합니다.
         /// </summary>
         /// <returns>
         /// An asynchronous operation that represents completion of the reload.<br/>
@@ -24,7 +24,8 @@ namespace RuniOS.NBS
         async UniTask ReloadCore()
         {
             AssetRef<NoteBlockClip> target = _clip;
-            if (this == null || !isActiveAndEnabled || target.IsSameTarget(scope))
+            // The bank is checked as well, because the clip can stay the same while its instrument sounds were missing at load, such as before the resource packs were loaded.
+            if (this == null || !isActiveAndEnabled || (target.IsSameTarget(scope) && (bank?.IsSameTarget() ?? true)))
                 return;
 
             IAssetScope<NoteBlockClip>? newScope = await target.LoadScopeAsync();
