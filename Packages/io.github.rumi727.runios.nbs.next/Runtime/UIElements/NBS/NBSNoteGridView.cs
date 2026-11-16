@@ -8,9 +8,11 @@ namespace RuniOS.UIElements.NBS
 {
     /// <summary>
     /// Shows every note of a <see cref="NoteBlockClip"/> in a read-only <see cref="GridView"/>, one track per layer and one column per tick, like Note Block Studio.<br/>
+    /// <see cref="GridView.corner"/> shows the time and length of the song, the tempo, and the bar, beat, and tick of the playhead, or of the start while there is none.<br/>
     /// While <see cref="player"/> plays, it draws the playhead and scrolls as <see cref="followMode"/> says. Clicking a ruler seeks; dragging on it moves the playhead and seeks where the drag ends.
     /// <br/><br/>
     /// <see cref="NoteBlockClip"/>의 모든 노트를 읽기 전용 <see cref="GridView"/>에 Note Block Studio처럼 레이어마다 트랙 하나, 틱마다 열 하나로 표시합니다.<br/>
+    /// <see cref="GridView.corner"/>에는 플레이헤드 위치의 시간, 곡 길이, 템포, 마디·박·틱을 표시하며, 플레이헤드가 없으면 처음 위치를 표시합니다.<br/>
     /// <see cref="player"/>가 재생 중이면 플레이헤드를 그리고, <see cref="followMode"/>에 따라 스크롤합니다. 룰러를 클릭하면 재생 위치를 옮기고, 끌면 플레이헤드를 옮긴 뒤 끌기가 끝난 위치로 재생 위치를 옮깁니다.
     /// </summary>
     /// <remarks>
@@ -21,6 +23,11 @@ namespace RuniOS.UIElements.NBS
     {
         public const string ussClassName = "runios-nbs-note-grid-view";
         public const string gridUssClassName = ussClassName + "__grid";
+        public const string timeUssClassName = ussClassName + "__time";
+        public const string currentTimeUssClassName = ussClassName + "__current-time";
+        public const string lengthUssClassName = ussClassName + "__length";
+        public const string timeDetailsUssClassName = ussClassName + "__time-details";
+        public const string timeBoxUssClassName = ussClassName + "__time-box";
         public const string layerHeaderUssClassName = ussClassName + "__layer-header";
         public const string layerHeaderLockedUssClassName = layerHeaderUssClassName + "--locked";
         public const string layerHeaderSoloUssClassName = layerHeaderUssClassName + "--solo";
@@ -146,6 +153,7 @@ namespace RuniOS.UIElements.NBS
             stopperGuides.Clear();
             noteFlash.Clear();
             ResetPlayback();
+            ResetTimeDisplay(newMap);
 
             tickScale.timeSignature = newMap?.header.timeSignature ?? 4;
             timeScale.tempo = newMap?.tempo;

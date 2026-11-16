@@ -12,6 +12,11 @@ namespace RuniOS.UIElements.NBS
         readonly NBSPlayheadElement playhead = new();
         readonly NBSVisualEffectOverlay effectOverlay = new();
         readonly NBSNoteFlash noteFlash = new();
+        readonly VisualElement timeDisplay = new() { name = "time", pickingMode = PickingMode.Ignore };
+        readonly Label currentTimeLabel = new() { name = "current-time", pickingMode = PickingMode.Ignore };
+        readonly Label lengthLabel = new() { name = "length", pickingMode = PickingMode.Ignore };
+        readonly Label tempoLabel = new() { name = "tempo", pickingMode = PickingMode.Ignore };
+        readonly Label positionLabel = new() { name = "position", pickingMode = PickingMode.Ignore };
 
         // The previous frame of playback, to tell passing ticks from a seek or a loop.
         double previousTime = double.NaN;
@@ -20,6 +25,11 @@ namespace RuniOS.UIElements.NBS
 
         // The tick that a drag on a ruler moves the playhead to, or NaN while not dragging. The player seeks there once, when the drag ends.
         double dragTick = double.NaN;
+
+        // The values the corner shows, so that each text is made again only when its value changes. They are reset when the clip changes.
+        long shownHundredths;
+        long shownTick;
+        double shownBeatsPerMinute;
 
         /// <summary>
         /// Gets or sets how the view scrolls to keep the playhead in view while playing. It is shared by every view.<br/>
@@ -42,6 +52,23 @@ namespace RuniOS.UIElements.NBS
             grid.overlay.makeElement = _ => playhead;
 
             Add(effectOverlay);
+
+            timeDisplay.AddToClassList(timeUssClassName);
+            currentTimeLabel.AddToClassList(currentTimeUssClassName);
+            lengthLabel.AddToClassList(lengthUssClassName);
+            tempoLabel.AddToClassList(timeBoxUssClassName);
+            positionLabel.AddToClassList(timeBoxUssClassName);
+
+            VisualElement details = new() { name = "time-details", pickingMode = PickingMode.Ignore };
+            details.AddToClassList(timeDetailsUssClassName);
+            details.Add(tempoLabel);
+            details.Add(positionLabel);
+
+            timeDisplay.Add(currentTimeLabel);
+            timeDisplay.Add(lengthLabel);
+            timeDisplay.Add(details);
+            grid.corner.Add(timeDisplay);
+            ResetTimeDisplay(null);
 
             /*
              * Seeking on every move of a drag would fight with following: the drag position is measured from the view, which following moves to the seeked tick every frame,
@@ -81,13 +108,15 @@ namespace RuniOS.UIElements.NBS
 
         void Update()
         {
+            // Without a playhead, the corner shows the start of the song.
             bool isPlaying = false;
-            double tick = double.NaN;
+            double time = 0;
+            double tick = 0;
 
             if (map != null && player is { isPlaying: true } playing)
             {
                 isPlaying = true;
-                double time = playing.time;
+                time = playing.time;
                 tick = map.tempo.TimeToTick(time);
                 UpdateEffects(map, time, tick);
             }
@@ -95,7 +124,11 @@ namespace RuniOS.UIElements.NBS
                 ResetPlayback();
 
             if (map != null && !double.IsNaN(dragTick))
+            {
+                tick = dragTick;
+                time = map.tempo.TickToTime(dragTick);
                 ShowPlayhead(dragTick);
+            }
             else if (isPlaying)
             {
                 // In tick by tick mode the view moves by whole ticks, so the playhead stays on the tick instead of sliding between them.
@@ -104,6 +137,9 @@ namespace RuniOS.UIElements.NBS
             }
             else if (playheadItem.layer != null)
                 grid.overlay.items.Remove(playheadItem);
+
+            if (map != null)
+                UpdateTimeDisplay(map, time, tick);
         }
 
         void UpdateEffects(NBSMap currentMap, double time, double tick)
@@ -161,6 +197,47 @@ namespace RuniOS.UIElements.NBS
 
             double lastOffset = songLength - visibleTicks;
             axis.SetView(lastOffset > 0 ? Math.Clamp(offset, 0, lastOffset) : 0, axis.pixelsPerUnit);
+        }
+
+        // The length is fixed for a clip, so it is made here once. The corner is hidden without a clip.
+        void ResetTimeDisplay(NBSMap? newMap)
+        {
+            shownHundredths = long.MinValue;
+            shownTick = long.MinValue;
+            shownBeatsPerMinute = double.NaN;
+
+            timeDisplay.style.display = newMap != null ? DisplayStyle.Flex : DisplayStyle.None;
+            lengthLabel.text = newMap != null ? "/ " + TimeUtility.ToTimeString(newMap.length) : string.Empty;
+        }
+
+        // Making a text allocates a string, which its label needs, so each text is made only when the value it shows changes.
+        void UpdateTimeDisplay(NBSMap currentMap, double time, double tick)
+        {
+            long hundredths = (long)Math.Floor(time * 100);
+            if (hundredths != shownHundredths)
+            {
+                shownHundredths = hundredths;
+
+                // The text is made from the floored value, so that it does not round up to a time not reached yet.
+                currentTimeLabel.text = TimeUtility.ToTimeString(hundredths / 100.0);
+            }
+
+            // Bar, beat, and tick, counted from 1 like Note Block Studio. One beat is four ticks.
+            long wholeTick = (long)Math.Floor(tick);
+            if (wholeTick != shownTick)
+            {
+                shownTick = wholeTick;
+
+                int beatsPerBar = Math.Max(1, (int)currentMap.header.timeSignature);
+                positionLabel.text = $"{(wholeTick / (beatsPerBar * 4)) + 1}. {(wholeTick / 4 % beatsPerBar) + 1}. {(wholeTick % 4) + 1}";
+            }
+
+            double beatsPerMinute = currentMap.tempo.GetChangeAtTick(tick).beatsPerMinute;
+            if (beatsPerMinute != shownBeatsPerMinute)
+            {
+                shownBeatsPerMinute = beatsPerMinute;
+                tempoLabel.text = $"{beatsPerMinute:0.##} BPM";
+            }
         }
     }
 }

@@ -9,8 +9,8 @@ using UnityEngine.UIElements;
 namespace RuniOS.Editor.UIElements.NBS
 {
     /// <summary>
-    /// The preview controls of a <see cref="NoteBlockClip"/>: the playback time, play, auto play, loop, the follow mode of <see cref="NBSNoteGridView"/>, and the volume.<br/>
-    /// <see cref="NoteBlockClip"/> 미리보기 컨트롤입니다. 재생 시간, 재생, 자동 재생, 반복, <see cref="NBSNoteGridView"/>의 따라가기 방식, 볼륨을 표시합니다.
+    /// The preview controls of a <see cref="NoteBlockClip"/>: play, auto play, loop, the follow mode of <see cref="NBSNoteGridView"/>, and the volume.<br/>
+    /// <see cref="NoteBlockClip"/> 미리보기 컨트롤입니다. 재생, 자동 재생, 반복, <see cref="NBSNoteGridView"/>의 따라가기 방식, 볼륨을 표시합니다.
     /// </summary>
     /// <remarks>
     /// Without a loop, the player is stopped once it passes the end, because the preview transport keeps running past it.<br/>
@@ -19,13 +19,11 @@ namespace RuniOS.Editor.UIElements.NBS
     public class NBSPreviewToolbar : VisualElement
     {
         public const string ussClassName = "runios-nbs-preview-toolbar";
-        public const string timeUssClassName = ussClassName + "__time";
         public const string buttonUssClassName = ussClassName + "__button";
         public const string iconUssClassName = ussClassName + "__icon";
         public const string volumeUssClassName = ussClassName + "__volume";
 
         readonly NBSPreview preview;
-        readonly Label time;
         readonly ToolbarToggle play;
         readonly ToolbarToggle autoPlay;
         readonly ToolbarToggle loop;
@@ -47,10 +45,6 @@ namespace RuniOS.Editor.UIElements.NBS
 
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
-
-            time = new Label { name = "time" };
-            time.AddToClassList(timeUssClassName);
-            Add(time);
 
             play = CreateToggle("play", "Play");
             play.RegisterValueChangedCallback(evt =>
@@ -147,8 +141,6 @@ namespace RuniOS.Editor.UIElements.NBS
 
             volume.SetValueWithoutNotify(NBSPreview.globalVolume);
             volume.tooltip = $"{GetTextOrKey("runios-editor:gui.volume")}: {(NBSPreview.globalVolume * 100).Floor()}";
-
-            time.text = isPlaying ? TimeUtility.ToTimeString(current!.time) : string.Empty;
         }
     }
 }
