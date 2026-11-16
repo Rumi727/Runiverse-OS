@@ -17,10 +17,12 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
     public sealed class NoteBlockSourceEditor : RuniAudioSourceEditor<NoteBlockSource>
     {
         const float visualEffectCardHeight = 28;
-        const double savePopupDuration = 1.25;
+        const double savePopupHoldDuration = 1;
+        const double savePopupFadeDuration = 0.25;
         static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
+        static readonly Color savePopupColor = new Color(0.4f, 0.4f, 0.4f, 0.95f);
 
-        double savePopupUntil = double.NegativeInfinity;
+        double savePopupStartedAt = double.NegativeInfinity;
         double previousTick = double.NaN;
         bool isRainbowShown;
 
@@ -38,7 +40,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         }
 
         /// <inheritdoc/>
-        protected override bool repaintInEditor => base.repaintInEditor || isRainbowShown || EditorApplication.timeSinceStartup < savePopupUntil;
+        protected override bool repaintInEditor => base.repaintInEditor || isRainbowShown || EditorApplication.timeSinceStartup < savePopupStartedAt + savePopupHoldDuration + savePopupFadeDuration;
 
         /// <inheritdoc/>
         protected override bool DrawSourceLayout()
@@ -204,7 +206,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
             double tick = source.tick;
             if (double.IsFinite(previousTick) && effects.TryFindSavePopup(previousTick, tick, out _))
-                savePopupUntil = EditorApplication.timeSinceStartup + savePopupDuration;
+                savePopupStartedAt = EditorApplication.timeSinceStartup;
 
             previousTick = tick;
 
@@ -223,10 +225,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
             EditorGUI.DrawRect(new Rect(card.x + 1, card.y + 1, 4, card.height - 2), accent);
 
-            string status = EditorApplication.timeSinceStartup < savePopupUntil
-                ? GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.song_saved")
-                : GetStatus(state);
-            GUI.Label(new Rect(card.x + 12, card.y, card.width - 16, card.height), status, EditorStyles.label);
+            GUI.Label(new Rect(card.x + 12, card.y, card.width - 16, card.height), GetStatus(state), EditorStyles.label);
+            DrawSavePopup(card);
 
             return true;
         }
@@ -244,6 +244,29 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             return status.Count > 0
                 ? string.Join(" · ", status)
                 : GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.inactive");
+        }
+
+        /// <summary>
+        /// Draws the song saved popup floating over the center of the visual effect card, fading out after it is held.<br/>
+        /// 노래 저장 팝업을 시각 효과 카드 가운데 위에 띄워 그리며, 잠시 유지한 뒤 서서히 사라지게 합니다.
+        /// </summary>
+        void DrawSavePopup(Rect card)
+        {
+            double elapsed = EditorApplication.timeSinceStartup - savePopupStartedAt;
+            if (elapsed >= savePopupHoldDuration + savePopupFadeDuration)
+                return;
+
+            float alpha = elapsed <= savePopupHoldDuration ? 1 : (float)(1 - ((elapsed - savePopupHoldDuration) / savePopupFadeDuration));
+
+            GUIContent content = TrTempContent("runios-editor:inspector.nbs_player.visual_effects.song_saved");
+            Vector2 size = EditorStyles.whiteLabel.CalcSize(content);
+            Rect popup = new Rect(card.center.x - (size.x * 0.5f) - 8, card.center.y - (size.y * 0.5f) - 1, size.x + 16, size.y + 2);
+            GUI.DrawTexture(popup, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, savePopupColor with { a = savePopupColor.a * alpha }, 0, 4);
+
+            Color previousColor = GUI.color;
+            GUI.color = previousColor with { a = previousColor.a * alpha };
+            GUI.Label(new Rect(popup.x + 8, popup.y + 1, size.x, size.y), content, EditorStyles.whiteLabel);
+            GUI.color = previousColor;
         }
 
         async UniTask ReloadAndRepaint(NoteBlockSource source)
