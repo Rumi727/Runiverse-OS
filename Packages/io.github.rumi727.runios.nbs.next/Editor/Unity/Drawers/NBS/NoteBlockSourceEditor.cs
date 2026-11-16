@@ -24,6 +24,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
         double savePopupStartedAt = double.NegativeInfinity;
         double previousTick = double.NaN;
+        NBSClockAnchor previousAnchor;
         bool isRainbowShown;
 
         /// <summary>
@@ -204,11 +205,14 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             if (effects.states.IsEmpty && effects.savePopupTicks.IsEmpty)
                 return false;
 
+            // Seeking, playing, pausing, and changing the tempo all anchor the timeline again, so an unchanged anchor means the tick advanced by playback alone.
             double tick = source.tick;
-            if (double.IsFinite(previousTick) && effects.TryFindSavePopup(previousTick, tick, out _))
+            NBSClockAnchor anchor = source.clockAnchor;
+            if (double.IsFinite(previousTick) && anchor == previousAnchor && effects.TryFindSavePopup(previousTick, tick, out _))
                 savePopupStartedAt = EditorApplication.timeSinceStartup;
 
             previousTick = tick;
+            previousAnchor = anchor;
 
             GUILayout.Label(TrTempContent("runios-editor:inspector.nbs_player.visual_effects.header"), EditorStyles.boldLabel);
 
