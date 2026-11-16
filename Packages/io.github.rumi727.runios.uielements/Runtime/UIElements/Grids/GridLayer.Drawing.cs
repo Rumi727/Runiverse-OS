@@ -69,6 +69,8 @@ namespace RuniOS.UIElements.Grids
                 }
             }
 
+            AddRowLines(rectBuffer, visibleTop, visibleBottom);
+
             if (isDense)
             {
                 denseRuns.Clear();
@@ -100,5 +102,8 @@ namespace RuniOS.UIElements.Grids
 
             context.DrawRects(CollectionsMarshal.AsSpan(rectBuffer));
         }
+
+        // Adds the lines between the rows of the layer that fall between top and bottom, drawn over the scale lines and under the items.
+        private protected virtual void AddRowLines(List<(Rect rect, Color color)> rects, float top, float bottom) { }
     }
 }

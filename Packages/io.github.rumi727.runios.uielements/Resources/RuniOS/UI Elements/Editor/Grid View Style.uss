@@ -33,6 +33,10 @@
     --runios-grid-selected-item-color: rgb(255, 255, 255);
 }
 
+.runios-plane-grid-layer {
+    --runios-grid-row-line-color: rgba(128, 128, 128, 0.25);
+}
+
 .runios-grid-item--selected {
     border-top-width: 1px;
     border-right-width: 1px;
