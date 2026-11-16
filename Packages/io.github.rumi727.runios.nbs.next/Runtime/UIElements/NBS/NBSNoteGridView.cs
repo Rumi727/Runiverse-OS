@@ -56,6 +56,9 @@ namespace RuniOS.UIElements.NBS
         // Above this many visible notes in one layer, the layer draws rectangles instead of blocks.
         const int maximumBlockCount = 128;
 
+        // Below this many pixels per tick, which is the width of a block, the layers draw rectangles instead of blocks.
+        const double minimumBlockPixelsPerTick = 4;
+
         // The average colors of the block textures, used while a layer draws rectangles.
         static readonly Color32[] denseColors =
         [
@@ -214,6 +217,7 @@ namespace RuniOS.UIElements.NBS
                 unitHeight = cellSize,
                 verticalLength = 1,
                 maximumElementCount = maximumBlockCount,
+                minimumElementPixelsPerUnit = minimumBlockPixelsPerTick,
                 makeElement = MakeBlock,
                 releaseElement = (_, element) => blockPool.Push((NBSNoteBlockElement)element),
                 denseColor = static x => denseColors[NBSNoteBlockElement.GetTextureIndex(((NBSNoteGridItem)x).note.note.instrument)]
