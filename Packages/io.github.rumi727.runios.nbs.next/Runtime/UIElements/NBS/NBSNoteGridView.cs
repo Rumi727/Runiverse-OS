@@ -93,6 +93,7 @@ namespace RuniOS.UIElements.NBS
             {
                 if (args.ruler != null && args.button == (int)MouseButton.LeftMouse)
                     Seek(args);
+            grid.axis.maximumPixelsPerUnit = cellSize;
 
                 return false;
             };
