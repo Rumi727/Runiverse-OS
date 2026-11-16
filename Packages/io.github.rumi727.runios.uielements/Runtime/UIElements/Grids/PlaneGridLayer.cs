@@ -25,8 +25,8 @@ namespace RuniOS.UIElements.Grids
         public PlaneGridLayer() => AddToClassList(ussClassName);
 
         /// <summary>
-        /// Gets or sets how many pixels one vertical unit takes.<br/>
-        /// 세로 1단위가 차지하는 픽셀 수를 가져오거나 설정합니다.
+        /// Gets or sets how many pixels one vertical unit takes while <see cref="GridView.verticalScale"/> is <c>1</c>. One unit is drawn <c>unitHeight * verticalScale</c> pixels high.<br/>
+        /// <see cref="GridView.verticalScale"/>이 <c>1</c>일 때 세로 1단위가 차지하는 픽셀 수를 가져오거나 설정합니다. 1단위는 <c>unitHeight * verticalScale</c> 픽셀 높이로 그려집니다.
         /// </summary>
         public float unitHeight
         {
@@ -39,8 +39,8 @@ namespace RuniOS.UIElements.Grids
         } = 20;
 
         /// <summary>
-        /// Gets or sets the number of vertical units the layer shows, such as the number of rows. The layer is <c>verticalLength * unitHeight</c> pixels high.<br/>
-        /// 레이어가 보여 주는 세로 단위 수(예: 행 수)를 가져오거나 설정합니다. 레이어 높이는 <c>verticalLength * unitHeight</c> 픽셀입니다.
+        /// Gets or sets the number of vertical units the layer shows, such as the number of rows. The layer is <c>verticalLength * unitHeight * verticalScale</c> pixels high.<br/>
+        /// 레이어가 보여 주는 세로 단위 수(예: 행 수)를 가져오거나 설정합니다. 레이어 높이는 <c>verticalLength * unitHeight * verticalScale</c> 픽셀입니다.
         /// </summary>
         public double verticalLength
         {
@@ -58,19 +58,26 @@ namespace RuniOS.UIElements.Grids
         /// </summary>
         public double verticalSnap { get; set; } = 1;
 
+        // One vertical unit in pixels at the current vertical scale.
+        float scaledUnitHeight => (float)(unitHeight * verticalScale);
+
         /// <inheritdoc/>
-        protected override void Arrange() => style.height = (float)(verticalLength * unitHeight);
+        protected override bool arrangesWithVerticalScale => true;
+
+        /// <inheritdoc/>
+        protected override void Arrange() => style.height = (float)(verticalLength * unitHeight * verticalScale);
 
         /// <inheritdoc/>
         public override Rect GetItemRect(GridItem item)
         {
             PlaneGridItem planeItem = (PlaneGridItem)item;
             (float x, float width) = GetHorizontalPixels(item);
-            return new Rect(x, (float)(planeItem.top * unitHeight), width, GetItemHeight(item, unitHeight));
+            float height = scaledUnitHeight;
+            return new Rect(x, (float)(planeItem.top * height), width, GetItemHeight(item, height));
         }
 
         /// <inheritdoc/>
-        public override double GetVerticalPosition(float localY) => localY / unitHeight;
+        public override double GetVerticalPosition(float localY) => localY / scaledUnitHeight;
 
         /// <summary>
         /// Rounds <paramref name="position"/> to a multiple of <see cref="verticalSnap"/>.<br/>

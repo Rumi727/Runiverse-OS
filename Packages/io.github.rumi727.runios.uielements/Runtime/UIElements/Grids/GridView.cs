@@ -124,6 +124,7 @@ namespace RuniOS.UIElements.Grids
             scrollView = new ScrollView(ScrollViewMode.Vertical) { name = "scroll-view", horizontalScrollerVisibility = ScrollerVisibility.Hidden };
             scrollView.AddToClassList(scrollViewUssClassName);
             scrollView.verticalScroller.valueChanged += _ => ScheduleTrackLayersRefresh();
+            scrollView.contentContainer.RegisterCallback<GeometryChangedEvent>(OnContentGeometryChanged);
             viewport.Add(scrollView);
 
             overlay = new SpanGridLayer { name = "overlay", pickingMode = PickingMode.Ignore, drawScaleLines = false };
@@ -393,10 +394,10 @@ namespace RuniOS.UIElements.Grids
 
         /// <summary>
         /// Refreshes the whole grid on the next frame: every layer, ruler, and popup. Calling it many times in one frame refreshes once.<br/>
-        /// Changes to the axis call this. Changes to the items of a layer, the selection, and vertical scrolling refresh only the layers they affect without it.
+        /// Changes to the axis and <see cref="verticalScale"/> call this. Changes to the items of a layer, the selection, and vertical scrolling refresh only the layers they affect without it.
         /// <br/><br/>
         /// 다음 프레임에 그리드 전체를 갱신합니다. 모든 레이어, 눈금자, 팝업을 갱신합니다. 한 프레임에 여러 번 호출해도 한 번만 갱신합니다.<br/>
-        /// 축이 바뀌면 이 메서드가 호출됩니다. 레이어의 아이템, 선택, 세로 스크롤의 변경은 이 메서드 없이 영향을 받는 레이어만 갱신합니다.
+        /// 축이나 <see cref="verticalScale"/>이 바뀌면 이 메서드가 호출됩니다. 레이어의 아이템, 선택, 세로 스크롤의 변경은 이 메서드 없이 영향을 받는 레이어만 갱신합니다.
         /// </summary>
         public void ScheduleRefresh()
         {

@@ -41,8 +41,8 @@ namespace RuniOS.UIElements.Grids
         public LaneGridLayer() => AddToClassList(ussClassName);
 
         /// <summary>
-        /// Gets or sets the height of one lane in pixels. Element heights are left to the elements.<br/>
-        /// 레인 하나의 픽셀 높이를 가져오거나 설정합니다. 요소 높이는 요소에 맡깁니다.
+        /// Gets or sets the height of one lane in pixels while <see cref="GridView.verticalScale"/> is <c>1</c>. A lane is drawn <c>laneHeight * verticalScale</c> pixels high. Element heights are left to the elements.<br/>
+        /// <see cref="GridView.verticalScale"/>이 <c>1</c>일 때 레인 하나의 픽셀 높이를 가져오거나 설정합니다. 레인은 <c>laneHeight * verticalScale</c> 픽셀 높이로 그려집니다. 요소 높이는 요소에 맡깁니다.
         /// </summary>
         public float laneHeight
         {
@@ -60,8 +60,14 @@ namespace RuniOS.UIElements.Grids
         /// </summary>
         public int laneCount => usedLaneCount;
 
+        // One lane in pixels at the current vertical scale.
+        float scaledLaneHeight => (float)(laneHeight * verticalScale);
+
         /// <inheritdoc/>
         protected override bool arrangesWithZoom => true;
+
+        /// <inheritdoc/>
+        protected override bool arrangesWithVerticalScale => true;
 
         /// <inheritdoc/>
         protected override void Arrange()
@@ -99,7 +105,7 @@ namespace RuniOS.UIElements.Grids
                 item.lane = lane;
             }
 
-            style.height = Math.Max(1, usedLaneCount) * laneHeight;
+            style.height = Math.Max(1, usedLaneCount) * scaledLaneHeight;
         }
 
         // Finds where [start, end) goes in a lane without overlapping its spans.
@@ -127,7 +133,8 @@ namespace RuniOS.UIElements.Grids
         public override Rect GetItemRect(GridItem item)
         {
             (float x, float width) = GetHorizontalPixels(item);
-            return new Rect(x, ((LaneGridItem)item).lane * laneHeight, width, GetItemHeight(item, laneHeight));
+            float height = scaledLaneHeight;
+            return new Rect(x, ((LaneGridItem)item).lane * height, width, GetItemHeight(item, height));
         }
 
         /// <summary>
@@ -135,6 +142,6 @@ namespace RuniOS.UIElements.Grids
         /// 레이어의 세로 픽셀을 레인으로 변환합니다. 정수 부분이 레인 인덱스입니다.
         /// </summary>
         /// <inheritdoc/>
-        public override double GetVerticalPosition(float localY) => localY / laneHeight;
+        public override double GetVerticalPosition(float localY) => localY / scaledLaneHeight;
     }
 }

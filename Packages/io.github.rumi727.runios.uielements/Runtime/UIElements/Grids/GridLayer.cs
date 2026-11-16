@@ -206,6 +206,18 @@ namespace RuniOS.UIElements.Grids
         protected virtual bool arrangesWithZoom => false;
 
         /// <summary>
+        /// Gets whether <see cref="Arrange"/> depends on <see cref="GridView.verticalScale"/>, so that it is also called when the scale changes. The default is <see langword="false"/>.<br/>
+        /// <see cref="Arrange"/>가 <see cref="GridView.verticalScale"/>에 따라 달라지는지 여부를 가져옵니다. <see langword="true"/>면 배율이 바뀔 때도 호출됩니다. 기본값은 <see langword="false"/>입니다.
+        /// </summary>
+        protected virtual bool arrangesWithVerticalScale => false;
+
+        /// <summary>
+        /// Gets <see cref="GridView.verticalScale"/> of <see cref="view"/>, or <c>1</c> while the layer is not in a grid.<br/>
+        /// <see cref="view"/>의 <see cref="GridView.verticalScale"/>을 가져오며, 레이어가 그리드에 없으면 <c>1</c>입니다.
+        /// </summary>
+        protected double verticalScale => view?.verticalScale ?? 1;
+
+        /// <summary>
         /// Places the items after they change, for example by stacking them into lanes, and sets the height of the layer. <see cref="sortedItems"/> is sorted when this is called.<br/>
         /// 아이템이 바뀐 뒤 레인에 쌓는 등 아이템을 배치하고 레이어 높이를 정합니다. 호출될 때 <see cref="sortedItems"/>는 정렬되어 있습니다.
         /// </summary>
@@ -515,6 +527,7 @@ namespace RuniOS.UIElements.Grids
         List<GridItem> nextVisible = [];
         readonly HashSet<GridItem> nextVisibleSet = [];
         double arrangedPixelsPerUnit = double.NaN;
+        double arrangedVerticalScale = double.NaN;
 
         /// <summary>
         /// Brings the layer up to date now: sorts and arranges changed items, finds the items on screen, and makes or gives back their elements.<br/>
@@ -546,11 +559,13 @@ namespace RuniOS.UIElements.Grids
                     maximumReach = Math.Max(maximumReach, GetItemWidth(sorted[i], axis) / axis.pixelsPerUnit);
             }
 
-            if (dirty || (zoomChanged && arrangesWithZoom))
+            bool verticalScaleChanged = !gridView.verticalScale.Approximately(arrangedVerticalScale);
+            if (dirty || (zoomChanged && arrangesWithZoom) || (verticalScaleChanged && arrangesWithVerticalScale))
                 Arrange();
 
             dirty = false;
             arrangedPixelsPerUnit = axis.pixelsPerUnit;
+            arrangedVerticalScale = gridView.verticalScale;
 
             Rect clip = gridView.viewport.worldBound;
             Rect bounds = worldBound;
