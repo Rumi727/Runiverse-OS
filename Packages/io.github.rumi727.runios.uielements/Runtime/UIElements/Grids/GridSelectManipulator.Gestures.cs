@@ -14,9 +14,6 @@ namespace RuniOS.UIElements.Grids
         double moveDelta;
         double moveVerticalDelta;
 
-        readonly List<GridItem> marqueeBase = [];
-        readonly List<GridItem> marqueeItems = [];
-
         void BeginMove(GridItem anchor)
         {
             moveEntries.Clear();
@@ -74,6 +71,9 @@ namespace RuniOS.UIElements.Grids
             moveEntries.Clear();
             moveAnchor = null;
         }
+
+        readonly List<GridItem> marqueeBase = [];
+        readonly List<GridItem> marqueeItems = [];
 
         void BeginMarquee()
         {

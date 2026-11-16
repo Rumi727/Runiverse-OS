@@ -41,19 +41,9 @@ namespace RuniOS.UIElements.Grids
 
         readonly List<GridItem> sorted = [];
         List<GridItem> visibleList = [];
-        List<GridItem> nextVisible = [];
-        readonly HashSet<GridItem> nextVisibleSet = [];
-
-        // Added and removed items are applied to the sorted list on the next refresh, keeping its previous order so the adaptive sort stays cheap.
-        // Removed items also leave the selection in one batch, so removing many items raises one selection change.
-        readonly List<GridItem> addedItems = [];
-        readonly HashSet<GridItem> addedSet = [];
-        readonly List<GridItem> removedItems = [];
-        readonly List<GridItem> queryBuffer = [];
 
         // Item values or the item set changed, so the sorted list is sorted and arranged again.
         bool dirty;
-        double arrangedPixelsPerUnit = double.NaN;
 
         /// <summary>
         /// Initializes the layer.<br/>
@@ -409,6 +399,8 @@ namespace RuniOS.UIElements.Grids
             CollectionsMarshal.SetCount(result, count);
         }
 
+        readonly List<GridItem> queryBuffer = [];
+
         /// <summary>
         /// Finds the item at <paramref name="localPosition"/>. When items overlap, the one later in start order wins.<br/>
         /// Only the items near the position are checked, so the cost does not depend on the total.
@@ -487,6 +479,12 @@ namespace RuniOS.UIElements.Grids
             view?.ScheduleRefresh();
         }
 
+        // Added and removed items are applied to the sorted list on the next refresh, keeping its previous order so the adaptive sort stays cheap.
+        // Removed items also leave the selection in one batch, so removing many items raises one selection change.
+        readonly List<GridItem> addedItems = [];
+        readonly HashSet<GridItem> addedSet = [];
+        readonly List<GridItem> removedItems = [];
+
         internal void OnItemAdded(GridItem item)
         {
             addedItems.Add(item);
@@ -503,6 +501,10 @@ namespace RuniOS.UIElements.Grids
             dirty = true;
             view?.ScheduleRefresh();
         }
+
+        List<GridItem> nextVisible = [];
+        readonly HashSet<GridItem> nextVisibleSet = [];
+        double arrangedPixelsPerUnit = double.NaN;
 
         /// <summary>
         /// Brings the layer up to date now: sorts and arranges changed items, finds the items on screen, and makes or gives back their elements.<br/>

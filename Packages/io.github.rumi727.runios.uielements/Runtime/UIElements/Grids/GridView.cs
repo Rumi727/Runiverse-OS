@@ -92,8 +92,6 @@ namespace RuniOS.UIElements.Grids
         public const string readOnlyUssClassName = ussClassName + "--read-only";
 
         readonly Action refreshAction;
-        bool refreshScheduled;
-        bool selectionPopupDirty;
 
         /// <summary>
         /// Initializes an empty grid.<br/>
@@ -380,6 +378,8 @@ namespace RuniOS.UIElements.Grids
             return track;
         }
 
+        bool refreshScheduled;
+
         /// <summary>
         /// Refreshes the grid on the next frame. Calling it many times in one frame refreshes once.<br/>
         /// 다음 프레임에 그리드를 갱신합니다. 한 프레임에 여러 번 호출해도 한 번만 갱신합니다.
@@ -392,6 +392,8 @@ namespace RuniOS.UIElements.Grids
             refreshScheduled = true;
             schedule.Execute(refreshAction);
         }
+
+        bool selectionPopupDirty;
 
         /// <summary>
         /// Refreshes the grid now: every layer, ruler, and popup.<br/>

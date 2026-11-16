@@ -30,7 +30,6 @@ namespace RuniOS.UIElements.Grids
     public class GridPanZoomManipulator(GridView view) : Manipulator
     {
         int pointerId = -1;
-        Vector2 lastPosition;
 
         /// <summary>
         /// Gets the grid to zoom and pan.<br/>
@@ -113,6 +112,8 @@ namespace RuniOS.UIElements.Grids
 
             evt.StopPropagation();
         }
+
+        Vector2 lastPosition;
 
         void OnPointerDown(PointerDownEvent evt)
         {
