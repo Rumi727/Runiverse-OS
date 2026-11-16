@@ -99,6 +99,21 @@ namespace RuniOS.NBS
         [SerializeField] NBSReversePitchAlignment _reversePitchAlignment;
 
         /// <summary>
+        /// Gets or sets whether the velocity is estimated from <see cref="Transform"/> changes when no <see cref="Rigidbody"/> or <see cref="Rigidbody2D"/> supplies it.<br/>
+        /// <see cref="Rigidbody"/>나 <see cref="Rigidbody2D"/>가 속도를 제공하지 않을 때 <see cref="Transform"/> 변화로 속도를 추정할지 가져오거나 설정합니다.
+        /// </summary>
+        /// <remarks>
+        /// While it is off and no physics body supplies the velocity, the velocity is zero.<br/>
+        /// 꺼져 있고 물리 바디도 속도를 제공하지 않으면 속도는 0입니다.
+        /// </remarks>
+        public bool nonRigidbodyVelocity
+        {
+            get => _nonRigidbodyVelocity;
+            set => _nonRigidbodyVelocity = value;
+        }
+        [SerializeField] bool _nonRigidbodyVelocity;
+
+        /// <summary>
         /// Gets or sets the distance rolloff of every sound.<br/>
         /// 모든 소리의 거리 감쇠 방식을 가져오거나 설정합니다.
         /// </summary>

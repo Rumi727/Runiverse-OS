@@ -92,6 +92,23 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 (x, value) => x.reversePitchAlignment = value
             );
 
+            EditPropertyValue
+            (
+                "_nonRigidbodyVelocity",
+                x => x.nonRigidbodyVelocity,
+                (position, x) => EditorGUI.Toggle
+                (
+                    position,
+                    TrTempContent
+                    (
+                        "runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity",
+                        "runios-editor:inspector.wave_audio_source.source.non_rigidbody_velocity.tooltip"
+                    ),
+                    x.nonRigidbodyVelocity
+                ),
+                (x, value) => x.nonRigidbodyVelocity = value
+            );
+
             return true;
         }
 

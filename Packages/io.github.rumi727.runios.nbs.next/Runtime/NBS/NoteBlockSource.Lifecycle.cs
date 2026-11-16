@@ -9,6 +9,13 @@ namespace RuniOS.NBS
     {
         Vector3 lastPosition;
 
+#if UNITY_PHYSICS_EXIST
+        Rigidbody? rigidbody;
+#endif
+#if UNITY_PHYSICS2D_EXIST
+        Rigidbody2D? rigidbody2D;
+#endif
+
         /// <summary>
         /// Loads <see cref="clip"/> and its instruments again when the reference points to a different target.<br/>
         /// 참조가 다른 대상을 가리키면 <see cref="clip"/>과 그 악기를 다시 로드합니다.
@@ -103,6 +110,12 @@ namespace RuniOS.NBS
         protected override void OnEnable()
         {
             base.OnEnable();
+#if UNITY_PHYSICS_EXIST
+            rigidbody = GetComponent<Rigidbody>();
+#endif
+#if UNITY_PHYSICS2D_EXIST
+            rigidbody2D = GetComponent<Rigidbody2D>();
+#endif
             lastPosition = transform.position;
 
             SoundSystem.main.onUpdate += SyncTimeToMixer;
@@ -169,8 +182,29 @@ namespace RuniOS.NBS
         {
             Transform current = transform;
             Vector3 position = current.position;
-            float deltaTime = Time.deltaTime;
-            Vector3 velocity = deltaTime > 0 ? (position - lastPosition) / deltaTime : Vector3.zero;
+            float deltaTime = Kernel.deltaTime;
+            if (spatialBlend <= 0)
+            {
+                lastPosition = position;
+                return;
+            }
+
+            Vector3 velocity;
+#if UNITY_PHYSICS_EXIST
+            if (rigidbody != null)
+                velocity = rigidbody.linearVelocity;
+            else
+#endif
+#if UNITY_PHYSICS2D_EXIST
+            if (rigidbody2D != null)
+                velocity = rigidbody2D.linearVelocity;
+            else
+#endif
+            if (_nonRigidbodyVelocity && deltaTime > 0)
+                velocity = ((position - lastPosition) / deltaTime).ClampMagnitude(20);
+            else
+                velocity = Vector3.zero;
+
             lastPosition = position;
 
             scheduler?.spatialState = new AudioSpatialState(position, velocity, current.rotation);
