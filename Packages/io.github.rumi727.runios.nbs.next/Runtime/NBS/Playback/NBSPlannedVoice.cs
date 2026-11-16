@@ -14,8 +14,8 @@ namespace RuniOS.NBS
     /// 조회 위치에서 소리가 시작하는 지점까지 진행 방향 기준의 타임라인 거리(초)입니다. 늦은 시작이면 음수일 수 있습니다.
     /// </param>
     /// <param name="position">
-    /// The song time in the coordinates of the note where the sound starts: its entry point, or the wrap point when it enters mid-sound after a loop wrap.<br/>
-    /// 노트 좌표 기준으로 소리가 시작하는 곡 시간입니다. 진입점이며, 반복으로 되돌아간 뒤 소리 중간에 들어가면 되돌아간 지점입니다.
+    /// The song time in the coordinates of the note where the sound starts: its entry point, or the query position when the sound is already playing there.<br/>
+    /// 노트 좌표 기준으로 소리가 시작하는 곡 시간입니다. 진입점이며, 조회 위치에서 이미 재생 중인 소리이면 조회 위치입니다.
     /// </param>
     /// <param name="sourceTime">
     /// The position in the sound, in seconds from its beginning, where playback starts.<br/>

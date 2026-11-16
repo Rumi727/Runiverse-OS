@@ -35,10 +35,6 @@ namespace RuniOS.NBS
         /// The list that receives the sounds, in no particular order.<br/>
         /// 소리를 받을 리스트이며 순서는 정해져 있지 않습니다.
         /// </param>
-        /// <remarks>
-        /// After a loop wrap, notes that are already sounding at the wrap point are also found with a start offset, as if playback had been placed there.<br/>
-        /// 반복으로 되돌아간 뒤에는 되돌아간 지점에서 이미 소리 나고 있어야 하는 노트도 시작 오프셋과 함께 찾습니다. 재생 위치를 그 지점에 둔 것과 같습니다.
-        /// </remarks>
         public void Query(double position, in NBSPlaybackRate rate, NBSLoopRange? loop, double fromDistance, bool includeFrom, double toDistance, List<NBSPlannedVoice> output)
         {
             ArgumentNullException.ThrowIfNull(output);
@@ -60,8 +56,6 @@ namespace RuniOS.NBS
             {
                 double boundary = forward ? range.end : range.start;
                 QuerySegment(window, segmentStart, boundary, offset, segment == 0, output);
-                if (segment > 0)
-                    QueryWrapPoint(window, segmentStart, offset, output);
 
                 offset += Math.Abs(boundary - segmentStart);
                 segmentStart = forward ? range.start : range.end;
@@ -81,8 +75,8 @@ namespace RuniOS.NBS
         /// 재생 속도입니다. <see cref="NBSPlaybackRate.canPlace"/>가 <see langword="false"/>이면 아무것도 찾지 않습니다.
         /// </param>
         /// <param name="loop">
-        /// The loop range, or <see langword="null"/> without looping. Sounds from earlier loop passes that ring across the loop boundary are included.<br/>
-        /// 반복 범위이며, 반복하지 않으면 <see langword="null"/>입니다. 반복 경계를 넘어 울리는 이전 회차의 소리도 포함합니다.
+        /// The loop range, or <see langword="null"/> without looping.<br/>
+        /// 반복 범위이며, 반복하지 않으면 <see langword="null"/>입니다.
         /// </param>
         /// <param name="output">
         /// The list that receives the sounds with a distance of <c>0</c> and their offsets.<br/>
@@ -104,20 +98,6 @@ namespace RuniOS.NBS
 
             Domain domain = Domain.Create(loop, looping, forward, true);
             QueryContaining(rate, loop, domain, position, position, 0, maximumLength, output);
-
-            if (!looping || loop is not { } loopRange || position < loopRange.start || position >= loopRange.end)
-                return;
-
-            // Notes from earlier passes appear one loop range further along the travel direction.
-            Domain loopDomain = Domain.Create(loop, true, forward, false);
-            for (int pass = 1; ; pass++)
-            {
-                double shifted = forward ? position + (pass * loopRange.range) : position - (pass * loopRange.range);
-                if (forward ? shifted - maximumLength >= loopRange.end : shifted + maximumLength < loopRange.start)
-                    break;
-
-                QueryContaining(rate, loop, loopDomain, shifted, shifted, 0, maximumLength, output);
-            }
         }
 
         readonly record struct Window(NBSPlaybackRate rate, NBSLoopRange? loop, double from, bool includeFrom, double to, double maximumLength)
@@ -170,14 +150,6 @@ namespace RuniOS.NBS
                 if (window.Contains(distance))
                     output.Add(new NBSPlannedVoice(i, distance, entry, placement.GetSourceTime(entry), placement, length, stopped));
             }
-        }
-
-        void QueryWrapPoint(in Window window, double point, double offset, List<NBSPlannedVoice> output)
-        {
-            if (!window.Contains(offset))
-                return;
-
-            QueryContaining(window.rate, window.loop, Domain.Create(window.loop, true, window.rate.tempo > 0, false), point, point, offset, window.maximumLength, output);
         }
 
         void QueryContaining(in NBSPlaybackRate rate, NBSLoopRange? loop, Domain domain, double point, double searchCenter, double distance, double maximumLength, List<NBSPlannedVoice> output)

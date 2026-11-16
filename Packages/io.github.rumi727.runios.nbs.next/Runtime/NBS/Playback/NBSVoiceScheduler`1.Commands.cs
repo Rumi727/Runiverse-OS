@@ -270,7 +270,7 @@ namespace RuniOS.NBS
         /*
          * A sound that has not started keeps its timeline distance to the start, so only the wall time follows the new tempo.
          * Its placement is computed again, because the sound position at the start and the stop point depend on the rate:
-         * a sound entered at a loop wrap starts mid-sound, and a sound shortened by a stopper starts at its cut point when reversed.
+         * a sound shortened by a stopper starts at its cut point when reversed.
          */
         void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, NBSLoopRange? loop, ulong changeClock, int sampleRate, double previousTempo, double tempo)
         {
