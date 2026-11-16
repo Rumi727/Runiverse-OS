@@ -35,7 +35,7 @@ namespace RuniOS.UIElements.NBS
         /// Gets or sets how the view scrolls to keep the playhead in view while playing. It is shared by every view, and defaults to <see cref="NBSFollowMode.pageByPage"/>.<br/>
         /// 재생 중 플레이헤드를 화면에 두기 위해 뷰가 스크롤하는 방식을 가져오거나 설정합니다. 모든 뷰가 공유하며, 기본값은 <see cref="NBSFollowMode.pageByPage"/>입니다.
         /// </summary>
-        public static NBSFollowMode followMode { get; set; }
+        public static NBSFollowMode followMode { get; set; } = NBSFollowMode.pageByPage;
 
         /// <summary>
         /// Gets or sets the player whose time the playhead follows, or <see langword="null"/> for no playhead. Its time is in seconds of <see cref="clip"/>.<br/>
@@ -134,7 +134,10 @@ namespace RuniOS.UIElements.NBS
             {
                 // In tick by tick mode the view moves by whole ticks, so the playhead stays on the tick instead of sliding between them.
                 ShowPlayhead(followMode == NBSFollowMode.tickByTick ? Math.Floor(tick) : tick);
-                Follow(tick);
+
+                // While paused the playhead stays, so the view stays too.
+                if (player is not IPausable { isPaused: true })
+                    Follow(tick);
             }
             else if (playheadItem.layer != null)
                 grid.overlay.items.Remove(playheadItem);
