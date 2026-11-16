@@ -101,7 +101,6 @@ namespace RuniOS.NBS
         readonly List<Voice> voiceSnapshot = [];
         readonly List<NBSPlannedVoice> planned = [];
 
-        NBSTimeline timeline;
         NBSPlaybackRate committedRate;
         double cursorClock;
         bool hasCursor;
@@ -120,6 +119,7 @@ namespace RuniOS.NBS
                     return timeline;
             }
         }
+        NBSTimeline timeline;
 
         /// <summary>
         /// Gets or sets where reversed sounds are placed. Changing it reschedules the sounds that have not started.<br/>
