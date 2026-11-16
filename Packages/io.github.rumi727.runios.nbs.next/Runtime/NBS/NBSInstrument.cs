@@ -1,5 +1,6 @@
 #nullable enable
 using System.Globalization;
+// ReSharper disable Unity.RedundantAttributeOnTarget
 
 namespace RuniOS.NBS
 {
