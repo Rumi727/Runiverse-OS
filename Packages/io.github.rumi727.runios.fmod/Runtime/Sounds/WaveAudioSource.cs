@@ -360,9 +360,9 @@ namespace RuniOS.Sounds
                     else
                         channel.spatialState = new AudioSpatialState(transform.position);
                 });
-
-                lastPosition = transform.position;
             }
+
+            lastPosition = transform.position;
         }
 
         /// <remarks>
