@@ -166,7 +166,7 @@ namespace RuniOS.NBS
                         {
                             voice.heldEndDistance = tempo > 0 ? ((double)voice.endClock - snapshot.clock) / snapshot.sampleRate * tempo : voice.heldEndDistance;
                             voice.endClock = 0;
-                            voice.channel.SetDelay(voice.startClock, 0);
+                            voice.channel.SetDelay(voice.startClock);
                         }
                     }
                     catch (ObjectDisposedException)
