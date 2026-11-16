@@ -51,6 +51,7 @@ namespace RuniOS.UIElements.NBS
             grid.overlay.defaultItemWidth = 2;
             grid.overlay.makeElement = _ => playhead;
 
+            Insert(0, effectOverlay.background);
             Add(effectOverlay);
 
             timeDisplay.AddToClassList(timeUssClassName);

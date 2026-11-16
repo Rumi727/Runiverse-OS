@@ -60,6 +60,7 @@
     overflow: hidden;
 }
 
+.runios-nbs-note-grid-view__effect-overlay,
 .runios-nbs-note-grid-view__accent {
     position: absolute;
     left: 0;

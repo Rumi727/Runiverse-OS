@@ -4,7 +4,8 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.NBS
 {
-    // Covers NBSNoteGridView with the visual effects of the song while it plays: the background accent, a faint tint of the accent color, and the song saved popup.
+    // Covers NBSNoteGridView with the visual effects of the song while it plays: the song saved popup, and the background accent, a faint tint of the accent color.
+    // The background accent is a separate element, which the view puts behind the grid so that it does not cover the notes and texts. This element holds only the popup, above everything.
     // The accent color, which the rainbow effect cycles, is returned so that the playhead takes it too.
     internal sealed class NBSVisualEffectOverlay : VisualElement
     {
@@ -16,14 +17,17 @@ namespace RuniOS.UIElements.NBS
         const double savePopupHoldDuration = 1;
         const double savePopupFadeDuration = 0.25;
 
+        public readonly VisualElement background = new() { name = "accent", pickingMode = PickingMode.Ignore };
+
         readonly Label savePopup;
         double savePopupStartedAt = double.NegativeInfinity;
 
         public NBSVisualEffectOverlay()
         {
-            name = "accent";
+            name = "effect-overlay";
             pickingMode = PickingMode.Ignore;
-            AddToClassList(NBSNoteGridView.accentUssClassName);
+            AddToClassList(NBSNoteGridView.effectOverlayUssClassName);
+            background.AddToClassList(NBSNoteGridView.accentUssClassName);
 
             savePopup = new Label { name = "save-popup", pickingMode = PickingMode.Ignore };
             savePopup.AddToClassList(NBSNoteGridView.savePopupUssClassName);
@@ -42,7 +46,7 @@ namespace RuniOS.UIElements.NBS
             if (state.rainbow)
                 accent = Color.HSVToRGB((float)(now * 0.25 % 1), 0.7f, 0.95f);
 
-            style.backgroundColor = state.backgroundAccent ? accent with { a = backgroundAlpha } : Color.clear;
+            background.style.backgroundColor = state.backgroundAccent ? accent with { a = backgroundAlpha } : Color.clear;
 
             if (continuous && effects.TryFindSavePopup(previousTick, tick, out _))
                 savePopupStartedAt = now;
@@ -59,7 +63,7 @@ namespace RuniOS.UIElements.NBS
         public void Reset()
         {
             savePopupStartedAt = double.NegativeInfinity;
-            style.backgroundColor = Color.clear;
+            background.style.backgroundColor = Color.clear;
             savePopup.style.display = DisplayStyle.None;
         }
     }

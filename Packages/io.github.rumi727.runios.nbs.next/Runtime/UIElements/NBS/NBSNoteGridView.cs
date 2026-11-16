@@ -42,6 +42,7 @@ namespace RuniOS.UIElements.NBS
         public const string mutedNotesUssClassName = notesUssClassName + "--muted";
         public const string playheadUssClassName = ussClassName + "__playhead";
         public const string playheadMarkerUssClassName = ussClassName + "__playhead-marker";
+        public const string effectOverlayUssClassName = ussClassName + "__effect-overlay";
         public const string accentUssClassName = ussClassName + "__accent";
         public const string savePopupUssClassName = ussClassName + "__save-popup";
         public const string stopperGuideUssClassName = ussClassName + "__stopper-guide";
