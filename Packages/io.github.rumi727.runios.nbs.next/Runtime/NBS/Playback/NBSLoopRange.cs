@@ -57,14 +57,16 @@ namespace RuniOS.NBS
         /// 어느 경계에서 되돌아갈지 정하는 부호 있는 타임라인 속도입니다.
         /// </param>
         /// <returns>
-        /// The folded position. Positions before the start while moving forward, such as an intro, stay as they are.<br/>
-        /// 접힌 위치를 반환합니다. 정방향 진행 중 시작 이전의 위치(인트로 등)는 그대로 유지됩니다.
+        /// The folded position, in <c>[start, end)</c> while moving forward and in <c>(start, end]</c> while moving backward.
+        /// Positions before the start while moving forward, such as an intro, and positions after the end while moving backward stay as they are.<br/>
+        /// 접힌 위치를 반환하며, 정방향 진행 중에는 <c>[start, end)</c>, 역방향 진행 중에는 <c>(start, end]</c> 안에 있습니다.
+        /// 정방향 진행 중 시작 이전의 위치(인트로 등)와 역방향 진행 중 끝 이후의 위치는 그대로 유지됩니다.
         /// </returns>
         public double Fold(double time, float tempo)
         {
             if (tempo > 0 && time >= end)
                 return start + ((time - start) % range);
-            if (tempo < 0 && time < start)
+            if (tempo < 0 && time <= start)
                 return end - ((start - time) % range);
 
             return time;
