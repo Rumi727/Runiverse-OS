@@ -233,13 +233,17 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
 
         static string GetStatus(NBSVisualEffectState state)
         {
-            if (!state.rainbow && !state.backgroundAccent)
-                return GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.inactive");
+            List<string> status = [];
+            if (state.rainbow)
+                status.Add(GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.rainbow"));
+            if (state.backgroundAccent)
+                status.Add(GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.background_accent"));
+            if (state.color is { } color)
+                status.Add($"#{color.r:X2}{color.g:X2}{color.b:X2}");
 
-            if (state.rainbow && state.backgroundAccent)
-                return $"{GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.rainbow")} · {GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.background_accent")}";
-
-            return GetTextOrKey(state.rainbow ? "runios-editor:inspector.nbs_player.visual_effects.rainbow" : "runios-editor:inspector.nbs_player.visual_effects.background_accent");
+            return status.Count > 0
+                ? string.Join(" · ", status)
+                : GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.inactive");
         }
 
         async UniTask ReloadAndRepaint(NoteBlockSource source)
