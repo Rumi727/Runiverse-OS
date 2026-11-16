@@ -98,7 +98,7 @@ NoteBlockSource (시간 축, 직렬화)
 
 ## 에디터
 
-- `NoteBlockClip` 인스펙터: 곡 요약과 씬 없는 미리듣기(`NBSPreviewTransport`)를 제공합니다.
+- `NoteBlockClip` 인스펙터: 곡 요약과 씬 없는 미리듣기(`NBSPreview`)를 제공합니다.
 - `NoteBlockSource` 인스펙터:
   - 타임라인 아래에 BPM 계단 그래프, Sound Stopper, 파일 반복 구간 레인을 그립니다. 마커에 마우스를 올리면 정보가 보이고, 클릭하면 그 위치로 이동합니다.
   - tick과 열 시간 단위, 리버스 배치 선택, 시각 효과 미리보기를 제공합니다.
