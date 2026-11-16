@@ -40,7 +40,7 @@ namespace RuniOS.UIElements.NBS
         public double minimumLabelSpacing { get; set; } = 60;
 
         /// <inheritdoc/>
-        public override void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines)
+        public override void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines)
         {
             if (!(pixelsPerUnit > 0))
                 return;
@@ -64,7 +64,7 @@ namespace RuniOS.UIElements.NBS
             {
                 long tick = i * lineStep;
                 if (tick % barStep == 0)
-                    lines.Add(new GridLine(tick, 0, tick % labelStep == 0 ? tick.ToString() : null));
+                    lines.Add(new GridLine(tick, 0, includeLabels && tick % labelStep == 0 ? tick.ToString() : null));
                 else
                     lines.Add(new GridLine(tick, tick % ticksPerBeat == 0 ? 1 : 2));
             }

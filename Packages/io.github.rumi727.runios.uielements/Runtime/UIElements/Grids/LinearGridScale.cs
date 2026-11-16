@@ -91,7 +91,7 @@ namespace RuniOS.UIElements.Grids
         bool HasSubdivision(double step, double pixelsPerUnit) => subdivision > 1 && (step / subdivision) * pixelsPerUnit >= minimumSubdivisionSpacing;
 
         /// <inheritdoc/>
-        public override void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines)
+        public override void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines)
         {
             double step = GetStep(pixelsPerUnit);
             if (!double.IsFinite(step) || step <= 0)
@@ -117,7 +117,7 @@ namespace RuniOS.UIElements.Grids
 
                 double steps = (position - origin) / unit;
                 bool major = majorInterval > 0 && IsMultiple(steps, majorInterval);
-                lines.Add(new GridLine(position, major ? 0 : 1, labelFormatter?.Invoke(steps) ?? steps.ToString("0.###")));
+                lines.Add(new GridLine(position, major ? 0 : 1, includeLabels ? labelFormatter?.Invoke(steps) ?? steps.ToString("0.###") : null));
             }
         }
 

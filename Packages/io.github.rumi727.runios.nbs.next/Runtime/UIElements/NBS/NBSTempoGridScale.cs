@@ -23,7 +23,7 @@ namespace RuniOS.UIElements.NBS
         public NBSTempoMap? tempo { get; set; }
 
         /// <inheritdoc/>
-        public override void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines)
+        public override void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines)
         {
             if (tempo == null)
                 return;

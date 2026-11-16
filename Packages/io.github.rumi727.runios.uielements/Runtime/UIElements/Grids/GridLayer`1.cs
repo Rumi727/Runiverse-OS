@@ -46,7 +46,7 @@ namespace RuniOS.UIElements.Grids
             set
             {
                 field = value;
-                view?.ScheduleRefresh();
+                ScheduleRefresh();
             }
         }
 

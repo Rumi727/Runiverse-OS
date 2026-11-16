@@ -40,7 +40,7 @@ namespace RuniOS.UIElements.NBS
         public double minimumSpacing { get; set; } = 70;
 
         /// <inheritdoc/>
-        public override void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines)
+        public override void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines)
         {
             if (tempo == null)
                 return;
@@ -75,7 +75,7 @@ namespace RuniOS.UIElements.NBS
             for (long i = (long)first; i <= (long)last; i++)
             {
                 double time = i * interval;
-                lines.Add(new GridLine(tempo.TimeToTick(time), 1, TimeUtility.ToTimeString(time, AlwayShowTimeUnit.minute, decimalPlaces)));
+                lines.Add(new GridLine(tempo.TimeToTick(time), 1, includeLabels ? TimeUtility.ToTimeString(time, AlwayShowTimeUnit.minute, decimalPlaces) : null));
             }
         }
     }

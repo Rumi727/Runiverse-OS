@@ -102,7 +102,7 @@ namespace RuniOS.UIElements.Grids
             this.AddManipulator(new DefaultStyleManipulator(UIElementsUtility.rosControlStyle, UIElementsUtility.rosEditorTheme));
             AddToClassList(ussClassName);
 
-            refreshAction = Refresh;
+            refreshAction = ApplyChanges;
 
             viewport = new VisualElement { name = "viewport", focusable = true };
             viewport.AddToClassList(viewportUssClassName);
@@ -123,7 +123,7 @@ namespace RuniOS.UIElements.Grids
 
             scrollView = new ScrollView(ScrollViewMode.Vertical) { name = "scroll-view", horizontalScrollerVisibility = ScrollerVisibility.Hidden };
             scrollView.AddToClassList(scrollViewUssClassName);
-            scrollView.verticalScroller.valueChanged += _ => ScheduleRefresh();
+            scrollView.verticalScroller.valueChanged += _ => ScheduleTrackLayersRefresh();
             viewport.Add(scrollView);
 
             overlay = new SpanGridLayer { name = "overlay", pickingMode = PickingMode.Ignore, drawScaleLines = false };
@@ -344,7 +344,7 @@ namespace RuniOS.UIElements.Grids
             set
             {
                 field = value;
-                OnSelectionChanged();
+                ScheduleSelectionPopup();
             }
         }
 
@@ -388,11 +388,24 @@ namespace RuniOS.UIElements.Grids
 
         bool refreshScheduled;
 
+        // The axis changed or a whole refresh was asked for, so every layer and ruler is refreshed on the next pass, not only the layers that marked themselves.
+        bool refreshAll;
+
         /// <summary>
-        /// Refreshes the grid on the next frame. Calling it many times in one frame refreshes once.<br/>
-        /// 다음 프레임에 그리드를 갱신합니다. 한 프레임에 여러 번 호출해도 한 번만 갱신합니다.
+        /// Refreshes the whole grid on the next frame: every layer, ruler, and popup. Calling it many times in one frame refreshes once.<br/>
+        /// Changes to the axis call this. Changes to the items of a layer, the selection, and vertical scrolling refresh only the layers they affect without it.
+        /// <br/><br/>
+        /// 다음 프레임에 그리드 전체를 갱신합니다. 모든 레이어, 눈금자, 팝업을 갱신합니다. 한 프레임에 여러 번 호출해도 한 번만 갱신합니다.<br/>
+        /// 축이 바뀌면 이 메서드가 호출됩니다. 레이어의 아이템, 선택, 세로 스크롤의 변경은 이 메서드 없이 영향을 받는 레이어만 갱신합니다.
         /// </summary>
         public void ScheduleRefresh()
+        {
+            refreshAll = true;
+            ScheduleChanges();
+        }
+
+        // Applies the pending changes on the next frame, once however many times it is called.
+        internal void ScheduleChanges()
         {
             if (refreshScheduled)
                 return;
@@ -404,18 +417,38 @@ namespace RuniOS.UIElements.Grids
         bool selectionPopupDirty;
 
         /// <summary>
-        /// Refreshes the grid now: every layer, ruler, and popup.<br/>
-        /// 지금 그리드를 갱신합니다. 모든 레이어, 눈금자, 팝업을 갱신합니다.
+        /// Refreshes the whole grid now: every layer, ruler, and popup.<br/>
+        /// 지금 그리드 전체를 갱신합니다. 모든 레이어, 눈금자, 팝업을 갱신합니다.
         /// </summary>
         public void Refresh()
         {
+            refreshAll = true;
+            ApplyChanges();
+        }
+
+        void ApplyChanges()
+        {
             refreshScheduled = false;
+            bool all = refreshAll;
+            refreshAll = false;
 
-            foreach (GridLayer layer in layers)
-                layer.Refresh();
+            // This runs every frame while something moves, so the children are walked by index instead of through the LINQ properties.
+            if (all || overlay.refreshPending)
+                overlay.Refresh();
 
-            foreach (GridRuler ruler in rulers)
-                ruler.MarkDirtyRepaint();
+            VisualElement trackContainer = scrollView.contentContainer;
+            for (int i = 0; i < trackContainer.childCount; i++)
+            {
+                if (trackContainer[i] is GridTrack track && (all || track.layer.refreshPending))
+                    track.layer.Refresh();
+            }
+
+            // The rulers show only the axis, so they are repainted only with the whole grid.
+            if (all)
+            {
+                for (int i = 0; i < rulerContainer.childCount; i++)
+                    rulerContainer[i].MarkDirtyRepaint();
+            }
 
             if (selectionPopupDirty)
             {
@@ -433,10 +466,29 @@ namespace RuniOS.UIElements.Grids
             }
         }
 
+        // Any layer can hold the items that joined or left the selection, so every layer is refreshed, but not the rulers.
         void OnSelectionChanged()
         {
+            overlay.ScheduleRefresh();
+            ScheduleTrackLayersRefresh();
+            ScheduleSelectionPopup();
+        }
+
+        void ScheduleSelectionPopup()
+        {
             selectionPopupDirty = true;
-            ScheduleRefresh();
+            ScheduleChanges();
+        }
+
+        // Vertical scrolling moves the tracks without changing their geometry, so the layers do not notice it by themselves.
+        void ScheduleTrackLayersRefresh()
+        {
+            VisualElement trackContainer = scrollView.contentContainer;
+            for (int i = 0; i < trackContainer.childCount; i++)
+            {
+                if (trackContainer[i] is GridTrack track)
+                    track.layer.ScheduleRefresh();
+            }
         }
 
         void UpdateLayout()

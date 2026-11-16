@@ -32,11 +32,15 @@ namespace RuniOS.UIElements.Grids
         /// How many pixels one axis unit currently takes. Use it to keep lines from getting too dense.<br/>
         /// 현재 축 1단위가 차지하는 픽셀 수입니다. 선이 너무 촘촘해지지 않게 하는 데 사용합니다.
         /// </param>
+        /// <param name="includeLabels">
+        /// Whether <see cref="GridLine.label"/> is used. <see cref="GridRuler"/> passes <see langword="true"/>; layers pass <see langword="false"/> because they draw only the lines, so labels need not be made.<br/>
+        /// <see cref="GridLine.label"/>을 쓰는지 여부입니다. <see cref="GridRuler"/>는 <see langword="true"/>를 넘기고, 레이어는 선만 그리므로 <see langword="false"/>를 넘깁니다. 이때는 라벨을 만들 필요가 없습니다.
+        /// </param>
         /// <param name="lines">
         /// The list to add to. It is not cleared by this method.<br/>
         /// 추가할 목록입니다. 이 메서드는 목록을 비우지 않습니다.
         /// </param>
-        public abstract void GetLines(GridRange range, double pixelsPerUnit, List<GridLine> lines);
+        public abstract void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines);
 
         /// <summary>
         /// Moves <paramref name="position"/> to the nearest position this scale snaps to. The default returns it unchanged.<br/>

@@ -56,7 +56,7 @@ namespace RuniOS.UIElements.Grids
                     continue;
 
                 lineBuffer.Clear();
-                scale.GetLines(range, axis.pixelsPerUnit, lineBuffer);
+                scale.GetLines(range, axis.pixelsPerUnit, false, lineBuffer);
                 for (int i = 0; i < lineBuffer.Count; i++)
                 {
                     GridLine line = lineBuffer[i];

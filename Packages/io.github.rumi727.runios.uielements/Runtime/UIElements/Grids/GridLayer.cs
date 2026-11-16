@@ -133,7 +133,7 @@ namespace RuniOS.UIElements.Grids
             set
             {
                 field = value;
-                view?.ScheduleRefresh();
+                ScheduleRefresh();
             }
         } = 2000;
 
@@ -476,7 +476,17 @@ namespace RuniOS.UIElements.Grids
         public void MarkDirty()
         {
             dirty = true;
-            view?.ScheduleRefresh();
+            ScheduleRefresh();
+        }
+
+        // Set when something only this layer shows changed, so GridView refreshes this layer on its next pass without refreshing the whole grid.
+        internal bool refreshPending { get; private set; }
+
+        // Refreshes this layer on the next frame without sorting or arranging the items again.
+        internal void ScheduleRefresh()
+        {
+            refreshPending = true;
+            view?.ScheduleChanges();
         }
 
         // Added and removed items are applied to the sorted list on the next refresh, keeping its previous order so the adaptive sort stays cheap.
@@ -489,7 +499,7 @@ namespace RuniOS.UIElements.Grids
         {
             addedItems.Add(item);
             dirty = true;
-            view?.ScheduleRefresh();
+            ScheduleRefresh();
         }
 
         internal void OnItemRemoved(GridItem item)
@@ -499,7 +509,7 @@ namespace RuniOS.UIElements.Grids
 
             removedItems.Add(item);
             dirty = true;
-            view?.ScheduleRefresh();
+            ScheduleRefresh();
         }
 
         List<GridItem> nextVisible = [];
@@ -515,6 +525,8 @@ namespace RuniOS.UIElements.Grids
         /// </summary>
         public void Refresh()
         {
+            // Cleared first, so a change raised during the refresh, such as the selection losing removed items, refreshes again on the next pass.
+            refreshPending = false;
             if (view is not { } gridView)
                 return;
 
@@ -692,7 +704,7 @@ namespace RuniOS.UIElements.Grids
         void OnAttachToPanel(AttachToPanelEvent evt)
         {
             view = GetFirstAncestorOfType<GridView>();
-            view?.ScheduleRefresh();
+            ScheduleRefresh();
         }
 
         void OnDetachFromPanel(DetachFromPanelEvent evt) => view = null;

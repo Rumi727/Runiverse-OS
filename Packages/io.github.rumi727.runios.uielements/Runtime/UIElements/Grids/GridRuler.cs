@@ -79,7 +79,7 @@ namespace RuniOS.UIElements.Grids
             float height = contentRect.height;
 
             lines.Clear();
-            scale.GetLines(axis.GetRange(), axis.pixelsPerUnit, lines);
+            scale.GetLines(axis.GetRange(), axis.pixelsPerUnit, true, lines);
 
             rects.Clear();
             for (int i = 0; i < lines.Count; i++)
