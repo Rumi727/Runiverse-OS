@@ -168,11 +168,11 @@ namespace RuniOS.NBS
         /// </summary>
         public double tick
         {
-            get => loadedClip is { } current ? current.map.tempo.TimeToTick(time) : 0;
+            get => loadedClip != null ? loadedClip.map.tempo.TimeToTick(time) : 0;
             set
             {
-                if (loadedClip is { } current)
-                    time = current.map.tempo.TickToTime(value);
+                if (loadedClip != null)
+                    time = loadedClip.map.tempo.TickToTime(value);
             }
         }
 
@@ -180,7 +180,7 @@ namespace RuniOS.NBS
         /// Gets the song length in seconds, or <c>0</c> while no clip is loaded.<br/>
         /// 곡 길이를 초 단위로 가져오며, 클립이 로드되지 않았으면 <c>0</c>입니다.
         /// </summary>
-        public override double length => loadedClip?.length ?? 0;
+        public override double length => loadedClip != null ? loadedClip.length : 0;
 
         /// <inheritdoc/>
         public override float tempo

@@ -199,11 +199,11 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         protected override void DrawAdditionalInformationLayout()
         {
-            DrawInformation("runios-editor:inspector.nbs_player.information.tick_length", x => x.loadedClip?.map.tickLength);
-            DrawInformation("runios-editor:inspector.nbs_player.information.index_length", x => x.loadedClip?.map.columns.Length);
-            DrawInformation("runios-editor:inspector.nbs_player.information.tps", x => x.loadedClip?.map.tempo.GetChangeAtTick(x.tick).ticksPerSecond.ToString("0.##"));
-            DrawInformation("runios-editor:inspector.nbs_player.information.bpm", x => x.loadedClip?.map.tempo.GetChangeAtTick(x.tick).beatsPerMinute.ToString("0.##"));
-            DrawInformation("runios-editor:inspector.nbs_player.information.custom_instruments", x => x.loadedClip?.map.instruments.Length);
+            DrawInformation("runios-editor:inspector.nbs_player.information.tick_length", x => x.loadedClip != null ? x.loadedClip.map.tickLength : 0);
+            DrawInformation("runios-editor:inspector.nbs_player.information.index_length", x => x.loadedClip != null ? x.loadedClip.map.columns.Length : 0);
+            DrawInformation("runios-editor:inspector.nbs_player.information.tps", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).ticksPerSecond.ToString("0.##") : null);
+            DrawInformation("runios-editor:inspector.nbs_player.information.bpm", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).beatsPerMinute.ToString("0.##") : null);
+            DrawInformation("runios-editor:inspector.nbs_player.information.custom_instruments", x => x.loadedClip != null ? x.loadedClip.map.instruments.Length : 0);
         }
 
         void DrawInformation<TValue>(string key, Func<NoteBlockSource, TValue> readFunc) => EditorGUILayout.LabelField(TrTempContent(key), new GUIContent(GetCommonValueString(readFunc)));

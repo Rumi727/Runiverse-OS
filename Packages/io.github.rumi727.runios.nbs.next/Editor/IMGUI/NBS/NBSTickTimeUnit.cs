@@ -36,9 +36,9 @@ namespace RuniOS.Editor.IMGUI.NBS
         public string TimeToString(NoteBlockSource? source) => source != null ? source.tick.ToString("0.###") : "—";
 
         /// <inheritdoc/>
-        public string RemainingTimeToString(NoteBlockSource? source) => source?.loadedClip is { } clip ? (clip.map.tickLength - source.tick).ToString("0.###") : "—";
+        public string RemainingTimeToString(NoteBlockSource? source) => source != null && source.loadedClip != null ? (source.loadedClip.map.tickLength - source.tick).ToString("0.###") : "—";
 
         /// <inheritdoc/>
-        public string LengthToString(NoteBlockSource? source) => source?.loadedClip is { } clip ? clip.map.tickLength.ToString() : "—";
+        public string LengthToString(NoteBlockSource? source) => source != null && source.loadedClip != null ? source.loadedClip.map.tickLength.ToString() : "—";
     }
 }

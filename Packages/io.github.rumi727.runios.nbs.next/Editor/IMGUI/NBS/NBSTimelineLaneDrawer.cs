@@ -53,10 +53,10 @@ namespace RuniOS.Editor.IMGUI.NBS
         /// </param>
         public static void Draw(Rect position, ISeekable seekable, double length)
         {
-            if (seekable is not NoteBlockSource source || source.loadedClip is not { } clip || !(length > 0))
+            if (seekable is not NoteBlockSource source || source.loadedClip == null || !(length > 0))
                 return;
 
-            NBSMap map = clip.map;
+            NBSMap map = source.loadedClip.map;
             Rect tempoLane = new Rect(position.x, position.y, position.width, tempoLaneHeight);
             Rect stopperLane = new Rect(position.x, tempoLane.yMax + laneSpacing, position.width, stopperLaneHeight);
 
@@ -64,7 +64,7 @@ namespace RuniOS.Editor.IMGUI.NBS
             {
                 EditorGUI.DrawRect(tempoLane, laneBackground);
                 EditorGUI.DrawRect(stopperLane, laneBackground);
-                DrawFileLoop(position, source, clip, length);
+                DrawFileLoop(position, source, source.loadedClip, length);
                 DrawTempo(tempoLane, map, length);
                 DrawStoppers(stopperLane, map, length);
             }

@@ -24,8 +24,8 @@ namespace RuniOS.Editor.IMGUI.NBS
             {
                 foreach (NoteBlockSource source in sources)
                 {
-                    if (source.loadedClip is { } clip && clip.map.columns.Length > 0)
-                        source.tick = clip.map.columns[Math.Clamp(value, 0, clip.map.columns.Length - 1)].tick;
+                    if (source.loadedClip != null && source.loadedClip.map.columns.Length > 0)
+                        source.tick = source.loadedClip.map.columns[Math.Clamp(value, 0, source.loadedClip.map.columns.Length - 1)].tick;
                 }
             }
 
@@ -39,20 +39,20 @@ namespace RuniOS.Editor.IMGUI.NBS
         public string TimeToString(NoteBlockSource? source) => source != null ? GetColumn(source).ToString() : "—";
 
         /// <inheritdoc/>
-        public string RemainingTimeToString(NoteBlockSource? source) => source?.loadedClip is { } clip ? (clip.map.columns.Length - GetColumn(source)).ToString() : "—";
+        public string RemainingTimeToString(NoteBlockSource? source) => source != null && source.loadedClip != null ? (source.loadedClip.map.columns.Length - GetColumn(source)).ToString() : "—";
 
         /// <inheritdoc/>
-        public string LengthToString(NoteBlockSource? source) => source?.loadedClip is { } clip ? clip.map.columns.Length.ToString() : "—";
+        public string LengthToString(NoteBlockSource? source) => source != null && source.loadedClip != null ? source.loadedClip.map.columns.Length.ToString() : "—";
 
         // The column at or before the current tick, which is the last column the marker has passed.
         static int GetColumn(NoteBlockSource source)
         {
-            if (source.loadedClip is not { } clip)
+            if (source.loadedClip == null)
                 return 0;
 
             double tick = source.tick;
-            int index = clip.map.FindColumnAtOrAfter(tick);
-            if (index < clip.map.columns.Length && clip.map.columns[index].tick == tick)
+            int index = source.loadedClip.map.FindColumnAtOrAfter(tick);
+            if (index < source.loadedClip.map.columns.Length && tick.Approximately(source.loadedClip.map.columns[index].tick))
                 return index;
 
             return Math.Max(0, index - 1);
