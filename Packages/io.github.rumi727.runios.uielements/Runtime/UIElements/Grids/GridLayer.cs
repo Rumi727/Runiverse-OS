@@ -7,10 +7,10 @@ namespace RuniOS.UIElements.Grids
 {
     /// <summary>
     /// The area of a <see cref="GridView"/> where items are placed. Derive from <see cref="GridLayer{TItem}"/> to make a new kind of layout.<br/>
-    /// Only items on screen get an element. When too many are on screen, they are drawn as plain rectangles instead.
+    /// Only items on screen get an element. When too many are on screen or the zoom is too far out, they are drawn as plain rectangles instead.
     /// <br/><br/>
     /// <see cref="GridView"/>에서 아이템이 놓이는 영역입니다. 새로운 배치 방식은 <see cref="GridLayer{TItem}"/>를 상속해 만드세요.<br/>
-    /// 화면에 보이는 아이템만 요소를 가집니다. 화면에 너무 많으면 요소 대신 단순한 사각형으로 그립니다.
+    /// 화면에 보이는 아이템만 요소를 가집니다. 화면에 너무 많거나 너무 축소되면 요소 대신 단순한 사각형으로 그립니다.
     /// </summary>
     /// <remarks>
     /// The layer finds its <see cref="GridView"/> when it is attached to a panel, and updates on the frame after something changes.<br/>
@@ -136,6 +136,20 @@ namespace RuniOS.UIElements.Grids
                 ScheduleRefresh();
             }
         } = 2000;
+
+        /// <summary>
+        /// Gets or sets the smallest <see cref="GridAxis.pixelsPerUnit"/> at which items are shown as elements. Below it, they are drawn as rectangles. The default is <c>0</c>.<br/>
+        /// 아이템을 요소로 보여 주는 가장 작은 <see cref="GridAxis.pixelsPerUnit"/>을 가져오거나 설정합니다. 이보다 작으면 사각형으로 그립니다. 기본값은 <c>0</c>입니다.
+        /// </summary>
+        public double minimumElementPixelsPerUnit
+        {
+            get;
+            set
+            {
+                field = value;
+                ScheduleRefresh();
+            }
+        }
 
         /// <summary>
         /// Gets or sets whether the lines of <see cref="GridAxis.scales"/> are drawn behind the items. <see cref="GridView.overlay"/> turns it off.<br/>
@@ -576,7 +590,7 @@ namespace RuniOS.UIElements.Grids
             if (bottom > top)
                 CollectVisible(gridView.axis.GetRange(), top, bottom, nextVisible);
 
-            bool useElements = usesElements && nextVisible.Count <= maximumElementCount;
+            bool useElements = usesElements && nextVisible.Count <= maximumElementCount && axis.pixelsPerUnit >= minimumElementPixelsPerUnit;
             if (useElements)
             {
                 nextVisibleSet.Clear();
