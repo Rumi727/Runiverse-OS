@@ -25,6 +25,12 @@ namespace RuniOS.UIElements.Grids
         /// </summary>
         public const string rowHeaderUssClassName = ussClassName + "__row-header";
 
+        /// <summary>
+        /// The USS class name of the row headers that are separated from the next row by a line, which the layer draws beside them. The last row and rows too low for a line have none.<br/>
+        /// 레이어가 옆에 선을 그려 다음 행과 구분되는 행 헤더의 USS 클래스 이름입니다. 마지막 행과 선을 그리기에 너무 낮은 행에는 붙지 않습니다.
+        /// </summary>
+        public const string rowHeaderSeparatedUssClassName = rowHeaderUssClassName + "--separated";
+
         static readonly CustomStyleProperty<Color> rowLineColorProperty = new("--runios-grid-row-line-color");
 
         // Below this many pixels per row, the lines between rows are not drawn, so that they do not cover the rows.
@@ -139,11 +145,13 @@ namespace RuniOS.UIElements.Grids
 
             // The same top as the items of the row, so that a header stays beside its row at any vertical scale.
             float height = scaledUnitHeight;
+            bool separated = height >= minimumRowLineSpacing;
             for (int i = 0; i < _rowHeaders.Count; i++)
             {
-                IStyle headerStyle = _rowHeaders[i].style;
-                headerStyle.top = i * height;
-                headerStyle.height = height;
+                VisualElement header = _rowHeaders[i];
+                header.style.top = i * height;
+                header.style.height = height;
+                header.EnableInClassList(rowHeaderSeparatedUssClassName, separated && i < _rowHeaders.Count - 1);
             }
         }
 

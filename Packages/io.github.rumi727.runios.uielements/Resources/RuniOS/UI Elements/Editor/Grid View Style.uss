@@ -37,6 +37,12 @@
     --runios-grid-row-line-color: rgba(128, 128, 128, 0.25);
 }
 
+/* 레이어가 그리는 행 경계선과 같은 색으로 헤더 열에도 선을 긋습니다. */
+.runios-plane-grid-layer__row-header--separated {
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(128, 128, 128, 0.25);
+}
+
 .runios-grid-item--selected {
     border-top-width: 1px;
     border-right-width: 1px;
