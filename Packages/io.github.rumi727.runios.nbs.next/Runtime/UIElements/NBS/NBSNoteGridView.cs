@@ -16,8 +16,8 @@ namespace RuniOS.UIElements.NBS
     /// <see cref="player"/>가 재생 중이면 플레이헤드를 그리고, <see cref="followMode"/>에 따라 스크롤합니다. 룰러를 클릭하면 재생 위치를 옮기고, 끌면 플레이헤드를 옮긴 뒤 끌기가 끝난 위치로 재생 위치를 옮깁니다.
     /// </summary>
     /// <remarks>
-    /// The wheel scrolls the layers, Ctrl + wheel zooms, and Shift + wheel scrolls the ticks.<br/>
-    /// 휠은 레이어를 스크롤하고, Ctrl + 휠은 확대·축소하며, Shift + 휠은 틱 방향으로 스크롤합니다.
+    /// The wheel scrolls the layers, Ctrl + wheel zooms, Shift + wheel scrolls the ticks, and Ctrl + Shift + wheel zooms the layers vertically.<br/>
+    /// 휠은 레이어를 스크롤하고, Ctrl + 휠은 확대·축소하며, Shift + 휠은 틱 방향으로 스크롤하고, Ctrl + Shift + 휠은 레이어를 세로로 확대·축소합니다.
     /// </remarks>
     public partial class NBSNoteGridView : VisualElement
     {
@@ -47,8 +47,8 @@ namespace RuniOS.UIElements.NBS
         public const string stopperGuideUssClassName = ussClassName + "__stopper-guide";
 
         /// <summary>
-        /// The pixel size of one block at the default zoom, and the height of every layer.<br/>
-        /// 기본 배율에서 블록 하나의 픽셀 크기이자 모든 레이어의 높이입니다.
+        /// The pixel size of one block at the default zoom, and the height of every layer at vertical scale <c>1</c>. Blocks and layers are <c>cellSize * grid.verticalScale</c> pixels high.<br/>
+        /// 기본 배율에서 블록 하나의 픽셀 크기이자 세로 배율 <c>1</c>에서 모든 레이어의 높이입니다. 블록과 레이어의 높이는 <c>cellSize * grid.verticalScale</c> 픽셀입니다.
         /// </summary>
         public const float cellSize = 32;
 
@@ -93,6 +93,13 @@ namespace RuniOS.UIElements.NBS
             grid.AddToClassList(gridUssClassName);
             grid.panZoom.zoomModifier = EventModifiers.Control;
             grid.panZoom.verticalModifier = EventModifiers.None;
+            grid.panZoom.verticalZoomModifier = EventModifiers.Control | EventModifiers.Shift;
+
+            // Layers can only get lower than cellSize, as the blocks can only get narrower, and stay at least one pixel high.
+            grid.maximumVerticalScale = 1;
+            grid.minimumVerticalScale = 1 / cellSize;
+            grid.verticalScaleChanged += UpdateBlockHeights;
+
             grid.axis.maximumPixelsPerUnit = cellSize;
             grid.axis.pixelsPerUnit = cellSize;
             grid.axis.scales.Add(tickScale);
@@ -313,7 +320,7 @@ namespace RuniOS.UIElements.NBS
             if (!blockPool.TryPop(out NBSNoteBlockElement? block))
                 block = new NBSNoteBlockElement();
 
-            block.style.height = cellSize;
+            block.style.height = blockHeight;
             block.Bind(note, map!);
             block.SetTexture(textures[NBSNoteBlockElement.GetTextureIndex(note.instrument)]);
 
@@ -323,6 +330,29 @@ namespace RuniOS.UIElements.NBS
                 block.SetFlash(flash);
 
             return block;
+        }
+
+        // The grid never sets element heights, so blocks follow the vertical scale here.
+        float blockHeight => (float)(cellSize * grid.verticalScale);
+
+        // Blocks already on screen take the new height; blocks made later get it in MakeBlock.
+        // This runs on every wheel tick while zooming, so the tracks and items are walked by index instead of through enumerators.
+        void UpdateBlockHeights()
+        {
+            float height = blockHeight;
+            VisualElement trackContainer = grid.contentContainer;
+            for (int i = 0; i < trackContainer.childCount; i++)
+            {
+                if (trackContainer[i] is not GridTrack track)
+                    continue;
+
+                IReadOnlyList<GridItem> items = track.layer.visibleItems;
+                for (int j = 0; j < items.Count; j++)
+                {
+                    if (items[j].element is NBSNoteBlockElement block)
+                        block.style.height = height;
+                }
+            }
         }
 
         // Blocks already on screen take a texture that finishes loading after them.
