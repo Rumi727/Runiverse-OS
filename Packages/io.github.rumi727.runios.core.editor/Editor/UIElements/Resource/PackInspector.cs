@@ -33,6 +33,8 @@ namespace RuniOS.Editor.UIElements.Resource
         public const string footerButtonUssClassName = ussClassName + "__footer-button";
         public const string previewUssClassName = ussClassName + "__preview";
         public const string previewHeaderUssClassName = ussClassName + "__preview-header";
+        public const string previewTitleUssClassName = ussClassName + "__preview-title";
+        public const string previewSettingsUssClassName = ussClassName + "__preview-settings";
         public const string previewContentUssClassName = ussClassName + "__preview-content";
 
         // Unity의 ObjectPreview.DrawPreview와 같은 값입니다.
@@ -127,9 +129,11 @@ namespace RuniOS.Editor.UIElements.Resource
         public Button revert { get; }
 
         public VisualElement preview { get; }
-        public IMGUIContainer previewHeader { get; }
+        public Toolbar previewHeader { get; }
+        public Label previewTitle { get; }
 
         VisualElement? body;
+        VisualElement? previewSettings;
         VisualElement? previewContent;
 
         public PackInspector()
@@ -166,8 +170,15 @@ namespace RuniOS.Editor.UIElements.Resource
                 preview = new VisualElement { name = "preview" };
                 preview.AddToClassList(previewUssClassName);
                 {
-                    previewHeader = new IMGUIContainer(DrawPreviewHeader) { name = "preview-header" };
+                    previewHeader = new Toolbar { name = "preview-header" };
                     previewHeader.AddToClassList(previewHeaderUssClassName);
+                    {
+                        previewTitle = new Label { name = "preview-title" };
+                        previewTitle.AddToClassList(previewTitleUssClassName);
+                        previewHeader.Add(previewTitle);
+
+                        previewHeader.Add(new FlexibleSpace());
+                    }
                     preview.Add(previewHeader);
                 }
                 splitView.Add(preview);
@@ -189,6 +200,9 @@ namespace RuniOS.Editor.UIElements.Resource
             revert.text = GetTextOrKey("runios-editor:gui.revert");
 
             title.text = GetTitle();
+
+            if (previewSettings != null)
+                previewTitle.text = drawer?.GetPreviewTitle().text ?? string.Empty;
         }
 
         // 드로어나 디버그 모드가 바뀌면 본문과 미리보기를 새로 만듭니다.
@@ -197,10 +211,14 @@ namespace RuniOS.Editor.UIElements.Resource
             body?.RemoveFromHierarchy();
             body = null;
 
+            previewSettings?.RemoveFromHierarchy();
+            previewSettings = null;
+
             previewContent?.RemoveFromHierarchy();
             previewContent = null;
 
             title.text = GetTitle();
+            previewTitle.text = string.Empty;
 
             if (drawer == null)
             {
@@ -230,6 +248,16 @@ namespace RuniOS.Editor.UIElements.Resource
             // 대상이 여러 개면 Unity 인스펙터처럼 모든 대상을 IMGUI 격자로 그리며, 드로어의 UI Toolkit 미리보기는 대상이 하나일 때만 씁니다.
             if (drawer.HasPreviewGUI() && drawer.targets.Length > 0)
             {
+                previewTitle.text = drawer.GetPreviewTitle().text;
+
+                if (drawer.targets.Length == 1 && drawer.CreatePreviewSettings(drawer.targets[0]) is { } settings)
+                    previewSettings = settings;
+                else
+                    previewSettings = new IMGUIContainer(DrawPreviewSettings);
+
+                previewSettings.AddToClassList(previewSettingsUssClassName);
+                previewHeader.Add(previewSettings);
+
                 if (drawer.targets.Length == 1 && drawer.CreatePreview(drawer.targets[0]) is { } element)
                     previewContent = element;
                 else
@@ -273,7 +301,7 @@ namespace RuniOS.Editor.UIElements.Resource
         void Repaint()
         {
             body?.MarkDirtyRepaint();
-            previewHeader.MarkDirtyRepaint();
+            previewSettings?.MarkDirtyRepaint();
             previewContent?.MarkDirtyRepaint();
         }
 
@@ -319,18 +347,14 @@ namespace RuniOS.Editor.UIElements.Resource
             EndHierarchyMode();
         }
 
-        void DrawPreviewHeader()
+        // 제목과 배경은 UI Toolkit 헤더가 그리므로 드로어의 IMGUI 설정만 가로로 그립니다.
+        void DrawPreviewSettings()
         {
             if (drawer == null)
                 return;
 
-            EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-            {
-                GUILayout.Label(drawer.GetPreviewTitle(), EditorStyles.boldLabel);
-                GUILayout.FlexibleSpace();
-
-                drawer.OnPreviewSettings();
-            }
+            EditorGUILayout.BeginHorizontal();
+            drawer.OnPreviewSettings();
             EditorGUILayout.EndHorizontal();
         }
 

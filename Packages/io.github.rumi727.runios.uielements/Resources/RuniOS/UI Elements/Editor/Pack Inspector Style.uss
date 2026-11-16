@@ -21,3 +21,10 @@
     padding-right: 10px;
     padding-bottom: 5px;
 }
+
+.runios-pack-inspector__preview-title {
+    -unity-font-style: bold;
+    text-overflow: ellipsis;
+    padding-left: 4px;
+    padding-right: 4px;
+}

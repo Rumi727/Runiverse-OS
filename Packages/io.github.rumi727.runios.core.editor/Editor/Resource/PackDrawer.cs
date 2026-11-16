@@ -124,6 +124,23 @@ namespace RuniOS.Editor.Resource
         /// </returns>
         protected internal virtual VisualElement? CreatePreview(IONode node) => null;
 
+        /// <summary>
+        /// Creates the UI Toolkit element shown at the right of the preview header for <paramref name="node"/>. Return <see langword="null"/> to draw the header with <see cref="OnPreviewSettings"/> instead.<br/>
+        /// Like <see cref="CreatePreview"/>, this is used only when <see cref="HasPreviewGUI"/> returns <see langword="true"/> and there is a single target.
+        /// <br/><br/>
+        /// <paramref name="node"/>의 미리보기 헤더 오른쪽에 표시할 UI Toolkit 요소를 만듭니다. <see langword="null"/>을 반환하면 대신 <see cref="OnPreviewSettings"/>로 헤더를 그립니다.<br/>
+        /// <see cref="CreatePreview"/>처럼 <see cref="HasPreviewGUI"/>가 <see langword="true"/>를 반환하고 대상이 하나일 때만 사용합니다.
+        /// </summary>
+        /// <param name="node">
+        /// The target to preview.<br/>
+        /// 미리 볼 대상입니다.
+        /// </param>
+        /// <returns>
+        /// The element shown in the preview header, or <see langword="null"/> to use <see cref="OnPreviewSettings"/>.<br/>
+        /// 미리보기 헤더에 표시할 요소를 반환하고, <see cref="OnPreviewSettings"/>를 쓰려면 <see langword="null"/>을 반환합니다.
+        /// </returns>
+        protected internal virtual VisualElement? CreatePreviewSettings(IONode node) => null;
+
         protected static bool IsMatch(RuniPath path, string folderName, IPatternMatcher matcher)
         {
             if (!Regex.IsMatch(path.value, $"^assets/.*/{folderName}/.*", RegexOptions.CultureInvariant | RegexOptions.ExplicitCapture))

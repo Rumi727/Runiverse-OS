@@ -27,3 +27,15 @@
 .runios-pack-inspector__preview-content {
     flex-grow: 1;
 }
+
+.runios-pack-inspector__preview-title {
+    flex-shrink: 1;
+    -unity-text-align: middle-left;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.runios-pack-inspector__preview-settings {
+    flex-direction: row;
+    align-self: center;
+}
