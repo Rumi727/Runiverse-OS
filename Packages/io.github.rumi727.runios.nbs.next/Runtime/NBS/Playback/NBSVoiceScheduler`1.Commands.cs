@@ -119,7 +119,7 @@ namespace RuniOS.NBS
                 if (tempo == 0)
                     hasCursor = false;
                 else if (keepsSchedule && hasCursor)
-                    cursorClock = changeClock + ((cursorClock - changeClock) * previousTempo / tempo);
+                    cursorClock = changeClock + (((cursorClock - changeClock) * previousTempo) / tempo);
                 else
                 {
                     cursorClock = snapshot.clock;
@@ -164,7 +164,7 @@ namespace RuniOS.NBS
                         // The DSP clock keeps running while a channel is paused, so a pending stop point would fire during the pause.
                         if (voice.endClock != 0)
                         {
-                            voice.heldEndDistance = tempo > 0 ? ((double)voice.endClock - snapshot.clock) / snapshot.sampleRate * tempo : voice.heldEndDistance;
+                            voice.heldEndDistance = tempo > 0 ? (((double)voice.endClock - snapshot.clock) / snapshot.sampleRate) * tempo : voice.heldEndDistance;
                             voice.endClock = 0;
                             voice.channel.SetDelay(voice.startClock);
                         }
@@ -290,7 +290,7 @@ namespace RuniOS.NBS
                 return;
             }
 
-            double distance = ((double)voice.startClock - changeClock) / sampleRate * previousTempo;
+            double distance = (((double)voice.startClock - changeClock) / sampleRate) * previousTempo;
             voice.startClock = ToClock(changeClock + ((distance / tempo) * sampleRate));
             voice.endClock = stopped && placement.startsAtAttack
                 ? ToClock(voice.startClock + ((Math.Abs(placement.exit - voice.startPosition) / tempo) * sampleRate))
@@ -305,7 +305,7 @@ namespace RuniOS.NBS
             // The stop point is a fixed timeline position, so its remaining distance is kept while the clock time follows the tempo.
             double distance = double.IsFinite(voice.heldEndDistance)
                 ? voice.heldEndDistance
-                : voice.endClock != 0 && previousTempo > 0 ? ((double)voice.endClock - changeClock) / sampleRate * previousTempo : double.NaN;
+                : voice.endClock != 0 && previousTempo > 0 ? (((double)voice.endClock - changeClock) / sampleRate) * previousTempo : double.NaN;
 
             if (!double.IsFinite(distance))
                 return;

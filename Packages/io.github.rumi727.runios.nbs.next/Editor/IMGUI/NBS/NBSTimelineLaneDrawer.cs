@@ -73,9 +73,9 @@ namespace RuniOS.Editor.IMGUI.NBS
             HandleMarkerHover(stopperLane, source, map, length, false);
         }
 
-        static float TimeToX(Rect lane, double time, double length) => lane.x + (float)(time / length * lane.width);
+        static float TimeToX(Rect lane, double time, double length) => lane.x + (float)((time / length) * lane.width);
 
-        static double XToTime(Rect lane, float x, double length) => (x - lane.x) / lane.width * length;
+        static double XToTime(Rect lane, float x, double length) => ((x - lane.x) / lane.width) * length;
 
         static void DrawFileLoop(Rect position, NoteBlockSource source, NoteBlockClip clip, double length)
         {
@@ -151,7 +151,7 @@ namespace RuniOS.Editor.IMGUI.NBS
                 Color color = all ? stopperAllColor : stopperRangeColor;
                 color.a *= Math.Min(1, 0.55f + (0.15f * count));
                 float markHeight = all ? lane.height : lane.height * 0.6f;
-                EditorGUI.DrawRect(new Rect(lane.x + x - 0.5f, lane.yMax - markHeight, 2, markHeight), color);
+                EditorGUI.DrawRect(new Rect((lane.x + x) - 0.5f, lane.yMax - markHeight, 2, markHeight), color);
             }
         }
 
@@ -162,7 +162,7 @@ namespace RuniOS.Editor.IMGUI.NBS
                 return;
 
             double center = XToTime(lane, current.mousePosition.x, length);
-            double radius = hoverDistance / lane.width * length;
+            double radius = (hoverDistance / lane.width) * length;
             if (!(tempoLane ? TryFindTempoChange(map, center, radius, out string tooltip, out double time) : TryFindStopper(map, center, radius, out tooltip, out time)))
                 return;
 

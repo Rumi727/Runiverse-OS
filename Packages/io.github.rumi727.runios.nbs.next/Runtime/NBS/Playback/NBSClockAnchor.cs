@@ -43,7 +43,7 @@ namespace RuniOS.NBS
         /// The linear position in seconds; <see cref="time"/> when <paramref name="clock"/> is not after <see cref="dspClock"/>.<br/>
         /// 초 단위 선형 위치를 반환하며, <paramref name="clock"/>이 <see cref="dspClock"/> 이후가 아니면 <see cref="time"/>을 반환합니다.
         /// </returns>
-        public double GetTime(ulong clock, float tempo, int sampleRate) => clock <= dspClock ? time : time + ((clock - dspClock) / (double)sampleRate * tempo);
+        public double GetTime(ulong clock, float tempo, int sampleRate) => clock <= dspClock ? time : time + (((clock - dspClock) / (double)sampleRate) * tempo);
 
         /// <summary>
         /// Gets the first DSP clock that the mixer has not started to mix. A sound scheduled at or after it starts exactly at its sample.<br/>
