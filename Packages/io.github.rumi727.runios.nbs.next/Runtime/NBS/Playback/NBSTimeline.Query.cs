@@ -97,7 +97,7 @@ namespace RuniOS.NBS
             bool looping = loop is { } range && (forward ? position < range.end : position >= range.start);
 
             Domain domain = Domain.Create(loop, looping, forward, true);
-            QueryContaining(rate, loop, domain, position, position, 0, maximumLength, output);
+            QueryContaining(rate, domain, position, position, 0, maximumLength, output);
         }
 
         readonly record struct Window(NBSPlaybackRate rate, NBSLoopRange? loop, double from, bool includeFrom, double to, double maximumLength)
@@ -139,7 +139,7 @@ namespace RuniOS.NBS
             ReadOnlySpan<NBSMapNote> notes = map.notes.AsSpan();
             for (int i = map.FindNoteAtOrAfter(low - window.maximumLength); i < notes.Length && notes[i].time <= high + window.maximumLength; i++)
             {
-                if (!domain.Contains(notes[i].time) || !TryPlace(i, window.rate, window.loop, out NBSNotePlacement placement, out double length, out bool stopped))
+                if (!domain.Contains(notes[i].time) || !TryPlace(i, window.rate, out NBSNotePlacement placement, out double length, out bool stopped))
                     continue;
 
                 double entry = placement.entry;
@@ -152,12 +152,12 @@ namespace RuniOS.NBS
             }
         }
 
-        void QueryContaining(in NBSPlaybackRate rate, NBSLoopRange? loop, Domain domain, double point, double searchCenter, double distance, double maximumLength, List<NBSPlannedVoice> output)
+        void QueryContaining(in NBSPlaybackRate rate, Domain domain, double point, double searchCenter, double distance, double maximumLength, List<NBSPlannedVoice> output)
         {
             ReadOnlySpan<NBSMapNote> notes = map.notes.AsSpan();
             for (int i = map.FindNoteAtOrAfter(searchCenter - maximumLength); i < notes.Length && notes[i].time <= searchCenter + maximumLength; i++)
             {
-                if (!domain.Contains(notes[i].time) || !TryPlace(i, rate, loop, out NBSNotePlacement placement, out double length, out bool stopped))
+                if (!domain.Contains(notes[i].time) || !TryPlace(i, rate, out NBSNotePlacement placement, out double length, out bool stopped))
                     continue;
 
                 if (placement.low < point && point < placement.high)
@@ -165,7 +165,7 @@ namespace RuniOS.NBS
             }
         }
 
-        bool TryPlace(int mapIndex, in NBSPlaybackRate rate, NBSLoopRange? loop, out NBSNotePlacement placement, out double length, out bool stopped)
+        bool TryPlace(int mapIndex, in NBSPlaybackRate rate, out NBSNotePlacement placement, out double length, out bool stopped)
         {
             placement = default;
             stopped = false;
@@ -173,7 +173,7 @@ namespace RuniOS.NBS
             if (!IsAudible(mapIndex, rate))
                 return false;
 
-            length = GetLength(mapIndex, rate, loop, out stopped);
+            length = GetLength(mapIndex, rate, out stopped);
             if (!(length > 0))
                 return false;
 

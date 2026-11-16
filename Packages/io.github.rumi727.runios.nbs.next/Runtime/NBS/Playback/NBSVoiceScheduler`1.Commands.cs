@@ -106,7 +106,7 @@ namespace RuniOS.NBS
 
                         SetFrequency(voice, rate.pitch);
                         if (voice.startClock > snapshot.clock)
-                            RetimePendingVoice(voice, rate, loop, changeClock, snapshot.sampleRate, previousTempo, tempo);
+                            RetimePendingVoice(voice, rate, changeClock, snapshot.sampleRate, previousTempo, tempo);
                         else if (!paused)
                             RetimeStopPoint(voice, changeClock, snapshot.sampleRate, previousTempo, tempo);
                     }
@@ -272,9 +272,9 @@ namespace RuniOS.NBS
          * Its placement is computed again, because the sound position at the start and the stop point depend on the rate:
          * a sound shortened by a stopper starts at its cut point when reversed.
          */
-        void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, NBSLoopRange? loop, ulong changeClock, int sampleRate, double previousTempo, double tempo)
+        void RetimePendingVoice(Voice voice, in NBSPlaybackRate rate, ulong changeClock, int sampleRate, double previousTempo, double tempo)
         {
-            double length = timeline.GetLength(voice.mapIndex, rate, loop, out bool stopped);
+            double length = timeline.GetLength(voice.mapIndex, rate, out bool stopped);
             if (!(length > 0))
             {
                 StopVoice(voice);

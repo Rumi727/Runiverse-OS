@@ -163,10 +163,6 @@ namespace RuniOS.NBS
         /// The playback rate.<br/>
         /// 재생 속도입니다.
         /// </param>
-        /// <param name="loop">
-        /// The loop range, which lets stoppers after the loop start stop notes that ring across the loop end.<br/>
-        /// 반복 범위이며, 반복 끝을 넘어 울리는 노트를 반복 시작 이후의 Stopper가 멈추게 합니다.
-        /// </param>
         /// <param name="stopped">
         /// Whether a sound stopper shortens the sound.<br/>
         /// Sound Stopper가 소리를 줄였는지 여부입니다.
@@ -179,7 +175,7 @@ namespace RuniOS.NBS
         /// Stoppers are applied to the forward rendering of the song, as Note Block Studio plays it. Other directions play the same shortened sound.<br/>
         /// Stopper는 Note Block Studio가 재생하는 곡의 정방향 렌더링에 적용합니다. 다른 방향도 같은 줄어든 소리를 재생합니다.
         /// </remarks>
-        public double GetLength(int mapIndex, in NBSPlaybackRate rate, NBSLoopRange? loop, out bool stopped)
+        public double GetLength(int mapIndex, in NBSPlaybackRate rate, out bool stopped)
         {
             stopped = false;
             double length = rate.timelineScale * bases[mapIndex];
@@ -187,14 +183,7 @@ namespace RuniOS.NBS
                 return double.NaN;
 
             ref readonly NBSMapNote note = ref map.notes[mapIndex];
-            double stopTime = note.nextStopTime;
-            if (loop is { } range && note.time < range.end && stopTime >= range.end)
-            {
-                double wrappedStop = map.FindStopTimeAtOrAfter(note.layer, range.start);
-                stopTime = wrappedStop < range.end ? range.end + (wrappedStop - range.start) : double.PositiveInfinity;
-            }
-
-            double stopLength = stopTime - note.time;
+            double stopLength = note.nextStopTime - note.time;
             if (stopLength < length)
             {
                 stopped = true;
