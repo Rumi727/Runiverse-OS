@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.Editor.NBS;
+using RuniOS.Editor.Unity.Inspectors;
 using RuniOS.NBS;
 using RuniOS.Resource;
 
@@ -15,7 +16,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
     /// <see cref="NoteBlockClipImporterEditor"/>가 가져온 오브젝트를 표시하지 않고 미리보기 영역이 클립을 대신 보여주므로 인스펙터 본문은 비어 있습니다.
     /// </remarks>
     [CustomEditor(typeof(NoteBlockClip))]
-    public sealed class NoteBlockClipEditor : UnityEditor.Editor
+    public sealed class NoteBlockClipEditor : CustomInspectorBase<NoteBlockClip>
     {
         static GUIStyle overlayLabelStyle => _overlayLabelStyle ??= "PreOverlayLabel";
         static GUIStyle? _overlayLabelStyle;
@@ -27,13 +28,14 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         NBSPreviewTransport? preview;
         bool isCreatingPreview;
 
-        void OnEnable()
+        protected override void OnEnable()
         {
-            if (autoPlay && target is NoteBlockClip clip)
-                LoadAndPlay(clip).Forget();
+            base.OnEnable();
+            if (autoPlay && target != null)
+                LoadAndPlay(target).Forget();
         }
 
-        void OnDisable() => DisposePreview();
+        protected override void OnDisable() => DisposePreview();
 
         /// <inheritdoc/>
         public override void OnInspectorGUI() { }
@@ -44,7 +46,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         public override void OnPreviewSettings()
         {
-            if (target is not NoteBlockClip clip)
+            if (target == null)
                 return;
 
             // Without a loop the transport keeps running past the end, so the preview stops there.
@@ -57,7 +59,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 if (GUILayout.Toggle(isPlaying, EditorGUIUtility.IconContent("Play"), EditorStyles.toolbarButton) != isPlaying)
                 {
                     if (preview == null)
-                        LoadAndPlay(clip).Forget();
+                        LoadAndPlay(target).Forget();
                     else if (isPlaying)
                         preview.Stop();
                     else
@@ -70,7 +72,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             // The loop follows the file until the preview is loaded.
             using (new EditorGUI.DisabledScope(preview == null))
             {
-                bool loop = preview?.loop ?? clip.header.loop;
+                bool loop = preview?.loop ?? target.header.loop;
                 if (GUILayout.Toggle(loop, EditorGUIUtility.IconContent("preAudioLoopOff"), EditorStyles.toolbarButton) != loop)
                     preview!.loop = !loop;
             }
@@ -87,7 +89,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         public override void OnPreviewGUI(Rect r, GUIStyle background)
         {
-            if (target is not NoteBlockClip clip)
+            if (target == null)
                 return;
 
             if (Event.current.type == EventType.Repaint)
@@ -97,7 +99,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             labelRect.xMin += 3;
 
             BeginAlignment(TextAnchor.UpperLeft, overlayLabelStyle);
-            EditorGUI.DropShadowLabel(labelRect, GetHeaderText(clip));
+            EditorGUI.DropShadowLabel(labelRect, GetHeaderText(target));
             EndAlignment(overlayLabelStyle);
 
             if (preview is not { isPlaying: true } || !(preview.length > 0))
@@ -136,11 +138,11 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         public override string GetInfoString()
         {
-            if (target is not NoteBlockClip clip)
+            if (target == null)
                 return string.Empty;
 
-            NBSHeader header = clip.header;
-            NBSMap map = clip.map;
+            NBSHeader header = target.header;
+            NBSMap map = target.map;
 
             string loop = header.loop ? $"loop from tick {header.loopStartTick} · max {(header.maxLoopCount == 0 ? "∞" : header.maxLoopCount.ToString())}" : "no loop";
             return $"Format {header.version} · {TimeUtility.ToTimeString(map.length)} · {map.tickLength} ticks · {header.ticksPerSecond:0.##} TPS · {header.ticksPerSecond * 15:0.##} BPM · "
