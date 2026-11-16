@@ -7,8 +7,8 @@ using RuniOS.Tasks;
 namespace RuniOS.NBS
 {
     /// <summary>
-    /// Plays a <see cref="NoteBlockClip"/> on its own timeline, as <see cref="AudioSource"/> plays an <see cref="AudioClip"/>.<br/>
-    /// <see cref="AudioSource"/>가 <see cref="AudioClip"/>을 재생하듯 자기 타임라인에서 <see cref="NoteBlockClip"/>을 재생합니다.
+    /// Plays a <see cref="NoteBlockClip"/> on its own timeline, as AudioSource plays an AudioClip/>.<br/>
+    /// AudioSource가 AudioClip을 재생하듯 자기 타임라인에서 <see cref="NoteBlockClip"/>을 재생합니다.
     /// </summary>
     /// <remarks>
     /// <para>The source owns the timeline. The tempo sign sets the timeline direction and the pitch sign sets the sound direction.</para>
@@ -99,8 +99,8 @@ namespace RuniOS.NBS
         [SerializeField] NBSReversePitchAlignment _reversePitchAlignment;
 
         /// <summary>
-        /// Gets or sets whether the velocity is estimated from <see cref="Transform"/> changes when no <see cref="Rigidbody"/> or <see cref="Rigidbody2D"/> supplies it.<br/>
-        /// <see cref="Rigidbody"/>나 <see cref="Rigidbody2D"/>가 속도를 제공하지 않을 때 <see cref="Transform"/> 변화로 속도를 추정할지 가져오거나 설정합니다.
+        /// Gets or sets whether the velocity is estimated from <see cref="Transform"/> changes when no Rigidbody or Rigidbody2D supplies it.<br/>
+        /// Rigidbody나 Rigidbody2D가 속도를 제공하지 않을 때 <see cref="Transform"/> 변화로 속도를 추정할지 가져오거나 설정합니다.
         /// </summary>
         /// <remarks>
         /// While it is off and no physics body supplies the velocity, the velocity is zero.<br/>
