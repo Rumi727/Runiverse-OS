@@ -54,8 +54,14 @@ namespace RuniOS.NBS
         /// </summary>
         public const int vanillaKey = 45;
 
-        NBSInstrumentBank(IAssetScope<WaveAudioClip>?[] scopes) => this.scopes = scopes;
+        NBSInstrumentBank(ResourceKey?[] keys, IAssetScope<WaveAudioClip>?[] scopes)
+        {
+            this.keys = keys;
+            this.scopes = scopes;
+        }
 
+        // The keys are kept so that a sound which was missing at load, such as before the resource packs were loaded, can be found by IsSameTarget.
+        readonly ResourceKey?[] keys;
         readonly IAssetScope<WaveAudioClip>?[] scopes;
 
         /// <summary>
@@ -91,6 +97,7 @@ namespace RuniOS.NBS
             ArgumentNullException.ThrowIfNull(map);
 
             int count = NBSInstrument.vanillaCount + map.instruments.Length;
+            ResourceKey?[] keys = new ResourceKey?[count];
             IAssetScope<WaveAudioClip>?[] scopes = new IAssetScope<WaveAudioClip>?[count];
             bool[] used = new bool[count];
 
@@ -102,7 +109,7 @@ namespace RuniOS.NBS
                     used[instrument] = true;
             }
 
-            NBSInstrumentBank bank = new NBSInstrumentBank(scopes);
+            NBSInstrumentBank bank = new NBSInstrumentBank(keys, scopes);
             try
             {
                 for (int instrument = 0; instrument < count; instrument++)
@@ -110,6 +117,7 @@ namespace RuniOS.NBS
                     if (!used[instrument] || !TryGetResourceKey(map, instrument, nameSpace, out ResourceKey key))
                         continue;
 
+                    keys[instrument] = key;
                     scopes[instrument] = await ResourceManager.LoadScopeAsync<WaveAudioClip>(key);
                     cancellationToken.ThrowIfCancellationRequested();
                 }
@@ -136,6 +144,30 @@ namespace RuniOS.NBS
         /// 로드된 사운드를 반환하며, 악기가 무음이면 <see langword="null"/>을 반환합니다.
         /// </returns>
         public WaveAudioClip? GetClip(int instrument) => (uint)instrument < (uint)scopes.Length ? scopes[instrument]?.asset : null;
+
+        /// <summary>
+        /// Determines whether every instrument sound still resolves to the sound that this bank loaded.<br/>
+        /// 모든 악기 사운드가 여전히 이 bank가 로드한 사운드로 확인되는지 확인합니다.
+        /// </summary>
+        /// <returns>
+        /// <see langword="true"/> when every instrument resolves to the loaded sound, or is still missing when it was missing at load; otherwise, <see langword="false"/>.<br/>
+        /// 모든 악기가 로드한 사운드로 확인되거나, 로드할 때 없던 사운드가 여전히 없으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        public bool IsSameTarget()
+        {
+            for (int i = 0; i < keys.Length; i++)
+            {
+                if (keys[i] is not ResourceKey key)
+                    continue;
+
+                IAssetHandle? handle = ResourceManager.GetHandle(key);
+                IAssetScope<WaveAudioClip>? scope = scopes[i];
+                if (handle == null ? scope != null : scope == null || !scope.handle.IsSameTarget(handle))
+                    return false;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Gets the resource key that an instrument sound is loaded from.<br/>
