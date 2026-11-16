@@ -27,9 +27,20 @@
 }
 
 .runios-nbs-note-grid-view__layer-name {
+    flex-grow: 1;
     flex-shrink: 1;
     white-space: nowrap;
     overflow: hidden;
+}
+
+.runios-nbs-note-grid-view__layer-lock {
+    flex-shrink: 0;
+    align-items: center;
+}
+
+.runios-nbs-note-grid-view__layer-solo {
+    flex-shrink: 0;
+    -unity-text-align: middle-center;
 }
 
 .runios-nbs-note-grid-view__playhead {

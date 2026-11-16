@@ -238,6 +238,8 @@
   "inspector.nbs_player.visual_effects.inactive": "無効",
   "inspector.nbs_player.visual_effects.mixed": "混在する視覚効果",
   "inspector.nbs_player.visual_effects.song_saved": "曲を保存しました",
+  "inspector.nbs_player.layer.locked": "ロック: このレイヤーのノートは鳴りません。",
+  "inspector.nbs_player.layer.solo": "ソロ: ソロのレイヤーがあると、ソロのレイヤーだけが鳴ります。",
   "inspector.nbs_player.note_info.tick": "ティック",
   "inspector.nbs_player.note_info.layer": "レイヤー",
   "inspector.nbs_player.note_info.time": "時間",

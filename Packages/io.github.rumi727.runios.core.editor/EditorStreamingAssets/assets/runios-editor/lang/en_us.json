@@ -238,6 +238,8 @@
   "inspector.nbs_player.visual_effects.inactive": "Inactive",
   "inspector.nbs_player.visual_effects.mixed": "Mixed Visual Effects",
   "inspector.nbs_player.visual_effects.song_saved": "Song saved",
+  "inspector.nbs_player.layer.locked": "Locked: the notes of this layer are muted.",
+  "inspector.nbs_player.layer.solo": "Solo: while any layer is solo, only solo layers play.",
   "inspector.nbs_player.note_info.tick": "Tick",
   "inspector.nbs_player.note_info.layer": "Layer",
   "inspector.nbs_player.note_info.time": "Time",

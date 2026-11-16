@@ -31,8 +31,13 @@ namespace RuniOS.UIElements.NBS
         public const string layerHeaderUssClassName = ussClassName + "__layer-header";
         public const string layerHeaderLockedUssClassName = layerHeaderUssClassName + "--locked";
         public const string layerHeaderSoloUssClassName = layerHeaderUssClassName + "--solo";
+        public const string layerHeaderMutedUssClassName = layerHeaderUssClassName + "--muted";
         public const string layerNumberUssClassName = ussClassName + "__layer-number";
         public const string layerNameUssClassName = ussClassName + "__layer-name";
+        public const string layerLockUssClassName = ussClassName + "__layer-lock";
+        public const string layerLockShackleUssClassName = layerLockUssClassName + "-shackle";
+        public const string layerLockBodyUssClassName = layerLockUssClassName + "-body";
+        public const string layerSoloUssClassName = ussClassName + "__layer-solo";
         public const string notesUssClassName = ussClassName + "__notes";
         public const string mutedNotesUssClassName = notesUssClassName + "--muted";
         public const string playheadUssClassName = ussClassName + "__playhead";
@@ -202,12 +207,14 @@ namespace RuniOS.UIElements.NBS
                 releaseElement = (_, element) => blockPool.Push((NBSNoteBlockElement)element),
                 denseColor = static x => denseColors[NBSNoteBlockElement.GetTextureIndex(((NBSNoteGridItem)x).note.note.instrument)]
             };
+            bool audible = newMap.IsLayerAudible(layer);
             notesLayer.AddToClassList(notesUssClassName);
-            notesLayer.EnableInClassList(mutedNotesUssClassName, !newMap.IsLayerAudible(layer));
+            notesLayer.EnableInClassList(mutedNotesUssClassName, !audible);
             notesLayer.items.AddRange(items);
 
             GridTrack track = grid.AddTrack(notesLayer);
             track.header.AddToClassList(layerHeaderUssClassName);
+            track.header.EnableInClassList(layerHeaderMutedUssClassName, !audible);
 
             if (NBSStopperGuide.IsNeeded(newMap, layer))
             {
@@ -228,7 +235,48 @@ namespace RuniOS.UIElements.NBS
                 Label name = new(row.name) { name = "name" };
                 name.AddToClassList(layerNameUssClassName);
                 track.header.Add(name);
+
+                if (row.lockState == NBSLayerLock.locked)
+                    track.header.Add(CreateLockBadge());
+                else if (row.lockState == NBSLayerLock.solo)
+                    track.header.Add(CreateSoloBadge());
             }
+        }
+
+        // A padlock drawn from two elements, because there is no lock icon that runtime UI can load.
+        static VisualElement CreateLockBadge()
+        {
+            VisualElement badge = new() { name = "lock" };
+            badge.AddToClassList(layerLockUssClassName);
+            SetLayerBadgeTooltip(badge);
+
+            VisualElement shackle = new() { name = "shackle", pickingMode = PickingMode.Ignore };
+            shackle.AddToClassList(layerLockShackleUssClassName);
+            badge.Add(shackle);
+
+            VisualElement body = new() { name = "body", pickingMode = PickingMode.Ignore };
+            body.AddToClassList(layerLockBodyUssClassName);
+            badge.Add(body);
+
+            return badge;
+        }
+
+        static Label CreateSoloBadge()
+        {
+            Label badge = new("!") { name = "solo" };
+            badge.AddToClassList(layerSoloUssClassName);
+            SetLayerBadgeTooltip(badge);
+
+            return badge;
+        }
+
+        // Other header children are left as they are, so the language change can pass every child of a header here.
+        static void SetLayerBadgeTooltip(VisualElement element)
+        {
+            if (element.ClassListContains(layerLockUssClassName))
+                element.tooltip = LocalizationUtility.GetTextOrKey("runios-editor:inspector.nbs_player.layer.locked");
+            else if (element.ClassListContains(layerSoloUssClassName))
+                element.tooltip = LocalizationUtility.GetTextOrKey("runios-editor:inspector.nbs_player.layer.solo");
         }
 
         // Texts that were read from the language are read again. Blocks on screen are bound again, and setting the factory again makes the popup of the selection again.
@@ -240,6 +288,9 @@ namespace RuniOS.UIElements.NBS
             {
                 foreach (GridTrack track in grid.tracks)
                 {
+                    for (int i = 0; i < track.header.childCount; i++)
+                        SetLayerBadgeTooltip(track.header[i]);
+
                     foreach (GridItem item in track.layer.visibleItems)
                     {
                         if (item is NBSNoteGridItem noteItem && item.element is NBSNoteBlockElement block)

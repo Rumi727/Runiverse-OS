@@ -237,6 +237,8 @@
   "inspector.nbs_player.visual_effects.inactive": "비활성",
   "inspector.nbs_player.visual_effects.mixed": "혼합된 시각 효과",
   "inspector.nbs_player.visual_effects.song_saved": "노래가 저장되었습니다",
+  "inspector.nbs_player.layer.locked": "잠금: 이 레이어의 노트는 소리가 나지 않습니다.",
+  "inspector.nbs_player.layer.solo": "솔로: 솔로 레이어가 하나라도 있으면 솔로 레이어만 재생됩니다.",
   "inspector.nbs_player.note_info.tick": "틱",
   "inspector.nbs_player.note_info.layer": "레이어",
   "inspector.nbs_player.note_info.time": "시간",
