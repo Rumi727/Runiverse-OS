@@ -7,8 +7,8 @@ using UnityEngine.UIElements;
 
 namespace RuniOS.UIElements.NBS
 {
-    // The wall that Note Block Studio draws at each sound stopper over the layers it stops, for one layer of NBSNoteGridView.
-    // It sits in the track after the layer, so it is drawn over the block elements of the layer; NBSNoteGridView repaints it when the axis changes.
+    // The wall that Note Block Studio draws at each sound stopper over the layers it stops, over every row of NBSNoteGridView.
+    // It sits in the track after the layer, so it is drawn over the block elements of the layer; NBSNoteGridView repaints it when the axis changes, and a new vertical scale repaints it by changing its height.
     internal sealed class NBSStopperGuide : VisualElement
     {
         // The alpha of each pixel column of the wall: it fades in towards the left edge of the tick and ends in two opaque columns.
@@ -21,14 +21,14 @@ namespace RuniOS.UIElements.NBS
 
         readonly GridAxis axis;
         readonly ImmutableArray<NBSSoundStopper> stoppers;
-        readonly int layer;
+        readonly int layerCount;
         Color color = Color.black;
 
-        public NBSStopperGuide(GridAxis axis, NBSMap map, int layer, float left)
+        public NBSStopperGuide(GridAxis axis, NBSMap map, int layerCount, float left)
         {
             this.axis = axis;
             stoppers = map.stoppers;
-            this.layer = layer;
+            this.layerCount = layerCount;
 
             name = "stopper-guide";
             pickingMode = PickingMode.Ignore;
@@ -37,17 +37,6 @@ namespace RuniOS.UIElements.NBS
 
             generateVisualContent += Draw;
             RegisterCallback<CustomStyleResolvedEvent>(OnCustomStyleResolved);
-        }
-
-        public static bool IsNeeded(NBSMap map, int layer)
-        {
-            foreach (NBSSoundStopper stopper in map.stoppers)
-            {
-                if (stopper.Targets(layer))
-                    return true;
-            }
-
-            return false;
         }
 
         void OnCustomStyleResolved(CustomStyleResolvedEvent evt)
@@ -78,17 +67,33 @@ namespace RuniOS.UIElements.NBS
                     high = middle;
             }
 
-            float height = contentRect.height;
+            // The guide spans every row, so one row is an equal share of its height.
+            float rowHeight = contentRect.height / Math.Max(1, layerCount);
             rects.Clear();
             for (int i = low; i < stoppers.Length && stoppers[i].tick <= endTick; i++)
             {
-                if (!stoppers[i].Targets(layer))
-                    continue;
+                NBSSoundStopper stopper = stoppers[i];
 
                 // Note Block Studio draws the 16 pixel wall sprite with its origin at the tick minus one pixel; only its first eight pixels are not transparent.
-                float left = MathF.Round(axis.ToPixel(stoppers[i].tick)) - 1 - alphas.Length;
-                for (int column = 0; column < alphas.Length; column++)
-                    rects.Add((new Rect(left + column + 1, 0, 1, height), color with { a = alphas[column] / 255f }));
+                float left = MathF.Round(axis.ToPixel(stopper.tick)) - 1 - alphas.Length;
+
+                // Each run of stopped rows is one wall.
+                for (int start = 0; start < layerCount; start++)
+                {
+                    if (!stopper.Targets(start))
+                        continue;
+
+                    int end = start + 1;
+                    while (end < layerCount && stopper.Targets(end))
+                        end++;
+
+                    float top = start * rowHeight;
+                    float height = (end - start) * rowHeight;
+                    for (int column = 0; column < alphas.Length; column++)
+                        rects.Add((new Rect(left + column + 1, top, 1, height), color with { a = alphas[column] / 255f }));
+
+                    start = end;
+                }
             }
 
             context.DrawRects(CollectionsMarshal.AsSpan(rects));

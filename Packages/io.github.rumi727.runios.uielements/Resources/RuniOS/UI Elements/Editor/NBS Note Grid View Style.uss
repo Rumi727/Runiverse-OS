@@ -98,8 +98,13 @@
     -unity-font-style: bold;
 }
 
-.runios-nbs-note-grid-view__notes--muted {
-    opacity: 0.4;
+.runios-nbs-note-grid-view__notes {
+    --runios-nbs-muted-note-opacity: 0.4;
+}
+
+/* 블록은 레이어의 자식이므로 같은 변수를 상속받아, 사각형으로 그릴 때와 같은 불투명도를 씁니다. */
+.runios-nbs-note-block--muted {
+    opacity: var(--runios-nbs-muted-note-opacity);
 }
 
 .runios-nbs-note-grid-view__playhead {

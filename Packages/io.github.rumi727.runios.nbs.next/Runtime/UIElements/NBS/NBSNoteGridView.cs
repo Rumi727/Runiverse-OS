@@ -7,11 +7,11 @@ using UnityEngine.UIElements;
 namespace RuniOS.UIElements.NBS
 {
     /// <summary>
-    /// Shows every note of a <see cref="NoteBlockClip"/> in a read-only <see cref="GridView"/>, one track per layer and one column per tick, like Note Block Studio.<br/>
+    /// Shows every note of a <see cref="NoteBlockClip"/> in a read-only <see cref="GridView"/>, one row per layer and one column per tick, like Note Block Studio.<br/>
     /// <see cref="GridView.corner"/> shows the time and length of the song, the tempo, and the bar, beat, and tick of the playhead, or of the start while there is none.<br/>
     /// While <see cref="player"/> plays, it draws the playhead and scrolls as <see cref="followMode"/> says. Clicking a ruler seeks; dragging on it moves the playhead and seeks where the drag ends.
     /// <br/><br/>
-    /// <see cref="NoteBlockClip"/>의 모든 노트를 읽기 전용 <see cref="GridView"/>에 Note Block Studio처럼 레이어마다 트랙 하나, 틱마다 열 하나로 표시합니다.<br/>
+    /// <see cref="NoteBlockClip"/>의 모든 노트를 읽기 전용 <see cref="GridView"/>에 Note Block Studio처럼 레이어마다 행 하나, 틱마다 열 하나로 표시합니다.<br/>
     /// <see cref="GridView.corner"/>에는 플레이헤드 위치의 시간, 곡 길이, 템포, 마디·박·틱을 표시하며, 플레이헤드가 없으면 처음 위치를 표시합니다.<br/>
     /// <see cref="player"/>가 재생 중이면 플레이헤드를 그리고, <see cref="followMode"/>에 따라 스크롤합니다. 룰러를 클릭하면 재생 위치를 옮기고, 끌면 플레이헤드를 옮긴 뒤 끌기가 끝난 위치로 재생 위치를 옮깁니다.
     /// </summary>
@@ -39,7 +39,6 @@ namespace RuniOS.UIElements.NBS
         public const string layerLockBodyUssClassName = layerLockUssClassName + "-body";
         public const string layerSoloUssClassName = ussClassName + "__layer-solo";
         public const string notesUssClassName = ussClassName + "__notes";
-        public const string mutedNotesUssClassName = notesUssClassName + "--muted";
         public const string playheadUssClassName = ussClassName + "__playhead";
         public const string playheadMarkerUssClassName = ussClassName + "__playhead-marker";
         public const string effectOverlayUssClassName = ussClassName + "__effect-overlay";
@@ -53,13 +52,15 @@ namespace RuniOS.UIElements.NBS
         /// </summary>
         public const float cellSize = 32;
 
-        // Above this many visible notes in one layer, the layer draws rectangles instead of blocks.
-        const int maximumBlockCount = 128;
+        // Above this many visible notes, the notes are drawn as rectangles instead of blocks.
+        const int maximumBlockCount = 512;
 
-        // Below this many pixels per tick, which is the width of a block, the layers draw rectangles instead of blocks.
+        // Below this many pixels per tick, which is the width of a block, the notes are drawn as rectangles instead of blocks.
         const double minimumBlockPixelsPerTick = 4;
 
-        // The average colors of the block textures, used while a layer draws rectangles.
+        static readonly CustomStyleProperty<float> mutedNoteOpacityProperty = new("--runios-nbs-muted-note-opacity");
+
+        // The average colors of the block textures, used while the notes are drawn as rectangles.
         static readonly Color32[] denseColors =
         [
             new(0x00, 0x34, 0x67, 0xFF), new(0x19, 0x51, 0x20, 0xFF), new(0x73, 0x39, 0x3A, 0xFF), new(0x73, 0x73, 0x00, 0xFF),
@@ -79,10 +80,14 @@ namespace RuniOS.UIElements.NBS
         readonly NBSTempoGridScale tempoScale = new();
         readonly Texture2D?[] textures = new Texture2D?[NBSNoteBlockElement.textureCount];
         readonly Stack<NBSNoteBlockElement> blockPool = new();
-        readonly List<NBSStopperGuide> stopperGuides = new();
         readonly Func<GridSelection, VisualElement?> noteInfoPopupFactory;
 
         NBSMap? map;
+        PlaneGridLayer? notesLayer;
+        NBSStopperGuide? stopperGuide;
+
+        // The opacity of the rectangles of muted layers, from USS, like the opacity that the muted class gives the blocks.
+        float mutedNoteOpacity = 1;
 
         /// <summary>
         /// Initializes an empty view.<br/>
@@ -112,11 +117,7 @@ namespace RuniOS.UIElements.NBS
             grid.AddRuler(tempoScale);
             Add(grid);
 
-            grid.axis.changed += () =>
-            {
-                foreach (NBSStopperGuide guide in stopperGuides)
-                    guide.MarkDirtyRepaint();
-            };
+            grid.axis.changed += () => stopperGuide?.MarkDirtyRepaint();
 
             noteInfoPopupFactory = selection => map != null ? NBSNoteInfoPopup.Create(map, selection) : null;
             grid.makeSelectionPopup = noteInfoPopupFactory;
@@ -169,7 +170,8 @@ namespace RuniOS.UIElements.NBS
 
             grid.Clear();
             blockPool.Clear();
-            stopperGuides.Clear();
+            notesLayer = null;
+            stopperGuide = null;
             noteFlash.Clear();
             ResetPlayback();
             ResetTimeDisplay(newMap);
@@ -189,73 +191,72 @@ namespace RuniOS.UIElements.NBS
             foreach (ref readonly NBSMapNote note in newMap.notes)
                 layerCount = Math.Max(layerCount, note.layer + 1);
 
-            for (int layer = 0; layer < layerCount; layer++)
-                AddLayer(newMap, layer);
+            PlaneGridItem[] items = new PlaneGridItem[newMap.notes.Count];
+            int index = 0;
+            foreach (ref readonly NBSMapNote note in newMap.notes)
+            {
+                NBSNoteGridItem item = new(note) { start = note.tick, top = note.layer };
+                items[index++] = item;
+                noteFlash.Add(item);
+            }
 
             noteFlash.Sort();
+
+            notesLayer = new PlaneGridLayer
+            {
+                unitHeight = cellSize,
+                verticalLength = layerCount,
+                maximumElementCount = maximumBlockCount,
+                minimumElementPixelsPerUnit = minimumBlockPixelsPerTick,
+                makeElement = MakeBlock,
+                releaseElement = (_, element) => blockPool.Push((NBSNoteBlockElement)element),
+                denseColor = GetDenseColor,
+                makeRowHeader = MakeLayerHeader
+            };
+            notesLayer.AddToClassList(notesUssClassName);
+            notesLayer.RegisterCallback<CustomStyleResolvedEvent>(OnNotesStyleResolved);
+            notesLayer.items.AddRange(items);
+
+            GridTrack track = grid.AddTrack(notesLayer);
+            if (newMap.stoppers.Length > 0)
+            {
+                stopperGuide = new NBSStopperGuide(grid.axis, newMap, layerCount, grid.headerWidth);
+                track.hierarchy.Add(stopperGuide);
+            }
 
             grid.axis.scrollRange = new GridRange(0, songLength);
             grid.axis.SetView(0, grid.axis.pixelsPerUnit);
             grid.ScheduleRefresh();
         }
 
-        void AddLayer(NBSMap newMap, int layer)
+        VisualElement MakeLayerHeader(int layer)
         {
-            NBSMap.LayerEnumerator notes = newMap.GetLayerNotes(layer);
-            PlaneGridItem[] items = new PlaneGridItem[notes.count];
+            NBSMap currentMap = map!;
 
-            int index = 0;
-            foreach (ref readonly NBSMapNote note in notes)
-            {
-                NBSNoteGridItem item = new(note) { start = note.tick };
-                items[index++] = item;
-                noteFlash.Add(item);
-            }
-
-            PlaneGridLayer notesLayer = new()
-            {
-                unitHeight = cellSize,
-                verticalLength = 1,
-                maximumElementCount = maximumBlockCount,
-                minimumElementPixelsPerUnit = minimumBlockPixelsPerTick,
-                makeElement = MakeBlock,
-                releaseElement = (_, element) => blockPool.Push((NBSNoteBlockElement)element),
-                denseColor = static x => denseColors[NBSNoteBlockElement.GetTextureIndex(((NBSNoteGridItem)x).note.note.instrument)]
-            };
-            bool audible = newMap.IsLayerAudible(layer);
-            notesLayer.AddToClassList(notesUssClassName);
-            notesLayer.EnableInClassList(mutedNotesUssClassName, !audible);
-            notesLayer.items.AddRange(items);
-
-            GridTrack track = grid.AddTrack(notesLayer);
-            track.header.AddToClassList(layerHeaderUssClassName);
-            track.header.EnableInClassList(layerHeaderMutedUssClassName, !audible);
-
-            if (NBSStopperGuide.IsNeeded(newMap, layer))
-            {
-                NBSStopperGuide guide = new(grid.axis, newMap, layer, grid.headerWidth);
-                track.hierarchy.Add(guide);
-                stopperGuides.Add(guide);
-            }
+            VisualElement header = new() { name = "layer-header" };
+            header.AddToClassList(layerHeaderUssClassName);
+            header.EnableInClassList(layerHeaderMutedUssClassName, !currentMap.IsLayerAudible(layer));
 
             Label number = new((layer + 1).ToString()) { name = "number" };
             number.AddToClassList(layerNumberUssClassName);
-            track.header.Add(number);
+            header.Add(number);
 
-            if (newMap.TryGetLayer(layer, out NBSLayer row))
+            if (currentMap.TryGetLayer(layer, out NBSLayer row))
             {
-                track.header.EnableInClassList(layerHeaderLockedUssClassName, row.lockState == NBSLayerLock.locked);
-                track.header.EnableInClassList(layerHeaderSoloUssClassName, row.lockState == NBSLayerLock.solo);
+                header.EnableInClassList(layerHeaderLockedUssClassName, row.lockState == NBSLayerLock.locked);
+                header.EnableInClassList(layerHeaderSoloUssClassName, row.lockState == NBSLayerLock.solo);
 
                 Label name = new(row.name) { name = "name" };
                 name.AddToClassList(layerNameUssClassName);
-                track.header.Add(name);
+                header.Add(name);
 
                 if (row.lockState == NBSLayerLock.locked)
-                    track.header.Add(CreateLockBadge());
+                    header.Add(CreateLockBadge());
                 else if (row.lockState == NBSLayerLock.solo)
-                    track.header.Add(CreateSoloBadge());
+                    header.Add(CreateSoloBadge());
             }
+
+            return header;
         }
 
         // A padlock drawn from two elements, because there is no lock icon that runtime UI can load.
@@ -299,18 +300,18 @@ namespace RuniOS.UIElements.NBS
         {
             effectOverlay.RefreshText();
 
-            if (map != null)
+            if (map != null && notesLayer != null)
             {
-                foreach (GridTrack track in grid.tracks)
+                foreach (VisualElement header in notesLayer.rowHeaders)
                 {
-                    for (int i = 0; i < track.header.childCount; i++)
-                        SetLayerBadgeTooltip(track.header[i]);
+                    for (int i = 0; i < header.childCount; i++)
+                        SetLayerBadgeTooltip(header[i]);
+                }
 
-                    foreach (GridItem item in track.layer.visibleItems)
-                    {
-                        if (item is NBSNoteGridItem noteItem && item.element is NBSNoteBlockElement block)
-                            block.Bind(noteItem.note.note, map);
-                    }
+                foreach (GridItem item in notesLayer.visibleItems)
+                {
+                    if (item is NBSNoteGridItem noteItem && item.element is NBSNoteBlockElement block)
+                        block.Bind(noteItem.note.note, map);
                 }
             }
 
@@ -321,12 +322,18 @@ namespace RuniOS.UIElements.NBS
         {
             NBSNoteGridItem noteItem = (NBSNoteGridItem)item;
             NBSNote note = noteItem.note.note;
+            NBSMap currentMap = map!;
 
             if (!blockPool.TryPop(out NBSNoteBlockElement? block))
                 block = new NBSNoteBlockElement();
 
+            // Blocks are pooled, so the classes of the layer are set on every reuse.
+            int layer = noteItem.note.layer;
+            block.EnableInClassList(NBSNoteBlockElement.mutedUssClassName, !currentMap.IsLayerAudible(layer));
+            block.EnableInClassList(NBSNoteBlockElement.lockedUssClassName, currentMap.TryGetLayer(layer, out NBSLayer row) && row.lockState == NBSLayerLock.locked);
+
             block.style.height = blockHeight;
-            block.Bind(note, map!);
+            block.Bind(note, currentMap);
             block.SetTexture(textures[NBSNoteBlockElement.GetTextureIndex(note.instrument)]);
 
             // A block made for a note that played a moment ago continues its flash.
@@ -337,26 +344,38 @@ namespace RuniOS.UIElements.NBS
             return block;
         }
 
+        Color GetDenseColor(PlaneGridItem item)
+        {
+            NBSMapNote note = ((NBSNoteGridItem)item).note;
+            Color color = denseColors[NBSNoteBlockElement.GetTextureIndex(note.note.instrument)];
+            return map!.IsLayerAudible(note.layer) ? color : color with { a = color.a * mutedNoteOpacity };
+        }
+
+        void OnNotesStyleResolved(CustomStyleResolvedEvent evt)
+        {
+            if (evt.customStyle.TryGetValue(mutedNoteOpacityProperty, out float opacity))
+            {
+                mutedNoteOpacity = opacity;
+                notesLayer?.MarkDirtyRepaint();
+            }
+        }
+
         // The grid never sets element heights, so blocks follow the vertical scale here.
         float blockHeight => (float)(cellSize * grid.verticalScale);
 
         // Blocks already on screen take the new height; blocks made later get it in MakeBlock.
-        // This runs on every wheel tick while zooming, so the tracks and items are walked by index instead of through enumerators.
+        // This runs on every wheel tick while zooming, so the items are walked by index instead of through an enumerator.
         void UpdateBlockHeights()
         {
-            float height = blockHeight;
-            VisualElement trackContainer = grid.contentContainer;
-            for (int i = 0; i < trackContainer.childCount; i++)
-            {
-                if (trackContainer[i] is not GridTrack track)
-                    continue;
+            if (notesLayer == null)
+                return;
 
-                IReadOnlyList<GridItem> items = track.layer.visibleItems;
-                for (int j = 0; j < items.Count; j++)
-                {
-                    if (items[j].element is NBSNoteBlockElement block)
-                        block.style.height = height;
-                }
+            float height = blockHeight;
+            IReadOnlyList<GridItem> items = notesLayer.visibleItems;
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].element is NBSNoteBlockElement block)
+                    block.style.height = height;
             }
         }
 
@@ -364,14 +383,13 @@ namespace RuniOS.UIElements.NBS
         void SetTexture(int index, Texture2D? texture)
         {
             textures[index] = texture;
+            if (notesLayer == null)
+                return;
 
-            foreach (GridTrack track in grid.tracks)
+            foreach (GridItem item in notesLayer.visibleItems)
             {
-                foreach (GridItem item in track.layer.visibleItems)
-                {
-                    if (item is NBSNoteGridItem noteItem && item.element is NBSNoteBlockElement block && NBSNoteBlockElement.GetTextureIndex(noteItem.note.note.instrument) == index)
-                        block.SetTexture(texture);
-                }
+                if (item is NBSNoteGridItem noteItem && item.element is NBSNoteBlockElement block && NBSNoteBlockElement.GetTextureIndex(noteItem.note.note.instrument) == index)
+                    block.SetTexture(texture);
             }
         }
     }

@@ -16,6 +16,8 @@ namespace RuniOS.UIElements.NBS
         public const string tintUpUssClassName = tintUssClassName + "--up";
         public const string keyUssClassName = ussClassName + "__key";
         public const string valueUssClassName = ussClassName + "__value";
+        public const string mutedUssClassName = ussClassName + "--muted";
+        public const string lockedUssClassName = ussClassName + "--locked";
 
         /// <summary>
         /// The number of block textures. Built-in instruments use their own index, and custom instruments repeat the remaining textures.<br/>
