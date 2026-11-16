@@ -20,7 +20,21 @@ namespace RuniOS.UIElements.NBS
         /// Gets or sets the tempo map to label, or <see langword="null"/> to label nothing. The initial tempo is not a change, so it gets no label.<br/>
         /// 표시할 템포 맵을 가져오거나 설정하며, 아무것도 표시하지 않으려면 <see langword="null"/>입니다. 초기 템포는 변경이 아니므로 라벨이 없습니다.
         /// </summary>
-        public NBSTempoMap? tempo { get; set; }
+        public NBSTempoMap? tempo
+        {
+            get;
+            set
+            {
+                field = value;
+
+                // The rulers repaint every frame while playing, so the labels are made once here.
+                labels = new string[value?.changes.Length ?? 0];
+                for (int i = 1; i < labels.Length; i++)
+                    labels[i] = $"BPM = {value!.changes[i].beatsPerMinute:0.##}";
+            }
+        }
+
+        string[] labels = [];
 
         /// <inheritdoc/>
         public override void GetLines(GridRange range, double pixelsPerUnit, bool includeLabels, List<GridLine> lines)
@@ -43,7 +57,7 @@ namespace RuniOS.UIElements.NBS
             }
 
             for (int i = low; i < changes.Length && changes[i].tick <= range.end; i++)
-                lines.Add(new GridLine(changes[i].tick, 1, $"BPM = {changes[i].beatsPerMinute:0.##}"));
+                lines.Add(new GridLine(changes[i].tick, 1, labels[i]));
         }
     }
 }

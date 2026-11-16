@@ -16,6 +16,9 @@ namespace RuniOS.UIElements.NBS
         public const string nameUssClassName = ussClassName + "__name";
         public const string valueUssClassName = ussClassName + "__value";
 
+        // The values that a popup for several notes shows as a range, by their key in the language.
+        static readonly string[] summaryKeys = ["tick", "layer", "key", "velocity", "panning", "pitch"];
+
         /// <summary>
         /// Makes the popup content for <paramref name="selection"/>, or <see langword="null"/> when it holds no note.<br/>
         /// <paramref name="selection"/>의 팝업 내용을 만들며, 노트가 없으면 <see langword="null"/>입니다.
@@ -30,26 +33,57 @@ namespace RuniOS.UIElements.NBS
         /// </param>
         public static VisualElement? Create(NBSMap map, GridSelection selection)
         {
-            List<NBSMapNote> notes = [];
+            // One pass over the selection finds the number of notes, the first note, and the range of every summarized value.
+            int count = 0;
+            NBSMapNote first = default;
+            Span<int> minimums = stackalloc int[summaryKeys.Length];
+            Span<int> maximums = stackalloc int[summaryKeys.Length];
+            minimums.Fill(int.MaxValue);
+            maximums.Fill(int.MinValue);
+
             foreach (GridItem item in selection)
             {
-                if (item is NBSNoteGridItem noteItem)
-                    notes.Add(noteItem.note);
+                if (item is not NBSNoteGridItem noteItem)
+                    continue;
+
+                if (count++ == 0)
+                    first = noteItem.note;
+
+                for (int i = 0; i < summaryKeys.Length; i++)
+                {
+                    int value = GetSummaryValue(noteItem.note, i);
+                    minimums[i] = Math.Min(minimums[i], value);
+                    maximums[i] = Math.Max(maximums[i], value);
+                }
             }
 
-            if (notes.Count == 0)
+            if (count == 0)
                 return null;
 
             VisualElement content = new();
             content.AddToClassList(ussClassName);
 
-            if (notes.Count == 1)
-                AddNote(content, map, notes[0]);
+            if (count == 1)
+                AddNote(content, map, first);
             else
-                AddSummary(content, notes);
+            {
+                AddRow(content, "notes", count.ToString());
+                for (int i = 0; i < summaryKeys.Length; i++)
+                    AddRow(content, summaryKeys[i], minimums[i] == maximums[i] ? minimums[i].ToString() : $"{minimums[i]} ~ {maximums[i]}");
+            }
 
             return content;
         }
+
+        static int GetSummaryValue(in NBSMapNote mapNote, int index) => index switch
+        {
+            0 => mapNote.note.tick,
+            1 => mapNote.note.layer + 1,
+            2 => mapNote.note.key,
+            3 => mapNote.note.velocity,
+            4 => mapNote.note.panning - 100,
+            _ => mapNote.note.pitch
+        };
 
         static void AddNote(VisualElement content, NBSMap map, in NBSMapNote mapNote)
         {
@@ -96,32 +130,6 @@ namespace RuniOS.UIElements.NBS
             AddRow(content, "velocity", note.velocity.ToString());
             AddRow(content, "panning", GetPanningString(note.panning));
             AddRow(content, "pitch", note.pitch.ToString());
-        }
-
-        static void AddSummary(VisualElement content, List<NBSMapNote> notes)
-        {
-            AddRow(content, "notes", notes.Count.ToString());
-
-            AddRange(content, "tick", notes, static x => x.note.tick);
-            AddRange(content, "layer", notes, static x => x.note.layer + 1);
-            AddRange(content, "key", notes, static x => x.note.key);
-            AddRange(content, "velocity", notes, static x => x.note.velocity);
-            AddRange(content, "panning", notes, static x => x.note.panning - 100);
-            AddRange(content, "pitch", notes, static x => x.note.pitch);
-        }
-
-        static void AddRange(VisualElement content, string key, List<NBSMapNote> notes, Func<NBSMapNote, int> selector)
-        {
-            int min = int.MaxValue;
-            int max = int.MinValue;
-            foreach (NBSMapNote note in notes)
-            {
-                int value = selector(note);
-                min = Math.Min(min, value);
-                max = Math.Max(max, value);
-            }
-
-            AddRow(content, key, min == max ? min.ToString() : $"{min} ~ {max}");
         }
 
         // Note Block Studio stores the pan from 0 (left) to 200 (right), and 100 is the center.

@@ -31,6 +31,9 @@ namespace RuniOS.Editor.UIElements.NBS
         readonly Image followIcon;
         readonly Slider volume;
 
+        // The volume the tooltip shows, or -1 when the tooltip must be made again.
+        int shownVolume = -1;
+
         /// <summary>
         /// Initializes the controls for clips played by <paramref name="preview"/>.<br/>
         /// <paramref name="preview"/>가 재생하는 클립의 컨트롤을 초기화합니다.
@@ -107,6 +110,7 @@ namespace RuniOS.Editor.UIElements.NBS
             autoPlay.tooltip = GetTextOrKey("runios-editor:gui.auto_play");
             loop.tooltip = GetTextOrKey("runios-editor:gui.loop");
             follow.tooltip = GetTextOrKey("runios-editor:gui.follow");
+            shownVolume = -1;
 
             follow.menu.ClearItems();
             AddFollowItem(NBSFollowMode.none, "runios-editor:gui.follow.none");
@@ -140,7 +144,14 @@ namespace RuniOS.Editor.UIElements.NBS
             followIcon.image = EditorGUIUtility.IconContent(NBSNoteGridView.followMode == NBSFollowMode.none ? "Unlinked" : "Linked").image;
 
             volume.SetValueWithoutNotify(NBSPreview.globalVolume);
-            volume.tooltip = $"{GetTextOrKey("runios-editor:gui.volume")}: {(NBSPreview.globalVolume * 100).Floor()}";
+
+            // Update runs every frame, so the tooltip string is made only when the volume it shows changes.
+            int shown = (int)(NBSPreview.globalVolume * 100).Floor();
+            if (shown != shownVolume)
+            {
+                shownVolume = shown;
+                volume.tooltip = $"{GetTextOrKey("runios-editor:gui.volume")}: {shown}";
+            }
         }
     }
 }
