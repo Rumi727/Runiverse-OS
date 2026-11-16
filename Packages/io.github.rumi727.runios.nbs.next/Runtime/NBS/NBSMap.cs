@@ -37,11 +37,11 @@ namespace RuniOS.NBS
         /// The custom instruments.<br/>
         /// 커스텀 악기입니다.
         /// </param>
-        public NBSMap(NBSHeader header, ReadOnlySpan<NBSNote> notes, ReadOnlySpan<NBSLayer> layers, ReadOnlySpan<NBSInstrument> instruments)
+        public NBSMap(NBSHeader header, scoped ReadOnlySpan<NBSNote> notes, scoped ReadOnlySpan<NBSLayer> layers, scoped ReadOnlySpan<NBSInstrument> instruments)
         {
             this.header = header;
-            this.layers = ImmutableArray.Create(layers);
-            this.instruments = ImmutableArray.Create(instruments);
+            this.layers = [..layers];
+            this.instruments = [..instruments];
 
             functions = new NBSInstrumentFunction[instruments.Length];
             for (int i = 0; i < instruments.Length; i++)
