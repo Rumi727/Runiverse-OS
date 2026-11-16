@@ -22,6 +22,33 @@
     bottom: 0;
 }
 
+.runios-nbs-note-grid-view__playhead-marker {
+    position: absolute;
+    top: 0;
+}
+
+.runios-nbs-note-grid-view__stopper-guide {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    overflow: hidden;
+}
+
+.runios-nbs-note-grid-view__accent {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.runios-nbs-note-grid-view__save-popup {
+    position: absolute;
+    left: 50%;
+    white-space: nowrap;
+}
+
 .runios-nbs-note-block {
     overflow: hidden;
 }
@@ -68,4 +95,13 @@
 .runios-nbs-preview-toolbar__time {
     -unity-text-align: middle-right;
     white-space: nowrap;
+}
+
+.runios-nbs-note-info__row {
+    flex-direction: row;
+}
+
+.runios-nbs-note-info__value {
+    flex-shrink: 1;
+    white-space: normal;
 }

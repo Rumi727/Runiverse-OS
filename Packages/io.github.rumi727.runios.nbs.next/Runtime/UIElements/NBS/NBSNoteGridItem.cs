@@ -20,6 +20,9 @@ namespace RuniOS.UIElements.NBS
         /// </summary>
         public NBSMapNote note { get; } = note;
 
+        // The real time the note played at while the view plays, for the flash of its block.
+        internal double playedAt = double.NegativeInfinity;
+
         /// <inheritdoc/>
         public override float GetWidth(GridAxis axis) => (float)axis.pixelsPerUnit;
     }

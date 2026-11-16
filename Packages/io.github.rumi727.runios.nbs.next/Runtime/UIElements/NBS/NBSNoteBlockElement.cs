@@ -33,6 +33,8 @@ namespace RuniOS.UIElements.NBS
         readonly Label key;
         readonly Label value;
 
+        float baseAlpha;
+
         /// <summary>
         /// Initializes an empty block.<br/>
         /// 빈 블록을 초기화합니다.
@@ -54,6 +56,16 @@ namespace RuniOS.UIElements.NBS
             value.AddToClassList(valueUssClassName);
             Add(value);
         }
+
+        /// <summary>
+        /// Gets the name of a key as Note Block Studio shows it, such as <c>F#3</c>. Key 0 is A0.<br/>
+        /// Note Block Studio가 표시하는 키 이름을 가져옵니다(예: <c>F#3</c>). 키 0은 A0입니다.
+        /// </summary>
+        /// <param name="key">
+        /// The key of a note.<br/>
+        /// 노트의 키입니다.
+        /// </param>
+        public static string GetKeyName(int key) => keyNames[key % keyNames.Length] + ((key + 9) / keyNames.Length);
 
         /// <summary>
         /// Gets the index of the block texture for an instrument.<br/>
@@ -90,22 +102,44 @@ namespace RuniOS.UIElements.NBS
         public void Bind(in NBSNote note, NBSMap map)
         {
             float alpha = 0.25f + (0.5f * note.velocity / 100f);
+            baseAlpha = alpha;
             style.unityBackgroundImageTintColor = new Color(1, 1, 1, alpha);
 
             tint.EnableInClassList(tintDownUssClassName, note.pitch < 0);
             tint.EnableInClassList(tintUpUssClassName, note.pitch > 0);
             tint.style.opacity = Math.Min(0.5f, Math.Abs(note.pitch) / 100f * alpha * 0.25f);
 
-            key.text = keyNames[note.key % keyNames.Length] + ((note.key + 9) / keyNames.Length);
+            key.text = GetKeyName(note.key);
             value.text = map.GetFunction(note.instrument) switch
             {
                 NBSInstrumentFunction.tempoChanger => $"{Math.Abs((int)note.pitch)} BPM",
+                NBSInstrumentFunction.soundStopper => GetStopperTargets(note),
                 NBSInstrumentFunction.none when note.key < lowestBlockKey => "<",
                 NBSInstrumentFunction.none when note.key > highestBlockKey => ">",
                 NBSInstrumentFunction.none => (note.key - lowestBlockKey).ToString(),
                 _ => string.Empty
             };
         }
+
+        // A sound stopper stores the layers it stops in its pitch, pan, and volume, which Note Block Studio shows as a range. No start layer means every layer, and an end before the start means none.
+        static string GetStopperTargets(in NBSNote note)
+        {
+            NBSSoundStopper stopper = NBSSoundStopper.FromNote(0, note, 0);
+            if (stopper.startLayer == 0)
+                return LocalizationUtility.GetTextOrKey("runios-editor:inspector.nbs_player.note_info.stopper_all");
+
+            return stopper.endLayer < stopper.startLayer ? LocalizationUtility.GetTextOrKey("runios-editor:inspector.nbs_player.note_info.stopper_off") : $"{stopper.startLayer}-{stopper.endLayer}";
+        }
+
+        /// <summary>
+        /// Adds up to <c>0.5</c> to the alpha of the block, like a note that has just played in Note Block Studio. The alpha never exceeds <c>1</c>.<br/>
+        /// 방금 재생된 Note Block Studio의 노트처럼 블록의 알파에 최대 <c>0.5</c>를 더합니다. 알파는 <c>1</c>을 넘지 않습니다.
+        /// </summary>
+        /// <param name="amount">
+        /// <c>0</c> shows the alpha of the note and <c>1</c> adds the whole <c>0.5</c>.<br/>
+        /// <c>0</c>이면 노트의 알파를 표시하고, <c>1</c>이면 <c>0.5</c>를 모두 더합니다.
+        /// </param>
+        public void SetFlash(float amount) => style.unityBackgroundImageTintColor = new Color(1, 1, 1, Math.Min(1, baseAlpha + (0.5f * amount)));
 
         /// <summary>
         /// Sets the block texture, or clears it with <see langword="null"/>.<br/>

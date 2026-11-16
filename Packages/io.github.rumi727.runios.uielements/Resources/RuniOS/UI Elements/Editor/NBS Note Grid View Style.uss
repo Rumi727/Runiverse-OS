@@ -1,3 +1,7 @@
+.runios-nbs-note-grid-view {
+    --runios-nbs-stopper-guide-color: var(--unity-colors-label-text);
+}
+
 .runios-nbs-note-grid-view__layer-header {
     padding-left: 4px;
     padding-right: 4px;
@@ -31,6 +35,27 @@
 .runios-nbs-note-grid-view__playhead {
     width: 2px;
     background-color: rgb(255, 255, 255);
+}
+
+.runios-nbs-note-grid-view__playhead-marker {
+    left: -5px;
+    width: 12px;
+    height: 10px;
+}
+
+.runios-nbs-note-grid-view__save-popup {
+    top: 80%;
+    translate: -50% -100%;
+    height: 40px;
+    padding: 0 10px;
+    border-width: 1px;
+    border-radius: 4px;
+    border-color: var(--unity-colors-default-border);
+    background-color: var(--unity-colors-window-background);
+    color: var(--unity-colors-label-text);
+    font-size: 15px;
+    -unity-font-style: bold;
+    -unity-text-align: middle-center;
 }
 
 .runios-nbs-note-block__tint--down {
@@ -69,4 +94,14 @@
     width: 75px;
     margin-left: 4px;
     margin-right: 4px;
+}
+
+.runios-nbs-note-info {
+    padding: 4px 8px;
+}
+
+.runios-nbs-note-info__name {
+    min-width: 96px;
+    margin-right: 8px;
+    opacity: 0.6;
 }
