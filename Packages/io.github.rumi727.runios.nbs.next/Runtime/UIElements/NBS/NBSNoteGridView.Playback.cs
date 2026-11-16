@@ -18,6 +18,9 @@ namespace RuniOS.UIElements.NBS
         double previousTick;
         double previousRealTime;
 
+        // The tick that a drag on a ruler moves the playhead to, or NaN while not dragging. The player seeks there once, when the drag ends.
+        double dragTick = double.NaN;
+
         /// <summary>
         /// Gets or sets how the view scrolls to keep the playhead in view while playing. It is shared by every view.<br/>
         /// 재생 중 플레이헤드를 화면에 두기 위해 뷰가 스크롤하는 방식을 가져오거나 설정합니다. 모든 뷰가 공유합니다.
@@ -40,8 +43,17 @@ namespace RuniOS.UIElements.NBS
 
             Add(effectOverlay);
 
-            grid.selector.dragStarting += static args => IsSeekPress(args);
-            grid.selector.dragging += args => Seek(Math.Max(0, args.position));
+            /*
+             * Seeking on every move of a drag would fight with following: the drag position is measured from the view, which following moves to the seeked tick every frame,
+             * so the next move would land on another tick. While dragging, only the playhead moves, and following waits.
+             */
+            grid.selector.dragStarting += args => map != null && player != null && IsSeekPress(args);
+            grid.selector.dragging += args => dragTick = Math.Max(0, args.position);
+            grid.selector.dragEnded += args =>
+            {
+                dragTick = double.NaN;
+                Seek(Math.Max(0, args.position));
+            };
             grid.selector.clicking += args =>
             {
                 if (IsSeekPress(args))
@@ -69,22 +81,29 @@ namespace RuniOS.UIElements.NBS
 
         void Update()
         {
-            if (map == null || player is not { isPlaying: true } playing)
+            bool isPlaying = false;
+            double tick = double.NaN;
+
+            if (map != null && player is { isPlaying: true } playing)
             {
-                if (playheadItem.layer != null)
-                    grid.overlay.items.Remove(playheadItem);
-
-                ResetPlayback();
-                return;
+                isPlaying = true;
+                double time = playing.time;
+                tick = map.tempo.TimeToTick(time);
+                UpdateEffects(map, time, tick);
             }
+            else
+                ResetPlayback();
 
-            double time = playing.time;
-            double tick = map.tempo.TimeToTick(time);
-            UpdateEffects(map, time, tick);
-
-            // In tick by tick mode the view moves by whole ticks, so the playhead stays on the tick instead of sliding between them.
-            ShowPlayhead(followMode == NBSFollowMode.tickByTick ? Math.Floor(tick) : tick);
-            Follow(tick);
+            if (map != null && !double.IsNaN(dragTick))
+                ShowPlayhead(dragTick);
+            else if (isPlaying)
+            {
+                // In tick by tick mode the view moves by whole ticks, so the playhead stays on the tick instead of sliding between them.
+                ShowPlayhead(followMode == NBSFollowMode.tickByTick ? Math.Floor(tick) : tick);
+                Follow(tick);
+            }
+            else if (playheadItem.layer != null)
+                grid.overlay.items.Remove(playheadItem);
         }
 
         void UpdateEffects(NBSMap currentMap, double time, double tick)

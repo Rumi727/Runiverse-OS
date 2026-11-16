@@ -8,10 +8,10 @@ namespace RuniOS.UIElements.NBS
 {
     /// <summary>
     /// Shows every note of a <see cref="NoteBlockClip"/> in a read-only <see cref="GridView"/>, one track per layer and one column per tick, like Note Block Studio.<br/>
-    /// While <see cref="player"/> plays, it draws the playhead and scrolls as <see cref="followMode"/> says. Clicking or dragging on a ruler seeks while playing.
+    /// While <see cref="player"/> plays, it draws the playhead and scrolls as <see cref="followMode"/> says. Clicking a ruler seeks; dragging on it moves the playhead and seeks where the drag ends.
     /// <br/><br/>
     /// <see cref="NoteBlockClip"/>의 모든 노트를 읽기 전용 <see cref="GridView"/>에 Note Block Studio처럼 레이어마다 트랙 하나, 틱마다 열 하나로 표시합니다.<br/>
-    /// <see cref="player"/>가 재생 중이면 플레이헤드를 그리고 <see cref="followMode"/>에 따라 스크롤합니다. 재생 중에 룰러를 클릭하거나 끌면 재생 위치를 옮깁니다.
+    /// <see cref="player"/>가 재생 중이면 플레이헤드를 그리고, <see cref="followMode"/>에 따라 스크롤합니다. 룰러를 클릭하면 재생 위치를 옮기고, 끌면 플레이헤드를 옮긴 뒤 끌기가 끝난 위치로 재생 위치를 옮깁니다.
     /// </summary>
     /// <remarks>
     /// The wheel scrolls the layers, Ctrl + wheel zooms, and Shift + wheel scrolls the ticks.<br/>
