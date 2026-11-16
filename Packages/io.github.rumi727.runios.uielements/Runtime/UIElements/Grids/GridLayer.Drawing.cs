@@ -20,9 +20,9 @@ namespace RuniOS.UIElements.Grids
         readonly List<GridLine> lineBuffer = [];
         readonly List<(Rect rect, Color color)> rectBuffer = [];
 
-        // Rectangles are at least this many pixels wide, so a narrow item always covers a pixel wherever it lands between pixels.
+        // Rectangles are at least this many pixels wide and high, so a small item always covers a pixel wherever it lands between pixels.
         // Items of the same row and color closer than this are drawn as one rectangle. Merging depends only on the distance between items, so scrolling never changes which items merge.
-        const float denseMinimumWidth = 1;
+        const float denseMinimumSize = 1;
 
         // The index in rectBuffer of the rectangle each row is extending, keyed by the top of the row.
         readonly Dictionary<float, int> denseRuns = [];
@@ -78,14 +78,15 @@ namespace RuniOS.UIElements.Grids
                 {
                     GridItem item = visibleList[i];
                     Rect rect = GetItemRect(item);
-                    rect.width = Math.Max(rect.width, denseMinimumWidth);
+                    rect.width = Math.Max(rect.width, denseMinimumSize);
+                    rect.height = Math.Max(rect.height, denseMinimumSize);
                     Color color = item.selected ? selectedItemColor : GetDenseColor(item) ?? itemColor;
 
                     // Items come in start order, so an item can only extend the last rectangle of its row.
                     if (denseRuns.TryGetValue(rect.y, out int index))
                     {
                         (Rect run, Color runColor) = rectBuffer[index];
-                        if (runColor == color && run.height == rect.height && rect.xMin < run.xMax + denseMinimumWidth)
+                        if (runColor == color && run.height == rect.height && rect.xMin < run.xMax + denseMinimumSize)
                         {
                             run.xMax = Math.Max(run.xMax, rect.xMax);
                             rectBuffer[index] = (run, runColor);
