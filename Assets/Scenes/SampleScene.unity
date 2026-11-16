@@ -119,6 +119,83 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &110345490
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 110345492}
+  - component: {fileID: 110345491}
+  m_Layer: 0
+  m_Name: GameObject (9)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &110345491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 110345490}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86010c5adca821aef972f5e438dfb7f2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: RuniOS.NBS.Next::RuniOS.NBS.NoteBlockSource
+  _volume: 0.2
+  _tempo: 1
+  _pitch: 1
+  _loop: 1
+  _loopStart: 0
+  _loopEnd: 1.7976931348623157e+308
+  _panStereo: 0
+  _spatialBlend: 1
+  _dopplerLevel: 1
+  _spread: 0
+  _minDistance: 1000000
+  _maxDistance: 16
+  _clip:
+    mode: 2
+    assetId:
+      _nameSpace: test
+      _path:
+        _value: candy_cookie_chocolate
+    resourceKey:
+      registryId:
+        _nameSpace: runios
+        _path:
+          _value: 
+      assetId:
+        _nameSpace: runios
+        _path:
+          _value: 
+    directAsset: {fileID: -6750239444755058063, guid: d878e5779815d35729768b5f0ea099bb, type: 3}
+  _directInstrumentNamespace: test
+  _useFileLoopSettings: 1
+  _reversePitchAlignment: 0
+  _nonRigidbodyVelocity: 0
+  _rolloffMode: 1
+--- !u!4 &110345492
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 110345490}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &160918341
 GameObject:
   m_ObjectHideFlags: 0
@@ -1504,6 +1581,18 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+  m_SoftShadowAngularDiameter: 0.5
+  m_SoftShadowScale: 1
+  m_SoftShadowPCSSSampleQuality: 1
+  m_SoftShadowBlockerSampleCount: 24
+  m_SoftShadowFilterSampleCount: 16
+  m_SoftShadowMaxPenumbraSize: 0.56
+  m_SoftShadowMaxSamplingDistance: 0.5
+  m_SoftShadowMinFilterSizeTexels: 1.5
+  m_SoftShadowMinFilterMaxAngularDiameter: 10
+  m_SoftShadowBlockerSearchAngularDiameter: 12
+  m_SoftShadowBlockerSamplingClumpExponent: 2
+  m_SoftShadowMinFilterSize: 0.1
   m_RenderingLayersMask:
     serializedVersion: 0
     m_Bits: 1
@@ -5002,7 +5091,7 @@ MonoBehaviour:
     assetId:
       _nameSpace: test
       _path:
-        _value: ievan_polkka
+        _value: candy_cookie_chocolate
     resourceKey:
       registryId:
         _nameSpace: runios
@@ -5186,3 +5275,4 @@ SceneRoots:
   - {fileID: 548284941}
   - {fileID: 1060755443}
   - {fileID: 2019768490}
+  - {fileID: 110345492}
