@@ -178,6 +178,23 @@ namespace RuniOS.Editor.NBS
                 pendingStartTime = null;
             }
 
+            /// <summary>Releases the transport, and waits to play again from the current time when it was playing.</summary>
+            internal void ReleaseTransport()
+            {
+                if (transport is { isPlaying: true })
+                    pendingStartTime = transport.time;
+
+                transport?.Dispose();
+                transport = null;
+            }
+
+            /// <summary>Requests the instruments again when the player is waiting to play.</summary>
+            internal void ResumeLoading()
+            {
+                if (transport == null && pendingStartTime is { } startTime)
+                    Play(startTime);
+            }
+
             internal void UpdateVolume() => transport?.volume = globalVolume;
 
             void CreateTransport(NBSInstrumentBank bank) => transport = new NBSPreviewTransport(clip, bank) { volume = globalVolume };

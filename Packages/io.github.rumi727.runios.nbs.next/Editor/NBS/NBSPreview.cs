@@ -1,6 +1,7 @@
 #nullable enable
 using Cysharp.Threading.Tasks;
 using RuniOS.NBS;
+using RuniOS.Resource;
 
 namespace RuniOS.Editor.NBS
 {
@@ -12,7 +13,7 @@ namespace RuniOS.Editor.NBS
     /// Disposing the preview stops its players and releases the instruments.<br/>
     /// 미리보기를 해제하면 플레이어를 멈추고 악기를 해제합니다.
     /// </remarks>
-    public sealed partial class NBSPreview : IDisposable
+    public sealed partial class NBSPreview : IDisposable, IReloadable
     {
         /// <summary>
         /// Initializes a preview.<br/>
@@ -22,7 +23,11 @@ namespace RuniOS.Editor.NBS
         /// The resource namespace of custom instrument sounds.<br/>
         /// 커스텀 악기 사운드의 리소스 네임스페이스입니다.
         /// </param>
-        public NBSPreview(string instrumentNamespace) => this.instrumentNamespace = instrumentNamespace;
+        public NBSPreview(string instrumentNamespace)
+        {
+            this.instrumentNamespace = instrumentNamespace;
+            ResourceManager.AttachReloadable(this);
+        }
 
         readonly string instrumentNamespace;
         readonly Dictionary<NoteBlockClip, NBSInstrumentBank> loadedBanks = [];
@@ -76,6 +81,7 @@ namespace RuniOS.Editor.NBS
         public void Dispose()
         {
             isDisposed = true;
+            ResourceManager.DetachReloadable(this);
 
             // The schedulers of the players use the banks, so they are released first.
             foreach (Player player in _players.Values)
@@ -88,6 +94,40 @@ namespace RuniOS.Editor.NBS
 
             loadedBanks.Clear();
             loadingBanks.Clear();
+        }
+
+        /// <summary>
+        /// Releases the instruments whose sounds changed, such as after the resource packs were loaded, and loads them again for the players that were playing.<br/>
+        /// 리소스 팩이 로드된 뒤처럼 사운드가 바뀐 악기를 해제하고, 재생 중이던 플레이어를 위해 다시 로드합니다.
+        /// </summary>
+        /// <returns>
+        /// A completed operation. The instruments load in the background.<br/>
+        /// 완료된 작업입니다. 악기는 백그라운드에서 로드됩니다.
+        /// </returns>
+        public UniTask Reload()
+        {
+            if (isDisposed)
+                return UniTask.CompletedTask;
+
+            // Removing the current entry while enumerating a dictionary is allowed.
+            foreach ((NoteBlockClip clip, NBSInstrumentBank bank) in loadedBanks)
+            {
+                if (bank.IsSameTarget())
+                    continue;
+
+                // The transport of the player uses the bank, so it is released first.
+                if (_players.TryGetValue(clip, out Player? player))
+                    player.ReleaseTransport();
+
+                bank.Dispose();
+                loadedBanks.Remove(clip);
+            }
+
+            // Loading starts after the enumeration, because a load that completes without suspending adds to the dictionary.
+            foreach (Player player in _players.Values)
+                player.ResumeLoading();
+
+            return UniTask.CompletedTask;
         }
 
         async UniTaskVoid LoadBank(NoteBlockClip clip)
