@@ -206,13 +206,17 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 return false;
 
             // Seeking, playing, pausing, and changing the tempo all anchor the timeline again, so an unchanged anchor means the tick advanced by playback alone.
-            double tick = source.tick;
             NBSClockAnchor anchor = source.clockAnchor;
-            if (double.IsFinite(previousTick) && anchor == previousAnchor && effects.TryFindSavePopup(previousTick, tick, out _))
-                savePopupStartedAt = EditorApplication.timeSinceStartup;
+            if (TryGetTimelineTick(source, clip, anchor, out double timelineTick))
+            {
+                if (double.IsFinite(previousTick) && anchor == previousAnchor && CrossesSavePopup(source, clip, previousTick, timelineTick))
+                    savePopupStartedAt = EditorApplication.timeSinceStartup;
 
-            previousTick = tick;
-            previousAnchor = anchor;
+                previousTick = timelineTick;
+                previousAnchor = anchor;
+            }
+
+            double tick = source.tick;
 
             GUILayout.Label(TrTempContent("runios-editor:inspector.nbs_player.visual_effects.header"), EditorStyles.boldLabel);
 
@@ -233,6 +237,58 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             DrawSavePopup(card);
 
             return true;
+        }
+
+        /// <summary>
+        /// Gets the tick of the timeline the sounds are scheduled on, read from the clock anchor at the next mix clock as the scheduler reads it.
+        /// Unlike the interpolated <see cref="NoteBlockSource.tick"/>, it never steps back under one anchor, so moving against the tempo always means a loop wrap.<br/>
+        /// 소리가 예약되는 타임라인의 tick을 스케줄러와 같은 방식으로 다음 믹스 클록에서 클록 기준점으로부터 읽습니다.
+        /// 보간된 <see cref="NoteBlockSource.tick"/>과 달리 같은 기준점 안에서는 뒤로 물러나지 않으므로, tempo와 반대로 움직였다면 항상 반복 범위를 한 바퀴 돈 것입니다.
+        /// </summary>
+        static bool TryGetTimelineTick(NoteBlockSource source, NoteBlockClip clip, NBSClockAnchor anchor, out double tick)
+        {
+            tick = 0;
+            int sampleRate = SoundSystem.main.outputSampleRate;
+            if (sampleRate <= 0 || !NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock))
+                return false;
+
+            double linear = source.isPlaying && !source.isPaused ? anchor.GetTime(clock, source.tempo, sampleRate) : anchor.time;
+            tick = clip.map.tempo.TimeToTick(source.loopRange is { } range ? range.Fold(linear, source.tempo) : linear);
+            return true;
+        }
+
+        /// <summary>
+        /// Determines whether playback passed a save popup tick while it advanced from <paramref name="fromTick"/> to <paramref name="toTick"/>.
+        /// Moving against the tempo means it wrapped around the loop range, so the passage is split at the loop boundaries.<br/>
+        /// 재생이 <paramref name="fromTick"/>에서 <paramref name="toTick"/>까지 진행하는 동안 저장 팝업 tick을 지났는지 확인합니다.
+        /// tempo와 반대로 움직였다면 반복 범위를 한 바퀴 돈 것이므로, 지나간 구간을 반복 경계에서 나눕니다.
+        /// </summary>
+        static bool CrossesSavePopup(NoteBlockSource source, NoteBlockClip clip, double fromTick, double toTick)
+        {
+            NBSVisualEffectMap effects = clip.map.visualEffects;
+            float tempo = source.tempo;
+            bool wrapped = tempo > 0 ? toTick < fromTick : tempo < 0 && toTick > fromTick;
+            if (!wrapped)
+                return effects.TryFindSavePopup(fromTick, toTick, out _);
+
+            if (source.loopRange is not { } range)
+                return false;
+
+            double startTick = clip.map.tempo.TimeToTick(range.start);
+            double endTick = clip.map.tempo.TimeToTick(range.end);
+
+            // Forward, NBSLoopRange.Fold wraps the end onto the start, so the end is left out and the start is included.
+            if (tempo > 0)
+            {
+                double lastTickBeforeEnd = Math.Ceiling(endTick) - 1;
+                return (fromTick < lastTickBeforeEnd && effects.TryFindSavePopup(fromTick, lastTickBeforeEnd, out _)) ||
+                    effects.TryFindSavePopup(Math.Ceiling(startTick) - 1, toTick, out _);
+            }
+
+            // Backward, it wraps the start onto the end, so the start is left out and the end is included.
+            double firstTickAfterStart = Math.Floor(startTick) + 1;
+            return (fromTick > firstTickAfterStart && effects.TryFindSavePopup(fromTick, firstTickAfterStart, out _)) ||
+                effects.TryFindSavePopup(Math.Floor(endTick) + 1, toTick, out _);
         }
 
         static string GetStatus(NBSVisualEffectState state)
