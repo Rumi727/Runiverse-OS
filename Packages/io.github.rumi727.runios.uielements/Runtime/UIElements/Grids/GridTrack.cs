@@ -53,16 +53,19 @@ namespace RuniOS.UIElements.Grids
             RegisterCallback<AttachToPanelEvent>(_ =>
             {
                 if (GetFirstAncestorOfType<GridView>() is { } view)
+                {
                     header.style.width = view.headerWidth;
+                    layer.style.marginLeft = view.headerWidth;
+                }
             });
         }
 
         /// <summary>
         /// Gets the header on the left. Add elements to it to show information or columns for the track.<br/>
-        /// Its width is <see cref="GridView.headerWidth"/>.
+        /// Its width is <see cref="GridView.headerWidth"/>. It is laid over the track without taking part in its height, so content taller than the layer is clipped.
         /// <br/><br/>
         /// 왼쪽의 헤더를 가져옵니다. 트랙의 정보나 열을 보여 주려면 여기에 요소를 추가하세요.<br/>
-        /// 폭은 <see cref="GridView.headerWidth"/>입니다.
+        /// 폭은 <see cref="GridView.headerWidth"/>입니다. 트랙 높이에 관여하지 않고 트랙 위에 놓이므로, 레이어보다 높은 내용은 잘립니다.
         /// </summary>
         public VisualElement header { get; }
 

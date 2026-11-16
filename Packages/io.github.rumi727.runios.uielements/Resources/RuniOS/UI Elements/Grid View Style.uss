@@ -69,8 +69,12 @@
     flex-shrink: 0;
 }
 
+/* 헤더를 흐름에서 빼서, 헤더 내용이 얼마나 높든 트랙이 레이어 높이를 따르게 합니다. 레이어는 GridView.headerWidth로 설정되는 왼쪽 여백으로 헤더 자리를 비웁니다. */
 .runios-grid-track__header {
-    flex-shrink: 0;
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
     overflow: hidden;
 }
 

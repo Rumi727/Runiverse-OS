@@ -292,7 +292,10 @@ namespace RuniOS.UIElements.Grids
                 field = value;
                 corner.style.width = value;
                 foreach (GridTrack track in tracks)
+                {
                     track.header.style.width = value;
+                    track.layer.style.marginLeft = value;
+                }
 
                 UpdateLayout();
             }
