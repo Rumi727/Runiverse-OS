@@ -10,14 +10,14 @@ namespace RuniOS.UIElements.Grids
     /// </summary>
     /// <remarks>
     /// <list type="bullet">
-    /// <item><description>Wheel: zooms horizontally around the pointer.</description></item>
+    /// <item><description>Wheel: zooms horizontally around the pointer. When <see cref="zoomModifier"/> is set, <see cref="zoomModifier"/> + wheel zooms and the wheel alone scrolls the tracks vertically.</description></item>
     /// <item><description><see cref="horizontalModifier"/> + wheel, or a horizontal wheel: pans horizontally.</description></item>
     /// <item><description><see cref="verticalModifier"/> + wheel: scrolls the tracks vertically.</description></item>
     /// <item><description>Middle drag, or <see cref="dragModifier"/> + left drag: pans in both directions.</description></item>
     /// </list>
     /// <br/><br/>
     /// <list type="bullet">
-    /// <item><description>휠: 포인터를 기준으로 가로 확대·축소합니다.</description></item>
+    /// <item><description>휠: 포인터를 기준으로 가로 확대·축소합니다. <see cref="zoomModifier"/>가 설정되어 있으면 <see cref="zoomModifier"/> + 휠이 확대·축소하고, 휠만 쓰면 트랙을 세로로 스크롤합니다.</description></item>
     /// <item><description><see cref="horizontalModifier"/> + 휠, 또는 가로 휠: 가로로 이동합니다.</description></item>
     /// <item><description><see cref="verticalModifier"/> + 휠: 트랙을 세로로 스크롤합니다.</description></item>
     /// <item><description>가운데 끌기, 또는 <see cref="dragModifier"/> + 왼쪽 끌기: 양방향으로 이동합니다.</description></item>
@@ -62,6 +62,12 @@ namespace RuniOS.UIElements.Grids
         public EventModifiers verticalModifier { get; set; } = EventModifiers.Control;
 
         /// <summary>
+        /// Gets or sets the modifier key that makes the wheel zoom. With <see cref="EventModifiers.None"/>, the wheel alone zooms; otherwise the wheel alone scrolls the tracks vertically.<br/>
+        /// 휠로 확대·축소하게 하는 보조 키를 가져오거나 설정합니다. <see cref="EventModifiers.None"/>이면 휠만으로 확대·축소하고, 그렇지 않으면 휠만 쓸 때 트랙을 세로로 스크롤합니다.
+        /// </summary>
+        public EventModifiers zoomModifier { get; set; } = EventModifiers.None;
+
+        /// <summary>
         /// Gets or sets the modifier key that makes a left drag pan.<br/>
         /// 왼쪽 끌기로 이동하게 하는 보조 키를 가져오거나 설정합니다.
         /// </summary>
@@ -101,12 +107,16 @@ namespace RuniOS.UIElements.Grids
             Vector3 delta = evt.delta;
             float ticks = delta.y / WheelEvent.scrollDeltaPerTick;
 
-            if (verticalModifier != EventModifiers.None && (evt.modifiers & verticalModifier) != 0)
+            if (zoomModifier != EventModifiers.None && (evt.modifiers & zoomModifier) != 0)
+                view.axis.Zoom(Math.Pow(zoomFactor, -ticks), view.GetAxisPixel(evt.mousePosition));
+            else if (verticalModifier != EventModifiers.None && (evt.modifiers & verticalModifier) != 0)
                 view.scrollView.scrollOffset += new Vector2(0, ticks * scrollDistance);
             else if (horizontalModifier != EventModifiers.None && (evt.modifiers & horizontalModifier) != 0)
                 view.axis.Pan(-(ticks + (delta.x / WheelEvent.scrollDeltaPerTick)) * scrollDistance);
             else if (delta.x != 0)
                 view.axis.Pan(-(delta.x / WheelEvent.scrollDeltaPerTick) * scrollDistance);
+            else if (zoomModifier != EventModifiers.None)
+                view.scrollView.scrollOffset += new Vector2(0, ticks * scrollDistance);
             else
                 view.axis.Zoom(Math.Pow(zoomFactor, -ticks), view.GetAxisPixel(evt.mousePosition));
 
