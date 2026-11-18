@@ -60,6 +60,10 @@ namespace RuniOS.NBS
                 oldBank = bank;
                 oldScope = scope;
 
+                // The anchor holds the unwrapped position, so it is wrapped into the loop range of the old clip first.
+                // Otherwise the repeats of the old clip would survive in the anchor and show again when the new loop range is longer.
+                MoveAnchorUnsafe();
+
                 scope = newScope;
                 bank = newBank;
                 scheduler = newScope != null && newBank != null ? CreateScheduler(newScope.asset, newBank) : null;
