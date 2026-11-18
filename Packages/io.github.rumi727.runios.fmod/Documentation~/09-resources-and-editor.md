@@ -77,7 +77,7 @@ flowchart LR
    | --- | --- | --- |
    | `normal` | `CreateSoundAsync(node)` | 디코딩된 PCM |
    | `keepCompressed` | `CreateSoundAsync(node, true)` | 압축 데이터. PCM 읽기 불가 |
-   | `stream` | `CreateStreamAsync(node)` | 재생하며 읽음. 비물리 노드는 [관찰된 동작](04-clip-creation.md#43-createstream-nonblocking으로-열고-기다리기)의 경로를 탐 |
+   | `stream` | `CreateStreamAsync(node)` | 재생하며 읽음. 비물리 노드는 [`CreateStream(Stream)`](04-clip-creation.md#43-createstream-nonblocking으로-열고-기다리기) 경로를 탐 |
 
 3. ③ 해제된 클립은 "없는 에셋"으로 봅니다. 코어의 `AssetHandle`은 쥔 에셋이 이 조건에 걸리면 다음 로드 요청 때 `Load()`를 다시 부르므로, `SoundSystem.Reset`이 클립을 해제한 뒤에는 새 클립을 만들어 돌려줍니다.
 4. ④ 같은 파일이어도 지금 쥔 클립이 해제됐으면 다른 대상으로 봅니다. [`WaveAudioSource.ReloadCore`](08-wave-audio-source.md#82-클립-로드-reload) ⑤가 이 비교로 리셋 뒤 다시 불러옵니다.

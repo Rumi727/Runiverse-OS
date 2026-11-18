@@ -194,42 +194,42 @@ stateDiagram-v2
 
 ```csharp
 // Runtime/Sounds/SoundSystem.Reset.cs
-87  public void Reset(SoundSystemSettings settings = default)
+60  public void Reset(SoundSystemSettings settings = default)
     {
-89      ThrowIfSystemLockHeld();                                                     // ①
-91      lock (lifecycleLock)                                                         // ②
+62      ThrowIfSystemLockHeld();                                                     // ①
+64      lock (lifecycleLock)                                                         // ②
         {
-93          if (invokingResettingHandlers)                                           // ③
-94              throw new InvalidOperationException("The FMOD sound system lifecycle cannot be changed from an onResetting handler.");
-96          ThrowIfLifecycleChangeUnavailable();
-97          InvokeResettingHandlers();                                               // ④
-98          List<ISoundSystemResource> resources = BeginResourceRelease(LifecycleState.Resetting);   // ⑤
-99          ReleaseOwnedResources(resources);
-101         nativeLock.EnterWriteLock();                                             // ⑥
-103         try
+66          if (invokingResettingHandlers)                                           // ③
+67              throw new InvalidOperationException("The FMOD sound system lifecycle cannot be changed from an onResetting handler.");
+69          ThrowIfLifecycleChangeUnavailable();
+70          InvokeResettingHandlers();                                               // ④
+71          List<ISoundSystemResource> resources = BeginResourceRelease(LifecycleState.Resetting);   // ⑤
+72          ReleaseOwnedResources(resources);
+74          nativeLock.EnterWriteLock();                                            // ⑥
+76          try
             {
-105             if (nativeInitialized)
+78              if (nativeInitialized)
                 {
-107                 ReleaseMixStampDSPUnsafe().ThrowIfNotOk();                       // ⑦
-108                 native.close().ThrowIfNotOk();
-109                 nativeInitialized = false;
+80                  ReleaseMixStampDSPUnsafe().ThrowIfNotOk();                      // ⑦
+81                  native.close().ThrowIfNotOk();
+82                  nativeInitialized = false;
                 }
-112             // No mixer runs now, and the new clock starts again from zero.
-113             ClearMixStampStateUnsafe();                                          // ⑧
-114             InitializeNative(settings);                                          // ⑨
-115             queuedDisposals = [];
-116             lifecycleState = LifecycleState.Active;
+85              // No mixer runs now, and the new clock starts again from zero.
+86              ClearMixStampStateUnsafe();                                         // ⑧
+87              InitializeNative(settings);                                         // ⑨
+88              queuedDisposals = [];
+89              lifecycleState = LifecycleState.Active;
             }
-118         catch
+91          catch
             {
-120             lifecycleState = LifecycleState.Faulted;                             // ⑩
-121             throw;
+93              lifecycleState = LifecycleState.Faulted;                            // ⑩
+94              throw;
             }
-123         finally
+96          finally
             {
-125             nativeLock.ExitWriteLock();
+98              nativeLock.ExitWriteLock();
             }
-128         InvokeResetHandlers();                                                   // ⑪
+101         onReset.SafeInvoke(this);                                                // ⑪
         }
     }
 ```

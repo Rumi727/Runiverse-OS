@@ -103,29 +103,29 @@ flowchart LR
 
 ```csharp
 // Runtime/Sounds/SoundSystem.Update.cs
-24  public void Update()
+10  public void Update()
     {
-26      nativeLock.EnterReadLock();
-28      try
+12      nativeLock.EnterReadLock();
+14      try
         {
-30          ThrowIfUnavailableUnsafe();
-31          native.update().LogErrorIfNotOk();                  // ①
+16          ThrowIfUnavailableUnsafe();
+17          native.update().LogErrorIfNotOk();                  // ①
         }
-33      finally
+19      finally
         {
-35          nativeLock.ExitReadLock();
+21          nativeLock.ExitReadLock();
         }
-38      SoundChannel.RetryPendingTimeSamples(this);             // ②
-39      DisposeQueuedResources();                               // ③
-41      lock (onUpdateLock)
-42          _onUpdate?.SafeInvoke();                            // ④
+24      DisposeQueuedResources();                               // ②
+26      onUpdate.SafeInvoke();                                  // ③
     }
 ```
 
 1. ① FMOD의 주기 작업입니다. 채널 콜백(재생 끝 `END`)은 FMOD가 이 호출 안에서 부릅니다. 그래서 [`SoundChannel.onStop`](05-channel.md#53-종료-콜백과-onstop)은 자연 종료일 때 업데이트 스레드에서 실행됩니다.
-2. ② FMOD가 `ERR_NOTREADY`로 미뤘던 위치 지정을 다시 시도합니다([5장](05-channel.md#55-위치-timesample과-time)).
-3. ③ [`QueueDispose`](02-resource-ownership.md#24-미룬-해제-queuedispose)로 미룬 해제를 처리합니다.
-4. ④ 구독자를 부릅니다. `SafeInvoke`는 처리기마다 예외를 잡아 기록하므로 한 처리기의 예외가 다른 처리기를 막지 않습니다. 호출하는 동안 `onUpdateLock`을 들고 있으므로, 다른 스레드의 구독·해지는 처리기가 끝날 때까지 기다립니다.
+2. ② [`QueueDispose`](02-resource-ownership.md#24-미룬-해제-queuedispose)로 미룬 해제를 처리합니다.
+3. ③ 구독자를 부릅니다. `onUpdate`는 필드형 이벤트라 구독·해지는 잠금 없이 원자적으로 대리자를 바꾸고, 호출은 그 순간의 대리자 목록 하나를 읽어 끝까지 씁니다. `SafeInvoke`는 처리기마다 예외를 잡아 기록하므로 한 처리기의 예외가 다른 처리기를 막지 않습니다.
+   - 호출 중에도 다른 스레드가 구독·해지를 기다리지 않습니다. 그래서 처리기가 잡는 잠금을 든 채 구독·해지해도 교착하지 않습니다(예: 채널이 `playbackLock`을 든 채 재시도를 구독하는 [5장 §5.5](05-channel.md#55-위치-timesample과-time)).
+   - 대신 해지가 돌아온 직후에도, 이미 읽힌 목록에 든 처리기는 이번 호출에서 한 번 더 실행될 수 있습니다.
+   - FMOD가 `ERR_NOTREADY`로 미룬 채널 위치 지정의 재시도도 이 구독자 중 하나입니다([5장 §5.5](05-channel.md#55-위치-timesample과-time)).
 
 `Update` 자신의 읽기 잠금은 ①에서 풀리지만, `main`의 경우 [§3.2](#32-업데이트-스레드-soundsystemmanager) ②의 `Execute`가 바깥에서 읽기 잠금을 들고 있습니다. 그러므로 `main`에서는 다음이 성립합니다.
 
@@ -214,8 +214,6 @@ flowchart LR
 | [`lifecycleLock`](../Runtime/Sounds/SoundSystem.cs#L98) | `Lock` | `Reset`/`Dispose` 전체 | `Reset`, `Dispose` |
 | [`nativeLock`](../Runtime/Sounds/SoundSystem.cs#L97) | `ReaderWriterLockSlim` (재귀) | 상태와 `native` 핸들 | 일반 API(읽기), 상태 전이·네이티브 해제(쓰기) |
 | [`resourceDisposalLock`](../Runtime/Sounds/SoundSystem.cs#L106) | `Monitor` | `activeResourceDisposals` | [2장 §2.3](02-resource-ownership.md#23-직접-해제-disposeresource), [§2.5](02-resource-ownership.md#25-시스템이-리소스를-한꺼번에-해제하는-경로) |
-| [`onUpdateLock`](../Runtime/Sounds/SoundSystem.Update.cs#L22) | `Lock` | `onUpdate` 구독과 호출 | `Update` |
-| [`resetEventLock`](../Runtime/Sounds/SoundSystem.Reset.cs#L57) | `Lock` | `onResetting`/`onReset` 구독 | 구독, 처리기 목록 복사 |
 | 클립·그룹·DSP `nativeLock` | `ReaderWriterLockSlim` (재귀) | 자기 핸들과 `_isDisposed` | [2장 §2.7](02-resource-ownership.md#27-리소스-쪽-잠금-usenative와-execute) |
 | 채널 `playbackLock` 등 | `ReaderWriterLockSlim` (재귀 없음) | 여러 FMOD 호출로 된 읽기-수정-쓰기 | [5장 §5.4](05-channel.md#54-잠금) |
 | `SoundFileStream.streamLock` | `Lock` | 관리 `Stream`의 위치 | [4장 §4.5](04-clip-creation.md#45-soundfilestream-파일-콜백) |

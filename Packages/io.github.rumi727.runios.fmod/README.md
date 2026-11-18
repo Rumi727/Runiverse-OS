@@ -83,7 +83,7 @@ FMOD가 채널 종료를 보고하면 callback이 그 자리에서 일반 `Dispo
 
 ```text
 FMOD CHANNELCONTROL_CALLBACK_TYPE.END   // native.update() 또는 channel.stop() 안
--> 핸들 표·보류 위치 목록에서 제거
+-> 핸들 표에서 제거, 보류 위치 재시도의 onUpdate 구독 해지
 -> _isDisposed 0 → 1 (처음 한 번만 계속)
 -> SoundSystem.Dispose(channel)
 -> onStop

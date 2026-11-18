@@ -129,7 +129,7 @@
     }
 ```
 
-리소스를 큐에 넣기만 하고, 다음 [`Update()`](../Runtime/Sounds/SoundSystem.Update.cs#L24)가 [`DisposeQueuedResources`](../Runtime/Sounds/SoundSystem.Update.cs#L45)에서 꺼내 `Dispose(resource)`로 해제합니다. 해제 예외는 기록만 합니다. 잠금을 잡을 수 없는 문맥(예: 네이티브 콜백)에서 해제를 업데이트 스레드로 미루는 공개 API입니다. **현재 패키지 안에는 이 메서드를 부르는 곳이 없습니다.** 채널 종료 콜백은 `Dispose(channel)`을 직접 부릅니다([5장](05-channel.md#53-종료-콜백과-onstop)).
+리소스를 큐에 넣기만 하고, 다음 [`Update()`](../Runtime/Sounds/SoundSystem.Update.cs#L10)가 [`DisposeQueuedResources`](../Runtime/Sounds/SoundSystem.Update.cs#L29)에서 꺼내 `Dispose(resource)`로 해제합니다. 해제 예외는 기록만 합니다. 잠금을 잡을 수 없는 문맥(예: 네이티브 콜백)에서 해제를 업데이트 스레드로 미루는 공개 API입니다. **현재 패키지 안에는 이 메서드를 부르는 곳이 없습니다.** 채널 종료 콜백은 `Dispose(channel)`을 직접 부릅니다([5장](05-channel.md#53-종료-콜백과-onstop)).
 
 `Reset`/`Dispose`는 시작할 때 큐를 `null`로 바꿉니다. 그 직후 옛 큐에 들어간 항목은 꺼내지지 않을 수 있지만, 그 리소스는 이미 시스템이 넘겨받은 목록에 있으므로 해제가 빠지지 않습니다.
 

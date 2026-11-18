@@ -62,27 +62,27 @@
 
 ```csharp
 // Runtime/Sounds/SoundSystem.CreateStream.cs
-83  WaveAudioClip CreateStreamUnsafe(string path)
+87  WaveAudioClip CreateStreamUnsafe(string path)
     {
-85      Sound sound = default;
-87      try
+89      Sound sound = default;
+91      try
         {
-89          native.createStream(path, MODE._3D | MODE.NONBLOCKING, out sound).ThrowIfNotOk();   // ①
-91          while (true)
+93          native.createStream(path, MODE._3D | MODE.NONBLOCKING, out sound).ThrowIfNotOk();   // ①
+95          while (true)
             {
-93              sound.getOpenState(out OPENSTATE state, out _, out _, out _).ThrowIfNotOk();
-95              if (state == OPENSTATE.READY)
-96                  return WaveAudioClip.Unsafe.CreateInstance(this, sound);                    // ②
-98              if (state == OPENSTATE.ERROR)
-99                  throw new InvalidOperationException("FMOD failed to open the stream.");
-101             Thread.Sleep(1);                                                                // ③
+97              sound.getOpenState(out OPENSTATE state, out _, out _, out _).ThrowIfNotOk();
+99              if (state == OPENSTATE.READY)
+100                 return WaveAudioClip.Unsafe.CreateInstance(this, sound);                    // ②
+102             if (state == OPENSTATE.ERROR)
+103                 throw new InvalidOperationException("FMOD failed to open the stream.");
+105             Thread.Sleep(1);                                                                // ③
             }
         }
-104     catch
+108     catch
         {
-106         if (sound.hasHandle())
-107             sound.release().LogErrorIfNotOk();                                              // ④
-109         throw;
+110         if (sound.hasHandle())
+111             sound.release().LogErrorIfNotOk();                                              // ④
+113         throw;
         }
     }
 ```
@@ -92,7 +92,7 @@
 3. ③ 1 ms씩 기다리며 폴링합니다. 시스템 읽기 잠금을 든 채 기다리므로, 이 동안 `Reset`/`Dispose`는 기다립니다.
 4. ④ 실패하면 만들다 만 Sound를 해제합니다.
 
-`CreateStreamUnsafe(SoundFileStream)`([`#L113`](../Runtime/Sounds/SoundSystem.CreateStream.cs#L113))는 같은 흐름에, 이름 대신 `"stream"`과 [§4.5](#45-soundfilestream-파일-콜백)의 콜백이 든 `CREATESOUNDEXINFO`를 넘기고, 래퍼에 `streamFile`을 `nativeLifetime`으로 줍니다.
+`CreateStreamUnsafe(SoundFileStream)`([`#L117`](../Runtime/Sounds/SoundSystem.CreateStream.cs#L117))는 같은 흐름에, 이름 대신 `"stream"`과 [§4.5](#45-soundfilestream-파일-콜백)의 콜백이 든 `CREATESOUNDEXINFO`를 넘기고, 래퍼에 `streamFile`을 `nativeLifetime`으로 줍니다.
 
 ```csharp
 // Runtime/Sounds/SoundSystem.CreateStream.cs
@@ -105,13 +105,19 @@
 73          ThrowIfUnavailableUnsafe();
 74          return CreateStreamUnsafe(streamFile);
         }
-76      finally
+76      catch
         {
-78          nativeLock.ExitReadLock();
-79          streamFile.Dispose();
+78          streamFile.Dispose();                     // ①
+79          throw;
+        }
+81      finally
+        {
+83          nativeLock.ExitReadLock();
         }
     }
 ```
+
+1. ① `streamFile`은 생성에 실패했을 때만 여기서 해제합니다. 성공하면 클립의 `nativeLifetime`이 소유하고, 클립을 해제할 때 Sound를 먼저 release한 뒤 해제합니다([§4.7](#47-해제)). 그래서 반환된 클립이 살아 있는 동안 FMOD의 읽기·탐색 콜백이 `stream`을 쓸 수 있습니다. `SoundFileStream.Dispose`는 두 번 불려도 한 번만 정리합니다.
 
 ## 4.4 비동기 생성
 

@@ -112,7 +112,6 @@ flowchart TB
 
 | 동작 | 장 |
 | --- | --- |
-| `CreateStream(Stream, leaveOpen)`이 성공한 뒤에도 `SoundFileStream`을 해제함 | [4.3](04-clip-creation.md#43-createstream-nonblocking으로-열고-기다리기) |
 | `Reset()`을 기본 설정으로 부르면 `main`의 `VOL0_BECOMES_VIRTUAL`이 빠짐 | [1.6](01-system-lifecycle.md#16-reset) |
 | 루프 위치 정규화에서 `end` 이상과 음수의 구간 시작이 다름 | [5.6](05-channel.md#56-위치-정규화와-루프) |
 | `dataParameters` getter가 잠금 해제 후에도 FMOD 메모리 `Span`을 돌려줌 | [7.3](07-dsp-wrappers.md#73-파라미터-접근자) |

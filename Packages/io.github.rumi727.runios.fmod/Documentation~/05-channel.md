@@ -136,7 +136,7 @@
 122     if (channel == null)
 123         return RESULT.OK;
 125     channelLists.TryRemove(channel.native.handle, out _);                           // ②
-126     pendingTimeSampleChannels.TryRemove(channel, out _);
+126     channel.system.onUpdate -= channel.RetryPendingTimeSample;
 128     if (Interlocked.CompareExchange(ref channel._isDisposed, 1, 0) != 0)            // ③
 129         return RESULT.OK;
 131     channel.system.Dispose(channel);                                                // ④
@@ -147,17 +147,18 @@
 138     return RESULT.OK;
     }
 
-713 public void Stop()
+// Runtime/Sounds/SoundChannel.Playback.cs
+696 public void Stop()
     {
-715     RESULT result = native.stop();                                                   // ⑥
-716     if (result == RESULT.ERR_INVALID_HANDLE || result == RESULT.ERR_CHANNEL_STOLEN)
-717         return;
-719     result.LogErrorIfNotOk();
+698     RESULT result = native.stop();                                                   // ⑥
+699     if (result == RESULT.ERR_INVALID_HANDLE || result == RESULT.ERR_CHANNEL_STOLEN)
+700         return;
+702     result.LogErrorIfNotOk();
     }
 ```
 
 1. ① 재생이 끝났다는(`END`) 채널 콜백만 처리합니다. 가상 채널 전환 등 다른 콜백은 무시합니다.
-2. ② 핸들 표와 [§5.5](#55-위치-timesample과-time)의 보류 목록에서 지웁니다.
+2. ② 핸들 표에서 지우고, [§5.5](#55-위치-timesample과-time)의 재시도 구독을 해지합니다.
 3. ③ `_isDisposed`를 0 → 1로 바꾼 호출 하나만 계속합니다. 같은 채널의 `END`가 두 번 오더라도 `onStop`은 한 번입니다.
 4. ④ 시스템 소유 목록에서 뺍니다. 이 호출의 `ReleaseUnmanagedResources`는 `Stop()`이고, 이미 끝난 채널이라 `native.stop()`은 무효 핸들로 조용히 돌아옵니다. 시스템이 `Reset`/`Dispose` 중이면 ④는 아무것도 하지 않습니다(시스템이 이미 목록을 넘겨받음).
 5. ⑤ `onStop` 처리기를 부릅니다. 처리기마다 예외를 잡아 기록합니다.
@@ -195,7 +196,7 @@ sequenceDiagram
 
 | 잠금 | 보호하는 멤버 |
 | --- | --- |
-| [`playbackLock`](../Runtime/Sounds/SoundChannel.Playback.cs#L12) | `frequency`, `timeSample`, `time`, 보류 위치, `loop`, `loopCount`, 루프 지점 속성들, 페이드 포인트 |
+| [`playbackLock`](../Runtime/Sounds/SoundChannel.Playback.cs#L9) | `frequency`, `timeSample`, `time`, 보류 위치, `loop`, `loopCount`, 루프 지점 속성들, 페이드 포인트 |
 | [`modeLock`](../Runtime/Sounds/SoundChannel.cs#L70) | `MODE` 플래그 읽기·쓰기 (`loop`, `rolloffMode`, 위치 정규화) |
 | [`spatialLock`](../Runtime/Sounds/SoundChannel.Spatial.cs#L11) | 최소·최대 거리, `rolloffMode` |
 | [`mixingLock`](../Runtime/Sounds/SoundChannel.Mixing.cs#L9) | 믹스 행렬 |
@@ -209,35 +210,35 @@ sequenceDiagram
 
 ```csharp
 // Runtime/Sounds/SoundChannel.Playback.cs
-178 public double time
+175 public double time
     {
         get
         {
-182         playbackLock.EnterReadLock();
-184         try
+179         playbackLock.EnterReadLock();
+181         try
             {
-186             native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
-187             return sample / GetTimeFrequencyUnsafe().Abs();                         // ①
+183             native.getPosition(out uint sample, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
+184             return sample / GetTimeFrequencyUnsafe().Abs();                         // ①
             }
             …
         }
         set
         {
-196         playbackLock.EnterWriteLock();
-198         try
+193         playbackLock.EnterWriteLock();
+195         try
             {
-200             SetTimeSampleUnsafe(value * GetTimeFrequencyUnsafe().Abs());
+197             SetTimeSampleUnsafe(value * GetTimeFrequencyUnsafe().Abs());
             }
             …
         }
     }
 
-209 float GetTimeFrequencyUnsafe()
+206 float GetTimeFrequencyUnsafe()
     {
-211     if (clip != null)
-212         return clip.frequency;                                                     // ②
-214     native.getFrequency(out float frequency).ThrowIfNotOkOfChannel();
-215     return frequency;
+208     if (clip != null)
+209         return clip.frequency;                                                     // ②
+211     native.getFrequency(out float frequency).ThrowIfNotOkOfChannel();
+212     return frequency;
     }
 ```
 
@@ -248,41 +249,47 @@ sequenceDiagram
 
 ```csharp
 // Runtime/Sounds/SoundChannel.Playback.cs
-218 void SetTimeSampleUnsafe(double value)
+215 void SetTimeSampleUnsafe(double value)
     {
-220     if (!TryNormalizeTimeSampleUnsafe(ref value))                     // ①
-221         return;
-223     uint sample = value.RoundToUInt();
-224     RESULT result = native.setPosition(sample, TIMEUNIT.PCM);
-225     if (result == RESULT.ERR_NOTREADY)                                 // ②
+217     if (!TryNormalizeTimeSampleUnsafe(ref value))                     // ①
+218         return;
+220     uint sample = value.RoundToUInt();
+221     RESULT result = native.setPosition(sample, TIMEUNIT.PCM);
+222     if (result == RESULT.ERR_NOTREADY)                                 // ②
         {
-227         pendingTimeSample = sample;                                    // ③
-228         pendingTimeSampleChannels.TryAdd(this, 0);
-230         if (Volatile.Read(ref _isDisposed) != 0)                       // ④
-231             pendingTimeSampleChannels.TryRemove(this, out _);
+224         if (!pendingTimeSample.HasValue)                               // ③
+            {
+226             system.onUpdate += RetryPendingTimeSample;
+228             if (Volatile.Read(ref _isDisposed) != 0)                   // ④
+229                 system.onUpdate -= RetryPendingTimeSample;
+            }
+232         pendingTimeSample = sample;
 233         return;
         }
-236     pendingTimeSample = null;                                          // ⑤
-237     pendingTimeSampleChannels.TryRemove(this, out _);
-238     result.ThrowIfNotOkOfChannel();
+236     if (pendingTimeSample.HasValue)                                    // ⑤
+        {
+238         pendingTimeSample = null;
+239         system.onUpdate -= RetryPendingTimeSample;
+        }
+242     result.ThrowIfNotOkOfChannel();
     }
 
-241 void RetryPendingTimeSample()
+245 void RetryPendingTimeSample()
     {
-243     playbackLock.EnterWriteLock();
-245     try
+247     playbackLock.EnterWriteLock();
+249     try
         {
-247         if (!pendingTimeSample.HasValue)
+251         if (!pendingTimeSample.HasValue)
             {
-249             pendingTimeSampleChannels.TryRemove(this, out _);
-250             return;
+253             system.onUpdate -= RetryPendingTimeSample;
+254             return;
             }
-253         RESULT result = native.setPosition(pendingTimeSample.Value, TIMEUNIT.PCM);
-254         if (result == RESULT.ERR_NOTREADY)
-255             return;                                                    // ⑥
-257         pendingTimeSample = null;
-258         pendingTimeSampleChannels.TryRemove(this, out _);
-260         result.ThrowIfNotOkOfChannel();
+257         RESULT result = native.setPosition(pendingTimeSample.Value, TIMEUNIT.PCM);
+258         if (result == RESULT.ERR_NOTREADY)
+259             return;                                                    // ⑥
+261         pendingTimeSample = null;
+262         system.onUpdate -= RetryPendingTimeSample;
+264         result.ThrowIfNotOkOfChannel();
         }
         …
     }
@@ -290,41 +297,41 @@ sequenceDiagram
 
 1. ① 루프 여부에 따라 값을 범위 안으로 옮깁니다([§5.6](#56-위치-정규화와-루프)). 길이가 0이면 아무것도 하지 않습니다.
 2. ② NONBLOCKING 스트림([4장 §4.3](04-clip-creation.md#43-createstream-nonblocking으로-열고-기다리기))은 앞선 위치 변경을 처리하는 동안(`SETPOSITION` 상태) Sound 명령에 `ERR_NOTREADY`를 돌려줍니다. 빠르게 탐색을 반복하면 자주 나옵니다.
-3. ③ 오류를 던지는 대신 **마지막 요청 값**을 기억하고 전역 보류 목록에 넣습니다. 그 사이 다시 탐색하면 값만 덮어씁니다.
-4. ④ 등록 직후 종료 콜백이 먼저 돌았으면 목록에 남지 않게 지웁니다. 콜백은 ③보다 먼저 목록에서 지웠을 수 있으므로 여기서 한 번 더 확인합니다.
-5. ⑤ 성공(또는 다른 오류)이면 이전 보류를 버립니다. 새 위치가 이겼기 때문입니다.
-6. ⑥ 재시도는 [`SoundSystem.Update`](03-threads-and-locks.md#33-update와-onupdate)가 매번 [`RetryPendingTimeSamples`](../Runtime/Sounds/SoundChannel.Playback.cs#L268)로 부릅니다. 아직 준비되지 않았으면 다음 업데이트에서 다시 시도합니다.
+3. ③ 오류를 던지는 대신 **마지막 요청 값**을 기억하고, 보류가 처음 생길 때만 시스템의 [`onUpdate`](03-threads-and-locks.md#33-update와-onupdate)에 재시도를 구독합니다. 이미 보류 중에 다시 탐색하면 구독은 그대로 두고 값만 덮어씁니다. 그래서 "보류 값이 있음"과 "구독 하나"가 `playbackLock` 아래에서 함께 움직입니다.
+4. ④ 구독한 **뒤에** 해제 여부를 봅니다. 종료 콜백([§5.3](#53-종료-콜백과-onstop) ②)은 `playbackLock` 없이 구독을 해지한 다음 `_isDisposed`를 올리므로, 콜백이 구독보다 먼저 돌았으면 여기서 해제를 보고 직접 해지하고, 나중에 돌았으면 콜백이 해지합니다. 어느 순서든 구독이 남지 않습니다.
+5. ⑤ 성공(또는 다른 오류)이면 이전 보류를 버리고 구독을 해지합니다. 새 위치가 이겼기 때문입니다. 보류가 없던 평소 경로에서는 구독을 건드리지 않습니다.
+6. ⑥ 재시도는 `Update`가 `onUpdate`를 부를 때마다 실행됩니다. 아직 준비되지 않았으면 다음 업데이트에서 다시 시도하고, 성공하거나 다른 오류가 나면 스스로 구독을 해지합니다. 재시도 중 예외는 `SafeInvoke`가 기록합니다.
 
-보류 목록은 정적(모든 시스템 공용)이고, `RetryPendingTimeSamples(system)`는 그 시스템의 채널만 골라 재시도합니다.
+`onUpdate`는 시스템마다 따로 있으므로 재시도는 자기 시스템의 업데이트에서만 돕니다. `onUpdate`가 필드형 이벤트라 `playbackLock`을 든 채 구독·해지해도 업데이트 스레드와 교착하지 않습니다([3장 §3.3](03-threads-and-locks.md#33-update와-onupdate) ③).
 
 ## 5.6 위치 정규화와 루프
 
 ```csharp
 // Runtime/Sounds/SoundChannel.Playback.cs
-289 bool TryNormalizeTimeSampleUnsafe(ref double value)
+272 bool TryNormalizeTimeSampleUnsafe(ref double value)
     {
-291     uint samples = this.samples;
-292     if (samples == 0)
-293         return false;
-295     modeLock.EnterReadLock();
-296     bool loop;
-298     try
+274     uint samples = this.samples;
+275     if (samples == 0)
+276         return false;
+278     modeLock.EnterReadLock();
+279     bool loop;
+281     try
         {
-300         native.getMode(out MODE mode).ThrowIfNotOkOfChannel();
-301         loop = mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
+283         native.getMode(out MODE mode).ThrowIfNotOkOfChannel();
+284         loop = mode.HasFlag(MODE.LOOP_NORMAL) || mode.HasFlag(MODE.LOOP_BIDI);
         }
         …
-308     if (loop)
+291     if (loop)
         {
-310         native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
-311         if (value >= end)
-312             value = value.Repeat(start, end);                                // ①
-313         else if (value < 0)
-314             value = value.Repeat(0, end);                                    // ②
+293         native.getLoopPoints(out uint start, TIMEUNIT.PCM, out uint end, TIMEUNIT.PCM).ThrowIfNotOkOfChannel();
+294         if (value >= end)
+295             value = value.Repeat(start, end);                                // ①
+296         else if (value < 0)
+297             value = value.Repeat(0, end);                                    // ②
         }
         else
-317         value = value.Clamp(0, samples - 1);                                 // ③
-319     return true;
+300         value = value.Clamp(0, samples - 1);                                 // ③
+302     return true;
     }
 ```
 
@@ -332,14 +339,14 @@ sequenceDiagram
 2. ② 음수는 `[0, end)`로 감습니다.
 3. ③ 루프가 아니면 마지막 샘플까지로 자릅니다.
 
-> **관찰된 동작:** 루프 채널에서 `end` 이상은 `[loopStart, loopEnd)`로, 음수는 `[0, loopEnd)`로 감깁니다([`#L311-L314`](../Runtime/Sounds/SoundChannel.Playback.cs#L311-L314)). 두 경우의 구간 시작이 다릅니다.
+> **관찰된 동작:** 루프 채널에서 `end` 이상은 `[loopStart, loopEnd)`로, 음수는 `[0, loopEnd)`로 감깁니다([`#L311-L314`](../Runtime/Sounds/SoundChannel.Playback.cs#L294-L297)). 두 경우의 구간 시작이 다릅니다.
 
 루프 속성은 다음과 같습니다.
 
 | 멤버 | 동작 |
 | --- | --- |
-| [`loop`](../Runtime/Sounds/SoundChannel.Playback.cs#L345) | `MODE`의 루프 플래그를 `LOOP_NORMAL`/`LOOP_OFF`로 바꾸고 `loopCount`를 `-1`(무한)/`0`으로 함께 설정 |
-| [`loopSampleRange`](../Runtime/Sounds/SoundChannel.Playback.cs#L442) | `start ∈ [0, samples−2]`, `end ∈ [start+1, samples−1]`로 맞춰 설정. 샘플이 1개 이하면 무시 |
+| [`loop`](../Runtime/Sounds/SoundChannel.Playback.cs#L328) | `MODE`의 루프 플래그를 `LOOP_NORMAL`/`LOOP_OFF`로 바꾸고 `loopCount`를 `-1`(무한)/`0`으로 함께 설정 |
+| [`loopSampleRange`](../Runtime/Sounds/SoundChannel.Playback.cs#L425) | `start ∈ [0, samples−2]`, `end ∈ [start+1, samples−1]`로 맞춰 설정. 샘플이 1개 이하면 무시 |
 | `loopStartSample` / `loopEndSample` | 한쪽만 바꾸고 다른 쪽과 겹치지 않게 자름 |
 | `loopRange` / `loopStart` / `loopEnd` | 초 단위. 클립 주파수로 샘플로 바꿔 위와 같은 규칙 |
 
@@ -347,12 +354,12 @@ sequenceDiagram
 
 | 멤버 | FMOD 함수 | 비고 |
 | --- | --- | --- |
-| [`GetDSPClock()`](../Runtime/Sounds/SoundChannel.Playback.cs#L730) | `getDSPClock` | `(채널 클록, 부모 클록)`. 예약에는 부모(마스터) 클록을 씀 |
-| [`SetDelay` / `GetDelay`](../Runtime/Sounds/SoundChannel.Playback.cs#L752) | `setDelay` / `getDelay` | [6장 §6.2](06-dsp-clock-and-mix-stamp.md#62-setdelay-클록으로-시작정지-예약) |
-| [`AddFadePoint`](../Runtime/Sounds/SoundChannel.Playback.cs#L781) | `addFadePoint` | 부모 DSP 클록 위치의 볼륨 점. 점 사이는 선형 보간 |
-| [`SetFadePointRamp`](../Runtime/Sounds/SoundChannel.Playback.cs#L807) | `setFadePointRamp` | 현재 볼륨에서 지정 클록까지 램프 |
-| [`RemoveFadePoints`](../Runtime/Sounds/SoundChannel.Playback.cs#L833) | `removeFadePoints` | 구간의 점 제거 |
-| [`GetFadePoints`](../Runtime/Sounds/SoundChannel.Playback.cs#L855) | `getFadePoints` | 개수를 먼저 읽고 배열을 할당해 다시 읽음 |
+| [`GetDSPClock()`](../Runtime/Sounds/SoundChannel.Playback.cs#L713) | `getDSPClock` | `(채널 클록, 부모 클록)`. 예약에는 부모(마스터) 클록을 씀 |
+| [`SetDelay` / `GetDelay`](../Runtime/Sounds/SoundChannel.Playback.cs#L735) | `setDelay` / `getDelay` | [6장 §6.2](06-dsp-clock-and-mix-stamp.md#62-setdelay-클록으로-시작정지-예약) |
+| [`AddFadePoint`](../Runtime/Sounds/SoundChannel.Playback.cs#L764) | `addFadePoint` | 부모 DSP 클록 위치의 볼륨 점. 점 사이는 선형 보간 |
+| [`SetFadePointRamp`](../Runtime/Sounds/SoundChannel.Playback.cs#L790) | `setFadePointRamp` | 현재 볼륨에서 지정 클록까지 램프 |
+| [`RemoveFadePoints`](../Runtime/Sounds/SoundChannel.Playback.cs#L816) | `removeFadePoints` | 구간의 점 제거 |
+| [`GetFadePoints`](../Runtime/Sounds/SoundChannel.Playback.cs#L838) | `getFadePoints` | 개수를 먼저 읽고 배열을 할당해 다시 읽음 |
 
 ## 5.8 믹싱과 3D 속성
 

@@ -36,8 +36,8 @@ FMOD 믹서는 출력 샘플을 **블록 단위**로 계산합니다. 블록 길
 
 ```csharp
 // Runtime/Sounds/SoundChannel.Playback.cs
-752 public void SetDelay(ulong startDspClock = 0, ulong endDspClock = 0, bool stopChannel = true) =>
-753     native.setDelay(startDspClock, endDspClock, stopChannel).ThrowIfNotOkOfChannel();
+735 public void SetDelay(ulong startDspClock = 0, ulong endDspClock = 0, bool stopChannel = true) =>
+736     native.setDelay(startDspClock, endDspClock, stopChannel).ThrowIfNotOkOfChannel();
 ```
 
 FMOD `Channel::setDelay`의 얇은 래퍼입니다. 클록은 부모(마스터) DSP 클록 기준입니다.
