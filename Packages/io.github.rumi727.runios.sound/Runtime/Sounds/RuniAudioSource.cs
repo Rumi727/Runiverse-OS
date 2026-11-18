@@ -131,21 +131,6 @@ namespace RuniOS.Sounds
         double outputBaseTime = 0;
         long outputBaseTimestamp = 0;
 
-        // The output time holds until a base timestamp in the future is reached, like the time.
-        double GetInterpolatedOutputTimeUnsafe(long timestamp) =>
-            _isPlaying && !_isPaused ? outputBaseTime + ((Math.Max(timestamp - outputBaseTimestamp, 0) / (double)Stopwatch.Frequency) * tempo) : outputBaseTime;
-
-        /// <summary>
-        /// Rebases the output time on its current value before the playback state or the tempo changes, so that it does not jump.
-        /// A base timestamp in the future is kept, so the output time still holds until it. The caller holds the write lock.
-        /// </summary>
-        void ContinueOutputTimeUnsafe()
-        {
-            long timestamp = Math.Max(Stopwatch.GetTimestamp(), outputBaseTimestamp);
-            outputBaseTime = GetInterpolatedOutputTimeUnsafe(timestamp);
-            outputBaseTimestamp = timestamp;
-        }
-
         public abstract double length { get; }
 
         public virtual float volume
@@ -444,6 +429,26 @@ namespace RuniOS.Sounds
             {
                 playingLock.ExitWriteLock();
             }
+        }
+
+        // The output time holds until a base timestamp in the future is reached, like the time.
+        double GetInterpolatedOutputTimeUnsafe(long timestamp)
+        {
+            if (_isPlaying && !_isPaused)
+                return outputBaseTime + (((timestamp - outputBaseTimestamp).Clamp(0) / (double)Stopwatch.Frequency) * tempo);
+            else
+                return outputBaseTime;
+        }
+
+        /// <summary>
+        /// Rebases the output time on its current value before the playback state or the tempo changes, so that it does not jump.
+        /// A base timestamp in the future is kept, so the output time still holds until it. The caller holds the write lock.
+        /// </summary>
+        void ContinueOutputTimeUnsafe()
+        {
+            long timestamp = Max(Stopwatch.GetTimestamp(), outputBaseTimestamp);
+            outputBaseTime = GetInterpolatedOutputTimeUnsafe(timestamp);
+            outputBaseTimestamp = timestamp;
         }
 
         /// <remarks>
