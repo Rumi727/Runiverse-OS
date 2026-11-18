@@ -314,13 +314,35 @@ namespace RuniOS.Sounds
 
                 try
                 {
-                    UnsafeSyncChannel();
+                    UnsafeSyncChannel(mixerAdvanced: true);
                 }
                 finally
                 {
                     playingLock.ExitUpgradeableReadLock();
                 }
             }
+        }
+
+        /// <summary>
+        /// Reads the channel position between two reads of the mix stamp, so that the position pairs with the time at which the mixer processed it.
+        /// A stamp written in between fails this read, and the next position change catches up.
+        /// </summary>
+        static bool TryGetChannelTimeAtMixStamp(SoundChannel channel, out double time, out long timestamp)
+        {
+            SoundSystem system = channel.system;
+            time = 0;
+            timestamp = 0;
+
+            if (!system.TryGetMixStamp(out SoundMixStamp before))
+                return false;
+
+            time = channel.time;
+
+            if (!system.TryGetMixStamp(out SoundMixStamp after) || before != after)
+                return false;
+
+            timestamp = before.timestamp;
+            return true;
         }
 
         /// <remarks>
@@ -533,12 +555,16 @@ namespace RuniOS.Sounds
 
         /// <remarks>
         /// The caller must hold the upgradeable read lock or write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
-        /// The method may acquire the write lock through <see cref="RuniAudioSource.SyncInterpolatedTime"/> when correcting the interpolated time.
+        /// The method may acquire the write lock through <see cref="RuniAudioSource.SyncInterpolatedTime(double, long)"/> when correcting the interpolated time.
         /// <br/><br/>
         /// 호출자는 <see cref="RuniAudioSource.playingLock"/>의 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유해야 합니다.<br/>
-        /// 보간 시간을 보정할 때 <see cref="RuniAudioSource.SyncInterpolatedTime"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
+        /// 보간 시간을 보정할 때 <see cref="RuniAudioSource.SyncInterpolatedTime(double, long)"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
         /// </remarks>
-        void UnsafeSyncChannel()
+        /// <param name="mixerAdvanced">
+        /// Whether the mixer moved the channel position, which then pairs with the mix stamp instead of the current time.
+        /// A position set through the API is synchronized at the current time.
+        /// </param>
+        void UnsafeSyncChannel(bool mixerAdvanced = false)
         {
             Debug.Assert
             (
@@ -563,7 +589,12 @@ namespace RuniOS.Sounds
                 }
 
                 if (channel != null)
-                    SyncInterpolatedTime(channel.time);
+                {
+                    if (!mixerAdvanced)
+                        SyncInterpolatedTime(channel.time);
+                    else if (TryGetChannelTimeAtMixStamp(channel, out double channelTime, out long timestamp))
+                        SyncInterpolatedTime(channelTime, timestamp);
+                }
                 else
                 {
                     if (scope.asset.system.Execute(system => system.PlaySound(scope.asset, true), out SoundChannel? newChannel) && newChannel != null)
