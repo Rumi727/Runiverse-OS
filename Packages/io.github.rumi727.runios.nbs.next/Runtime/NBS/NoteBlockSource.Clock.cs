@@ -75,12 +75,27 @@ namespace RuniOS.NBS
                 SyncInterpolatedTime(_clockAnchor.time, long.MaxValue);
         }
 
-        /// <summary>Moves the interpolated time to where the timeline was when the mixer processed the clock of <paramref name="stamp"/>.</summary>
+        /// <summary>
+        /// Moves the interpolated time to where the timeline was when the mixer processed the clock of <paramref name="stamp"/>,
+        /// and the interpolated output time to where it was at the output clock.
+        /// </summary>
         void SyncTimeToStampUnsafe(SoundMixStamp stamp)
         {
             int sampleRate = SoundSystem.main.outputSampleRate;
             double linearTime = _clockAnchor.GetTime(stamp.dspClock, base.tempo, sampleRate);
             SyncInterpolatedTime(linearTime, GetMixTimestamp(stamp, _clockAnchor.dspClock, sampleRate));
+
+            // An anchor that cannot be reached holds the output time as well.
+            if (_clockAnchor.dspClock == ulong.MaxValue)
+            {
+                SyncInterpolatedOutputTime(_clockAnchor.time, long.MaxValue);
+                return;
+            }
+
+            // The output clock is behind the mixer and often before the anchor, so the timeline is extrapolated back from the anchor
+            // and passes the anchor time when its sound is output.
+            long outputOffset = (long)(stamp.outputClock - _clockAnchor.dspClock);
+            SyncInterpolatedOutputTime(_clockAnchor.time + ((outputOffset / (double)sampleRate) * base.tempo), stamp.timestamp);
         }
 
         double FoldTime(double linear) => loopRange is { } range ? range.Fold(linear, base.tempo) : linear;

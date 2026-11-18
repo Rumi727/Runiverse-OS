@@ -128,6 +128,13 @@ namespace RuniOS.NBS
         }
         [SerializeField] SoundRolloffMode _rolloffMode = SoundRolloffMode.inverse;
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// It follows <see cref="clockAnchor"/> at the output clock of the mixer, wrapped into the loop range like <see cref="time"/>.<br/>
+        /// 믹서의 출력 클록에서 <see cref="clockAnchor"/>를 따라가며, <see cref="time"/>처럼 반복 범위 안으로 접힙니다.
+        /// </remarks>
+        public override double outputTime => FoldTime(base.outputTime);
+
         /// <summary>
         /// Gets or sets the playback position in seconds. While looping, the getter wraps into the loop range.<br/>
         /// 재생 위치를 초 단위로 가져오거나 설정합니다. 반복 중이면 getter는 반복 범위 안으로 되돌아간 값을 반환합니다.
