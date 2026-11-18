@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 330" width="980" height="330" font-family='"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif' font-size="13">
+<title>인터리브에서 planar로</title>
+<defs><marker id="aink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f2937"/></marker><marker id="asub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker><marker id="agrid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker><marker id="ablue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker><marker id="alblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dbeafe"/></marker><marker id="aorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker><marker id="alorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffedd5"/></marker><marker id="agreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16a34a"/></marker><marker id="algreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dcfce7"/></marker><marker id="apurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker><marker id="alpurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ede9fe"/></marker><marker id="ared" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker><marker id="alred" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fee2e2"/></marker><marker id="agray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker><marker id="algray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f3f4f6"/></marker><marker id="ayellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ca8a04"/></marker><marker id="alyellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fef9c3"/></marker></defs>
+<rect x="0.5" y="0.5" width="979" height="329" rx="10" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="24.0" y="32.0" font-size="16" fill="#1f2937" text-anchor="start" font-weight="bold">인터리브에서 planar로</text>
+<text x="24.0" y="52.0" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">스테레오, 프레임 N개. 잡 하나가 프레임 구간 하나(16384 프레임)를 맡아 두 채널 영역에 연속으로 씁니다.</text>
+<text x="138.0" y="119.0" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal">FMOD 메모리</text>
+<text x="138.0" y="135.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">(인터리브)</text>
+<rect x="150.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="171.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L0</text>
+<rect x="196.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="217.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R0</text>
+<rect x="242.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="263.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L1</text>
+<rect x="288.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="309.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R1</text>
+<rect x="334.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="355.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L2</text>
+<rect x="380.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="401.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R2</text>
+<rect x="426.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="447.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L3</text>
+<rect x="472.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="493.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R3</text>
+<rect x="518.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="539.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L4</text>
+<rect x="564.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="585.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R4</text>
+<rect x="610.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="631.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L5</text>
+<rect x="656.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="677.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R5</text>
+<rect x="702.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="723.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L6</text>
+<rect x="748.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="769.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R6</text>
+<rect x="794.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="815.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L7</text>
+<rect x="840.0" y="95.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="861.0" y="117.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R7</text>
+<text x="138.0" y="259.0" font-size="12" fill="#1f2937" text-anchor="end" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>NativeArray&lt;short&gt;</text>
+<text x="138.0" y="275.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">(planar)</text>
+<rect x="150.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="171.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L0</text>
+<rect x="196.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="217.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L1</text>
+<rect x="242.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="263.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L2</text>
+<rect x="288.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="309.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L3</text>
+<rect x="334.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="355.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L4</text>
+<rect x="380.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="401.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L5</text>
+<rect x="426.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="447.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L6</text>
+<rect x="472.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#dbeafe" stroke="#2563eb" stroke-width="1" opacity="1"/>
+<text x="493.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>L7</text>
+<rect x="518.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="539.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R0</text>
+<rect x="564.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="585.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R1</text>
+<rect x="610.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="631.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R2</text>
+<rect x="656.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="677.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R3</text>
+<rect x="702.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="723.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R4</text>
+<rect x="748.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="769.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R5</text>
+<rect x="794.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="815.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R6</text>
+<rect x="840.0" y="235.0" width="42.0" height="34.0" rx="3" fill="#ffedd5" stroke="#ea580c" stroke-width="1" opacity="1"/>
+<text x="861.0" y="257.0" font-size="12" fill="#1f2937" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>R7</text>
+<line x1="171.0" y1="131.0" x2="171.0" y2="231.0" stroke="#2563eb" stroke-width="1.2" marker-end="url(#ablue)"/>
+<line x1="217.0" y1="131.0" x2="539.0" y2="231.0" stroke="#ea580c" stroke-width="1.2" marker-end="url(#aorange)"/>
+<line x1="263.0" y1="131.0" x2="217.0" y2="231.0" stroke="#2563eb" stroke-width="1.2" marker-end="url(#ablue)"/>
+<line x1="309.0" y1="131.0" x2="585.0" y2="231.0" stroke="#ea580c" stroke-width="1.2" marker-end="url(#aorange)"/>
+<line x1="355.0" y1="131.0" x2="263.0" y2="231.0" stroke="#2563eb" stroke-width="1.2" marker-end="url(#ablue)"/>
+<line x1="401.0" y1="131.0" x2="631.0" y2="231.0" stroke="#ea580c" stroke-width="1.2" marker-end="url(#aorange)"/>
+<text x="332.0" y="293.0" font-size="12" fill="#2563eb" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>output[i]  (0 ≤ i &lt; sampleCount)</text>
+<text x="700.0" y="293.0" font-size="12" fill="#ea580c" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>output[sampleCount + i]</text>
+<text x="882.0" y="149.0" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>source[i·2 + ch]</text>
+</svg>
