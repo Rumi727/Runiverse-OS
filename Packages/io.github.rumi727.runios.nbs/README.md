@@ -2,6 +2,8 @@
 
 Note Block Studio 곡(`.nbs`)을 Unity 에셋과 리소스팩으로 불러오고, FMOD DSP 클록에 맞춰 재생하는 패키지입니다.
 
+> 내부 구조와 작동 원리(클록 앵커, 워커 예약, 노트 배치 등)는 [Documentation~/README.md](Documentation~/README.md)에 그림과 함께 정리되어 있습니다.
+
 ## 불러오기
 
 | 경로 | 방법 |
