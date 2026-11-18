@@ -17,7 +17,7 @@ namespace RuniOS.Sounds
         unsafe MixStampState* mixStampState;
 
         /// <summary>The pass-through DSP at the head of the master channel group that writes <see cref="mixStampState"/>.</summary>
-        FMOD.DSP mixStampDSP;
+        DSP mixStampDSP;
 
         /// <summary>
         /// Gets the latest master DSP clock that the mixer processed and the timestamp at which it processed it.<br/>
@@ -107,7 +107,7 @@ namespace RuniOS.Sounds
         {
             // FMOD describes its software latency as the DSP buffer length times the buffer count.
             native.getDSPBufferSize(out uint bufferLength, out int bufferCount).ThrowIfNotOk();
-            mixStampState->outputLatency = (ulong)bufferLength * (ulong)bufferCount;
+            mixStampState->outputLatency = bufferLength * (ulong)bufferCount;
 
             DSP_DESCRIPTION description = new()
             {
@@ -121,7 +121,7 @@ namespace RuniOS.Sounds
                 userdata = (IntPtr)mixStampState
             };
 
-            native.createDSP(ref description, out FMOD.DSP dsp).ThrowIfNotOk();
+            native.createDSP(ref description, out DSP dsp).ThrowIfNotOk();
 
             try
             {
