@@ -6,7 +6,7 @@
 이 문서는 현재 패키지에 구현된 API와 수명·동기화 계약을 설명합니다. 대상은 FMOD Studio 이벤트
 시스템이 아니라 FMOD Core의 `System`, `Sound`, `Channel`입니다.
 
-> DSP 클록, 믹스 스탬프, `WaveAudioSource`의 시간 동기화 같은 내부 구조는 [Documentation~/README.md](Documentation~/README.md)에 그림과 함께 정리되어 있습니다.
+> 작동 원리(시스템 수명, 리소스 소유권, 스레드와 잠금, 클립 생성, 채널, DSP 클록과 믹스 스탬프, DSP 래퍼, `WaveAudioSource`, 리소스와 에디터)는 [Documentation~/README.md](Documentation~/README.md)에 장별로, 코드 발췌와 그림과 함께 정리되어 있습니다.
 
 ## 이 시스템이 하는 일
 
