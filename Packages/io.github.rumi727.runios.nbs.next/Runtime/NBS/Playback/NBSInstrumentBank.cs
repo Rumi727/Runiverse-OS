@@ -157,7 +157,7 @@ namespace RuniOS.NBS
         {
             for (int i = 0; i < keys.Length; i++)
             {
-                if (keys[i] is not ResourceKey key)
+                if (keys[i] is not { } key)
                     continue;
 
                 IAssetHandle? handle = ResourceManager.GetHandle(key);

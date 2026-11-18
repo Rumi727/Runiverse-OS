@@ -42,7 +42,7 @@ namespace RuniOS.UIElements.NBS
         {
             NBSVisualEffectState state = effects.GetState(tick);
 
-            Color accent = state.color is { } color ? (Color)color : defaultAccentColor;
+            Color accent = state.color ?? defaultAccentColor;
             if (state.rainbow)
                 accent = Color.HSVToRGB((float)((now * 0.25) % 1), 0.7f, 0.95f);
 
