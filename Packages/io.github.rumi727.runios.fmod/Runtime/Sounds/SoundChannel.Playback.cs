@@ -1,14 +1,11 @@
 #nullable enable
 using FMOD;
-using System.Collections.Concurrent;
 using System.Threading;
 
 namespace RuniOS.Sounds
 {
     public sealed partial class SoundChannel
     {
-        static readonly ConcurrentDictionary<SoundChannel, byte> pendingTimeSampleChannels = [];
-
         readonly ReaderWriterLockSlim playbackLock = new();
         uint? pendingTimeSample;
 
@@ -225,16 +222,15 @@ namespace RuniOS.Sounds
             if (result == RESULT.ERR_NOTREADY)
             {
                 pendingTimeSample = sample;
-                pendingTimeSampleChannels.TryAdd(this, 0);
 
-                if (Volatile.Read(ref _isDisposed) != 0)
-                    pendingTimeSampleChannels.TryRemove(this, out _);
+                if (Volatile.Read(ref _isDisposed) == 0)
+                    system.onUpdate += RetryPendingTimeSample;
 
                 return;
             }
 
             pendingTimeSample = null;
-            pendingTimeSampleChannels.TryRemove(this, out _);
+            system.onUpdate -= RetryPendingTimeSample;
             result.ThrowIfNotOkOfChannel();
         }
 
@@ -246,7 +242,7 @@ namespace RuniOS.Sounds
             {
                 if (!pendingTimeSample.HasValue)
                 {
-                    pendingTimeSampleChannels.TryRemove(this, out _);
+                    system.onUpdate -= RetryPendingTimeSample;
                     return;
                 }
 
@@ -255,34 +251,13 @@ namespace RuniOS.Sounds
                     return;
 
                 pendingTimeSample = null;
-                pendingTimeSampleChannels.TryRemove(this, out _);
+                system.onUpdate -= RetryPendingTimeSample;
 
                 result.ThrowIfNotOkOfChannel();
             }
             finally
             {
                 playbackLock.ExitWriteLock();
-            }
-        }
-
-        internal static void RetryPendingTimeSamples(SoundSystem system)
-        {
-            if (pendingTimeSampleChannels.IsEmpty)
-                return;
-
-            foreach (SoundChannel channel in pendingTimeSampleChannels.Keys)
-            {
-                if (!ReferenceEquals(channel.system, system))
-                    continue;
-
-                try
-                {
-                    channel.RetryPendingTimeSample();
-                }
-                catch (Exception exception)
-                {
-                    Debug.LogException(exception);
-                }
             }
         }
 

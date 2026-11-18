@@ -14,20 +14,7 @@ namespace RuniOS.Sounds
         /// 처리기가 실행될 때 lifecycle 상태는 변경되지 않습니다. 처리기에서 <see cref="Reset(SoundSystemSettings)"/> 또는 <see cref="Dispose()"/>를 호출하면 안 됩니다.<br/>
         /// 처리기 예외는 로그로 출력하고 Reset을 계속합니다.
         /// </remarks>
-        public event Action<SoundSystem>? onResetting
-        {
-            add
-            {
-                lock (resetEventLock)
-                    _onResetting += value;
-            }
-            remove
-            {
-                lock (resetEventLock)
-                    _onResetting -= value;
-            }
-        }
-        Action<SoundSystem>? _onResetting;
+        public event Action<SoundSystem>? onResetting;
 
         /// <summary>
         /// Occurs immediately after this system successfully completes a reset.<br/>
@@ -40,21 +27,7 @@ namespace RuniOS.Sounds
         /// 처리기가 실행될 때 시스템은 활성 상태입니다. 네이티브 재초기화에 실패하면 이 이벤트는 발생하지 않습니다.<br/>
         /// 처리기 예외는 로그로 출력하며 완료된 Reset 상태를 변경하지 않습니다.
         /// </remarks>
-        public event Action<SoundSystem>? onReset
-        {
-            add
-            {
-                lock (resetEventLock)
-                    _onReset += value;
-            }
-            remove
-            {
-                lock (resetEventLock)
-                    _onReset -= value;
-            }
-        }
-        Action<SoundSystem>? _onReset;
-        readonly System.Threading.Lock resetEventLock = new();
+        public event Action<SoundSystem>? onReset;
         bool invokingResettingHandlers;
 
         /// <summary>
@@ -125,35 +98,22 @@ namespace RuniOS.Sounds
                     nativeLock.ExitWriteLock();
                 }
 
-                InvokeResetHandlers();
+                onReset.SafeInvoke(this);
             }
         }
 
         void InvokeResettingHandlers()
         {
-            Action<SoundSystem>? handlers;
-            lock (resetEventLock)
-                handlers = _onResetting;
-
             invokingResettingHandlers = true;
 
             try
             {
-                handlers.SafeInvoke(this);
+                onResetting.SafeInvoke(this);
             }
             finally
             {
                 invokingResettingHandlers = false;
             }
-        }
-
-        void InvokeResetHandlers()
-        {
-            Action<SoundSystem>? handlers;
-            lock (resetEventLock)
-                handlers = _onReset;
-
-            handlers.SafeInvoke(this);
         }
     }
 }

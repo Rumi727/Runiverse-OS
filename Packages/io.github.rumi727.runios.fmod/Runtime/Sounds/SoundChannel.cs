@@ -123,7 +123,7 @@ namespace RuniOS.Sounds
                 return RESULT.OK;
 
             channelLists.TryRemove(channel.native.handle, out _);
-            pendingTimeSampleChannels.TryRemove(channel, out _);
+            channel.system.onUpdate -= channel.RetryPendingTimeSample;
 
             if (Interlocked.CompareExchange(ref channel._isDisposed, 1, 0) != 0)
                 return RESULT.OK;
