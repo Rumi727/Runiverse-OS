@@ -84,7 +84,7 @@ namespace RuniOS.Sounds
                 {
                     // The time holds until a base timestamp in the future is reached.
                     if (_isPlaying && !_isPaused)
-                        return baseTime + ((Math.Max(Stopwatch.GetTimestamp() - baseTimestamp, 0) / (double)Stopwatch.Frequency) * tempo);
+                        return baseTime + (((Stopwatch.GetTimestamp() - baseTimestamp).Clamp(0) / (double)Stopwatch.Frequency) * tempo);
                     else
                         return baseTime;
                 }
@@ -97,6 +97,54 @@ namespace RuniOS.Sounds
         }
         double baseTime = 0;
         long baseTimestamp = 0;
+
+        /// <summary>
+        /// Gets the playback time that is being output now, as opposed to <see cref="time"/>, which is where the playback is.<br/>
+        /// <see cref="time"/>이 재생 위치인 것과 달리, 지금 출력되고 있는 재생 시간을 가져옵니다.
+        /// </summary>
+        /// <remarks>
+        /// The derived source synchronizes it independently of <see cref="time"/> from what its backend is outputting, such as behind an output buffer.
+        /// It may differ from what is heard right after an explicit move, such as seeking, looping, or pausing.
+        /// A source that does not synchronize it only keeps it continuous across playing, pausing, and tempo changes.
+        /// The getter acquires the read lock of <see cref="playingLock"/>.<br/>
+        /// 하위 소스는 출력 버퍼 뒤처럼 백엔드가 출력하고 있는 위치를 바탕으로 <see cref="time"/>과 독립적으로 이 값을 동기화합니다.
+        /// 탐색, 반복, 일시 정지처럼 명시적으로 이동한 직후에는 들리는 위치와 다를 수 있습니다.
+        /// 이 값을 동기화하지 않는 소스는 재생, 일시 정지 및 템포 변경에 걸쳐 값을 이어 주기만 합니다.
+        /// getter는 <see cref="playingLock"/>의 읽기 잠금을 획득합니다.
+        /// </remarks>
+        public virtual double outputTime
+        {
+            get
+            {
+                playingLock.EnterReadLock();
+
+                try
+                {
+                    return GetInterpolatedOutputTimeUnsafe(Stopwatch.GetTimestamp());
+                }
+                finally
+                {
+                    playingLock.ExitReadLock();
+                }
+            }
+        }
+        double outputBaseTime = 0;
+        long outputBaseTimestamp = 0;
+
+        // The output time holds until a base timestamp in the future is reached, like the time.
+        double GetInterpolatedOutputTimeUnsafe(long timestamp) =>
+            _isPlaying && !_isPaused ? outputBaseTime + ((Math.Max(timestamp - outputBaseTimestamp, 0) / (double)Stopwatch.Frequency) * tempo) : outputBaseTime;
+
+        /// <summary>
+        /// Rebases the output time on its current value before the playback state or the tempo changes, so that it does not jump.
+        /// A base timestamp in the future is kept, so the output time still holds until it. The caller holds the write lock.
+        /// </summary>
+        void ContinueOutputTimeUnsafe()
+        {
+            long timestamp = Math.Max(Stopwatch.GetTimestamp(), outputBaseTimestamp);
+            outputBaseTime = GetInterpolatedOutputTimeUnsafe(timestamp);
+            outputBaseTimestamp = timestamp;
+        }
 
         public abstract double length { get; }
 
@@ -124,6 +172,7 @@ namespace RuniOS.Sounds
                 try
                 {
                     SyncInterpolatedTime(time);
+                    ContinueOutputTimeUnsafe();
                     _tempo = value;
                 }
                 finally
@@ -220,6 +269,7 @@ namespace RuniOS.Sounds
 
             try
             {
+                ContinueOutputTimeUnsafe();
                 _isPlaying = true;
 
                 time = startTime;
@@ -250,6 +300,7 @@ namespace RuniOS.Sounds
                 _isPlaying = false;
 
                 time = 0;
+                SyncInterpolatedOutputTime(0, Stopwatch.GetTimestamp());
                 OnStop();
             }
             finally
@@ -275,6 +326,7 @@ namespace RuniOS.Sounds
             try
             {
                 SyncInterpolatedTime(time);
+                ContinueOutputTimeUnsafe();
                 _isPaused = true;
 
                 OnPause();
@@ -302,6 +354,7 @@ namespace RuniOS.Sounds
             try
             {
                 SyncInterpolatedTime(time);
+                ContinueOutputTimeUnsafe();
                 _isPaused = false;
 
                 OnUnPause();
@@ -353,6 +406,39 @@ namespace RuniOS.Sounds
             {
                 baseTime = time;
                 baseTimestamp = timestamp;
+            }
+            finally
+            {
+                playingLock.ExitWriteLock();
+            }
+        }
+
+        /// <summary>
+        /// Synchronizes the interpolated output time so that it was <paramref name="time"/> at <paramref name="timestamp"/>.<br/>
+        /// 보간된 출력 시간이 <paramref name="timestamp"/>에 <paramref name="time"/>이었도록 동기화합니다.
+        /// </summary>
+        /// <param name="time">
+        /// The playback time being output at <paramref name="timestamp"/>.<br/>
+        /// <paramref name="timestamp"/>에 출력되던 재생 시간입니다.
+        /// </param>
+        /// <param name="timestamp">
+        /// The <see cref="Stopwatch.GetTimestamp"/> value at which <paramref name="time"/> was being output.
+        /// A timestamp in the future holds the output time at <paramref name="time"/> until it is reached.<br/>
+        /// <paramref name="time"/>이 출력되던 <see cref="Stopwatch.GetTimestamp"/> 값입니다.
+        /// 미래의 타임스탬프는 그 시각이 될 때까지 출력 시간을 <paramref name="time"/>에 유지합니다.
+        /// </param>
+        /// <remarks>
+        /// Acquires the write lock of <see cref="playingLock"/> under the same conditions as <see cref="SyncInterpolatedTime(double)"/>.<br/>
+        /// <see cref="SyncInterpolatedTime(double)"/>과 같은 조건으로 <see cref="playingLock"/>의 쓰기 잠금을 획득합니다.
+        /// </remarks>
+        protected void SyncInterpolatedOutputTime(double time, long timestamp)
+        {
+            playingLock.EnterWriteLock();
+
+            try
+            {
+                outputBaseTime = time;
+                outputBaseTimestamp = timestamp;
             }
             finally
             {
