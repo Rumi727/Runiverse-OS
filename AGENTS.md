@@ -72,6 +72,7 @@
 - A class that declares a Unity lifecycle API method (for example one marked with `[OnAssemblyLoaded]` or `[OnAssemblyUnloading]` from `Unity.Scripting.LifecycleManagement`) must be declared `partial`. Do this even when the whole class lives in one file; follow the existing services such as `LinuxFileOpenService` (`sealed partial class`).
 
 - Prefer `MathUtility` and its extensions over `System.Math` and `UnityEngine.Mathf`. Use `Math`/`Mathf` only when `MathUtility` and its extensions provide no equivalent.
+- Do not use C# null-check syntax on `UnityEngine.Object`-derived objects (`?.`, `??`, `??=`, `is null`, `is not null`, `is { }`, and similar patterns). They bypass Unity's overloaded `==`/`!=` and its destroyed-object ("fake null") semantics. Use an explicit `if` or a ternary operator with `== null` / `!= null` (or an implicit `bool` conversion) instead.
 
 ## No Python-Style Code and Heap Allocation
 
