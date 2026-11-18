@@ -73,10 +73,14 @@ namespace RuniOS.Sounds
                 ThrowIfUnavailableUnsafe();
                 return CreateStreamUnsafe(streamFile);
             }
+            catch
+            {
+                streamFile.Dispose();
+                throw;
+            }
             finally
             {
                 nativeLock.ExitReadLock();
-                streamFile.Dispose();
             }
         }
 

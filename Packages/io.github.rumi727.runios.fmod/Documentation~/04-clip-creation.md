@@ -5,15 +5,16 @@
 [`WaveAudioClip`](../Runtime/Sounds/WaveAudioClip.cs#L7)은 FMOD `Sound` 하나의 래퍼이고, Sound 패키지의 `IAudioClip`을 구현합니다. 클립은 소리 데이터일 뿐이고 재생은 [채널](05-channel.md)이 합니다.
 이 장은 클립을 만드는 다섯 경로, 스트림을 관리 `Stream`에서 읽게 하는 파일 콜백, 그리고 파형 표시에 쓰는 PCM 데이터 읽기를 다룹니다.
 
-- [4.1 생성 경로 한눈에](#41-생성-경로-한눈에)
-- [4.2 `CreateSound`와 `CreatePCM`](#42-createsound와-createpcm)
-- [4.3 `CreateStream`: NONBLOCKING으로 열고 기다리기](#43-createstream-nonblocking으로-열고-기다리기)
-- [4.4 비동기 생성](#44-비동기-생성)
-- [4.5 `SoundFileStream`: 파일 콜백](#45-soundfilestream-파일-콜백)
-- [4.6 생성자와 속성](#46-생성자와-속성)
-- [4.7 해제](#47-해제)
-- [4.8 PCM 데이터 읽기](#48-pcm-데이터-읽기)
-- [4.9 `CreatePlanarSamples`: 파형용 planar 변환](#49-createplanarsamples-파형용-planar-변환)
+- [4. 클립 생성과 데이터: `WaveAudioClip`](#4-클립-생성과-데이터-waveaudioclip)
+  - [4.1 생성 경로 한눈에](#41-생성-경로-한눈에)
+  - [4.2 `CreateSound`와 `CreatePCM`](#42-createsound와-createpcm)
+  - [4.3 `CreateStream`: NONBLOCKING으로 열고 기다리기](#43-createstream-nonblocking으로-열고-기다리기)
+  - [4.4 비동기 생성](#44-비동기-생성)
+  - [4.5 `SoundFileStream`: 파일 콜백](#45-soundfilestream-파일-콜백)
+  - [4.6 생성자와 속성](#46-생성자와-속성)
+  - [4.7 해제](#47-해제)
+  - [4.8 PCM 데이터 읽기](#48-pcm-데이터-읽기)
+  - [4.9 `CreatePlanarSamples`: 파형용 planar 변환](#49-createplanarsamples-파형용-planar-변환)
 
 ---
 
@@ -111,8 +112,6 @@
         }
     }
 ```
-
-> **관찰된 동작:** `finally`의 `streamFile.Dispose()`([`#L79`](../Runtime/Sounds/SoundSystem.CreateStream.cs#L79))는 성공해서 클립을 돌려줄 때도 실행됩니다. 이 호출은 FMOD 콜백이 쓰는 `GCHandle`을 풀고, `leaveOpen == false`면 `stream`도 닫습니다. 반면 같은 `streamFile`은 클립의 `nativeLifetime`으로 넘어가 있고([`#L127`](../Runtime/Sounds/SoundSystem.CreateStream.cs#L127)), XML 주석은 "반환된 클립이 해제될 때까지 FMOD가 `stream`에 접근한다"고 적고 있습니다. 코드대로라면 생성 이후의 읽기·탐색 콜백은 [§4.5](#45-soundfilestream-파일-콜백)의 `catch`로 가서 `ERR_FILE_BAD`/`ERR_FILE_COULDNOTSEEK`을 돌려줍니다. 물리 경로가 없는 `IONode`를 `stream` 모드로 불러오는 경로([9장](09-resources-and-editor.md#91-waveaudioassetregistry))가 이 메서드를 거칩니다.
 
 ## 4.4 비동기 생성
 
