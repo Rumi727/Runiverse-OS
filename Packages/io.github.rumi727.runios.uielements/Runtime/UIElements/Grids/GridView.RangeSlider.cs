@@ -39,8 +39,8 @@ namespace RuniOS.UIElements.Grids
             double length = range.y - range.x;
 
             // The zoom is limited by the axis. When only the low end was dragged, the offset is worked out from the limited zoom so that the high end stays.
-            double pixelsPerUnit = Math.Clamp(length > 0 ? axis.width / length : double.PositiveInfinity, axis.minimumPixelsPerUnit, axis.maximumPixelsPerUnit);
-            double offset = range.x != previous.x && range.y == previous.y ? range.y - (axis.width / pixelsPerUnit) : range.x;
+            double pixelsPerUnit = (length > 0 ? axis.width / length : double.PositiveInfinity).Clamp(axis.minimumPixelsPerUnit, axis.maximumPixelsPerUnit);
+            double offset = !range.x.Approximately(previous.x) && range.y.Approximately(previous.y) ? range.y - (axis.width / pixelsPerUnit) : range.x;
             axis.SetView(offset, pixelsPerUnit);
         }
 
@@ -55,14 +55,14 @@ namespace RuniOS.UIElements.Grids
             horizontalRangeSlider.style.display = DisplayStyle.Flex;
 
             GridRange visible = axis.GetRange();
-            float low = (float)Math.Min(range.start, visible.start);
-            float high = (float)Math.Max(range.end, visible.end);
+            float low = Min(range.start, visible.start).ClampToFloat();
+            float high = Max(range.end, visible.end).ClampToFloat();
 
             // Setting a limit clamps the value and reports it as changed, which would move the axis, and a low limit above the high limit throws.
             // The limits are widened first, then the value is set, then the limits are narrowed around it.
             MinMaxSlider slider = horizontalRangeSlider;
-            slider.highLimit = Math.Max(slider.highLimit, high);
-            slider.lowLimit = Math.Min(slider.lowLimit, low);
+            slider.highLimit = Max(slider.highLimit, high);
+            slider.lowLimit = Min(slider.lowLimit, low);
             slider.SetValueWithoutNotify(new Vector2((float)visible.start, (float)visible.end));
             slider.lowLimit = low;
             slider.highLimit = high;

@@ -109,7 +109,7 @@ namespace RuniOS.UIElements.NBS
 
             tint.EnableInClassList(tintDownUssClassName, note.pitch < 0);
             tint.EnableInClassList(tintUpUssClassName, note.pitch > 0);
-            tint.style.opacity = Math.Min(0.5f, Math.Abs(note.pitch) / 100f * alpha * 0.25f);
+            tint.style.opacity = MathUtility.Min(0.5f, (note.pitch.Abs() / 100f) * alpha * 0.25f);
 
             key.text = GetKeyName(note.key);
             value.text = map.GetFunction(note.instrument) switch

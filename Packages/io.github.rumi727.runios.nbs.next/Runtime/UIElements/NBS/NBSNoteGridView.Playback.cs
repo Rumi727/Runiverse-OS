@@ -237,7 +237,7 @@ namespace RuniOS.UIElements.NBS
             }
 
             double beatsPerMinute = currentMap.tempo.GetChangeAtTick(tick).beatsPerMinute;
-            if (beatsPerMinute != shownBeatsPerMinute)
+            if (!beatsPerMinute.Approximately(shownBeatsPerMinute))
             {
                 shownBeatsPerMinute = beatsPerMinute;
                 tempoLabel.text = $"{beatsPerMinute:0.##} BPM";

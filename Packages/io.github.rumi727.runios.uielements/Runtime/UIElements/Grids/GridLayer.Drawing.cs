@@ -86,7 +86,7 @@ namespace RuniOS.UIElements.Grids
                     if (denseRuns.TryGetValue(rect.y, out int index))
                     {
                         (Rect run, Color runColor) = rectBuffer[index];
-                        if (runColor == color && run.height == rect.height && rect.xMin < run.xMax + denseMinimumSize)
+                        if (runColor == color && run.height.Approximately(rect.height) && rect.xMin < run.xMax + denseMinimumSize)
                         {
                             run.xMax = Math.Max(run.xMax, rect.xMax);
                             rectBuffer[index] = (run, runColor);
