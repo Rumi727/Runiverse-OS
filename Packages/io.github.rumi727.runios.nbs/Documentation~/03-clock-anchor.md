@@ -2,7 +2,7 @@
 
 > 기준 커밋: `440c549c`. [← 목차](README.md) · 이전: [2. 데이터 모델](02-data-model.md) · 다음: [4. 워커와 예약](04-worker-scheduling.md)
 >
-> 선행: [Sound — 시간 보간](../../io.github.rumi727.runios.sound/Documentation~/03-time-interpolation.md), [FMOD — DSP 클록과 믹스 스탬프](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md)
+> 선행: [Sound — 시간 보간](../../io.github.rumi727.runios.sound/Documentation~/03-time-interpolation.md), [FMOD — DSP 클록과 믹스 스탬프](../../io.github.rumi727.runios.fmod/Documentation~/06-dsp-clock-and-mix-stamp.md)
 
 NBS 재생에서 **시간의 정의는 하나뿐**입니다. `NoteBlockSource`가 가진 `NBSClockAnchor`입니다.
 소리의 예약 시각(스케줄러), 화면의 재생 위치(`time`), 스피커 위치(`outputTime`)가 모두 이 값 하나에서 계산됩니다.
@@ -52,7 +52,7 @@ NBS 재생에서 **시간의 정의는 하나뿐**입니다. `NoteBlockSource`�
     }
 ```
 
-FMOD가 알려 주는 마스터 클록은 "믹스 중인 블록의 시작"일 수도 "다음 블록의 시작"일 수도 있습니다. 한 블록을 더하면 **믹서가 아직 손대지 않은 첫 클록**이 됩니다([FMOD 문서 그림](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md#1-dsp-클록과-믹스-블록)).
+FMOD가 알려 주는 마스터 클록은 "믹스 중인 블록의 시작"일 수도 "다음 블록의 시작"일 수도 있습니다. 한 블록을 더하면 **믹서가 아직 손대지 않은 첫 클록**이 됩니다([FMOD 문서 그림](../../io.github.rumi727.runios.fmod/Documentation~/06-dsp-clock-and-mix-stamp.md#61-dsp-클록과-믹스-블록)).
 
 모든 명령(seek, 재생, tempo·반복 변경, 일시 정지·재개)은 **이 클록에 앵커를 찍습니다.** 그래서
 
@@ -193,7 +193,7 @@ FMOD가 알려 주는 마스터 클록은 "믹스 중인 블록의 시작"일 �
 ```
 
 - ② 블록마다 **한 번만** 기준점을 다시 잡습니다. 그 사이에는 `RuniAudioSource`의 보간이 매끄럽게 이어 줍니다.
-- ③ **기다리면 교착 상태가 됩니다.** 이 처리기는 `SoundSystem`의 `nativeLock` 읽기 잠금을 보유한 채 실행됩니다([FMOD 문서](../../io.github.rumi727.runios.fmod/Documentation~/README.md#스레드와-잠금-요약)).
+- ③ **기다리면 교착 상태가 됩니다.** 이 처리기는 `SoundSystem`의 `nativeLock` 읽기 잠금을 보유한 채 실행됩니다([FMOD 문서](../../io.github.rumi727.runios.fmod/Documentation~/03-threads-and-locks.md#33-update와-onupdate)).
 
   ```mermaid
   sequenceDiagram
@@ -279,7 +279,7 @@ FMOD가 알려 주는 마스터 클록은 "믹스 중인 블록의 시작"일 �
 
 ## 3.9 `WaveAudioSource`와 비교
 
-| | `WaveAudioSource` ([FMOD 문서](../../io.github.rumi727.runios.fmod/Documentation~/wave-audio-source.md)) | `NoteBlockSource` |
+| | `WaveAudioSource` ([FMOD 문서](../../io.github.rumi727.runios.fmod/Documentation~/08-wave-audio-source.md)) | `NoteBlockSource` |
 | --- | --- | --- |
 | 진실의 원천 | 단일 `SoundChannel`의 재생 위치 | 자기 `NBSClockAnchor` (채널이 노트마다 수십 개라 하나를 기준으로 삼을 수 없음) |
 | `time` 갱신 시점 | 채널 위치가 바뀐 업데이트 | 스탬프 `dspClock`이 바뀐 업데이트 |

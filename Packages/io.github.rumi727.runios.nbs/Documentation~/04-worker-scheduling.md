@@ -290,7 +290,7 @@ sequenceDiagram
    - 잘리지 않은 소리는 끝까지 자연 재생되므로 필요 없습니다.
    - 역재생 소리는 잘린 지점에서 **시작**해 샘플 0에서 자연히 끝나므로 필요 없습니다.
 7. ⑪ FMOD는 음수 frequency를 역재생으로 처리합니다. `clip.frequency`는 원본 샘플 레이트입니다. 스트림 클립은 역재생할 수 없어서, 5장의 `IsAudible`이 pitch < 0일 때 미리 제외합니다.
-8. ⑩⑯ 일시 정지 상태로 만들고 모든 속성과 예약을 정한 뒤 재개하는 [FMOD 패턴](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md#2-setdelay-클록으로-시작정지-예약)입니다. `PlaySound` 람다는 `static`이고, 클립을 상태 인자로 넘겨 캡처를 피합니다.
+8. ⑩⑯ 일시 정지 상태로 만들고 모든 속성과 예약을 정한 뒤 재개하는 [FMOD 패턴](../../io.github.rumi727.runios.fmod/Documentation~/06-dsp-clock-and-mix-stamp.md#62-setdelay-클록으로-시작정지-예약)입니다. `PlaySound` 람다는 `static`이고, 클립을 상태 인자로 넘겨 캡처를 피합니다.
 9. ⑮ `stopHandler`는 이 스케줄러를 캡처하는 람다라 노트마다 한 번 할당됩니다. 나중에 `StopVoice`에서 구독을 끊으려면 같은 델리게이트 인스턴스가 필요해서 `Voice`에 보관합니다.
 
 > 스케줄러가 바꾸는 것은 `SoundChannel`의 시작·정지 **예약**과 frequency뿐입니다. 소리 사이의 간격은 `startClock`끼리의 차이로 정해지며, 이 값들은 모두 같은 앵커 직선에서 나옵니다. 그래서 **워커가 언제 순회하든 샘플 단위로 정확**합니다.
