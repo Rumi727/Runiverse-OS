@@ -7,12 +7,21 @@ using System.Threading;
 
 namespace RuniOS.Sounds
 {
+    /// <summary>
+    /// Plays a <see cref="WaveAudioClip"/> through an FMOD channel and follows the channel position.<br/>
+    /// FMOD 채널로 <see cref="WaveAudioClip"/>을 재생하고 채널 위치를 따라갑니다.
+    /// </summary>
     [ExecuteAlways]
     [AddComponentMenu("Audio/Wave Audio Source")]
     public sealed class WaveAudioSource : RuniAudioSource, IReloadable
     {
+        /// <summary>
+        /// Gets or sets the reference to the clip that this source plays.<br/>
+        /// 이 소스가 재생할 클립의 참조를 가져오거나 설정합니다.
+        /// </summary>
         /// <remarks>
-        /// 메인 스레드에서만 사용해야합니다!
+        /// Must be used only from the main thread.<br/>
+        /// 메인 스레드에서만 사용해야 합니다.
         /// </remarks>
         public AssetRef<WaveAudioClip> clipRef
         {
@@ -29,6 +38,7 @@ namespace RuniOS.Sounds
         /// </remarks>
         public override double outputTime => base.outputTime - pitchDSPTimeOffset;
 
+        /// <inheritdoc/>
         /// <remarks>
         /// The getter delegates to <see cref="RuniAudioSource.time"/> and acquires the read lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// The setter acquires the write lock while synchronizing the interpolated time and seeking the current channel.
@@ -56,6 +66,10 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <summary>
+        /// Gets or sets the playback position of the current channel in PCM samples, or zero when there is no channel.<br/>
+        /// 현재 채널의 재생 위치를 PCM 샘플 단위로 가져오거나 설정하며, 채널이 없으면 0입니다.
+        /// </summary>
         /// <remarks>
         /// The getter does not acquire <see cref="RuniAudioSource.playingLock"/> and reads the current channel through its own channel lock.<br/>
         /// The setter acquires the write lock while synchronizing the interpolated time and seeking the current channel.
@@ -87,15 +101,25 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override double length => Volatile.Read(ref clipLength);
         double clipLength = 0;
 
+        /// <summary>
+        /// Gets the length of the current clip in PCM samples.<br/>
+        /// 현재 클립의 길이를 PCM 샘플 단위로 가져옵니다.
+        /// </summary>
         public uint samples => clipSamples;
         volatile uint clipSamples = 0;
 
+        /// <summary>
+        /// Gets the default sample rate of the current clip in hertz.<br/>
+        /// 현재 클립의 기본 샘플 레이트를 헤르츠 단위로 가져옵니다.
+        /// </summary>
         public float frequency => clipFrequency;
         volatile float clipFrequency = 0;
 
+        /// <inheritdoc/>
         public override float volume
         {
             get => base.volume;
@@ -106,6 +130,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         /// <remarks>
         /// The getter does not acquire <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// The setter delegates to <see cref="RuniAudioSource.tempo"/>, which acquires the write lock, and updates the current channel after that lock is released.
@@ -123,6 +148,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float pitch
         {
             get => base.pitch;
@@ -133,6 +159,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override bool loop
         {
             get => base.loop;
@@ -143,6 +170,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override double loopStart
         {
             get => base.loopStart;
@@ -153,6 +181,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override double loopEnd
         {
             get => base.loopEnd;
@@ -163,6 +192,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float panStereo
         {
             get => base.panStereo;
@@ -173,6 +203,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float spatialBlend
         {
             get => base.spatialBlend;
@@ -183,6 +214,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float dopplerLevel
         {
             get => base.dopplerLevel;
@@ -193,6 +225,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float spread
         {
             get => base.spread;
@@ -203,6 +236,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float minDistance
         {
             get => base.minDistance;
@@ -213,6 +247,7 @@ namespace RuniOS.Sounds
             }
         }
 
+        /// <inheritdoc/>
         public override float maxDistance
         {
             get => base.maxDistance;
@@ -238,8 +273,13 @@ namespace RuniOS.Sounds
         }
         [SerializeField] volatile SoundRolloffMode _rolloffMode = SoundRolloffMode.inverse;
 
+        /// <summary>
+        /// Gets or sets whether the Doppler velocity is computed from the movement of the transform when there is no rigidbody.<br/>
+        /// 리지드바디가 없을 때 트랜스폼의 이동으로 도플러 속도를 계산할지 여부를 가져오거나 설정합니다.
+        /// </summary>
         /// <remarks>
-        /// 메인 스레드에서만 사용해야합니다!
+        /// Must be used only from the main thread.<br/>
+        /// 메인 스레드에서만 사용해야 합니다.
         /// </remarks>
         public bool nonRigidbodyVelocity
         {
@@ -284,6 +324,7 @@ namespace RuniOS.Sounds
 
         Vector3 lastPosition;
 
+        /// <inheritdoc/>
         /// <remarks>
         /// <see cref="RuniAudioSource.OnEnable"/> temporarily acquires the write lock while setting the active state.<br/>
         /// The remaining initialization runs after that lock is released.
@@ -331,9 +372,28 @@ namespace RuniOS.Sounds
         }
 
         /// <summary>
-        /// Reads the channel position between two reads of the mix stamp, so that the position pairs with the time at which the mixer processed it.
+        /// Reads the channel position between two reads of the mix stamp, so that the position pairs with the time at which the mixer processed it.<br/>
         /// A stamp written in between fails this read, and the next position change catches up.
+        /// <br/><br/>
+        /// 믹스 스탬프를 두 번 읽는 사이에 채널 위치를 읽어, 그 위치를 믹서가 처리한 시각과 짝짓습니다.<br/>
+        /// 그 사이에 스탬프가 기록되면 이번 읽기는 실패하고, 다음 위치 변경에서 따라잡습니다.
         /// </summary>
+        /// <param name="channel">
+        /// The channel to read.<br/>
+        /// 읽을 채널입니다.
+        /// </param>
+        /// <param name="time">
+        /// The channel position in seconds when successful; otherwise, the position read or zero.<br/>
+        /// 성공하면 초 단위 채널 위치이고, 그렇지 않으면 읽은 위치 또는 0입니다.
+        /// </param>
+        /// <param name="stamp">
+        /// The stamp paired with <paramref name="time"/> when successful; otherwise, the first stamp read or <see langword="default"/>.<br/>
+        /// 성공하면 <paramref name="time"/>과 짝지은 스탬프이고, 그렇지 않으면 처음 읽은 스탬프 또는 <see langword="default"/>입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if both reads returned the same stamp; otherwise, <see langword="false"/>.<br/>
+        /// 두 번의 읽기가 같은 스탬프를 반환했으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
         static bool TryGetChannelTimeAtMixStamp(SoundChannel channel, out double time, out SoundMixStamp stamp)
         {
             SoundSystem system = channel.system;
@@ -347,16 +407,45 @@ namespace RuniOS.Sounds
         }
 
         /// <summary>
-        /// Synchronizes the output time from a channel position at the end of the block of <paramref name="stamp"/>.
+        /// Synchronizes the output time from a channel position at the end of the block of <paramref name="stamp"/>.<br/>
         /// The output is behind that position by the software buffer, which is the distance from the stamp clock to its output clock.
+        /// <br/><br/>
+        /// <paramref name="stamp"/> 블록의 끝에서의 채널 위치로 출력 시간을 동기화합니다.<br/>
+        /// 출력은 그 위치보다 소프트웨어 버퍼만큼 뒤에 있으며, 이는 스탬프 클록에서 출력 클록까지의 거리입니다.
         /// </summary>
+        /// <param name="channelTime">
+        /// The channel position in seconds at the end of the block of <paramref name="stamp"/>.<br/>
+        /// <paramref name="stamp"/> 블록의 끝에서의 초 단위 채널 위치입니다.
+        /// </param>
+        /// <param name="stamp">
+        /// The mix stamp that gives the software buffer and the timestamp.<br/>
+        /// 소프트웨어 버퍼와 타임스탬프를 제공하는 믹스 스탬프입니다.
+        /// </param>
+        /// <param name="sampleRate">
+        /// The output sample rate of the sound system.<br/>
+        /// 사운드 시스템의 출력 샘플 레이트입니다.
+        /// </param>
         void SyncOutputTimeToMixStamp(double channelTime, SoundMixStamp stamp, int sampleRate)
         {
             double outputDelay = (stamp.dspClock - stamp.outputClock) / (double)sampleRate;
             SyncInterpolatedOutputTime(channelTime - (outputDelay * tempo), stamp.timestamp);
         }
 
-        /// <summary>Synchronizes the output time from a channel position set now, using the latest stamp. Without a stamp, the output time is left as it is.</summary>
+        /// <summary>
+        /// Synchronizes the output time from a channel position set now, using the latest stamp.<br/>
+        /// Without a stamp, the output time is left as it is.
+        /// <br/><br/>
+        /// 최신 스탬프를 사용해 지금 설정한 채널 위치로 출력 시간을 동기화합니다.<br/>
+        /// 스탬프가 없으면 출력 시간을 그대로 둡니다.
+        /// </summary>
+        /// <param name="channel">
+        /// The channel whose sound system gives the stamp.<br/>
+        /// 스탬프를 제공하는 사운드 시스템의 채널입니다.
+        /// </param>
+        /// <param name="channelTime">
+        /// The channel position in seconds that was set now.<br/>
+        /// 지금 설정한 초 단위 채널 위치입니다.
+        /// </param>
         void SyncOutputTimeToLatestMixStamp(SoundChannel channel, double channelTime)
         {
             if (channel.system.TryGetMixStamp(out SoundMixStamp stamp))
@@ -405,6 +494,7 @@ namespace RuniOS.Sounds
             lastPosition = transform.position;
         }
 
+        /// <inheritdoc/>
         /// <remarks>
         /// Acquires the write lock of <see cref="RuniAudioSource.playingLock"/> while disabling playback, detaching reload behavior, and clearing source state.<br/>
         /// The previous asset scope is queued for disposal after the lock is released.
@@ -441,6 +531,14 @@ namespace RuniOS.Sounds
 
         readonly AsyncReloadGate reloadGate = new();
 
+        /// <summary>
+        /// Loads the clip of <see cref="clipRef"/> when it refers to a different target, and synchronizes the channel with it.<br/>
+        /// <see cref="clipRef"/>가 다른 대상을 가리키면 그 클립을 로드하고 채널을 동기화합니다.
+        /// </summary>
+        /// <returns>
+        /// An asynchronous operation that represents completion of the reload.<br/>
+        /// 리로드 완료를 나타내는 비동기 작업입니다.
+        /// </returns>
         /// <remarks>
         /// Must be called only from the main thread.<br/>
         /// The asynchronous load runs without holding <see cref="RuniAudioSource.playingLock"/>; the write lock is acquired only when replacing the scope and synchronizing the channel.
@@ -547,24 +645,28 @@ namespace RuniOS.Sounds
             return defaultValue;
         }
 
+        /// <inheritdoc/>
         /// <remarks>
         /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
         /// </remarks>
         protected override void OnPlay() => UnsafeSyncChannel();
 
+        /// <inheritdoc/>
         /// <remarks>
         /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
         /// </remarks>
         protected override void OnStop() => UnsafeSyncChannel();
 
+        /// <inheritdoc/>
         /// <remarks>
         /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
         /// </remarks>
         protected override void OnPause() => TryGetAliveChannel(UnsafeUpdateChannelPause);
 
+        /// <inheritdoc/>
         /// <remarks>
         /// Called while the current thread holds the write lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// 현재 스레드가 <see cref="RuniAudioSource.playingLock"/>의 쓰기 잠금을 보유한 상태에서 호출됩니다.
@@ -579,8 +681,11 @@ namespace RuniOS.Sounds
         /// 보간 시간을 보정할 때 <see cref="RuniAudioSource.SyncInterpolatedTime(double, long)"/>을 통해 쓰기 잠금을 획득할 수 있습니다.
         /// </remarks>
         /// <param name="mixerAdvanced">
-        /// Whether the mixer moved the channel position, which then pairs with the mix stamp instead of the current time.
+        /// Whether the mixer moved the channel position, which then pairs with the mix stamp instead of the current time.<br/>
         /// A position set through the API is synchronized at the current time.
+        /// <br/><br/>
+        /// 믹서가 채널 위치를 옮겼는지 여부이며, 그렇다면 위치를 현재 시각 대신 믹스 스탬프와 짝짓습니다.<br/>
+        /// API로 설정한 위치는 현재 시각으로 동기화합니다.
         /// </param>
         void UnsafeSyncChannel(bool mixerAdvanced = false)
         {
