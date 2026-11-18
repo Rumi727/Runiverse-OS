@@ -27,7 +27,7 @@ FMOD 믹서는 출력 샘플을 **블록 단위**로 계산합니다. 블록 길
 | 용어 | 의미 | 코드 |
 | --- | --- | --- |
 | master DSP clock | FMOD가 알려 주는 현재 클록. **믹스 중인 블록의 시작**일 수도, **다음 블록의 시작**일 수도 있습니다. | `GetMasterDSPClock()` |
-| 출력 지연 | 믹스 끝 위치와 스피커 위치의 차이 = `bufferLength · bufferCount` 샘플 | [`CreateMixStampDSPUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L124) |
+| 출력 지연 | 믹스 끝 위치와 스피커 위치의 차이 = `bufferLength · bufferCount` 샘플 | [`CreateMixStampDSPUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L135) |
 | 다음 믹스 클록 | master clock + 한 블록. 믹서가 **아직 손대지 않았음이 확실한** 첫 클록 | 이 패키지에는 API가 없음. 호출자가 계산 |
 
 > 한 블록을 더해야 하는 이유: 클록 값이 "믹스 중인 블록의 시작"이라면 그 블록은 이미 계산되고 있어서, 그 안의 샘플로 예약한 소리는 정확한 위치에서 시작하지 못합니다. 어느 경우든 한 블록 뒤는 아직 믹스 전입니다.
@@ -84,29 +84,29 @@ public readonly record struct SoundMixStamp(ulong dspClock, ulong outputClock, l
 
 ### 어떻게 블록마다 끼어드는가
 
-[`CreateMixStampDSPUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L124)는 `InitializeNative` 마지막에 호출되어([`SoundSystem.cs#L365`](../Runtime/Sounds/SoundSystem.cs#L365)), 소리를 바꾸지 않는 커스텀 DSP를 **마스터 채널 그룹의 HEAD**에 붙입니다.
+[`CreateMixStampDSPUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L135)는 `InitializeNative` 마지막에 호출되어([`SoundSystem.cs#L365`](../Runtime/Sounds/SoundSystem.cs#L365)), 소리를 바꾸지 않는 커스텀 DSP를 **마스터 채널 그룹의 HEAD**에 붙입니다.
 
 ```csharp
 // Runtime/Sounds/SoundSystem.MixStamp.cs
-127 native.getDSPBufferSize(out uint bufferLength, out int bufferCount).ThrowIfNotOk();
-128 mixStampState->outputLatency = bufferLength * (ulong)bufferCount;          // ①
-130 DSP_DESCRIPTION description = new()
+138 native.getDSPBufferSize(out uint bufferLength, out int bufferCount).ThrowIfNotOk();
+139 mixStampState->outputLatency = bufferLength * (ulong)bufferCount;          // ①
+141 DSP_DESCRIPTION description = new()
     {
         …
-137     read = mixStampReadCallback,                                           // ②
-138     shouldiprocess = mixStampShouldProcessCallback,                        // ③
-139     userdata = (IntPtr)mixStampState                                       // ④
+148     read = mixStampReadCallback,                                           // ②
+149     shouldiprocess = mixStampShouldProcessCallback,                        // ③
+150     userdata = (IntPtr)mixStampState                                       // ④
     };
-142 native.createDSP(ref description, out DSP dsp).ThrowIfNotOk();
+153 native.createDSP(ref description, out DSP dsp).ThrowIfNotOk();
     …
-147 native.getMasterChannelGroup(out ChannelGroup masterGroup).ThrowIfNotOk();
-148 masterGroup.addDSP(CHANNELCONTROL_DSP_INDEX.HEAD, dsp).ThrowIfNotOk();    // ⑤
+158 native.getMasterChannelGroup(out ChannelGroup masterGroup).ThrowIfNotOk();
+159 masterGroup.addDSP(CHANNELCONTROL_DSP_INDEX.HEAD, dsp).ThrowIfNotOk();    // ⑤
 ```
 
 1. ① 출력 지연을 한 번 계산해 공유 상태에 저장합니다. 버퍼 크기는 `init` 뒤에 바뀌지 않으므로 블록마다 다시 읽을 필요가 없습니다.
 2. ② 신호를 그대로 복사하는 `read`입니다. 실제로는 거의 불리지 않습니다(④ 참고).
 3. ③ 블록마다 호출되는 `shouldiprocess`가 진짜 목적입니다.
-4. ④ 스탬프 상태(`MixStampState`)는 GC가 옮기지 못하도록 `NativeMemory.AllocZeroed`로 할당한 **네이티브 메모리**입니다([`AllocateMixStampState`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L107)). 시스템 하나에 한 번만 할당하며, `Reset`할 때는 지우기만 하고([`ClearMixStampStateUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L122)) 시스템을 해제할 때 반납합니다. 해제에 실패한 시스템은 아직 이 메모리에 쓰고 있을 수 있으므로 반납하지 않습니다([1장 §1.7](01-system-lifecycle.md#17-dispose) ⑥).
+4. ④ 스탬프 상태(`MixStampState`)는 GC가 옮기지 못하도록 `NativeMemory.AllocZeroed`로 할당한 **네이티브 메모리**입니다([`AllocateMixStampState`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L118)). 시스템 하나에 한 번만 할당하며, `Reset`할 때는 지우기만 하고([`ClearMixStampStateUnsafe`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L133)) 시스템을 해제할 때 반납합니다. 해제에 실패한 시스템은 아직 이 메모리에 쓰고 있을 수 있으므로 반납하지 않습니다([1장 §1.7](01-system-lifecycle.md#17-dispose) ⑥).
 5. ⑤ HEAD는 마스터 그룹 DSP 체인의 출력 쪽 끝입니다. 모든 채널과 그룹을 섞은 뒤 처리되므로, 매 블록 **같은 지점**에서 스탬프를 찍습니다.
 
 콜백 델리게이트는 `static readonly` 필드에 보관해서([`Callbacks.cs#L12`](../Runtime/Sounds/SoundSystem.MixStamp.Callbacks.cs#L12)) 네이티브 썽크가 GC되지 않게 합니다.
@@ -152,39 +152,38 @@ public readonly record struct SoundMixStamp(ulong dspClock, ulong outputClock, l
 
 ```csharp
 // Runtime/Sounds/SoundSystem.MixStamp.cs
-64  public unsafe bool TryGetMixStamp(out SoundMixStamp stamp)
+75  public unsafe bool TryGetMixStamp(out SoundMixStamp stamp)
     {
-66      nativeLock.EnterReadLock();                                       // ①
-68      try
+77      nativeLock.EnterReadLock();                                       // ①
+79      try
         {
-70          ThrowIfUnavailableUnsafe();                                   // ②
-72          MixStampState* state = mixStampState;
-73          while (true)
+81          ThrowIfUnavailableUnsafe();                                   // ②
+83          MixStampState* state = mixStampState;
+84          for (int attempt = 0; attempt < mixStampReadAttempts; attempt++)
             {
-75              long sequence = Volatile.Read(ref state->sequence);       // ③
-76              if (sequence == 0)                                        // ④
+86              long sequence = Volatile.Read(ref state->sequence);       // ③
+87              if (sequence == 0)                                        // ④
+88                  break;
+91              if ((sequence & 1) != 0)                                  // ⑤
                 {
-78                  stamp = default;
-79                  return false;
+93                  System.Threading.Thread.SpinWait(1);
+94                  continue;
                 }
-83              if ((sequence & 1) != 0)                                  // ⑤
+97              ulong dspClock = Volatile.Read(ref state->dspClock);      // ⑥
+98              ulong outputClock = Volatile.Read(ref state->outputClock);
+99              long timestamp = Volatile.Read(ref state->timestamp);
+101             if (Volatile.Read(ref state->sequence) == sequence)       // ⑦
                 {
-85                  System.Threading.Thread.SpinWait(1);
-86                  continue;
-                }
-89              ulong dspClock = Volatile.Read(ref state->dspClock);      // ⑥
-90              ulong outputClock = Volatile.Read(ref state->outputClock);
-91              long timestamp = Volatile.Read(ref state->timestamp);
-93              if (Volatile.Read(ref state->sequence) == sequence)       // ⑦
-                {
-95                  stamp = new SoundMixStamp(dspClock, outputClock, timestamp);
-96                  return true;
+103                 stamp = new SoundMixStamp(dspClock, outputClock, timestamp);
+104                 return true;
                 }
             }                                                             // ⑧
+108         stamp = default;                                              // ⑨
+109         return false;
         }
-100     finally
+111     finally
         {
-102         nativeLock.ExitReadLock();
+113         nativeLock.ExitReadLock();
         }
     }
 ```
@@ -196,7 +195,10 @@ public readonly record struct SoundMixStamp(ulong dspClock, ulong outputClock, l
 5. ⑤ 홀수면 믹서가 쓰는 중입니다. 잠깐 돌고 다시 읽습니다.
 6. ⑥ 데이터 세 개를 복사합니다.
 7. ⑦ 그 사이 번호가 바뀌지 않았으면 일관된 스냅샷입니다.
-8. ⑧ 바뀌었으면 처음부터 다시 읽습니다.
+8. ⑧ 바뀌었으면 처음부터 다시 읽습니다. 홀수를 만났을 때도, 번호가 바뀌었을 때도 시도 한 번으로 셉니다.
+9. ⑨ 아직 블록이 없거나 시도를 [`mixStampReadAttempts`](../Runtime/Sounds/SoundSystem.MixStamp.cs#L23)(100번)만큼 해도 일관된 스냅샷을 얻지 못하면 `false`입니다.
+   - seqlock은 reader가 언젠가 끝난다고 보장하지 않습니다. 믹서 스레드가 홀수를 쓴 채 선점되거나 멈추면, 상한이 없는 루프는 `nativeLock` 읽기 잠금을 쥔 채 계속 돕니다.
+   - 스탬프는 시간 보정에만 쓰입니다. 호출하는 쪽은 이미 `false`를 "이번에는 건너뛰기"로 처리하고, 다음 읽기에서 따라잡습니다.
 
 ```mermaid
 sequenceDiagram
