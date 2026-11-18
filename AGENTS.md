@@ -71,6 +71,8 @@
 - Put `#nullable enable` at the very top of C# files.
 - A class that declares a Unity lifecycle API method (for example one marked with `[OnAssemblyLoaded]` or `[OnAssemblyUnloading]` from `Unity.Scripting.LifecycleManagement`) must be declared `partial`. Do this even when the whole class lives in one file; follow the existing services such as `LinuxFileOpenService` (`sealed partial class`).
 
+- Prefer `MathUtility` and its extensions over `System.Math` and `UnityEngine.Mathf`. Use `Math`/`Mathf` only when `MathUtility` and its extensions provide no equivalent.
+
 ## No Python-Style Code and Heap Allocation
 
 - Do not write Python-style C#: code that reaches for a convenient temporary collection instead of the straightforward algorithm. Examples are a `new List<T>()` or `new HashSet<T>()` inside a method only to collect, deduplicate, or reorder values, or removing duplicates by converting a list to a set and back. Write the direct, conventional loop, binary search, in-place operation, or existing collection API instead.
