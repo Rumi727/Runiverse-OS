@@ -147,7 +147,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 86010c5adca821aef972f5e438dfb7f2, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: RuniOS.NBS.Next::RuniOS.NBS.NoteBlockSource
+  m_EditorClassIdentifier: RuniOS.NBS::RuniOS.NBS.NoteBlockSource
   _volume: 0.2
   _tempo: 1
   _pitch: 1
