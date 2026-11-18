@@ -66,7 +66,6 @@ namespace RuniOS.NBS
 
                 // The loop range can change with the clip, so the current position is wrapped again before the new scheduler reads it.
                 MoveAnchorUnsafe();
-                SyncInterpolatedTime(time);
             }
             finally
             {
@@ -166,9 +165,8 @@ namespace RuniOS.NBS
         /// <inheritdoc/>
         protected override void OnPause()
         {
-            // The timeline stops at the next mix clock, and the interpolated time shows that position.
+            // The timeline stops at the next mix clock, and moving the anchor shows that position.
             MoveAnchorUnsafe();
-            SyncInterpolatedTime(_clockAnchor.time);
             scheduler?.Pause();
         }
 

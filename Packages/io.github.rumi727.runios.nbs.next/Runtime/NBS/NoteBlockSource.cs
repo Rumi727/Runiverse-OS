@@ -195,6 +195,9 @@ namespace RuniOS.NBS
                     // The new tempo applies from the next mix clock, where the timeline keeps its position.
                     MoveAnchorUnsafe();
                     base.tempo = value;
+
+                    // The base setter restarts the interpolation now, while the timeline keeps its position until the mixer reaches the anchor.
+                    SyncTimeToAnchorUnsafe();
                     scheduler?.OnRateChanged();
                 }
                 finally
@@ -356,7 +359,6 @@ namespace RuniOS.NBS
             {
                 // Freezes the wrapped position first, so the new range does not move the current position.
                 MoveAnchorUnsafe();
-                SyncInterpolatedTime(time);
                 change();
                 scheduler?.OnLoopChanged();
             }

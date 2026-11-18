@@ -1,4 +1,5 @@
 #nullable enable
+using System.Diagnostics;
 using RuniOS.Sounds;
 
 namespace RuniOS.NBS
@@ -10,8 +11,8 @@ namespace RuniOS.NBS
         /// 소리가 따라가는 타임라인을 정의하는 DSP 클록 기준점을 가져옵니다.
         /// </summary>
         /// <remarks>
-        /// <see cref="time"/> follows this timeline as the mixer advances, so it can lag the anchor by about one mix block.<br/>
-        /// <see cref="time"/>은 믹서가 진행할 때마다 이 타임라인을 따라가므로 기준점보다 약 한 믹스 블록 늦을 수 있습니다.
+        /// <see cref="time"/> follows this timeline from the moment the mixer processed each block, and holds before the mixer reaches the anchor.<br/>
+        /// <see cref="time"/>은 믹서가 각 블록을 처리한 순간을 기준으로 이 타임라인을 따라가며, 믹서가 기준점에 도달하기 전에는 위치를 유지합니다.
         /// </remarks>
         public NBSClockAnchor clockAnchor
         {
@@ -53,16 +54,52 @@ namespace RuniOS.NBS
             // Without a readable clock the anchor stays ahead of every clock, so the timeline holds until the sound system resets and anchors it again.
             _clockAnchor = new NBSClockAnchor(clock, linearTime);
             anchorAdvances = isPlaying && !isPaused;
+            SyncTimeToAnchorUnsafe();
+        }
+
+        /// <summary>
+        /// Moves the interpolated time to the new anchor. While the timeline advances, the time holds until the mixer reaches the anchor,
+        /// which is also the case until the mixer stamps its first block.
+        /// </summary>
+        void SyncTimeToAnchorUnsafe()
+        {
+            if (!anchorAdvances)
+            {
+                SyncInterpolatedTime(_clockAnchor.time);
+                return;
+            }
+
+            if (SoundSystem.main.Execute(static system => (system.TryGetMixStamp(out SoundMixStamp stamp), stamp), out (bool hasStamp, SoundMixStamp stamp) mix) && mix.hasStamp)
+                SyncTimeToStampUnsafe(mix.stamp);
+            else
+                SyncInterpolatedTime(_clockAnchor.time, long.MaxValue);
+        }
+
+        /// <summary>Moves the interpolated time to where the timeline was when the mixer processed the clock of <paramref name="stamp"/>.</summary>
+        void SyncTimeToStampUnsafe(SoundMixStamp stamp)
+        {
+            int sampleRate = SoundSystem.main.outputSampleRate;
+            double linearTime = _clockAnchor.GetTime(stamp.dspClock, base.tempo, sampleRate);
+            SyncInterpolatedTime(linearTime, GetMixTimestamp(stamp, _clockAnchor.dspClock, sampleRate));
         }
 
         double FoldTime(double linear) => loopRange is { } range ? range.Fold(linear, base.tempo) : linear;
 
         ulong lastMixClock;
 
-        /// <summary>Moves the interpolated time to the timeline whenever the mixer advances, as <see cref="WaveAudioSource"/> follows its channel.</summary>
+        /// <summary>
+        /// Moves the interpolated time to the timeline whenever the mixer advances, as <see cref="WaveAudioSource"/> follows its channel.
+        /// The time is based on when the mixer processed the clock, not on when this update found it.
+        /// </summary>
         void SyncTimeToMixer()
         {
-            if (!anchorAdvances || !SoundSystem.main.Execute(static system => system.GetMasterDSPClock(), out ulong clock) || clock == lastMixClock)
+            if
+            (
+                !anchorAdvances ||
+                !SoundSystem.main.Execute(static system => (system.TryGetMixStamp(out SoundMixStamp stamp), stamp), out (bool hasStamp, SoundMixStamp stamp) mix) ||
+                !mix.hasStamp ||
+                mix.stamp.dspClock == lastMixClock
+            )
                 return;
 
             // This runs under the sound system lock, which a reset waits for while a command may hold the playing lock and wait for the sound system.
@@ -72,14 +109,28 @@ namespace RuniOS.NBS
 
             try
             {
-                lastMixClock = clock;
+                lastMixClock = mix.stamp.dspClock;
                 if (anchorAdvances)
-                    SyncInterpolatedTime(_clockAnchor.GetTime(clock, base.tempo, SoundSystem.main.outputSampleRate));
+                    SyncTimeToStampUnsafe(mix.stamp);
             }
             finally
             {
                 playingLock.ExitWriteLock();
             }
+        }
+
+        /// <summary>
+        /// Gets the timestamp at which the mixer reaches <paramref name="clock"/>, extrapolated from <paramref name="stamp"/>.
+        /// The anchor is usually a block or two ahead of the latest stamp, and the time must hold until the mixer reaches it.
+        /// A clock that cannot be reached, such as <see cref="ulong.MaxValue"/>, holds the time indefinitely.
+        /// </summary>
+        static long GetMixTimestamp(SoundMixStamp stamp, ulong clock, int sampleRate)
+        {
+            if (clock <= stamp.dspClock)
+                return stamp.timestamp;
+
+            double timestamp = stamp.timestamp + (((clock - stamp.dspClock) / (double)sampleRate) * Stopwatch.Frequency);
+            return timestamp >= long.MaxValue ? long.MaxValue : (long)timestamp;
         }
 
         void OnSoundSystemReset(SoundSystem system)
