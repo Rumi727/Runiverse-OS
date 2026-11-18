@@ -161,7 +161,7 @@ namespace RuniOS.UIElements.NBS
             set
             {
                 field = value;
-                Rebuild(value?.map);
+                Rebuild(value != null ? value.map : null);
             }
         }
 

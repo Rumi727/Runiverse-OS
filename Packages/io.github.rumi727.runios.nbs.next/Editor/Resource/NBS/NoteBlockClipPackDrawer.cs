@@ -70,12 +70,12 @@ namespace RuniOS.Editor.Resource.NBS
                 clips[node] = clip;
             }
 
-            if (targetClip is { } loaded)
+            if (targetClip != null)
             {
-                ShowClip(loaded);
+                ShowClip(targetClip);
 
                 if (NBSPreview.autoPlay)
-                    preview!.GetOrCreatePlayer(loaded).Play();
+                    preview!.GetOrCreatePlayer(targetClip).Play();
             }
 
             Repaint();
@@ -96,8 +96,8 @@ namespace RuniOS.Editor.Resource.NBS
         /// <inheritdoc/>
         protected override void DrawInfoLayout()
         {
-            if (targetClip is { } clip)
-                NBSClipInfoGUI.DrawLayout(clip);
+            if (targetClip != null)
+                NBSClipInfoGUI.DrawLayout(targetClip);
             else
                 base.DrawInfoLayout();
         }
@@ -109,8 +109,8 @@ namespace RuniOS.Editor.Resource.NBS
         protected override VisualElement? CreatePreview(IONode node)
         {
             grid = new NBSNoteGridView();
-            if (targetClip is { } clip)
-                ShowClip(clip);
+            if (targetClip != null)
+                ShowClip(targetClip);
 
             return grid;
         }

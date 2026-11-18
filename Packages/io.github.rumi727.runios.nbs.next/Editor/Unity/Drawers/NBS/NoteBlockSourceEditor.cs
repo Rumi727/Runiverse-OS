@@ -242,25 +242,25 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         bool DrawVisualEffectsLayout()
         {
             isRainbowShown = false;
-            if (targets.Length != 1 || targets[0] is not { } source || source.loadedClip is not { } clip)
+            if (targets.Length != 1 || target == null || target.loadedClip == null)
                 return false;
 
-            NBSVisualEffectMap effects = clip.map.visualEffects;
+            NBSVisualEffectMap effects = target.loadedClip.map.visualEffects;
             if (effects.states.IsEmpty && effects.savePopupTicks.IsEmpty)
                 return false;
 
             // Seeking, playing, pausing, and changing the tempo all anchor the timeline again, so an unchanged anchor means the tick advanced by playback alone.
-            NBSClockAnchor anchor = source.clockAnchor;
-            if (TryGetTimelineTick(source, clip, anchor, out double timelineTick))
+            NBSClockAnchor anchor = target.clockAnchor;
+            if (TryGetTimelineTick(target, target.loadedClip, anchor, out double timelineTick))
             {
-                if (double.IsFinite(previousTick) && anchor == previousAnchor && CrossesSavePopup(source, clip, previousTick, timelineTick))
+                if (double.IsFinite(previousTick) && anchor == previousAnchor && CrossesSavePopup(target, target.loadedClip, previousTick, timelineTick))
                     savePopupStartedAt = EditorApplication.timeSinceStartup;
 
                 previousTick = timelineTick;
                 previousAnchor = anchor;
             }
 
-            double tick = source.tick;
+            double tick = target.tick;
 
             GUILayout.Label(TrTempContent("runios-editor:inspector.nbs_player.visual_effects.header"), EditorStyles.boldLabel);
 

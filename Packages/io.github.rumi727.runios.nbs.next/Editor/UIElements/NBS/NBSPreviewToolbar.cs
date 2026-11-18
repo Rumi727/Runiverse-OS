@@ -139,7 +139,7 @@ namespace RuniOS.Editor.UIElements.NBS
 
             // The loop follows the file until the instruments are loaded.
             loop.SetEnabled(current is { isLoaded: true });
-            loop.SetValueWithoutNotify(current?.loop ?? clip?.header.loop ?? false);
+            loop.SetValueWithoutNotify(current?.loop ?? (clip != null && clip.header.loop));
 
             followIcon.image = EditorGUIUtility.IconContent(NBSNoteGridView.followMode == NBSFollowMode.none ? "Unlinked" : "Linked").image;
 

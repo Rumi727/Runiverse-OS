@@ -22,7 +22,8 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
         /// <inheritdoc/>
         public override void OnInspectorGUI()
         {
-            if (assetTarget is NoteBlockClip clip)
+            // ReSharper disable once Unity.NoNullPatternMatching
+            if (assetTarget != null && assetTarget is NoteBlockClip clip)
                 NBSClipInfoGUI.DrawLayout(clip);
         }
     }
