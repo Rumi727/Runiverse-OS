@@ -1,0 +1,628 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NBS 예약 시뮬레이터</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: one column of instruments — controls, DSP block strip, timeline plot, then state + log side by side. */
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #1b2330;
+  --sub: #5d6878;
+  --line: #dde2ea;
+  --accent: #2459d6;      /* time / scheduling */
+  --output: #12855a;      /* output / heard */
+  --mix: #d4691a;         /* mixing block, pending voices */
+  --anchor: #8a3fd1;      /* anchor */
+  --alert: #c8323a;       /* commands, late */
+  --buffer: #d9efe4;
+  --played: #e9ecf1;
+  --future: #f7f8fa;
+  --mixing: #fde3cc;
+  --window: rgba(36, 89, 214, 0.12);
+  --font: "Pretendard", "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", "Cascadia Code", "D2Coding", Consolas, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11151c; --panel: #1a2029; --ink: #e6eaf0; --sub: #9aa5b5; --line: #2d3542;
+    --accent: #6f9bff; --output: #3fcf93; --mix: #ff9a4d; --anchor: #c08bff; --alert: #ff6b72;
+    --buffer: #173628; --played: #232a35; --future: #1d232d; --mixing: #4a2d17; --window: rgba(111, 155, 255, 0.16);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11151c; --panel: #1a2029; --ink: #e6eaf0; --sub: #9aa5b5; --line: #2d3542;
+  --accent: #6f9bff; --output: #3fcf93; --mix: #ff9a4d; --anchor: #c08bff; --alert: #ff6b72;
+  --buffer: #173628; --played: #232a35; --future: #1d232d; --mixing: #4a2d17; --window: rgba(111, 155, 255, 0.16);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg); color: var(--ink); font: 14px/1.55 var(--font);
+  padding-block: 20px 40px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+main { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+h1 { font-size: 22px; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+h2 { font-size: 15px; margin: 0; }
+p { margin: 0; }
+.lede { color: var(--sub); max-width: 72ch; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 10px; min-width: 0; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 7px;
+  padding: 6px 12px; cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.sliders { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px 18px; }
+.sliders label { display: grid; gap: 2px; font-size: 12.5px; color: var(--sub); }
+.sliders label span.v { color: var(--ink); font-family: var(--mono); font-variant-numeric: tabular-nums; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+.toggle { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; color: var(--sub); }
+canvas { width: 100%; display: block; border-radius: 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12px; color: var(--sub); }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr); gap: 16px; }
+@media (max-width: 760px) { .two { grid-template-columns: minmax(0, 1fr); } }
+table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+td { padding: 3px 4px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td:first-child { color: var(--sub); white-space: nowrap; }
+td.num { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+ol.log { margin: 0; padding-left: 0; list-style: none; font-family: var(--mono); font-size: 12px; display: grid; gap: 3px; max-height: 260px; overflow: auto; }
+ol.log li { padding: 3px 6px; border-radius: 4px; background: var(--bg); overflow-wrap: anywhere; }
+ol.log li.cmd { border-left: 3px solid var(--alert); }
+ol.log li.tick { border-left: 3px solid var(--accent); }
+ol.log li.sys { border-left: 3px solid var(--sub); }
+.note { font-size: 12.5px; color: var(--sub); }
+code { font-family: var(--mono); font-size: 0.92em; }
+.err-ok { color: var(--output); } .err-bad { color: var(--alert); }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+<main>
+  <header class="panel" style="gap:6px">
+    <h1>NBS 예약 시뮬레이터</h1>
+    <p class="lede">FMOD 믹서의 블록, <code>NBSClockAnchor</code>, <code>NBSPlaybackWorker</code>의 lookahead 예약, <code>time</code>/<code>outputTime</code> 보간을 실제 코드와 같은 식으로 축소해 움직입니다. 소리는 나지 않습니다. 정방향(tempo &gt; 0), 노트 배치는 <code>attackAtNote</code> + pitch &gt; 0만 다룹니다.</p>
+  </header>
+
+  <section class="panel" aria-label="조작">
+    <div class="row">
+      <button id="btn-play" class="primary" type="button">재생</button>
+      <button id="btn-pause" type="button">일시 정지</button>
+      <button id="btn-stop" type="button">정지</button>
+      <button id="btn-seek" type="button">seek +1초</button>
+      <button id="btn-seek-loop" type="button">seek → 5.8초</button>
+      <label class="toggle"><input id="chk-loop" type="checkbox"> 반복 [2, 6)초</label>
+    </div>
+    <div class="sliders">
+      <label>시뮬레이션 속도 (느리게 보기) <span class="v" id="v-speed"></span><input id="in-speed" type="range" min="0.02" max="1" step="0.01" value="0.15"></label>
+      <label>tempo <span class="v" id="v-tempo"></span><input id="in-tempo" type="range" min="0.25" max="2" step="0.05" value="1"></label>
+      <label>블록 길이 (샘플, 다음 재생부터) <span class="v" id="v-block"></span><input id="in-block" type="range" min="8" max="11" step="1" value="10"></label>
+      <label>버퍼 수 bufferCount <span class="v" id="v-count"></span><input id="in-count" type="range" min="2" max="8" step="1" value="4"></label>
+      <label>workerInterval <span class="v" id="v-interval"></span><input id="in-interval" type="range" min="0.02" max="0.4" step="0.01" value="0.1"></label>
+      <label>schedulingLookahead <span class="v" id="v-look"></span><input id="in-look" type="range" min="0" max="0.5" step="0.01" value="0.2"></label>
+      <label>워커 깨어남 지연 흔들림 <span class="v" id="v-jitter"></span><input id="in-jitter" type="range" min="0" max="0.2" step="0.005" value="0.03"></label>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="DSP 블록 띠">
+    <h2>① DSP 클록 위의 블록과 예약 (가로 = 샘플)</h2>
+    <canvas id="cv-strip" height="230"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--played)"></i>이미 출력됨</span>
+      <span><i style="background:var(--buffer)"></i>링 버퍼 (믹스 끝, 출력 대기)</span>
+      <span><i style="background:var(--mixing)"></i>지금 믹스 중</span>
+      <span><i style="background:var(--window)"></i>예약 끝난 범위 (next mix clock → cursorClock)</span>
+      <span><i style="background:var(--mix)"></i>예약된 Voice (SetDelay startClock)</span>
+      <span><i style="background:var(--anchor)"></i>앵커</span>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="시간 그래프">
+    <h2>② 벽시계에 따른 타임라인 위치 (최근 구간)</h2>
+    <canvas id="cv-plot" height="260"></canvas>
+    <div class="legend">
+      <span><i style="background:var(--accent)"></i><code>time</code> (믹서 기준, 보간)</span>
+      <span><i style="background:var(--output)"></i><code>outputTime</code> (보간)</span>
+      <span><i style="background:var(--sub)"></i>실제로 스피커에서 나는 위치</span>
+      <span><i style="background:var(--alert)"></i>명령</span>
+      <span>· 아래 점: 믹스 스탬프 / 위 눈금: 워커 순회</span>
+    </div>
+  </section>
+
+  <div class="two">
+    <section class="panel" aria-label="상태">
+      <h2>③ 상태</h2>
+      <table><tbody id="state"></tbody></table>
+      <p class="note">"시작 오차"는 Voice가 실제로 시작하는 클록과 앵커 직선이 말하는 이상적인 클록의 차이입니다. 늦은 시작이 아니면 항상 0 샘플입니다. 워커 흔들림을 키우거나 lookahead를 0으로 줄여 보세요.</p>
+    </section>
+    <section class="panel" aria-label="로그">
+      <h2>④ 이벤트 로그 (최근 순)</h2>
+      <ol class="log" id="log"></ol>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="읽는 법">
+    <h2>읽는 법</h2>
+    <p>재생을 누르면 앵커가 <b>다음 믹스 클록</b>(①의 빨간 선 = master + 1블록)에 찍히고, 그 순간까지 <code>time</code>은 멈춰 있습니다(②의 평평한 구간). 워커는 <code>workerInterval</code>마다 깨어나 <code>(cursor, next mix clock + lookahead·tempo]</code> 안의 노트를 정확한 클록에 예약합니다(①의 주황 점이 회색 눈금에 정확히 겹침). tempo를 바꾸면 앵커가 다시 찍히고 대기 중인 Voice가 비례 이동합니다. 일시 정지는 대기 중인 Voice를 취소하고, 재개하면 앵커부터 다시 예약합니다. 반복을 켜고 6초 근처로 seek하면 쿼리가 반복 구간을 펼쳐 2초 쪽 노트를 미리 예약하는 것을 볼 수 있습니다.</p>
+    <p class="note">대응 코드: <code>NBSClockAnchor.TryGetNextMixClock</code>, <code>NoteBlockSource.Clock</code>(<code>SyncTimeToStampUnsafe</code>, <code>GetMixTimestamp</code>), <code>NBSVoiceScheduler.Tick</code>/<code>ScheduleUnsafe</code>/<code>CreateVoiceUnsafe</code>/<code>OnRateChanged</code>/<code>Pause</code>/<code>UnPause</code>/<code>OnLoopChanged</code>, <code>NBSTimeline.Query</code>. 문서: <a href="../README.md">NBS 작동 원리</a>.</p>
+  </section>
+</main>
+
+<script>
+(() => {
+  "use strict";
+  const SR = 48000;
+  const SONG_LENGTH = 8;
+  const LOOP = { start: 2, end: 6 };
+  const NOTES = [];
+  for (let i = 0; i * 0.1 < SONG_LENGTH - 1e-9; i++)
+    if (i % 4 !== 3) NOTES.push(+(i * 0.1).toFixed(3));   // 10 TPS columns, every 4th column empty
+
+  const $ = id => document.getElementById(id);
+  const ui = {
+    speed: $("in-speed"), tempo: $("in-tempo"), block: $("in-block"), count: $("in-count"),
+    interval: $("in-interval"), look: $("in-look"), jitter: $("in-jitter"), loop: $("chk-loop")
+  };
+
+  // ---------------- state ----------------
+  let blockLength = 1024, bufferCount = 4;
+  let t = 0;                       // simulated wall clock (s)
+  let master = 0;                  // master DSP clock (block steps)
+  let stamp = null;                // latest mix stamp {dsp, out, ts}
+  let stamps = [];                 // history for the plot
+  let tempo = 1;
+  let playing = false, paused = false;
+  let anchor = { clock: 0, time: 0 };
+  let advances = false;
+  let base = { time: 0, ts: 0 }, outBase = { time: 0, ts: 0 };
+  let lastMixClock = -1;
+  let voices = [];                 // {note, start, ideal, late, sounded}
+  let hasCursor = false, cursorClock = 0;
+  let nextWorker = 0, nextUpdate = 0, pendingSignal = false;
+  let workerPasses = [], commands = [], history = [];
+  let lastWindow = null;
+  let maxError = 0, lateCount = 0;
+  const log = [];
+
+  const latency = () => blockLength * bufferCount;
+  const mixCont = () => t * SR + latency();                  // continuous mixer position
+  const outCont = () => t * SR;                              // continuous output position
+  const nextMixClock = () => master + blockLength;           // TryGetNextMixClock
+  const getTime = (a, clock, tp) => clock <= a.clock ? a.time : a.time + ((clock - a.clock) / SR) * tp;
+  const loopRange = () => ui.loop.checked ? LOOP : null;
+  const fold = v => { const r = loopRange(); return r && v >= r.end ? r.start + ((v - r.start) % (r.end - r.start)) : v; };
+  const fmt = (v, d = 3) => Number.isFinite(v) ? v.toFixed(d) : "–";
+
+  function addLog(kind, text) {
+    log.unshift({ kind, text: `[${t.toFixed(3)}s] ${text}` });
+    if (log.length > 60) log.length = 60;
+    renderLog();
+  }
+
+  // ---------------- NoteBlockSource clock (Clock.cs) ----------------
+  function mixTimestamp(s, clock) {
+    if (clock <= s.dsp) return s.ts;
+    return s.ts + (clock - s.dsp) / SR;
+  }
+  function syncTimeToStamp(s) {
+    base = { time: getTime(anchor, s.dsp, tempo), ts: mixTimestamp(s, anchor.clock) };
+    outBase = { time: anchor.time + ((s.out - anchor.clock) / SR) * tempo, ts: s.ts };
+  }
+  function syncTimeToAnchor() {
+    if (!advances) { base = { time: anchor.time, ts: t }; return; }
+    if (stamp) syncTimeToStamp(stamp); else base = { time: anchor.time, ts: Infinity };
+  }
+  function setAnchor(clock, linear) {
+    anchor = { clock, time: linear };
+    advances = playing && !paused;
+    syncTimeToAnchor();
+  }
+  function moveAnchor() {
+    const clock = nextMixClock();
+    const linear = advances ? getTime(anchor, clock, tempo) : anchor.time;
+    setAnchor(clock, fold(linear));
+  }
+  const interp = b => playing && !paused ? b.time + Math.max(0, t - b.ts) * tempo : b.time;
+  const shownTime = () => fold(interp(base));
+  const shownOutput = () => fold(interp(outBase));
+
+  // ---------------- timeline query (NBSTimeline.Query, forward, attackAtNote) ----------------
+  function query(position, from, includeFrom, to) {
+    const out = [];
+    const r = loopRange();
+    const contains = d => (includeFrom ? d >= from : d > from) && d <= to;
+    const segment = (segStart, boundary, offset, first) => {
+      for (const n of NOTES) {
+        const inDomain = !r || !Number.isFinite(boundary) ? true : first ? n < r.end : n >= r.start && n < r.end;
+        if (!inDomain) continue;
+        if (n >= boundary || (!first && n < segStart)) continue;
+        const near = first ? from - offset : Math.max(0, from - offset);
+        if (n < segStart + near - 1e-12) continue;
+        const d = offset + (n - segStart);
+        if (contains(d)) out.push({ note: n, distance: d });
+      }
+    };
+    if (!r || position >= r.end) { segment(position, SONG_LENGTH, 0, true); return out; }
+    let segStart = position, offset = 0;
+    for (let s = 0; offset <= to; s++) {
+      segment(segStart, r.end, offset, s === 0);
+      offset += r.end - segStart;
+      segStart = r.start;
+    }
+    return out;
+  }
+
+  // ---------------- scheduler (NBSVoiceScheduler) ----------------
+  function snapshot() {
+    const clock = nextMixClock();
+    if (anchor.clock > clock) return null;
+    const linear = playing && !paused ? getTime(anchor, clock, tempo) : anchor.time;
+    return { clock, position: fold(linear) };
+  }
+  function createVoice(plan, snap) {
+    const ideal = snap.clock + (plan.distance / tempo) * SR;
+    const start = Math.max(snap.clock, Math.round(snap.clock + (Math.max(0, plan.distance) / tempo) * SR));
+    const late = plan.distance < 0;
+    voices.push({ note: plan.note, start, ideal, late, sounded: false });
+    if (late) lateCount++;
+    else maxError = Math.max(maxError, Math.abs(start - Math.round(ideal)));
+  }
+  function schedule(snap, from, includeFrom, to) {
+    const plans = query(snap.position, from, includeFrom, to);
+    for (const p of plans) createVoice(p, snap);
+    cursorClock = snap.clock + (to / tempo) * SR;
+    hasCursor = true;
+    lastWindow = { from: snap.clock + (Math.max(0, from) / tempo) * SR, to: cursorClock };
+    return plans;
+  }
+  function stopPending(after) {
+    const before = voices.length;
+    voices = voices.filter(v => v.sounded || v.start <= after);
+    return before - voices.length;
+  }
+  function resync(snap) {
+    stopPending(-Infinity);
+    voices = voices.filter(v => v.sounded);
+    hasCursor = false;
+    if (!playing || paused || !snap) return;
+    const plans = schedule(snap, 0, true, +ui.look.value * tempo);
+    addLog("tick", `Resync: 위치 ${fmt(snap.position)}s에서 [0, ${fmt(+ui.look.value * tempo)}] 예약 → ${plans.length}개`);
+  }
+  function tick() {
+    workerPasses.push(t);
+    if (!playing || paused) return;
+    const snap = snapshot();
+    if (!snap) return;
+    if (!hasCursor) { resync(snap); return; }
+    const from = ((cursorClock - snap.clock) / SR) * tempo;
+    const to = +ui.look.value * tempo;
+    if (to <= from) { addLog("tick", `Tick: 이미 충분히 예약됨 (from ${fmt(from)} ≥ to ${fmt(to)})`); return; }
+    const plans = schedule(snap, from, false, to);
+    addLog("tick", `Tick: (${fmt(from)}, ${fmt(to)}] → ${plans.length}개${from < 0 ? " · 커서가 지나 늦은 시작 포함" : ""}`);
+  }
+  const signal = () => { pendingSignal = true; };
+
+  // ---------------- commands ----------------
+  function markCommand(label) { commands.push({ t, label }); addLog("cmd", label); }
+  function play(start) {
+    if (blockLength !== 1 << +ui.block.value) { blockLength = 1 << +ui.block.value; }
+    playing = true;
+    setAnchor(nextMixClock(), start);
+    resync(snapshot());
+    signal();
+    markCommand(`Play(${fmt(start, 2)}) → 앵커 (${anchor.clock}, ${fmt(anchor.time)})`);
+  }
+  function stop() {
+    playing = false; paused = false;
+    setAnchor(nextMixClock(), 0);
+    voices = voices.filter(v => v.sounded);
+    hasCursor = false;
+    markCommand("Stop → 모든 Voice 정지");
+  }
+  function pause() {
+    if (!playing) return;
+    if (paused) { unpause(); return; }
+    paused = true;
+    moveAnchor();
+    const removed = stopPending(nextMixClock());
+    hasCursor = false;
+    markCommand(`Pause → 앵커 (${anchor.clock}, ${fmt(anchor.time)}) 유지, 대기 Voice ${removed}개 취소`);
+    $("btn-pause").textContent = "재개";
+  }
+  function unpause() {
+    paused = false;
+    moveAnchor();
+    cursorClock = anchor.clock; hasCursor = true;
+    signal();
+    markCommand(`UnPause → 앵커 (${anchor.clock}, ${fmt(anchor.time)}), cursor = 앵커`);
+    $("btn-pause").textContent = "일시 정지";
+  }
+  function seek(pos) {
+    if (!playing) { play(pos); return; }
+    setAnchor(nextMixClock(), pos);
+    resync(snapshot());
+    signal();
+    markCommand(`time = ${fmt(pos, 2)} → 앵커 (${anchor.clock}, ${fmt(pos)}) + Resync`);
+  }
+  function setTempo(v) {
+    const old = tempo;
+    if (v === old) return;
+    moveAnchor();
+    tempo = v;
+    syncTimeToAnchor();
+    const change = anchor.clock;
+    let moved = 0;
+    for (const voice of voices) {
+      if (!voice.sounded && voice.start > change) {
+        voice.start = Math.round(change + ((voice.start - change) * old) / v);
+        voice.ideal = change + ((voice.ideal - change) * old) / v;
+        moved++;
+      }
+    }
+    if (hasCursor) cursorClock = change + ((cursorClock - change) * old) / v;
+    signal();
+    markCommand(`tempo ${old} → ${v}: 앵커 이동, 대기 Voice ${moved}개 비례 이동 (× ${fmt(old / v, 3)})`);
+  }
+  function loopChanged() {
+    moveAnchor();
+    const change = anchor.clock;
+    const removed = stopPending(change);
+    cursorClock = change;
+    signal();
+    markCommand(`반복 ${ui.loop.checked ? "켬" : "끔"} → 변경 지점 이후 대기 Voice ${removed}개 취소, cursor = 앵커`);
+  }
+
+  // ---------------- simulation step ----------------
+  function step(dt) {
+    const target = t + dt;
+    const h = 0.0005;
+    while (t < target) {
+      t = Math.min(target, t + h);
+      const newMaster = Math.floor(mixCont() / blockLength) * blockLength;
+      if (newMaster !== master) {
+        master = newMaster;
+        stamp = { dsp: master, out: Math.max(0, master - latency()), ts: t };
+        stamps.push(stamp);
+      }
+      if (t >= nextUpdate) {                                  // SoundSystem.Update → onUpdate → SyncTimeToMixer
+        nextUpdate = t + 0.01;
+        if (advances && stamp && stamp.dsp !== lastMixClock) { lastMixClock = stamp.dsp; syncTimeToStamp(stamp); }
+      }
+      if (pendingSignal || t >= nextWorker) {                 // NBSPlaybackWorker.Run
+        pendingSignal = false;
+        tick();
+        nextWorker = t + +ui.interval.value + Math.random() * +ui.jitter.value;
+      }
+      for (const v of voices) if (!v.sounded && v.start <= outCont()) { v.sounded = true; v.heardAt = t; }
+    }
+    if (playing) {
+      history.push({ t, time: shownTime(), out: shownOutput(), heard: advances || paused ? fold(getTime(anchor, outCont(), advances ? tempo : 0)) : NaN });
+    }
+    const keep = t - 4;
+    history = history.filter(p => p.t >= keep);
+    stamps = stamps.filter(s => s.ts >= keep);
+    workerPasses = workerPasses.filter(w => w >= keep);
+    commands = commands.filter(c => c.t >= keep);
+    voices = voices.filter(v => !v.sounded || t - v.heardAt < 2);
+  }
+
+  // ---------------- drawing ----------------
+  let colors = {};
+  function readColors() {
+    const s = getComputedStyle(document.documentElement);
+    for (const k of ["panel", "ink", "sub", "line", "accent", "output", "mix", "anchor", "alert", "buffer", "played", "future", "mixing", "window"])
+      colors[k] = s.getPropertyValue("--" + k).trim();
+    colors.font = s.getPropertyValue("--font"); colors.mono = s.getPropertyValue("--mono");
+  }
+  function fit(cv) {
+    const dpr = window.devicePixelRatio || 1;
+    const w = cv.clientWidth, h = +cv.getAttribute("height");
+    if (cv.width !== Math.round(w * dpr)) { cv.width = Math.round(w * dpr); cv.height = Math.round(h * dpr); cv.style.height = h + "px"; }
+    const ctx = cv.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w, h };
+  }
+  function vline(ctx, x, y0, y1, color, width = 1.5, dash = null) {
+    ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash || []);
+    ctx.beginPath(); ctx.moveTo(x, y0); ctx.lineTo(x, y1); ctx.stroke(); ctx.setLineDash([]);
+  }
+  function label(ctx, text, x, y, color, align = "center", mono = true) {
+    ctx.fillStyle = color; ctx.textAlign = align; ctx.font = `11px ${mono ? colors.mono : colors.font}`; ctx.fillText(text, x, y);
+  }
+
+  function drawStrip() {
+    const { ctx, w, h } = fit($("cv-strip"));
+    ctx.fillStyle = colors.panel; ctx.fillRect(0, 0, w, h);
+    const look = +ui.look.value * SR;
+    const left = outCont() - blockLength * 1.5;
+    const right = mixCont() + Math.max(look, blockLength * 4) + blockLength * 2;
+    const X = c => ((c - left) / (right - left)) * (w - 20) + 10;
+    const yb = 40, hb = 40;
+    // blocks
+    const first = Math.floor(left / blockLength) * blockLength;
+    for (let b = first; b < right; b += blockLength) {
+      let fill = colors.future;
+      if (b + blockLength <= outCont()) fill = colors.played;
+      else if (b < master) fill = colors.buffer;
+      else if (b === master) fill = colors.mixing;
+      const x0 = Math.max(10, X(b)), x1 = Math.min(w - 10, X(b + blockLength));
+      if (x1 <= x0) continue;
+      ctx.fillStyle = fill; ctx.fillRect(x0, yb, x1 - x0 - 1, hb);
+    }
+    label(ctx, "블록", 10, yb - 6, colors.sub, "left", false);
+    // markers
+    const marks = [
+      [outCont(), colors.output, "output", 0],
+      [master, colors.mix, "master", 1],
+      [nextMixClock(), colors.alert, "next mix", 2]
+    ];
+    for (const [c, col, name, row] of marks) {
+      const x = X(c); vline(ctx, x, yb - 2, yb + hb + 6 + row * 14, col, 1.6);
+      label(ctx, name, x, yb + hb + 16 + row * 14, col);
+    }
+    if (anchor.clock > left && anchor.clock < right) {
+      const x = X(anchor.clock);
+      ctx.fillStyle = colors.anchor; ctx.beginPath(); ctx.moveTo(x, yb - 10); ctx.lineTo(x + 6, yb - 4); ctx.lineTo(x, yb + 2); ctx.lineTo(x - 6, yb - 4); ctx.fill();
+      label(ctx, `anchor ${fmt(anchor.time, 2)}s`, x + 8, yb - 12, colors.anchor, "left");
+    }
+    // ideal notes along the anchor line
+    const yn = 140;
+    label(ctx, "곡 노트 (앵커 직선이 말하는 이상적 클록)", 10, yn - 12, colors.sub, "left", false);
+    vline(ctx, 10, yn, yn, colors.line);
+    if (playing && !paused) {
+      // unroll forward from the anchor: walk the timeline distance, folding at the loop end
+      const r = loopRange();
+      let segStart = anchor.time, offset = 0;
+      const maxDist = ((right - anchor.clock) / SR) * tempo;
+      for (let s = 0; s < 6 && offset <= maxDist; s++) {
+        const boundary = r && segStart < r.end ? r.end : SONG_LENGTH;
+        for (const n of NOTES) {
+          if (n < segStart || n >= boundary) continue;
+          const c = anchor.clock + ((offset + n - segStart) / tempo) * SR;
+          if (c > left && c < right) vline(ctx, X(c), yn - 6, yn + 6, colors.sub, 1);
+        }
+        offset += boundary - segStart;
+        if (!r || boundary !== r.end) break;
+        segStart = r.start;
+      }
+    }
+    // scheduled window and voices
+    const yv = 185;
+    label(ctx, "예약된 Voice", 10, yv - 22, colors.sub, "left", false);
+    if (lastWindow && hasCursor) {
+      const x0 = Math.max(10, X(nextMixClock())), x1 = Math.min(w - 10, X(cursorClock));
+      if (x1 > x0) { ctx.fillStyle = colors.window; ctx.fillRect(x0, yv - 14, x1 - x0, 28); }
+      if (cursorClock > left && cursorClock < right) { vline(ctx, X(cursorClock), yv - 16, yv + 16, colors.accent, 1.5, [4, 3]); label(ctx, "cursor", X(cursorClock), yv + 28, colors.accent); }
+    }
+    for (const v of voices) {
+      if (v.start < left || v.start > right) continue;
+      const x = X(v.start);
+      const alpha = v.sounded ? Math.max(0.15, 1 - (t - v.heardAt) * 0.8) : 1;
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = v.late ? colors.alert : colors.mix;
+      ctx.beginPath(); ctx.arc(x, yv, v.sounded ? 5 : 4.5, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+      vline(ctx, x, yv + 6, yn + 6, v.late ? colors.alert : colors.mix, 0.6, [2, 3]);
+    }
+    // latency bracket
+    const xo = X(outCont()), xm = X(master);
+    ctx.strokeStyle = colors.output; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(xo, yb + hb + 3); ctx.lineTo(xm, yb + hb + 3); ctx.stroke();
+    label(ctx, `출력 지연 ${latency()} 샘플 = ${fmt((latency() / SR) * 1000, 1)} ms`, (xo + xm) / 2, 24, colors.output);
+  }
+
+  function drawPlot() {
+    const { ctx, w, h } = fit($("cv-plot"));
+    ctx.fillStyle = colors.panel; ctx.fillRect(0, 0, w, h);
+    const span = 2.0 * (+ui.speed.value < 0.1 ? 0.5 : 1);
+    const t0 = t - span, t1 = t + 0.05;
+    const pts = history.filter(p => p.t >= t0);
+    let lo = Infinity, hi = -Infinity;
+    for (const p of pts) for (const v of [p.time, p.out, p.heard]) if (Number.isFinite(v)) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+    if (!Number.isFinite(lo)) { lo = 0; hi = 1; }
+    if (hi - lo < 0.2) { const m = (hi + lo) / 2; lo = m - 0.1; hi = m + 0.1; }
+    const pad = (hi - lo) * 0.08; lo -= pad; hi += pad;
+    const L = 46, R = w - 10, T = 18, B = h - 26;
+    const X = v => L + ((v - t0) / (t1 - t0)) * (R - L);
+    const Y = v => B - ((v - lo) / (hi - lo)) * (B - T);
+    ctx.strokeStyle = colors.line; ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const v = lo + ((hi - lo) * i) / 4, y = Y(v);
+      ctx.beginPath(); ctx.moveTo(L, y); ctx.lineTo(R, y); ctx.stroke();
+      label(ctx, v.toFixed(2), L - 4, y + 4, colors.sub, "right");
+    }
+    label(ctx, "타임라인(초)", L, 12, colors.sub, "left", false);
+    label(ctx, "벽시계 →", R, h - 8, colors.sub, "right", false);
+    for (const wp of workerPasses) if (wp >= t0) vline(ctx, X(wp), T - 6, T + 4, colors.accent, 1.2);
+    for (const s of stamps) if (s.ts >= t0) { ctx.fillStyle = colors.mix; ctx.beginPath(); ctx.arc(X(s.ts), B + 8, 2, 0, Math.PI * 2); ctx.fill(); }
+    for (const c of commands) if (c.t >= t0) vline(ctx, X(c.t), T, B, colors.alert, 1.4, [5, 3]);
+    const series = (key, color, width, dash) => {
+      ctx.strokeStyle = color; ctx.lineWidth = width; ctx.setLineDash(dash || []);
+      ctx.beginPath(); let pen = false, prev = null;
+      for (const p of pts) {
+        const v = p[key];
+        if (!Number.isFinite(v)) { pen = false; continue; }
+        if (pen && prev !== null && Math.abs(v - prev) > (hi - lo) * 0.5) pen = false;   // loop wrap
+        if (pen) ctx.lineTo(X(p.t), Y(v)); else ctx.moveTo(X(p.t), Y(v));
+        pen = true; prev = v;
+      }
+      ctx.stroke(); ctx.setLineDash([]);
+    };
+    series("heard", colors.sub, 1.2, [2, 2]);
+    series("out", colors.output, 2, [6, 3]);
+    series("time", colors.accent, 2.2);
+  }
+
+  function renderState() {
+    const pending = voices.filter(v => !v.sounded).length;
+    const rows = [
+      ["재생 상태", playing ? (paused ? "일시 정지" : "재생 중") : "정지"],
+      ["master DSP clock", master],
+      ["next mix clock", nextMixClock()],
+      ["최신 스탬프 dsp / out", stamp ? `${stamp.dsp} / ${stamp.out}` : "–"],
+      ["앵커 (clock, time)", `${anchor.clock === Infinity ? "∞" : anchor.clock}, ${fmt(anchor.time)}`],
+      ["anchorAdvances", String(advances)],
+      ["time / outputTime", `${fmt(shownTime())} / ${fmt(shownOutput())}`],
+      ["cursorClock", hasCursor ? Math.round(cursorClock) : "없음"],
+      ["대기 중인 Voice", pending],
+      ["시작 오차 (정시 노트 최대)", `<span class="${maxError === 0 ? "err-ok" : "err-bad"}">${maxError} 샘플</span>`],
+      ["늦은 시작 노트 수", `<span class="${lateCount === 0 ? "err-ok" : "err-bad"}">${lateCount}</span>`]
+    ];
+    $("state").innerHTML = rows.map(([k, v]) => `<tr><td>${k}</td><td class="num">${v}</td></tr>`).join("");
+  }
+  function renderLog() {
+    $("log").innerHTML = log.slice(0, 40).map(e => `<li class="${e.kind}">${e.text.replace(/&/g, "&amp;").replace(/</g, "&lt;")}</li>`).join("");
+  }
+  function renderValues() {
+    $("v-speed").textContent = `× ${(+ui.speed.value).toFixed(2)}`;
+    $("v-tempo").textContent = (+ui.tempo.value).toFixed(2);
+    $("v-block").textContent = `${1 << +ui.block.value} (${fmt(((1 << +ui.block.value) / SR) * 1000, 1)} ms)`;
+    $("v-count").textContent = ui.count.value;
+    $("v-interval").textContent = `${(+ui.interval.value).toFixed(2)} s`;
+    $("v-look").textContent = `${(+ui.look.value).toFixed(2)} s`;
+    $("v-jitter").textContent = `0 ~ ${(+ui.jitter.value * 1000).toFixed(0)} ms`;
+  }
+
+  // ---------------- wiring ----------------
+  $("btn-play").addEventListener("click", () => play(0));
+  $("btn-pause").addEventListener("click", pause);
+  $("btn-stop").addEventListener("click", () => { stop(); $("btn-pause").textContent = "일시 정지"; });
+  $("btn-seek").addEventListener("click", () => seek(Math.min(SONG_LENGTH - 0.5, shownTime() + 1)));
+  $("btn-seek-loop").addEventListener("click", () => { if (!ui.loop.checked) { ui.loop.checked = true; } seek(5.8); });
+  ui.loop.addEventListener("change", () => { if (playing) loopChanged(); });
+  ui.tempo.addEventListener("input", () => { renderValues(); if (playing) setTempo(+ui.tempo.value); else tempo = +ui.tempo.value; });
+  ui.count.addEventListener("input", () => { bufferCount = +ui.count.value; renderValues(); addLog("sys", `bufferCount = ${bufferCount} → 출력 지연 ${latency()} 샘플`); });
+  for (const el of [ui.speed, ui.block, ui.interval, ui.look, ui.jitter]) el.addEventListener("input", renderValues);
+  ui.interval.addEventListener("change", signal);
+  ui.look.addEventListener("change", signal);
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change", readColors);
+  new MutationObserver(readColors).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+
+  readColors(); renderValues();
+  // Start in a working state: warm the mixer up, then play from 0.
+  step(0.3);
+  play(0);
+  addLog("sys", "예제 곡: 10 TPS, 8초, 4열마다 한 열 비움. 반복 구간 [2, 6)초.");
+
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    step(dt * +ui.speed.value);
+    if (playing && !paused && shownTime() >= SONG_LENGTH && !ui.loop.checked) stop();
+    drawStrip(); drawPlot(); renderState();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

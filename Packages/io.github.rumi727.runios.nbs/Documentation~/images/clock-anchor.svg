@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520" font-family='"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif' font-size="13">
+<title>NBSClockAnchor 타임라인</title>
+<defs><marker id="aink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f2937"/></marker><marker id="asub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker><marker id="agrid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker><marker id="ablue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker><marker id="alblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dbeafe"/></marker><marker id="aorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker><marker id="alorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffedd5"/></marker><marker id="agreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16a34a"/></marker><marker id="algreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dcfce7"/></marker><marker id="apurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker><marker id="alpurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ede9fe"/></marker><marker id="ared" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker><marker id="alred" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fee2e2"/></marker><marker id="agray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker><marker id="algray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f3f4f6"/></marker><marker id="ayellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ca8a04"/></marker><marker id="alyellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fef9c3"/></marker></defs>
+<rect x="0.5" y="0.5" width="979" height="519" rx="10" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="24.0" y="32.0" font-size="16" fill="#1f2937" text-anchor="start" font-weight="bold">NoteBlockSource의 타임라인 = DSP 클록 위의 직선 (NBSClockAnchor)</text>
+<text x="24.0" y="52.0" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>linear(clock) = clock ≤ anchor.dspClock ? anchor.time : anchor.time + (clock − anchor.dspClock) / sampleRate · tempo</text>
+<line x1="70.0" y1="430.0" x2="930.0" y2="430.0" stroke="#1f2937" stroke-width="1.2" marker-end="url(#aink)"/>
+<line x1="70.0" y1="430.0" x2="70.0" y2="90.0" stroke="#1f2937" stroke-width="1.2" marker-end="url(#aink)"/>
+<text x="926.0" y="452.0" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal">마스터 DSP 클록 (샘플)</text>
+<text x="76.0" y="94.0" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">타임라인 위치 (초)</text>
+<line x1="70.0" y1="430.0" x2="70.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="113.0" y1="430.0" x2="113.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="156.0" y1="430.0" x2="156.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="199.0" y1="430.0" x2="199.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="242.0" y1="430.0" x2="242.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="285.0" y1="430.0" x2="285.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="328.0" y1="430.0" x2="328.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="371.0" y1="430.0" x2="371.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="414.0" y1="430.0" x2="414.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="457.0" y1="430.0" x2="457.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="500.0" y1="430.0" x2="500.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="543.0" y1="430.0" x2="543.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="586.0" y1="430.0" x2="586.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="629.0" y1="430.0" x2="629.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="672.0" y1="430.0" x2="672.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="715.0" y1="430.0" x2="715.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="758.0" y1="430.0" x2="758.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="801.0" y1="430.0" x2="801.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="844.0" y1="430.0" x2="844.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="887.0" y1="430.0" x2="887.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="930.0" y1="430.0" x2="930.0" y2="90.0" stroke="#e5e7eb" stroke-width="1"/>
+<polyline points="113.0,396.0 199.0,396.0" fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round"/>
+<polyline points="199.0,396.0 500.0,253.2" fill="none" stroke="#2563eb" stroke-width="2.2" stroke-linejoin="round"/>
+<polyline points="500.0,253.2 715.0,151.2" fill="none" stroke="#7c3aed" stroke-width="2.2" stroke-linejoin="round"/>
+<polyline points="715.0,151.2 908.5,151.2" fill="none" stroke="#ea580c" stroke-width="3" stroke-linejoin="round"/>
+<path d="M199.0,389.0 L206.0,396.0 L199.0,403.0 L192.0,396.0 z" fill="#2563eb" stroke="#fff" stroke-width="1.2"/>
+<text x="209.0" y="386.0" font-size="12" fill="#2563eb" text-anchor="start" font-weight="bold">Play/seek → Anchor(next mix clock, 1.0)</text>
+<path d="M500.0,246.2 L507.0,253.2 L500.0,260.2 L493.0,253.2 z" fill="#7c3aed" stroke="#fff" stroke-width="1.2"/>
+<text x="510.0" y="243.2" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="bold">tempo 변경 → MoveAnchor(next mix clock, 현재 위치)</text>
+<path d="M715.0,144.20000000000005 L722.0,151.20000000000005 L715.0,158.20000000000005 L708.0,151.20000000000005 z" fill="#ea580c" stroke="#fff" stroke-width="1.2"/>
+<text x="705.0" y="139.2" font-size="12" fill="#ea580c" text-anchor="end" font-weight="bold">Pause → MoveAnchor, anchorAdvances = false</text>
+<line x1="156.0" y1="430.0" x2="156.0" y2="416.0" stroke="#dc2626" stroke-width="2"/>
+<text x="156.0" y="448.0" font-size="11.5" fill="#dc2626" text-anchor="middle" font-weight="normal">Play() 호출</text>
+<line x1="457.0" y1="430.0" x2="457.0" y2="416.0" stroke="#dc2626" stroke-width="2"/>
+<text x="457.0" y="448.0" font-size="11.5" fill="#dc2626" text-anchor="middle" font-weight="normal">tempo= 호출</text>
+<line x1="672.0" y1="430.0" x2="672.0" y2="416.0" stroke="#dc2626" stroke-width="2"/>
+<text x="672.0" y="448.0" font-size="11.5" fill="#dc2626" text-anchor="middle" font-weight="normal">Pause() 호출</text>
+<text x="121.6" y="414.0" font-size="11.5" fill="#ea580c" text-anchor="start" font-weight="normal">앵커 전: 위치 유지</text>
+<text x="328.0" y="329.6" font-size="12" fill="#2563eb" text-anchor="start" font-weight="normal">tempo = 1</text>
+<text x="598.9" y="229.6" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="normal">tempo = 1.5</text>
+<text x="24.0" y="470.0" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">• 명령은 언제 오든 &#x27;다음 믹스 클록&#x27;(TryGetNextMixClock)에서 효과가 납니다. 그래서 보통 한두 블록 늦게 반영되지만, 소리의 시작 클록은 전부 이 직선에서 계산되므로</text>
+<text x="24.0" y="488.0" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">  워커가 언제 돌든 소리 사이 간격은 샘플 단위로 정확합니다. 클록을 못 읽으면 앵커 dspClock = ulong.MaxValue → 영원히 &#x27;앵커 전&#x27;(유지) 상태가 됩니다.</text>
+</svg>

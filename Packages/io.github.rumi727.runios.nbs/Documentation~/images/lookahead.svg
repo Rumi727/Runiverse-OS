@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 520" width="980" height="520" font-family='"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","Segoe UI",sans-serif' font-size="13">
+<title>워커 lookahead 예약</title>
+<defs><marker id="aink" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#1f2937"/></marker><marker id="asub" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#6b7280"/></marker><marker id="agrid" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#e5e7eb"/></marker><marker id="ablue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2563eb"/></marker><marker id="alblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dbeafe"/></marker><marker id="aorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ea580c"/></marker><marker id="alorange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ffedd5"/></marker><marker id="agreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16a34a"/></marker><marker id="algreen" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dcfce7"/></marker><marker id="apurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7c3aed"/></marker><marker id="alpurple" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ede9fe"/></marker><marker id="ared" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#dc2626"/></marker><marker id="alred" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fee2e2"/></marker><marker id="agray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#9ca3af"/></marker><marker id="algray" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#f3f4f6"/></marker><marker id="ayellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#ca8a04"/></marker><marker id="alyellow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#fef9c3"/></marker></defs>
+<rect x="0.5" y="0.5" width="979" height="519" rx="10" fill="#ffffff" stroke="#e5e7eb"/>
+<text x="24.0" y="32.0" font-size="16" fill="#1f2937" text-anchor="start" font-weight="bold">NBSPlaybackWorker 순회와 lookahead 창 (workerInterval 0.1 s, schedulingLookahead 0.2 s)</text>
+<line x1="160.0" y1="80.0" x2="950.0" y2="80.0" stroke="#1f2937" stroke-width="1.2" marker-end="url(#aink)"/>
+<line x1="160.0" y1="74.0" x2="160.0" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="160.0" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.0s</text>
+<line x1="258.8" y1="74.0" x2="258.8" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="258.8" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.1s</text>
+<line x1="357.5" y1="74.0" x2="357.5" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="357.5" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.2s</text>
+<line x1="456.2" y1="74.0" x2="456.2" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="456.2" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.3s</text>
+<line x1="555.0" y1="74.0" x2="555.0" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="555.0" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.4s</text>
+<line x1="653.8" y1="74.0" x2="653.8" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="653.8" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.5s</text>
+<line x1="752.5" y1="74.0" x2="752.5" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="752.5" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.6s</text>
+<line x1="851.2" y1="74.0" x2="851.2" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="851.2" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.7s</text>
+<line x1="950.0" y1="74.0" x2="950.0" y2="86.0" stroke="#1f2937" stroke-width="1"/>
+<text x="950.0" y="70.0" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>0.8s</text>
+<text x="950.0" y="102.0" font-size="11.5" fill="#6b7280" text-anchor="end" font-weight="normal">DSP 클록 → 초 환산 (tempo = 1)</text>
+<text x="24.0" y="150.0" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">Resync</text>
+<text x="24.0" y="166.0" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>snapshot.clock ≈ 0.00s</text>
+<rect x="160.0" y="136.0" width="197.5" height="34.0" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" opacity="1"/>
+<line x1="160.0" y1="130.0" x2="160.0" y2="176.0" stroke="#dc2626" stroke-width="2"/>
+<circle cx="199.5" cy="153.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="278.5" cy="153.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="347.6" cy="153.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="416.8" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="485.9" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="564.9" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="624.1" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="703.1" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="772.2" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="851.2" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="910.5" cy="153.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<text x="24.0" y="212.0" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">Tick #1</text>
+<text x="24.0" y="228.0" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>snapshot.clock ≈ 0.10s</text>
+<rect x="357.5" y="198.0" width="98.8" height="34.0" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" opacity="1"/>
+<line x1="258.8" y1="192.0" x2="258.8" y2="238.0" stroke="#dc2626" stroke-width="2"/>
+<line x1="357.5" y1="192.0" x2="357.5" y2="238.0" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="4,3"/>
+<circle cx="199.5" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="278.5" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="347.6" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="416.8" cy="215.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="485.9" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="564.9" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="624.1" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="703.1" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="772.2" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="851.2" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="910.5" cy="215.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<text x="24.0" y="274.0" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">Tick #2</text>
+<text x="24.0" y="290.0" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>snapshot.clock ≈ 0.20s</text>
+<rect x="456.2" y="260.0" width="98.8" height="34.0" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" opacity="1"/>
+<line x1="357.5" y1="254.0" x2="357.5" y2="300.0" stroke="#dc2626" stroke-width="2"/>
+<line x1="456.2" y1="254.0" x2="456.2" y2="300.0" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="4,3"/>
+<circle cx="199.5" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="278.5" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="347.6" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="416.8" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="485.9" cy="277.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="564.9" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="624.1" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="703.1" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="772.2" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="851.2" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="910.5" cy="277.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<text x="24.0" y="336.0" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">Tick #3</text>
+<text x="24.0" y="352.0" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>snapshot.clock ≈ 0.30s</text>
+<rect x="555.0" y="322.0" width="98.8" height="34.0" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" opacity="1"/>
+<line x1="456.2" y1="316.0" x2="456.2" y2="362.0" stroke="#dc2626" stroke-width="2"/>
+<line x1="555.0" y1="316.0" x2="555.0" y2="362.0" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="4,3"/>
+<circle cx="199.5" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="278.5" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="347.6" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="416.8" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="485.9" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="564.9" cy="339.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="624.1" cy="339.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="703.1" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="772.2" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="851.2" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="910.5" cy="339.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<text x="24.0" y="398.0" font-size="12.5" fill="#1f2937" text-anchor="start" font-weight="bold">Tick #4</text>
+<text x="24.0" y="414.0" font-size="11" fill="#6b7280" text-anchor="start" font-weight="normal" font-family='"JetBrains Mono","Cascadia Code",Consolas,monospace'>snapshot.clock ≈ 0.40s</text>
+<rect x="653.8" y="384.0" width="98.8" height="34.0" rx="4" fill="#dbeafe" stroke="#2563eb" stroke-width="1.2" opacity="1"/>
+<line x1="555.0" y1="378.0" x2="555.0" y2="424.0" stroke="#dc2626" stroke-width="2"/>
+<line x1="653.8" y1="378.0" x2="653.8" y2="424.0" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="4,3"/>
+<circle cx="199.5" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="278.5" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="347.6" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="416.8" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="485.9" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="564.9" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="624.1" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="703.1" cy="401.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="772.2" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="851.2" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="910.5" cy="401.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<circle cx="140.0" cy="448.0" r="5" fill="#ea580c" stroke="#ffffff" stroke-width="1.5"/>
+<text x="152.0" y="452.0" font-size="12" fill="#1f2937" text-anchor="start" font-weight="normal">이번 순회에서 예약(SetDelay)되는 노트</text>
+<circle cx="450.0" cy="448.0" r="3.5" fill="#9ca3af" stroke="#ffffff" stroke-width="1.5"/>
+<text x="462.0" y="452.0" font-size="12" fill="#1f2937" text-anchor="start" font-weight="normal">이번 순회에 해당하지 않는 노트</text>
+<line x1="700.0" y1="441.0" x2="700.0" y2="455.0" stroke="#dc2626" stroke-width="2"/>
+<text x="708.0" y="452.0" font-size="12" fill="#dc2626" text-anchor="start" font-weight="normal">next mix clock</text>
+<line x1="830.0" y1="441.0" x2="830.0" y2="455.0" stroke="#7c3aed" stroke-width="1.6" stroke-dasharray="4,3"/>
+<text x="838.0" y="452.0" font-size="12" fill="#7c3aed" text-anchor="start" font-weight="normal">cursorClock</text>
+<text x="24.0" y="480.0" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">• 창 = (cursorClock, snapshot.clock + lookahead·|tempo|] (거리 단위). 각 노트는 정확히 한 순회에서 한 번만 잡히고, 예약된 시작 클록은 앵커에서 계산되므로 순회 시각에 흔들리지 않습니다.</text>
+<text x="24.0" y="498.0" font-size="11.5" fill="#6b7280" text-anchor="start" font-weight="normal">• 순회가 늦어져도 cursor 덕분에 빠지는 노트가 없고, 이미 지난 시작은 늦은 만큼 소리 앞부분을 건너뛰어 재생합니다.</text>
+</svg>
