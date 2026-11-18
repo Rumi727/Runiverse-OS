@@ -6,17 +6,28 @@ using RuniOS.NBS;
 namespace RuniOS.Resource.NBS
 {
     /// <summary>
-    /// Loads and scope-tracks one NBS resource file.<br/>
-    /// NBS 리소스 파일 하나를 로드하고 스코프를 추적합니다.
+    /// Loads one NBS file of a resource pack as a <see cref="NoteBlockClip"/>.<br/>
+    /// 리소스팩의 NBS 파일 하나를 <see cref="NoteBlockClip"/>으로 로드합니다.
     /// </summary>
+    /// <param name="node">
+    /// The NBS file.<br/>
+    /// NBS 파일입니다.
+    /// </param>
+    /// <param name="fileMetaData">
+    /// The metadata used to detect file changes on reload.<br/>
+    /// 리로드할 때 파일 변경을 감지하는 데 사용하는 메타데이터입니다.
+    /// </param>
     public sealed class NBSAssetHandle(IONode node, FileMetaData fileMetaData) : AssetHandle<NoteBlockClip>(node, fileMetaData)
     {
+        /// <inheritdoc/>
         protected override async UniTask<NoteBlockClip?> Load()
         {
-            await using Stream stream = await node.file.OpenRead();
-            return await UniTask.RunOnThreadPool(() => NBSReader.Read(stream));
+            NoteBlockClip clip = await NoteBlockClip.LoadAsync(node);
+            clip.hideFlags = HideFlags.HideAndDontSave;
+            return clip;
         }
 
-        protected override void Unload(NoteBlockClip unloadedAsset) { }
+        /// <inheritdoc/>
+        protected override void Unload(NoteBlockClip unloadedAsset) => Object.DestroyImmediate(unloadedAsset);
     }
 }

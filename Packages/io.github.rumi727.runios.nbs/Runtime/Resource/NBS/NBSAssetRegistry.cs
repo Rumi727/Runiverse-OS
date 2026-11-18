@@ -7,13 +7,13 @@ using Unity.Scripting.LifecycleManagement;
 namespace RuniOS.Resource.NBS
 {
     /// <summary>
-    /// Registers files below <c>assets/&lt;namespace&gt;/nbs</c> as scoped <see cref="NoteBlockClip"/> resources.<br/>
-    /// <c>assets/&lt;namespace&gt;/nbs</c> 아래 파일을 스코프 기반 <see cref="NoteBlockClip"/> 리소스로 등록합니다.
+    /// Registers the files below <c>assets/&lt;namespace&gt;/nbses</c> as <see cref="NoteBlockClip"/> resources.<br/>
+    /// <c>assets/&lt;namespace&gt;/nbses</c> 아래 파일을 <see cref="NoteBlockClip"/> 리소스로 등록합니다.
     /// </summary>
     public sealed partial class NBSAssetRegistry : SimpleAssetRegistry<NBSAssetHandle>
     {
-        /// <inheritdoc cref="registryId" />
-        public static Identifier id = new Identifier("runios", "nbs");
+        /// <inheritdoc cref="registryId"/>
+        public static readonly Identifier id = new Identifier("runios", "nbs");
 
         /// <inheritdoc/>
         public override Identifier registryId => id;
@@ -33,6 +33,8 @@ namespace RuniOS.Resource.NBS
         [OnCodeUnloading]
         static void OnCodeUnloading() => AssetRegistryManager.Unregister<NBSAssetRegistry>();
 
-        protected override UniTask<NBSAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData) => UniTask.FromResult(new NBSAssetHandle(node, fileMetaData));
+        /// <inheritdoc/>
+        protected override UniTask<NBSAssetHandle> CreateHandle(AssetDiscoveryContext context, Identifier identifier, IONode node, FileMetaData fileMetaData) =>
+            UniTask.FromResult(new NBSAssetHandle(node, fileMetaData));
     }
 }

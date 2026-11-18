@@ -1,475 +1,496 @@
 #nullable enable
-using RuniOS.Linq;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Text;
 
 namespace RuniOS.NBS
 {
     /// <summary>
-    /// Reads Note Block Studio versions 0 through 6 and rejects newer layouts.<br/>
-    /// Note Block Studio 버전 0부터 6까지 읽고 그보다 새로운 레이아웃은 거부합니다.
+    /// Reads an NBS file from a stream section by section.<br/>
+    /// 스트림에서 NBS 파일을 섹션 단위로 읽습니다.
     /// </summary>
-    public static class NBSReader
+    /// <remarks>
+    /// Call <see cref="ReadHeader"/>, <see cref="ReadNotes"/>, <see cref="ReadLayers"/>, and <see cref="ReadInstruments"/> in that order. Reading can stop after any section.<br/>
+    /// The stream is read sequentially and never loaded into memory at once. Corrections follow the Note Block Studio loader: keys are clamped to <c>0</c>–<c>87</c>, layer volumes to <c>0</c>–<c>100</c>, the time signature to <c>2</c>–<c>8</c>, and work statistics to non-negative values.
+    /// Custom instrument indexes are moved to the current layout of <see cref="NBSInstrument.vanillaCount"/> built-in instruments.
+    /// <br/><br/>
+    /// <see cref="ReadHeader"/>, <see cref="ReadNotes"/>, <see cref="ReadLayers"/>, <see cref="ReadInstruments"/>를 이 순서대로 호출합니다. 어느 섹션 뒤에서든 읽기를 멈출 수 있습니다.<br/>
+    /// 스트림은 순차적으로 읽으며 한 번에 메모리에 올리지 않습니다. 보정은 Note Block Studio 로더를 따릅니다. 건반은 <c>0</c>–<c>87</c>, 레이어 음량은 <c>0</c>–<c>100</c>, 박자표는 <c>2</c>–<c>8</c>로 제한하고 작업 통계는 음수가 되지 않게 합니다.
+    /// 커스텀 악기 인덱스는 <see cref="NBSInstrument.vanillaCount"/>개 기본 악기의 현재 배치로 옮깁니다.
+    /// </remarks>
+    public sealed class NBSReader : IDisposable
     {
-        const int maximumStringBytes = 16 * 1024 * 1024;
-        static readonly UTF8Encoding strictUtf8 = new UTF8Encoding(false, true);
+        /// <summary>
+        /// Identifies the next section that the reader expects.<br/>
+        /// 리더가 다음으로 기대하는 섹션을 식별합니다.
+        /// </summary>
+        public enum Section
+        {
+            /// <summary>
+            /// The header has not been read.<br/>
+            /// 헤더를 아직 읽지 않았습니다.
+            /// </summary>
+            header,
+
+            /// <summary>
+            /// The note block section is next.<br/>
+            /// 다음은 노트 블록 섹션입니다.
+            /// </summary>
+            notes,
+
+            /// <summary>
+            /// The optional layer section is next.<br/>
+            /// 다음은 선택적인 레이어 섹션입니다.
+            /// </summary>
+            layers,
+
+            /// <summary>
+            /// The optional custom instrument section is next.<br/>
+            /// 다음은 선택적인 커스텀 악기 섹션입니다.
+            /// </summary>
+            instruments,
+
+            /// <summary>
+            /// Every section has been read or the file ended.<br/>
+            /// 모든 섹션을 읽었거나 파일이 끝났습니다.
+            /// </summary>
+            end
+        }
 
         /// <summary>
-        /// Reads and parses one NBS file from <paramref name="stream"/> without taking ownership of the stream.<br/>
-        /// <paramref name="stream"/>의 소유권을 가져오지 않고 NBS 파일 하나를 읽고 파싱합니다.
+        /// The newest format version the reader accepts.<br/>
+        /// 리더가 받아들이는 가장 새로운 포맷 버전입니다.
+        /// </summary>
+        public const byte latestVersion = 6;
+
+        /// <summary>
+        /// Initializes a reader for <paramref name="stream"/>.<br/>
+        /// <paramref name="stream"/>을 읽는 리더를 초기화합니다.
         /// </summary>
         /// <param name="stream">
-        /// The readable stream positioned at the beginning of an NBS file.<br/>
-        /// NBS 파일 시작 위치에 놓인 읽기 가능한 스트림입니다.
+        /// The readable stream positioned at the start of an NBS file.<br/>
+        /// NBS 파일 시작 위치에 있는 읽기 가능한 스트림입니다.
         /// </param>
-        /// <returns>
-        /// The immutable parsed file and its precomputed tempo map.<br/>
-        /// 파싱된 불변 파일과 미리 계산된 템포 맵을 반환합니다.
-        /// </returns>
+        /// <param name="leaveOpen">
+        /// Whether <paramref name="stream"/> stays open after the reader is disposed.<br/>
+        /// 리더를 해제한 뒤에도 <paramref name="stream"/>을 열어 둘지 여부입니다.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// Thrown when <paramref name="stream"/> is <see langword="null"/>.<br/>
-        /// <paramref name="stream"/>이 <see langword="null"/>이면 발생합니다.
+        /// <paramref name="stream"/>이 <see langword="null"/>인 경우 발생합니다.
         /// </exception>
-        /// <exception cref="InvalidDataException">
-        /// Thrown when the file is truncated, corrupt, or uses version 7 or newer.<br/>
-        /// 파일이 잘렸거나 손상되었거나 버전 7 이상이면 발생합니다.
+        /// <exception cref="ArgumentException">
+        /// Thrown when <paramref name="stream"/> cannot be read.<br/>
+        /// <paramref name="stream"/>을 읽을 수 없는 경우 발생합니다.
         /// </exception>
-        public static NoteBlockClip Read(Stream stream)
+        public NBSReader(Stream stream, bool leaveOpen = false)
         {
             ArgumentNullException.ThrowIfNull(stream);
+            if (!stream.CanRead)
+                throw new ArgumentException("The stream must be readable.", nameof(stream));
 
-            try
-            {
-                using BinaryReader reader = new BinaryReader(stream, strictUtf8, true);
-                // OpenNBS writes this with buffer_u16. A non-zero classic length is not used to build its timeline,
-                // but preserve its raw unsigned value in the header for callers that need the original metadata.
-                ushort firstValue = reader.ReadUInt16();
-
-                byte version;
-                byte vanillaInstrumentCount;
-                ushort declaredSongLength;
-                ushort layerCount;
-                if (firstValue != 0)
-                {
-                    version = 0;
-                    vanillaInstrumentCount = 10;
-                    declaredSongLength = firstValue;
-                    layerCount = ReadNonNegativeShort(reader, "layer count");
-                }
-                else
-                {
-                    version = reader.ReadByte();
-                    if (version > 6)
-                        throw new InvalidDataException($"NBS version {version} is newer than the supported version 6.");
-
-                    vanillaInstrumentCount = reader.ReadByte();
-                    declaredSongLength = version >= 3
-                        ? reader.ReadUInt16()
-                        : (ushort)0;
-                    layerCount = ReadNonNegativeShort(reader, "layer count");
-                }
-
-                string songName = ReadString(reader);
-                string author = ReadString(reader);
-                string originalAuthor = ReadString(reader);
-                string description = ReadString(reader);
-
-                ushort rawTempo = ReadNonNegativeShort(reader, "song tempo");
-                double ticksPerSecond = rawTempo / 100d;
-                if (ticksPerSecond <= 0)
-                    throw new InvalidDataException($"The NBS header tempo must be greater than zero: raw value {rawTempo}, {ticksPerSecond} ticks per second.");
-
-                bool autoSave = reader.ReadByte() != 0;
-                byte autoSaveDuration = reader.ReadByte();
-                byte timeSignature = reader.ReadByte();
-                int minutesSpent = reader.ReadInt32();
-                int leftClicks = reader.ReadInt32();
-                int rightClicks = reader.ReadInt32();
-                int blocksAdded = reader.ReadInt32();
-                int blocksRemoved = reader.ReadInt32();
-                string importedFileName = ReadString(reader);
-
-                bool loopEnabled = false;
-                byte maxLoopCount = 0;
-                ushort loopStartTick = 0;
-                if (version >= 4)
-                {
-                    loopEnabled = reader.ReadByte() != 0;
-                    maxLoopCount = reader.ReadByte();
-                    // OpenNBS lets its loop-start editor reach the full song length and writes it with buffer_u16.
-                    loopStartTick = reader.ReadUInt16();
-                }
-
-                List<NBSNote> notes = ReadNotes(reader, version);
-                List<NBSLayer> layers = ReadLayers(reader, version, layerCount);
-                List<NBSCustomInstrument> customInstruments = ReadCustomInstruments(reader);
-                ValidateCoordinatesAndInstruments(notes, layerCount, vanillaInstrumentCount, customInstruments);
-
-                List<NBSSpecialEvent> specialEvents = ParseSpecialEvents(vanillaInstrumentCount, notes, customInstruments);
-
-                int lastNoteTick = 0;
-                if (notes.Count > 0)
-                {
-                    int maximumNoteTick = notes.Max(x => x.tick);
-                    if (maximumNoteTick == int.MaxValue)
-                        throw new InvalidDataException($"NBS song length exceeds Int32: last note tick {maximumNoteTick}, required length {(long)maximumNoteTick + 1}.");
-
-                    lastNoteTick = maximumNoteTick + 1;
-                }
-
-                // OpenNBS reads the declared length but derives the actual song size from note coordinates.
-                int tickLength = lastNoteTick;
-
-                NBSTick[] ticks = GroupNotesByTick(notes);
-
-                NBSHeader header = new NBSHeader
-                (
-                    version,
-                    vanillaInstrumentCount,
-                    declaredSongLength,
-                    layerCount,
-                    songName,
-                    author,
-                    originalAuthor,
-                    description,
-                    ticksPerSecond,
-                    autoSave,
-                    autoSaveDuration,
-                    timeSignature,
-                    minutesSpent,
-                    leftClicks,
-                    rightClicks,
-                    blocksAdded,
-                    blocksRemoved,
-                    importedFileName,
-                    loopEnabled,
-                    maxLoopCount,
-                    loopStartTick
-                );
-
-                return new NoteBlockClip
-                (
-                    header,
-                    ticks.AsReadOnly(),
-                    layers.AsReadOnly(),
-                    customInstruments.AsReadOnly(),
-                    specialEvents.AsReadOnly(),
-                    tickLength
-                );
-            }
-            catch (EndOfStreamException exception)
-            {
-                throw new InvalidDataException($"The NBS file ended before the current structure was complete{GetStreamPositionDescription(stream)}.", exception);
-            }
-            catch (OverflowException exception)
-            {
-                throw new InvalidDataException($"The NBS file contains an out-of-range length or coordinate{GetStreamPositionDescription(stream)}.", exception);
-            }
+            this.stream = stream;
+            this.leaveOpen = leaveOpen;
         }
 
-        static NBSTick[] GroupNotesByTick(IReadOnlyList<NBSNote> notes)
+        readonly Stream stream;
+        readonly bool leaveOpen;
+
+        /// <summary>
+        /// Gets the next section that the reader expects.<br/>
+        /// 리더가 다음으로 기대하는 섹션을 가져옵니다.
+        /// </summary>
+        public Section section { get; private set; } = Section.header;
+
+        /// <summary>
+        /// Gets the header after <see cref="ReadHeader"/> succeeds.<br/>
+        /// <see cref="ReadHeader"/>가 성공한 뒤의 헤더를 가져옵니다.
+        /// </summary>
+        public NBSHeader header { get; private set; }
+
+        /// <summary>
+        /// Reads the header.<br/>
+        /// 헤더를 읽습니다.
+        /// </summary>
+        /// <returns>
+        /// The header read from the stream.<br/>
+        /// 스트림에서 읽은 헤더를 반환합니다.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the header has already been read.<br/>
+        /// 헤더를 이미 읽은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// Thrown when the version is newer than <see cref="latestVersion"/> or a field is invalid.<br/>
+        /// 버전이 <see cref="latestVersion"/>보다 새롭거나 필드가 유효하지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="EndOfStreamException">
+        /// Thrown when the stream ends inside the header.<br/>
+        /// 헤더 도중에 스트림이 끝난 경우 발생합니다.
+        /// </exception>
+        public NBSHeader ReadHeader()
         {
-            List<NBSTick> result = [];
-            int startIndex = 0;
-            while (startIndex < notes.Count)
+            ExpectSection(Section.header);
+
+            NBSHeader result = new NBSHeader();
+            short first = ReadInt16();
+            if (first == 0)
             {
-                int tick = notes[startIndex].tick;
-                int endIndex = startIndex + 1;
-                while (endIndex < notes.Count && notes[endIndex].tick == tick)
-                    endIndex++;
+                result.version = ReadByte();
+                if (result.version > latestVersion)
+                    throw new InvalidDataException($"NBS version {result.version} is newer than the supported version {latestVersion}.");
 
-                NBSNote[] tickNotes = new NBSNote[endIndex - startIndex];
-                for (int i = startIndex; i < endIndex; i++)
-                    tickNotes[i - startIndex] = notes[i];
-
-                result.Add(new NBSTick(tick, Array.AsReadOnly(tickNotes)));
-                startIndex = endIndex;
+                result.vanillaInstrumentCount = ReadByte();
+                result.songLength = result.version >= 3 ? ReadInt16() : (short)0;
+            }
+            else
+            {
+                result.version = 0;
+                result.vanillaInstrumentCount = 0;
+                result.songLength = first;
             }
 
-            return result.ToArray();
+            result.layerCount = ReadInt16();
+            if (result.layerCount < 0)
+                throw new InvalidDataException($"The NBS layer count cannot be negative: {result.layerCount}.");
+
+            result.name = ReadString();
+            result.author = ReadString();
+            result.originalAuthor = ReadString();
+            result.description = ReadString();
+            result.rawTempo = ReadInt16();
+            result.autoSave = ReadByte() != 0;
+            result.autoSaveDuration = ReadByte();
+            result.timeSignature = Math.Clamp(ReadByte(), (byte)2, (byte)8);
+            result.minutesSpent = Math.Max(0, ReadInt32());
+            result.leftClicks = Math.Max(0, ReadInt32());
+            result.rightClicks = Math.Max(0, ReadInt32());
+            result.blocksAdded = Math.Max(0, ReadInt32());
+            result.blocksRemoved = Math.Max(0, ReadInt32());
+            result.importedFileName = ReadString();
+
+            if (result.version >= 4)
+            {
+                result.loop = ReadByte() != 0;
+                result.maxLoopCount = ReadByte();
+                result.loopStartTick = ReadInt16();
+            }
+
+            header = result;
+            section = Section.notes;
+            return result;
         }
 
-        static List<NBSNote> ReadNotes
-        (
-            BinaryReader reader,
-            byte version
-        )
+        /// <summary>
+        /// Reads every note block and appends it to <paramref name="notes"/> in file order, which is ascending by tick and then by layer.<br/>
+        /// 모든 노트 블록을 파일 순서(tick, 레이어 오름차순)대로 <paramref name="notes"/>에 추가합니다.
+        /// </summary>
+        /// <param name="notes">
+        /// The list that receives the notes.<br/>
+        /// 노트를 받을 리스트입니다.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="notes"/> is <see langword="null"/>.<br/>
+        /// <paramref name="notes"/>가 <see langword="null"/>인 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the reader is not at <see cref="Section.notes"/>.<br/>
+        /// 리더가 <see cref="Section.notes"/>에 있지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// Thrown when a jump is negative or a coordinate exceeds <see cref="int"/>.<br/>
+        /// 점프 값이 음수이거나 좌표가 <see cref="int"/>를 넘는 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="EndOfStreamException">
+        /// Thrown when the stream ends inside the note block section.<br/>
+        /// 노트 블록 섹션 도중에 스트림이 끝난 경우 발생합니다.
+        /// </exception>
+        public void ReadNotes(List<NBSNote> notes)
         {
-            List<NBSNote> notes = [];
+            ArgumentNullException.ThrowIfNull(notes);
+            ExpectSection(Section.notes);
+
+            bool hasNoteDetails = header.version >= 4;
+            int customIndexOffset = header.version == 0 ? 0 : NBSInstrument.vanillaCount - header.vanillaInstrumentCount;
+
+            // A note needs at least a layer jump, an instrument, and a key. The bound only reserves memory, it never limits reading.
+            if (stream.CanSeek)
+            {
+                long minimumNoteBytes = hasNoteDetails ? 8 : 4;
+                notes.EnsureCapacity(notes.Count + (int)Math.Min(int.MaxValue - notes.Count, (stream.Length - stream.Position) / minimumNoteBytes));
+            }
+
             int tick = -1;
-
             while (true)
             {
-                ushort tickJump = ReadNonNegativeShort(reader, "tick jump");
+                short tickJump = ReadInt16();
                 if (tickJump == 0)
                     break;
 
-                tick = AddCoordinateJump(tick, tickJump, "tick");
+                tick = AddJump(tick, tickJump, "tick");
+
                 int layer = -1;
                 while (true)
                 {
-                    ushort layerJump = ReadNonNegativeShort(reader, "layer jump");
+                    short layerJump = ReadInt16();
                     if (layerJump == 0)
                         break;
 
-                    layer = AddCoordinateJump(layer, layerJump, "layer");
-                    byte instrument = reader.ReadByte();
-                    byte key = reader.ReadByte();
-                    byte velocity = version >= 4 ? reader.ReadByte() : (byte)100;
-                    byte panning = version >= 4 ? reader.ReadByte() : (byte)100;
-                    short pitch = version >= 4 ? reader.ReadInt16() : (short)0;
+                    layer = AddJump(layer, layerJump, "layer");
+
+                    int instrument = ReadByte();
+                    if (instrument >= header.vanillaInstrumentCount)
+                        instrument += customIndexOffset;
+
+                    byte key = Math.Min(ReadByte(), (byte)87);
+                    byte velocity = 100;
+                    byte panning = 100;
+                    short pitch = 0;
+                    if (hasNoteDetails)
+                    {
+                        velocity = ReadByte();
+                        panning = ReadByte();
+                        pitch = ReadInt16();
+                    }
+
                     notes.Add(new NBSNote(tick, layer, instrument, key, velocity, panning, pitch));
                 }
             }
 
-            return notes;
+            section = Section.layers;
         }
 
-        static List<NBSLayer> ReadLayers
-        (
-            BinaryReader reader,
-            byte version,
-            ushort layerCount
-        )
+        /// <summary>
+        /// Reads the layer section and appends <see cref="NBSHeader.layerCount"/> layers to <paramref name="layers"/>.<br/>
+        /// 레이어 섹션을 읽고 <see cref="NBSHeader.layerCount"/>개의 레이어를 <paramref name="layers"/>에 추가합니다.
+        /// </summary>
+        /// <param name="layers">
+        /// The list that receives the layers.<br/>
+        /// 레이어를 받을 리스트입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the section exists; <see langword="false"/> if the file ended after the notes.<br/>
+        /// 섹션이 있으면 <see langword="true"/>를 반환하고, 파일이 노트 뒤에서 끝났으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="layers"/> is <see langword="null"/>.<br/>
+        /// <paramref name="layers"/>가 <see langword="null"/>인 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the reader is not at <see cref="Section.layers"/>.<br/>
+        /// 리더가 <see cref="Section.layers"/>에 있지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// Thrown when a string length is invalid.<br/>
+        /// 문자열 길이가 유효하지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="EndOfStreamException">
+        /// Thrown when the stream ends inside the layer section.<br/>
+        /// 레이어 섹션 도중에 스트림이 끝난 경우 발생합니다.
+        /// </exception>
+        public bool ReadLayers(List<NBSLayer> layers)
         {
-            List<NBSLayer> layers = new List<NBSLayer>(layerCount);
-            for (int i = 0; i < layerCount; i++)
+            ArgumentNullException.ThrowIfNull(layers);
+            ExpectSection(Section.layers);
+
+            if (!TryReadByte(out byte firstByte))
             {
-                string name;
-                try
-                {
-                    name = ReadString(reader);
-                }
-                catch (EndOfStreamException) when (i == 0)
-                {
-                    for (; i < layerCount; i++)
-                        layers.Add(new NBSLayer(string.Empty, false, 100, 100));
-
-                    return layers;
-                }
-
-                bool locked = version >= 4 && reader.ReadByte() != 0;
-                byte volume = reader.ReadByte();
-                byte panning = version >= 2 ? reader.ReadByte() : (byte)100;
-
-                layers.Add(new NBSLayer(name, locked, volume, panning));
+                section = Section.end;
+                return false;
             }
 
-            return layers;
+            layers.EnsureCapacity(layers.Count + header.layerCount);
+            for (int i = 0; i < header.layerCount; i++)
+            {
+                string name = i == 0 ? ReadString(firstByte) : ReadString();
+                NBSLayerLock lockState = header.version >= 4 ? (NBSLayerLock)ReadByte() : NBSLayerLock.none;
+                byte volume = Math.Min(ReadByte(), (byte)100);
+                byte panning = header.version >= 2 ? ReadByte() : (byte)100;
+                layers.Add(new NBSLayer(name, lockState, volume, panning));
+            }
+
+            // With no layers, the first byte already belongs to the instrument count.
+            if (header.layerCount == 0)
+            {
+                pendingByte = firstByte;
+                hasPendingByte = true;
+            }
+
+            section = Section.instruments;
+            return true;
         }
 
-        static List<NBSCustomInstrument> ReadCustomInstruments
-        (
-            BinaryReader reader
-        )
+        /// <summary>
+        /// Reads the custom instrument section and appends every instrument to <paramref name="instruments"/>.<br/>
+        /// 커스텀 악기 섹션을 읽고 모든 악기를 <paramref name="instruments"/>에 추가합니다.
+        /// </summary>
+        /// <param name="instruments">
+        /// The list that receives the instruments.<br/>
+        /// 악기를 받을 리스트입니다.
+        /// </param>
+        /// <returns>
+        /// <see langword="true"/> if the section exists; <see langword="false"/> if the file ended after the layers.<br/>
+        /// 섹션이 있으면 <see langword="true"/>를 반환하고, 파일이 레이어 뒤에서 끝났으면 <see langword="false"/>를 반환합니다.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when <paramref name="instruments"/> is <see langword="null"/>.<br/>
+        /// <paramref name="instruments"/>가 <see langword="null"/>인 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the reader is not at <see cref="Section.instruments"/>.<br/>
+        /// 리더가 <see cref="Section.instruments"/>에 있지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// Thrown when a string length is invalid.<br/>
+        /// 문자열 길이가 유효하지 않은 경우 발생합니다.
+        /// </exception>
+        /// <exception cref="EndOfStreamException">
+        /// Thrown when the stream ends inside the custom instrument section.<br/>
+        /// 커스텀 악기 섹션 도중에 스트림이 끝난 경우 발생합니다.
+        /// </exception>
+        public bool ReadInstruments(List<NBSInstrument> instruments)
         {
-            List<NBSCustomInstrument> instruments = [];
-            int count;
-            try
-            {
-                count = reader.ReadByte();
-            }
-            catch (EndOfStreamException)
-            {
-                return instruments;
-            }
+            ArgumentNullException.ThrowIfNull(instruments);
+            ExpectSection(Section.instruments);
 
-            instruments.Capacity = count;
-            for (int i = 0; i < count; i++)
-            {
-                string name = ReadString(reader);
-                string soundFile = ReadString(reader);
-                byte key = reader.ReadByte();
-                bool pressKey = reader.ReadByte() != 0;
-                if (key > 87)
-                    throw new InvalidDataException($"NBS custom instrument {i} contains invalid key {key}.");
-
-                instruments.Add(new NBSCustomInstrument(name, soundFile, key, pressKey));
-            }
-
-            return instruments;
-        }
-
-        static void ValidateCoordinatesAndInstruments
-        (
-            IEnumerable<NBSNote> notes,
-            ushort layerCount,
-            byte vanillaInstrumentCount,
-            IReadOnlyList<NBSCustomInstrument> customInstruments
-        )
-        {
-            int instrumentCount = vanillaInstrumentCount + customInstruments.Count;
-            foreach (NBSNote note in notes)
-            {
-                if (note.layer < 0 || note.layer >= layerCount)
-                    throw new InvalidDataException($"NBS note at tick {note.tick} refers to layer {note.layer}, but the file contains {layerCount} layers.");
-                if (note.instrument >= instrumentCount)
-                    throw new InvalidDataException($"NBS note at tick {note.tick}, layer {note.layer} refers to missing instrument {note.instrument}, but the file contains {instrumentCount} instruments.");
-            }
-        }
-
-        static List<NBSSpecialEvent> ParseSpecialEvents
-        (
-            byte vanillaInstrumentCount,
-            IEnumerable<NBSNote> notes,
-            IReadOnlyList<NBSCustomInstrument> customInstruments
-        )
-        {
-            List<NBSSpecialEvent> result = [];
-            foreach (NBSNote note in notes)
-            {
-                int customIndex = note.instrument - vanillaInstrumentCount;
-                if (customIndex < 0 || customIndex >= customInstruments.Count)
-                    continue;
-
-                string name = customInstruments[customIndex].name.Trim();
-                if (name.Equals("Tempo Changer", StringComparison.OrdinalIgnoreCase))
-                {
-                    double bpm = note.pitch.Abs();
-                    if (bpm == 0)
-                        Debug.RuntimeLogWarning($"Ignored a zero BPM Tempo Changer at tick {note.tick}, layer {note.layer}.", nameof(NBSReader));
-
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.tempoChange, note.tick, note.layer, bpm));
-                }
-                else if (name.Equals("Sound Stopper", StringComparison.OrdinalIgnoreCase))
-                {
-                    int startLayer = MathUtility.Max((short)0, note.pitch);
-                    int packedEndLayer = (note.velocity << 8) | note.panning;
-                    int endLayer = packedEndLayer == 0 ? int.MaxValue : packedEndLayer;
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.soundStop, note.tick, note.layer, 0, startLayer, endLayer));
-                }
-                else if (name.Equals("Toggle Rainbow", StringComparison.OrdinalIgnoreCase))
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.toggleRainbow, note.tick, note.layer));
-                else if (name.Equals("Show Save Popup", StringComparison.OrdinalIgnoreCase))
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.showSavePopup, note.tick, note.layer));
-                else if (name.Equals("Toggle Background Accent", StringComparison.OrdinalIgnoreCase))
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.toggleBackgroundAccent, note.tick, note.layer));
-                else if (TryParseMainColor(name, out HexColor color))
-                    result.Add(new NBSSpecialEvent(NBSSpecialEventKind.changeMainColor, note.tick, note.layer, color: color));
-            }
-
-            return result;
-        }
-
-        static bool TryParseMainColor(string name, out HexColor color)
-        {
-            const string prefix = "Change Color to ";
-            color = default;
-            if (!name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase) || name.Length != prefix.Length + 7)
+            section = Section.end;
+            if (!TryReadByte(out byte count))
                 return false;
 
-            if (HexColor.TryParse(name.Substring(prefix.Length), out Color32 result))
+            instruments.EnsureCapacity(instruments.Count + count);
+            for (int i = 0; i < count; i++)
             {
-                color = result;
-                return true;
+                string name = ReadString();
+                string soundFile = ReadString();
+                byte key = ReadByte();
+                bool pressKey = ReadByte() != 0;
+                instruments.Add(new NBSInstrument(name, soundFile, key, pressKey));
             }
 
-            return false;
+            return true;
         }
 
-        static string ReadString(BinaryReader reader)
+        /// <summary>
+        /// Releases the reader and, unless the reader was created with <c>leaveOpen</c>, the stream.<br/>
+        /// 리더를 해제하고, <c>leaveOpen</c>으로 생성하지 않았다면 스트림도 해제합니다.
+        /// </summary>
+        public void Dispose()
         {
-            int length = reader.ReadInt32();
-            if (length < 0 || length > maximumStringBytes)
-                throw new InvalidDataException($"Invalid NBS string byte length: {length}.");
-
-            byte[] bytes = reader.ReadBytes(length);
-            if (bytes.Length != length)
-                throw new EndOfStreamException();
-
-            try
-            {
-                return strictUtf8.GetString(bytes);
-            }
-            catch (DecoderFallbackException)
-            {
-                return DecodeWindows1252(bytes);
-            }
+            if (!leaveOpen)
+                stream.Dispose();
         }
 
-        static ushort ReadNonNegativeShort
-        (
-            BinaryReader reader,
-            string fieldName
-        )
-        {
-            short value = reader.ReadInt16();
-            if (value < 0)
-                throw new InvalidDataException($"NBS {fieldName} cannot be negative: {value}.");
+        byte pendingByte;
+        bool hasPendingByte;
 
-            return (ushort)value;
+        void ExpectSection(Section expected)
+        {
+            if (section != expected)
+                throw new InvalidOperationException($"The NBS reader expected the {expected} section, but it is at the {section} section.");
         }
 
-        static int AddCoordinateJump(int current, ushort jump, string coordinateName)
+        static int AddJump(int coordinate, short jump, string coordinateName)
         {
-            long result = (long)current + jump;
+            if (jump < 0)
+                throw new InvalidDataException($"The NBS {coordinateName} jump cannot be negative: {jump}.");
+
+            long result = (long)coordinate + jump;
             if (result > int.MaxValue)
-                throw new InvalidDataException($"NBS {coordinateName} exceeds Int32: current value {current}, jump {jump}, result {result}.");
+                throw new InvalidDataException($"The NBS {coordinateName} exceeds Int32: {result}.");
 
             return (int)result;
         }
 
-        static string GetStreamPositionDescription(Stream stream)
+        bool TryReadByte(out byte value)
         {
+            if (hasPendingByte)
+            {
+                hasPendingByte = false;
+                value = pendingByte;
+                return true;
+            }
+
+            int result = stream.ReadByte();
+            value = (byte)result;
+            return result >= 0;
+        }
+
+        byte ReadByte() => TryReadByte(out byte value) ? value : throw new EndOfStreamException();
+
+        short ReadInt16()
+        {
+            Span<byte> buffer = stackalloc byte[sizeof(short)];
+            ReadExactly(buffer);
+            return BinaryPrimitives.ReadInt16LittleEndian(buffer);
+        }
+
+        int ReadInt32()
+        {
+            Span<byte> buffer = stackalloc byte[sizeof(int)];
+            ReadExactly(buffer);
+            return BinaryPrimitives.ReadInt32LittleEndian(buffer);
+        }
+
+        void ReadExactly(Span<byte> buffer)
+        {
+            if (buffer.IsEmpty)
+                return;
+
+            if (hasPendingByte)
+            {
+                hasPendingByte = false;
+                buffer[0] = pendingByte;
+                buffer = buffer[1..];
+            }
+
+            stream.ReadExactly(buffer);
+        }
+
+        string ReadString()
+        {
+            Span<byte> lengthBytes = stackalloc byte[sizeof(int)];
+            ReadExactly(lengthBytes);
+            return ReadStringContent(BinaryPrimitives.ReadInt32LittleEndian(lengthBytes));
+        }
+
+        string ReadString(byte firstLengthByte)
+        {
+            Span<byte> lengthBytes = stackalloc byte[sizeof(int)];
+            lengthBytes[0] = firstLengthByte;
+            ReadExactly(lengthBytes[1..]);
+            return ReadStringContent(BinaryPrimitives.ReadInt32LittleEndian(lengthBytes));
+        }
+
+        static readonly UTF8Encoding strictUtf8 = new UTF8Encoding(false, true);
+
+        string ReadStringContent(int length)
+        {
+            if (length < 0 || (stream.CanSeek && length > stream.Length - stream.Position))
+                throw new InvalidDataException($"Invalid NBS string byte length: {length}.");
+
+            if (length == 0)
+                return string.Empty;
+
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(length);
             try
             {
-                if (!stream.CanSeek)
-                    return string.Empty;
+                Span<byte> bytes = buffer.AsSpan(0, length);
+                ReadExactly(bytes);
 
-                return $" at byte offset {stream.Position} of {stream.Length}";
+                try
+                {
+                    return strictUtf8.GetString(bytes);
+                }
+                catch (DecoderFallbackException)
+                {
+                    // Note Block Studio maps every byte directly to a character.
+                    return Encoding.Latin1.GetString(bytes);
+                }
             }
-            catch (IOException)
+            finally
             {
-                return string.Empty;
-            }
-            catch (NotSupportedException)
-            {
-                return string.Empty;
-            }
-            catch (ObjectDisposedException)
-            {
-                return string.Empty;
+                ArrayPool<byte>.Shared.Return(buffer);
             }
         }
-
-        static string DecodeWindows1252(byte[] bytes)
-        {
-            char[] characters = new char[bytes.Length];
-            for (int i = 0; i < bytes.Length; i++)
-                characters[i] = DecodeWindows1252Byte(bytes[i]);
-
-            return new string(characters);
-        }
-
-        static char DecodeWindows1252Byte(byte value) => value switch
-        {
-            0x80 => '\u20ac', // EURO SIGN
-            0x82 => '\u201a', // SINGLE LOW-9 QUOTATION MARK
-            0x83 => '\u0192', // LATIN SMALL LETTER F WITH HOOK
-            0x84 => '\u201e', // DOUBLE LOW-9 QUOTATION MARK
-            0x85 => '\u2026', // HORIZONTAL ELLIPSIS
-            0x86 => '\u2020', // DAGGER
-            0x87 => '\u2021', // DOUBLE DAGGER
-            0x88 => '\u02c6', // MODIFIER LETTER CIRCUMFLEX ACCENT
-            0x89 => '\u2030', // PER MILLE SIGN
-            0x8a => '\u0160', // LATIN CAPITAL LETTER S WITH CARON
-            0x8b => '\u2039', // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
-            0x8c => '\u0152', // LATIN CAPITAL LIGATURE OE
-            0x8e => '\u017d', // LATIN CAPITAL LETTER Z WITH CARON
-            0x91 => '\u2018', // LEFT SINGLE QUOTATION MARK
-            0x92 => '\u2019', // RIGHT SINGLE QUOTATION MARK
-            0x93 => '\u201c', // LEFT DOUBLE QUOTATION MARK
-            0x94 => '\u201d', // RIGHT DOUBLE QUOTATION MARK
-            0x95 => '\u2022', // BULLET
-            0x96 => '\u2013', // EN DASH
-            0x97 => '\u2014', // EM DASH
-            0x98 => '\u02dc', // SMALL TILDE
-            0x99 => '\u2122', // TRADE MARK SIGN
-            0x9a => '\u0161', // LATIN SMALL LETTER S WITH CARON
-            0x9b => '\u203a', // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
-            0x9c => '\u0153', // LATIN SMALL LIGATURE OE
-            0x9e => '\u017e', // LATIN SMALL LETTER Z WITH CARON
-            0x9f => '\u0178', // LATIN CAPITAL LETTER Y WITH DIAERESIS
-            _ => (char)value
-        };
     }
 }

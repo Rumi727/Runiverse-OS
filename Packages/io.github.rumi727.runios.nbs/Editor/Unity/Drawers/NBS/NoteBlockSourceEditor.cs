@@ -5,92 +5,54 @@ using RuniOS.Editor.IMGUI.NBS;
 using RuniOS.Editor.Unity.Drawers.Sounds;
 using RuniOS.NBS;
 using RuniOS.Sounds;
-using RuniOS.Utility;
+using RuniOS.UIElements.NBS;
+using UnityEngine.UIElements;
 
 namespace RuniOS.Editor.Unity.Drawers.NBS
 {
     /// <summary>
-    /// Draws NBS resource, scheduling, transport, visual-effect preview, and timing information for <see cref="NoteBlockSource"/>.<br/>
-    /// <see cref="NoteBlockSource"/>의 NBS 리소스, 예약, 트랜스포트, 시각 효과 미리보기 및 타이밍 정보를 그립니다.
+    /// Draws the clip, playback, timeline lanes, visual effect preview, and song information of <see cref="NoteBlockSource"/>.<br/>
+    /// <see cref="NoteBlockSource"/>의 클립, 재생, 타임라인 레인, 시각 효과 미리보기, 곡 정보를 그립니다.
     /// </summary>
     [CanEditMultipleObjects]
     [CustomEditor(typeof(NoteBlockSource), true)]
     public sealed class NoteBlockSourceEditor : RuniAudioSourceEditor<NoteBlockSource>
     {
-        const float visualEffectCardHeight = 44;
-        const float tempoChangeMarkerWidth = 2;
-        const float soundStopperMarkerWidth = 2;
+        const float visualEffectCardHeight = 28;
         const double savePopupHoldDuration = 1;
         const double savePopupFadeDuration = 0.25;
-        static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
-        static readonly Color tempoChangeMarkerColor = new Color(1, 0.65f, 0.15f, 0.9f);
-        static readonly Color soundStopperMarkerColor = new Color(1, 0.25f, 0.25f, 0.9f);
 
-        readonly Dictionary<EntityId, SavePopupTracker> savePopupTrackers = [];
         double savePopupStartedAt = double.NegativeInfinity;
-        GUIStyle? visualEffectStatusStyle;
-        GUIStyle? savePopupStyle;
+        bool isRainbowShown;
 
+        /// <summary>
+        /// Initializes the editor with the tick and column time units and the timeline lanes.<br/>
+        /// tick과 열 시간 단위, 타임라인 레인으로 에디터를 초기화합니다.
+        /// </summary>
         public NoteBlockSourceEditor()
         {
             controller.timeUnits.Add(new NBSTickTimeUnit());
-            controller.timeUnits.Add(new NBSIndexTimeUnit());
+            controller.timeUnits.Add(new NBSColumnTimeUnit());
 
-            controller.timelineOverlay = DrawTimelineMarkers;
+            controller.timelineLaneHeight = NBSTimelineLaneDrawer.height;
+            controller.timelineLane = NBSTimelineLaneDrawer.Draw;
         }
 
-        protected override bool repaintInEditor
-        {
-            get
-            {
-                if (base.repaintInEditor || EditorApplication.timeSinceStartup < savePopupStartedAt + savePopupHoldDuration + savePopupFadeDuration)
-                    return true;
+        /// <inheritdoc/>
+        protected override bool repaintInEditor => base.repaintInEditor || isRainbowShown || EditorApplication.timeSinceStartup < savePopupStartedAt + savePopupHoldDuration + savePopupFadeDuration;
 
-                if (targets.IsDefaultOrEmpty)
-                    return false;
-
-                foreach (NoteBlockSource? player in targets)
-                {
-                    if (player != null && player.nbsFile != null && player.nbsFile.visualEffectMap.GetState(player.tick).rainbowEnabled)
-                        return true;
-                }
-
-                return false;
-            }
-        }
-
-        protected override void OnEnable()
-        {
-            ResetSavePopupTracking();
-            base.OnEnable();
-        }
-
-        protected override void OnDisable()
-        {
-            ResetSavePopupTracking();
-            base.OnDisable();
-        }
-
+        /// <inheritdoc/>
         protected override bool DrawSourceLayout()
         {
             GUILayout.Label(TrTempContent("runios-editor:inspector.nbs_player.source.header"), EditorStyles.boldLabel);
 
             if (EditPropertyValue
             (
-                "_nbsFileRef",
-                x => x.nbsFileRef,
-                (position, x) => RuniFields.AssetRefField
-                (
-                    position,
-                    TrTempContent("runios-editor:inspector.nbs_player.source.file"),
-                    x.nbsFileRef
-                ),
-                (x, value) => x.nbsFileRef = value,
-                x => RuniFields.GetAssetRefFieldHeight
-                (
-                    TrTempContent("runios-editor:inspector.nbs_player.source.file"),
-                    x.nbsFileRef
-                )
+                "_clip",
+                x => x.clip,
+                (position, x) => RuniFields.AssetRefField(position, TrTempContent("runios-editor:inspector.nbs_player.source.file"), x.clip),
+                (x, value) => x.clip = value,
+                x => RuniFields.GetAssetRefFieldHeight(TrTempContent("runios-editor:inspector.nbs_player.source.file"), x.clip)
             ))
                 ForEach(x => ReloadAndRepaint(x).Forget());
 
@@ -98,15 +60,35 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             (
                 "_directInstrumentNamespace",
                 x => x.directInstrumentNamespace,
-                (position, x) => EditorGUI.TextField
-                (
-                    position,
-                    TrTempContent("runios-editor:inspector.nbs_player.source.custom_instrument_namespace"),
-                    x.directInstrumentNamespace
-                ),
+                (position, x) => EditorGUI.TextField(position, TrTempContent("runios-editor:inspector.nbs_player.source.custom_instrument_namespace"), x.directInstrumentNamespace),
                 (x, value) => x.directInstrumentNamespace = value
             ))
                 ForEach(x => ReloadAndRepaint(x).Forget());
+
+            EditPropertyValue
+            (
+                "_useFileLoopSettings",
+                x => x.useFileLoopSettings,
+                (position, x) => EditorGUI.Toggle(position, TrTempContent("runios-editor:inspector.nbs_player.source.use_file_loop_settings"), x.useFileLoopSettings),
+                (x, value) => x.useFileLoopSettings = value
+            );
+
+            EditPropertyValue
+            (
+                "_reversePitchAlignment",
+                x => x.reversePitchAlignment,
+                (position, x) => (NBSReversePitchAlignment)EditorGUI.EnumPopup
+                (
+                    position,
+                    TrTempContent
+                    (
+                        "runios-editor:inspector.nbs_player.source.reverse_pitch_alignment",
+                        "runios-editor:inspector.nbs_player.source.reverse_pitch_alignment.tooltip"
+                    ),
+                    x.reversePitchAlignment
+                ),
+                (x, value) => x.reversePitchAlignment = value
+            );
 
             EditPropertyValue
             (
@@ -125,21 +107,10 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 (x, value) => x.nonRigidbodyVelocity = value
             );
 
-            EditPropertyValue
-            (
-                "_useFileLoopSettings",
-                x => x.useFileLoopSettings,
-                (position, x) => EditorGUI.Toggle
-                (
-                    position,
-                    TrTempContent("runios-editor:inspector.nbs_player.source.use_file_loop_settings"),
-                    x.useFileLoopSettings
-                ),
-                (x, value) => x.useFileLoopSettings = value
-            );
             return true;
         }
 
+        /// <inheritdoc/>
         protected override void DrawPlaybackLayout()
         {
             GUILayout.Label(GetTextOrKey("runios-editor:inspector.runi_audio_source.playback.header"), EditorStyles.boldLabel);
@@ -158,11 +129,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 (position, x) => EditorGUI.Slider
                 (
                     position,
-                    TrTempContent
-                    (
-                        "runios-editor:inspector.runi_audio_source.playback.tempo",
-                        "runios-editor:inspector.nbs_player.playback.tempo.tooltip"
-                    ),
+                    TrTempContent("runios-editor:inspector.runi_audio_source.playback.tempo", "runios-editor:inspector.nbs_player.playback.tempo.tooltip"),
                     x.tempo,
                     -3,
                     3
@@ -176,11 +143,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
                 (position, x) => EditorGUI.Slider
                 (
                     position,
-                    TrTempContent
-                    (
-                        "runios-editor:inspector.runi_audio_source.playback.pitch",
-                        "runios-editor:inspector.nbs_player.playback.pitch.tooltip"
-                    ),
+                    TrTempContent("runios-editor:inspector.runi_audio_source.playback.pitch", "runios-editor:inspector.nbs_player.playback.pitch.tooltip"),
                     x.pitch,
                     -3,
                     3
@@ -189,59 +152,44 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             );
         }
 
-        protected override void DrawTransportLayout()
+        /// <inheritdoc/>
+        protected override void DrawAdditionalSpatialLayout()
         {
-            EditorGUI.BeginChangeCheck();
-            base.DrawTransportLayout();
-            if (EditorGUI.EndChangeCheck())
-                ResetSavePopupTracking();
-
-            Space();
-
-            EditorGUI.BeginChangeCheck();
-            double value = EditorGUILayout.DoubleField
+            EditPropertyValue
             (
-                TrTempContent
-                (
-                    "runios-editor:inspector.nbs_player.transport.worker_interval",
-                    "runios-editor:inspector.nbs_player.transport.worker_interval.tooltip"
-                ),
-                NoteBlockPlaybackSettings.workerInterval
-            );
-            if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value > 0)
-                NoteBlockPlaybackSettings.workerInterval = value;
-
-            EditorGUI.BeginChangeCheck();
-            value = EditorGUILayout.DoubleField
-            (
-                TrTempContent
-                (
-                    "runios-editor:inspector.nbs_player.transport.scheduling_lookahead",
-                    "runios-editor:inspector.nbs_player.transport.scheduling_lookahead.tooltip"
-                ),
-                NoteBlockPlaybackSettings.schedulingLookahead
-            );
-            if (EditorGUI.EndChangeCheck() && double.IsFinite(value) && value >= 0)
-                NoteBlockPlaybackSettings.schedulingLookahead = value;
-
-            Space();
-
-            SoundSystem.main.Execute(system => system.playingChannelCount, out int playingChannelCount);
-            int softwareChannelCount = SoundSystem.main.softwareChannelCount;
-            int maxChannelCount = SoundSystem.main.maxChannels;
-
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.playing_channels"),
-                new GUIContent(playingChannelCount <= softwareChannelCount ? playingChannelCount.ToString() : $"{playingChannelCount.Clamp(0, softwareChannelCount)} + {playingChannelCount - softwareChannelCount}")
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.max_channels"),
-                new GUIContent($"{softwareChannelCount} + {maxChannelCount - softwareChannelCount}")
+                "_rolloffMode",
+                x => x.rolloffMode,
+                (position, x) => (SoundRolloffMode)EditorGUI.EnumPopup(position, TrTempContent("runios-editor:inspector.wave_audio_source.spatial.rolloff_mode"), x.rolloffMode),
+                (x, value) => x.rolloffMode = value
             );
         }
 
+        /// <inheritdoc/>
+        protected override void DrawTransportLayout()
+        {
+            base.DrawTransportLayout();
+            Space();
+
+            EditorGUI.BeginChangeCheck();
+            double interval = EditorGUILayout.DoubleField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.transport.worker_interval", "runios-editor:inspector.nbs_player.transport.worker_interval.tooltip"),
+                NBSPlaybackSettings.workerInterval
+            );
+            if (EditorGUI.EndChangeCheck() && double.IsFinite(interval) && interval > 0)
+                NBSPlaybackSettings.workerInterval = interval;
+
+            EditorGUI.BeginChangeCheck();
+            double lookahead = EditorGUILayout.DoubleField
+            (
+                TrTempContent("runios-editor:inspector.nbs_player.transport.scheduling_lookahead", "runios-editor:inspector.nbs_player.transport.scheduling_lookahead.tooltip"),
+                NBSPlaybackSettings.schedulingLookahead
+            );
+            if (EditorGUI.EndChangeCheck() && double.IsFinite(lookahead) && lookahead >= 0)
+                NBSPlaybackSettings.schedulingLookahead = lookahead;
+        }
+
+        /// <inheritdoc/>
         protected override void DrawInformationLayout()
         {
             if (DrawVisualEffectsLayout())
@@ -250,360 +198,188 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             base.DrawInformationLayout();
         }
 
-        protected override void DrawAdditionalSpatialLayout()
-        {
-            EditPropertyValue
-            (
-                "_rolloffMode",
-                x => x.rolloffMode,
-                (position, x) => (SoundRolloffMode)EditorGUI.EnumPopup
-                (
-                    position,
-                    TrTempContent("runios-editor:inspector.wave_audio_source.spatial.rolloff_mode"),
-                    x.rolloffMode
-                ),
-                (x, value) => x.rolloffMode = value
-            );
-        }
-
+        /// <inheritdoc/>
         protected override void DrawAdditionalInformationLayout()
         {
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.tick_length"),
-                new GUIContent(GetCommonValueString(x => x.tickLength))
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.index_length"),
-                new GUIContent(GetCommonValueString(x => x.indexLength))
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.tps"),
-                new GUIContent(GetCommonValueString(x => x.ticksPerSecond))
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.bpm"),
-                new GUIContent(GetCommonValueString(x => x.beatsPerMinute))
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.vanilla_instruments"),
-                new GUIContent(GetCommonValueString(x => x.nbsFile?.header.vanillaInstrumentCount ?? 0))
-            );
-            EditorGUILayout.LabelField
-            (
-                TrTempContent("runios-editor:inspector.nbs_player.information.custom_instruments"),
-                new GUIContent(GetCommonValueString(x => x.nbsFile?.customInstruments.Count ?? 0))
-            );
+            DrawInformation("runios-editor:inspector.nbs_player.information.tick_length", x => x.loadedClip != null ? x.loadedClip.map.tickLength : 0);
+            DrawInformation("runios-editor:inspector.nbs_player.information.index_length", x => x.loadedClip != null ? x.loadedClip.map.columns.Length : 0);
+            DrawInformation("runios-editor:inspector.nbs_player.information.tps", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).ticksPerSecond.ToString("0.##") : null);
+            DrawInformation("runios-editor:inspector.nbs_player.information.bpm", x => x.loadedClip != null ? x.loadedClip.map.tempo.GetChangeAtTick(x.tick).beatsPerMinute.ToString("0.##") : null);
+            DrawInformation("runios-editor:inspector.nbs_player.information.custom_instruments", x => x.loadedClip != null ? x.loadedClip.map.instruments.Length : 0);
         }
+
+        /// <inheritdoc/>
+        public override bool HasPreviewGUI() => true;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// The playhead follows the source itself, and the view shows <see cref="NoteBlockSource.loadedClip"/>, which changes when the clip is replaced or reloaded.<br/>
+        /// 플레이헤드는 소스 자체를 따라가며, 뷰는 클립이 바뀌거나 다시 로드될 때 달라지는 <see cref="NoteBlockSource.loadedClip"/>을 표시합니다.
+        /// </remarks>
+        public override VisualElement CreatePreview(VisualElement inspectorPreviewWindow)
+        {
+            NoteBlockSource? source = target;
+            NBSNoteGridView grid = new() { clip = source != null ? source.loadedClip : null, player = source };
+            inspectorPreviewWindow.Add(grid);
+
+            // The clip is loaded asynchronously and may be replaced, so the view follows it by polling.
+            grid.schedule.Execute(() =>
+            {
+                NoteBlockClip? loadedClip = source != null ? source.loadedClip : null;
+                if (grid.clip != loadedClip)
+                    grid.clip = loadedClip;
+            }).Every(100);
+
+            return grid;
+        }
+
+        void DrawInformation<TValue>(string key, Func<NoteBlockSource, TValue> readFunc) => EditorGUILayout.LabelField(TrTempContent(key), new GUIContent(GetCommonValueString(readFunc)));
+
+        static readonly Color defaultAccentColor = new Color32(0, 120, 212, byte.MaxValue);
+        double previousTick = double.NaN;
+        NBSClockAnchor previousAnchor;
 
         bool DrawVisualEffectsLayout()
         {
-            bool hasVisualEffects = false;
-            bool hasFirstState = false;
-            bool hasMixedState = false;
-            NBSVisualEffectMap.State? commonState = null;
+            isRainbowShown = false;
+            if (targets.Length != 1 || target == null || target.loadedClip == null)
+                return false;
 
-            foreach (NoteBlockSource? player in targets)
+            NBSVisualEffectMap effects = target.loadedClip.map.visualEffects;
+            if (effects.states.IsEmpty && effects.savePopupTicks.IsEmpty)
+                return false;
+
+            // Seeking, playing, pausing, and changing the tempo all anchor the timeline again, so an unchanged anchor means the tick advanced by playback alone.
+            NBSClockAnchor anchor = target.clockAnchor;
+            if (TryGetTimelineTick(target, target.loadedClip, anchor, out double timelineTick))
             {
-                if (player == null)
-                    continue;
+                if (double.IsFinite(previousTick) && anchor == previousAnchor && CrossesSavePopup(target, target.loadedClip, previousTick, timelineTick))
+                    savePopupStartedAt = EditorApplication.timeSinceStartup;
 
-                NoteBlockClip? file = player.nbsFile;
-                UpdateSavePopupTracking(player, file);
-
-                if (file?.visualEffectMap.hasEvents == true)
-                    hasVisualEffects = true;
-
-                NBSVisualEffectMap.State? state = file?.visualEffectMap.GetState(player.tick);
-                if (!hasFirstState)
-                {
-                    commonState = state;
-                    hasFirstState = true;
-                }
-                else if (commonState != state)
-                    hasMixedState = true;
+                previousTick = timelineTick;
+                previousAnchor = anchor;
             }
 
-            if (!hasVisualEffects)
-                return false;
+            double tick = target.tick;
 
             GUILayout.Label(TrTempContent("runios-editor:inspector.nbs_player.visual_effects.header"), EditorStyles.boldLabel);
 
-            NBSVisualEffectMap.State stateToDraw = commonState ?? default;
-            Color accentColor = GetAccentColor(stateToDraw);
-            Rect cardPosition = EditorGUILayout.GetControlRect(false, visualEffectCardHeight);
-            GUI.Box(cardPosition, GUIContent.none, EditorStyles.helpBox);
+            NBSVisualEffectState state = effects.GetState(tick);
+            isRainbowShown = state.rainbow;
+            Color accent = state.color ?? defaultAccentColor;
+            if (state.rainbow)
+                accent = Color.HSVToRGB((float)((EditorApplication.timeSinceStartup * 0.25) % 1), 0.7f, 0.95f);
 
-            Rect innerPosition = new Rect(cardPosition.x + 1, cardPosition.y + 1, cardPosition.width - 2, cardPosition.height - 2);
-            if (!hasMixedState && stateToDraw.backgroundAccentEnabled)
-            {
-                Color backgroundColor = accentColor;
-                backgroundColor.a = 0.15f;
-                EditorGUI.DrawRect(innerPosition, backgroundColor);
-            }
+            Rect card = EditorGUILayout.GetControlRect(false, visualEffectCardHeight);
+            GUI.Box(card, GUIContent.none, EditorStyles.helpBox);
+            if (state.backgroundAccent)
+                EditorGUI.DrawRect(new Rect(card.x + 1, card.y + 1, card.width - 2, card.height - 2), accent with { a = 0.18f });
 
-            Rect accentPosition = new Rect(cardPosition.x + 1, cardPosition.y + 1, 4, cardPosition.height - 2);
-            EditorGUI.DrawRect(accentPosition, hasMixedState ? Color.gray : accentColor);
+            EditorGUI.DrawRect(new Rect(card.x + 1, card.y + 1, 4, card.height - 2), accent);
 
-            string status = hasMixedState
-                ? GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.mixed")
-                : GetVisualEffectStatus(stateToDraw);
-            GUIStyle statusStyle = GetVisualEffectStatusStyle();
-            GUIContent statusContent = TempContent(status);
-            Vector2 statusSize = statusStyle.CalcSize(statusContent);
-            float statusHeight = Mathf.Min(statusSize.y, Mathf.Max(0, cardPosition.height - 2));
-            Rect statusPosition = new Rect
-            (
-                cardPosition.x + 10,
-                (cardPosition.y - (statusHeight * 0.5f)) + 10,
-                Mathf.Max(0, cardPosition.width - 16),
-                statusHeight
-            );
-            GUI.Label(statusPosition, statusContent, statusStyle);
+            GUI.Label(new Rect(card.x + 12, card.y, card.width - 16, card.height), GetStatus(state), EditorStyles.label);
+            DrawSavePopup(card);
 
-            DrawSavePopup(cardPosition);
             return true;
         }
 
-        void UpdateSavePopupTracking(NoteBlockSource player, NoteBlockClip? file)
+        /// <summary>
+        /// Gets the tick of the timeline the sounds are scheduled on, read from the clock anchor at the next mix clock as the scheduler reads it.
+        /// Unlike the interpolated <see cref="NoteBlockSource.tick"/>, it never steps back under one anchor, so moving against the tempo always means a loop wrap.<br/>
+        /// 소리가 예약되는 타임라인의 tick을 스케줄러와 같은 방식으로 다음 믹스 클록에서 클록 기준점으로부터 읽습니다.
+        /// 보간된 <see cref="NoteBlockSource.tick"/>과 달리 같은 기준점 안에서는 뒤로 물러나지 않으므로, tempo와 반대로 움직였다면 항상 반복 범위를 한 바퀴 돈 것입니다.
+        /// </summary>
+        static bool TryGetTimelineTick(NoteBlockSource source, NoteBlockClip clip, NBSClockAnchor anchor, out double tick)
         {
-            EntityId instanceId = player.GetEntityId();
-            double currentTick = file == null ? 0 : player.tick;
-            bool isContinuouslyPlaying = player.isPlaying && !player.isPaused;
-
-            if (!savePopupTrackers.TryGetValue(instanceId, out SavePopupTracker? tracker))
-            {
-                savePopupTrackers.Add(instanceId, new SavePopupTracker(file, currentTick, isContinuouslyPlaying));
-                return;
-            }
-
-            if (ReferenceEquals(tracker.file, file) && tracker.wasPlaying && isContinuouslyPlaying && file != null &&
-                TryGetSavePopupCrossing(player, file, tracker.tick, currentTick))
-                savePopupStartedAt = EditorApplication.timeSinceStartup;
-
-            tracker.file = file;
-            tracker.tick = currentTick;
-            tracker.wasPlaying = isContinuouslyPlaying;
-        }
-
-        static bool TryGetSavePopupCrossing(NoteBlockSource player, NoteBlockClip file, double previousTick, double currentTick)
-        {
-            NBSVisualEffectMap map = file.visualEffectMap;
-            if (map.savePopupTicks.Count == 0 || !double.IsFinite(previousTick) || !double.IsFinite(currentTick))
+            tick = 0;
+            int sampleRate = SoundSystem.main.outputSampleRate;
+            if (sampleRate <= 0 || !NBSClockAnchor.TryGetNextMixClock(SoundSystem.main, out ulong clock))
                 return false;
 
-            if (player.tempo > 0)
-            {
-                if (currentTick >= previousTick)
-                    return map.TryGetSavePopupCrossing(previousTick, currentTick, out _);
-
-                if (!TryGetLoopTickRange(player, file, out double loopStartTick, out double loopEndTick))
-                    return false;
-
-                double lastTickBeforeLoopEnd = Math.Ceiling(loopEndTick) - 1;
-                double firstTickAfterLoopStart = Math.Ceiling(loopStartTick);
-                return (previousTick < lastTickBeforeLoopEnd && map.TryGetSavePopupCrossing(previousTick, lastTickBeforeLoopEnd, out _)) ||
-                    (firstTickAfterLoopStart <= currentTick && map.TryGetSavePopupCrossing(firstTickAfterLoopStart - 1, currentTick, out _));
-            }
-
-            if (player.tempo < 0)
-            {
-                if (currentTick <= previousTick)
-                    return map.TryGetSavePopupCrossing(previousTick, currentTick, out _);
-
-                if (!TryGetLoopTickRange(player, file, out double loopStartTick, out double loopEndTick))
-                    return false;
-
-                double firstTickAfterLoopStart = Math.Floor(loopStartTick) + 1;
-                double lastTickAtLoopEnd = Math.Floor(loopEndTick);
-                return (previousTick > firstTickAfterLoopStart && map.TryGetSavePopupCrossing(previousTick, firstTickAfterLoopStart, out _)) ||
-                    (lastTickAtLoopEnd >= currentTick && map.TryGetSavePopupCrossing(lastTickAtLoopEnd + 1, currentTick, out _));
-            }
-
-            return false;
+            double linear = source.isPlaying && !source.isPaused ? anchor.GetTime(clock, source.tempo, sampleRate) : anchor.time;
+            tick = clip.map.tempo.TimeToTick(source.loopRange is { } range ? range.Fold(linear, source.tempo) : linear);
+            return true;
         }
 
-        static bool TryGetLoopTickRange(NoteBlockSource player, NoteBlockClip file, out double loopStartTick, out double loopEndTick)
+        /// <summary>
+        /// Determines whether playback passed a save popup tick while it advanced from <paramref name="fromTick"/> to <paramref name="toTick"/>.
+        /// Moving against the tempo means it wrapped around the loop range, so the passage is split at the loop boundaries.<br/>
+        /// 재생이 <paramref name="fromTick"/>에서 <paramref name="toTick"/>까지 진행하는 동안 저장 팝업 tick을 지났는지 확인합니다.
+        /// tempo와 반대로 움직였다면 반복 범위를 한 바퀴 돈 것이므로, 지나간 구간을 반복 경계에서 나눕니다.
+        /// </summary>
+        static bool CrossesSavePopup(NoteBlockSource source, NoteBlockClip clip, double fromTick, double toTick)
         {
-            loopStartTick = 0;
-            loopEndTick = 0;
-            if (!player.loop)
+            NBSVisualEffectMap effects = clip.map.visualEffects;
+            float tempo = source.tempo;
+            bool wrapped = tempo > 0 ? toTick < fromTick : tempo < 0 && toTick > fromTick;
+            if (!wrapped)
+                return effects.TryFindSavePopup(fromTick, toTick, out _);
+
+            if (source.loopRange is not { } range)
                 return false;
 
-            bool useFileLoop = player.useFileLoopSettings && file.header.loopEnabled;
-            double loopStartTime = useFileLoop ? file.tempoMap.TickToTime(file.header.loopStartTick) : player.loopStart;
-            double loopEndTime = useFileLoop
-                ? file.length
-                : Math.Min(Math.Max(player.loopEnd, loopStartTime), file.length);
-            if (!double.IsFinite(loopStartTime) || !double.IsFinite(loopEndTime) || loopEndTime <= loopStartTime)
-                return false;
+            double startTick = clip.map.tempo.TimeToTick(range.start);
+            double endTick = clip.map.tempo.TimeToTick(range.end);
 
-            loopStartTick = useFileLoop ? file.header.loopStartTick : file.tempoMap.TimeToTick(loopStartTime);
-            loopEndTick = useFileLoop ? file.tickLength : file.tempoMap.TimeToTick(loopEndTime);
-            return double.IsFinite(loopStartTick) && double.IsFinite(loopEndTick) && loopEndTick > loopStartTick;
-        }
-
-        static void DrawTimelineMarkers(Rect trackPosition, ISeekable seekable, double length)
-        {
-            DrawTempoChangeMarkers(trackPosition, seekable, length);
-            DrawSoundStopperMarkers(trackPosition, seekable, length);
-        }
-
-        static void DrawSoundStopperMarkers(Rect trackPosition, ISeekable seekable, double length)
-        {
-            if (seekable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0 || length <= 0)
-                return;
-
-            foreach (NBSMappedSpecialEvent mappedEvent in file.noteMap.specialEvents)
+            // Forward, NBSLoopRange.Fold wraps the end onto the start, so the end is left out and the start is included.
+            if (tempo > 0)
             {
-                NBSSpecialEvent specialEvent = mappedEvent.specialEvent;
-                if (specialEvent.kind != NBSSpecialEventKind.soundStop || !double.IsFinite(mappedEvent.time) || mappedEvent.time < 0 || mappedEvent.time > length)
-                    continue;
-
-                float x = trackPosition.xMin.Lerp(trackPosition.xMax, (mappedEvent.time / length).ClampToFloat());
-                Rect markerPosition = new Rect
-                (
-                    x - (soundStopperMarkerWidth * 0.5f),
-                    trackPosition.y + 2,
-                    soundStopperMarkerWidth,
-                    trackPosition.height - 8
-                );
-                EditorGUI.DrawRect(markerPosition, soundStopperMarkerColor);
-
-                string endLayer = specialEvent.endLayer == int.MaxValue ? "∞" : specialEvent.endLayer.ToString();
-                GUI.Label(markerPosition, TempContent(string.Empty, $"Sound Stopper (Layer {specialEvent.startLayer} - {endLayer})"), GUIStyle.none);
-            }
-        }
-
-        static void DrawTempoChangeMarkers(Rect trackPosition, ISeekable seekable, double length)
-        {
-            if (seekable is not NoteBlockSource player || player.nbsFile is not { } file || trackPosition.width <= 0)
-                return;
-
-            foreach (NBSTempoMap.Segment segment in file.tempoMap.segments)
-            {
-                if (segment.startTick <= 0 || !double.IsFinite(segment.startTime) || segment.startTime <= 0 || segment.startTime >= length)
-                    continue;
-
-                float x = trackPosition.xMin.Lerp(trackPosition.xMax, (segment.startTime / length).ClampToFloat());
-                Rect markerPosition = new Rect
-                (
-                    x - (tempoChangeMarkerWidth * 0.5f),
-                    trackPosition.y + 2,
-                    tempoChangeMarkerWidth,
-                    trackPosition.height - 8
-                );
-                EditorGUI.DrawRect(markerPosition, tempoChangeMarkerColor);
-                GUI.Label(markerPosition, TempContent(string.Empty, $"BPM {segment.ticksPerSecond * 15:0.##}"), GUIStyle.none);
-            }
-        }
-
-        static Color GetAccentColor(NBSVisualEffectMap.State state)
-        {
-            if (state.rainbowEnabled)
-            {
-                float hue = (float)((EditorApplication.timeSinceStartup / 3d) % 1d);
-                return Color.HSVToRGB(hue, 1, 1);
+                double lastTickBeforeEnd = Math.Ceiling(endTick) - 1;
+                return (fromTick < lastTickBeforeEnd && effects.TryFindSavePopup(fromTick, lastTickBeforeEnd, out _)) ||
+                    effects.TryFindSavePopup(Math.Ceiling(startTick) - 1, toTick, out _);
             }
 
-            return state.mainColor ?? defaultAccentColor;
+            // Backward, it wraps the start onto the end, so the start is left out and the end is included.
+            double firstTickAfterStart = Math.Floor(startTick) + 1;
+            return (fromTick > firstTickAfterStart && effects.TryFindSavePopup(fromTick, firstTickAfterStart, out _)) ||
+                effects.TryFindSavePopup(Math.Floor(endTick) + 1, toTick, out _);
         }
 
-        static string GetVisualEffectStatus(NBSVisualEffectMap.State state)
+        static string GetStatus(NBSVisualEffectState state)
         {
             List<string> status = [];
-            if (state.rainbowEnabled)
+            if (state.rainbow)
                 status.Add(GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.rainbow"));
-            if (state.backgroundAccentEnabled)
+            if (state.backgroundAccent)
                 status.Add(GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.background_accent"));
-            if (state.mainColor is { } mainColor)
-                status.Add($"#{mainColor.r:X2}{mainColor.g:X2}{mainColor.b:X2}");
+            if (state.color is { } color)
+                status.Add($"#{color.r:X2}{color.g:X2}{color.b:X2}");
 
             return status.Count > 0
                 ? string.Join(" · ", status)
                 : GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.inactive");
         }
 
-        GUIStyle GetVisualEffectStatusStyle() => visualEffectStatusStyle ??= new GUIStyle(EditorStyles.label)
-        {
-            alignment = TextAnchor.MiddleLeft,
-            clipping = TextClipping.Clip
-        };
+        static readonly Color savePopupColor = new Color(0.4f, 0.4f, 0.4f, 0.95f);
 
-        void DrawSavePopup(Rect cardPosition)
+        /// <summary>
+        /// Draws the song saved popup floating over the center of the visual effect card, fading out after it is held.<br/>
+        /// 노래 저장 팝업을 시각 효과 카드 가운데 위에 띄워 그리며, 잠시 유지한 뒤 서서히 사라지게 합니다.
+        /// </summary>
+        void DrawSavePopup(Rect card)
         {
             double elapsed = EditorApplication.timeSinceStartup - savePopupStartedAt;
-            double totalDuration = savePopupHoldDuration + savePopupFadeDuration;
-            if (elapsed < 0 || elapsed >= totalDuration)
+            if (elapsed >= savePopupHoldDuration + savePopupFadeDuration)
                 return;
 
-            float alpha = elapsed <= savePopupHoldDuration
-                ? 1
-                : (float)(1 - ((elapsed - savePopupHoldDuration) / savePopupFadeDuration));
+            float alpha = elapsed <= savePopupHoldDuration ? 1 : (float)(1 - ((elapsed - savePopupHoldDuration) / savePopupFadeDuration));
 
-            GUIStyle style = GetSavePopupStyle();
-            GUIContent content = TempContent(GetTextOrKey("runios-editor:inspector.nbs_player.visual_effects.song_saved"));
-            Vector2 contentSize = style.CalcSize(content);
-            float popupWidth = Mathf.Min(Mathf.Max(0, cardPosition.width - 16), contentSize.x + 16);
-            float popupHeight = Mathf.Min(Mathf.Max(0, cardPosition.height - 8), EditorGUIUtility.singleLineHeight + 4);
-            Rect popupPosition = new Rect
-            (
-                cardPosition.center.x - (popupWidth * 0.5f),
-                cardPosition.center.y - (popupHeight * 0.5f),
-                popupWidth,
-                popupHeight
-            );
-            EditorGUI.DrawRect(popupPosition, new Color(0, 0, 0, 0.6f * alpha));
+            GUIContent content = TrTempContent("runios-editor:inspector.nbs_player.visual_effects.song_saved");
+            Vector2 size = EditorStyles.whiteLabel.CalcSize(content);
+            Rect popup = new Rect(card.center.x - (size.x * 0.5f) - 8, card.center.y - (size.y * 0.5f) - 1, size.x + 16, size.y + 2);
+            GUI.DrawTexture(popup, Texture2D.whiteTexture, ScaleMode.StretchToFill, true, 0, savePopupColor with { a = savePopupColor.a * alpha }, 0, 4);
 
-            float textWidth = Mathf.Min(contentSize.x, popupPosition.width);
-            float textHeight = Mathf.Min(contentSize.y, popupPosition.height);
-            Rect textPosition = new Rect
-            (
-                popupPosition.center.x - (textWidth * 0.5f),
-                popupPosition.center.y - (textHeight * 0.5f),
-                textWidth,
-                textHeight
-            );
-
-            GUI.Label(textPosition, TempContent($"<color=#FFFFFFFF>{content.text}</color>"), style);
+            Color previousColor = GUI.color;
+            GUI.color = previousColor with { a = previousColor.a * alpha };
+            GUI.Label(new Rect(popup.x + 8, popup.y + 1, size.x, size.y), content, EditorStyles.whiteLabel);
+            GUI.color = previousColor;
         }
 
-        GUIStyle GetSavePopupStyle()
+        async UniTask ReloadAndRepaint(NoteBlockSource source)
         {
-            if (savePopupStyle != null)
-                return savePopupStyle;
-
-            savePopupStyle = new GUIStyle(EditorStyles.whiteLabel)
-            {
-                alignment = TextAnchor.MiddleCenter,
-                clipping = TextClipping.Clip,
-                richText = true
-            };
-            return savePopupStyle;
-        }
-
-        void ResetSavePopupTracking()
-        {
-            savePopupTrackers.Clear();
-            savePopupStartedAt = double.NegativeInfinity;
-        }
-
-        async UniTask ReloadAndRepaint(NoteBlockSource player)
-        {
-            await player.Reload();
+            await source.Reload();
             if (this != null)
                 Repaint();
-        }
-
-        sealed class SavePopupTracker(NoteBlockClip? file, double tick, bool wasPlaying)
-        {
-            public NoteBlockClip? file = file;
-            public double tick = tick;
-            public bool wasPlaying = wasPlaying;
         }
     }
 }

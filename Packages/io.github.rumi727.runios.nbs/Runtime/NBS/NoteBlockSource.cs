@@ -3,210 +3,191 @@ using Cysharp.Threading.Tasks;
 using RuniOS.Resource;
 using RuniOS.Sounds;
 using RuniOS.Tasks;
-using System.Threading;
 
 namespace RuniOS.NBS
 {
     /// <summary>
-    /// Plays scoped NBS resources through precomputed schedules and a shared background worker.<br/>
-    /// 미리 계산된 스케줄과 공유 백그라운드 워커를 통해 스코프 기반 NBS 리소스를 재생합니다.
+    /// Plays a <see cref="NoteBlockClip"/> on its own timeline, as AudioSource plays an AudioClip/>.<br/>
+    /// AudioSource가 AudioClip을 재생하듯 자기 타임라인에서 <see cref="NoteBlockClip"/>을 재생합니다.
     /// </summary>
+    /// <remarks>
+    /// <para>The source owns the timeline. The tempo sign sets the timeline direction and the pitch sign sets the sound direction.</para>
+    /// <para>While looping, <see cref="time"/> wraps into the loop range in the direction of travel. With <see cref="useFileLoopSettings"/>, the loop range of the NBS header, from its start tick to the song end, is used when the header loop is on.</para>
+    /// <br/><br/>
+    /// <para>소스가 타임라인을 소유합니다. tempo 부호는 타임라인 방향을, pitch 부호는 소리 방향을 정합니다.</para>
+    /// <para>반복 중에는 <see cref="time"/>이 진행 방향을 기준으로 반복 범위 안으로 되돌아갑니다. <see cref="useFileLoopSettings"/>이면 헤더 반복이 켜져 있을 때 NBS 헤더의 반복 범위(시작 tick부터 곡 끝까지)를 사용합니다.</para>
+    /// </remarks>
     [ExecuteAlways]
     [AddComponentMenu("Audio/Note Block Source")]
-    public sealed partial class NoteBlockSource : RuniAudioSource, IReloadable
+    public sealed partial class NoteBlockSource : RuniAudioSource, INBSTransport, IReloadable
     {
-        /// <summary>Gets or sets the NBS resource reference.<br/>NBS 리소스 참조를 가져오거나 설정합니다.</summary>
-        public AssetRef<NoteBlockClip> nbsFileRef
+        /// <summary>
+        /// Gets or sets the clip reference. Setting it reloads the clip.<br/>
+        /// 클립 참조를 가져오거나 설정합니다. 설정하면 클립을 다시 로드합니다.
+        /// </summary>
+        public AssetRef<NoteBlockClip> clip
         {
-            get
-            {
-                nbsFileRefLock.EnterReadLock();
-                try
-                {
-                    return _nbsFileRef;
-                }
-                finally
-                {
-                    nbsFileRefLock.ExitReadLock();
-                }
-            }
+            get => _clip;
             set
             {
-                nbsFileRefLock.EnterWriteLock();
-                try
-                {
-                    _nbsFileRef = value;
-                }
-                finally
-                {
-                    nbsFileRefLock.ExitWriteLock();
-                }
+                _clip = value;
+                if (isActiveAndEnabled)
+                    Reload().Forget();
             }
         }
-        readonly ReaderWriterLockSlim nbsFileRefLock = new ReaderWriterLockSlim();
-        [SerializeField] AssetRef<NoteBlockClip> _nbsFileRef;
-
-        public string directInstrumentNamespace
-        {
-            get
-            {
-                nbsFileRefLock.EnterReadLock();
-                try
-                {
-                    return _directInstrumentNamespace ?? string.Empty;
-                }
-                finally
-                {
-                    nbsFileRefLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                nbsFileRefLock.EnterWriteLock();
-                try
-                {
-                    _directInstrumentNamespace = value;
-                }
-                finally
-                {
-                    nbsFileRefLock.ExitWriteLock();
-                }
-            }
-        }
-        [SerializeField] string? _directInstrumentNamespace = "";
-
-        /// <summary>Gets the currently scoped NBS file, or <see langword="null"/> while unavailable.<br/>현재 스코프된 NBS 파일을 가져오며, 사용할 수 없으면 <see langword="null"/>입니다.</summary>
-        public NoteBlockClip? nbsFile
-        {
-            get
-            {
-                playingLock.EnterReadLock();
-                try
-                {
-                    return nbsScope?.asset;
-                }
-                finally
-                {
-                    playingLock.ExitReadLock();
-                }
-            }
-        }
-
-        IAssetScope<NoteBlockClip>? nbsScope;
-        NoteBlockInstrumentBank? instrumentBank;
-        NBSPlaybackSchedule? playbackSchedule;
-        NBSPlaybackCursor playbackCursor;
-        readonly List<PendingSubmission> pendingSubmissions = [];
-        long scheduleGeneration;
-        long completedLoops;
-        bool restoreSnapshot;
-        long playbackRevision;
-        long voiceSettingsRevision;
-        long observedSchedulingRevision = NoteBlockPlaybackSettings.schedulingRevision;
-        readonly AsyncReloadGate reloadGate = new AsyncReloadGate();
+        [SerializeField] AssetRef<NoteBlockClip> _clip;
 
         /// <summary>
-        /// Gets or sets the loop-relative transport position in seconds.<br/>
-        /// 루프 기준 트랜스포트 위치를 초 단위로 가져오거나 설정합니다.
+        /// Gets or sets the resource namespace of custom instrument sounds when <see cref="clip"/> refers to an asset directly.<br/>
+        /// <see cref="clip"/>이 에셋을 직접 참조할 때 커스텀 악기 사운드의 리소스 네임스페이스를 가져오거나 설정합니다.
         /// </summary>
+        /// <remarks>
+        /// Registry references use the namespace of the clip identifier instead. This setting is temporary until the rule for imported clips is decided.<br/>
+        /// 레지스트리 참조는 대신 클립 식별자의 네임스페이스를 사용합니다. 이 설정은 가져온 클립의 규칙이 정해질 때까지 임시로 둡니다.
+        /// </remarks>
+        public string directInstrumentNamespace
+        {
+            get => _directInstrumentNamespace;
+            set => _directInstrumentNamespace = value;
+        }
+        [SerializeField] string _directInstrumentNamespace = Identifier.defaultNamespace;
+
+        /// <summary>
+        /// Gets the loaded clip, or <see langword="null"/> while none is loaded.<br/>
+        /// 로드된 클립을 가져오며, 로드된 클립이 없으면 <see langword="null"/>입니다.
+        /// </summary>
+        public NoteBlockClip? loadedClip => scope?.asset;
+
+        /// <summary>
+        /// Gets the scheduler that plays the loaded clip, or <see langword="null"/> while none is loaded.<br/>
+        /// 로드된 클립을 재생하는 스케줄러를 가져오며, 로드된 클립이 없으면 <see langword="null"/>입니다.
+        /// </summary>
+        /// <remarks>
+        /// The source drives the scheduler. Calling its commands or changing its mix directly makes it disagree with the source until the next change.<br/>
+        /// 소스가 스케줄러를 조작합니다. 명령을 직접 호출하거나 믹스를 직접 바꾸면 다음 변경 전까지 소스와 어긋납니다.
+        /// </remarks>
+        public NBSVoiceScheduler<NoteBlockSource>? scheduler { get; private set; }
+
+        IAssetScope<NoteBlockClip>? scope;
+        NBSInstrumentBank? bank;
+        readonly AsyncReloadGate reloadGate = new();
+
+        /// <summary>
+        /// Gets or sets whether <see cref="loopRange"/> uses the loop range of the NBS header instead of <see cref="loopStart"/> and <see cref="loopEnd"/> when the header loop is on. <see cref="loop"/> still decides whether playback loops.<br/>
+        /// 헤더 반복이 켜져 있을 때 <see cref="loopRange"/>가 <see cref="loopStart"/>와 <see cref="loopEnd"/> 대신 NBS 헤더의 반복 범위를 사용할지 가져오거나 설정합니다. 반복 여부는 여전히 <see cref="loop"/>가 정합니다.
+        /// </summary>
+        public bool useFileLoopSettings
+        {
+            get => _useFileLoopSettings;
+            set => ChangeLoop(() => _useFileLoopSettings = value);
+        }
+        [SerializeField] bool _useFileLoopSettings = true;
+
+        /// <summary>
+        /// Gets or sets where reversed sounds are placed when the pitch is negative.<br/>
+        /// pitch가 음수일 때 리버스된 소리를 어디에 배치할지 가져오거나 설정합니다.
+        /// </summary>
+        public NBSReversePitchAlignment reversePitchAlignment
+        {
+            get => _reversePitchAlignment;
+            set
+            {
+                _reversePitchAlignment = value;
+                scheduler?.reversePitchAlignment = value;
+            }
+        }
+        [SerializeField] NBSReversePitchAlignment _reversePitchAlignment;
+
+        /// <summary>
+        /// Gets or sets whether the velocity is estimated from <see cref="Transform"/> changes when no Rigidbody or Rigidbody2D supplies it.<br/>
+        /// Rigidbody나 Rigidbody2D가 속도를 제공하지 않을 때 <see cref="Transform"/> 변화로 속도를 추정할지 가져오거나 설정합니다.
+        /// </summary>
+        /// <remarks>
+        /// While it is off and no physics body supplies the velocity, the velocity is zero.<br/>
+        /// 꺼져 있고 물리 바디도 속도를 제공하지 않으면 속도는 0입니다.
+        /// </remarks>
+        public bool nonRigidbodyVelocity
+        {
+            get => _nonRigidbodyVelocity;
+            set => _nonRigidbodyVelocity = value;
+        }
+        [SerializeField] bool _nonRigidbodyVelocity;
+
+        /// <summary>
+        /// Gets or sets the distance rolloff of every sound.<br/>
+        /// 모든 소리의 거리 감쇠 방식을 가져오거나 설정합니다.
+        /// </summary>
+        public SoundRolloffMode rolloffMode
+        {
+            get => _rolloffMode;
+            set
+            {
+                _rolloffMode = value;
+                scheduler?.rolloffMode = value;
+            }
+        }
+        [SerializeField] SoundRolloffMode _rolloffMode = SoundRolloffMode.inverse;
+
+        /// <inheritdoc/>
+        /// <remarks>
+        /// It follows <see cref="clockAnchor"/> at the output clock of the mixer, wrapped into the loop range like <see cref="time"/>.<br/>
+        /// 믹서의 출력 클록에서 <see cref="clockAnchor"/>를 따라가며, <see cref="time"/>처럼 반복 범위 안으로 접힙니다.
+        /// </remarks>
+        public override double outputTime => FoldTime(base.outputTime);
+
+        /// <summary>
+        /// Gets or sets the playback position in seconds. While looping, the getter wraps into the loop range.<br/>
+        /// 재생 위치를 초 단위로 가져오거나 설정합니다. 반복 중이면 getter는 반복 범위 안으로 되돌아간 값을 반환합니다.
+        /// </summary>
+        /// <remarks>
+        /// Setting the position restarts the sounds from it, including the sounds that should already be ringing there.<br/>
+        /// 위치를 설정하면 그 위치에서 이미 울리고 있어야 하는 소리를 포함하여 소리를 다시 시작합니다.
+        /// </remarks>
         public override double time
         {
-            get => base.time;
+            get
+            {
+                double linear = base.time;
+                return loopRange is { } range ? range.Fold(linear, base.tempo) : linear;
+            }
             set
             {
                 playingLock.EnterWriteLock();
+
                 try
                 {
-                    StopAllVoicesUnsafe();
-                    pendingSubmissions.Clear();
                     base.time = value;
-                    completedLoops = 0;
-                    ResetCursorUnsafe(true);
-                    restoreSnapshot = isPlaying;
+                    AnchorUnsafe(value);
+
+                    // RuniAudioSource.Play and Stop assign the time, so this also restarts the sounds for them.
+                    scheduler?.Resync();
                 }
                 finally
                 {
                     playingLock.ExitWriteLock();
                 }
-
-                NoteBlockPlaybackWorker.Signal();
             }
         }
 
-        /// <summary>Gets or sets the unbounded logical NBS tick position.<br/>범위 제한 없는 논리적 NBS 틱 위치를 가져오거나 설정합니다.</summary>
+        /// <summary>
+        /// Gets or sets the playback position in NBS ticks through the tempo map of the loaded clip.<br/>
+        /// 로드된 클립의 템포 맵을 통해 재생 위치를 NBS tick 단위로 가져오거나 설정합니다.
+        /// </summary>
         public double tick
         {
-            get
-            {
-                playingLock.EnterReadLock();
-                try
-                {
-                    return nbsScope?.asset.tempoMap.TimeToTick(base.time) ?? 0;
-                }
-                finally
-                {
-                    playingLock.ExitReadLock();
-                }
-            }
+            get => loadedClip != null ? loadedClip.map.tempo.TimeToTick(time) : 0;
             set
             {
-                NoteBlockClip? file = nbsFile;
-                time = file?.tempoMap.TickToTime(value) ?? 0;
+                if (loadedClip != null)
+                    time = loadedClip.map.tempo.TickToTime(value);
             }
         }
 
-        /// <summary>Gets or sets the nearest active tick-column index. Ties choose the lower tick.<br/>가장 가까운 활성 틱 열 인덱스를 가져오거나 설정합니다. 거리가 같으면 더 낮은 틱을 선택합니다.</summary>
-        public int index
-        {
-            get
-            {
-                playingLock.EnterReadLock();
-                try
-                {
-                    NoteBlockClip? file = nbsScope?.asset;
-                    return file == null ? 0 : FindNearestIndex(file, file.tempoMap.TimeToTick(base.time));
-                }
-                finally
-                {
-                    playingLock.ExitReadLock();
-                }
-            }
-            set
-            {
-                NoteBlockClip? file = nbsFile;
-                if (file == null || file.ticks.Count == 0)
-                    return;
-
-                tick = file.ticks[Math.Clamp(value, 0, file.ticks.Count - 1)].tick;
-            }
-        }
-
-        /// <summary>Gets the logical song length in NBS ticks.<br/>NBS 틱 단위의 논리적 곡 길이를 가져옵니다.</summary>
-        public int tickLength => nbsFile?.tickLength ?? 0;
-
-        /// <summary>Gets the number of active tick columns.<br/>활성 틱 열 수를 가져옵니다.</summary>
-        public int indexLength => nbsFile?.ticks.Count ?? 0;
-
-        /// <summary>Gets the file tempo in ticks per second at the current position.<br/>현재 위치의 파일 템포를 초당 틱 수로 가져옵니다.</summary>
-        public double ticksPerSecond => nbsFile?.tempoMap.GetTicksPerSecond(tick) ?? 0;
-
-        /// <summary>Gets the file tempo in beats per minute, where one beat equals four NBS ticks.<br/>한 박을 NBS 4틱으로 계산한 분당 박자 수를 가져옵니다.</summary>
-        public double beatsPerMinute => ticksPerSecond * 15;
-
-        /// <inheritdoc/>
-        public override double length => nbsFile?.length ?? 0;
-
-        /// <summary>Gets or sets whether loop metadata stored in the NBS file is used.<br/>NBS 파일에 저장된 루프 메타데이터를 사용할지 가져오거나 설정합니다.</summary>
-        public bool useFileLoopSettings
-        {
-            get => Volatile.Read(ref _useFileLoopSettings);
-            set
-            {
-                Volatile.Write(ref _useFileLoopSettings, value);
-                InvalidateLoopSchedule();
-            }
-        }
-        [SerializeField] bool _useFileLoopSettings = true;
+        /// <summary>
+        /// Gets the song length in seconds, or <c>0</c> while no clip is loaded.<br/>
+        /// 곡 길이를 초 단위로 가져오며, 클립이 로드되지 않았으면 <c>0</c>입니다.
+        /// </summary>
+        public override double length => loadedClip != null ? loadedClip.length : 0;
 
         /// <inheritdoc/>
         public override float tempo
@@ -215,21 +196,21 @@ namespace RuniOS.NBS
             set
             {
                 playingLock.EnterWriteLock();
+
                 try
                 {
-                    if (base.tempo.Equals(value))
-                        return;
-
-                    CancelFutureSubmissionsUnsafe();
+                    // The new tempo applies from the next mix clock, where the timeline keeps its position.
+                    MoveAnchorUnsafe();
                     base.tempo = value;
-                    RebuildScheduleUnsafe(false, false);
+
+                    // The base setter restarts the interpolation now, while the timeline keeps its position until the mixer reaches the anchor.
+                    SyncTimeToAnchorUnsafe();
+                    scheduler?.OnRateChanged();
                 }
                 finally
                 {
                     playingLock.ExitWriteLock();
                 }
-
-                NoteBlockPlaybackWorker.Signal();
             }
         }
 
@@ -240,28 +221,16 @@ namespace RuniOS.NBS
             set
             {
                 playingLock.EnterWriteLock();
+
                 try
                 {
-                    float previous = base.pitch;
-                    if (previous.Equals(value))
-                        return;
-
-                    CancelFutureSubmissionsUnsafe();
                     base.pitch = value;
-                    bool restoringFromZero = previous == 0 && value != 0;
-                    if (!float.IsFinite(value) || value == 0)
-                        StopAllVoicesUnsafe();
-                    else
-                        UpdateVoiceFrequenciesUnsafe();
-
-                    RebuildScheduleUnsafe(restoringFromZero, restoringFromZero);
+                    scheduler?.OnRateChanged();
                 }
                 finally
                 {
                     playingLock.ExitWriteLock();
                 }
-
-                NoteBlockPlaybackWorker.Signal();
             }
         }
 
@@ -271,23 +240,8 @@ namespace RuniOS.NBS
             get => base.volume;
             set
             {
-                lock (voiceSettingsApplyLock)
-                {
-                    Voice[] snapshot;
-                    playingLock.EnterWriteLock();
-                    try
-                    {
-                        base.volume = value;
-                        voiceSettingsRevision++;
-                        snapshot = GetVoiceSnapshot();
-                    }
-                    finally
-                    {
-                        playingLock.ExitWriteLock();
-                    }
-
-                    UpdateVoiceVolumesUnsafe(snapshot, value);
-                }
+                base.volume = value;
+                scheduler?.volume = value;
             }
         }
 
@@ -297,23 +251,8 @@ namespace RuniOS.NBS
             get => base.panStereo;
             set
             {
-                lock (voiceSettingsApplyLock)
-                {
-                    Voice[] snapshot;
-                    playingLock.EnterWriteLock();
-                    try
-                    {
-                        base.panStereo = value;
-                        voiceSettingsRevision++;
-                        snapshot = GetVoiceSnapshot();
-                    }
-                    finally
-                    {
-                        playingLock.ExitWriteLock();
-                    }
-
-                    UpdateVoicePansUnsafe(snapshot, value);
-                }
+                base.panStereo = value;
+                scheduler?.panStereo = value;
             }
         }
 
@@ -321,80 +260,54 @@ namespace RuniOS.NBS
         public override float spatialBlend
         {
             get => base.spatialBlend;
-            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.spatialBlend = propertyValue, static (player, propertyValue) => player.SetBaseSpatialBlend(propertyValue));
+            set
+            {
+                base.spatialBlend = value;
+                scheduler?.spatialBlend = value;
+            }
         }
 
         /// <inheritdoc/>
         public override float dopplerLevel
         {
             get => base.dopplerLevel;
-            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.dopplerLevel = propertyValue, static (player, propertyValue) => player.SetBaseDopplerLevel(propertyValue));
+            set
+            {
+                base.dopplerLevel = value;
+                scheduler?.dopplerLevel = value;
+            }
         }
 
         /// <inheritdoc/>
         public override float spread
         {
             get => base.spread;
-            set => SetSpatialProperty(value, static (channel, propertyValue) => channel.spread = propertyValue, static (player, propertyValue) => player.SetBaseSpread(propertyValue));
+            set
+            {
+                base.spread = value;
+                scheduler?.spread = value;
+            }
         }
 
         /// <inheritdoc/>
         public override float minDistance
         {
             get => base.minDistance;
-            set => SetDistanceProperty(value, true);
+            set
+            {
+                base.minDistance = value;
+                scheduler?.minMaxDistance = (value, maxDistance);
+            }
         }
 
         /// <inheritdoc/>
         public override float maxDistance
         {
             get => base.maxDistance;
-            set => SetDistanceProperty(value, false);
-        }
-
-        /// <summary>Gets or sets the 3D distance attenuation curve used by every Voice.<br/>모든 Voice에 사용할 3D 거리 감쇠 곡선을 가져오거나 설정합니다.</summary>
-        public SoundRolloffMode rolloffMode
-        {
-            get => _rolloffMode;
             set
             {
-                lock (voiceSettingsApplyLock)
-                {
-                    Voice[] snapshot;
-                    playingLock.EnterWriteLock();
-                    try
-                    {
-                        _rolloffMode = value;
-                        voiceSettingsRevision++;
-                        snapshot = GetVoiceSnapshot();
-                    }
-                    finally
-                    {
-                        playingLock.ExitWriteLock();
-                    }
-
-                    UpdateVoiceRolloffModeUnsafe(snapshot, value);
-                }
-            }
-        }
-        [SerializeField] volatile SoundRolloffMode _rolloffMode = SoundRolloffMode.inverse;
-
-        /// <summary>Gets or sets whether Transform changes estimate velocity when no physics body supplies it.<br/>물리 바디가 속도를 제공하지 않을 때 Transform 변화로 속도를 추정할지 가져오거나 설정합니다.</summary>
-        public bool nonRigidbodyVelocity
-        {
-            get => _nonRigidbodyVelocity;
-            set => _nonRigidbodyVelocity = value;
-        }
-        [SerializeField] bool _nonRigidbodyVelocity;
-
-        /// <inheritdoc/>
-        public override bool loop
-        {
-            get => base.loop;
-            set
-            {
-                base.loop = value;
-                InvalidateLoopSchedule();
+                base.maxDistance = value;
+                scheduler?.minMaxDistance = (minDistance, value);
             }
         }
 
@@ -402,290 +315,64 @@ namespace RuniOS.NBS
         public override double loopStart
         {
             get => base.loopStart;
-            set
-            {
-                base.loopStart = value;
-                InvalidateLoopSchedule();
-            }
+            set => ChangeLoop(() => base.loopStart = value);
         }
 
         /// <inheritdoc/>
         public override double loopEnd
         {
             get => base.loopEnd;
-            set
+            set => ChangeLoop(() => base.loopEnd = value);
+        }
+
+        /// <inheritdoc/>
+        public override bool loop
+        {
+            get => base.loop;
+            set => ChangeLoop(() => base.loop = value);
+        }
+
+        /// <summary>
+        /// Gets the song time range that playback repeats, or <see langword="null"/> while it does not loop.<br/>
+        /// 재생이 반복하는 곡 시간 범위를 가져오며, 반복하지 않으면 <see langword="null"/>입니다.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="RuniAudioSource.loop"/> always decides whether playback loops. While a clip is loaded, the range is the loop of the NBS header
+        /// when <see cref="useFileLoopSettings"/> is set and the header loop is on, and otherwise <see cref="loopStart"/> and <see cref="loopEnd"/> clamped to the song.<br/>
+        /// 반복 여부는 항상 <see cref="RuniAudioSource.loop"/>가 정합니다. 클립이 로드되어 있으면 범위는 <see cref="useFileLoopSettings"/>가 켜져 있고 헤더 반복이 켜져 있을 때 NBS 헤더의 반복이고,
+        /// 그렇지 않으면 곡 범위로 제한한 <see cref="loopStart"/>와 <see cref="loopEnd"/>입니다.
+        /// </remarks>
+        public NBSLoopRange? loopRange
+        {
+            get
             {
-                base.loopEnd = value;
-                InvalidateLoopSchedule();
+                NoteBlockClip? current = loadedClip;
+                if (current == null)
+                    return NBSLoopRange.Create(loop, loopStart, loopEnd);
+
+                if (_useFileLoopSettings && current.header.loop)
+                    return NBSLoopRange.Create(loop, current.map.tempo.TickToTime(current.header.loopStartTick), current.length);
+
+                double start = Math.Clamp(loopStart, 0, current.length);
+                return NBSLoopRange.Create(loop, start, Math.Clamp(loopEnd, start, current.length));
             }
         }
 
-        /// <summary>Reloads the NBS scope and all unique instrument scopes.<br/>NBS 스코프와 모든 고유 악기 스코프를 다시 로드합니다.</summary>
-        /// <returns>An asynchronous operation that represents completion of the generation swap.<br/>세대 교체 완료를 나타내는 비동기 작업입니다.</returns>
-        public UniTask Reload() => reloadGate.Run(ReloadCore);
-
-        async UniTask ReloadCore()
+        void ChangeLoop(Action change)
         {
-            AssetRef<NoteBlockClip> target = nbsFileRef;
-            if (this == null || !isActiveAndEnabled || target.IsSameTarget(nbsScope))
-                return;
-
-            IAssetScope<NoteBlockClip>? newScope = await target.LoadScopeAsync();
-            if (this == null || !isActiveAndEnabled)
-            {
-                DisposeQueue.Enqueue(newScope);
-                return;
-            }
-
-            NoteBlockInstrumentBank? newBank = null;
-            try
-            {
-                if (newScope != null)
-                {
-                    string sourceNamespace = target.mode switch
-                    {
-                        AssetRefMode.direct => directInstrumentNamespace,
-                        AssetRefMode.automatic => target.assetId.nameSpace,
-                        _ => target.resourceKey.assetId.nameSpace
-                    };
-                    newBank = await NoteBlockInstrumentBank.Create(newScope.asset.playbackMap, sourceNamespace);
-                }
-            }
-            catch
-            {
-                DisposeQueue.Enqueue(newScope);
-                throw;
-            }
-
-            if (this == null || !isActiveAndEnabled)
-            {
-                DisposeQueue.Enqueue(newScope);
-                DisposeQueue.Enqueue(newBank);
-                return;
-            }
-
-            IAssetScope<NoteBlockClip>? oldScope;
-            NoteBlockInstrumentBank? oldBank;
-            Voice[] oldVoices;
-            while (true)
-            {
-                float preparedTempo = base.tempo;
-                float preparedPitch = base.pitch;
-                NBSPlaybackSchedule? preparedSchedule;
-                try
-                {
-                    preparedSchedule = newScope != null && newBank != null &&
-                        float.IsFinite(preparedTempo) && preparedTempo != 0 &&
-                        float.IsFinite(preparedPitch) && preparedPitch != 0
-                        ? newScope.asset.playbackMap.CreateSchedule(preparedTempo, preparedPitch, newBank)
-                        : null;
-                }
-                catch
-                {
-                    DisposeQueue.Enqueue(newScope);
-                    DisposeQueue.Enqueue(newBank);
-                    throw;
-                }
-
-                bool swapped;
-                playingLock.EnterWriteLock();
-                try
-                {
-                    if (!base.tempo.Equals(preparedTempo) || !base.pitch.Equals(preparedPitch))
-                        continue;
-
-                    oldVoices = DetachAllVoicesUnsafe();
-                    pendingSubmissions.Clear();
-                    oldScope = nbsScope;
-                    oldBank = instrumentBank;
-                    nbsScope = newScope;
-                    instrumentBank = newBank;
-                    completedLoops = 0;
-                    scheduleGeneration++;
-                    playbackSchedule = preparedSchedule;
-                    ResetCursorUnsafe(true);
-                    restoreSnapshot = isPlaying;
-                    swapped = true;
-                }
-                finally
-                {
-                    playingLock.ExitWriteLock();
-                }
-
-                if (swapped)
-                    break;
-            }
-
-            StopVoices(oldVoices);
-            DisposeQueue.Enqueue(oldScope);
-            DisposeQueue.Enqueue(oldBank);
-            NoteBlockPlaybackWorker.Signal();
-        }
-
-        protected override void OnEnable()
-        {
-            base.OnEnable();
-#if UNITY_PHYSICS_EXIST
-            rigidbody = GetComponent<Rigidbody>();
-#endif
-#if UNITY_PHYSICS2D_EXIST
-            rigidbody2D = GetComponent<Rigidbody2D>();
-#endif
-            Transform currentTransform = transform;
-            lock (spatialSnapshotLock)
-                spatialSnapshot = new AudioSpatialState(currentTransform);
-            lastSpatialPosition = currentTransform.position;
-
-            ResourceManager.AttachReloadable(this);
-            NoteBlockPlaybackWorker.Register(this);
-            Reload().Forget();
-        }
-
-        protected override void OnDisable()
-        {
-            base.OnDisable();
-            ResourceManager.DetachReloadable(this);
-            NoteBlockPlaybackWorker.Unregister(this);
-
-            IAssetScope<NoteBlockClip>? oldScope;
-            NoteBlockInstrumentBank? oldBank;
             playingLock.EnterWriteLock();
+
             try
             {
-                StopAllVoicesUnsafe();
-                pendingSubmissions.Clear();
-                oldScope = nbsScope;
-                oldBank = instrumentBank;
-                nbsScope = null;
-                instrumentBank = null;
-                playbackSchedule = null;
-                playbackCursor = default;
-                restoreSnapshot = false;
+                // Freezes the wrapped position first, so the new range does not move the current position.
+                MoveAnchorUnsafe();
+                change();
+                scheduler?.OnLoopChanged();
             }
             finally
             {
                 playingLock.ExitWriteLock();
             }
-
-            DisposeQueue.Enqueue(oldScope);
-            DisposeQueue.Enqueue(oldBank);
-        }
-
-        protected override void OnPlay()
-        {
-            StopAllVoicesUnsafe();
-            pendingSubmissions.Clear();
-            completedLoops = 0;
-            ResetCursorUnsafe(true);
-            restoreSnapshot = true;
-            NoteBlockPlaybackWorker.Signal();
-        }
-
-        protected override void OnStop()
-        {
-            StopAllVoicesUnsafe();
-            pendingSubmissions.Clear();
-            completedLoops = 0;
-            restoreSnapshot = false;
-            ResetCursorUnsafe(true);
-        }
-
-        protected override void OnPause()
-        {
-            playbackRevision++;
-            CancelFutureSubmissionsUnsafe();
-            ClearVoiceEndDelaysUnsafe();
-            PauseVoicesUnsafe();
-        }
-
-        protected override void OnUnPause()
-        {
-            UnPauseVoicesUnsafe();
-            if (!playbackCursor.initialized)
-                ResetCursorUnsafe(false);
-            NoteBlockPlaybackWorker.Signal();
-        }
-
-        void OnValidate() => NoteBlockPlaybackWorker.Signal();
-
-        void InvalidateLoopSchedule()
-        {
-            playingLock.EnterWriteLock();
-            try
-            {
-                CancelFutureSubmissionsUnsafe();
-                scheduleGeneration++;
-                completedLoops = 0;
-                ResetCursorUnsafe(false);
-            }
-            finally
-            {
-                playingLock.ExitWriteLock();
-            }
-
-            NoteBlockPlaybackWorker.Signal();
-        }
-
-        void RebuildScheduleUnsafe(bool includeCurrent, bool includePreviousNotes)
-        {
-            scheduleGeneration++;
-            NoteBlockClip? file = nbsScope?.asset;
-            NoteBlockInstrumentBank? bank = instrumentBank;
-            float currentTempo = base.tempo;
-            float currentPitch = base.pitch;
-            playbackSchedule = file != null && bank != null &&
-                float.IsFinite(currentTempo) && currentTempo != 0 &&
-                float.IsFinite(currentPitch) && currentPitch != 0
-                ? file.playbackMap.CreateSchedule(currentTempo, currentPitch, bank)
-                : null;
-            ResetCursorUnsafe(includeCurrent);
-            restoreSnapshot = includePreviousNotes && isPlaying;
-        }
-
-        void ResetCursorUnsafe(bool includeCurrent)
-        {
-            playbackRevision++;
-            observedSchedulingRevision = NoteBlockPlaybackSettings.schedulingRevision;
-            NBSPlaybackSchedule? schedule = playbackSchedule;
-            if (schedule == null || !double.IsFinite(base.time))
-            {
-                playbackCursor = default;
-                return;
-            }
-
-            playbackCursor = schedule.CreateCursor
-            (
-                new NBSPlaybackPosition(base.time, completedLoops),
-                GetLoopInfoUnsafe(nbsScope?.asset),
-                scheduleGeneration,
-                includeCurrent
-            );
-        }
-
-        static int FindNearestIndex(NoteBlockClip file, double tick)
-        {
-            if (file.ticks.Count == 0)
-                return 0;
-
-            int low = 0;
-            int high = file.ticks.Count;
-            while (low < high)
-            {
-                int middle = (low + high) / 2;
-                if (file.ticks[middle].tick < tick)
-                    low = middle + 1;
-                else
-                    high = middle;
-            }
-
-            if (low <= 0)
-                return 0;
-            if (low >= file.ticks.Count)
-                return file.ticks.Count - 1;
-
-            double lowerDistance = Math.Abs(file.ticks[low - 1].tick - tick);
-            double upperDistance = Math.Abs(file.ticks[low].tick - tick);
-            return lowerDistance <= upperDistance ? low - 1 : low;
         }
     }
 }

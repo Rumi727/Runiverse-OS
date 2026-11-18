@@ -1,136 +1,101 @@
 # Runiverse OS NBS
 
-Note Block Studio 파일을 Runiverse OS 리소스 시스템으로 등록하고 FMOD DSP 클록에 맞춰 재생하는 패키지입니다.
+Note Block Studio 곡(`.nbs`)을 Unity 에셋과 리소스팩으로 불러오고, FMOD DSP 클록에 맞춰 재생하는 패키지입니다.
 
-> **주의:** 이 패키지의 대부분의 코드는 Codex가 작성했습니다.\
-> 아직 전체 코드를 충분히 검토하고 테스트하지 못했으므로, 의도한 대로 올바르게 작동하는지와 장기적으로 유지보수 가능한지를 완벽하게 보장할 수 없습니다.\
-> 실제 사용 전 코드 검토와 충분한 테스트를 진행해야 합니다.
+## 불러오기
 
-추후 이 패키지를 새로 개편하게 된다면 `ScriptedImporter`를 사용해 Unity가 `.nbs` 파일을 직접 읽고 에셋으로 임포트할 수 있도록 할 예정입니다.
+| 경로 | 방법 |
+| --- | --- |
+| Unity 에셋 | `.nbs` 파일을 프로젝트에 넣으면 `NoteBlockClipImporter`가 `NoteBlockClip`으로 가져옵니다. |
+| 리소스팩 | `assets/{namespace}/nbses/` 아래 파일을 `NBSAssetRegistry`가 등록하고, `NBSAssetHandle`이 `NoteBlockClip.LoadAsync(IONode)`로 로드합니다. |
+| 코드 | `NoteBlockClip.Create(Stream)`, `NoteBlockClip.Create(header, notes, layers, instruments)`, `NoteBlockClip.LoadAsync(IONode)` |
 
-## 리소스 구조
+`NBSReader`는 Stream을 섹션 단위로 순차적으로 읽는 public 리더입니다. 헤더만 읽고 멈출 수도 있습니다.
 
-NBS 파일은 `assets/{namespace}/nbs`, 커스텀 악기는 같은 네임스페이스의 `sounds` 아래에 둡니다.
-
-```text
-pack.json
-assets/
-  my_game/
-    nbs/music.nbs
-    sounds/custom/instrument.ogg
+```csharp
+using NBSReader reader = new NBSReader(stream, leaveOpen: true);
+NBSHeader header = reader.ReadHeader();
 ```
 
-`NBSAssetRegistry`는 NBS를 `runios:nbs` 레지스트리에 등록합니다. 커스텀 악기의 `soundFile`에서는 `sounds/` 접두사와 확장자를 제거합니다. 절대 경로, `..`, 다른 네임스페이스 지정은 거부됩니다. 실제 NBS와 악기 클립 수명은 `NoteBlockSource`가 보유한 scope와 `NoteBlockInstrumentBank`가 관리합니다.
+## 편집 모델과 맵
 
-## 사전 계산 데이터
+`NoteBlockClip`(ScriptableObject)은 직렬화되는 곡 데이터를 그대로 가집니다. 노트와 레이어는 서로 독립이며, 노트는 `tick`과 `layer` 좌표를 가집니다.
 
-`NBSReader`는 raw header/tick/layer/custom instrument/event를 검증한 뒤 다음 불변 맵을 만듭니다.
-
-- `NBSTempoMap`: tempo change를 반영한 tick과 절대 시간 변환
-- `NBSNoteMap`: 모든 note와 special event의 안정적인 ID, 절대 시간, 이진 검색 범위
-- `NBSPlaybackMap`: clip 독립적인 instrument reference, pitch ratio, volume, pan, Sound Stopper
-- `NBSVisualEffectMap`: Editor preview용 지속 상태와 transient event
-
-`NBSPlaybackMap`에는 `WaveAudioClip`이나 scope가 없습니다. 각 `NoteBlockSource`는 현재 instrument metadata, tempo, pitch로 `NBSPlaybackSchedule`을 생성합니다. 스케줄은 note의 원본 시작 `S`, 끝 `E`, 원래 발생 시점, 실제 Voice 시작 anchor, playback interval, source 방향, interval index를 보유합니다. Worker hot path는 raw tick을 다시 시간으로 변환하지 않습니다.
-
-## TPS와 BPM
-
-NBS 헤더 원시 tempo는 `TPS × 100`입니다. NBS 한 박은 4틱입니다.
-
-```text
-BPM = TPS × 15
-TPS = BPM / 15
+```csharp
+clip.notes[i] = clip.notes[i] with { pitch = 100 };
+clip.layers[0] = clip.layers[0] with { volume = 50 };
+clip.Apply(); // Texture2D.Apply()처럼 맵을 다시 만듭니다.
 ```
 
-`Tempo Changer` 이후 TPS는 `abs(note.pitch) / 15`입니다. 같은 tick에 여러 개가 있으면 가장 높은 layer가 우선합니다.
+`clip.map`(`NBSMap`)은 마지막 `Apply()` 또는 로드 시점의 불변 맵입니다. 어느 스레드에서든 잠금 없이 읽을 수 있습니다.
 
-## 재생 시간 모델
+- `notes`: tick, 레이어 순으로 정렬되고 곡 시간이 붙은 노트. `notes[i]`, `notes[tick, layer]`, `IndexOf`, `TryGet`
+- `columns`: 노트가 있는 tick 열(`tick`, `time`, `noteStart`, `noteCount`)
+- `GetTickNotes(tick)`, `GetNotes(startTick, endTick, startLayer, endLayer)`, `GetLayerNotes(layer)`: 할당 없는 조회
+- `tempo`(`NBSTempoMap`): tick ↔ 시간 변환, TPS·BPM, 템포 변경 목록
+- `visualEffects`(`NBSVisualEffectMap`): Rainbow, 배경 강조, 색, Save Popup
+- `stoppers`: Sound Stopper 목록
+- Raw로 돌아가기: `NBSMapNote.sourceIndex`, `TryGetMapIndex`, `TryGetCustomInstrumentIndex`, `TryGetLayer`
 
-tempo와 pitch 부호는 독립입니다.
+맵은 직렬화하지 않고 `OnAfterDeserialize`와 `Apply()`에서 만듭니다. 정렬은 이미 정렬된 입력에서 O(n)인 삽입 정렬이고, 많이 흐트러진 입력은 introsort로 전환합니다.
 
-- `tempo > 0`: NBS timeline 정방향
-- `tempo < 0`: NBS timeline 역방향
-- `pitch > 0`: clip PCM 정방향
-- `pitch < 0`: clip PCM 역방향
+## OpenNBS 충실도
 
-note에 대해 원본 시작 시간을 `S`, clip 길이를 `L`, 정적 pitch ratio를 `Q`, NoteBlockSource 값을 `T`, `P`라고 하면 다음 값을 스케줄 생성 시 한 번 계산합니다.
+기준은 OpenNBS `development` 브랜치의 로더와 재생 코드입니다.
+
+- **로더 보정:** key는 0~87, layer volume은 0~100, 박자표는 2~8로 제한하고, 작업 통계는 음수가 되지 않게 합니다. pitch, velocity, panning은 제한하지 않습니다.
+- **커스텀 악기 인덱스:** 기본 악기 20개 배치로 옮깁니다.
+- **레이어 lock:** 1은 무음, 2는 솔로입니다. 솔로 레이어가 하나라도 있으면 솔로만 재생합니다.
+- **기능성 악기:** 이름은 정확히 일치해야 합니다(Change Color만 대소문자 무시 포함 검사). 레이어 lock과 관계없이 적용합니다.
+  - Tempo Changer: `max(0.25, floor(|pitch|) / 15)` TPS
+  - Sound Stopper: 1부터 시작하는 레이어 `[floor(pitch), ((pan + 156) % 256) + ((velocity + 156) % 256) · 256]`. 시작이 0이면 전체 레이어입니다.
+- **레이어 행이 없는 노트:** OpenNBS와 같이 음량 1%, 완전 왼쪽, 미세 피치 없이 재생합니다.
+- **문자열:** UTF-8로 읽고, 실패하면 원본처럼 바이트를 그대로 문자로 바꿉니다(Latin-1).
+- **Max loop count:** 저장만 하고 재생에는 영향을 주지 않습니다.
+
+## 재생
 
 ```text
-sourceRate      = Q × abs(P)
-wallDuration    = L / sourceRate
-timelineDuration = L × abs(T) / (Q × abs(P))
-E               = S + timelineDuration
-originalAnchor  = T > 0 ? S : E
-actualAnchor(^)  = originalAnchor - (P < 0 ? timelineDuration : 0)
+NoteBlockSource (시간 축, 직렬화)
+  -> NBSVoiceScheduler (시간 축 없음, Voice 예약)
+       -> NBSTimeline (노트 배치 계산)
+       -> NBSInstrumentBank (악기 사운드)
+       -> FMOD SoundChannel
 ```
 
-`*`는 note가 원래 발생해야 하는 시간이며, `^`는 실제 Voice가 시작하는 시간입니다. tempo 부호는 타임라인 진행 방향과 재생 속도만 결정합니다. pitch가 음수이면 `^`를 숫자 타임라인 기준으로 clip 재생시간만큼 앞당기고, clip 끝에서 PCM을 시작합니다.
+- **시간 축은 `NoteBlockSource` 하나만 가지며, DSP 클록 위에 정의됩니다.**
+  - 타임라인은 `clockAnchor`(`NBSClockAnchor`: DSP 클록과 그때의 위치)에서 tempo만큼 진행합니다. 소리의 시작 클록은 여기서 단순 계산으로 나오므로 소리 사이 간격이 샘플 단위로 정확하고, 드리프트나 장치 멈춤도 오디오를 따라갑니다.
+  - seek, 재생, tempo·반복 변경, 일시 정지와 재개는 믹스 중인 블록을 피해 확실히 아직 믹스하지 않은 블록에서 적용되므로 보통 한두 블록(기본 약 21~43ms) 늦게 시작합니다. 재생 중 소리 사이 간격에는 영향이 없습니다.
+  - `time`은 `WaveAudioSource`처럼 믹서가 진행할 때마다 이 타임라인을 따라가는 표시용 값이라 약 한 블록 늦을 수 있습니다.
+  - 반복 중에는 `time`이 진행 방향을 기준으로 반복 범위 안으로 되돌아갑니다.
+  - 반복 여부는 항상 `loop`가 정합니다. `useFileLoopSettings`이고 헤더 반복이 켜져 있으면 범위만 NBS 헤더의 반복(시작 tick부터 곡 끝까지)으로 바뀝니다. 그 밖에는 `loopStart`·`loopEnd`를 곡 범위로 제한해 사용합니다.
+- **`NBSVoiceScheduler`는 `SoundChannel`과 같은 위치의 엔진 계층입니다.**
+  - 공유 `NBSPlaybackWorker`가 `workerInterval`(기본 0.1초)마다 트랜스포트의 현재 위치를 읽습니다.
+  - 그때부터 `schedulingLookahead`(기본 0.2초) 안에 시작하는 소리만 DSP 클록에 예약합니다.
+  - Mono 없이 쓰려면 `INBSTransport`, `ISeekable`, `ITempoControl`, `IPitchControl`, `ILoopControl`, `IPausable`을 구현한 트랜스포트를 넘깁니다.
+  - seek, 재생, tempo·pitch·반복 변경 같은 불연속은 트랜스포트 주인이 `Resync`, `OnRateChanged`, `OnLoopChanged`, `Pause`, `UnPause`, `Stop`으로 알립니다. 그 전에 `NBSClockAnchor.TryGetNextMixClock`으로 기준점을 옮겨 둡니다.
+- **배치:** 소리 길이 `L`, 피치 배율 `Q`인 노트는 `D = (|tempo| / |pitch|) · L / Q` 타임라인 초를 차지합니다. tempo나 pitch가 바뀌어도 다시 계산할 것이 없습니다.
+- **tempo와 pitch의 부호:** tempo 부호는 타임라인 방향, pitch 부호는 소리 방향입니다.
+  - tempo < 0 재생은 pitch 부호가 반대인 tempo > 0 렌더링을 시간축으로 뒤집은 것입니다.
+  - `reversePitchAlignment = attackAtNote`(기본): 네 조합 모두 어택이 노트 위치에 옵니다.
+  - `startAtNote`: 샘플러처럼 노트 위치에서 소리 내용만 뒤집습니다.
+- **Sound Stopper:** 정방향 렌더링 기준으로 노트 길이를 자릅니다(`D' = min(D, 다음 Stopper − S)`). 역방향에서는 잘린 지점부터 재생합니다. 반복 끝을 넘어 울리는 노트는 반복 시작 이후의 Stopper가 멈춥니다.
+- **재생 의미:**
+  - seek·재생 시작·늦은 로드는 현재 위치에 걸친 소리를 offset부터 복원합니다.
+  - tempo를 바꿔도 재생 중인 소리는 유지하고, pitch를 바꾸면 frequency가 즉시 바뀝니다.
+  - pitch 0이면 모두 멈추고, tempo 0이면 새 예약만 멈춥니다.
+  - Pause는 소리 위치까지 멈춥니다.
+  - 반복 경계에서 소리를 자르지 않으며, 이미 끝난 짧은 소리는 소급해서 재생하지 않습니다.
+- **스트림 클립:** 스트림으로 로드된 악기는 역재생할 수 없어 pitch가 음수이면 무음입니다.
+- **리로드:** bank는 로드할 때 악기 인덱스별로 사운드를 연결합니다. 편집 후 `Apply()`만으로 반영되지 않아 `Reload()`가 필요한 경우는 다음과 같습니다.
+  - 사운드 파일을 바꾼 경우
+  - 커스텀 악기 순서를 바꾼 경우
+  - 로드할 때 무음이던 레이어의 무음을 해제한 경우
+  - 새 악기를 추가한 경우
 
-| tempo | pitch | `*` 원래 발생 시점 | `^` 실제 시작 시점 |
-|---|---|---:|---:|
-| 양수 | 양수 | `S` | `S` |
-| 양수 | 음수 | `S` | `S - timelineDuration` |
-| 음수 | 양수 | `E` | `E` |
-| 음수 | 음수 | `E` | `E - timelineDuration = S` |
+## 에디터
 
-실제 playback interval은 tempo 방향에 따라 `^`부터 진행되며, 중간 재생·seek·늦은 resource load·reload는 이 interval을 기준으로 현재 위치에 걸쳐 있는 모든 tail을 찾습니다. 이미 끝난 짧은 음은 소급 출력하지 않습니다.
-
-## Worker와 DSP 예약
-
-모든 `NoteBlockSource`는 하나의 공유 background Worker를 사용합니다.
-
-- `NoteBlockPlaybackSettings.workerInterval`: 기본 `0.1`초
-- `NoteBlockPlaybackSettings.schedulingLookahead`: 기본 `0.2`초, wall-clock 기준
-- 한 batch에서 master DSP clock과 실제 output sample rate를 한 번 읽음
-- 미래 occurrence는 paused channel 생성 후 `SetDelay`로 예약
-- 현재/past occurrence는 같은 경로에서 현재 DSP clock과 계산된 source offset 사용
-- 같은 moment의 note와 Sound Stopper는 같은 DSP start clock 사용
-
-`schedulingLookahead == 0`이어도 `wallDelay <= 0`인 현재 occurrence를 정확히 한 번 처리합니다. Worker가 늦으면 cursor부터 현재까지 소비하며, 아직 살아 있는 note만 offset부터 재생합니다. `lateTolerance` 기반 tick-column 생략은 없습니다.
-
-미래까지 전진한 cursor와 실제 DSP 시작 사이에는 pending submission이 남습니다. Pause, tempo/pitch/lookahead/loop 변경 시 아직 미래인 Voice를 제거하고 가장 이른 pending moment 전으로 cursor를 되감아 중복 없이 다시 예약합니다.
-
-## 상태 변경
-
-- `Play(startTime)`: 현재 위치 snapshot과 lookahead 범위를 제출합니다. resource가 늦게 준비되면 그 시점의 현재 위치에서 snapshot을 복원합니다.
-- `Pause`: active Voice의 PCM 위치까지 정지하고 future Voice 및 Stopper 종료 예약을 취소합니다.
-- `UnPause`: active Voice를 같은 PCM 위치에서 재개하고 future schedule을 다시 제출합니다.
-- `Stop`: 모든 Voice와 submission을 제거하고 time과 loop iteration을 0으로 되돌립니다.
-- seek: 모든 Voice를 비운 뒤 target 위치의 active tail과 current/future occurrence를 다시 만듭니다.
-- tempo 변경: 기존 active Voice는 유지하고 timeline schedule만 교체합니다.
-- pitch 변경: 기존 active Voice의 현재 PCM 위치를 유지한 채 frequency 크기와 부호를 즉시 바꿉니다.
-- pitch 0: 모든 Voice를 비웁니다. 0이 아닌 값으로 복구하면 현재 위치 snapshot을 복원합니다.
-- tempo 0: transport와 새 제출만 멈춥니다. 이미 시작한 Voice는 계속 재생합니다.
-- volume, pan, spatial blend, doppler, spread, distance, rolloff 변경: active/pending Voice에 즉시 반영합니다.
-
-## 호출 스레드 비용 및 lock 주의
-
-공유 background Worker가 일반적인 schedule query를 담당하지만 `NoteBlockSource`의 모든 API가 Worker로 전달되는 것은 아닙니다. 현재 구현은 다음 비용을 호출 경로에서 즉시 수행할 수 있습니다.
-
-- 일부 property get/set이 `playingLock`, `voiceLock`, `voiceSettingsApplyLock`을 획득합니다. 일부 경로는 lock이 실제 상태 변경에 필요한 범위보다 넓은 작업을 감싸므로 Worker 또는 FMOD callback과 경합할 수 있습니다.
-- volume, pan, spatial/distance/rolloff property setter는 기존 active/pending Voice snapshot을 만든 뒤 각 Voice의 FMOD 채널에 즉시 적용합니다. Voice 수가 많으면 호출 시간이 함께 늘어납니다.
-- tempo/pitch 변경은 큰 playback map을 순회하고 clip metadata를 조회하며 정렬과 interval index 생성을 포함한 `NBSPlaybackSchedule` 재생성을 수행할 수 있습니다.
-- `Reload`의 resource load와 instrument load는 비동기지만, load 이후 schedule 생성과 generation swap은 별도 Worker로 강제 분리되지 않습니다. 준비된 schedule 생성은 곡의 entry 수에 따라 커질 수 있습니다.
-
-따라서 큰 곡에서는 property get/set, seek/loop 변경, `Reload` 등이 호출 스레드 또는 `Reload` continuation에 frame hitch을 만들거나 Worker lock contention을 유발할 수 있습니다. 지연에 민감한 루프에서 매 프레임 반복 호출하지 말고, 설정 변경은 가능한 한 묶어서 적용하며, 대형 곡 reload는 여유 있는 시점에 수행해야 합니다. 실제 비용은 note/entry 수, Voice 수, clip metadata 수, 동시 Worker 작업량에 따라 달라집니다.
-
-## Loop
-
-공개 `time`은 현재 loop 구간의 file time이며 내부 occurrence는 loop iteration을 함께 사용합니다. file loop는 `loopEnabled`인 header의 start tick부터 곡 길이까지를 사용하며, header의 maximum loop count는 읽지만 재생에 사용하지 않습니다. manual loop는 `loopStart`와 `loopEnd`를 무한 반복합니다.
-
-loop 경계에서는 기존 tail을 자르지 않습니다. interval snapshot은 최대 note duration에 따라 이전 iteration도 검색하므로 경계를 넘어온 tail을 복원합니다. loop가 없으면 score duration 이후에도 transport는 계속 진행하고 기존 tail은 자연 종료합니다.
-
-## 지원 포맷과 기능성 악기
-
-[공식 NBS 포맷 문서](https://noteblock.studio/nbs) 기준 버전 0부터 6까지 읽고 버전 7 이상은 거부합니다.
-
-다음 기능성 커스텀 악기를 대소문자 구분 없이 파싱합니다.
-
-- `Tempo Changer`
-- `Sound Stopper`
-- `Toggle Rainbow`
-- `Show Save Popup`
-- `Toggle Background Accent`
-- `Change Color to #RRGGBB`
-
-`Tempo Changer`는 `NBSTempoMap`, `Sound Stopper`는 audio schedule에 반영합니다. visual event는 `NBSVisualEffectMap`에만 저장하며 clip을 요청하지 않습니다.
+- `NoteBlockClip` 인스펙터: 곡 요약과 씬 없는 미리듣기(`NBSPreview`)를 제공합니다.
+- `NoteBlockSource` 인스펙터:
+  - 타임라인 아래에 BPM 계단 그래프, Sound Stopper, 파일 반복 구간 레인을 그립니다. 마커에 마우스를 올리면 정보가 보이고, 클릭하면 그 위치로 이동합니다.
+  - tick과 열 시간 단위, 리버스 배치 선택, 시각 효과 미리보기를 제공합니다.

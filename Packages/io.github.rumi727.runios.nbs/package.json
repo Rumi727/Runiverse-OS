@@ -2,7 +2,7 @@
   "name": "io.github.rumi727.runios.nbs",
   "version": "0.0.0",
   "displayName": "Runiverse OS NBS",
-  "description": "Note Block Studio file loading and FMOD playback for Runiverse OS",
+  "description": "Note Block Studio importing, mapping and FMOD playback for Runiverse OS",
   "author": {
     "name": "Rumi"
   },
