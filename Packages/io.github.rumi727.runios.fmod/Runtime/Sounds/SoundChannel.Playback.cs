@@ -221,16 +221,24 @@ namespace RuniOS.Sounds
             RESULT result = native.setPosition(sample, TIMEUNIT.PCM);
             if (result == RESULT.ERR_NOTREADY)
             {
-                pendingTimeSample = sample;
-
-                if (Volatile.Read(ref _isDisposed) == 0)
+                if (!pendingTimeSample.HasValue)
+                {
                     system.onUpdate += RetryPendingTimeSample;
 
+                    if (Volatile.Read(ref _isDisposed) != 0)
+                        system.onUpdate -= RetryPendingTimeSample;
+                }
+
+                pendingTimeSample = sample;
                 return;
             }
 
-            pendingTimeSample = null;
-            system.onUpdate -= RetryPendingTimeSample;
+            if (pendingTimeSample.HasValue)
+            {
+                pendingTimeSample = null;
+                system.onUpdate -= RetryPendingTimeSample;
+            }
+
             result.ThrowIfNotOkOfChannel();
         }
 
