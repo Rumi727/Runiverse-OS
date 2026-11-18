@@ -82,8 +82,9 @@ namespace RuniOS.Sounds
 
                 try
                 {
+                    // The time holds until a base timestamp in the future is reached.
                     if (_isPlaying && !_isPaused)
-                        return baseTime + (((Stopwatch.GetTimestamp() - baseTimestamp) / (double)Stopwatch.Frequency) * tempo);
+                        return baseTime + ((Math.Max(Stopwatch.GetTimestamp() - baseTimestamp, 0) / (double)Stopwatch.Frequency) * tempo);
                     else
                         return baseTime;
                 }
@@ -324,14 +325,34 @@ namespace RuniOS.Sounds
         /// 보간된 재생 시간을 동기화하는 동안 <see cref="playingLock"/>의 쓰기 잠금을 획득합니다.<br/>
         /// 잠금을 보유하지 않거나 업그레이드 가능 읽기 잠금 또는 쓰기 잠금을 보유한 상태에서 호출할 수 있지만, 현재 스레드가 읽기 잠금만 보유한 상태에서는 호출하면 안 됩니다.
         /// </remarks>
-        protected void SyncInterpolatedTime(double time)
+        protected void SyncInterpolatedTime(double time) => SyncInterpolatedTime(time, Stopwatch.GetTimestamp());
+
+        /// <summary>
+        /// Synchronizes the interpolated playback time so that it was <paramref name="time"/> at <paramref name="timestamp"/>.<br/>
+        /// 보간된 재생 시간이 <paramref name="timestamp"/>에 <paramref name="time"/>이었도록 동기화합니다.
+        /// </summary>
+        /// <param name="time">
+        /// The playback time at <paramref name="timestamp"/>.<br/>
+        /// <paramref name="timestamp"/>에서의 재생 시간입니다.
+        /// </param>
+        /// <param name="timestamp">
+        /// The <see cref="Stopwatch.GetTimestamp"/> value at which the playback was at <paramref name="time"/>.
+        /// A timestamp in the future holds the time at <paramref name="time"/> until it is reached.<br/>
+        /// 재생 위치가 <paramref name="time"/>이었던 <see cref="Stopwatch.GetTimestamp"/> 값입니다.
+        /// 미래의 타임스탬프는 그 시각이 될 때까지 시간을 <paramref name="time"/>에 유지합니다.
+        /// </param>
+        /// <remarks>
+        /// Acquires the write lock of <see cref="playingLock"/> under the same conditions as <see cref="SyncInterpolatedTime(double)"/>.<br/>
+        /// <see cref="SyncInterpolatedTime(double)"/>과 같은 조건으로 <see cref="playingLock"/>의 쓰기 잠금을 획득합니다.
+        /// </remarks>
+        protected void SyncInterpolatedTime(double time, long timestamp)
         {
             playingLock.EnterWriteLock();
 
             try
             {
                 baseTime = time;
-                baseTimestamp = Stopwatch.GetTimestamp();
+                baseTimestamp = timestamp;
             }
             finally
             {
