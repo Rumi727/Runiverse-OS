@@ -14,6 +14,15 @@ namespace RuniOS.Sounds
         const uint pluginSDKVersion = 110;
 
         /// <summary>
+        /// How many times <see cref="TryGetMixStamp"/> reads the stamp before it gives up.<br/>
+        /// A mixer stalled in the middle of a write would otherwise hold the reader, while the stamp is only a time correction that a later read catches up.
+        /// <br/><br/>
+        /// <see cref="TryGetMixStamp"/>가 포기하기 전까지 스탬프를 읽는 횟수입니다.<br/>
+        /// 쓰기 도중 멈춘 믹서가 읽는 쪽을 붙잡지 않게 하며, 스탬프는 이후 읽기에서 따라잡는 시간 보정일 뿐입니다.
+        /// </summary>
+        const int mixStampReadAttempts = 100;
+
+        /// <summary>
         /// The stamp that the mixer writes for this system.<br/>
         /// It lives in native memory because the mixer writes it outside the GC, and it is freed only after the native system is released,
         /// so a callback still running never writes to freed memory.
@@ -39,8 +48,10 @@ namespace RuniOS.Sounds
         /// 성공하면 최신 스탬프이고, 그렇지 않으면 <see langword="default"/>입니다.
         /// </param>
         /// <returns>
-        /// <see langword="true"/> if the mixer has processed a block since this system was initialized or reset; otherwise, <see langword="false"/>.<br/>
-        /// 이 시스템이 초기화되거나 재설정된 뒤 믹서가 블록을 처리했으면 <see langword="true"/>를 반환하고, 그렇지 않으면 <see langword="false"/>를 반환합니다.
+        /// <see langword="true"/> if the mixer has processed a block since this system was initialized or reset and a consistent stamp was read;
+        /// otherwise, <see langword="false"/>, which includes the mixer writing the stamp throughout every attempt.<br/>
+        /// 이 시스템이 초기화되거나 재설정된 뒤 믹서가 블록을 처리했고 일관된 스탬프를 읽었으면 <see langword="true"/>를 반환하고,
+        /// 그렇지 않으면 <see langword="false"/>를 반환하며, 시도할 때마다 믹서가 스탬프를 쓰고 있던 경우도 포함됩니다.
         /// </returns>
         /// <exception cref="ObjectDisposedException">
         /// Thrown when this sound system has been disposed.<br/>
@@ -70,14 +81,11 @@ namespace RuniOS.Sounds
                 ThrowIfUnavailableUnsafe();
 
                 MixStampState* state = mixStampState;
-                while (true)
+                for (int attempt = 0; attempt < mixStampReadAttempts; attempt++)
                 {
                     long sequence = Volatile.Read(ref state->sequence);
                     if (sequence == 0)
-                    {
-                        stamp = default;
-                        return false;
-                    }
+                        break;
 
                     // The mixer is writing the stamp, which takes only a few stores.
                     if ((sequence & 1) != 0)
@@ -96,6 +104,9 @@ namespace RuniOS.Sounds
                         return true;
                     }
                 }
+
+                stamp = default;
+                return false;
             }
             finally
             {
