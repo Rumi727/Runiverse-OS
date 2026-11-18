@@ -15,7 +15,7 @@
 - `WaveAudioClip`을 재생해 개별 재생 세션인 `SoundChannel`을 반환하고, `SoundChannelGroup`으로 출력 하이어라키를 구성합니다.
 - 생성한 clip/channel/channel group을 시스템에 등록하고, 종료 시 남은 리소스의 해제가 끝난 뒤 FMOD System을 해제합니다.
 - `ReaderWriterLockSlim`으로 일반 FMOD 호출과 시스템 해제가 동시에 실행되지 않게 합니다.
-- 무거운 생성 작업은 `UniTask.RunOnThreadPool`로 옮기되, FMOD `MODE.NONBLOCKING`은 사용하지 않습니다.
+- 무거운 생성 작업은 `UniTask.RunOnThreadPool`로 옮깁니다. FMOD `MODE.NONBLOCKING`은 스트림(`CreateStream`)에만 쓰며, 이때도 `READY`가 될 때까지 폴링한 뒤 반환합니다.
 - `WaveAudioAssetRegistry`와 연결해 리소스 팩의 사운드 파일을 필요할 때 `WaveAudioClip`으로 로드합니다.
 
 각 `WaveAudioClip`과 `SoundChannelGroup`은 자신을 만든 `SoundSystem`에 귀속됩니다. clip은 같은 시스템의
@@ -47,7 +47,7 @@ flowchart TD
 | --- | --- | --- |
 | `SoundSystem` | 자신의 FMOD Core System과 등록 리소스의 루트 소유자 | 인스턴스 수명 소유자가 자식 리소스를 정리한 뒤 `Dispose()`합니다. |
 | `WaveAudioClip` | `FMOD.Sound`의 관리형 래퍼. 길이, 샘플 수, 포맷, 루프, stream 상태를 제공합니다. | 사용이 끝나면 `Dispose()`합니다. `CreateStream`으로 만들었다면 연결된 `Stream`도 기본적으로 이때 닫힙니다. |
-| `SoundChannel` | 한 번의 재생을 나타내는 `FMOD.Channel` 래퍼 | `Stop()` 또는 `Dispose()`가 네이티브 채널을 중지하고 시스템 등록에서 제거합니다. |
+| `SoundChannel` | 한 번의 재생을 나타내는 `FMOD.Channel` 래퍼 | `Stop()`이 네이티브 채널을 중지하고, FMOD 종료 콜백이 시스템 등록에서 제거합니다. `Dispose()`는 없습니다. |
 | `SoundChannelGroup` | `FMOD.ChannelGroup`의 관리형 래퍼. channel/group 입력을 섞는 submix입니다. | `Dispose()`가 group만 release합니다. FMOD는 입력 channel/group을 master group으로 옮기며, 입력 wrapper를 dispose하지 않습니다. |
 | `WaveAudioSource` | `AssetRef<WaveAudioClip>`을 재생하는 Unity `MonoBehaviour` | 재생 시간 보간, 속성 동기화, 3D 위치 갱신을 담당하는 상위 컨트롤러입니다. `SoundSystem` 자체의 수명 소유자는 아닙니다. |
 
@@ -77,24 +77,25 @@ flowchart TD
 
 ### 자연 종료한 `SoundChannel`
 
-FMOD가 채널 종료를 보고하면 callback은 채널을 직접 해제하지 않고 `QueueDispose(channel)`만 호출합니다.
-`SoundSystem.Update()`는 `native.update()`의 read lock을 푼 뒤 queue를 drain하고, 그때 일반
-`Dispose(resource)`와 같은 경로로 채널을 해제합니다.
+FMOD가 채널 종료를 보고하면 callback이 그 자리에서 일반 `Dispose(resource)` 경로로 채널을 등록 해제한 뒤
+`onStop`을 호출합니다. 자연 종료라면 이 callback은 `SoundSystem.Update()`의 `native.update()` 안에서,
+`Stop()`이라면 `Stop()`을 부른 스레드에서 즉시 실행됩니다.
 
 ```text
-FMOD CHANNELCONTROL_CALLBACK_TYPE.END
--> QueueDispose(channel)
--> SoundSystem.Update()의 native.update() 종료
--> queuedDisposals dequeue
--> Dispose(channel)
+FMOD CHANNELCONTROL_CALLBACK_TYPE.END   // native.update() 또는 channel.stop() 안
+-> 핸들 표·보류 위치 목록에서 제거
+-> _isDisposed 0 → 1 (처음 한 번만 계속)
+-> SoundSystem.Dispose(channel)
+-> onStop
 ```
 
-자연 종료 뒤의 명시적 `channel.Dispose()`는 안전하지만 보통 필요하지 않습니다. 중복 요청은 첫 번째
-해제권 확보 뒤 no-op이 됩니다.
+자연 종료 뒤의 명시적 `channel.Stop()`은 안전하지만 보통 필요하지 않습니다. 이미 끝난 채널의 `Stop()`은
+아무것도 하지 않습니다. `QueueDispose(resource)`는 해제를 다음 `Update()`로 미루는 공개 API이며, 채널 종료 경로는
+이것을 쓰지 않습니다.
 
 ### `SoundSystem` 생성과 `Reset()`
 
-`SoundSystem.main`은 `maxChannels = 4095`, `softwareChannels = 1024`, `INITFLAGS.NORMAL`로 생성됩니다. 즉 가상 채널은 최대 4095개, 동시에 소프트웨어 믹싱되는 실제 채널은 최대 1024개입니다. 별도 시스템은 public
+`SoundSystem.main`은 `maxChannels = 4095`(기본값), `softwareChannels = 1023`, `INITFLAGS.VOL0_BECOMES_VIRTUAL`로 생성됩니다. 즉 가상 채널은 최대 4095개, 동시에 소프트웨어 믹싱되는 실제 채널은 최대 1023개이며, 볼륨이 0인 채널은 가상 채널이 됩니다. 별도 시스템은 public
 생성자에서 init 전 설정을 지정할 수 있으며, 소유자가 직접 `Update()`와 `Dispose()`를 호출해야 합니다.
 
 ```csharp
@@ -106,10 +107,13 @@ using SoundSystem system = new(new SoundSystemSettings
 });
 ```
 
-`Reset(settings)`은 non-null field만 현재 저장 설정에 병합한 뒤, 시스템이 소유한 리소스를 해제하고
-같은 native system을 `close()`/`init()` 합니다. 리소스 해제 예외는 로그로 출력하고 남은 리소스 정리와
-네이티브 재초기화를 계속합니다. native close, 설정 적용 또는 init 실패 뒤에는 병합 설정을 보존하므로,
-잘못된 field만 바꾼 다음 `Reset()`을 다시 호출할 수 있습니다. Reset이 해제한 리소스의 재로드는 수행하지 않습니다.
+`Reset(settings)`은 시스템이 소유한 리소스를 해제하고 같은 native system을 `close()`한 뒤, 넘겨받은
+`settings`로 다시 `init()` 합니다. 저장된 설정과 병합하지 않습니다. `init` 전 설정(`softwareChannels`,
+`softwareFormat`, `dspBuffer`)은 `null`이면 호출하지 않으므로 FMOD 객체에 남은 값이 유지되지만,
+`maxChannels`와 `initFlags`는 `null`이면 4095와 `INITFLAGS.NORMAL`이 됩니다. 리소스 해제 예외는 로그로
+출력하고 남은 리소스 정리와 네이티브 재초기화를 계속합니다. native close, 설정 적용 또는 init에 실패하면
+시스템은 `Faulted` 상태가 되고, 설정을 고쳐 `Reset()`을 다시 호출하거나 `Dispose()`할 수 있습니다.
+Reset이 해제한 리소스의 재로드는 수행하지 않습니다.
 `onResetting`은 lifecycle 상태 변경 및 소유 리소스 해제 직전에, `onReset`은 재초기화 성공 및 활성 상태 복귀 직후 발생합니다.
 
 ### `SoundSystem.Dispose()`
@@ -123,7 +127,8 @@ write lock 획득                         // 기존 read 작업과 resource 해�
 -> 남은 ownedResources snapshot 후 Clear
 -> write lock 해제
 -> 이미 실행 중인 resource release 완료 대기
--> snapshot resource 각각 ReleaseUnmanagedResources() 호출  // SoundSystem lock 없음
+-> snapshot을 channel·group → 기타 → DSP → clip 순으로 정렬
+-> 각각 ReleaseUnmanagedResources() 호출  // SoundSystem lock 없음, 순서가 바뀔 때마다 native.update()
 -> write lock 획득
 -> FMOD.System.release()
 -> native handle 제거
@@ -133,7 +138,7 @@ write lock 획득                         // 기존 read 작업과 resource 해�
 리소스 해제 예외와 마지막 `FMOD.System.release()` 실패는 로그로 출력하고, 남은 종료 절차를 계속합니다.
 
 `ownedResources` snapshot은 동시성 락 자체가 아니라 소유권 전이입니다. static `SoundSystem.main`이
-계속 살아 있어도 종료된 resource wrapper를 dictionary가 계속 참조하지 않게 하고, 외부 resource 구현을
+계속 살아 있어도 종료된 resource wrapper를 소유 표(`ConditionalWeakTable`)가 계속 참조하지 않게 하고, 외부 resource 구현을
 호출하기 전에 시스템의 소유 목록을 비웁니다.
 
 `QueueDispose()`와 종료가 동시에 일어날 수 있습니다. shutdown이 queue를 분리한 직후 이전 queue에
@@ -143,14 +148,14 @@ release로 추적됩니다. 그러므로 native release가 누락되거나 두 �
 일반 사용자는 다음 순서를 지키는 편이 이해하기 쉽습니다.
 
 ```text
-SoundChannel.Stop() 또는 Dispose()
+SoundChannel.Stop()
 -> SoundChannelGroup.Dispose()  // 필요할 때만; 남은 입력은 FMOD가 master로 재라우팅
 -> WaveAudioClip.Dispose()
 -> SoundSystem.Dispose()  // 시스템 종료·에디터 리로드 시점
 ```
 
-시스템 종료 시 dictionary 열거 순서에 channel 우선 규칙은 없습니다. 특별한 의존 관계가 있는 리소스는
-시스템 종료 전에 호출자가 명시적으로 정리해야 합니다.
+시스템 종료 시에는 종류별 순서(channel·group → 기타 → DSP → clip)만 정해져 있고, 같은 종류 안의 순서는
+정해져 있지 않습니다. 그보다 세밀한 의존 관계가 있는 리소스는 시스템 종료 전에 호출자가 명시적으로 정리해야 합니다.
 
 그 밖의 수명 규칙:
 
@@ -184,7 +189,7 @@ SoundSystem.Dispose()
 
 `activeResourceDisposals`는 `nativeLock` 밖에서 실행 중인 resource release 수입니다. system 종료는 이 수가
 0이 될 때까지 `Monitor.Wait`으로 대기하며, 마지막 release가 `Monitor.PulseAll`로 깨웁니다. 이 count가
-resource를 dictionary에서 제거한 뒤 system이 먼저 `native.release()`하는 경합을 막습니다.
+resource를 소유 표에서 제거한 뒤 system이 먼저 `native.release()`하는 경합을 막습니다.
 
 `Execute(...)` 안에서 같은 스레드로 다시 public API를 호출하는 경우도 재귀 read lock으로 처리됩니다.
 
@@ -206,7 +211,7 @@ bool success = system.Execute(system =>
 `Execute<T>`는 같은 의미의 `success`와 `result`를 반환합니다.
 
 `UseNative`은 관리 래퍼에 아직 없는 FMOD Core API를 짧은 동기 callback 안에서 호출하기 위한
-escape hatch입니다. `SoundSystem`, `WaveAudioClip`, `SoundChannel`, `SoundChannelGroup` 각각에 대응 API가 있습니다.
+escape hatch입니다. `SoundSystem`, `WaveAudioClip`, `SoundChannelGroup`, `Processing.DSP` 각각에 대응 API가 있습니다. `SoundChannel`은 `UseNative` 대신 `native` 속성으로 `FMOD.Channel` 핸들을 노출합니다.
 
 ```csharp
 system.UseNative(nativeSystem =>
@@ -246,8 +251,8 @@ IONode/Stream 비동기 읽기 또는 열기
 ```
 
 즉 `Create*Async`의 완료는 FMOD 비동기 open 상태를 폴링한 결과가 아니라, ThreadPool에서 수행한
-동기 생성이 끝났다는 뜻입니다. 시스템 해제가 먼저 완료되면 worker의 생성 단계에서
-`ObjectDisposedException`이 await 지점으로 전달될 수 있습니다.
+동기 생성이 끝났다는 뜻입니다. worker는 `Execute`의 read lock 아래에서 시스템이 `Active`인지 확인하므로,
+시스템 해제나 `Reset`이 먼저 일어나면 예외 대신 `null`이 await 지점으로 돌아옵니다.
 
 `Create*Async`는 `WaveAudioClip?`를 반환합니다. 시스템에서 생성 작업을 실행하지 못한 경우 `null`일 수 있으므로 호출자는 결과의 `null` 여부를 확인해야 합니다.
 
@@ -281,8 +286,8 @@ async UniTask PlayOnce(SoundSystem system, IONode node)
         }
         finally
         {
-            // 자연 종료한 channel은 Update가 자동 해제한다. 호출해도 중복 해제는 no-op이다.
-            channel.Dispose();
+            // 자연 종료한 channel은 종료 콜백이 등록을 해제한다. 이미 끝난 channel의 Stop은 아무것도 하지 않는다.
+            channel.Stop();
         }
     }
     finally
@@ -309,16 +314,16 @@ WaveAudioClip? clip = await system.CreatePCMAsync(
 
 ## `SoundChannel`이 제공하는 것
 
-`SoundChannel`은 재사용 가능한 AudioSource가 아니라 disposable 재생 세션입니다. 주요 기능은 다음과
+`SoundChannel`은 재사용 가능한 AudioSource가 아니라 한 번 쓰고 끝나는 재생 세션입니다(`Stop()`으로 끝냄). 주요 기능은 다음과
 같습니다.
 
 - 재생 상태, 일시 정지, PCM sample/초 단위 위치, 루프 지점과 횟수
 - DSP clock 기반 시작/종료 예약과 볼륨 fade point
 - 볼륨, pitch, mute, pan, mix matrix, reverb send
 - 위치/속도, 거리 감쇠, 2D↔3D blend, 도플러, spread, cone, occlusion
-- `UseNative`을 통한 아직 래핑되지 않은 `FMOD.Channel` 기능
+- `native` 속성(`FMOD.Channel` 핸들)을 통한 아직 래핑되지 않은 기능
 
-리듬 게임처럼 위치 정밀도가 중요한 경로는 `timeSample`, `lengthSample`, `loopStartSample`,
+리듬 게임처럼 위치 정밀도가 중요한 경로는 `timeSample`, `samples`, `loopStartSample`,
 `loopEndSample` 같은 sample 단위 API를 우선 사용하고, 초 단위 속성은 편의 API로 사용합니다.
 
 ## `SoundChannelGroup` 하이어라키
