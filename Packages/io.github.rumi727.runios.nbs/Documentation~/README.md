@@ -74,7 +74,7 @@ flowchart TB
 
 | 패키지 | 문서 | NBS에서 쓰는 부분 |
 | --- | --- | --- |
-| `io.github.rumi727.runios.sound` | [Sound 구조](../../io.github.rumi727.runios.sound/Documentation~/README.md), [시간 보간](../../io.github.rumi727.runios.sound/Documentation~/time-interpolation.md) | `RuniAudioSource`의 보간, 재생 인터페이스 |
+| `io.github.rumi727.runios.sound` | [Sound 구조](../../io.github.rumi727.runios.sound/Documentation~/README.md), [시간 보간](../../io.github.rumi727.runios.sound/Documentation~/03-time-interpolation.md) | `RuniAudioSource`의 보간, 재생 인터페이스 |
 | `io.github.rumi727.runios.fmod` | [FMOD 구조](../../io.github.rumi727.runios.fmod/Documentation~/README.md), [DSP 클록과 믹스 스탬프](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md), [WaveAudioSource](../../io.github.rumi727.runios.fmod/Documentation~/wave-audio-source.md) | DSP 클록, `SetDelay`, 믹스 스탬프, `WaveAudioClip` |
 | `io.github.rumi727.runios.uielements` | [Grids](../../io.github.rumi727.runios.uielements/Documentation~/Grids/README.md) | `NBSNoteGridView`의 기반 |
 

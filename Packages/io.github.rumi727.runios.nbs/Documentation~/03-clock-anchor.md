@@ -2,7 +2,7 @@
 
 > 기준 커밋: `440c549c`. [← 목차](README.md) · 이전: [2. 데이터 모델](02-data-model.md) · 다음: [4. 워커와 예약](04-worker-scheduling.md)
 >
-> 선행: [Sound — 시간 보간](../../io.github.rumi727.runios.sound/Documentation~/time-interpolation.md), [FMOD — DSP 클록과 믹스 스탬프](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md)
+> 선행: [Sound — 시간 보간](../../io.github.rumi727.runios.sound/Documentation~/03-time-interpolation.md), [FMOD — DSP 클록과 믹스 스탬프](../../io.github.rumi727.runios.fmod/Documentation~/dsp-clock-and-mix-stamp.md)
 
 NBS 재생에서 **시간의 정의는 하나뿐**입니다. `NoteBlockSource`가 가진 `NBSClockAnchor`입니다.
 소리의 예약 시각(스케줄러), 화면의 재생 위치(`time`), 스피커 위치(`outputTime`)가 모두 이 값 하나에서 계산됩니다.
@@ -157,7 +157,7 @@ FMOD가 알려 주는 마스터 클록은 "믹스 중인 블록의 시작"일 �
         }
    ```
 
-   앵커가 아직 미래(보통 최신 스탬프보다 한두 블록 앞)이면, 믹서가 앵커에 도달할 **미래의 벽시계 시각**을 기준 시각으로 줍니다. [Sound 보간의 `Clamp(0)` 규칙](../../io.github.rumi727.runios.sound/Documentation~/time-interpolation.md#2-time-getter-줄-단위) 덕분에 `time`은 그때까지 `anchor.time`에 머물다가 그 순간부터 진행합니다. `ulong.MaxValue` 앵커는 `long.MaxValue`로 포화되어 무기한 유지됩니다.
+   앵커가 아직 미래(보통 최신 스탬프보다 한두 블록 앞)이면, 믹서가 앵커에 도달할 **미래의 벽시계 시각**을 기준 시각으로 줍니다. [Sound 보간의 `Clamp(0)` 규칙](../../io.github.rumi727.runios.sound/Documentation~/03-time-interpolation.md#32-time-getter) 덕분에 `time`은 그때까지 `anchor.time`에 머물다가 그 순간부터 진행합니다. `ulong.MaxValue` 앵커는 `long.MaxValue`로 포화되어 무기한 유지됩니다.
 3. ④⑤ **`outputTime`은 앵커에서 거꾸로 외삽**합니다.
    - `outputClock`은 믹서보다 출력 지연만큼 뒤에 있어서, 앵커를 막 찍은 직후에는 앵커보다 **앞(과거)**입니다. `ulong` 뺄셈 결과를 `long`으로 바꾸면 음수가 됩니다.
    - 따라서 `outputTime`은 `anchor.time`보다 조금 작은 값에서 시작해 진행하고, **앵커에서 나는 소리가 실제로 스피커에 도달하는 순간** `anchor.time`을 지납니다.
