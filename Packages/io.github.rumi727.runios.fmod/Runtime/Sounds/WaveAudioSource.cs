@@ -22,6 +22,13 @@ namespace RuniOS.Sounds
         [SerializeField] AssetRef<WaveAudioClip> _clipRef;
         IAssetScope<WaveAudioClip>? scope;
 
+        /// <inheritdoc/>
+        /// <remarks>
+        /// It follows the channel position behind the software buffer of the sound system, corrected by the pitch DSP latency like <see cref="time"/>.<br/>
+        /// 사운드 시스템의 소프트웨어 버퍼만큼 뒤의 채널 위치를 따라가며, <see cref="time"/>처럼 피치 DSP 지연만큼 보정됩니다.
+        /// </remarks>
+        public override double outputTime => base.outputTime - pitchDSPTimeOffset;
+
         /// <remarks>
         /// The getter delegates to <see cref="RuniAudioSource.time"/> and acquires the read lock of <see cref="RuniAudioSource.playingLock"/>.<br/>
         /// The setter acquires the write lock while synchronizing the interpolated time and seeking the current channel.
@@ -327,22 +334,33 @@ namespace RuniOS.Sounds
         /// Reads the channel position between two reads of the mix stamp, so that the position pairs with the time at which the mixer processed it.
         /// A stamp written in between fails this read, and the next position change catches up.
         /// </summary>
-        static bool TryGetChannelTimeAtMixStamp(SoundChannel channel, out double time, out long timestamp)
+        static bool TryGetChannelTimeAtMixStamp(SoundChannel channel, out double time, out SoundMixStamp stamp)
         {
             SoundSystem system = channel.system;
             time = 0;
-            timestamp = 0;
 
-            if (!system.TryGetMixStamp(out SoundMixStamp before))
+            if (!system.TryGetMixStamp(out stamp))
                 return false;
 
             time = channel.time;
+            return system.TryGetMixStamp(out SoundMixStamp after) && stamp == after;
+        }
 
-            if (!system.TryGetMixStamp(out SoundMixStamp after) || before != after)
-                return false;
+        /// <summary>
+        /// Synchronizes the output time from a channel position at the end of the block of <paramref name="stamp"/>.
+        /// The output is behind that position by the software buffer, which is the distance from the stamp clock to its output clock.
+        /// </summary>
+        void SyncOutputTimeToMixStamp(double channelTime, SoundMixStamp stamp, int sampleRate)
+        {
+            double outputDelay = (stamp.dspClock - stamp.outputClock) / (double)sampleRate;
+            SyncInterpolatedOutputTime(channelTime - (outputDelay * tempo), stamp.timestamp);
+        }
 
-            timestamp = before.timestamp;
-            return true;
+        /// <summary>Synchronizes the output time from a channel position set now, using the latest stamp. Without a stamp, the output time is left as it is.</summary>
+        void SyncOutputTimeToLatestMixStamp(SoundChannel channel, double channelTime)
+        {
+            if (channel.system.TryGetMixStamp(out SoundMixStamp stamp))
+                SyncOutputTimeToMixStamp(channelTime, stamp, channel.system.outputSampleRate);
         }
 
         /// <remarks>
@@ -591,9 +609,16 @@ namespace RuniOS.Sounds
                 if (channel != null)
                 {
                     if (!mixerAdvanced)
-                        SyncInterpolatedTime(channel.time);
-                    else if (TryGetChannelTimeAtMixStamp(channel, out double channelTime, out long timestamp))
-                        SyncInterpolatedTime(channelTime, timestamp);
+                    {
+                        double setTime = channel.time;
+                        SyncInterpolatedTime(setTime);
+                        SyncOutputTimeToLatestMixStamp(channel, setTime);
+                    }
+                    else if (TryGetChannelTimeAtMixStamp(channel, out double channelTime, out SoundMixStamp stamp))
+                    {
+                        SyncInterpolatedTime(channelTime, stamp.timestamp);
+                        SyncOutputTimeToMixStamp(channelTime, stamp, channel.system.outputSampleRate);
+                    }
                 }
                 else
                 {
@@ -614,6 +639,8 @@ namespace RuniOS.Sounds
                         {
                             channelLock.ExitWriteLock();
                         }
+
+                        SyncOutputTimeToLatestMixStamp(newChannel, currentTime);
                     }
                 }
             }
