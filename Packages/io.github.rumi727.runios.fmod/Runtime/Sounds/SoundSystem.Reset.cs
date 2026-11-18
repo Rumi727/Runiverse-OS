@@ -104,10 +104,13 @@ namespace RuniOS.Sounds
                 {
                     if (nativeInitialized)
                     {
+                        ReleaseMixStampDSPUnsafe().ThrowIfNotOk();
                         native.close().ThrowIfNotOk();
                         nativeInitialized = false;
                     }
 
+                    // No mixer runs now, and the new clock starts again from zero.
+                    ClearMixStampStateUnsafe();
                     InitializeNative(settings);
                     queuedDisposals = [];
                     lifecycleState = LifecycleState.Active;

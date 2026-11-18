@@ -66,19 +66,27 @@ namespace RuniOS.Sounds
             lock (systemLifetimeLock)
                 Factory.System_Create(out native).ThrowIfNotOk();
 
+            AllocateMixStampState();
+
             try
             {
                 InitializeNative(settings);
             }
             catch
             {
+                RESULT result = RESULT.OK;
+
                 lock (systemLifetimeLock)
                 {
                     if (native.hasHandle())
-                        native.release().LogErrorIfNotOk();
+                        result = native.release().LogErrorIfNotOk();
 
                     native.clearHandle();
                 }
+
+                // A system that failed to release may still be mixing into the stamp, so it is left allocated.
+                if (result == RESULT.OK)
+                    FreeMixStampState();
 
                 lifecycleState = LifecycleState.Disposed;
                 throw;
@@ -307,11 +315,19 @@ namespace RuniOS.Sounds
 
                 try
                 {
+                    if (nativeInitialized)
+                        ReleaseMixStampDSPUnsafe().LogErrorIfNotOk();
+
+                    RESULT result;
                     lock (systemLifetimeLock)
-                        native.release().LogErrorIfNotOk();
+                        result = native.release().LogErrorIfNotOk();
 
                     nativeInitialized = false;
                     native.clearHandle();
+
+                    // A system that failed to release may still be mixing into the stamp, so it is left allocated.
+                    if (result == RESULT.OK)
+                        FreeMixStampState();
                 }
                 finally
                 {
@@ -345,6 +361,8 @@ namespace RuniOS.Sounds
 
             native.getSoftwareFormat(out int sampleRate, out _, out _).ThrowIfNotOk();
             Volatile.Write(ref _outputSampleRate, sampleRate);
+
+            CreateMixStampDSPUnsafe();
         }
 
         List<ISoundSystemResource> BeginResourceRelease(LifecycleState nextState)
