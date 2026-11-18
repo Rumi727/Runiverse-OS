@@ -12,10 +12,11 @@ namespace RuniOS.Sounds
     /// 믹서가 처리한 블록의 끝에 해당하는 출력 샘플 단위 마스터 DSP 클록이며, 그 블록이 믹스된 뒤의 마스터 클록과 같습니다.
     /// </param>
     /// <param name="outputClock">
-    /// The master DSP clock in output samples that FMOD was outputting at <paramref name="timestamp"/>,
-    /// which is <paramref name="dspClock"/> minus the software buffer of the DSP buffer size and count, and does not go below zero.<br/>
-    /// <paramref name="timestamp"/> 시각에 FMOD가 출력하던 출력 샘플 단위 마스터 DSP 클록이며,
-    /// <paramref name="dspClock"/>에서 DSP 버퍼 크기와 개수만큼의 소프트웨어 버퍼를 뺀 값이고 0 아래로 내려가지 않습니다.
+    /// The master DSP clock in output samples that FMOD was outputting at <paramref name="timestamp"/>.<br/>
+    /// It is <paramref name="dspClock"/> minus the software buffer of the DSP buffer length times the buffer count, and does not go below zero.
+    /// <br/><br/>
+    /// <paramref name="timestamp"/> 시각에 FMOD가 출력하던 출력 샘플 단위 마스터 DSP 클록입니다.<br/>
+    /// <paramref name="dspClock"/>에서 DSP 버퍼 길이와 개수를 곱한 소프트웨어 버퍼를 뺀 값이며, 0 아래로 내려가지 않습니다.
     /// </param>
     /// <param name="timestamp">
     /// The <see cref="Stopwatch.GetTimestamp"/> value taken on the mixer thread while it processed <paramref name="dspClock"/>.<br/>
