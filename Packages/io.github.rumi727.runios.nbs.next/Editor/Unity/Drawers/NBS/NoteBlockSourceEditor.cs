@@ -268,7 +268,7 @@ namespace RuniOS.Editor.Unity.Drawers.NBS
             isRainbowShown = state.rainbow;
             Color accent = state.color is { } color ? (Color)color : defaultAccentColor;
             if (state.rainbow)
-                accent = Color.HSVToRGB((float)(EditorApplication.timeSinceStartup * 0.25 % 1), 0.7f, 0.95f);
+                accent = Color.HSVToRGB((float)((EditorApplication.timeSinceStartup * 0.25) % 1), 0.7f, 0.95f);
 
             Rect card = EditorGUILayout.GetControlRect(false, visualEffectCardHeight);
             GUI.Box(card, GUIContent.none, EditorStyles.helpBox);

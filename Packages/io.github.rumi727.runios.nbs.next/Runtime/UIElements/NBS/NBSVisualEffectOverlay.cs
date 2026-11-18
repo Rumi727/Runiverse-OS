@@ -44,7 +44,7 @@ namespace RuniOS.UIElements.NBS
 
             Color accent = state.color is { } color ? (Color)color : defaultAccentColor;
             if (state.rainbow)
-                accent = Color.HSVToRGB((float)(now * 0.25 % 1), 0.7f, 0.95f);
+                accent = Color.HSVToRGB((float)((now * 0.25) % 1), 0.7f, 0.95f);
 
             background.style.backgroundColor = state.backgroundAccent ? accent with { a = backgroundAlpha } : Color.clear;
 

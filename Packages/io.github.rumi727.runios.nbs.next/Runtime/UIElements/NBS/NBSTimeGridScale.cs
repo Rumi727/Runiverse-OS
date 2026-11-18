@@ -54,7 +54,7 @@ namespace RuniOS.UIElements.NBS
             if (!(endTime > startTime))
                 return;
 
-            double pixelsPerSecond = (range.end - startTick) * pixelsPerUnit / (endTime - startTime);
+            double pixelsPerSecond = ((range.end - startTick) * pixelsPerUnit) / (endTime - startTime);
 
             double interval = intervals[^1];
             foreach (double candidate in intervals)

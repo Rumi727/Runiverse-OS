@@ -192,7 +192,7 @@ namespace RuniOS.UIElements.NBS
                 case NBSFollowMode.frameByFrame:
                     offset = tick - (visibleTicks / 2);
                     break;
-                case NBSFollowMode.pageByPage when Math.Floor(tick) >= axis.offset + visibleTicks - 1 || tick < axis.offset:
+                case NBSFollowMode.pageByPage when Math.Floor(tick) >= (axis.offset + visibleTicks) - 1 || tick < axis.offset:
                     offset = Math.Floor(tick) - 1;
                     break;
                 default:
@@ -233,7 +233,7 @@ namespace RuniOS.UIElements.NBS
                 shownTick = wholeTick;
 
                 int beatsPerBar = Math.Max(1, (int)currentMap.header.timeSignature);
-                positionLabel.text = $"{(wholeTick / (beatsPerBar * 4)) + 1}. {(wholeTick / 4 % beatsPerBar) + 1}. {(wholeTick % 4) + 1}";
+                positionLabel.text = $"{(wholeTick / (beatsPerBar * 4)) + 1}. {((wholeTick / 4) % beatsPerBar) + 1}. {(wholeTick % 4) + 1}";
             }
 
             double beatsPerMinute = currentMap.tempo.GetChangeAtTick(tick).beatsPerMinute;

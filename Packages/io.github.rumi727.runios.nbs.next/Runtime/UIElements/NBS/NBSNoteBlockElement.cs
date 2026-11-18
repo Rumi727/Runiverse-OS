@@ -103,7 +103,7 @@ namespace RuniOS.UIElements.NBS
         /// </param>
         public void Bind(in NBSNote note, NBSMap map)
         {
-            float alpha = 0.25f + (0.5f * note.velocity / 100f);
+            float alpha = 0.25f + ((0.5f * note.velocity) / 100f);
             baseAlpha = alpha;
             style.unityBackgroundImageTintColor = new Color(1, 1, 1, alpha);
 
