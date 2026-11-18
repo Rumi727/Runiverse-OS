@@ -37,10 +37,15 @@ namespace RuniOS.Sounds
             long timestamp = Stopwatch.GetTimestamp();
             MixStampState* stamp = (MixStampState*)userData;
 
+            // The software buffer is full while the mixer keeps up, so the output is that far behind the block just mixed.
+            ulong outputLatency = stamp->outputLatency;
+            ulong outputClock = dspClock > outputLatency ? dspClock - outputLatency : 0;
+
             // Seqlock with a single writer: the odd sequence is published with a full fence before the data,
             // and the even sequence is released after it.
             long sequence = Interlocked.Increment(ref stamp->sequence);
             Volatile.Write(ref stamp->dspClock, dspClock);
+            Volatile.Write(ref stamp->outputClock, outputClock);
             Volatile.Write(ref stamp->timestamp, timestamp);
             Volatile.Write(ref stamp->sequence, sequence + 1);
 
@@ -63,7 +68,11 @@ namespace RuniOS.Sounds
         {
             public long sequence;
             public ulong dspClock;
+            public ulong outputClock;
             public long timestamp;
+
+            /// <summary>The software buffer in output samples, written before the stamp DSP is added and only read by the mixer.</summary>
+            public ulong outputLatency;
         }
 
         /// <summary>The layout of <c>FMOD_DSP_STATE</c>.</summary>

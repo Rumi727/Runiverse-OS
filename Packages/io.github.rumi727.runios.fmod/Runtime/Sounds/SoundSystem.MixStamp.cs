@@ -42,9 +42,11 @@ namespace RuniOS.Sounds
         /// <remarks>
         /// The stamp is written on the mixer thread for every block, so the timestamp is when the mixer reached that clock, not when the clock was read.
         /// The clock is the end of the block, the same point as the master clock and the channel positions after the block is mixed.
+        /// The output clock is what FMOD was outputting at the same time, which gives the position being heard.
         /// It maps clocks to time for interpolation; use the master clock to find a clock the mixer has not started yet.<br/>
         /// 스탬프는 믹서 스레드가 블록마다 기록하므로, 타임스탬프는 클록을 읽은 시각이 아니라 믹서가 그 클록에 도달한 시각입니다.
         /// 클록은 블록의 끝이며, 블록이 믹스된 뒤의 마스터 클록 및 채널 위치와 같은 지점입니다.
+        /// 출력 클록은 같은 시각에 FMOD가 출력하던 클록이며, 지금 들리는 위치를 구하는 데 씁니다.
         /// 보간을 위해 클록을 시간에 대응시키는 용도이며, 믹서가 아직 시작하지 않은 클록은 마스터 클록으로 구해야 합니다.
         /// </remarks>
         public unsafe bool TryGetMixStamp(out SoundMixStamp stamp)
@@ -73,11 +75,12 @@ namespace RuniOS.Sounds
                     }
 
                     ulong dspClock = Volatile.Read(ref state->dspClock);
+                    ulong outputClock = Volatile.Read(ref state->outputClock);
                     long timestamp = Volatile.Read(ref state->timestamp);
 
                     if (Volatile.Read(ref state->sequence) == sequence)
                     {
-                        stamp = new SoundMixStamp(dspClock, timestamp);
+                        stamp = new SoundMixStamp(dspClock, outputClock, timestamp);
                         return true;
                     }
                 }
@@ -102,6 +105,10 @@ namespace RuniOS.Sounds
 
         unsafe void CreateMixStampDSPUnsafe()
         {
+            // FMOD describes its software latency as the DSP buffer length times the buffer count.
+            native.getDSPBufferSize(out uint bufferLength, out int bufferCount).ThrowIfNotOk();
+            mixStampState->outputLatency = (ulong)bufferLength * (ulong)bufferCount;
+
             DSP_DESCRIPTION description = new()
             {
                 pluginsdkversion = pluginSDKVersion,
