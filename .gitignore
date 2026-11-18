@@ -140,6 +140,9 @@ fmod_editor.log
 /[Aa]ssets/89478062_0.png
 /[Aa]ssets/89478062_0.png.meta
 
+/[Aa]ssets/nbses/*
+/[Aa]ssets/nbses.meta
+
 /[Pa]ackages/com.singularitygroup.hotreload
 
 # NBS instrument sound effects
