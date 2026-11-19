@@ -128,7 +128,7 @@
 114             // 0번 인덱스가 제일 우선순위가 높습니다.
 115             case RequiredPackSort.BeforeVanilla:
                 {
-117                 int vanillaIndex = _enabledPackIdentifiers.LastIndexOf(pack.identifier);
+117                 int vanillaIndex = _enabledPackIdentifiers.LastIndexOf(defaultPack?.identifier ?? PackIdentifier.empty);
 118                 if (vanillaIndex < 0)
 119                     EnablePack(pack.identifier, 0);
 120                 else
@@ -146,9 +146,11 @@
 
 `NotRequired` 팩은 자동으로 활성화되지 않습니다. 사용자가 `EnablePack`으로 켭니다. ② 리로드는 활성화 여부와 관계없이 **등록된** 팩 모두에 대해 일어납니다.
 
-> **관찰된 동작:** `BeforeVanilla` 분기의 `vanillaIndex`는 vanilla 팩이 아니라 그 팩 **자신**의 위치를 찾습니다(117행). 아직 없으면 0번(가장 높음)에 넣고, 이미 있으면 `EnablePack`이 아무것도 하지 않습니다. `AfterVanilla`도 0번에 넣습니다(126행). 그래서 두 값 모두 팩을 vanilla **위**에 둡니다. 필수 팩이 여럿이면 `loadedResourcePacks` 열거 순서에서 나중에 처리된 팩이 앞에 옵니다.
+`BeforeVanilla`는 vanilla 팩의 위치를 찾아 그 바로 **뒤**(낮은 우선순위)에 넣습니다. vanilla가 활성화되어 있지 않으면 0번에 넣습니다. vanilla 팩 자신도 `BeforeVanilla`지만 이미 활성화되어 있어 `EnablePack`이 아무것도 하지 않습니다. `AfterVanilla`는 0번에 넣으며, vanilla는 항상 맨 뒤에 있으므로 vanilla **위**가 됩니다.
 
-현재 에디터의 활성화 목록은 `[runios:editor, runios:vanilla]`가 됩니다.
+> **관찰된 동작:** 같은 정렬 값의 필수 팩이 여럿이면 서로의 순서는 정해져 있지 않고 `loadedResourcePacks` 열거 순서를 따릅니다(의도적으로 미지정).
+
+현재 에디터의 활성화 목록은 `[runios:vanilla, runios:editor]`가 됩니다. 에디터 팩이 vanilla(StreamingAssets)보다 낮으므로, StreamingAssets가 에디터 팩의 에셋을 덮어씁니다.
 
 > **관찰된 동작:** `_enabledPackIdentifiers`에는 "임시"라는 TODO 주석이 있습니다(51~54행). 활성화 목록을 저장하거나 불러오는 코드는 없습니다.
 

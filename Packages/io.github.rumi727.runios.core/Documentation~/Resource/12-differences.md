@@ -17,7 +17,6 @@
 | 53행: 리로드가 끝나면 완료 이벤트 호출 | 이벤트는 레지스트리 단계 뒤, `IReloadable`보다 먼저, 실패한 패스에서도 발생합니다([4.4절](04-reload-pipeline.md#44-완료-단계-이벤트-그다음-ireloadable)). |
 | 84·117행: `IdentifierJsonContext`를 넘겨 기본 네임스페이스 지정 | 넘기는 코드가 없어 팩 JSON의 축약 ID는 항상 `runios`입니다([1.2절](01-identifiers.md#12-문자열-변환과-파싱)). |
 | 87행: `defaultPack`은 `StreamingIOProvider.instance` 사용 | 그런 타입은 없습니다. 등록된 `IStreamingAssetsService`의 공급자이고, 서비스가 없으면 `null`입니다([2.5절](02-resource-packs.md#25-기본-팩과-에디터-팩)). |
-| 88행: `BeforeVanilla`/`AfterVanilla`로 vanilla 앞뒤에 둠 | 둘 다 0번(vanilla보다 위)에 넣습니다([2.4절](02-resource-packs.md#24-활성화-순서와-우선순위)). |
 | 186~195행: 핸들 유지·교체·제거, 완료 이벤트에서 최신 핸들 재조회 | 교체·제거된 옛 핸들은 봉인되지 않고 계속 쓸 수 있습니다. 갈아타는 표준 경로는 이벤트가 아니라 `IReloadable`입니다([7.6절](07-handles-and-scopes.md#76-리로드-뒤의-옛-핸들과-seal)). |
 | 218행: `unloadDelayFrame` 뒤 언로드 | 기본값 600프레임, 실제 정리는 `DisposeQueue`가 프레임당 10 ms씩 합니다([7.4절](07-handles-and-scopes.md#74-disposequeue)). |
 | 282행: `SpriteAssetRegistry`처럼 `Reload()`에서 사이드카를 미리 읽을 수도 있음 | `SpriteAssetRegistry`는 그렇게 하지 않습니다. 사이드카는 `SpriteAssetHandle.Load`에서 읽습니다. |
@@ -40,7 +39,7 @@
 | `IdentifierJsonContext`를 만드는 곳 없음 | [1.2](01-identifiers.md#12-문자열-변환과-파싱) |
 | `targetVersion` 검사 없음 | [2.1](02-resource-packs.md#21-팩의-폴더-구조) |
 | `pack.json` 삭제 시 `isValid` 유지, 파싱 실패 시 이전 네임스페이스 유지 | [2.3](02-resource-packs.md#23-팩-리로드-packjson과-네임스페이스) |
-| `BeforeVanilla`·`AfterVanilla`가 모두 vanilla 위, 활성화 목록 "임시" | [2.4](02-resource-packs.md#24-활성화-순서와-우선순위) |
+| 활성화 목록은 "임시", 같은 정렬 값의 필수 팩 순서는 미지정 | [2.4](02-resource-packs.md#24-활성화-순서와-우선순위) |
 | 진행률 콜백이 정적 `currentTask`에 씀 | [4.3](04-reload-pipeline.md#43-레지스트리-리로드와-진행률) |
 | 에디터 후처리기가 `movedFromAssetPaths`를 보지 않음, 부분 문자열 일치 | [4.5](04-reload-pipeline.md#45-누가-리로드를-시작하나) |
 | 실패한 리로드의 부분 인덱스로 교체 | [5.2](05-registries.md#52-추적-먼저-기록한-것이-이긴다) |
