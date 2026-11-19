@@ -114,7 +114,7 @@ namespace RuniOS.Resource
                     // 0번 인덱스가 제일 우선순위가 높습니다.
                     case RequiredPackSort.BeforeVanilla:
                     {
-                        int vanillaIndex = _enabledPackIdentifiers.LastIndexOf(pack.identifier);
+                        int vanillaIndex = _enabledPackIdentifiers.LastIndexOf(defaultPack?.identifier ?? PackIdentifier.empty);
                         if (vanillaIndex < 0)
                             EnablePack(pack.identifier, 0);
                         else
