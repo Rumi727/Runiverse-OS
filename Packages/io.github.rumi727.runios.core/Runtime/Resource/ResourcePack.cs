@@ -34,9 +34,11 @@ namespace RuniOS.Resource
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
         /// <param name="provider">팩의 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
         /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
-        ResourcePack(PackIdentifier identifier, IIOProvider provider, RequiredPackSort requiredSort)
+        /// <param name="leaveOpen"><see langword="true"/>면 <see cref="Dispose"/>가 <paramref name="provider"/>를 dispose하지 않습니다.</param>
+        ResourcePack(PackIdentifier identifier, IIOProvider provider, RequiredPackSort requiredSort, bool leaveOpen)
         {
             this.identifier = identifier;
+            this.leaveOpen = leaveOpen;
 
             rootFolder = provider.rootNode;
             assetFolder = rootFolder.CreateChild(assetsFolderName);
@@ -80,6 +82,8 @@ namespace RuniOS.Resource
         public ImmutableArray<string> namespaces { get; private set; } = ImmutableArray<string>.Empty;
         
         public bool isDisposed { get; private set; }
+
+        readonly bool leaveOpen;
 
         readonly AsyncReloadGate reloadGate = new();
 
@@ -140,7 +144,8 @@ namespace RuniOS.Resource
             if (isDisposed)
                 throw new ObjectDisposedException(identifier.ToString());
 
-            rootFolder.provider.Dispose();
+            if (!leaveOpen)
+                rootFolder.provider.Dispose();
 
             isDisposed = true;
             isValid = false;

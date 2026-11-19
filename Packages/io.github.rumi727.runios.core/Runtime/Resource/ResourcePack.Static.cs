@@ -68,8 +68,9 @@ namespace RuniOS.Resource
         /// <param name="identifier">팩의 고유 식별자입니다.</param>
         /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
         /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
+        /// <param name="leaveOpen"><see langword="true"/>면 팩을 dispose할 때 <paramref name="provider"/>를 dispose하지 않습니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static ResourcePack Create(Identifier identifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired) => Create(PackIdentifier.CreateByID(identifier), provider, requiredSort);
+        public static ResourcePack Create(Identifier identifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired, bool leaveOpen = false) => Create(PackIdentifier.CreateByID(identifier), provider, requiredSort, leaveOpen);
 
         /// <summary>
         /// 지정된 식별자와 I/O 핸들러를 사용하여 리소스 팩을 생성합니다.<br/>
@@ -78,13 +79,14 @@ namespace RuniOS.Resource
         /// <param name="packIdentifier">팩의 고유 식별자입니다.</param>
         /// <param name="provider">팩 루트 폴더에 접근하는 <see cref="IIOProvider"/>입니다.</param>
         /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
+        /// <param name="leaveOpen"><see langword="true"/>면 팩을 dispose할 때 <paramref name="provider"/>를 dispose하지 않습니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
-        public static ResourcePack Create(PackIdentifier packIdentifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired)
+        public static ResourcePack Create(PackIdentifier packIdentifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired, bool leaveOpen = false)
         {
             if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
                 return loadedPack;
 
-            ResourcePack resourcePack = new ResourcePack(packIdentifier, provider, requiredSort);
+            ResourcePack resourcePack = new ResourcePack(packIdentifier, provider, requiredSort, leaveOpen);
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
 
             return resourcePack;
