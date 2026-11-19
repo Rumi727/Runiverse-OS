@@ -2,6 +2,8 @@
 
 Language available: \[[**한국어 (대한민국)**](README.md)\] \[[English (US)](README-EN.md)\]  
 
+> 내부 작동 원리와 줄 단위 코드 해설은 [`Documentation~/IO`](../../Documentation~/IO/README.md)에 있습니다.
+
 ## 개요
 
 이 프로젝트의 I/O 시스템은 파일이 어디에 있는지를 사용하는 쪽에 직접 노출하지 않습니다.\

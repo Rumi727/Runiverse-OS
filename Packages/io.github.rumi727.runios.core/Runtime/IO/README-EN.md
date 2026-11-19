@@ -2,6 +2,8 @@
 
 Language available: \[[한국어 (대한민국)](README.md)\] \[[**English (US)**](README-EN.md)\]  
 
+> A walkthrough of the internals with line-by-line code notes (in Korean) is in [`Documentation~/IO`](../../Documentation~/IO/README.md).
+
 ## Overview
 
 This project's I/O system does not expose where files physically live to the code that uses them.\
