@@ -49,18 +49,22 @@ namespace RuniOS.Resource
         bool isLoading { get; }
         
         /// <summary>
-        /// Gets the handle registered for the specified identifier, or <see langword="null"/> when no handle is registered.<br/>
-        /// 지정된 식별자로 등록된 핸들을 가져오며, 등록된 핸들이 없으면 <see langword="null"/>을 반환합니다.
+        /// Gets the handle registered for the specified identifier.<br/>
+        /// 지정된 식별자로 등록된 핸들을 가져옵니다.
         /// </summary>
         /// <param name="key">
         /// The identifier of the asset to retrieve.<br/>
         /// 가져올 에셋의 식별자입니다.
         /// </param>
         /// <value>
-        /// The matching asset handle, or <see langword="null"/> when the identifier is not registered.<br/>
-        /// 일치하는 에셋 핸들이며, 식별자가 등록되지 않았으면 <see langword="null"/>입니다.
+        /// The matching asset handle.<br/>
+        /// 일치하는 에셋 핸들입니다.
         /// </value>
-        IAssetHandle? this[Identifier key] { get; }
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the identifier is not registered. Use <see cref="TryGetHandle(Identifier, out IAssetHandle?)"/> to avoid the exception.<br/>
+        /// 식별자가 등록되지 않았으면 발생합니다. 예외를 피하려면 <see cref="TryGetHandle(Identifier, out IAssetHandle?)"/>를 사용하세요.
+        /// </exception>
+        IAssetHandle this[Identifier key] { get; }
 
         /// <summary>
         /// Gets the identifiers of all registered assets.<br/>

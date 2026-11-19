@@ -53,14 +53,14 @@ namespace RuniOS.Resource
         public bool isTracking => trackedHandles != null;
 
         /// <inheritdoc/>
-        public THandle? this[Identifier key]
+        public THandle this[Identifier key]
         {
             get
             {
                 if (TryGetHandle(key, out var handle))
                     return handle;
 
-                return default;
+                throw new KeyNotFoundException($"The asset identifier '{key}' is not registered in registry '{registryId}'.");
             }
         }
 

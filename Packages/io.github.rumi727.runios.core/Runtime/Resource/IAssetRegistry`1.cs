@@ -24,11 +24,15 @@ namespace RuniOS.Resource
         /// 가져올 에셋의 식별자입니다.
         /// </param>
         /// <value>
-        /// The matching handle, or <see langword="null"/> when the identifier is not registered.<br/>
-        /// 일치하는 핸들이며, 식별자가 등록되지 않았으면 <see langword="null"/>입니다.
+        /// The matching handle.<br/>
+        /// 일치하는 핸들입니다.
         /// </value>
-        new THandle? this[Identifier key] { get; }
-        IAssetHandle? IAssetRegistry.this[Identifier key] => this[key];
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown when the identifier is not registered. Use <see cref="TryGetHandle(Identifier, out THandle?)"/> to avoid the exception.<br/>
+        /// 식별자가 등록되지 않았으면 발생합니다. 예외를 피하려면 <see cref="TryGetHandle(Identifier, out THandle?)"/>를 사용하세요.
+        /// </exception>
+        new THandle this[Identifier key] { get; }
+        IAssetHandle IAssetRegistry.this[Identifier key] => this[key];
 
         /// <summary>
         /// Gets all strongly typed handles registered by this registry.<br/>
