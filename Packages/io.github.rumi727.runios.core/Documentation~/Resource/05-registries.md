@@ -88,11 +88,11 @@ flowchart LR
 | --- | --- | --- |
 | 레지스트리 지정 | [`ResourceManager.GetHandle(ResourceKey)`](../../Runtime/Resource/ResourceManager.cs#L219) | `registryId`의 레지스트리에서만 찾음. 대체 없음 |
 | 에셋 타입으로 자동 | [`ResourceManager.GetHandle<T>(Identifier)`](../../Runtime/Resource/ResourceManager.cs#L237) → [`AssetRegistryManager.GetHandle`](../../Runtime/Resource/AssetRegistryManager.cs#L162) | `providedAssetType == typeof(T)`인 레지스트리를 `priority` 높은 순으로, 처음 찾은 것 |
-| 레지스트리 직접 | `AssetRegistryManager.Get<TRegistry>()?[id]` | 타입으로 레지스트리를 꺼내 인덱서 |
+| 레지스트리 직접 | `AssetRegistryManager.Get<TRegistry>()?[id]` | 타입으로 레지스트리를 꺼내 인덱서. 없는 키면 `KeyNotFoundException` |
 
 ```csharp
 // Runtime/Resource/ResourceManager.cs
-219 public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?[key.assetId];
+219 public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?.TryGetHandle(key.assetId, out IAssetHandle? handle) == true ? handle : null;
 …
 255 public static UniTask<IAssetScope<T>?> LoadScopeAsync<T>(Identifier identifier) where T : notnull => GetHandle<T>(identifier)?.GetScope() ?? UniTask.FromResult<IAssetScope<T>?>(null);
 ```
@@ -114,7 +114,7 @@ flowchart LR
 
 자동 조회는 `AssetRef`의 `automatic` 모드가 씁니다([8장](08-asset-ref-and-binders.md)). 같은 식별자가 여러 레지스트리에 있을 수 있을 때(텍스처와 스프라이트) 어느 쪽을 쓸지는 요청한 에셋 타입이 정합니다.
 
-> **관찰된 동작:** [`AssetRegistry`의 인덱서](../../Runtime/Resource/AssetRegistry.cs#L56)는 없는 키에 `default(THandle)`을 돌려줍니다. 핸들이 클래스면 `null`이지만, `InstanceAssetHandle<T>`처럼 구조체면 박싱되어 `null`이 아닌 빈 핸들이 됩니다. 그래서 그런 레지스트리(언어 레지스트리, sound 패키지의 Sound 레지스트리)에 `ResourceManager.GetHandle(ResourceKey)`로 없는 에셋을 물으면 에셋이 `null`인 핸들이 돌아옵니다.
+[`AssetRegistry`의 인덱서](../../Runtime/Resource/AssetRegistry.cs#L56)는 없는 키에 `KeyNotFoundException`을 던집니다. 예외 없이 확인하려면 `TryGetHandle`을 씁니다. `ResourceManager.GetHandle(ResourceKey)`는 `TryGetHandle`로 조회하므로, 레지스트리나 에셋이 없으면 핸들 종류와 관계없이 `null`입니다.
 
 > **관찰된 동작:** `AssetRegistryManager.GetHandle<TAsset>`([#L140](../../Runtime/Resource/AssetRegistryManager.cs#L140))은 찾은 핸들을 `IAssetHandle<TAsset>`로 변환하므로, 우선순위가 높은 레지스트리가 다른 핸들 타입을 돌려주면 다음 레지스트리를 보지 않고 `null`입니다.
 

@@ -28,7 +28,6 @@
 | --- | --- | --- |
 | [`ResourceManager.isPreloaded`](../../Runtime/Resource/ResourceManager.cs#L22) (16~21행) | 에디터에서는 사전 로드 여부, 런타임에서는 첫 리로드 완료 후 `true` | 에디터·런타임 구분이 없고, 실패한 패스에서도 `true`가 됩니다. |
 | [`preReloadCompletionEvent`](../../Runtime/Resource/ResourceManager.cs#L46) / [`reloadCompletionEvent`](../../Runtime/Resource/ResourceManager.cs#L52) | 완료 직전 / 완료될 때 | 두 이벤트 모두 `Reload()`의 Task가 끝나기 전, `IReloadable`보다 먼저 발생합니다. |
-| [`ResourceManager.GetHandle(ResourceKey)`](../../Runtime/Resource/ResourceManager.cs#L219) | 없으면 `null` | 구조체 핸들 레지스트리에서는 빈 핸들([5.3절](05-registries.md#53-조회-세-가지)) |
 | [`PackIdentifier.GetHashCode`](../../Runtime/Resource/PackIdentifier.cs#L168) (163행 근처 주석) | 무효 값의 해시는 `int.MinValue` | `0` |
 | [`SimpleAssetRegistry`](../../Runtime/Resource/SimpleAssetRegistry.cs#L84) 주석 (53·76·81행 근처) | MD5 사용, 다른 호출을 기다리게 함, 예외를 던짐 | MD5 없음, 게이트로 합침, 예외는 모두 잡아 로그 |
 | [`IdentifierConverter`](../../Runtime/Json/Converters/Resource/IdentifierConverter.cs#L13) (18행 근처 주석) | `Version.ToString` 사용 | `Identifier.ToString` |
@@ -45,7 +44,7 @@
 | 진행률 콜백이 정적 `currentTask`에 씀 | [4.3](04-reload-pipeline.md#43-레지스트리-리로드와-진행률) |
 | 에디터 후처리기가 `movedFromAssetPaths`를 보지 않음, 부분 문자열 일치 | [4.5](04-reload-pipeline.md#45-누가-리로드를-시작하나) |
 | 실패한 리로드의 부분 인덱스로 교체 | [5.2](05-registries.md#52-추적-먼저-기록한-것이-이긴다) |
-| 인덱서가 구조체 핸들의 빈 값을 돌려줌, 타입 불일치 시 다음 레지스트리를 보지 않음 | [5.3](05-registries.md#53-조회-세-가지) |
+| 타입 불일치 시 다음 레지스트리를 보지 않음 | [5.3](05-registries.md#53-조회-세-가지) |
 | `Unregister`가 리로드·핸들을 정리하지 않음 | [5.4](05-registries.md#54-등록과-해제-assetregistrymanager) |
 | 1단계 `IsTracked`가 항상 `false`, `loadTargetDict`가 `List` | [6.2](06-simple-asset-registry.md#62-리로드-1단계-인덱싱) |
 | 비동기 공급자에서 첫 `GetScope` 경합, 어셈블리 리로드 구독 중복 | [7.2](07-handles-and-scopes.md#72-getscope-지연-로드) |
