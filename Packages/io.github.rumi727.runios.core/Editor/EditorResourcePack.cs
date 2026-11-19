@@ -9,7 +9,7 @@ namespace RuniOS.Editor
         public static ResourcePack? pack { get; private set; }
 
         [OnAssemblyLoaded]
-        static void OnAssemblyLoaded() => pack = ResourcePack.Create("runios:editor", EditorStreamingAssetsService.editorProvider, RequiredPackSort.BeforeVanilla);
+        static void OnAssemblyLoaded() => pack = ResourcePack.Create("runios:editor", EditorStreamingAssetsService.editorProvider, RequiredPackSort.BeforeVanilla, leaveOpen: true);
 
         [OnAssemblyUnloading]
         static void OnAssemblyUnloading() => pack?.Dispose();

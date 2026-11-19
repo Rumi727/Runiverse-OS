@@ -42,7 +42,7 @@ namespace RuniOS.Resource
             if (providers.Length <= 0)
                 return null;
 
-            return Create("runios:vanilla", providers.Length == 1 ? providers[0] : new GroupIOProvider(providers, leaveOpen: true), RequiredPackSort.BeforeVanilla);
+            return Create("runios:vanilla", providers.Length == 1 ? providers[0] : new GroupIOProvider(providers, leaveOpen: true), RequiredPackSort.BeforeVanilla, leaveOpen: true);
         }
 
         static readonly Dictionary<PackIdentifier, ResourcePack> _loadedResourcePacks;
