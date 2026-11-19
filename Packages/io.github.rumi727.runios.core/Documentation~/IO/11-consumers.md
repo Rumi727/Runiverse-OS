@@ -25,21 +25,23 @@ IO 시스템을 실제로 어떻게 쓰는지 core와 다른 패키지의 대표
 
 ## 11.2 리소스 팩
 
-[`ResourcePack`](../../Runtime/Resource/ResourcePack.cs#L37)은 공급자 하나를 받아 팩 구조를 노드로 잡습니다.
+> 이 절의 코드 인용과 줄 번호는 공급자 소유권 수정 이후인 `7e5d710f` 기준입니다. 자세한 내용은 [Resource 2장](../Resource/02-resource-packs.md)에 있습니다.
+
+[`ResourcePack`](../../Runtime/Resource/ResourcePack.cs#L38)은 공급자 하나를 받아 팩 구조를 노드로 잡습니다.
 
 ```csharp
 // Runtime/Resource/ResourcePack.cs
-41  rootFolder = provider.rootNode;
-42  assetFolder = rootFolder.CreateChild(assetsFolderName);    // "assets"
-43  infoFile = rootFolder.CreateChild(infoPath);               // "pack.json"
+43  rootFolder = provider.rootNode;
+44  assetFolder = rootFolder.CreateChild(assetsFolderName);    // "assets"
+45  infoFile = rootFolder.CreateChild(infoPath);               // "pack.json"
 …
-90  if (!await infoFile.file.Exists())
+94  if (!await infoFile.file.Exists())
 …
-100     metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.file.ReadAllText());
+104     metaData = JsonConvert.DeserializeObject<PackMetaData>(await infoFile.file.ReadAllText());
 …
-111 else if (await assetFolder.dir.Exists())
+115 else if (await assetFolder.dir.Exists())
 …
-116     await assetFolder.dir.GetDirectories()                  // 네임스페이스 = assets/ 아래 폴더
+120     await assetFolder.dir.GetDirectories()                  // 네임스페이스 = assets/ 아래 폴더
 ```
 
 팩은 공급자의 종류를 모릅니다. 디스크 폴더(`ResourcePack.Create(PhysicalPath)`는 기본 정책 `BlockLinks`의 `PhysicalIOProvider`를 만듦, [`#L62`](../../Runtime/Resource/ResourcePack.Static.cs#L62)), StreamingAssets 서비스의 공급자, 에디터의 겹친 공급자가 모두 같은 코드로 읽힙니다.
@@ -53,13 +55,11 @@ IO 시스템을 실제로 어떻게 쓰는지 core와 다른 패키지의 대표
 41      IIOProvider[] providers = [..ServiceRegistry.GetAll<IStreamingAssetsService>().Where(x => x.isAvailable).Select(x => x.provider)];
 42      if (providers.Length <= 0)
 43          return null;                                                   // ① 서비스가 없으면 기본 팩 없음 (WebGL)
-45      return Create("runios:vanilla", providers.Length == 1 ? providers[0] : new GroupIOProvider(providers, leaveOpen: true), RequiredPackSort.BeforeVanilla);   // ② 하나면 그대로, 여럿이면 겹침
+45      return Create("runios:vanilla", providers.Length == 1 ? providers[0] : new GroupIOProvider(providers, leaveOpen: true), RequiredPackSort.BeforeVanilla, leaveOpen: true);   // ② 팩이 공급자를 소유하지 않음
     }
 ```
 
-`ResourcePack.Dispose()`는 자기 공급자를 dispose합니다([`ResourcePack.cs#L143`](../../Runtime/Resource/ResourcePack.cs#L143)).
-
-> **관찰된 동작:** ② 서비스가 여럿이면 `leaveOpen: true` 그룹으로 감싸 서비스의 공급자를 소유하지 않지만, 하나면 서비스의 공급자를 그대로 넘기므로 팩을 dispose하면 서비스가 들고 있는 공급자까지 dispose됩니다. 서비스 수에 따라 공급자 소유권이 달라지고, `ResourcePack`에는 공급자를 소유하지 않게 하는 선택지가 없습니다. 현재는 기본 팩을 dispose하는 코드가 없고 StreamingAssets 공급자들의 `Dispose`가 모두 빈 메서드라 실제 영향은 없습니다.
+`ResourcePack.Dispose()`는 `leaveOpen`이 아닐 때만 자기 공급자를 dispose합니다([`ResourcePack.cs#L147`](../../Runtime/Resource/ResourcePack.cs#L147)). ② 서비스가 하나든 여럿이든 서비스가 가진 공급자는 팩이 소유하지 않습니다. 여럿일 때 쓰는 그룹도 `leaveOpen: true`라 안쪽 공급자를 dispose하지 않습니다. 에디터 팩(`runios:editor`)도 같은 방식으로 만듭니다([`EditorResourcePack.cs#L12`](../../Editor/EditorResourcePack.cs#L12)).
 
 ## 11.3 에셋 레지스트리와 핸들
 
