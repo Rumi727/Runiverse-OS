@@ -8,7 +8,7 @@
 | --- | --- | --- |
 | [IO](IO/README.md) | `RuniPath`·`PhysicalPath`, `IIOProvider`와 `IONode`, 샌드박스, `GroupIOProvider`, StreamingAssets, Android 에셋, 가상 파일 시스템, Locations | 작성됨 (`b3e1a343`) |
 | [Resource](Resource/README.md) | `Identifier`, 리소스 팩, `AsyncReloadGate`, 리로드 파이프라인, 에셋 레지스트리, 핸들과 스코프, `AssetRef`·바인더, 사이드카 | 작성됨 (`7e5d710f`) |
-| 부팅·커널 | 수명 주기 훅, `BootLoader`, 마일스톤, `Kernel`, `ServiceRegistry` | 예정 |
-| 유틸리티 | `TypeRegistry`, 컬렉션 핸들러, 텍스트, 인스펙터 모델, Undo, 구조체, `MathUtility` 등 | 예정 |
+| [부팅·커널](Boot/README.md) | 수명 주기 훅, `BootLoader`, 마일스톤, `Kernel`, `ServiceRegistry` | 작성됨 (`1f1bb93d`) |
+| 유틸리티 | `TypeRegistry`, 컬렉션 핸들러, 텍스트, 인스펙터 모델, Undo, 구조체, `MathUtility`, `UnityThread`, `RuniPlayerLoop`, `AsyncTask`, `Debug`, `InfiniteLoopDetector` 등 | 예정 |
 
 에디터 확장 패키지 `io.github.rumi727.runios.core.editor`는 그 패키지의 `Documentation~`에 따로 둘 예정입니다.
