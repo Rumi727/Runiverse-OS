@@ -216,7 +216,7 @@ namespace RuniOS.Resource
         /// The handle, or <see langword="null"/> when the registry or asset is unavailable.<br/>
         /// 핸들을 반환하며, 레지스트리나 에셋을 사용할 수 없으면 <see langword="null"/>을 반환합니다.
         /// </returns>
-        public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?[key.assetId];
+        public static IAssetHandle? GetHandle(ResourceKey key) => AssetRegistryManager.Get(key.registryId)?.TryGetHandle(key.assetId, out IAssetHandle? handle) == true ? handle : null;
 
         /// <summary>
         /// Gets a handle by searching all registries that provide <typeparamref name="T"/> in descending priority order.<br/>
