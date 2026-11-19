@@ -48,7 +48,7 @@ flowchart TB
 | [5. `ServiceRegistry`](05-service-registry.md) | 등록·해제, `Get` 해석 순서, 기본값, 캐시, 계약과 구현 표 | **줄 단위** |
 | [6. 차이와 기존 문서](06-differences.md) | XML과 다른 곳, 관찰된 동작, 확인하지 않은 것, 사용처 없는 멤버 | 표 |
 
-`UnityThread`, `RuniPlayerLoop`, `AsyncTask`, `Debug`, `InfiniteLoopDetector`는 유틸리티 영역 문서(예정)에서 다룹니다.
+`UnityThread`, `RuniPlayerLoop`, `AsyncTask`, `Debug`, `InfiniteLoopDetector`는 [유틸리티 영역 문서](../Utility/README.md)에서 다룹니다.
 
 ## 용어집
 
