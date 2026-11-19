@@ -70,6 +70,7 @@ namespace RuniOS.Resource
         /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
         /// <param name="leaveOpen"><see langword="true"/>면 팩을 dispose할 때 <paramref name="provider"/>를 dispose하지 않습니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
+        /// <exception cref="ArgumentException">같은 식별자의 팩이 이미 로드되어 있습니다. 기존 팩은 <see cref="GetLoadedPack"/>으로 가져옵니다.</exception>
         public static ResourcePack Create(Identifier identifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired, bool leaveOpen = false) => Create(PackIdentifier.CreateByID(identifier), provider, requiredSort, leaveOpen);
 
         /// <summary>
@@ -81,16 +82,21 @@ namespace RuniOS.Resource
         /// <param name="requiredSort">필수 리소스팩인지 여부와 정렬 기준입니다.</param>
         /// <param name="leaveOpen"><see langword="true"/>면 팩을 dispose할 때 <paramref name="provider"/>를 dispose하지 않습니다.</param>
         /// <returns>생성된 <see cref="ResourcePack"/> 인스턴스를 반환합니다.</returns>
+        /// <exception cref="ArgumentException">같은 식별자의 팩이 이미 로드되어 있습니다. 기존 팩은 <see cref="GetLoadedPack"/>으로 가져옵니다.</exception>
         public static ResourcePack Create(PackIdentifier packIdentifier, IIOProvider provider, RequiredPackSort requiredSort = RequiredPackSort.NotRequired, bool leaveOpen = false)
         {
-            if (_loadedResourcePacks.TryGetValue(packIdentifier, out var loadedPack))
-                return loadedPack;
-
             ResourcePack resourcePack = new ResourcePack(packIdentifier, provider, requiredSort, leaveOpen);
             _loadedResourcePacks.Add(packIdentifier, resourcePack);
 
             return resourcePack;
         }
+
+        /// <summary>
+        /// 지정된 식별자로 이미 로드된 리소스 팩을 가져옵니다.
+        /// </summary>
+        /// <param name="packIdentifier">가져올 팩의 식별자입니다.</param>
+        /// <returns>로드된 팩이 없으면 <see langword="null"/>입니다.</returns>
+        public static ResourcePack? GetLoadedPack(PackIdentifier packIdentifier) => _loadedResourcePacks.GetValueOrDefault(packIdentifier);
 
         static readonly AsyncReloadGate reloadAllGate = new();
         public static UniTask ReloadAll() => reloadAllGate.Run(ReloadAllCore);
