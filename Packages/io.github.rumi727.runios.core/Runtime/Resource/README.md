@@ -2,6 +2,8 @@
 
 Language available: \[[**한국어 (대한민국)**](README.md)\] \[[English (US)](README-EN.md)\]  
 
+> 내부 작동 원리와 줄 단위 코드 해설은 [`Documentation~/Resource`](../../Documentation~/Resource/README.md)에 있습니다.
+
 ## 개요
 
 이 프로젝트의 리소스 시스템은 Minecraft의 리소스 팩 구조에서 아이디어를 가져왔습니다.\

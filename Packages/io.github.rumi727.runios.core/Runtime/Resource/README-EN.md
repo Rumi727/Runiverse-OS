@@ -2,6 +2,8 @@
 
 Language available: \[[한국어 (대한민국)](README.md)\] \[[**English (US)**](README-EN.md)\]  
 
+> A walkthrough of the internals with line-by-line code notes (in Korean) is in [`Documentation~/Resource`](../../Documentation~/Resource/README.md).
+
 ## Overview
 
 This project's resource system is inspired by Minecraft resource packs.\
